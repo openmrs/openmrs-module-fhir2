@@ -13,7 +13,10 @@ import javax.inject.Inject;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -48,6 +51,18 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		Patient patient = new Patient();
 		
 		patient.setId(openmrsPatient.getUuid());
+		patient.setBirthDate(openmrsPatient.getBirthdate());
+		patient.setActive(!openmrsPatient.getVoided());
+
+		if (openmrsPatient.getDead()) {
+			if (openmrsPatient.getDeathDate() != null) {
+				patient.setDeceased(new DateTimeType(openmrsPatient.getDeathDate()));
+			} else {
+				patient.setDeceased(new BooleanType(true));
+			}
+		} else {
+			patient.setDeceased(new BooleanType(false));
+		}
 		
 		for (PatientIdentifier identifier : openmrsPatient.getActiveIdentifiers()) {
 			patient.addIdentifier(identifierTranslator.toFhirResource(identifier));
@@ -73,6 +88,29 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		
 		patient.setUuid(fhirPatient.getId());
+		patient.setBirthdate(fhirPatient.getBirthDate());
+
+		if (!fhirPatient.getActive()) {
+			patient.setVoided(true);
+			patient.setVoidReason("Voided by FHIR module");
+		}
+
+		if (fhirPatient.getDeceased() != null) {
+			try {
+				fhirPatient.getDeceasedBooleanType();
+
+				patient.setDead(fhirPatient.getDeceasedBooleanType().booleanValue());
+			} catch (FHIRException ignored) {}
+
+			try {
+				fhirPatient.getDeceasedDateTimeType();
+
+
+
+				patient.setDead(true);
+				patient.setDeathDate(fhirPatient.getDeceasedDateTimeType().getValue());
+			} catch (FHIRException ignored) {}
+		}
 		
 		for (Identifier identifier : fhirPatient.getIdentifier()) {
 			patient.addIdentifier(identifierTranslator.toOpenmrsType(identifier));
