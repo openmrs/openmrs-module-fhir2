@@ -60,9 +60,9 @@ public class PatientTranslatorImplTest {
 	private static final String ADDRESS_UUID = "135791-acegik-135791";
 	
 	private static final String ADDRESS_CITY = "Maputo";
-
+	
 	private static final Date PATIENT_DEATH_DATE = Date.from(Instant.ofEpochSecond(872986980L));
-
+	
 	@Mock
 	private PatientIdentifierTranslator identifierTranslator;
 	
@@ -101,43 +101,43 @@ public class PatientTranslatorImplTest {
 		Patient result = patientTranslator.toFhirResource(patient);
 		assertThat(result.getId(), equalTo(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void shouldMarkVoidedPatientAsInactive() {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setVoided(true);
-
+		
 		assertThat(patientTranslator.toFhirResource(patient).getActive(), is(false));
 	}
-
+	
 	@Test
 	public void shouldTranslateAlivePatientToAlive() {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setDead(false);
-
+		
 		Patient result = patientTranslator.toFhirResource(patient);
 		assertThat(result.getDeceased(), notNullValue());
 		assertThat(result.getDeceasedBooleanType(), notNullValue());
 		assertThat(result.getDeceasedBooleanType().booleanValue(), is(false));
 	}
-
+	
 	@Test
 	public void shouldTranslateDeadPatientWithoutDeathDateToDead() {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setDead(true);
-
+		
 		Patient result = patientTranslator.toFhirResource(patient);
 		assertThat(result.getDeceased(), notNullValue());
 		assertThat(result.getDeceasedBooleanType(), notNullValue());
 		assertThat(result.getDeceasedBooleanType().booleanValue(), is(true));
 	}
-
+	
 	@Test
 	public void shouldTranslateDeadPatientWithDeathDateToPatientWithDeathDate() {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setDead(true);
 		patient.setDeathDate(PATIENT_DEATH_DATE);
-
+		
 		Patient result = patientTranslator.toFhirResource(patient);
 		assertThat(result.getDeceased(), notNullValue());
 		assertThat(result.getDeceasedDateTimeType(), notNullValue());
@@ -228,38 +228,38 @@ public class PatientTranslatorImplTest {
 		org.openmrs.Patient result = patientTranslator.toOpenmrsType(patient);
 		assertThat(result.getUuid(), equalTo(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void shouldVoidInactivePatient() {
 		Patient patient = new Patient();
 		patient.setActive(false);
-
+		
 		org.openmrs.Patient result = patientTranslator.toOpenmrsType(patient);
 		assertThat(result.getVoided(), is(true));
 		assertThat(result.getVoidReason(), equalTo("Voided by FHIR module"));
 	}
-
+	
 	@Test
 	public void shouldTranslateAliveFhirPatientToAlive() {
 		Patient patient = new Patient();
 		patient.setDeceased(new BooleanType(false));
-
+		
 		assertThat(patientTranslator.toOpenmrsType(patient).getDead(), is(false));
 	}
-
+	
 	@Test
 	public void shouldTranslateDeceasedPatientToDeceased() {
 		Patient patient = new Patient();
 		patient.setDeceased(new BooleanType(true));
-
+		
 		assertThat(patientTranslator.toOpenmrsType(patient).getDead(), is(true));
 	}
-
+	
 	@Test
 	public void shouldTranslateDeathDateToDeceasedPatient() {
 		Patient patient = new Patient();
 		patient.setDeceased(new DateTimeType(PATIENT_DEATH_DATE));
-
+		
 		org.openmrs.Patient result = patientTranslator.toOpenmrsType(patient);
 		assertThat(result.getDead(), is(true));
 		assertThat(result.getDeathDate(), equalTo(PATIENT_DEATH_DATE));

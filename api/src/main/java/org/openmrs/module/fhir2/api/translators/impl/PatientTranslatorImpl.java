@@ -53,7 +53,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		patient.setId(openmrsPatient.getUuid());
 		patient.setBirthDate(openmrsPatient.getBirthdate());
 		patient.setActive(!openmrsPatient.getVoided());
-
+		
 		if (openmrsPatient.getDead()) {
 			if (openmrsPatient.getDeathDate() != null) {
 				patient.setDeceased(new DateTimeType(openmrsPatient.getDeathDate()));
@@ -89,27 +89,27 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		
 		patient.setUuid(fhirPatient.getId());
 		patient.setBirthdate(fhirPatient.getBirthDate());
-
+		
 		if (!fhirPatient.getActive()) {
 			patient.setVoided(true);
 			patient.setVoidReason("Voided by FHIR module");
 		}
-
+		
 		if (fhirPatient.getDeceased() != null) {
 			try {
 				fhirPatient.getDeceasedBooleanType();
-
+				
 				patient.setDead(fhirPatient.getDeceasedBooleanType().booleanValue());
-			} catch (FHIRException ignored) {}
-
+			}
+			catch (FHIRException ignored) {}
+			
 			try {
 				fhirPatient.getDeceasedDateTimeType();
-
-
-
+				
 				patient.setDead(true);
 				patient.setDeathDate(fhirPatient.getDeceasedDateTimeType().getValue());
-			} catch (FHIRException ignored) {}
+			}
+			catch (FHIRException ignored) {}
 		}
 		
 		for (Identifier identifier : fhirPatient.getIdentifier()) {

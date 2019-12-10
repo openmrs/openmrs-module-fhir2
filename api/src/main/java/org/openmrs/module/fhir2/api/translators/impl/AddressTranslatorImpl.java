@@ -25,14 +25,14 @@ public class AddressTranslatorImpl implements AddressTranslator {
 		fhirAddress.setState(address.getStateProvince());
 		fhirAddress.setCountry(address.getCountry());
 		fhirAddress.setPostalCode(address.getPostalCode());
-
+		
 		// TODO is this the right mapping?
 		if (address.getPreferred()) {
 			fhirAddress.setUse(Address.AddressUse.HOME);
 		} else {
 			fhirAddress.setUse(Address.AddressUse.OLD);
 		}
-
+		
 		return fhirAddress;
 	}
 	
@@ -44,11 +44,11 @@ public class AddressTranslatorImpl implements AddressTranslator {
 		personAddress.setStateProvince(address.getState());
 		personAddress.setCountry(address.getCountry());
 		personAddress.setPostalCode(address.getPostalCode());
-
+		
 		if (Address.AddressUse.HOME.equals(address.getUse())) {
 			personAddress.setPreferred(true);
 		}
-
+		
 		return personAddress;
 	}
 }
