@@ -1,7 +1,5 @@
 package org.openmrs.module.fhir2.web.filter;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -12,26 +10,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
 
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AuthenticationFilter implements Filter {
-	
-	private static final Logger log = LoggerFactory.getLogger(AuthenticationFilter.class);
-	
-	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
-	
+
 	@Override
 	public void init(FilterConfig filterConfig) {
 	}
