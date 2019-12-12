@@ -10,12 +10,10 @@
 package org.openmrs.module.fhir2;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 
 @Configuration
-@Import(FhirSpringConfiguration.class)
-@ImportResource("classpath:applicationContext-service.xml")
+@ImportResource({ "classpath:applicationContext-service.xml", "classpath*:moduleApplicationContext.xml" })
 public class TestFhirSpringConfiguration {
 	
 }

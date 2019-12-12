@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//OpenMRS//DTD OpenMRS Config 1.0//EN"
-		"https://resources.openmrs.org/doctype/config-1.6.dtd">
-<module configVersion="1.2">
+		"https://resources.openmrs.org/doctype/config-1.5.dtd">
+<module configVersion="1.5">
 	
 	<!-- Base Module Properties -->
 	<id>${project.parent.artifactId}</id>
@@ -25,6 +25,29 @@
 	<aware_of_modules>
 		<aware_of_module>org.openmrs.module.legacyui</aware_of_module>
 	</aware_of_modules>
+
+	<servlet>
+		<servlet-name>fhir2Servlet</servlet-name>
+		<servlet-class>org.openmrs.module.fhir2.web.servlet.FhirRestServlet</servlet-class>
+	</servlet>
+
+	<filter>
+		<filter-name>fhir2AuthenticationFilter</filter-name>
+		<filter-class>org.openmrs.module.fhir2.web.filter.AuthenticationFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>fhir2AuthenticationFilter</filter-name>
+		<url-pattern>/ws/fhir2/*</url-pattern>
+		<url-pattern>/ms/fhir2Servlet/*</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>fhir2ForwardingFilter</filter-name>
+		<filter-class>org.openmrs.module.fhir2.web.filter.ForwardingFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>fhir2ForwardingFilter</filter-name>
+		<url-pattern>/ws/fhir2/*</url-pattern>
+	</filter-mapping>
 
 	<!-- Internationalization -->
 	<!-- All message codes should start with @MODULE_ID@.* -->
