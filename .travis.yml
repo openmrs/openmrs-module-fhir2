@@ -1,9 +1,11 @@
 language: java
 jdk:
- - openjdk8
+  - openjdk8
 script: mvn clean install --batch-mode
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 matrix:
-    - jdk: openjdk8
+  - jdk: openjdk8
 branches:
   only:
     - master
