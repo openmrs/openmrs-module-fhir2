@@ -1,4 +1,4 @@
-/**
+/*
  * This Source Code Form is subject to the terms of the Mozilla Public License,
  * v. 2.0. If a copy of the MPL was not distributed with this file, You can
  * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
@@ -7,20 +7,12 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2;
+package org.openmrs.module.fhir2.api;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.hl7.fhir.r4.model.Person;
 
-public class FhirConstants {
+public interface FhirPersonService {
 	
-	private FhirConstants() {
-	}
-	
-	public static String OPENMRS_FHIR_SERVER_NAME = "OpenMRS FHIR Server";
-	
-	@Value("${project.version}")
-	public static String OPENMRS_FHIR_SERVER_VERSION;
-	
-	public static String PATIENT = "Patient";
+	Person getPersonByUuid(String uuid);
 	
 }

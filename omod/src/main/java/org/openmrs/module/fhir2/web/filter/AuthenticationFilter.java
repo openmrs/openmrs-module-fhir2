@@ -20,10 +20,10 @@ public class AuthenticationFilter implements Filter {
 	@Override
 	public void init(FilterConfig filterConfig) {
 	}
-	
+
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-	        ServletException {
+			ServletException {
 		// skip if the session has timed out, we're already authenticated, or it's not an HTTP request
 		if (request instanceof HttpServletRequest) {
 			HttpServletRequest httpRequest = (HttpServletRequest) request;
@@ -32,7 +32,7 @@ public class AuthenticationFilter implements Filter {
 				httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Session timed out");
 				return;
 			}
-			
+
 			if (!Context.isAuthenticated()) {
 				String basicAuth = httpRequest.getHeader("Authorization");
 				if (!StringUtils.isBlank(basicAuth)) {
@@ -55,10 +55,10 @@ public class AuthenticationFilter implements Filter {
 				}
 			}
 		}
-		
+
 		chain.doFilter(request, response);
 	}
-	
+
 	@Override
 	public void destroy() {
 	}
