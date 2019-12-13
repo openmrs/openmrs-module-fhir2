@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,6 +31,10 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	@Read
 	@SuppressWarnings("unused")
 	public Patient getPatientById(@IdParam IdType id) {
-		return patientService.getPatientByUuid(id.getIdPart());
+		Patient patient = patientService.getPatientByUuid(id.getIdPart());
+		if (patient == null) {
+			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
+		}
+		return patient;
 	}
 }

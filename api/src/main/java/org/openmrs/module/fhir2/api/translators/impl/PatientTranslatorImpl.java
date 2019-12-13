@@ -49,35 +49,36 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	@Override
 	public Patient toFhirResource(org.openmrs.Patient openmrsPatient) {
 		Patient patient = new Patient();
-		
-		patient.setId(openmrsPatient.getUuid());
-		patient.setBirthDate(openmrsPatient.getBirthdate());
-		patient.setActive(!openmrsPatient.getVoided());
-		
-		if (openmrsPatient.getDead()) {
-			if (openmrsPatient.getDeathDate() != null) {
-				patient.setDeceased(new DateTimeType(openmrsPatient.getDeathDate()));
+		if (openmrsPatient != null) {
+			patient.setId(openmrsPatient.getUuid());
+			patient.setBirthDate(openmrsPatient.getBirthdate());
+			patient.setActive(!openmrsPatient.getVoided());
+			
+			if (openmrsPatient.getDead()) {
+				if (openmrsPatient.getDeathDate() != null) {
+					patient.setDeceased(new DateTimeType(openmrsPatient.getDeathDate()));
+				} else {
+					patient.setDeceased(new BooleanType(true));
+				}
 			} else {
-				patient.setDeceased(new BooleanType(true));
+				patient.setDeceased(new BooleanType(false));
 			}
-		} else {
-			patient.setDeceased(new BooleanType(false));
-		}
-		
-		for (PatientIdentifier identifier : openmrsPatient.getActiveIdentifiers()) {
-			patient.addIdentifier(identifierTranslator.toFhirResource(identifier));
-		}
-		
-		for (PersonName name : openmrsPatient.getNames()) {
-			patient.addName(nameTranslator.toFhirResource(name));
-		}
-		
-		if (openmrsPatient.getGender() != null) {
-			patient.setGender(genderTranslator.toFhirResource(openmrsPatient.getGender()));
-		}
-		
-		for (PersonAddress address : openmrsPatient.getAddresses()) {
-			patient.addAddress(addressTranslator.toFhirResource(address));
+			
+			for (PatientIdentifier identifier : openmrsPatient.getActiveIdentifiers()) {
+				patient.addIdentifier(identifierTranslator.toFhirResource(identifier));
+			}
+			
+			for (PersonName name : openmrsPatient.getNames()) {
+				patient.addName(nameTranslator.toFhirResource(name));
+			}
+			
+			if (openmrsPatient.getGender() != null) {
+				patient.setGender(genderTranslator.toFhirResource(openmrsPatient.getGender()));
+			}
+			
+			for (PersonAddress address : openmrsPatient.getAddresses()) {
+				patient.addAddress(addressTranslator.toFhirResource(address));
+			}
 		}
 		
 		return patient;
