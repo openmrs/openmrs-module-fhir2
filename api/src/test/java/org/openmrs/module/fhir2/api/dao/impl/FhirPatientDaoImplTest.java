@@ -33,14 +33,6 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PATIENT_UUID = "256ccf6d-6b41-455c-9be2-51ff4386ae76";
 	
-	private static final String PATIENT_IDENTIFIER_TYPE_NAME = "Test Identifier Type";
-	
-	private static final String PATIENT_IDENTIFIER_TYPE_UUID = "c5576187-9a67-43a7-9b7c-04db22851211";
-	
-	private static final String WRONG_IDENTIFIER_TYPE_NAME = "Wrong Identifier Type";
-	
-	private static final String WRONG_IDENTIFIER_TYPE_UUID = "123456-abcdef-123456";
-	
 	private static final String PATIENT_SEARCH_DATA_XML = "org/openmrs/api/include/PatientServiceTest-findPatients.xml";
 	
 	private FhirPatientDaoImpl dao;
@@ -66,45 +58,4 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(PATIENT_UUID));
 	}
-	
-	@Test
-	public void shouldRetrievePatientIdentifierTypeByName() {
-		PatientIdentifierType result = dao.getPatientIdentifierTypeByNameOrUuid(PATIENT_IDENTIFIER_TYPE_NAME, null);
-		assertThat(result, notNullValue());
-		assertThat(result.getName(), equalTo(PATIENT_IDENTIFIER_TYPE_NAME));
-		assertThat(result.getUuid(), equalTo(PATIENT_IDENTIFIER_TYPE_UUID));
-	}
-	
-	@Test
-	public void shouldRetrievePatientIdentifierTypeByUuid() {
-		PatientIdentifierType result = dao.getPatientIdentifierTypeByNameOrUuid(null, PATIENT_IDENTIFIER_TYPE_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getName(), equalTo(PATIENT_IDENTIFIER_TYPE_NAME));
-		assertThat(result.getUuid(), equalTo(PATIENT_IDENTIFIER_TYPE_UUID));
-	}
-	
-	@Test
-	public void shouldReturnResultIfRightNameWrongUuid() {
-		PatientIdentifierType result = dao.getPatientIdentifierTypeByNameOrUuid(PATIENT_IDENTIFIER_TYPE_NAME,
-		    WRONG_IDENTIFIER_TYPE_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getName(), equalTo(PATIENT_IDENTIFIER_TYPE_NAME));
-		assertThat(result.getUuid(), equalTo(PATIENT_IDENTIFIER_TYPE_UUID));
-	}
-	
-	@Test
-	public void shouldReturnResultIfRightUuidWrongName() {
-		PatientIdentifierType result = dao.getPatientIdentifierTypeByNameOrUuid(WRONG_IDENTIFIER_TYPE_NAME,
-		    PATIENT_IDENTIFIER_TYPE_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getName(), equalTo(PATIENT_IDENTIFIER_TYPE_NAME));
-		assertThat(result.getUuid(), equalTo(PATIENT_IDENTIFIER_TYPE_UUID));
-	}
-	
-	@Test
-	public void shouldReturnNullIfIdentifierCannotBeFound() {
-		PatientIdentifierType result = dao.getPatientIdentifierTypeByNameOrUuid(null, null);
-		assertThat(result, nullValue());
-	}
-	
 }

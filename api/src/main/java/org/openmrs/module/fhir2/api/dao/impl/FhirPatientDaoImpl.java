@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.or;
 import static org.hibernate.criterion.Restrictions.eq;
 
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -48,18 +50,18 @@ public class FhirPatientDaoImpl implements FhirPatientDao {
 	@SuppressWarnings("unchecked")
 	public PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid) {
 		List<PatientIdentifierType> identifierTypes = (List<PatientIdentifierType>) sessionFactory.getCurrentSession()
-		        .createCriteria(PatientIdentifierType.class).add(or(eq("name", name), eq("uuid", uuid))).list();
+				.createCriteria(PatientIdentifierType.class).add(or(
+					and(eq("name", name), eq("retired", false)),
+						eq("uuid", uuid))).list();
 		
 		if (identifierTypes.isEmpty()) {
 			return null;
 		} else {
 			// favour uuid if one was supplied
 			if (uuid != null) {
-				for (PatientIdentifierType identifierType : identifierTypes) {
-					if (uuid.equals(identifierType.getUuid())) {
-						return identifierType;
-					}
-				}
+				try {
+					return identifierTypes.stream().filter((idType) -> uuid.equals(idType.getUuid())).findFirst().get();
+				} catch (NoSuchElementException ignored) {}
 			}
 			
 			return identifierTypes.get(0);
