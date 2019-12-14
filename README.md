@@ -1,5 +1,7 @@
 openmrs-module-fhir2
 ==========================
+[![Build Status](https://travis-ci.com/ibacher/openmrs-module-fhir2.svg?branch=master)](https://travis-ci.com/ibacher/openmrs-module-fhir2)
+[![codecov](https://codecov.io/gh/ibacher/openmrs-module-fhir2/branch/master/graph/badge.svg)](https://codecov.io/gh/ibacher/openmrs-module-fhir2)
 
 Description
 -----------
