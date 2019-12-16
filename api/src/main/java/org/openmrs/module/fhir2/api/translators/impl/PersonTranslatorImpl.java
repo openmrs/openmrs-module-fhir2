@@ -49,7 +49,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
 		if (openmrsPerson != null) {
 			person.setId(openmrsPerson.getUuid());
-			person.setActive(openmrsPerson.getPersonVoided());
+			person.setActive(!openmrsPerson.getVoided());
 			person.setBirthDate(openmrsPerson.getBirthdate());
 
 			if (openmrsPerson.getGender() != null) {
