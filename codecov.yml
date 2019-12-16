@@ -1,0 +1,19 @@
+codecov:
+  notify:
+    require_ci_to_pass: yes
+
+coverage:
+  precision: 2
+  round: nearest
+  range: "70...100"
+
+  status:
+    project: yes
+    patch: yes
+    changes: no
+
+ignore:
+  - "/api/src/main/java/org/openmrs/module/fhir2/FhirActivator.java"
+  - "/api/src/main/java/org/openmrs/module/fhir2/FhirConstants.java"
+  - "doc"
+  - "**/*.md"
