@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Identifier;
@@ -39,5 +42,20 @@ public class FhirPatientServiceImpl implements FhirPatientService {
 	@Override
 	public PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier) {
 		return dao.getPatientIdentifierTypeByNameOrUuid(identifier.getSystem(), null);
+	}
+	
+	@Override
+	public Collection<Patient> findPatientsByName(String name) {
+		return dao.findPatientsByName(name).stream().map(translator::toFhirResource).collect(Collectors.toList());
+	}
+	
+	@Override
+	public Collection<Patient> findPatientsByGivenName(String given) {
+		return dao.findPatientsByGivenName(given).stream().map(translator::toFhirResource).collect(Collectors.toList());
+	}
+	
+	@Override
+	public Collection<Patient> findPatientsByFamilyName(String family) {
+		return dao.findPatientsByFamilyName(family).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
 }

@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.ilike;
 import static org.hibernate.criterion.Restrictions.or;
 import static org.hibernate.criterion.Restrictions.eq;
 
@@ -22,6 +23,7 @@ import java.util.NoSuchElementException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.MatchMode;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.PatientService;
@@ -66,5 +68,25 @@ public class FhirPatientDaoImpl implements FhirPatientDao {
 			
 			return identifierTypes.get(0);
 		}
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<Patient> findPatientsByName(String name) {
+		return patientService.getPatients(name);
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Patient> findPatientsByGivenName(String given) {
+		return sessionFactory.getCurrentSession().createCriteria(Patient.class).createAlias("names", "names")
+				.add(ilike("names.givenName", given, MatchMode.ANYWHERE)).list();
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Patient> findPatientsByFamilyName(String family) {
+		return sessionFactory.getCurrentSession().createCriteria(Patient.class).createAlias("names", "names")
+				.add(ilike("names.familyName", family, MatchMode.ANYWHERE)).list();
 	}
 }

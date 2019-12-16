@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Collection;
+
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 
@@ -20,4 +22,9 @@ public interface FhirPatientDao {
 	
 	PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid);
 	
+	Collection<Patient> findPatientsByName(String name);
+	
+	Collection<Patient> findPatientsByGivenName(String given);
+	
+	Collection<Patient> findPatientsByFamilyName(String family);
 }
