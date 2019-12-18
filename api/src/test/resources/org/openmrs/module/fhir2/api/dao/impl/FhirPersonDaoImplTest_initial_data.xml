@@ -7,7 +7,6 @@
 
     Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
     graphic logo is a trademark of OpenMRS Inc.
-
 -->
 <dataset>
     <person person_id="2" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="61b38324-e2fd-4feb-95b7-9e9a2a4400df"/>
