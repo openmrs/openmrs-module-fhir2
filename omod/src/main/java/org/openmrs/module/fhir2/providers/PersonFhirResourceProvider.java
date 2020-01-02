@@ -10,9 +10,12 @@
 package org.openmrs.module.fhir2.providers;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -27,22 +30,22 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 @Component
 @Qualifier("fhirResources")
 @Setter(AccessLevel.PACKAGE)
 public class PersonFhirResourceProvider implements IResourceProvider {
-	
+
 	@Inject
 	private FhirPersonService fhirPersonService;
-	
+
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {
 		return Person.class;
 	}
-	
+
 	@Read
+	@SuppressWarnings("unused")
 	public Person getPersonById(@IdParam IdType id) {
 		Person person = fhirPersonService.getPersonByUuid(id.getIdPart());
 		if (person == null) {
@@ -50,9 +53,24 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		}
 		return person;
 	}
-	
+
+	/**
+	 * Find similar people by Name, birthday and gender
+	 * 
+	 * @param name Name of the person to search
+	 * @param birthDate The year of birth
+	 * @param gender Gender field to search on (Typically just "M" or "F")
+	 * @return Returns a bundle list of people. This list may contain multiple matching * resources,
+	 *         or it may also be empty.
+	 */
+
 	@Search
-	public Bundle searchPersonsByName(@RequiredParam(name = Person.SP_NAME) @NotNull String name) {
-		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByName(name));
+	@SuppressWarnings("unused")
+	public Bundle findSimilarPeople(@RequiredParam(name = Person.SP_NAME) StringParam name,
+	        @RequiredParam(name = Person.SP_BIRTHDATE) DateParam birthDate,
+	        @OptionalParam(name = Person.SP_GENDER) String gender) {
+		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findSimilarPeople(name.getValue(), birthDate
+		        .getValue().getYear(), gender));
+		
 	}
 }

@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -49,7 +50,11 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String PERSON_PARTIAL_NAME = "Joh";
 	
 	private static final String NOT_FOUND_NAME = "not found name";
-	
+
+	private static final int PERSON_BIRTH_YEAR = 1999;
+
+	private static final int WRONG_BIRTH_YEAR = 1000;
+
 	private FhirPersonDaoImpl fhirPersonDao;
 	
 	@Inject
@@ -98,5 +103,19 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	public void findPersonsByNonExistingName_shouldReturnEmptyCollection() {
 		Collection<Person> people = fhirPersonDao.findPersonsByName(NOT_FOUND_NAME);
 		assertThat(people, is(empty()));
+	}
+
+	@Test
+	public void findSimilarPeople_shouldReturnMatchingSimilarPeople() {
+		Collection<Person> people = fhirPersonDao.findSimilarPeople(PERSON_NAME, PERSON_BIRTH_YEAR, GENDER);
+		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void findSimilarPeople_shouldReturnEmptyCollectionForNotMatched() {
+		Collection<Person> people = fhirPersonDao.findSimilarPeople(NOT_FOUND_NAME, WRONG_BIRTH_YEAR, GENDER);
+		assertThat(people, notNullValue());
+		assertThat(people, empty());
 	}
 }
