@@ -36,40 +36,40 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirPersonServiceImplTest {
-
+	
 	private static final String GIVEN_NAME = "John";
-
+	
 	private static final String FAMILY_NAME = "kipchumba";
-
+	
 	private static final String PERSON_PARTIAL_NAME = "kip";
-
+	
 	private static final String NOT_FOUND_NAME = "not found name";
-
+	
 	private static final String GENDER = "M";
-
+	
 	private static final int PERSON_BIRTH_YEAR = 1999;
-
+	
 	private static final int NON_PERSON_BIRTH_YEAR = 1000;
-
+	
 	private static final String PERSON_UUID = "1223-2323-2323-nd23";
-
+	
 	private static final String PERSON_NAME_UUID = "test-uuid-1223-2312";
-
+	
 	@Mock
 	private FhirPersonDao dao;
-
+	
 	@Mock
 	private PersonTranslator personTranslator;
-
+	
 	private FhirPersonServiceImpl personService;
-
+	
 	@Before
 	public void setUp() {
 		personService = new FhirPersonServiceImpl();
 		personService.setFhirPersonDao(dao);
 		personService.setPersonTranslator(personTranslator);
 	}
-
+	
 	@Test
 	public void shouldReturnCollectionOfPersonForMatchOnPersonName() {
 		Collection<org.openmrs.Person> people = new ArrayList<>();
@@ -88,7 +88,7 @@ public class FhirPersonServiceImplTest {
 		assertNotNull(personCollection);
 		assertEquals(personCollection.size(), 1);
 	}
-
+	
 	@Test
 	public void shouldReturnCollectionOfPersonsForPartialMatchOnPersonName() {
 		Collection<org.openmrs.Person> people = new ArrayList<>();
@@ -107,13 +107,13 @@ public class FhirPersonServiceImplTest {
 		assertThat(personCollection, not(empty()));
 		assertThat(personCollection.size(), greaterThanOrEqualTo(1));
 	}
-
+	
 	@Test
 	public void findPersonsByNonExistingName_shouldReturnEmptyCollection() {
 		Collection<Person> people = personService.findPersonsByName(NOT_FOUND_NAME);
 		assertThat(people, is(empty()));
 	}
-
+	
 	@Test
 	public void shouldReturnCollectionOfPersonForMatchOnSimilarPeople() {
 		Collection<org.openmrs.Person> people = new ArrayList<>();
@@ -132,7 +132,7 @@ public class FhirPersonServiceImplTest {
 		assertNotNull(personCollection);
 		assertThat(personCollection.size(), greaterThanOrEqualTo(1));
 	}
-
+	
 	@Test
 	public void shouldReturnEmptyListWhenPersonNameGenderBirthYearNotMatched() {
 		Collection<org.openmrs.Person> people = new ArrayList<>();

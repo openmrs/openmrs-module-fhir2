@@ -80,13 +80,13 @@ public class FhirPatientDaoImpl implements FhirPatientDao {
 	@SuppressWarnings("unchecked")
 	public List<Patient> findPatientsByGivenName(String given) {
 		return sessionFactory.getCurrentSession().createCriteria(Patient.class).createAlias("names", "names")
-				.add(ilike("names.givenName", given, MatchMode.ANYWHERE)).list();
+		        .add(ilike("names.givenName", given, MatchMode.ANYWHERE)).list();
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Patient> findPatientsByFamilyName(String family) {
 		return sessionFactory.getCurrentSession().createCriteria(Patient.class).createAlias("names", "names")
-				.add(ilike("names.familyName", family, MatchMode.ANYWHERE)).list();
+		        .add(ilike("names.familyName", family, MatchMode.ANYWHERE)).list();
 	}
 }

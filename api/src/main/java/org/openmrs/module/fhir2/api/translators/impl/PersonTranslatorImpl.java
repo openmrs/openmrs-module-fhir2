@@ -31,16 +31,16 @@ import java.util.List;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class PersonTranslatorImpl implements PersonTranslator {
-
+	
 	@Inject
 	private PersonNameTranslator nameTranslator;
-
+	
 	@Inject
 	private AddressTranslator addressTranslator;
-
+	
 	@Inject
 	private GenderTranslator genderTranslator;
-
+	
 	/**
 	 * @see org.openmrs.module.fhir2.api.translators.PersonTranslator#toFhirResource(org.openmrs.Person)
 	 */
@@ -51,11 +51,11 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			person.setId(openmrsPerson.getUuid());
 			person.setActive(!openmrsPerson.getVoided());
 			person.setBirthDate(openmrsPerson.getBirthdate());
-
+			
 			if (openmrsPerson.getGender() != null) {
 				person.setGender(genderTranslator.toFhirResource(openmrsPerson.getGender()));
 			}
-
+			
 			for (PersonName name : openmrsPerson.getNames()) {
 				person.addName(nameTranslator.toFhirResource(name));
 			}
@@ -66,7 +66,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		}
 		return person;
 	}
-
+	
 	/**
 	 * TODO Find a better way to implement this generically and maybe move to different package
 	 */
@@ -86,7 +86,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			person.setLink(links);
 		}
 	}
-
+	
 	/**
 	 * @see org.openmrs.module.fhir2.api.translators.PersonTranslator#toOpenmrsType(org.hl7.fhir.r4.model.Person)
 	 */
@@ -97,7 +97,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			openmrsPerson.setUuid(person.getId());
 			openmrsPerson.setVoided(person.getActive());
 			openmrsPerson.setBirthdate(person.getBirthDate());
-
+			
 			if (person.getGender() != null) {
 				openmrsPerson.setGender(genderTranslator.toOpenmrsType(person.getGender()));
 			}
@@ -108,7 +108,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 				openmrsPerson.addAddress(addressTranslator.toOpenmrsType(address));
 			}
 		}
-
+		
 		return openmrsPerson;
 	}
 }

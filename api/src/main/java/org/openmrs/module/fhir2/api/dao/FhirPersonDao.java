@@ -18,6 +18,6 @@ public interface FhirPersonDao {
 	Person getPersonByUuid(@NotNull String uuid);
 	
 	Collection<Person> findPersonsByName(@NotNull String name);
-
+	
 	Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender);
 }

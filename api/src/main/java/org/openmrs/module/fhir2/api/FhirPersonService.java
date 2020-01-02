@@ -18,7 +18,7 @@ public interface FhirPersonService {
 	Person getPersonByUuid(String uuid);
 	
 	Collection<Person> findPersonsByName(String name);
-
+	
 	Collection<Person> findSimilarPeople(String name, int birthYear, String gender);
-
+	
 }

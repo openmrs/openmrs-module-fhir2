@@ -34,7 +34,7 @@ public class FhirPersonDaoImpl implements FhirPersonDao {
 	public Collection<Person> findPersonsByName(String name) {
 		return personService.getPeople(name, false);
 	}
-
+	
 	@Override
 	public Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender) {
 		return personService.getSimilarPeople(name, birthYear, gender);

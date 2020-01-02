@@ -14,6 +14,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.PersonName;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.springframework.stereotype.Component;
 
@@ -35,8 +36,6 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 		if (name.getFamilyName() != null) {
 			humanName.setFamily(name.getFamilyName());
 		}
-		
-		// TODO handle other name components
 		
 		return humanName;
 	}
@@ -64,8 +63,6 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 		if (name.getFamily() != null) {
 			personName.setFamilyName(name.getFamily());
 		}
-		
-		// TODO handle other name components
 		
 		return personName;
 	}

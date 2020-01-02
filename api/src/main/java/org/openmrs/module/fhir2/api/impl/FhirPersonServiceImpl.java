@@ -42,7 +42,7 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 				.map(personTranslator::toFhirResource)
 				.collect(Collectors.toList());
 	}
-
+	
 	@Override
 	public Collection<Person> findSimilarPeople(String name, int birthYear, String gender) {
 		return fhirPersonDao.findSimilarPeople(name, birthYear, gender)
