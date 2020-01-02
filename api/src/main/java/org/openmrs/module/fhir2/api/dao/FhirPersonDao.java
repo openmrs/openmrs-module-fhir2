@@ -11,9 +11,12 @@ package org.openmrs.module.fhir2.api.dao;
 import org.openmrs.Person;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
 
 public interface FhirPersonDao {
 	
 	Person getPersonByUuid(@NotNull String uuid);
+	
+	Collection<Person> findPersonsByName(@NotNull String name);
 	
 }

@@ -11,8 +11,12 @@ package org.openmrs.module.fhir2.api;
 
 import org.hl7.fhir.r4.model.Person;
 
+import java.util.Collection;
+
 public interface FhirPersonService {
 	
 	Person getPersonByUuid(String uuid);
+	
+	Collection<Person> findPersonsByName(String name);
 	
 }

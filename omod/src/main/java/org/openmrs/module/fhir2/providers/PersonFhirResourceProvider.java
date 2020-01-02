@@ -11,18 +11,23 @@ package org.openmrs.module.fhir2.providers;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Person;
 import org.openmrs.module.fhir2.api.FhirPersonService;
+import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 @Component
 @Qualifier("fhirResources")
@@ -44,5 +49,10 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find Person with Id " + id.getIdPart());
 		}
 		return person;
+	}
+	
+	@Search
+	public Bundle searchPersonsByName(@RequiredParam(name = Person.SP_NAME) @NotNull String name) {
+		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByName(name));
 	}
 }
