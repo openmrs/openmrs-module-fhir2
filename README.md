@@ -57,7 +57,7 @@ That is, we should write tests that make judicious use of mocks and tests that r
 a database should use an in-memory database.
 
 In general, to test the output of any method, we should favour using
-[JUnit's `assertThat()` method](http://junit.sourceforge.net/javadoc/org/junit/Assert.html#assertThat(T,%20org.hamcrest.Matcher).
+[JUnit's `assertThat()` method](http://junit.sourceforge.net/javadoc/org/junit/Assert.html#assertThat(T,%20org.hamcrest.Matcher)).
 This will tend to lead to more "readable" assertions. For example compare this:
 
 ```java
