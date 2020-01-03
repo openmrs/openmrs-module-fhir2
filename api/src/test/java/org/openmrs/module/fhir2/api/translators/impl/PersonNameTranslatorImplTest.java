@@ -11,15 +11,18 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.PersonName;
+import org.openmrs.module.fhir2.FhirConstants;
 
 public class PersonNameTranslatorImplTest {
 	
@@ -82,6 +85,56 @@ public class PersonNameTranslatorImplTest {
 	}
 	
 	@Test
+	public void shouldAddExtensionForPrefix() {
+		PersonName name = new PersonName();
+		name.setPrefix(PERSON_MIDDLE_NAME);
+		
+		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#prefix"),
+		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
+	}
+	
+	@Test
+	public void shouldAddExtensionForFamilyNamePrefix() {
+		PersonName name = new PersonName();
+		name.setFamilyNamePrefix(PERSON_MIDDLE_NAME);
+		
+		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix"),
+		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
+	}
+	
+	@Test
+	public void shouldAddExtensionForFamilyName2() {
+		PersonName name = new PersonName();
+		name.setFamilyName2(PERSON_MIDDLE_NAME);
+		
+		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2"),
+		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
+	}
+	
+	@Test
+	public void shouldAddExtensionForFamilyNameSuffix() {
+		PersonName name = new PersonName();
+		name.setFamilyNameSuffix(PERSON_MIDDLE_NAME);
+		
+		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix"),
+		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
+	}
+	
+	@Test
+	public void shouldAddExtensionForDegree() {
+		PersonName name = new PersonName();
+		name.setDegree(PERSON_MIDDLE_NAME);
+		
+		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#degree"),
+		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
+	}
+	
+	@Test
 	public void shouldConvertHumanNameToPersonName() {
 		HumanName name = new HumanName();
 		name.setId(PERSON_NAME_UUID);
@@ -117,6 +170,58 @@ public class PersonNameTranslatorImplTest {
 		name.setFamily(PERSON_FAMILY_NAME);
 		
 		assertThat(personNameTranslator.toOpenmrsType(name).getFamilyName(), equalTo(PERSON_FAMILY_NAME));
+	}
+	
+	@Test
+	public void shouldConvertExtensionToPrefix() {
+		HumanName name = new HumanName();
+		Extension nameExtension = name.addExtension();
+		nameExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
+		nameExtension.addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#prefix", new StringType(PERSON_MIDDLE_NAME));
+		
+		assertThat(personNameTranslator.toOpenmrsType(name).getPrefix(), equalTo(PERSON_MIDDLE_NAME));
+	}
+	
+	@Test
+	public void shouldConvertExtensionToFamilyNamePrefix() {
+		HumanName name = new HumanName();
+		Extension nameExtension = name.addExtension();
+		nameExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
+		nameExtension.addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix", new StringType(
+		        PERSON_MIDDLE_NAME));
+		
+		assertThat(personNameTranslator.toOpenmrsType(name).getFamilyNamePrefix(), equalTo(PERSON_MIDDLE_NAME));
+	}
+	
+	@Test
+	public void shouldConvertExtensionToFamilyName2() {
+		HumanName name = new HumanName();
+		Extension nameExtension = name.addExtension();
+		nameExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
+		nameExtension.addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2", new StringType(PERSON_MIDDLE_NAME));
+		
+		assertThat(personNameTranslator.toOpenmrsType(name).getFamilyName2(), equalTo(PERSON_MIDDLE_NAME));
+	}
+	
+	@Test
+	public void shouldConvertExtensionToFamilyNameSuffix() {
+		HumanName name = new HumanName();
+		Extension nameExtension = name.addExtension();
+		nameExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
+		nameExtension.addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix", new StringType(
+		        PERSON_MIDDLE_NAME));
+		
+		assertThat(personNameTranslator.toOpenmrsType(name).getFamilyNameSuffix(), equalTo(PERSON_MIDDLE_NAME));
+	}
+	
+	@Test
+	public void shouldConvertExtensionToDegree() {
+		HumanName name = new HumanName();
+		Extension nameExtension = name.addExtension();
+		nameExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
+		nameExtension.addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#degree", new StringType(PERSON_MIDDLE_NAME));
+		
+		assertThat(personNameTranslator.toOpenmrsType(name).getDegree(), equalTo(PERSON_MIDDLE_NAME));
 	}
 	
 }

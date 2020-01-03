@@ -21,6 +21,12 @@ public class FhirConstants {
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	
+	public static String OPENMRS_FHIR_PREFIX = "https://fhir.openmrs.org";
+	
+	public static String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
+	
+	public static String OPENMRS_FHIR_EXT_NAME = OPENMRS_FHIR_EXT_PREFIX + "/name";
+	
 	public static String PATIENT = "Patient";
 	
 }
