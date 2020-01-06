@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import javax.inject.Inject;
 
 import lombok.AccessLevel;
@@ -86,49 +88,58 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	
 	@Override
 	public org.openmrs.Patient toOpenmrsType(Patient fhirPatient) {
-		org.openmrs.Patient patient = new org.openmrs.Patient();
-		
-		patient.setUuid(fhirPatient.getId());
-		patient.setBirthdate(fhirPatient.getBirthDate());
-		
-		if (!fhirPatient.getActive()) {
-			patient.setVoided(true);
-			patient.setVoidReason("Voided by FHIR module");
+		return toOpenmrsType(new org.openmrs.Patient(), fhirPatient);
+	}
+
+	@Override
+	public org.openmrs.Patient toOpenmrsType(org.openmrs.Patient currentPatient, Patient patient) {
+		notNull(currentPatient, "currentPatient cannot be null");
+
+		if (patient == null) {
+			return currentPatient;
 		}
-		
-		if (fhirPatient.getDeceased() != null) {
+
+		currentPatient.setUuid(patient.getId());
+		currentPatient.setBirthdate(patient.getBirthDate());
+
+		if (!patient.getActive()) {
+			currentPatient.setVoided(true);
+			currentPatient.setVoidReason("Voided by FHIR module");
+		}
+
+		if (patient.getDeceased() != null) {
 			try {
-				fhirPatient.getDeceasedBooleanType();
-				
-				patient.setDead(fhirPatient.getDeceasedBooleanType().booleanValue());
+				patient.getDeceasedBooleanType();
+
+				currentPatient.setDead(patient.getDeceasedBooleanType().booleanValue());
 			}
 			catch (FHIRException ignored) {}
-			
+
 			try {
-				fhirPatient.getDeceasedDateTimeType();
-				
-				patient.setDead(true);
-				patient.setDeathDate(fhirPatient.getDeceasedDateTimeType().getValue());
+				patient.getDeceasedDateTimeType();
+
+				currentPatient.setDead(true);
+				currentPatient.setDeathDate(patient.getDeceasedDateTimeType().getValue());
 			}
 			catch (FHIRException ignored) {}
 		}
-		
-		for (Identifier identifier : fhirPatient.getIdentifier()) {
-			patient.addIdentifier(identifierTranslator.toOpenmrsType(identifier));
+
+		for (Identifier identifier : patient.getIdentifier()) {
+			currentPatient.addIdentifier(identifierTranslator.toOpenmrsType(identifier));
 		}
-		
-		for (HumanName name : fhirPatient.getName()) {
-			patient.addName(nameTranslator.toOpenmrsType(name));
+
+		for (HumanName name : patient.getName()) {
+			currentPatient.addName(nameTranslator.toOpenmrsType(name));
 		}
-		
-		if (fhirPatient.getGender() != null) {
-			patient.setGender(genderTranslator.toOpenmrsType(fhirPatient.getGender()));
+
+		if (patient.getGender() != null) {
+			currentPatient.setGender(genderTranslator.toOpenmrsType(patient.getGender()));
 		}
-		
-		for (Address address : fhirPatient.getAddress()) {
-			patient.addAddress(addressTranslator.toOpenmrsType(address));
+
+		for (Address address : patient.getAddress()) {
+			currentPatient.addAddress(addressTranslator.toOpenmrsType(address));
 		}
-		
-		return patient;
+
+		return currentPatient;
 	}
 }

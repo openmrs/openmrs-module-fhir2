@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.translators;
 
 import org.hl7.fhir.r4.model.Person;
 
-public interface PersonTranslator extends OpenmrsFhirTranslator<org.openmrs.Person, org.hl7.fhir.r4.model.Person> {
+public interface PersonTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Person, Person> {
 	
 	/**
 	 * Maps an {@link org.openmrs.Person} to a {@link org.hl7.fhir.r4.model.Person}
@@ -25,9 +25,19 @@ public interface PersonTranslator extends OpenmrsFhirTranslator<org.openmrs.Pers
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Person} to an {@link org.openmrs.Person}
 	 * 
-	 * @param person the FHIR resource to translate
+	 * @param person the FHIR person to translate
 	 * @return the corresponding OpenMRS person
 	 */
 	@Override
 	org.openmrs.Person toOpenmrsType(Person person);
+
+	/**
+	 * Maps a {@link org.hl7.fhir.r4.model.Person} to an existing {@link org.openmrs.Person}
+	 *
+	 * @param currentPerson the existing OpenMRS person to update
+	 * @param person the FHIR person to translate
+	 * @return the updated OpenMRS person
+	 */
+	@Override
+	org.openmrs.Person toOpenmrsType(org.openmrs.Person currentPerson, Person person);
 }

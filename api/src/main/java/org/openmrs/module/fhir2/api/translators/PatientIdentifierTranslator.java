@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.Identifier;
 import org.openmrs.PatientIdentifier;
 
-public interface PatientIdentifierTranslator extends OpenmrsFhirTranslator<PatientIdentifier, Identifier> {
+public interface PatientIdentifierTranslator extends OpenmrsFhirUpdatableTranslator<PatientIdentifier, Identifier> {
 	
 	/**
 	 * Maps a {@link PatientIdentifier} to a FHIR {@link Identifier}
@@ -31,4 +31,14 @@ public interface PatientIdentifierTranslator extends OpenmrsFhirTranslator<Patie
 	 */
 	@Override
 	PatientIdentifier toOpenmrsType(Identifier identifier);
+
+	/**
+	 * Maps a {@link Identifier} to an existing {@link PatientIdentifier}
+	 *
+	 * @param patientIdentifier the existing patient identifier to update
+	 * @param identifier the identifier to translate
+	 * @return the updated patient identifier
+	 */
+	@Override
+	PatientIdentifier toOpenmrsType(PatientIdentifier patientIdentifier, Identifier identifier);
 }

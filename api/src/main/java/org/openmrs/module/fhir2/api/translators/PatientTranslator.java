@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.translators;
 
 import org.hl7.fhir.r4.model.Patient;
 
-public interface PatientTranslator extends OpenmrsFhirTranslator<org.openmrs.Patient, org.hl7.fhir.r4.model.Patient> {
+public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Patient, Patient> {
 	
 	/**
 	 * Maps a {@link org.openmrs.Patient} to a {@link Patient}
@@ -30,4 +30,14 @@ public interface PatientTranslator extends OpenmrsFhirTranslator<org.openmrs.Pat
 	 */
 	@Override
 	org.openmrs.Patient toOpenmrsType(Patient patient);
+
+	/**
+	 * Maps a {@link Patient} to an existing {@link org.openmrs.Patient}
+	 *
+	 * @param currentPatient the patient to update
+	 * @param patient the FHIR patient to map
+	 * @return the updated OpenMRS patient
+	 */
+	@Override
+	org.openmrs.Patient toOpenmrsType(org.openmrs.Patient currentPatient, Patient patient);
 }

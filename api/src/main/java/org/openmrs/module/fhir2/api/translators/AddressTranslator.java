@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.Address;
 import org.openmrs.PersonAddress;
 
-public interface AddressTranslator extends OpenmrsFhirTranslator<PersonAddress, Address> {
+public interface AddressTranslator extends OpenmrsFhirUpdatableTranslator<PersonAddress, Address> {
 	
 	/**
 	 * Maps an {@link PersonAddress} to an {@link Address}
@@ -31,4 +31,14 @@ public interface AddressTranslator extends OpenmrsFhirTranslator<PersonAddress, 
 	 */
 	@Override
 	PersonAddress toOpenmrsType(Address address);
+
+	/**
+	 * Maps an {@link Address} to an existing {@link org.openmrs.Address}
+	 *
+	 * @param personAddress the person address to update
+	 * @param address the resource to translate
+	 * @return the updated OpenMRS address
+	 */
+	@Override
+	PersonAddress toOpenmrsType(PersonAddress personAddress, Address address);
 }

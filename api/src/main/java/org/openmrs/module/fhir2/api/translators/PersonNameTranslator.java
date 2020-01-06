@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.HumanName;
 import org.openmrs.PersonName;
 
-public interface PersonNameTranslator extends OpenmrsFhirTranslator<org.openmrs.PersonName, org.hl7.fhir.r4.model.HumanName> {
+public interface PersonNameTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.PersonName, org.hl7.fhir.r4.model.HumanName> {
 	
 	/**
 	 * Maps a {@link PersonName} to a {@link HumanName}
@@ -31,4 +31,14 @@ public interface PersonNameTranslator extends OpenmrsFhirTranslator<org.openmrs.
 	 */
 	@Override
 	PersonName toOpenmrsType(HumanName name);
+
+	/**
+	 * Maps a {@link HumanName} to an existing {@link PersonName}
+	 *
+	 * @param personName the person name to update
+	 * @param name the name to translate
+	 * @return the updated person name
+	 */
+	@Override
+	PersonName toOpenmrsType(PersonName personName, HumanName name);
 }
