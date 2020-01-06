@@ -12,12 +12,15 @@ import org.openmrs.Person;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.Date;
 
 public interface FhirPersonDao {
 	
 	Person getPersonByUuid(@NotNull String uuid);
 	
 	Collection<Person> findPersonsByName(@NotNull String name);
+	
+	Collection<Person> findPersonsByBirthDate(@NotNull Date birthDate);
 	
 	Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender);
 }

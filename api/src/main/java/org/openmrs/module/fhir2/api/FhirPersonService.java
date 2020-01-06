@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api;
 import org.hl7.fhir.r4.model.Person;
 
 import java.util.Collection;
+import java.util.Date;
 
 public interface FhirPersonService {
 	
@@ -21,4 +22,5 @@ public interface FhirPersonService {
 	
 	Collection<Person> findSimilarPeople(String name, int birthYear, String gender);
 	
+	Collection<Person> findPersonsByBirthDate(Date birthDate);
 }

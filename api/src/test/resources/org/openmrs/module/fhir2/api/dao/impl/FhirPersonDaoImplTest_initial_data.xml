@@ -9,9 +9,9 @@
     graphic logo is a trademark of OpenMRS Inc.
 -->
 <dataset>
-    <person person_id="2" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="61b38324-e2fd-4feb-95b7-9e9a2a4400df"/>
-    <person person_id="3" gender="M" dead="true" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="5c521595-4e12-46b0-8248-b8f2d3697766"/>
-    <person person_id="4" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="256ccf6d-6b41-455c-9be2-51ff4386ae76"/>
+    <person person_id="2" gender="M" birthdate="1999-12-20" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="61b38324-e2fd-4feb-95b7-9e9a2a4400df"/>
+    <person person_id="3" gender="M" birthdate="2000-11-18" dead="true" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="5c521595-4e12-46b0-8248-b8f2d3697766"/>
+    <person person_id="4" gender="M" birthdate="1993-04-02" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="256ccf6d-6b41-455c-9be2-51ff4386ae76"/>
     <person_name person_name_id="2" preferred="true" person_id="2" given_name="John" middle_name="F" family_name="Doe" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="7e2acadc-5073-4a39-914a-debcbec8c1c9"/>
     <person_name person_name_id="3" preferred="true" person_id="3" given_name="I" middle_name="am" family_name="voided" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="37e60810-0ba9-4f32-ba80-0af59f59e966"/>
     <person_name person_name_id="4" preferred="true" person_id="4" given_name="Jean Claude" middle_name=" " family_name="Doe" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="89232176-29cd-47e5-9ce2-ae375436fb15"/>

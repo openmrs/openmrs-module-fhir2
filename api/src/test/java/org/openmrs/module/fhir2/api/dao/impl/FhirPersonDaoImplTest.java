@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import org.exparity.hamcrest.date.DateMatchers;
+import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Person;
@@ -20,9 +22,14 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -55,16 +62,26 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final int WRONG_BIRTH_YEAR = 1000;
 	
+	private static SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+	
+	private static final String BIRTH_DATE = "1999-12-20";
+	
+	private static final String NOT_FOUND_BIRTH_DATE = "1000-00-00";
+	
 	private FhirPersonDaoImpl fhirPersonDao;
 	
 	@Inject
 	@Named("personService")
 	private Provider<PersonService> personServiceProvider;
 	
+	@Inject
+	private Provider<SessionFactory> sessionFactoryProvider;
+	
 	@Before
 	public void setup() throws Exception {
 		fhirPersonDao = new FhirPersonDaoImpl();
 		fhirPersonDao.setPersonService(personServiceProvider.get());
+		fhirPersonDao.setSessionFactory(sessionFactoryProvider.get());
 		executeDataSet(PERSON_INITIAL_DATA_XML);
 	}
 	
@@ -117,5 +134,23 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		Collection<Person> people = fhirPersonDao.findSimilarPeople(NOT_FOUND_NAME, WRONG_BIRTH_YEAR, GENDER);
 		assertThat(people, notNullValue());
 		assertThat(people, empty());
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPersonsForMatchOnPersonBirthDate() throws ParseException {
+		Date personBirthDate = dateFormatter.parse(BIRTH_DATE);
+		Collection<Person> people = fhirPersonDao.findPersonsByBirthDate(personBirthDate);
+		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		assertThat(people.stream().findAny().isPresent(), is(true));
+		assertThat(people.stream().findAny().get().getBirthdate(), DateMatchers.sameDay(personBirthDate));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionForPersonBirthDateNotMatch() throws ParseException {
+		Date personBirthDate = dateFormatter.parse(NOT_FOUND_BIRTH_DATE);
+		Collection<Person> persons = fhirPersonDao.findPersonsByBirthDate(personBirthDate);
+		assertThat(persons, notNullValue());
+		assertThat(persons, empty());
 	}
 }

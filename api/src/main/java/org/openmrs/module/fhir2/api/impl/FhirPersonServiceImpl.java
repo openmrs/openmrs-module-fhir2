@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.util.Collection;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 @Component
@@ -38,6 +39,14 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	@Override
 	public Collection<Person> findPersonsByName(String name) {
 		return fhirPersonDao.findPersonsByName(name)
+				.stream()
+				.map(personTranslator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+	
+	@Override
+	public Collection<Person> findPersonsByBirthDate(Date birthDate) {
+		return fhirPersonDao.findPersonsByBirthDate(birthDate)
 				.stream()
 				.map(personTranslator::toFhirResource)
 				.collect(Collectors.toList());

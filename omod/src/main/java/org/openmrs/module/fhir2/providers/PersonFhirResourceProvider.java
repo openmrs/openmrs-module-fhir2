@@ -35,15 +35,15 @@ import javax.inject.Inject;
 @Qualifier("fhirResources")
 @Setter(AccessLevel.PACKAGE)
 public class PersonFhirResourceProvider implements IResourceProvider {
-
+	
 	@Inject
 	private FhirPersonService fhirPersonService;
-
+	
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {
 		return Person.class;
 	}
-
+	
 	@Read
 	@SuppressWarnings("unused")
 	public Person getPersonById(@IdParam IdType id) {
@@ -53,7 +53,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		}
 		return person;
 	}
-
+	
 	/**
 	 * Find similar people by Name, birthday and gender
 	 * 
@@ -63,7 +63,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	 * @return Returns a bundle list of people. This list may contain multiple matching * resources,
 	 *         or it may also be empty.
 	 */
-
+	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle findSimilarPeople(@RequiredParam(name = Person.SP_NAME) StringParam name,
@@ -72,5 +72,10 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findSimilarPeople(name.getValue(), birthDate
 		        .getValue().getYear(), gender));
 		
+	}
+	
+	@Search
+	public Bundle findPersonsByBirthDate(@RequiredParam(name = Person.SP_BIRTHDATE) DateParam birthDate) {
+		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByBirthDate(birthDate.getValue()));
 	}
 }

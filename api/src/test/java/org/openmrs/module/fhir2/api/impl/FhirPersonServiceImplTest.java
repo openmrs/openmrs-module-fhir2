@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,9 +19,11 @@ import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Date;
 
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -54,6 +55,12 @@ public class FhirPersonServiceImplTest {
 	private static final String PERSON_UUID = "1223-2323-2323-nd23";
 	
 	private static final String PERSON_NAME_UUID = "test-uuid-1223-2312";
+	
+	private static final String PERSON_BIRTH_DATE = "1996-12-12";
+	
+	private static final String NOT_FOUND_PERSON_BIRTH_DATE = "0000-00-00";
+	
+	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	
 	@Mock
 	private FhirPersonDao dao;
@@ -140,6 +147,37 @@ public class FhirPersonServiceImplTest {
 		when(dao.findSimilarPeople(NOT_FOUND_NAME,NON_PERSON_BIRTH_YEAR,GENDER)).thenReturn(people);
 
 		Collection<Person> results = personService.findSimilarPeople(NOT_FOUND_NAME,NON_PERSON_BIRTH_YEAR,GENDER);
+		assertThat(results, notNullValue());
+		assertThat(results, empty());
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPersonWhenPersonBirthDateMatched() throws ParseException {
+		Date birthDate = dateFormatter.parse(PERSON_BIRTH_DATE);
+		Collection<org.openmrs.Person> people = new ArrayList<>();
+		PersonName name = new PersonName();
+		name.setUuid(PERSON_NAME_UUID);
+		name.setFamilyName(FAMILY_NAME);
+		org.openmrs.Person person = new org.openmrs.Person();
+		person.setUuid(PERSON_UUID);
+		person.setGender(GENDER);
+		person.setBirthdate(birthDate);
+		person.addName(name);
+		people.add(person);
+		when(dao.findPersonsByBirthDate(birthDate)).thenReturn(people);
+
+		Collection<Person> results = personService.findPersonsByBirthDate(birthDate);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionWhenPersonBirthDateNotMatched() throws ParseException {
+		Date birthDate = dateFormatter.parse(NOT_FOUND_PERSON_BIRTH_DATE);
+		Collection<org.openmrs.Person> people = new ArrayList<>();
+		when(dao.findPersonsByBirthDate(birthDate)).thenReturn(people);
+		Collection<Person> results = personService.findPersonsByBirthDate(birthDate);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
 	}
