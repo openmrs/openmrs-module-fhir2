@@ -31,10 +31,10 @@ public interface PersonNameTranslator extends OpenmrsFhirUpdatableTranslator<org
 	 */
 	@Override
 	PersonName toOpenmrsType(HumanName name);
-
+	
 	/**
 	 * Maps a {@link HumanName} to an existing {@link PersonName}
-	 *
+	 * 
 	 * @param personName the person name to update
 	 * @param name the name to translate
 	 * @return the updated person name

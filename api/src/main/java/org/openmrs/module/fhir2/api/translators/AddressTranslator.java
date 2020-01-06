@@ -31,10 +31,10 @@ public interface AddressTranslator extends OpenmrsFhirUpdatableTranslator<Person
 	 */
 	@Override
 	PersonAddress toOpenmrsType(Address address);
-
+	
 	/**
 	 * Maps an {@link Address} to an existing {@link org.openmrs.Address}
-	 *
+	 * 
 	 * @param personAddress the person address to update
 	 * @param address the resource to translate
 	 * @return the updated OpenMRS address

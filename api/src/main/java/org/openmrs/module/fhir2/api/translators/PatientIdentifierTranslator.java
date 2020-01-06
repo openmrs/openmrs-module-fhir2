@@ -31,10 +31,10 @@ public interface PatientIdentifierTranslator extends OpenmrsFhirUpdatableTransla
 	 */
 	@Override
 	PatientIdentifier toOpenmrsType(Identifier identifier);
-
+	
 	/**
 	 * Maps a {@link Identifier} to an existing {@link PatientIdentifier}
-	 *
+	 * 
 	 * @param patientIdentifier the existing patient identifier to update
 	 * @param identifier the identifier to translate
 	 * @return the updated patient identifier

@@ -30,10 +30,10 @@ public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.op
 	 */
 	@Override
 	org.openmrs.Patient toOpenmrsType(Patient patient);
-
+	
 	/**
 	 * Maps a {@link Patient} to an existing {@link org.openmrs.Patient}
-	 *
+	 * 
 	 * @param currentPatient the patient to update
 	 * @param patient the FHIR patient to map
 	 * @return the updated OpenMRS patient

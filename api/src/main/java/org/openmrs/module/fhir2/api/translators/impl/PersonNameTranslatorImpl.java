@@ -56,7 +56,7 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 	public PersonName toOpenmrsType(HumanName name) {
 		return toOpenmrsType(new PersonName(), name);
 	}
-
+	
 	@Override
 	public PersonName toOpenmrsType(PersonName personName, HumanName name) {
 		notNull(personName, "personName cannot be null");

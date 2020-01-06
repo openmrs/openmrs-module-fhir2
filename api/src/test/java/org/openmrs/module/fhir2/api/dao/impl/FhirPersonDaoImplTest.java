@@ -48,9 +48,9 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String PERSON_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPersonDaoImplTest_initial_data.xml";
 	
 	private static final String GENDER = "M";
-
+	
 	private static final String WRONG_GENDER = "wrong gender";
-
+	
 	private static final String GIVEN_NAME = "John";
 	
 	private static final String PERSON_NAME = "John";
@@ -155,7 +155,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(persons, notNullValue());
 		assertThat(persons, empty());
 	}
-
+	
 	@Test
 	public void shouldReturnCollectionOfPersonsForMatchingGender() {
 		Collection<Person> people = fhirPersonDao.findPersonsByGender(GENDER);
@@ -164,7 +164,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(people.stream().findAny().isPresent(), is(true));
 		assertThat(people.stream().findAny().get().getGender(), equalTo(GENDER));
 	}
-
+	
 	@Test
 	public void shouldReturnEmptyCollectionForWrongGender() {
 		Collection<Person> results = fhirPersonDao.findPersonsByGender(WRONG_GENDER);

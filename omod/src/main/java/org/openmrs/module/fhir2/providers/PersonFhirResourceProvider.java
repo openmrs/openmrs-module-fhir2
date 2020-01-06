@@ -78,9 +78,9 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	public Bundle findPersonsByBirthDate(@RequiredParam(name = Person.SP_BIRTHDATE) DateParam birthDate) {
 		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByBirthDate(birthDate.getValue()));
 	}
-
+	
 	@Search
-	public Bundle findPersonsByGender(@RequiredParam( name = Person.SP_GENDER) StringParam gender) {
+	public Bundle findPersonsByGender(@RequiredParam(name = Person.SP_GENDER) StringParam gender) {
 		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByGender(gender.getValueNotNull()));
 	}
 }

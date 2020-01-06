@@ -59,32 +59,32 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 		
 		return toOpenmrsType(new PatientIdentifier(), identifier);
 	}
-
+	
 	@Override
 	public PatientIdentifier toOpenmrsType(PatientIdentifier patientIdentifier, Identifier identifier) {
 		notNull(patientIdentifier, "patientIdentifier cannot be null");
-
+		
 		if (identifier == null) {
 			return patientIdentifier;
 		}
-
+		
 		patientIdentifier.setUuid(identifier.getId());
 		patientIdentifier.setIdentifier(identifier.getValue());
-
+		
 		if (Identifier.IdentifierUse.OFFICIAL.equals(identifier.getUse())) {
 			patientIdentifier.setPreferred(true);
 		} else {
 			patientIdentifier.setPreferred(false);
 		}
-
+		
 		PatientIdentifierType type = patientService.getPatientIdentifierTypeByIdentifier(identifier);
 		if (type == null && patientIdentifier.getIdentifierType() == null) {
 			// TODO implement error handling
 			throw new APIException("cannot find identifier type for " + identifier.getId());
 		}
-
+		
 		patientIdentifier.setIdentifierType(type);
-
+		
 		return patientIdentifier;
 	}
 }

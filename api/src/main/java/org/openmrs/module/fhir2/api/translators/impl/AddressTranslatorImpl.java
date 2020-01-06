@@ -42,25 +42,25 @@ public class AddressTranslatorImpl implements AddressTranslator {
 	public PersonAddress toOpenmrsType(Address address) {
 		return toOpenmrsType(new PersonAddress(), address);
 	}
-
+	
 	@Override
 	public PersonAddress toOpenmrsType(PersonAddress personAddress, Address address) {
 		notNull(personAddress, "personAddress cannot be null");
-
+		
 		if (address == null) {
 			return personAddress;
 		}
-
+		
 		personAddress.setUuid(address.getId());
 		personAddress.setCityVillage(address.getCity());
 		personAddress.setStateProvince(address.getState());
 		personAddress.setCountry(address.getCountry());
 		personAddress.setPostalCode(address.getPostalCode());
-
+		
 		if (Address.AddressUse.HOME.equals(address.getUse())) {
 			personAddress.setPreferred(true);
 		}
-
+		
 		return personAddress;
 	}
 }

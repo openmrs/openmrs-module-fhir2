@@ -58,7 +58,7 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 				.stream()
 				.map(personTranslator::toFhirResource).collect(Collectors.toList());
 	}
-
+	
 	@Override
 	public Collection<Person> findPersonsByGender(String gender) {
 		return fhirPersonDao.findPersonsByGender(gender)

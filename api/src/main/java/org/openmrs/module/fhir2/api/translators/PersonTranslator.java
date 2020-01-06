@@ -30,10 +30,10 @@ public interface PersonTranslator extends OpenmrsFhirUpdatableTranslator<org.ope
 	 */
 	@Override
 	org.openmrs.Person toOpenmrsType(Person person);
-
+	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Person} to an existing {@link org.openmrs.Person}
-	 *
+	 * 
 	 * @param currentPerson the existing OpenMRS person to update
 	 * @param person the FHIR person to translate
 	 * @return the updated OpenMRS person

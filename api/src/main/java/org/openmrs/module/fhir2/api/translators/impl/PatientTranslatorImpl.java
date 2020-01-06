@@ -90,56 +90,56 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	public org.openmrs.Patient toOpenmrsType(Patient fhirPatient) {
 		return toOpenmrsType(new org.openmrs.Patient(), fhirPatient);
 	}
-
+	
 	@Override
 	public org.openmrs.Patient toOpenmrsType(org.openmrs.Patient currentPatient, Patient patient) {
 		notNull(currentPatient, "currentPatient cannot be null");
-
+		
 		if (patient == null) {
 			return currentPatient;
 		}
-
+		
 		currentPatient.setUuid(patient.getId());
 		currentPatient.setBirthdate(patient.getBirthDate());
-
+		
 		if (!patient.getActive()) {
 			currentPatient.setVoided(true);
 			currentPatient.setVoidReason("Voided by FHIR module");
 		}
-
+		
 		if (patient.getDeceased() != null) {
 			try {
 				patient.getDeceasedBooleanType();
-
+				
 				currentPatient.setDead(patient.getDeceasedBooleanType().booleanValue());
 			}
 			catch (FHIRException ignored) {}
-
+			
 			try {
 				patient.getDeceasedDateTimeType();
-
+				
 				currentPatient.setDead(true);
 				currentPatient.setDeathDate(patient.getDeceasedDateTimeType().getValue());
 			}
 			catch (FHIRException ignored) {}
 		}
-
+		
 		for (Identifier identifier : patient.getIdentifier()) {
 			currentPatient.addIdentifier(identifierTranslator.toOpenmrsType(identifier));
 		}
-
+		
 		for (HumanName name : patient.getName()) {
 			currentPatient.addName(nameTranslator.toOpenmrsType(name));
 		}
-
+		
 		if (patient.getGender() != null) {
 			currentPatient.setGender(genderTranslator.toOpenmrsType(patient.getGender()));
 		}
-
+		
 		for (Address address : patient.getAddress()) {
 			currentPatient.addAddress(addressTranslator.toOpenmrsType(address));
 		}
-
+		
 		return currentPatient;
 	}
 }

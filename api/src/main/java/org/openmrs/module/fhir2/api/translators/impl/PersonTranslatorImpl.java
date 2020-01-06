@@ -42,7 +42,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	
 	@Inject
 	private GenderTranslator genderTranslator;
-
+	
 	@Override
 	public org.hl7.fhir.r4.model.Person toFhirResource(@NotNull Person openmrsPerson) {
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
@@ -58,11 +58,11 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			for (PersonName name : openmrsPerson.getNames()) {
 				person.addName(nameTranslator.toFhirResource(name));
 			}
-
+			
 			for (PersonAddress address : openmrsPerson.getAddresses()) {
 				person.addAddress(addressTranslator.toFhirResource(address));
 			}
-
+			
 			buildPersonLinks(openmrsPerson, person);
 		}
 		return person;
@@ -86,36 +86,36 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			person.setLink(links);
 		}
 	}
-
+	
 	@Override
 	public Person toOpenmrsType(org.hl7.fhir.r4.model.Person person) {
 		return toOpenmrsType(new Person(), person);
 	}
-
+	
 	@Override
 	public Person toOpenmrsType(Person openmrsPerson, org.hl7.fhir.r4.model.Person person) {
 		notNull(openmrsPerson, "openmrsPerson cannot be null");
-
+		
 		if (person == null) {
 			return openmrsPerson;
 		}
-
+		
 		openmrsPerson.setUuid(person.getId());
 		openmrsPerson.setVoided(person.getActive());
 		openmrsPerson.setBirthdate(person.getBirthDate());
-
+		
 		if (person.getGender() != null) {
 			openmrsPerson.setGender(genderTranslator.toOpenmrsType(person.getGender()));
 		}
-
+		
 		for (HumanName name : person.getName()) {
 			openmrsPerson.addName(nameTranslator.toOpenmrsType(name));
 		}
-
+		
 		for (Address address : person.getAddress()) {
 			openmrsPerson.addAddress(addressTranslator.toOpenmrsType(address));
 		}
-
+		
 		return openmrsPerson;
 	}
 }

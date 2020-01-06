@@ -28,7 +28,7 @@ public class FhirPersonDaoImpl implements FhirPersonDao {
 	
 	@Inject
 	PersonService personService;
-
+	
 	@Inject
 	@Named("sessionFactory")
 	SessionFactory sessionFactory;
@@ -54,11 +54,10 @@ public class FhirPersonDaoImpl implements FhirPersonDao {
 	public Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender) {
 		return personService.getSimilarPeople(name, birthYear, gender);
 	}
-
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	public Collection<Person> findPersonsByGender(String gender) {
-		return sessionFactory.getCurrentSession().createCriteria(Person.class)
-				.add(Restrictions.eq("gender", gender)).list();
+		return sessionFactory.getCurrentSession().createCriteria(Person.class).add(Restrictions.eq("gender", gender)).list();
 	}
 }
