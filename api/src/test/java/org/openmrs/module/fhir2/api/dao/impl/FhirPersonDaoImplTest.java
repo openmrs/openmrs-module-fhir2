@@ -22,7 +22,6 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -49,7 +48,9 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String PERSON_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPersonDaoImplTest_initial_data.xml";
 	
 	private static final String GENDER = "M";
-	
+
+	private static final String WRONG_GENDER = "wrong gender";
+
 	private static final String GIVEN_NAME = "John";
 	
 	private static final String PERSON_NAME = "John";
@@ -75,6 +76,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	private Provider<PersonService> personServiceProvider;
 	
 	@Inject
+	@Named("sessionFactory")
 	private Provider<SessionFactory> sessionFactoryProvider;
 	
 	@Before
@@ -152,5 +154,21 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		Collection<Person> persons = fhirPersonDao.findPersonsByBirthDate(personBirthDate);
 		assertThat(persons, notNullValue());
 		assertThat(persons, empty());
+	}
+
+	@Test
+	public void shouldReturnCollectionOfPersonsForMatchingGender() {
+		Collection<Person> people = fhirPersonDao.findPersonsByGender(GENDER);
+		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		assertThat(people.stream().findAny().isPresent(), is(true));
+		assertThat(people.stream().findAny().get().getGender(), equalTo(GENDER));
+	}
+
+	@Test
+	public void shouldReturnEmptyCollectionForWrongGender() {
+		Collection<Person> results = fhirPersonDao.findPersonsByGender(WRONG_GENDER);
+		assertThat(results, notNullValue());
+		assertThat(results, is(empty()));
 	}
 }

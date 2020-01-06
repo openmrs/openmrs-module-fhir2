@@ -23,4 +23,6 @@ public interface FhirPersonDao {
 	Collection<Person> findPersonsByBirthDate(@NotNull Date birthDate);
 	
 	Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender);
+
+	Collection<Person> findPersonsByGender(@NotNull String gender);
 }

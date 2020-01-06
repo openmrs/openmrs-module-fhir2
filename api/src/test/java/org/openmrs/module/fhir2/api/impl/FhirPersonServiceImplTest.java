@@ -47,7 +47,9 @@ public class FhirPersonServiceImplTest {
 	private static final String NOT_FOUND_NAME = "not found name";
 	
 	private static final String GENDER = "M";
-	
+
+	private static final String WRONG_GENDER = "wrong-gender";
+
 	private static final int PERSON_BIRTH_YEAR = 1999;
 	
 	private static final int NON_PERSON_BIRTH_YEAR = 1000;
@@ -178,6 +180,35 @@ public class FhirPersonServiceImplTest {
 		Collection<org.openmrs.Person> people = new ArrayList<>();
 		when(dao.findPersonsByBirthDate(birthDate)).thenReturn(people);
 		Collection<Person> results = personService.findPersonsByBirthDate(birthDate);
+		assertThat(results, notNullValue());
+		assertThat(results, empty());
+	}
+
+	@Test
+	public void shouldReturnCollectionOfPersonWhenPersonGenderMatched() {
+		Collection<org.openmrs.Person> people = new ArrayList<>();
+		PersonName name = new PersonName();
+		name.setUuid(PERSON_NAME_UUID);
+		name.setGivenName(GIVEN_NAME);
+		org.openmrs.Person person = new org.openmrs.Person();
+		person.setUuid(PERSON_UUID);
+		person.setGender(GENDER);
+		person.addName(name);
+		people.add(person);
+		when(dao.findPersonsByGender(GENDER)).thenReturn(people);
+
+		Collection<Person> results = personService.findPersonsByGender(GENDER);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void shouldReturnEmptyCollectionWhenPersonGenderNotMatched() {
+		Collection<org.openmrs.Person> people = new ArrayList<>();
+
+		when(dao.findPersonsByGender(WRONG_GENDER)).thenReturn(people);
+
+		Collection<Person> results = personService.findPersonsByGender(WRONG_GENDER);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
 	}
