@@ -22,7 +22,7 @@ public interface FhirTaskService {
 	 * @param uuid
 	 * @return task with given internal identifier
 	 */
-	public Task getTaskByUuid(String uuid);
+	Task getTaskByUuid(String uuid);
 	
 	/**
 	 * Save task to the DB
@@ -30,6 +30,13 @@ public interface FhirTaskService {
 	 * @param task the task to save
 	 * @return the saved task
 	 */
-	public Task saveTask(Task task);
+	Task saveTask(Task task);
 	
+	/**
+	 * Save task to the DB
+	 * 
+	 * @param task the task to save
+	 * @return the saved task
+	 */
+	Task updateTask(String uuid, Task task);
 }

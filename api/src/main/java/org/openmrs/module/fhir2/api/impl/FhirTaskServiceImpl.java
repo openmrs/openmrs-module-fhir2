@@ -40,9 +40,25 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 	 */
 	@Override
 	public Task saveTask(Task task) {
-		org.openmrs.module.fhir2.Task savedOpenmrsTask = dao.saveTask(translator.toOpenmrsType(task));
+		return translator.toFhirResource(dao.saveTask(translator.toOpenmrsType(task)));
+	}
+	
+	/**
+	 * Save task to the DB, or update task if one exists with given UUID
+	 * 
+	 * @param uuid the uuid of the task to update
+	 * @param task the task to save
+	 * @return the saved task
+	 */
+	@Override
+	public Task updateTask(String uuid, Task task) {
+		org.openmrs.module.fhir2.Task openmrsTask = null;
 		
-		return null;
+		if (uuid != null) {
+			openmrsTask = dao.getTaskByUuid(task.getId());
+		}
+		
+		return translator.toFhirResource(dao.saveTask(translator.toOpenmrsType(openmrsTask, task)));
 	}
 	
 }
