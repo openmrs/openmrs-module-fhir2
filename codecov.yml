@@ -5,7 +5,7 @@ codecov:
 coverage:
   precision: 2
   round: nearest
-  range: "70...100"
+  range: "75...90"
 
   status:
     project: yes
@@ -15,5 +15,3 @@ coverage:
 ignore:
   - "/api/src/main/java/org/openmrs/module/fhir2/FhirActivator.java"
   - "/api/src/main/java/org/openmrs/module/fhir2/FhirConstants.java"
-  - "doc"
-  - "**/*.md"
