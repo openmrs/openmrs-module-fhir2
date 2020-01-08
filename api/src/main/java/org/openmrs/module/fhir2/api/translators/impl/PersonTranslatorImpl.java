@@ -8,27 +8,35 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang3.Validate.notNull;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
+import org.openmrs.PersonAttribute;
+import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
+import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.Validate.notNull;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -42,7 +50,16 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	
 	@Inject
 	private GenderTranslator genderTranslator;
-	
+
+	@Inject
+	private TelecomTranslator telecomTranslator;
+
+	@Inject
+	private PersonService personService;
+
+	@Inject
+	private FhirGlobalPropertyService globalPropertyService;
+
 	@Override
 	public org.hl7.fhir.r4.model.Person toFhirResource(@NotNull Person openmrsPerson) {
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
@@ -62,12 +79,25 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			for (PersonAddress address : openmrsPerson.getAddresses()) {
 				person.addAddress(addressTranslator.toFhirResource(address));
 			}
-			
+			person.setTelecom(getPersonContactDetails(openmrsPerson));
+
 			buildPersonLinks(openmrsPerson, person);
 		}
 		return person;
 	}
-	
+
+	public List<ContactPoint> getPersonContactDetails(@NotNull Person person) {
+		List<ContactPoint> contactPoints = new ArrayList<>();
+		PersonAttributeType contactAttributeType = personService.getPersonAttributeTypeByUuid(
+				globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY));
+		person.getActiveAttributes().forEach(personAttribute -> {
+			if (personAttribute.getAttributeType().equals(contactAttributeType)) {
+				contactPoints.add(telecomTranslator.toFhirResource(personAttribute));
+			}
+		});
+		return contactPoints;
+	}
+
 	/**
 	 * TODO Find a better way to implement this generically and maybe move to different package
 	 */
@@ -115,7 +145,10 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		for (Address address : person.getAddress()) {
 			openmrsPerson.addAddress(addressTranslator.toOpenmrsType(address));
 		}
-		
+		Set<PersonAttribute> attributes = person.getTelecom().stream().map(telecomTranslator::toOpenmrsType).collect(
+				Collectors.toSet());
+		openmrsPerson.setAttributes(attributes);
+
 		return openmrsPerson;
 	}
 }
