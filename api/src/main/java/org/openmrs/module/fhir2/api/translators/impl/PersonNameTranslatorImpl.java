@@ -98,7 +98,7 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 			return;
 		}
 		
-		getOpenmrsNameExtension(name).orElse(name.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)).addExtension(
+		getOpenmrsNameExtension(name).orElseGet(() -> name.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)).addExtension(
 		    FhirConstants.OPENMRS_FHIR_EXT_NAME + "#" + extensionProperty, new StringType(value));
 	}
 	
