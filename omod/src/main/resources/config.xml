@@ -73,6 +73,12 @@
 		<file>messages_es.properties</file>
 	</messages>
 	<!-- /Internationalization -->
-	
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.personAttributeTypeUuid</property>
+		<defaultValue>14d4f066-15f5-102d-96e4-000c29c2a5d7</defaultValue>
+		<description>Set person attribute type uuid</description>
+	</globalProperty>
+
 </module>
 

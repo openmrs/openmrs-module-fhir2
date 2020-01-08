@@ -9,6 +9,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.junit.Before;
@@ -18,14 +19,22 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
+import org.openmrs.PersonAttribute;
+import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
+import org.openmrs.api.PersonService;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -47,6 +56,18 @@ public class PersonTranslatorImplTest {
 	
 	private static final String ADDRESS_CITY = "Eldoret";
 	
+	private static final String PERSON_ATTRIBUTE_UUID = "12o3et5kl3-2e323-23g23-232h3y343s";
+	
+	private static final String PERSON_ATTRIBUTE_VALUE = "254723723456";
+
+	private static final String PERSON_ATTRIBUTE_TYPE_NAME = "Contact";
+
+	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
+
+	private static final String CONTACT_VALUE = "254701884000";
+
+	private static final String CONTACT_ID = "uu23823gf-3834sd-s934n-34nss";
+
 	@Mock
 	private GenderTranslator genderTranslator;
 	
@@ -56,6 +77,15 @@ public class PersonTranslatorImplTest {
 	@Mock
 	private AddressTranslator addressTranslator;
 	
+	@Mock
+	private TelecomTranslator telecomTranslator;
+
+	@Mock
+	private FhirGlobalPropertyService administrationService;
+
+	@Mock
+	private PersonService personService;
+	
 	private PersonTranslatorImpl personTranslator;
 	
 	@Before
@@ -64,6 +94,9 @@ public class PersonTranslatorImplTest {
 		personTranslator.setGenderTranslator(genderTranslator);
 		personTranslator.setNameTranslator(nameTranslator);
 		personTranslator.setAddressTranslator(addressTranslator);
+		personTranslator.setTelecomTranslator(telecomTranslator);
+		personTranslator.setPersonService(personService);
+		personTranslator.setGlobalPropertyService(administrationService);
 	}
 	
 	@Test
@@ -87,6 +120,17 @@ public class PersonTranslatorImplTest {
 	@Test
 	public void shouldTranslateOpenmrsGenderToFhirGenderType() {
 		Person person = new Person();
+		ContactPoint contactPoint = new ContactPoint();
+		contactPoint.setId(CONTACT_ID);
+		contactPoint.setValue(CONTACT_VALUE);
+		PersonAttributeType attributeType = new PersonAttributeType();
+		attributeType.setName(PERSON_ATTRIBUTE_TYPE_NAME);
+		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
+		PersonAttribute personAttribute = new PersonAttribute();
+		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
+		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
+		personAttribute.setAttributeType(attributeType);
+
 		when(genderTranslator.toFhirResource(argThat(equalTo("F")))).thenReturn(Enumerations.AdministrativeGender.FEMALE);
 		person.setGender("F");
 		
@@ -243,5 +287,68 @@ public class PersonTranslatorImplTest {
 		assertThat(result.getPersonAddress(), notNullValue());
 		assertThat(result.getPersonAddress().getUuid(), equalTo(ADDRESS_UUID));
 		assertThat(result.getPersonAddress().getCityVillage(), equalTo(ADDRESS_CITY));
+	}
+	
+	@Test
+	public void shouldTranslatePersonAttributeToFhirContactPoint() {
+		ContactPoint contactPoint = new ContactPoint();
+		contactPoint.setId(CONTACT_ID);
+		contactPoint.setValue(CONTACT_VALUE);
+		PersonAttributeType attributeType = new PersonAttributeType();
+		attributeType.setName(PERSON_ATTRIBUTE_TYPE_NAME);
+		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
+		PersonAttribute personAttribute = new PersonAttribute();
+		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
+		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
+		personAttribute.setAttributeType(attributeType);
+		Person person = new Person();
+
+		when(telecomTranslator.toFhirResource(personAttribute)).thenReturn(contactPoint);
+
+		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
+		assertThat(result, notNullValue());
+		assertThat(result.getTelecom(), notNullValue());
+
+	}
+	
+	@Test
+	public void shouldTranslateFhirContactPointToPersonAttribute() {
+		PersonAttributeType attributeType = new PersonAttributeType();
+		attributeType.setName(PERSON_ATTRIBUTE_TYPE_NAME);
+		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
+		PersonAttribute personAttribute = new PersonAttribute();
+		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
+		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
+		personAttribute.setAttributeType(attributeType);
+		
+		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
+		ContactPoint contactPoint = person.getTelecomFirstRep();
+		contactPoint.setId(PERSON_ATTRIBUTE_UUID);
+		contactPoint.setValue(PERSON_ATTRIBUTE_VALUE);
+		
+		when(telecomTranslator.toOpenmrsType(contactPoint)).thenReturn(personAttribute);
+		
+		Person people = personTranslator.toOpenmrsType(person);
+		assertThat(people, notNullValue());
+		assertThat(people.getActiveAttributes(), notNullValue());
+		assertThat(people.getAttributes().size(), greaterThanOrEqualTo(1));
+		assertThat(people.getActiveAttributes().stream().findAny().isPresent(), is(true));
+		assertThat(people.getActiveAttributes().stream().findAny().get().getAttributeType(), equalTo(attributeType));
+	}
+
+	@Test
+	public void shouldReturnPersonContactPointGivenOpenMrsPerson() {
+		PersonAttributeType attributeType = new PersonAttributeType();
+		attributeType.setName(PERSON_ATTRIBUTE_TYPE_NAME);
+		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
+		PersonAttribute personAttribute = new PersonAttribute();
+		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
+		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
+		personAttribute.setAttributeType(attributeType);
+		Person person = new Person();
+		person.addAttribute(personAttribute);
+
+		List<ContactPoint> contactPoints = personTranslator.getPersonContactDetails(person);
+		assertThat(contactPoints, notNullValue());
 	}
 }
