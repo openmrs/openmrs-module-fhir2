@@ -12,5 +12,68 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
- 
+
+	<changeSet id="fhir2-20191214-0022-task-resource" author="pmanko">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="fhir_task"/>
+			</not>
+		</preConditions>
+		<comment>
+			Create Task table for the Task FHIR resource
+		</comment>
+		<createTable tableName="fhir_task">
+			<column name="task_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="status" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="status_reason" type="varchar(1024)" />
+
+			<column name="business_status" type="varchar(1024)" />
+
+			<column name="description" type="varchar(1024)" />
+
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+
+			<column name="intent" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+
+			<column name="creator" type="int" >
+				<constraints nullable="false" />
+			</column>
+
+			<column name="date_created" type="datetime" >
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="changed_by" type="int" />
+
+			<column name="date_changed" type="datetime" />
+
+			<column name="voided" type="tinyint" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="voided_by" type="int" />
+			<column name="date_voided" type="datetime" />
+			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
+		</createTable>
+
+		<addForeignKeyConstraint constraintName="task_creator"
+								 baseTableName="fhir2_task" baseColumnNames="creator"
+								 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="task_changed_by"
+								 baseTableName="fhir2_task" baseColumnNames="changed_by"
+								 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="task_voided_by"
+								 baseTableName="fhir2_task" baseColumnNames="voided_by"
+								 referencedTableName="users" referencedColumnNames="user_id"/>
+	</changeSet>
+
+
 </databaseChangeLog>
