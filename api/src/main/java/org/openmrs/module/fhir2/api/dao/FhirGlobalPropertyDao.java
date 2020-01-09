@@ -13,8 +13,8 @@ import org.openmrs.GlobalProperty;
 import org.openmrs.api.APIException;
 
 public interface FhirGlobalPropertyDao {
-
+	
 	String getGlobalProperty(String property) throws APIException;
-
+	
 	GlobalProperty getGlobalPropertyObject(String property);
 }

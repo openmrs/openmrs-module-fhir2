@@ -21,10 +21,10 @@ import javax.inject.Inject;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirGlobalPropertyServiceImpl implements FhirGlobalPropertyService {
-
+	
 	@Inject
 	private FhirGlobalPropertyDao dao;
-
+	
 	@Override
 	public String getGlobalProperty(String property) throws APIException {
 		return dao.getGlobalProperty(property);

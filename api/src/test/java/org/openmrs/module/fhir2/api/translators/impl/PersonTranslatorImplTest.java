@@ -59,15 +59,15 @@ public class PersonTranslatorImplTest {
 	private static final String PERSON_ATTRIBUTE_UUID = "12o3et5kl3-2e323-23g23-232h3y343s";
 	
 	private static final String PERSON_ATTRIBUTE_VALUE = "254723723456";
-
+	
 	private static final String PERSON_ATTRIBUTE_TYPE_NAME = "Contact";
-
+	
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
-
+	
 	private static final String CONTACT_VALUE = "254701884000";
-
+	
 	private static final String CONTACT_ID = "uu23823gf-3834sd-s934n-34nss";
-
+	
 	@Mock
 	private GenderTranslator genderTranslator;
 	
@@ -79,10 +79,10 @@ public class PersonTranslatorImplTest {
 	
 	@Mock
 	private TelecomTranslator telecomTranslator;
-
+	
 	@Mock
 	private FhirGlobalPropertyService administrationService;
-
+	
 	@Mock
 	private PersonService personService;
 	
@@ -130,7 +130,7 @@ public class PersonTranslatorImplTest {
 		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
 		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
 		personAttribute.setAttributeType(attributeType);
-
+		
 		when(genderTranslator.toFhirResource(argThat(equalTo("F")))).thenReturn(Enumerations.AdministrativeGender.FEMALE);
 		person.setGender("F");
 		
@@ -302,13 +302,13 @@ public class PersonTranslatorImplTest {
 		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
 		personAttribute.setAttributeType(attributeType);
 		Person person = new Person();
-
+		
 		when(telecomTranslator.toFhirResource(personAttribute)).thenReturn(contactPoint);
-
+		
 		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
 		assertThat(result, notNullValue());
 		assertThat(result.getTelecom(), notNullValue());
-
+		
 	}
 	
 	@Test
@@ -335,7 +335,7 @@ public class PersonTranslatorImplTest {
 		assertThat(people.getActiveAttributes().stream().findAny().isPresent(), is(true));
 		assertThat(people.getActiveAttributes().stream().findAny().get().getAttributeType(), equalTo(attributeType));
 	}
-
+	
 	@Test
 	public void shouldReturnPersonContactPointGivenOpenMrsPerson() {
 		PersonAttributeType attributeType = new PersonAttributeType();
@@ -347,7 +347,7 @@ public class PersonTranslatorImplTest {
 		personAttribute.setAttributeType(attributeType);
 		Person person = new Person();
 		person.addAttribute(personAttribute);
-
+		
 		List<ContactPoint> contactPoints = personTranslator.getPersonContactDetails(person);
 		assertThat(contactPoints, notNullValue());
 	}

@@ -24,21 +24,21 @@ import javax.inject.Named;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
-
+	
 	@Inject
 	@Named("sessionFactory")
 	SessionFactory sessionFactory;
-
+	
 	@Override
 	public String getGlobalProperty(String property) throws APIException {
-		GlobalProperty globalProperty = (GlobalProperty) sessionFactory.getCurrentSession().createCriteria(GlobalProperty.class)
-				.add(Restrictions.eq("property", property)).uniqueResult();
+		GlobalProperty globalProperty = (GlobalProperty) sessionFactory.getCurrentSession()
+		        .createCriteria(GlobalProperty.class).add(Restrictions.eq("property", property)).uniqueResult();
 		return globalProperty == null ? null : globalProperty.getPropertyValue();
 	}
-
+	
 	@Override
 	public GlobalProperty getGlobalPropertyObject(String property) {
 		return (GlobalProperty) sessionFactory.getCurrentSession().createCriteria(GlobalProperty.class)
-				.add(Restrictions.eq("property", property)).uniqueResult();
+		        .add(Restrictions.eq("property", property)).uniqueResult();
 	}
 }

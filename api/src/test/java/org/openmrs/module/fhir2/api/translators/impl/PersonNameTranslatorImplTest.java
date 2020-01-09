@@ -135,15 +135,16 @@ public class PersonNameTranslatorImplTest {
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#degree"),
 		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
 	}
-
+	
 	@Test
 	public void shouldOnlyCreateOneExtensionForExtensibleAttributes() {
 		PersonName name = new PersonName();
 		name.setFamilyNamePrefix(PERSON_MIDDLE_NAME);
 		name.setFamilyNameSuffix(PERSON_MIDDLE_NAME);
-
+		
 		// note that this throws an IllegalArgumentException if more than extension with the same URL occurs
-		Extension extension = personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
+		Extension extension = personNameTranslator.toFhirResource(name).getExtensionByUrl(
+		    FhirConstants.OPENMRS_FHIR_EXT_NAME);
 		assertThat(extension.getExtension().size(), greaterThan(1));
 	}
 	

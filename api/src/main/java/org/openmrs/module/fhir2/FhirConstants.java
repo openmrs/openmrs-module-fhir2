@@ -28,7 +28,7 @@ public class FhirConstants {
 	public static String OPENMRS_FHIR_EXT_NAME = OPENMRS_FHIR_EXT_PREFIX + "/name";
 	
 	public static String PATIENT = "Patient";
-
+	
 	@Value("${project.parent.artifactId}.personAttributeTypeUuid")
 	public static String PERSON_ATTRIBUTE_TYPE_PROPERTY;
 	
