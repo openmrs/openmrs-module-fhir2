@@ -24,39 +24,37 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirGlobalPropertyServiceImplTest {
-
+	
 	private static final String PERSON_ATTRIBUTE_TYPE_VALUE = "fhir2.personAttributeTypeUuid";
-
+	
 	private static final String PERSON_ATTRIBUTE_TYPE_VALUE_NOT_FOUND = "fhir2.non-existing property";
-
+	
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "12323h324-32423n30-32n23-23j23";
-
+	
 	@Mock
 	private FhirGlobalPropertyDao fhirGlobalPropertyDao;
-
+	
 	private FhirGlobalPropertyServiceImpl globalPropertyService;
-
+	
 	@Before
 	public void setUp() {
-	globalPropertyService = new FhirGlobalPropertyServiceImpl();
-	globalPropertyService.setDao(fhirGlobalPropertyDao);
+		globalPropertyService = new FhirGlobalPropertyServiceImpl();
+		globalPropertyService.setDao(fhirGlobalPropertyDao);
 	}
-
+	
 	@Test
 	public void shouldReturnStringGlobalPropertyWhenPropertyMatched() {
-		when(fhirGlobalPropertyDao.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE)).thenReturn(
-				PERSON_ATTRIBUTE_TYPE_UUID);
+		when(fhirGlobalPropertyDao.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE)).thenReturn(PERSON_ATTRIBUTE_TYPE_UUID);
 		String personAttributeTypeUuid = globalPropertyService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE);
 		assertThat(personAttributeTypeUuid, notNullValue());
 		assertThat(personAttributeTypeUuid, equalTo(PERSON_ATTRIBUTE_TYPE_UUID));
 	}
-
+	
 	@Test
 	public void shouldReturnNullWhenGlobalPropertyNotFound() {
-		when(fhirGlobalPropertyDao.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE_NOT_FOUND)).thenReturn(
-				"");
+		when(fhirGlobalPropertyDao.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE_NOT_FOUND)).thenReturn("");
 		String personAttributeTypeUuid = globalPropertyService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE);
 		assertThat(personAttributeTypeUuid, nullValue());
 	}
-
+	
 }

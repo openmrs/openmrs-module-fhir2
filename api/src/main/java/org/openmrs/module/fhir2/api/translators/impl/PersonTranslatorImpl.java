@@ -50,16 +50,16 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	
 	@Inject
 	private GenderTranslator genderTranslator;
-
+	
 	@Inject
 	private TelecomTranslator telecomTranslator;
-
+	
 	@Inject
 	private PersonService personService;
-
+	
 	@Inject
 	private FhirGlobalPropertyService globalPropertyService;
-
+	
 	@Override
 	public org.hl7.fhir.r4.model.Person toFhirResource(@NotNull Person openmrsPerson) {
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
@@ -80,12 +80,12 @@ public class PersonTranslatorImpl implements PersonTranslator {
 				person.addAddress(addressTranslator.toFhirResource(address));
 			}
 			person.setTelecom(getPersonContactDetails(openmrsPerson));
-
+			
 			buildPersonLinks(openmrsPerson, person);
 		}
 		return person;
 	}
-
+	
 	public List<ContactPoint> getPersonContactDetails(@NotNull Person person) {
 		List<ContactPoint> contactPoints = new ArrayList<>();
 		PersonAttributeType contactAttributeType = personService.getPersonAttributeTypeByUuid(
@@ -97,7 +97,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		});
 		return contactPoints;
 	}
-
+	
 	/**
 	 * TODO Find a better way to implement this generically and maybe move to different package
 	 */

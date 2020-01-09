@@ -25,13 +25,13 @@ import static org.apache.commons.lang.Validate.notNull;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class TelecomTranslatorImpl implements TelecomTranslator {
-
+	
 	@Inject
 	private PersonService personService;
-
+	
 	@Inject
 	private FhirGlobalPropertyService globalPropertyService;
-
+	
 	@Override
 	public PersonAttribute toOpenmrsType(PersonAttribute currentPersonAttribute, ContactPoint contactPoint) {
 		notNull(currentPersonAttribute, "currentPersonAttribute cannot be null");
@@ -42,7 +42,7 @@ public class TelecomTranslatorImpl implements TelecomTranslator {
 		currentPersonAttribute.setValue(contactPoint.getValue());
 		return currentPersonAttribute;
 	}
-
+	
 	@Override
 	public ContactPoint toFhirResource(PersonAttribute personAttribute) {
 		ContactPoint contactPoint = new ContactPoint();
@@ -50,14 +50,14 @@ public class TelecomTranslatorImpl implements TelecomTranslator {
 		contactPoint.setValue(personAttribute.getValue());
 		return contactPoint;
 	}
-
+	
 	@Override
 	public PersonAttribute toOpenmrsType(ContactPoint contactPoint) {
 		PersonAttribute personAttribute = new PersonAttribute();
 		personAttribute.setUuid(contactPoint.getId());
 		personAttribute.setValue(contactPoint.getValue());
-		personAttribute.setAttributeType(personService.getPersonAttributeTypeByUuid(
-				globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)));
+		personAttribute.setAttributeType(personService.getPersonAttributeTypeByUuid(globalPropertyService
+		        .getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)));
 		return personAttribute;
 	}
 }

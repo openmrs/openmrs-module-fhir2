@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api;
 import org.openmrs.api.APIException;
 
 public interface FhirGlobalPropertyService {
-
+	
 	String getGlobalProperty(String property) throws APIException;
-
+	
 }
