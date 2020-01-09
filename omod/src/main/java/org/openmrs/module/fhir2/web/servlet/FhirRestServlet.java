@@ -38,6 +38,7 @@ public class FhirRestServlet extends RestfulServer {
 	private static final long serialVersionUID = 1L;
 	
 	@Inject
+	@Named("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
 	
 	@Override

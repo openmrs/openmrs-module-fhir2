@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -21,6 +22,7 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
 
@@ -132,6 +134,17 @@ public class PersonNameTranslatorImplTest {
 		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#degree"),
 		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
+	}
+
+	@Test
+	public void shouldOnlyCreateOneExtensionForExtensibleAttributes() {
+		PersonName name = new PersonName();
+		name.setFamilyNamePrefix(PERSON_MIDDLE_NAME);
+		name.setFamilyNameSuffix(PERSON_MIDDLE_NAME);
+
+		// note that this throws an IllegalArgumentException if more than extension with the same URL occurs
+		Extension extension = personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
+		assertThat(extension.getExtension().size(), greaterThan(1));
 	}
 	
 	@Test
