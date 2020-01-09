@@ -65,13 +65,13 @@
 		</createTable>
 
 		<addForeignKeyConstraint constraintName="task_creator"
-								 baseTableName="fhir2_task" baseColumnNames="creator"
+								 baseTableName="fhir_task" baseColumnNames="creator"
 								 referencedTableName="users" referencedColumnNames="user_id"/>
 		<addForeignKeyConstraint constraintName="task_changed_by"
-								 baseTableName="fhir2_task" baseColumnNames="changed_by"
+								 baseTableName="fhir_task" baseColumnNames="changed_by"
 								 referencedTableName="users" referencedColumnNames="user_id"/>
 		<addForeignKeyConstraint constraintName="task_voided_by"
-								 baseTableName="fhir2_task" baseColumnNames="voided_by"
+								 baseTableName="fhir_task" baseColumnNames="voided_by"
 								 referencedTableName="users" referencedColumnNames="user_id"/>
 	</changeSet>
 

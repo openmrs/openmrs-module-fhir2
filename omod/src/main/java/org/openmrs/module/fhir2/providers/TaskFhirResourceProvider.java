@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -22,6 +23,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
+import org.openmrs.module.fhir2.util.MethodOutComeUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -50,12 +52,12 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Create
-	public Task createTask(@ResourceParam Task newTask) {
-		return service.saveTask(newTask);
+	public MethodOutcome createTask(@ResourceParam Task newTask) {
+		return MethodOutComeUtils.buildCreate(service.saveTask(newTask));
 	}
 	
 	@Update
-	Task updateTask(@IdParam IdType id, @ResourceParam Task task) {
+	public MethodOutcome updateTask(@IdParam IdType id, @ResourceParam Task task) {
 		Task existingTask = service.getTaskByUuid(id.getIdPart());
 		
 		if (task == null) {
@@ -66,7 +68,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 		
 		task.setId(existingTask.getId());
 		
-		return service.saveTask(task);
+		return MethodOutComeUtils.buildUpdate(service.saveTask(task));
 		
 	}
 	
