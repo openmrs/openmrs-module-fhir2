@@ -12,8 +12,11 @@ package org.openmrs.module.fhir2.api;
 import org.hl7.fhir.r4.model.Location;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
 
 public interface FhirLocationService {
 	
 	Location getLocationByUuid(@NotNull String uuid);
+	
+	Collection<Location> findLocationByName(@NotNull String name);
 }
