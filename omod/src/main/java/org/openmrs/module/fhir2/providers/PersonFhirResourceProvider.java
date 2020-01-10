@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.time.LocalDate;
 
 @Component
 @Qualifier("fhirResources")
@@ -63,23 +64,28 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	 * @return Returns a bundle list of people. This list may contain multiple matching * resources,
 	 *         or it may also be empty.
 	 */
-	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle findSimilarPeople(@RequiredParam(name = Person.SP_NAME) StringParam name,
-	        @RequiredParam(name = Person.SP_BIRTHDATE) DateParam birthDate,
+	        @OptionalParam(name = Person.SP_BIRTHDATE) DateParam birthDate,
 	        @OptionalParam(name = Person.SP_GENDER) String gender) {
-		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findSimilarPeople(name.getValue(), birthDate
-		        .getValue().getYear(), gender));
+		Integer year = null;
+		if (birthDate != null) {
+			year = LocalDate.from(birthDate.getValue().toInstant()).getYear();
+		}
+		
+		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findSimilarPeople(name.getValue(), year, gender));
 		
 	}
 	
 	@Search
+	@SuppressWarnings("unused")
 	public Bundle findPersonsByBirthDate(@RequiredParam(name = Person.SP_BIRTHDATE) DateParam birthDate) {
 		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByBirthDate(birthDate.getValue()));
 	}
 	
 	@Search
+	@SuppressWarnings("unused")
 	public Bundle findPersonsByGender(@RequiredParam(name = Person.SP_GENDER) StringParam gender) {
 		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByGender(gender.getValueNotNull()));
 	}
