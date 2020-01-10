@@ -18,6 +18,8 @@ import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -32,5 +34,12 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	@Override
 	public Location getLocationByUuid(String uuid) {
 		return locationTranslator.toFhirResource(locationDao.getLocationByUuid(uuid));
+	}
+	
+	@Override
+	public Collection<Location> findLocationByName(String name) {
+		return locationDao.findLocationByName(name).
+				stream().map(locationTranslator::toFhirResource)
+				.collect(Collectors.toList());
 	}
 }
