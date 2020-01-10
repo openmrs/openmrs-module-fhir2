@@ -40,9 +40,7 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 	 */
 	@Override
 	public Task saveTask(Task task) {
-		org.openmrs.module.fhir2.Task savedOpenmrsTask = dao.saveTask(translator.toOpenmrsType(task));
-		
-		return null;
+		return translator.toFhirResource(dao.saveTask(translator.toOpenmrsType(task)));
 	}
 	
 }

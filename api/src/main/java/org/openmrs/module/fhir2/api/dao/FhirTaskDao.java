@@ -15,8 +15,8 @@ import org.openmrs.module.fhir2.Task;
 
 public interface FhirTaskDao {
 	
-	public Task saveTask(Task task);
+	Task saveTask(Task task);
 	
-	public Task getTaskByUuid(@NotNull String taskUUID);
+	Task getTaskByUuid(@NotNull String taskUUID);
 	
 }
