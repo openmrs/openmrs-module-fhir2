@@ -9,9 +9,9 @@
  */
 package org.openmrs.module.fhir2;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.BaseModuleActivator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class contains the logic that is run every time this module is either started or shutdown
@@ -19,18 +19,14 @@ import org.openmrs.module.BaseModuleActivator;
 @SuppressWarnings("unused")
 public class FhirActivator extends BaseModuleActivator {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private static final Logger log = LoggerFactory.getLogger(FhirActivator.class);
 	
-	/**
-	 * @see #started()
-	 */
+	@Override
 	public void started() {
 		log.info("Started FHIR");
 	}
 	
-	/**
-	 * @see #stopped()
-	 */
+	@Override
 	public void stopped() {
 		log.info("Shutdown FHIR");
 	}
