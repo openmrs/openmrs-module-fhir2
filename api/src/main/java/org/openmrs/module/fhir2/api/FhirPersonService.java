@@ -20,7 +20,7 @@ public interface FhirPersonService {
 	
 	Collection<Person> findPersonsByName(String name);
 	
-	Collection<Person> findSimilarPeople(String name, int birthYear, String gender);
+	Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender);
 	
 	Collection<Person> findPersonsByGender(String gender);
 	

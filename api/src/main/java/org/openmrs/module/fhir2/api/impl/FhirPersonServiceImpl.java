@@ -53,7 +53,7 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	}
 	
 	@Override
-	public Collection<Person> findSimilarPeople(String name, int birthYear, String gender) {
+	public Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender) {
 		return fhirPersonDao.findSimilarPeople(name, birthYear, gender)
 				.stream()
 				.map(personTranslator::toFhirResource).collect(Collectors.toList());
