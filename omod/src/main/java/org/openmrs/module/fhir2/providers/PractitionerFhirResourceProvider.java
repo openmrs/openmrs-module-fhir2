@@ -11,14 +11,18 @@ package org.openmrs.module.fhir2.providers;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
+import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -46,5 +50,11 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
 		}
 		return practitioner;
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle findPractitionersByName(@RequiredParam(name = Practitioner.SP_NAME) @NotNull String name) {
+		return FhirUtils.convertSearchResultsToBundle(practitionerService.findPractitionerByName(name));
 	}
 }

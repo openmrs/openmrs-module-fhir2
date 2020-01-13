@@ -11,8 +11,11 @@ package org.openmrs.module.fhir2.api.dao;
 import org.openmrs.Provider;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
 
 public interface FhirPractitionerDao {
 	
 	Provider getProviderByUuid(@NotNull String uuid);
+	
+	Collection<Provider> findProviderByName(@NotNull String name);
 }
