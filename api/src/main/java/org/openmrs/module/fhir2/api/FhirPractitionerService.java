@@ -11,7 +11,11 @@ package org.openmrs.module.fhir2.api;
 
 import org.hl7.fhir.r4.model.Practitioner;
 
+import java.util.Collection;
+
 public interface FhirPractitionerService {
 	
 	Practitioner getPractitionerByUuid(String uuid);
+	
+	Collection<Practitioner> findPractitionerByName(String name);
 }

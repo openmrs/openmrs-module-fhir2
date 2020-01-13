@@ -10,12 +10,18 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.SessionFactory;
 import org.openmrs.Provider;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.List;
+
+import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -24,8 +30,19 @@ public class FhirPractitionerDaoImpl implements FhirPractitionerDao {
 	@Inject
 	private ProviderService providerService;
 	
+	@Inject
+	@Named("sessionFactory")
+	private SessionFactory sessionFactory;
+	
 	@Override
 	public Provider getProviderByUuid(String uuid) {
 		return providerService.getProviderByUuid(uuid);
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Provider> findProviderByName(String name) {
+		return sessionFactory.getCurrentSession().createCriteria(Provider.class)
+		        .add(and(eq("name", name), eq("retired", false))).list();
 	}
 }

@@ -18,6 +18,8 @@ import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -32,5 +34,10 @@ public class FhirPractitionerServiceImpl implements FhirPractitionerService {
 	@Override
 	public Practitioner getPractitionerByUuid(String uuid) {
 		return translator.toFhirResource(dao.getProviderByUuid(uuid));
+	}
+	
+	@Override
+	public Collection<Practitioner> findPractitionerByName(String name) {
+		return dao.findProviderByName(name).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
 }
