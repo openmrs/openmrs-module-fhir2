@@ -58,18 +58,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	
 	@Update
 	public MethodOutcome updateTask(@IdParam IdType id, @ResourceParam Task task) {
-		Task existingTask = service.getTaskByUuid(id.getIdPart());
 		
-		if (task == null) {
-			throw new ResourceNotFoundException("Could not update Task with Id " + id.getIdPart() + ". Task not found.");
-		}
-		
-		// TODO: Figure out how OpenMRS determines whether to create or save
-		
-		task.setId(existingTask.getId());
-		
-		return MethodOutComeUtils.buildUpdate(service.saveTask(task));
-		
+		return MethodOutComeUtils.buildUpdate(service.updateTask(id.getIdPart(), task));
 	}
-	
 }
