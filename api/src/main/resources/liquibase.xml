@@ -12,7 +12,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-	<changeSet id="fhir2-20191214-0022-task-resource" author="pmanko">
+	<changeSet id="add_fhir_task_20191214" author="pmanko">
 		<preConditions onFail="MARK_RAN">
 			<not>
 				<tableExists tableName="fhir_task"/>
@@ -113,16 +113,16 @@
                                  referencedTableName="concept_reference_source" referencedColumnNames="concept_source_id" />
         <addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="creator"
                                  constraintName="fhir_concept_source_creator_fk"
-                                 referencedTableName="user" referencedColumnNames="user_id" />
+                                 referencedTableName="users" referencedColumnNames="user_id" />
         <addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="changed_by"
                                  constraintName="fhir_concept_source_changed_by_fk"
-                                 referencedTableName="user" referencedColumnNames="user_id" />
+                                 referencedTableName="users" referencedColumnNames="user_id" />
         <addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="retired_by"
                                  constraintName="fhir_concept_source_retired_by_fk"
-                                 referencedTableName="user" referencedColumnNames="user_id" />
+                                 referencedTableName="users" referencedColumnNames="user_id" />
     </changeSet>
 
-    <changeSet id="add_loinc_fhir_concept_source" author="ibacher" dbms="mysql">
+    <changeSet id="add_loinc_fhir_concept_source_20200105" author="ibacher" dbms="mysql">
         <preConditions>
             <and>
                 <tableExists tableName="fhir_concept_source" />
@@ -131,14 +131,14 @@
             </and>
         </preConditions>
         <sql><![CDATA[
-            insert into fhir_concept_source (name, concept_source_id, url, creator, date_created)
-            select name, concept_source_id, 'http://loinc.org', 1, now()
+            insert into fhir_concept_source (name, concept_source_id, url, creator, date_created, uuid)
+            select name, concept_source_id, 'http://loinc.org', 1, now(), '249b13c8-72fa-4b96-8d3d-b200efed985e'
             from concept_reference_source
             where name = 'LOINC' and retired = 0
         ]]></sql>
     </changeSet>
 
-    <changeSet id="add_ciel_fhir_concept_source" author="ibacher" dbms="mysql">
+    <changeSet id="add_ciel_fhir_concept_source_20200105" author="ibacher" dbms="mysql">
         <preConditions>
             <and>
                 <tableExists tableName="fhir_concept_source" />
@@ -147,8 +147,8 @@
             </and>
         </preConditions>
         <sql><![CDATA[
-            insert into fhir_concept_source (name, concept_source_id, url, creator, date_created)
-            select name, concept_source_id, 'urn:oid:2.16.840.1.113883.3.7201', 1, now()
+            insert into fhir_concept_source (name, concept_source_id, url, creator, date_created, uuid)
+            select name, concept_source_id, 'urn:oid:2.16.840.1.113883.3.7201', 1, now(), '2b3c1ff8-768a-102f-83f4-12313b04a615'
             from concept_reference_source
             where name = 'CIEL' and retired = 0
         ]]></sql>
