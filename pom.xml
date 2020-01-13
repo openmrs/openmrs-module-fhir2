@@ -128,6 +128,45 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>3.0</version>
+					<configuration>
+						<header>..${file.separator}license-header.txt</header>
+						<headerDefinitions>
+							<headerDefinition>..${file.separator}license-format.xml</headerDefinition>
+						</headerDefinitions>
+						<mapping>
+							<java>JAVA_STYLE</java>
+							<xml>MYXML_STYLE</xml>
+						</mapping>
+						<includes>
+							<include>**/*.java</include>
+							<include>**/*.xml</include>
+							<include>**/*.properties</include>
+						</includes>
+						<excludes>
+							<exclude>**/pom.xml</exclude>
+							<exclude>**/target/**</exclude>
+							<exclude>.git/**</exclude>
+							<exclude>.idea/**</exclude>
+							<exclude>.settings/**</exclude>
+							<exclude>.externalToolBuilders/</exclude>
+							<exclude>nbproject/private/</exclude>
+							<exclude>.vscode/**</exclude>
+						</excludes>
+					</configuration>
+					<executions>
+						<execution>
+							<id>check-license</id>
+							<goals>
+								<goal>check</goal>
+							</goals>
+							<phase>validate</phase>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>org.projectlombok</groupId>
 					<artifactId>lombok-maven-plugin</artifactId>
 					<version>${lombokVersion}.0</version>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<additionalHeaders>
+    <java_style>
+        <firstLine>/*</firstLine>
+        <beforeEachLine> * </beforeEachLine>
+        <endLine> */</endLine>
+        <firstLineDetectionPattern>(\s|\t)*/\*.*$</firstLineDetectionPattern>
+        <lastLineDetectionPattern>.*\*/(\s|\t)*$</lastLineDetectionPattern>
+        <allowBlankLines>false</allowBlankLines>
+        <isMultiline>true</isMultiline>
+        <padLines>false</padLines>
+    </java_style>
+    <myxml_style>
+        <firstLine><![CDATA[<!--]]></firstLine>
+        <beforeEachLine>    </beforeEachLine>
+        <endLine><![CDATA[-->]]></endLine>
+        <skipLine><![CDATA[^<\?xml.*>$]]></skipLine>
+        <firstLineDetectionPattern><![CDATA[(\s|\t)*<!--.*$]]></firstLineDetectionPattern>
+        <lastLineDetectionPattern><![CDATA[.*-->(\s|\t)*$]]></lastLineDetectionPattern>
+        <allowBlankLines>false</allowBlankLines>
+        <isMultiline>true</isMultiline>
+        <padLines>false</padLines>
+    </myxml_style>
+</additionalHeaders>
