@@ -65,44 +65,44 @@ public class FhirConceptSourceServiceImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result, empty());
 	}
-
+	
 	@Test
 	public void getFhirConceptSourceByUrl_shouldReturnConceptSourceForUrl() {
 		FhirConceptSource source = new FhirConceptSource();
 		when(dao.getFhirConceptSourceByUrl("http://www.example.com")).thenReturn(Optional.of(source));
-
+		
 		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByUrl("http://www.example.com");
-
+		
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get(), equalTo(source));
 	}
-
+	
 	@Test
 	public void getFhirConceptSourceByUrl_shouldReturnEmptyWhenNoConceptSourceFound() {
 		when(dao.getFhirConceptSourceByUrl("http://www.example.com")).thenReturn(Optional.empty());
-
+		
 		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByUrl("http://www.example.com");
-
+		
 		assertThat(result.isPresent(), is(false));
 	}
-
+	
 	@Test
 	public void getFhirConceptSourceByConceptSourceName_shouldReturnConceptSourceForName() {
 		FhirConceptSource source = new FhirConceptSource();
 		when(dao.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.of(source));
-
+		
 		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC");
-
+		
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get(), equalTo(source));
 	}
-
+	
 	@Test
 	public void getFhirConceptSourceByConceptSourceName_shouldReturnEmptyWhenNoConceptSourceFound() {
 		when(dao.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.empty());
-
+		
 		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC");
-
+		
 		assertThat(result.isPresent(), is(false));
 	}
 }
