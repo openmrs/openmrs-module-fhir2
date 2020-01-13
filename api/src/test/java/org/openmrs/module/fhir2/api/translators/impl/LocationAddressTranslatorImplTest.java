@@ -116,7 +116,7 @@ public class LocationAddressTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldReturnNullIfCalledWithoutlocation() {
+	public void toFhirResource_shouldReturnNullIfCalledWithoutLocation() {
 		Address address = translator.toFhirResource(null);
 		assertNull(address.getCity());
 		assertNull(address.getState());
@@ -165,153 +165,153 @@ public class LocationAddressTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess1() {
+	public void shouldAddExtensionForAddress1() {
 		Location location = new Location();
-		location.setAddress1("address 1");
+		location.setAddress1(ADDRESS_1);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address1"),
-		    hasProperty("value", hasProperty("value", equalTo("address 1"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_1))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess2() {
+	public void shouldAddExtensionForAddress2() {
 		Location location = new Location();
-		location.setAddress2("address 2");
+		location.setAddress2(ADDRESS_2);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address2"),
-		    hasProperty("value", hasProperty("value", equalTo("address 2"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_2))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess3() {
+	public void shouldAddExtensionForAddress3() {
 		Location location = new Location();
-		location.setAddress3("address 3");
+		location.setAddress3(ADDRESS_3);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address3"),
-		    hasProperty("value", hasProperty("value", equalTo("address 3"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_3))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess4() {
+	public void shouldAddExtensionForAddress4() {
 		Location location = new Location();
-		location.setAddress4("address 4");
+		location.setAddress4(ADDRESS_4);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address4"),
-		    hasProperty("value", hasProperty("value", equalTo("address 4"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_4))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess5() {
+	public void shouldAddExtensionForAddress5() {
 		Location location = new Location();
-		location.setAddress5("address 5");
+		location.setAddress5(ADDRESS_5);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address5"),
-		    hasProperty("value", hasProperty("value", equalTo("address 5"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_5))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess6() {
+	public void shouldAddExtensionForAddress6() {
 		Location location = new Location();
-		location.setAddress6("address 6");
+		location.setAddress6(ADDRESS_6);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address6"),
-		    hasProperty("value", hasProperty("value", equalTo("address 6"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_6))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess7() {
+	public void shouldAddExtensionForAddress7() {
 		Location location = new Location();
-		location.setAddress7("address 7");
+		location.setAddress7(ADDRESS_7);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address7"),
-		    hasProperty("value", hasProperty("value", equalTo("address 7"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_7))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess8() {
+	public void shouldAddExtensionForAddress8() {
 		Location location = new Location();
-		location.setAddress8("address 8");
+		location.setAddress8(ADDRESS_8);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address8"),
-		    hasProperty("value", hasProperty("value", equalTo("address 8"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_8))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess9() {
+	public void shouldAddExtensionForAddress9() {
 		Location location = new Location();
-		location.setAddress9("address 9");
+		location.setAddress9(ADDRESS_9);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address9"),
-		    hasProperty("value", hasProperty("value", equalTo("address 9"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_9))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess10() {
+	public void shouldAddExtensionForAddress10() {
 		Location location = new Location();
-		location.setAddress10("address 10");
+		location.setAddress10(ADDRESS_10);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address10"),
-		    hasProperty("value", hasProperty("value", equalTo("address 10"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_10))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess11() {
+	public void shouldAddExtensionForAddress11() {
 		Location location = new Location();
-		location.setAddress11("address 11");
+		location.setAddress11(ADDRESS_11);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address11"),
-		    hasProperty("value", hasProperty("value", equalTo("address 11"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_11))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess12() {
+	public void shouldAddExtensionForAddress12() {
 		Location location = new Location();
-		location.setAddress12("address 12");
+		location.setAddress12(ADDRESS_12);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address12"),
-		    hasProperty("value", hasProperty("value", equalTo("address 12"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_12))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess13() {
+	public void shouldAddExtensionForAddress13() {
 		Location location = new Location();
-		location.setAddress13("address 13");
+		location.setAddress13(ADDRESS_13);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address13"),
-		    hasProperty("value", hasProperty("value", equalTo("address 13"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_13))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess14() {
+	public void shouldAddExtensionForAddress14() {
 		Location location = new Location();
-		location.setAddress14("address 14");
+		location.setAddress14(ADDRESS_14);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address14"),
-		    hasProperty("value", hasProperty("value", equalTo("address 14"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_14))));
 	}
 	
 	@Test
-	public void shouldAddEtexnsionForAddess15() {
+	public void shouldAddExtensionForAddress15() {
 		Location location = new Location();
-		location.setAddress15("address 15");
+		location.setAddress15(ADDRESS_15);
 		
 		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
 		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address15"),
-		    hasProperty("value", hasProperty("value", equalTo("address 15"))));
+		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_15))));
 	}
 	
 	@Test

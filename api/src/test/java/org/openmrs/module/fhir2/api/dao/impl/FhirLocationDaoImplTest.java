@@ -56,14 +56,14 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void getLocationByuuid_shouldReturnMatchingLocation() {
+	public void getLocationByUuid_shouldReturnMatchingLocation() {
 		Location location = fhirLocationDao.getLocationByUuid(LOCATION_UUID);
 		assertNotNull(location);
 		assertEquals(location.getUuid(), LOCATION_UUID);
 	}
 	
 	@Test
-	public void getLocationByuuid_shouldReturnNullWithUnknownUuid() {
+	public void getLocationByUuid_shouldReturnNullWithUnknownUuid() {
 		Location location = fhirLocationDao.getLocationByUuid(UNKNOWN_LOCATION_UUID);
 		assertNull(location);
 	}
