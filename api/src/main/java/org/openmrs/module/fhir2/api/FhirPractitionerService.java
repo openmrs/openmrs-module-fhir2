@@ -18,4 +18,6 @@ public interface FhirPractitionerService {
 	Practitioner getPractitionerByUuid(String uuid);
 	
 	Collection<Practitioner> findPractitionerByName(String name);
+	
+	Collection<Practitioner> findPractitionerByIdentifier(String identifier);
 }

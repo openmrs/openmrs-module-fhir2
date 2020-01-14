@@ -19,4 +19,6 @@ public interface FhirPractitionerDao {
 	Provider getProviderByUuid(@NotNull String uuid);
 	
 	Collection<Provider> findProviderByName(@NotNull String name);
+	
+	Collection<Provider> findProviderByIdentifier(@NotNull String identifier);
 }

@@ -57,4 +57,10 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	public Bundle findPractitionersByName(@RequiredParam(name = Practitioner.SP_NAME) @NotNull String name) {
 		return FhirUtils.convertSearchResultsToBundle(practitionerService.findPractitionerByName(name));
 	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle findPractitionersByIdentifier(@RequiredParam(name = Practitioner.SP_IDENTIFIER) @NotNull String identifier) {
+		return FhirUtils.convertSearchResultsToBundle(practitionerService.findPractitionerByIdentifier(identifier));
+	}
 }

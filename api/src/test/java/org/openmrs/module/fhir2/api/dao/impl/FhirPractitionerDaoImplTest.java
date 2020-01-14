@@ -20,16 +20,15 @@ import org.springframework.test.context.ContextConfiguration;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.nullValue;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest {
@@ -40,7 +39,11 @@ public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest 
 	
 	private static final String PRACTITIONER_NAME = "John";
 	
+	private static final String PRACTITIONER_IDENTIFIER = "347834-gf";
+	
 	private static final String NOT_FOUND_PRACTITIONER_NAME = "waf";
+	
+	private static final String NOT_FOUND_PRACTITIONER_IDENTIFIER = "38934-t";
 	
 	@Inject
 	@Named("providerService")
@@ -83,4 +86,20 @@ public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest 
 		assertThat(results, empty());
 	}
 	
+	@Test
+	public void shouldSearchForPractitionerByIdentifier() {
+		List<org.openmrs.Provider> results = dao.findProviderByIdentifier(PRACTITIONER_IDENTIFIER);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		assertThat(results.get(0).getIdentifier(), equalTo(PRACTITIONER_IDENTIFIER));
+		
+	}
+	
+	@Test
+	public void shouldReturnEmptyListForIdentifierNotMatched() {
+		List<org.openmrs.Provider> results = dao.findProviderByIdentifier(NOT_FOUND_PRACTITIONER_IDENTIFIER);
+		assertThat(results, notNullValue());
+		assertThat(results, is(empty()));
+	}
 }
