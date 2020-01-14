@@ -101,3 +101,59 @@ Concept result = getConcept("expectedConcept");
 // here we verify that what we expect happens.
 assertThat(result, equalTo(expected));
 ```
+
+License
+-------
+
+The license for this project is included in the [LICENSE](https://github.com/openmrs/openmrs-module-fhir2/blob/master/LICENSE)
+file. However, in addition to the full license included here, each file should contain the text found in
+[license-header.txt](https://github.com/openmrs/openmrs-module-fhir2/blob/master/license-header.txt)
+at the start of the file.
+
+For Java files, we should have the following message:
+
+```java
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * 
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+```
+
+For XML files, we should use the following:
+
+```xml
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+```
+
+For properties files, we should use the following:
+
+```properties
+#
+# This Source Code Form is subject to the terms of the Mozilla Public License,
+# v. 2.0. If a copy of the MPL was not distributed with this file, You can
+# obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+# the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+#
+# Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+# graphic logo is a trademark of OpenMRS Inc.
+#
+```
+
+In any case, the appropriate license header can easily be added to any existing file that needs it by running:
+
+```shell script
+mvn com.mycila:license-maven-plugin:format
+```
