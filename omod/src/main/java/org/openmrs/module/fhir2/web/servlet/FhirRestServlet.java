@@ -48,10 +48,10 @@ public class FhirRestServlet extends RestfulServer {
 		// ensure properties for this class are properly injected
 		SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, getServletContext());
 		
-    int defaultPageSize = NumberUtils
-					.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE), 10);
+		int defaultPageSize = NumberUtils
+			.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE), 10);
 		int maximumPageSize = NumberUtils
-					.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE), 100);
+			.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE), 100);
 
 		FifoMemoryPagingProvider pp = new FifoMemoryPagingProvider(defaultPageSize);
 		pp.setDefaultPageSize(defaultPageSize);
