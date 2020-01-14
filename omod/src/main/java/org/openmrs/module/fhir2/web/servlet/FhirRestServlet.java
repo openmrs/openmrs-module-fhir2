@@ -11,8 +11,6 @@ package org.openmrs.module.fhir2.web.servlet;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 import java.util.Collection;
 
@@ -23,13 +21,11 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.openmrs.api.context.Context;
-import org.openmrs.api.context.ServiceContext;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 @Component
 @Setter(AccessLevel.MODULE)
@@ -44,14 +40,7 @@ public class FhirRestServlet extends RestfulServer {
 	@Override
 	protected void initialize() {
 		// ensure properties for this class are properly injected
-		// TODO find a way around this hack!
-		try {
-			((ServiceContext) FieldUtils.readStaticField(Context.class, "serviceContext", true)).getApplicationContext()
-			        .getAutowireCapableBeanFactory().autowireBean(this);
-		}
-		catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
+		SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, getServletContext());
 		
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 		registerInterceptor(loggingInterceptor);
