@@ -80,5 +80,17 @@
 		<description>Set person attribute type uuid</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>${project.parent.artifactId}.paging.default</property>
+		<defaultValue>10</defaultValue>
+		<description>Set default page size</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.paging.maximum</property>
+		<defaultValue>100</defaultValue>
+		<description>Set maximum page size</description>
+	</globalProperty>
+
 </module>
 
