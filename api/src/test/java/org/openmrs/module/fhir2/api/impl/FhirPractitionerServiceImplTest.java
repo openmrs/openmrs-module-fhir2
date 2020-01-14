@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,8 +22,10 @@ import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.empty;
@@ -39,7 +42,7 @@ public class FhirPractitionerServiceImplTest {
 	
 	private static final String PROVIDER_NAME = "John";
 	
-	private static final String NOT_FOUND_PROVIDER_NAME = "not found";
+	private static final String PRACTITIONER_IDENTIFIER = "3r34g346-tk";
 	
 	@Mock
 	private PractitionerTranslator practitionerTranslator;
@@ -95,6 +98,38 @@ public class FhirPractitionerServiceImplTest {
 	@Test
 	public void shouldReturnEmptyCollectionWhenPractitionerNameNotMatched() {
 		Collection<Practitioner> results = practitionerService.findPractitionerByName(PROVIDER_NAME);
+		assertThat(results, notNullValue());
+		assertThat(results, empty());
+	}
+	
+	@Test
+	public void shouldSearchForPractitionersByIdentifier() {
+		Collection<Provider> providers = new ArrayList<>();
+		Provider provider = new Provider();
+		provider.setUuid(PROVIDER_UUID);
+		provider.setRetired(false);
+		provider.setIdentifier(PRACTITIONER_IDENTIFIER);
+		providers.add(provider);
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId(PRACTITIONER_UUID);
+		Identifier identifier = new Identifier();
+		identifier.setValue(PRACTITIONER_IDENTIFIER);
+		List<Identifier> identifiers = new ArrayList<>();
+		identifiers.add(identifier);
+		practitioner.setIdentifier(identifiers);
+		when(practitionerDao.findProviderByIdentifier(PRACTITIONER_IDENTIFIER)).thenReturn(providers);
+		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
+		Collection<Practitioner> results = practitionerService.findPractitionerByIdentifier(PRACTITIONER_IDENTIFIER);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		assertThat(results.stream().findAny().isPresent(), is(true));
+		assertThat(results.stream().findAny().get().getIdentifier().get(0).getValue(), equalTo(PRACTITIONER_IDENTIFIER));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionWhenPractitionerIdentifierNotMatched() {
+		Collection<Practitioner> results = practitionerService.findPractitionerByIdentifier(PRACTITIONER_IDENTIFIER);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
 	}

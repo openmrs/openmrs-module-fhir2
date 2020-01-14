@@ -40,4 +40,9 @@ public class FhirPractitionerServiceImpl implements FhirPractitionerService {
 	public Collection<Practitioner> findPractitionerByName(String name) {
 		return dao.findProviderByName(name).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
+	
+	@Override
+	public Collection<Practitioner> findPractitionerByIdentifier(String identifier) {
+		return dao.findProviderByIdentifier(identifier).stream().map(translator::toFhirResource).collect(Collectors.toList());
+	}
 }

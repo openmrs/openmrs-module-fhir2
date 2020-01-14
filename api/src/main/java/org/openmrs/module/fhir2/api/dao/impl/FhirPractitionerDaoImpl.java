@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.openmrs.Provider;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
@@ -45,5 +46,12 @@ public class FhirPractitionerDaoImpl implements FhirPractitionerDao {
 	public List<Provider> findProviderByName(String name) {
 		return sessionFactory.getCurrentSession().createCriteria(Provider.class)
 		        .add(and(eq("name", name), eq("retired", false))).list();
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Provider> findProviderByIdentifier(String identifier) {
+		return sessionFactory.getCurrentSession().createCriteria(Provider.class)
+		        .add(Restrictions.eq("identifier", identifier)).list();
 	}
 }
