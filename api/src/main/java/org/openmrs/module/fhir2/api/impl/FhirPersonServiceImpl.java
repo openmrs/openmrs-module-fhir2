@@ -3,6 +3,7 @@
  * v. 2.0. If a copy of the MPL was not distributed with this file, You can
  * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
  * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
@@ -53,7 +54,7 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	}
 	
 	@Override
-	public Collection<Person> findSimilarPeople(String name, int birthYear, String gender) {
+	public Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender) {
 		return fhirPersonDao.findSimilarPeople(name, birthYear, gender)
 				.stream()
 				.map(personTranslator::toFhirResource).collect(Collectors.toList());

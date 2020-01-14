@@ -18,10 +18,14 @@ import org.openmrs.Location;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,25 +45,51 @@ public class FhirLocationServiceImplTest {
 	
 	private FhirLocationServiceImpl fhirLocationService;
 	
+	private Location location;
+	
+	private org.hl7.fhir.r4.model.Location fhirLocation;
+	
 	@Before
 	public void setUp() {
 		fhirLocationService = new FhirLocationServiceImpl();
 		fhirLocationService.setLocationDao(locationDao);
 		fhirLocationService.setLocationTranslator(locationTranslator);
-	}
-	
-	@Test
-	public void shouldGetLocationByUuid() {
-		Location location = new Location();
+		
+		location = new Location();
 		location.setUuid(LOCATION_UUID);
 		location.setName(LOCATION_NAME);
 		location.setDescription(LOCATION_DESCRIPTION);
 		location.setDateCreated(new Date());
 		location.setRetired(false);
 		
+		fhirLocation = new org.hl7.fhir.r4.model.Location();
+		fhirLocation.setId(LOCATION_UUID);
+		fhirLocation.setName(LOCATION_NAME);
+		fhirLocation.setDescription(LOCATION_DESCRIPTION);
+	}
+	
+	@Test
+	public void getLocationByUuid_shouldGetLocationByUuid() {
 		when(locationDao.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 		
 		org.hl7.fhir.r4.model.Location result = fhirLocationService.getLocationByUuid(LOCATION_UUID);
-		assertNotNull(location);
+		assertNotNull(result);
+		assertEquals(result.getId(), fhirLocation.getId());
+		assertEquals(result.getName(), LOCATION_NAME);
+		assertEquals(result.getDescription(), LOCATION_DESCRIPTION);
+		
+	}
+	
+	@Test
+	public void findLocationByName_shouldFindLocationByName() {
+		Collection<Location> locations = new ArrayList<>();
+		locations.add(location);
+		when(locationDao.findLocationByName(LOCATION_NAME)).thenReturn(locations);
+		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
+		
+		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationByName(LOCATION_NAME);
+		assertNotNull(results);
+		assertEquals(results.size(), 1);
 	}
 }

@@ -1,11 +1,11 @@
 /*
-  This Source Code Form is subject to the terms of the Mozilla Public License,
-  v. 2.0. If a copy of the MPL was not distributed with this file, You can
-  obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
-  the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
-
-  Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
-  graphic logo is a trademark of OpenMRS Inc.
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
  */
 package org.openmrs.module.fhir2.providers;
 
@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.time.LocalDate;
 
 @Component
 @Qualifier("fhirResources")
@@ -63,23 +64,28 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	 * @return Returns a bundle list of people. This list may contain multiple matching * resources,
 	 *         or it may also be empty.
 	 */
-	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle findSimilarPeople(@RequiredParam(name = Person.SP_NAME) StringParam name,
-	        @RequiredParam(name = Person.SP_BIRTHDATE) DateParam birthDate,
+	        @OptionalParam(name = Person.SP_BIRTHDATE) DateParam birthDate,
 	        @OptionalParam(name = Person.SP_GENDER) String gender) {
-		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findSimilarPeople(name.getValue(), birthDate
-		        .getValue().getYear(), gender));
+		Integer year = null;
+		if (birthDate != null) {
+			year = LocalDate.from(birthDate.getValue().toInstant()).getYear();
+		}
+		
+		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findSimilarPeople(name.getValue(), year, gender));
 		
 	}
 	
 	@Search
+	@SuppressWarnings("unused")
 	public Bundle findPersonsByBirthDate(@RequiredParam(name = Person.SP_BIRTHDATE) DateParam birthDate) {
 		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByBirthDate(birthDate.getValue()));
 	}
 	
 	@Search
+	@SuppressWarnings("unused")
 	public Bundle findPersonsByGender(@RequiredParam(name = Person.SP_GENDER) StringParam gender) {
 		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByGender(gender.getValueNotNull()));
 	}

@@ -11,10 +11,39 @@ package org.openmrs.module.fhir2.util;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FhirUtils {
+	
+	public static MethodOutcome buildUpdate(DomainResource resource) {
+		MethodOutcome methodOutcome = new MethodOutcome();
+		methodOutcome.setCreated(false);
+		return buildWithResource(methodOutcome, resource);
+	}
+	
+	public static MethodOutcome buildCreate(DomainResource resource) {
+		MethodOutcome methodOutcome = new MethodOutcome();
+		methodOutcome.setCreated(true);
+		return buildWithResource(methodOutcome, resource);
+	}
+	
+	private static MethodOutcome buildWithResource(MethodOutcome methodOutcome, DomainResource resource) {
+		if (resource != null) {
+			if (resource.getId() != null) {
+				methodOutcome.setId(resource.getIdElement());
+			}
+			
+			methodOutcome.setResource(resource);
+		}
+		
+		return methodOutcome;
+	}
 	
 	public static <T extends Resource> Bundle convertSearchResultsToBundle(Collection<T> resources) {
 		Bundle bundle = FhirUtils.convertIterableToBundle(resources);

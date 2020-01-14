@@ -1,4 +1,4 @@
-/**
+/*
  * This Source Code Form is subject to the terms of the Mozilla Public License,
  * v. 2.0. If a copy of the MPL was not distributed with this file, You can
  * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
@@ -22,7 +22,7 @@ public interface FhirTaskService {
 	 * @param uuid
 	 * @return task with given internal identifier
 	 */
-	public Task getTaskByUuid(String uuid);
+	Task getTaskByUuid(String uuid);
 	
 	/**
 	 * Save task to the DB
@@ -30,6 +30,13 @@ public interface FhirTaskService {
 	 * @param task the task to save
 	 * @return the saved task
 	 */
-	public Task saveTask(Task task);
+	Task saveTask(Task task);
 	
+	/**
+	 * Save task to the DB
+	 * 
+	 * @param task the task to save
+	 * @return the saved task
+	 */
+	Task updateTask(String uuid, Task task);
 }

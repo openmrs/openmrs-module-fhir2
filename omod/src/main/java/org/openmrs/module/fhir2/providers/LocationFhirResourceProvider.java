@@ -11,14 +11,19 @@ package org.openmrs.module.fhir2.providers;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.openmrs.module.fhir2.api.FhirLocationService;
+import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -46,5 +51,11 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find location with Id " + id.getIdPart());
 		}
 		return location;
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle findLocationByName(@RequiredParam(name = Location.SP_NAME) StringParam name) {
+		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationByName(name.getValue()));
 	}
 }

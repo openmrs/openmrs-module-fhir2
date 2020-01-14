@@ -17,6 +17,7 @@ import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.util.Collection;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -28,6 +29,11 @@ public class FhirLocationDaoImpl implements FhirLocationDao {
 	@Override
 	public Location getLocationByUuid(String uuid) {
 		return locationService.getLocationByUuid(uuid);
+	}
+	
+	@Override
+	public Collection<Location> findLocationByName(String name) {
+		return locationService.getLocations(name);
 	}
 	
 }
