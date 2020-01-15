@@ -11,12 +11,24 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Location;
+import org.openmrs.LocationAttribute;
+import org.openmrs.LocationAttributeType;
+import org.openmrs.api.LocationService;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationTelecomTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -24,6 +36,15 @@ public class LocationTranslatorImpl implements LocationTranslator {
 	
 	@Inject
 	private LocationAddressTranslator locationAddressTranslator;
+	
+	@Inject
+	private LocationTelecomTranslator locationTelecomTranslator;
+	
+	@Inject
+	private FhirGlobalPropertyService propertyService;
+	
+	@Inject
+	private LocationService locationService;
 	
 	/**
 	 * @see org.openmrs.module.fhir2.api.translators.LocationTranslator#toFhirResource(org.openmrs.Location)
@@ -54,8 +75,22 @@ public class LocationTranslatorImpl implements LocationTranslator {
 			if (openmrsLocation.getRetired()) {
 				fhirLocation.setStatus(Location.LocationStatus.INACTIVE);
 			}
+			
+			fhirLocation.setTelecom(getLocationContactDetails(openmrsLocation));
 		}
 		return fhirLocation;
+	}
+	
+	public List<ContactPoint> getLocationContactDetails(@NotNull org.openmrs.Location location){
+		List<ContactPoint> contactPoints = new ArrayList<>();
+		LocationAttributeType locationAttributeType = locationService.getLocationAttributeTypeByUuid(
+				propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY));
+		for (LocationAttribute attribute : location.getActiveAttributes()){
+			if (attribute.getAttributeType().equals(locationAttributeType)){
+				contactPoints.add(locationTelecomTranslator.toFhirResource(attribute));
+			}
+		}
+		return contactPoints;
 	}
 	
 	/**
@@ -73,6 +108,10 @@ public class LocationTranslatorImpl implements LocationTranslator {
 			openmrsLocation.setStateProvince(fhirLocation.getAddress().getState());
 			openmrsLocation.setCountry(fhirLocation.getAddress().getCountry());
 			openmrsLocation.setPostalCode(fhirLocation.getAddress().getPostalCode());
+
+			Set<LocationAttribute> attributes = fhirLocation.getTelecom().stream()
+					.map(locationTelecomTranslator::toOpenmrsType).collect(Collectors.toSet());
+			openmrsLocation.setAttributes(attributes);
 		}
 		return openmrsLocation;
 	}

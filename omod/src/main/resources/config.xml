@@ -92,5 +92,11 @@
 		<description>Set maximum page size</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>${project.parent.artifactId}.locationAttributeTypeUuid</property>
+		<defaultValue>abcde432-1691-11df-97a5-7038c432abcd</defaultValue>
+		<description>Set location attribute type uuid</description>
+	</globalProperty>
+
 </module>
 

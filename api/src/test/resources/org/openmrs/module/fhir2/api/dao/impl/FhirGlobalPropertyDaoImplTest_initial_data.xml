@@ -10,4 +10,5 @@
 -->
 <dataset>
     <global_property property="fhir2.personAttributeTypeUuid" property_value="1289123-230-23n210-11nj2" description="Set person attribute type uuid" uuid="cd9d0baa-a88b-4553-907a-b4ea7811ebf8"/>
+    <global_property property="fhir2.locationAttributeTypeUuid" property_value="street name" description="location attribute type" uuid="abcde432-1691-11df-9755-7038c432abcd"/>
 </dataset>
