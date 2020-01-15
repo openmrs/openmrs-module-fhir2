@@ -11,32 +11,34 @@ package org.openmrs.module.fhir2.web.servlet;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 import java.util.Collection;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.openmrs.api.context.Context;
-import org.openmrs.api.context.ServiceContext;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 @Component
 @Setter(AccessLevel.MODULE)
 public class FhirRestServlet extends RestfulServer {
 	
 	private static final long serialVersionUID = 1L;
-	
+
+	@Inject
+	FhirGlobalPropertyService globalPropertyService;
+
 	@Inject
 	@Named("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
@@ -44,15 +46,18 @@ public class FhirRestServlet extends RestfulServer {
 	@Override
 	protected void initialize() {
 		// ensure properties for this class are properly injected
-		// TODO find a way around this hack!
-		try {
-			((ServiceContext) FieldUtils.readStaticField(Context.class, "serviceContext", true)).getApplicationContext()
-			        .getAutowireCapableBeanFactory().autowireBean(this);
-		}
-		catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
+		SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, getServletContext());
 		
+		int defaultPageSize = NumberUtils
+			.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE), 10);
+		int maximumPageSize = NumberUtils
+			.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE), 100);
+
+		FifoMemoryPagingProvider pp = new FifoMemoryPagingProvider(defaultPageSize);
+		pp.setDefaultPageSize(defaultPageSize);
+		pp.setMaximumPageSize(maximumPageSize);
+    
+		setPagingProvider(pp);
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 		registerInterceptor(loggingInterceptor);
 	}
