@@ -28,14 +28,17 @@ public class FhirConstants {
 	public static String OPENMRS_FHIR_EXT_NAME = OPENMRS_FHIR_EXT_PREFIX + "/name";
 	
 	public static String OPENMRS_FHIR_EXT_ADDRESS = OPENMRS_FHIR_EXT_PREFIX + "/address";
-
+	
 	public static String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
-
+	
 	public static String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
 	
 	public static String PATIENT = "Patient";
 	
 	@Value("${project.parent.artifactId}.personAttributeTypeUuid")
 	public static String PERSON_ATTRIBUTE_TYPE_PROPERTY;
+	
+	@Value("${project.parent.artifactId}.locationAttributeTypeUuid")
+	public static String LOCATION_ATTRIBUTE_TYPE_PROPERTY;
 	
 }
