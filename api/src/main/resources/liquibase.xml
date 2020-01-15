@@ -23,38 +23,26 @@
 		</comment>
 		<createTable tableName="fhir_task">
 			<column name="task_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false"/>
+				<constraints primaryKey="true" />
 			</column>
-			<column name="status" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-
-			<column name="status_reason" type="varchar(1024)" />
-
-			<column name="business_status" type="varchar(1024)" />
-
-			<column name="description" type="varchar(1024)" />
-
+			<column name="status" type="varchar(255)"/>
+            <column name="status_reason" type="varchar(255)" />
+			<column name="description" type="text" />
 			<column name="uuid" type="char(38)">
 				<constraints nullable="false" unique="true"/>
 			</column>
-
 			<column name="intent" type="varchar(255)">
 				<constraints nullable="false" />
 			</column>
-
+            <column name="based_on" type="varchar(255)" />
 			<column name="creator" type="int" >
 				<constraints nullable="false" />
 			</column>
-
 			<column name="date_created" type="datetime" >
 				<constraints nullable="false"/>
 			</column>
-
 			<column name="changed_by" type="int" />
-
 			<column name="date_changed" type="datetime" />
-
 			<column name="voided" type="tinyint" defaultValueNumeric="0">
 				<constraints nullable="false"/>
 			</column>
