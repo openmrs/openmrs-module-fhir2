@@ -9,31 +9,30 @@
  */
 package org.openmrs.module.fhir2;
 
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 
+@NoArgsConstructor
 public class FhirConstants {
 	
-	private FhirConstants() {
-	}
-	
-	public static String OPENMRS_FHIR_SERVER_NAME = "OpenMRS FHIR Server";
+	public static final String OPENMRS_FHIR_SERVER_NAME = "OpenMRS FHIR Server";
 	
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	
-	public static String OPENMRS_FHIR_PREFIX = "https://fhir.openmrs.org";
+	public static final String OPENMRS_FHIR_PREFIX = "https://fhir.openmrs.org";
 	
-	public static String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
+	public static final String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
 	
-	public static String OPENMRS_FHIR_EXT_NAME = OPENMRS_FHIR_EXT_PREFIX + "/name";
+	public static final String OPENMRS_FHIR_EXT_NAME = OPENMRS_FHIR_EXT_PREFIX + "/name";
 	
-	public static String OPENMRS_FHIR_EXT_ADDRESS = OPENMRS_FHIR_EXT_PREFIX + "/address";
+	public static final String OPENMRS_FHIR_EXT_ADDRESS = OPENMRS_FHIR_EXT_PREFIX + "/address";
 	
-	public static String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
+	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
-	public static String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
+	public static final String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
 	
-	public static String PATIENT = "Patient";
+	public static final String PATIENT = "Patient";
 	
 	@Value("${project.parent.artifactId}.personAttributeTypeUuid")
 	public static String PERSON_ATTRIBUTE_TYPE_PROPERTY;
