@@ -67,7 +67,7 @@ public class LocationTranslatorImplTest {
 	private LocationAddressTranslator locationAddressTranslator;
 	
 	@Mock
-	private TelecomTranslator<LocationAttribute> telecomTranslator;
+	private TelecomTranslator<Object> telecomTranslator;
 	
 	@Mock
 	private LocationService locationService;
@@ -260,28 +260,10 @@ public class LocationTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateWithCorrectLocationAttributeTypeForContactDetails() {
-		ContactPoint contactPoint = new ContactPoint();
-		contactPoint.setId(CONTACT_POINT_ID);
-		contactPoint.setValue(CONTACT_POINT_VALUE);
-		
-		LocationAttributeType attributeType = new LocationAttributeType();
-		attributeType.setName(LOCATION_ATTRIBUTE_TYPE_NAME);
-		attributeType.setUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
-		
-		when(propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
-		    LOCATION_ATTRIBUTE_TYPE_UUID);
-		when(locationService.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
-		
-		LocationAttribute attribute = telecomTranslator.toOpenmrsType(contactPoint);
-		assertThat(attributeType.getUuid(), equalTo(LOCATION_ATTRIBUTE_TYPE_UUID));
-	}
-	
-	@Test
 	public void getLocationContactDetails_shouldWorkAsExpected(){
-		Set<LocationAttribute> locationAttributes = new LinkedHashSet<>();
 		Location omrsLocation = new Location();
 		omrsLocation.setUuid(LOCATION_UUID);
+
 		LocationAttribute locationAttribute = new LocationAttribute();
 		locationAttribute.setUuid(LOCATION_ATTRIBUTE_UUID);
 		locationAttribute.setValue(LOCATION_ATTRIBUTE_VALUE);
@@ -290,7 +272,6 @@ public class LocationTranslatorImplTest {
 		attributeType.setUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
 		attributeType.setName(LOCATION_ATTRIBUTE_TYPE_NAME);
 		locationAttribute.setAttributeType(attributeType);
-		locationAttributes.add(locationAttribute);
 		omrsLocation.setAttribute(locationAttribute);
 
 		List<ContactPoint> contactPoints = locationTranslator.getLocationContactDetails(omrsLocation);

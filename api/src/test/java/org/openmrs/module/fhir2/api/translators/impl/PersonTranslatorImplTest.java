@@ -330,7 +330,7 @@ public class PersonTranslatorImplTest {
 		person.addTelecom(contactPoint);
 		
 		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
-		when(telecomTranslator.toOpenmrsType(contactPoint)).thenReturn(personAttribute);
+		when(telecomTranslator.toOpenmrsType(personAttribute, contactPoint)).thenReturn(personAttribute);
 		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
 		    PERSON_ATTRIBUTE_TYPE_UUID);
 		

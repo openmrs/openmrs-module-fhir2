@@ -38,7 +38,7 @@ public class LocationTranslatorImpl implements LocationTranslator {
 	private LocationAddressTranslator locationAddressTranslator;
 	
 	@Inject
-	private TelecomTranslator telecomTranslator;
+	private TelecomTranslator<Object> telecomTranslator;
 	
 	@Inject
 	private FhirGlobalPropertyService propertyService;
@@ -81,7 +81,7 @@ public class LocationTranslatorImpl implements LocationTranslator {
 		return fhirLocation;
 	}
 	
-	public List<ContactPoint> getLocationContactDetails(@NotNull org.openmrs.Location location){
+	protected List<ContactPoint> getLocationContactDetails(@NotNull org.openmrs.Location location){
 		List<ContactPoint> contactPoints = new ArrayList<>();
 		LocationAttributeType locationAttributeType = locationService.getLocationAttributeTypeByUuid(
 				propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY));

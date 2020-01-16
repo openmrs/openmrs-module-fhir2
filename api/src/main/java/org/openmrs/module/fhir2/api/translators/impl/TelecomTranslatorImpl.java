@@ -23,8 +23,6 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 
-import static org.apache.commons.lang.Validate.notNull;
-
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class TelecomTranslatorImpl implements TelecomTranslator<Object> {
@@ -39,55 +37,48 @@ public class TelecomTranslatorImpl implements TelecomTranslator<Object> {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
-	public Object toOpenmrsType(Object whichAttributeOrExistingAttribute, ContactPoint contactPoint) {
-		notNull(whichAttributeOrExistingAttribute, "currentAttribute cannot be null");
-		if (contactPoint == null) {
-			return whichAttributeOrExistingAttribute;
+	public Object toOpenmrsType(Object attribute, ContactPoint contactPoint) {
+		if (attribute == null) {
+			return null;
 		}
-		if (whichAttributeOrExistingAttribute instanceof PersonAttribute) {
-			PersonAttribute personAttribute = (PersonAttribute) whichAttributeOrExistingAttribute;
+
+		if (contactPoint == null) {
+			return attribute;
+		}
+
+		if (attribute instanceof PersonAttribute) {
+			PersonAttribute personAttribute = (PersonAttribute) attribute;
 			personAttribute.setUuid(contactPoint.getId());
 			personAttribute.setValue(contactPoint.getValue());
 			personAttribute.setAttributeType(personService.getPersonAttributeTypeByUuid(globalPropertyService
 			        .getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)));
-			return personAttribute;
 		}
-		if (whichAttributeOrExistingAttribute instanceof LocationAttribute) {
-			LocationAttribute locationAttribute = (LocationAttribute) whichAttributeOrExistingAttribute;
+		else if (attribute instanceof LocationAttribute) {
+			LocationAttribute locationAttribute = (LocationAttribute) attribute;
 			locationAttribute.setUuid(contactPoint.getId());
 			locationAttribute.setValue(contactPoint.getValue());
 			locationAttribute.setAttributeType(locationService.getLocationAttributeTypeByUuid(globalPropertyService
 			        .getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY)));
-			return locationAttribute;
 		}
-		return whichAttributeOrExistingAttribute;
+
+		return attribute;
 	}
 	
 	@Override
 	public ContactPoint toFhirResource(Object attribute) {
 		ContactPoint contactPoint = new ContactPoint();
+
 		if (attribute instanceof PersonAttribute) {
 			PersonAttribute personAttribute = (PersonAttribute) attribute;
 			contactPoint.setId(personAttribute.getUuid());
 			contactPoint.setValue(personAttribute.getValue());
 		}
-		if (attribute instanceof LocationAttribute) {
+		else if (attribute instanceof LocationAttribute) {
 			LocationAttribute locationAttribute = (LocationAttribute) attribute;
 			contactPoint.setId(locationAttribute.getUuid());
 			contactPoint.setValue(locationAttribute.getValue().toString());
 		}
 		
 		return contactPoint;
-	}
-	
-	/**
-	 * Maps a FHIR contactPoint to an OpenMRS data element
-	 * 
-	 * @param contactPoint the FHIR contactPoint to translate
-	 * @return the corresponding OpenMRS data element
-	 */
-	@Override
-	public Object toOpenmrsType(ContactPoint contactPoint) {
-		return this.toOpenmrsType(new Object(), contactPoint);
 	}
 }

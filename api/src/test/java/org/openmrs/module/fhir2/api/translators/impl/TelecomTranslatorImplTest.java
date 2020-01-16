@@ -26,6 +26,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -237,6 +238,12 @@ public class TelecomTranslatorImplTest {
 		LocationAttribute attribute = (LocationAttribute) telecomTranslator.toOpenmrsType(locationAttribute, contactPoint);
 		assertThat(attribute.getUuid(), notNullValue());
 		assertThat(attribute.getUuid(), equalTo(TEST_LOCATION_ATTRIBUTE_UUID));
+	}
+
+	@Test
+	public void toOpenmrsType_shouldReturnNullIfAttributeIsNull() {
+		Object result = telecomTranslator.toOpenmrsType(null, contactPoint);
+		assertThat(result, nullValue());
 	}
 	
 	@Test
