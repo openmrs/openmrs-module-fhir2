@@ -15,12 +15,12 @@
 	<name>FHIR2</name>
 	<description>Implementation of FHIR R4 for OpenMRS</description>
 
-	<url>https://wiki.openmrs.org/x/FQ4z</url>
+	<url>https://wiki.openmrs.org/display/projects/OpenMRS+FHIR+Module</url>
 
 	<scm>
-		<connection>scm:git:git@github.com:ibacher/openmrs-module-fhir2.git</connection>
-		<developerConnection>scm:git:git@github.com:ibacher/openmrs-module-fhir2.git</developerConnection>
-		<url>https://github.com/ibacher/openmrs-module-fhir2/</url>
+		<connection>scm:git:git@github.com:openmrs/openmrs-module-fhir2.git</connection>
+		<developerConnection>scm:git:git@github.com:openmrs/openmrs-module-fhir2.git</developerConnection>
+		<url>https://github.com/openmrs/openmrs-module-fhir2/</url>
 	</scm>
 
 	<modules>
