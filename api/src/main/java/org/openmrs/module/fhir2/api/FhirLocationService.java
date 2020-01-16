@@ -19,4 +19,12 @@ public interface FhirLocationService {
 	Location getLocationByUuid(@NotNull String uuid);
 	
 	Collection<Location> findLocationByName(@NotNull String name);
+	
+	Collection<Location> findLocationsByCity(@NotNull String city);
+	
+	Collection<Location> findLocationsByCountry(@NotNull String country);
+	
+	Collection<Location> findLocationsByPostalCode(@NotNull String postalCode);
+	
+	Collection<Location> findLocationsByState(@NotNull String state);
 }

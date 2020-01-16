@@ -42,4 +42,32 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 				stream().map(locationTranslator::toFhirResource)
 				.collect(Collectors.toList());
 	}
+	
+	@Override
+	public Collection<Location> findLocationsByCity(String city) {
+		return locationDao.findLocationsByCity(city).stream()
+				.map(locationTranslator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+	
+	@Override
+	public Collection<Location> findLocationsByCountry(String country) {
+		return locationDao.findLocationsByCountry(country).stream()
+				.map(locationTranslator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+	
+	@Override
+	public Collection<Location> findLocationsByPostalCode(String postalCode) {
+		return locationDao.findLocationsByPostalCode(postalCode).stream()
+				.map(locationTranslator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+	
+	@Override
+	public Collection<Location> findLocationsByState(String state) {
+		return locationDao.findLocationsByState(state).stream()
+				.map(locationTranslator::toFhirResource)
+				.collect(Collectors.toList());
+	}
 }

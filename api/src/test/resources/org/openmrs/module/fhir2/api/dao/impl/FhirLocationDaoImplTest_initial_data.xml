@@ -12,5 +12,8 @@
     <location location_id="1"  name="Test location 1" description="Test description" date_created="2005-01-01 00:00:00.0" retired="false" uuid="c0938432-1691-11df-97a5-7038c432aaba"/>
     <location location_id="2"  name="Test location 2" description="Test description" date_created="2005-01-01 00:00:00.0" retired="false" uuid="c0938432-1691-11df-97a5-7038c432aabb"/>
     <location location_id="3"  name="Test location 3" description="Test description" date_created="2005-01-01 00:00:00.0" retired="false" uuid="c0938432-1691-11df-97a5-7038c432aabc"/>
-    <location location_id="4"  name="Test location 3" description="Test description" date_created="2005-01-01 00:00:00.0" retired="false" uuid="c0938432-1691-11df-97a5-7038c432aabd"/>
+    <location location_id="4"  name="Test location 4" description="Test description" date_created="2005-01-01 00:00:00.0" retired="false" uuid="c0938432-1691-11df-97a5-7038c432aabd"/>
+    <location location_id="5"  name="Test location 5" description="Test description" city_village="Artuor" country="Kenya" postal_code="4069-3100" state_province="province" date_created="2005-01-01 00:00:00.0" retired="false" uuid="c0938432-1691-11df-2222-7038c432aabd"/>
+    <location location_id="6"  name="Test location 6" description="Test description" city_village="Kerio" country="Kenya" postal_code="4069-3100" state_province="province" date_created="2005-01-01 00:00:00.0" retired="false" uuid="c0938432-1691-11df-2222-7038u432aabd"/>
 </dataset>
+

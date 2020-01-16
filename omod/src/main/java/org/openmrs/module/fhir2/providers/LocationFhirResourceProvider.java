@@ -58,4 +58,28 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	public Bundle findLocationByName(@RequiredParam(name = Location.SP_NAME) StringParam name) {
 		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationByName(name.getValue()));
 	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle findLocationByCity(@RequiredParam(name = Location.SP_ADDRESS_CITY) StringParam city) {
+		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByCity(city.getValue()));
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle findLocationByCountry(@RequiredParam(name = Location.SP_ADDRESS_COUNTRY) StringParam country) {
+		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByCountry(country.getValue()));
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle findLocationByPostalCode(@RequiredParam(name = Location.SP_ADDRESS_POSTALCODE) StringParam postalCode) {
+		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByPostalCode(postalCode.getValue()));
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle findLocationByState(@RequiredParam(name = Location.SP_ADDRESS_STATE) StringParam state) {
+		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByState(state.getValue()));
+	}
 }
