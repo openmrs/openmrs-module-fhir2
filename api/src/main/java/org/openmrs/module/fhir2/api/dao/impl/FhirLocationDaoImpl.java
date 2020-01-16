@@ -11,12 +11,15 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Collection;
 
 @Component
@@ -25,6 +28,10 @@ public class FhirLocationDaoImpl implements FhirLocationDao {
 	
 	@Inject
 	LocationService locationService;
+	
+	@Inject
+	@Named("sessionFactory")
+	SessionFactory sessionFactory;
 	
 	@Override
 	public Location getLocationByUuid(String uuid) {
@@ -36,4 +43,27 @@ public class FhirLocationDaoImpl implements FhirLocationDao {
 		return locationService.getLocations(name);
 	}
 	
+	@Override
+	public Collection<Location> findLocationsByCity(String city) {
+		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(Restrictions.eq("cityVillage", city))
+		        .list();
+	}
+	
+	@Override
+	public Collection<Location> findLocationsByCountry(String country) {
+		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(Restrictions.eq("country", country))
+		        .list();
+	}
+	
+	@Override
+	public Collection<Location> findLocationsByPostalCode(String postalCode) {
+		return sessionFactory.getCurrentSession().createCriteria(Location.class)
+		        .add(Restrictions.eq("postalCode", postalCode)).list();
+	}
+	
+	@Override
+	public Collection<Location> findLocationsByState(String state) {
+		return sessionFactory.getCurrentSession().createCriteria(Location.class)
+		        .add(Restrictions.eq("stateProvince", state)).list();
+	}
 }
