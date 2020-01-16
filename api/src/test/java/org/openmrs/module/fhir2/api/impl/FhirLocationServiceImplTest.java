@@ -159,4 +159,3 @@ public class FhirLocationServiceImplTest {
 		assertThat(collection.size(), greaterThanOrEqualTo(1));
 	}
 }
-
