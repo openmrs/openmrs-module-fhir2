@@ -22,15 +22,13 @@ import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
-import org.openmrs.module.fhir2.api.translators.LocationTelecomTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -69,7 +67,7 @@ public class LocationTranslatorImplTest {
 	private LocationAddressTranslator locationAddressTranslator;
 	
 	@Mock
-	private LocationTelecomTranslator telecomTranslator;
+	private TelecomTranslator<Object> telecomTranslator;
 	
 	@Mock
 	private LocationService locationService;
@@ -86,7 +84,7 @@ public class LocationTranslatorImplTest {
 		omrsLocation = new Location();
 		locationTranslator = new LocationTranslatorImpl();
 		locationTranslator.setLocationAddressTranslator(locationAddressTranslator);
-		locationTranslator.setLocationTelecomTranslator(telecomTranslator);
+		locationTranslator.setTelecomTranslator(telecomTranslator);
 		locationTranslator.setLocationService(locationService);
 		locationTranslator.setPropertyService(propertyService);
 		
@@ -253,39 +251,19 @@ public class LocationTranslatorImplTest {
 		contactPoint.setId(LOCATION_ATTRIBUTE_UUID);
 		contactPoint.setValue(LOCATION_ATTRIBUTE_VALUE);
 		
-		when(telecomTranslator.toOpenmrsType(contactPoint)).thenReturn(locationAttribute);
+		when(telecomTranslator.toOpenmrsType(new LocationAttribute(), contactPoint)).thenReturn(locationAttribute);
 		
 		Location omrsLocation = locationTranslator.toOpenmrsType(location);
 		assertThat(omrsLocation, notNullValue());
-		assertThat(omrsLocation.getActiveAttributes(), notNullValue());
+		assertThat(omrsLocation.getAttributes(), notNullValue());
 		assertThat(omrsLocation.getAttributes().size(), greaterThanOrEqualTo(1));
-		assertThat(omrsLocation.getActiveAttributes().stream().findAny().isPresent(), is(true));
-		assertThat(omrsLocation.getActiveAttributes().stream().findAny().get().getAttributeType(), equalTo(attributeType));
-	}
-	
-	@Test
-	public void shouldTranslateWithCorrectLocationAttributeTypeForContactDetails() {
-		ContactPoint contactPoint = new ContactPoint();
-		contactPoint.setId(CONTACT_POINT_ID);
-		contactPoint.setValue(CONTACT_POINT_VALUE);
-		
-		LocationAttributeType attributeType = new LocationAttributeType();
-		attributeType.setName(LOCATION_ATTRIBUTE_TYPE_NAME);
-		attributeType.setUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
-		
-		when(propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
-		    LOCATION_ATTRIBUTE_TYPE_UUID);
-		when(locationService.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
-		
-		LocationAttribute attribute = telecomTranslator.toOpenmrsType(contactPoint);
-		assertThat(attributeType.getUuid(), equalTo(LOCATION_ATTRIBUTE_TYPE_UUID));
 	}
 	
 	@Test
 	public void getLocationContactDetails_shouldWorkAsExpected(){
-		Set<LocationAttribute> locationAttributes = new LinkedHashSet<>();
 		Location omrsLocation = new Location();
 		omrsLocation.setUuid(LOCATION_UUID);
+
 		LocationAttribute locationAttribute = new LocationAttribute();
 		locationAttribute.setUuid(LOCATION_ATTRIBUTE_UUID);
 		locationAttribute.setValue(LOCATION_ATTRIBUTE_VALUE);
@@ -294,7 +272,6 @@ public class LocationTranslatorImplTest {
 		attributeType.setUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
 		attributeType.setName(LOCATION_ATTRIBUTE_TYPE_NAME);
 		locationAttribute.setAttributeType(attributeType);
-		locationAttributes.add(locationAttribute);
 		omrsLocation.setAttribute(locationAttribute);
 
 		List<ContactPoint> contactPoints = locationTranslator.getLocationContactDetails(omrsLocation);

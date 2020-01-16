@@ -24,6 +24,7 @@ import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
 import org.openmrs.api.PersonService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
@@ -79,10 +80,10 @@ public class PersonTranslatorImplTest {
 	private AddressTranslator addressTranslator;
 	
 	@Mock
-	private TelecomTranslator telecomTranslator;
+	private TelecomTranslator<PersonAttribute> telecomTranslator;
 	
 	@Mock
-	private FhirGlobalPropertyService administrationService;
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
 	private PersonService personService;
@@ -97,7 +98,7 @@ public class PersonTranslatorImplTest {
 		personTranslator.setAddressTranslator(addressTranslator);
 		personTranslator.setTelecomTranslator(telecomTranslator);
 		personTranslator.setPersonService(personService);
-		personTranslator.setGlobalPropertyService(administrationService);
+		personTranslator.setGlobalPropertyService(globalPropertyService);
 	}
 	
 	@Test
@@ -323,18 +324,21 @@ public class PersonTranslatorImplTest {
 		personAttribute.setAttributeType(attributeType);
 		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
-		ContactPoint contactPoint = person.getTelecomFirstRep();
+		ContactPoint contactPoint = new ContactPoint();
 		contactPoint.setId(PERSON_ATTRIBUTE_UUID);
 		contactPoint.setValue(PERSON_ATTRIBUTE_VALUE);
+		person.addTelecom(contactPoint);
 		
-		when(telecomTranslator.toOpenmrsType(contactPoint)).thenReturn(personAttribute);
+		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
+		when(telecomTranslator.toOpenmrsType(personAttribute, contactPoint)).thenReturn(personAttribute);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
+		    PERSON_ATTRIBUTE_TYPE_UUID);
 		
 		Person people = personTranslator.toOpenmrsType(person);
 		assertThat(people, notNullValue());
-		assertThat(people.getActiveAttributes(), notNullValue());
+		assertThat(people.getAttributes(), notNullValue());
+		assertThat(people.getAttributes().isEmpty(), is(false));
 		assertThat(people.getAttributes().size(), greaterThanOrEqualTo(1));
-		assertThat(people.getActiveAttributes().stream().findAny().isPresent(), is(true));
-		assertThat(people.getActiveAttributes().stream().findAny().get().getAttributeType(), equalTo(attributeType));
 	}
 	
 	@Test

@@ -10,37 +10,25 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import org.hl7.fhir.r4.model.ContactPoint;
-import org.openmrs.PersonAttribute;
 
-public interface TelecomTranslator extends OpenmrsFhirUpdatableTranslator<PersonAttribute, ContactPoint> {
-	
+public interface TelecomTranslator<T> extends ToFhirTranslator<T, ContactPoint>, UpdatableOpenmrsTranslator<T, ContactPoint> {
+
 	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.ContactPoint } to an existing
-	 * {@link org.openmrs.PersonAttribute}
+	 * Maps an Openmrs Attribute representing a contact point to a FHIR {@link ContactPoint}
+	 *
+	 * @param attribute the OpenMRS attribute element to translate
+	 * @return the corresponding FHIR ContactPoint resource
+	 */
+	@Override
+	ContactPoint toFhirResource(T attribute);
+
+	/**
+	 * Maps a FHIR {@link ContactPoint} to a corresponding Openmrs attribute
 	 * 
-	 * @param currentPersonAttribute the currentPersonAttribute to update
+	 * @param existingAttribute the attribute to update
 	 * @param contactPoint the contactPoint to map
-	 * @return an updated version of the currentPersonAttribute
+	 * @return an updated or mapped version of the openMrs attribute
 	 */
 	@Override
-	PersonAttribute toOpenmrsType(PersonAttribute currentPersonAttribute, ContactPoint contactPoint);
-	
-	/**
-	 * Maps an {@link org.openmrs.PersonAttribute} to a {@link org.hl7.fhir.r4.model.ContactPoint}
-	 * 
-	 * @param personAttribute the OpenMRS personAttribute element to translate
-	 * @return the corresponding FHIR resource
-	 */
-	@Override
-	ContactPoint toFhirResource(PersonAttribute personAttribute);
-	
-	/**
-	 * Maps a FHIR {@link org.hl7.fhir.r4.model.ContactPoint} to an
-	 * {@link org.openmrs.PersonAttribute}
-	 * 
-	 * @param contactPoint the FHIR contactPoint to translate
-	 * @return the corresponding OpenMRS data element
-	 */
-	@Override
-	PersonAttribute toOpenmrsType(ContactPoint contactPoint);
+	T toOpenmrsType(T existingAttribute, ContactPoint contactPoint);
 }
