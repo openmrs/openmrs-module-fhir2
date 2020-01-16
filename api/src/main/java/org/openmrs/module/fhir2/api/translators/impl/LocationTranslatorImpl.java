@@ -19,8 +19,8 @@ import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
-import org.openmrs.module.fhir2.api.translators.LocationTelecomTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -38,7 +38,7 @@ public class LocationTranslatorImpl implements LocationTranslator {
 	private LocationAddressTranslator locationAddressTranslator;
 	
 	@Inject
-	private LocationTelecomTranslator locationTelecomTranslator;
+	private TelecomTranslator telecomTranslator;
 	
 	@Inject
 	private FhirGlobalPropertyService propertyService;
@@ -87,7 +87,7 @@ public class LocationTranslatorImpl implements LocationTranslator {
 				propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY));
 		for (LocationAttribute attribute : location.getActiveAttributes()){
 			if (attribute.getAttributeType().equals(locationAttributeType)){
-				contactPoints.add(locationTelecomTranslator.toFhirResource(attribute));
+				contactPoints.add(telecomTranslator.toFhirResource(attribute));
 			}
 		}
 		return contactPoints;
@@ -109,8 +109,10 @@ public class LocationTranslatorImpl implements LocationTranslator {
 			openmrsLocation.setCountry(fhirLocation.getAddress().getCountry());
 			openmrsLocation.setPostalCode(fhirLocation.getAddress().getPostalCode());
 
-			Set<LocationAttribute> attributes = fhirLocation.getTelecom().stream()
-					.map(locationTelecomTranslator::toOpenmrsType).collect(Collectors.toSet());
+			Set<LocationAttribute> attributes = fhirLocation.getTelecom()
+					.stream()
+					.map(contactPoint -> (LocationAttribute)telecomTranslator.toOpenmrsType(new LocationAttribute(),contactPoint))
+					.collect(Collectors.toSet());
 			openmrsLocation.setAttributes(attributes);
 		}
 		return openmrsLocation;

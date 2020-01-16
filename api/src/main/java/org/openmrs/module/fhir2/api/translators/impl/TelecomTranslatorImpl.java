@@ -12,7 +12,9 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.openmrs.LocationAttribute;
 import org.openmrs.PersonAttribute;
+import org.openmrs.api.LocationService;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -25,40 +27,67 @@ import static org.apache.commons.lang.Validate.notNull;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class TelecomTranslatorImpl implements TelecomTranslator {
+public class TelecomTranslatorImpl implements TelecomTranslator<Object> {
 	
 	@Inject
 	private PersonService personService;
 	
 	@Inject
+	private LocationService locationService;
+	
+	@Inject
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
-	public PersonAttribute toOpenmrsType(PersonAttribute currentPersonAttribute, ContactPoint contactPoint) {
-		notNull(currentPersonAttribute, "currentPersonAttribute cannot be null");
+	public Object toOpenmrsType(Object whichAttributeOrExistingAttribute, ContactPoint contactPoint) {
+		notNull(whichAttributeOrExistingAttribute, "currentAttribute cannot be null");
 		if (contactPoint == null) {
-			return currentPersonAttribute;
+			return whichAttributeOrExistingAttribute;
 		}
-		currentPersonAttribute.setUuid(contactPoint.getId());
-		currentPersonAttribute.setValue(contactPoint.getValue());
-		return currentPersonAttribute;
+		if (whichAttributeOrExistingAttribute instanceof PersonAttribute) {
+			PersonAttribute personAttribute = (PersonAttribute) whichAttributeOrExistingAttribute;
+			personAttribute.setUuid(contactPoint.getId());
+			personAttribute.setValue(contactPoint.getValue());
+			personAttribute.setAttributeType(personService.getPersonAttributeTypeByUuid(globalPropertyService
+			        .getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)));
+			return personAttribute;
+		}
+		if (whichAttributeOrExistingAttribute instanceof LocationAttribute) {
+			LocationAttribute locationAttribute = (LocationAttribute) whichAttributeOrExistingAttribute;
+			locationAttribute.setUuid(contactPoint.getId());
+			locationAttribute.setValue(contactPoint.getValue());
+			locationAttribute.setAttributeType(locationService.getLocationAttributeTypeByUuid(globalPropertyService
+			        .getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY)));
+			return locationAttribute;
+		}
+		return whichAttributeOrExistingAttribute;
 	}
 	
 	@Override
-	public ContactPoint toFhirResource(PersonAttribute personAttribute) {
+	public ContactPoint toFhirResource(Object attribute) {
 		ContactPoint contactPoint = new ContactPoint();
-		contactPoint.setId(personAttribute.getUuid());
-		contactPoint.setValue(personAttribute.getValue());
+		if (attribute instanceof PersonAttribute) {
+			PersonAttribute personAttribute = (PersonAttribute) attribute;
+			contactPoint.setId(personAttribute.getUuid());
+			contactPoint.setValue(personAttribute.getValue());
+		}
+		if (attribute instanceof LocationAttribute) {
+			LocationAttribute locationAttribute = (LocationAttribute) attribute;
+			contactPoint.setId(locationAttribute.getUuid());
+			contactPoint.setValue(locationAttribute.getValue().toString());
+		}
+		
 		return contactPoint;
 	}
 	
+	/**
+	 * Maps a FHIR contactPoint to an OpenMRS data element
+	 * 
+	 * @param contactPoint the FHIR contactPoint to translate
+	 * @return the corresponding OpenMRS data element
+	 */
 	@Override
-	public PersonAttribute toOpenmrsType(ContactPoint contactPoint) {
-		PersonAttribute personAttribute = new PersonAttribute();
-		personAttribute.setUuid(contactPoint.getId());
-		personAttribute.setValue(contactPoint.getValue());
-		personAttribute.setAttributeType(personService.getPersonAttributeTypeByUuid(globalPropertyService
-		        .getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)));
-		return personAttribute;
+	public Object toOpenmrsType(ContactPoint contactPoint) {
+		return this.toOpenmrsType(new Object(), contactPoint);
 	}
 }

@@ -22,15 +22,13 @@ import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
-import org.openmrs.module.fhir2.api.translators.LocationTelecomTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -69,7 +67,7 @@ public class LocationTranslatorImplTest {
 	private LocationAddressTranslator locationAddressTranslator;
 	
 	@Mock
-	private LocationTelecomTranslator telecomTranslator;
+	private TelecomTranslator<LocationAttribute> telecomTranslator;
 	
 	@Mock
 	private LocationService locationService;
@@ -86,7 +84,7 @@ public class LocationTranslatorImplTest {
 		omrsLocation = new Location();
 		locationTranslator = new LocationTranslatorImpl();
 		locationTranslator.setLocationAddressTranslator(locationAddressTranslator);
-		locationTranslator.setLocationTelecomTranslator(telecomTranslator);
+		locationTranslator.setTelecomTranslator(telecomTranslator);
 		locationTranslator.setLocationService(locationService);
 		locationTranslator.setPropertyService(propertyService);
 		
@@ -253,14 +251,12 @@ public class LocationTranslatorImplTest {
 		contactPoint.setId(LOCATION_ATTRIBUTE_UUID);
 		contactPoint.setValue(LOCATION_ATTRIBUTE_VALUE);
 		
-		when(telecomTranslator.toOpenmrsType(contactPoint)).thenReturn(locationAttribute);
+		when(telecomTranslator.toOpenmrsType(new LocationAttribute(), contactPoint)).thenReturn(locationAttribute);
 		
 		Location omrsLocation = locationTranslator.toOpenmrsType(location);
 		assertThat(omrsLocation, notNullValue());
-		assertThat(omrsLocation.getActiveAttributes(), notNullValue());
+		assertThat(omrsLocation.getAttributes(), notNullValue());
 		assertThat(omrsLocation.getAttributes().size(), greaterThanOrEqualTo(1));
-		assertThat(omrsLocation.getActiveAttributes().stream().findAny().isPresent(), is(true));
-		assertThat(omrsLocation.getActiveAttributes().stream().findAny().get().getAttributeType(), equalTo(attributeType));
 	}
 	
 	@Test

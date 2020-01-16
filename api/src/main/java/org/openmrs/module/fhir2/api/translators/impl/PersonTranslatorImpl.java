@@ -146,8 +146,10 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		for (Address address : person.getAddress()) {
 			openmrsPerson.addAddress(addressTranslator.toOpenmrsType(address));
 		}
-		Set<PersonAttribute> attributes = person.getTelecom().stream().map(telecomTranslator::toOpenmrsType).collect(
-				Collectors.toSet());
+		Set<PersonAttribute> attributes = person.getTelecom()
+				.stream()
+				.map( contactPoint -> (PersonAttribute)telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
+				.collect(Collectors.toSet());
 		openmrsPerson.setAttributes(attributes);
 
 		return openmrsPerson;
