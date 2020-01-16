@@ -11,18 +11,17 @@ package org.openmrs.module.fhir2.api.translators;
 
 /**
  * Generic interface for a translator between OpenMRS data and FHIR resources
- *
+ * 
  * @param <T> OpenMRS data type
  * @param <U> FHIR resource type
  */
 public interface ToFhirTranslator<T, U> {
-
+	
 	/**
 	 * Maps an OpenMRS data element to a FHIR resource
-	 *
+	 * 
 	 * @param data the OpenMRS data element to translate
 	 * @return the corresponding FHIR resource
 	 */
 	U toFhirResource(T data);
-
 }

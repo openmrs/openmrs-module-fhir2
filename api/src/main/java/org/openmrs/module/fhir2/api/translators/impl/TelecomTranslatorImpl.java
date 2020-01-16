@@ -41,39 +41,37 @@ public class TelecomTranslatorImpl implements TelecomTranslator<Object> {
 		if (attribute == null) {
 			return null;
 		}
-
+		
 		if (contactPoint == null) {
 			return attribute;
 		}
-
+		
 		if (attribute instanceof PersonAttribute) {
 			PersonAttribute personAttribute = (PersonAttribute) attribute;
 			personAttribute.setUuid(contactPoint.getId());
 			personAttribute.setValue(contactPoint.getValue());
 			personAttribute.setAttributeType(personService.getPersonAttributeTypeByUuid(globalPropertyService
 			        .getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)));
-		}
-		else if (attribute instanceof LocationAttribute) {
+		} else if (attribute instanceof LocationAttribute) {
 			LocationAttribute locationAttribute = (LocationAttribute) attribute;
 			locationAttribute.setUuid(contactPoint.getId());
 			locationAttribute.setValue(contactPoint.getValue());
 			locationAttribute.setAttributeType(locationService.getLocationAttributeTypeByUuid(globalPropertyService
 			        .getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY)));
 		}
-
+		
 		return attribute;
 	}
 	
 	@Override
 	public ContactPoint toFhirResource(Object attribute) {
 		ContactPoint contactPoint = new ContactPoint();
-
+		
 		if (attribute instanceof PersonAttribute) {
 			PersonAttribute personAttribute = (PersonAttribute) attribute;
 			contactPoint.setId(personAttribute.getUuid());
 			contactPoint.setValue(personAttribute.getValue());
-		}
-		else if (attribute instanceof LocationAttribute) {
+		} else if (attribute instanceof LocationAttribute) {
 			LocationAttribute locationAttribute = (LocationAttribute) attribute;
 			contactPoint.setId(locationAttribute.getUuid());
 			contactPoint.setValue(locationAttribute.getValue().toString());

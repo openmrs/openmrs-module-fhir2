@@ -239,7 +239,7 @@ public class TelecomTranslatorImplTest {
 		assertThat(attribute.getUuid(), notNullValue());
 		assertThat(attribute.getUuid(), equalTo(TEST_LOCATION_ATTRIBUTE_UUID));
 	}
-
+	
 	@Test
 	public void toOpenmrsType_shouldReturnNullIfAttributeIsNull() {
 		Object result = telecomTranslator.toOpenmrsType(null, contactPoint);

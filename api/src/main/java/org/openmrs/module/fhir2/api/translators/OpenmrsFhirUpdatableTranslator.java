@@ -16,5 +16,4 @@ package org.openmrs.module.fhir2.api.translators;
  * @param <T> OpenMRS data type
  * @param <U> FHIR resource type
  */
-public interface OpenmrsFhirUpdatableTranslator<T, U> extends OpenmrsFhirTranslator<T, U>, UpdatableOpenmrsTranslator<T, U> {
-}
+public interface OpenmrsFhirUpdatableTranslator<T, U> extends OpenmrsFhirTranslator<T, U>, UpdatableOpenmrsTranslator<T, U> {}

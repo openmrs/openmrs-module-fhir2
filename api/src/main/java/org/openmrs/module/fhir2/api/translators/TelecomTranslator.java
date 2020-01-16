@@ -12,16 +12,16 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.ContactPoint;
 
 public interface TelecomTranslator<T> extends ToFhirTranslator<T, ContactPoint>, UpdatableOpenmrsTranslator<T, ContactPoint> {
-
+	
 	/**
 	 * Maps an Openmrs Attribute representing a contact point to a FHIR {@link ContactPoint}
-	 *
+	 * 
 	 * @param attribute the OpenMRS attribute element to translate
 	 * @return the corresponding FHIR ContactPoint resource
 	 */
 	@Override
 	ContactPoint toFhirResource(T attribute);
-
+	
 	/**
 	 * Maps a FHIR {@link ContactPoint} to a corresponding Openmrs attribute
 	 * 
