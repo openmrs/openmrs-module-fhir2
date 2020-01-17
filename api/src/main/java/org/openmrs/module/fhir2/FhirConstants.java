@@ -40,4 +40,7 @@ public class FhirConstants {
 	@Value("${project.parent.artifactId}.locationAttributeTypeUuid")
 	public static String LOCATION_ATTRIBUTE_TYPE_PROPERTY;
 	
+	@Value("${project.parent.artifactId}.providerAttributeTypeUuid")
+	public static String PROVIDER_ATTRIBUTE_TYPE_PROPERTY;
+	
 }

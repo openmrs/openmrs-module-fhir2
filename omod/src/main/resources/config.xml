@@ -98,5 +98,11 @@
 		<description>Set location attribute type uuid</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>${project.parent.artifactId}.providerAttributeTypeUuid</property>
+		<defaultValue>5021b1a1-e7f6-44b4-ba02-da2f2bcf8718</defaultValue>
+		<description>Set provider attribute type uuid</description>
+	</globalProperty>
+
 </module>
 
