@@ -9,7 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -23,6 +25,11 @@ import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
+import org.openmrs.ProviderAttribute;
+import org.openmrs.ProviderAttributeType;
+import org.openmrs.api.ProviderService;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
@@ -34,6 +41,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -60,6 +68,14 @@ public class PractitionerTranslatorImplTest {
 	
 	private static final String PRACTITIONER_IDENTIFIER = "practitioner-identifier";
 	
+	private static final String PERSON_ATTRIBUTE_UUID = "TY78UI-HJ89XX67-XX56XX-KL78S67D";
+	
+	private static final String PERSON_ATTRIBUTE_VALUE = "+254723723456";
+	
+	private static final String PERSON_ATTRIBUTE_TYPE_NAME = "PHONE";
+	
+	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "FF89DD99-OOX78-KKG89D-XX89CC8";
+	
 	@Mock
 	private GenderTranslator genderTranslator;
 	
@@ -68,6 +84,15 @@ public class PractitionerTranslatorImplTest {
 	
 	@Mock
 	private AddressTranslator addressTranslator;
+	
+	@Mock
+	private TelecomTranslator<ProviderAttribute> telecomTranslator;
+	
+	@Mock
+	private ProviderService providerService;
+	
+	@Mock
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	private PractitionerTranslatorImpl practitionerTranslator;
 	
@@ -81,6 +106,9 @@ public class PractitionerTranslatorImplTest {
 		practitionerTranslator.setAddressTranslator(addressTranslator);
 		practitionerTranslator.setGenderTranslator(genderTranslator);
 		practitionerTranslator.setNameTranslator(nameTranslator);
+		practitionerTranslator.setTelecomTranslator(telecomTranslator);
+		practitionerTranslator.setProviderService(providerService);
+		practitionerTranslator.setGlobalPropertyService(globalPropertyService);
 		
 		Person person = new Person();
 		person.setGender(GENDER);
@@ -193,5 +221,32 @@ public class PractitionerTranslatorImplTest {
 		assertThat(result.getRetired(), is(false));
 		assertThat(result.getRetireReason(), notNullValue());
 		assertThat(result.getRetireReason(), equalTo(RETIRE_REASON));
+	}
+	
+	@Test
+	public void shouldTranslateFhirContactPointToPersonAttribute() {
+		ProviderAttributeType attributeType = new ProviderAttributeType();
+		attributeType.setName(PERSON_ATTRIBUTE_TYPE_NAME);
+		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
+		ProviderAttribute providerAttribute = new ProviderAttribute();
+		providerAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
+		providerAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
+		providerAttribute.setAttributeType(attributeType);
+		
+		ContactPoint contactPoint = new ContactPoint();
+		contactPoint.setId(PERSON_ATTRIBUTE_UUID);
+		contactPoint.setValue(PERSON_ATTRIBUTE_VALUE);
+		practitioner.addTelecom(contactPoint);
+		
+		when(providerService.getProviderAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
+		when(telecomTranslator.toOpenmrsType(providerAttribute, contactPoint)).thenReturn(providerAttribute);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
+		    PERSON_ATTRIBUTE_TYPE_UUID);
+		
+		Provider provider = practitionerTranslator.toOpenmrsType(practitioner);
+		assertThat(provider, Matchers.notNullValue());
+		assertThat(provider.getAttributes(), Matchers.notNullValue());
+		assertThat(provider.getAttributes().isEmpty(), Matchers.is(false));
+		assertThat(provider.getAttributes().size(), greaterThanOrEqualTo(1));
 	}
 }

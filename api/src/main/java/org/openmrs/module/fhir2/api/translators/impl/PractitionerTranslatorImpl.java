@@ -12,21 +12,31 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang.Validate;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
+import org.openmrs.ProviderAttribute;
+import org.openmrs.ProviderAttributeType;
+import org.openmrs.api.ProviderService;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -40,6 +50,15 @@ public class PractitionerTranslatorImpl implements PractitionerTranslator {
 	
 	@Inject
 	private GenderTranslator genderTranslator;
+	
+	@Inject
+	private TelecomTranslator telecomTranslator;
+	
+	@Inject
+	private ProviderService providerService;
+	
+	@Inject
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
 	public Provider toOpenmrsType(Provider existingProvider, Practitioner practitioner) {
@@ -55,7 +74,13 @@ public class PractitionerTranslatorImpl implements PractitionerTranslator {
 			existingProvider.setDateRetired(new Date());
 			existingProvider.setRetireReason("Retired By FHIR module");
 		}
-		
+
+		Set<ProviderAttribute> attributes = practitioner.getTelecom()
+				.stream()
+				.map( contactPoint -> (ProviderAttribute)telecomTranslator.toOpenmrsType(new ProviderAttribute(), contactPoint))
+				.collect(Collectors.toSet());
+		existingProvider.setAttributes(attributes);
+
 		return existingProvider;
 	}
 	
@@ -72,6 +97,7 @@ public class PractitionerTranslatorImpl implements PractitionerTranslator {
 		practitioner.setIdentifier(identifiers);
 		practitioner.setId(provider.getUuid());
 		practitioner.setActive(provider.getRetired());
+		practitioner.setTelecom(getProviderContactDetails(provider));
 		
 		if (provider.getPerson() != null) {
 			practitioner.setBirthDate(provider.getPerson().getBirthdate());
@@ -85,6 +111,18 @@ public class PractitionerTranslatorImpl implements PractitionerTranslator {
 		}
 		
 		return practitioner;
+	}
+	
+	public List<ContactPoint> getProviderContactDetails(@NotNull Provider provider) {
+		List<ContactPoint> contactPoints = new ArrayList<>();
+		ProviderAttributeType providerAttributeType = providerService.getProviderAttributeTypeByUuid(
+				globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY));
+		provider.getAttributes().forEach(providerAttribute -> {
+			if (providerAttribute.getAttributeType().equals(providerAttributeType)) {
+				contactPoints.add(telecomTranslator.toFhirResource(providerAttribute));
+			}
+		});
+		return contactPoints;
 	}
 	
 	@Override
