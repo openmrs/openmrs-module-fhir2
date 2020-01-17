@@ -1,3 +1,5 @@
+<img src="https://talk.openmrs.org/uploads/default/original/2X/f/f1ec579b0398cb04c80a54c56da219b2440fe249.jpg"  alt="OpenMrs on FHIR"/>
+
 openmrs-module-fhir2
 ==========================
 [![Build Status](https://travis-ci.com/openmrs/openmrs-module-fhir2.svg?branch=master)](https://travis-ci.com/openmrs/openmrs-module-fhir2)
