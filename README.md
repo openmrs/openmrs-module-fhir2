@@ -1,4 +1,4 @@
-<img src="https://talk.openmrs.org/uploads/default/original/2X/f/f1ec579b0398cb04c80a54c56da219b2440fe249.jpg"  alt="OpenMrs on FHIR"/>
+<img src="https://github.com/openmrs/openmrs-module-fhir2/blob/master/openmrsonfhir.png"  alt="OpenMrs on FHIR"/>
 
 openmrs-module-fhir2
 ==========================
