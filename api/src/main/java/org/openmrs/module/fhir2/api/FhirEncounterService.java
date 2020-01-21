@@ -7,12 +7,13 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2;
+package org.openmrs.module.fhir2.api;
 
-public class FhirTestConstants {
+import javax.validation.constraints.NotNull;
+
+import org.hl7.fhir.r4.model.Encounter;
+
+public interface FhirEncounterService {
 	
-	public static final String LOINC_SYSTEM_URL = "http://loinc.org";
-	
-	public static final String CIEL_SYSTEM_URN = "urn:oid:2.16.840.1.113883.3.7201";
-	
+	Encounter getEncounterByUuid(@NotNull String uuid);
 }

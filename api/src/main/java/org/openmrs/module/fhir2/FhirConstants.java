@@ -34,6 +34,8 @@ public class FhirConstants {
 	
 	public static final String PATIENT = "Patient";
 	
+	public static final String IDENTIFIER = "identifier";
+	
 	@Value("${project.parent.artifactId}.personAttributeTypeUuid")
 	public static String PERSON_ATTRIBUTE_TYPE_PROPERTY;
 	
