@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -30,24 +31,30 @@ public class FhirReferenceUtilsTest {
 	private static final String IDENTIFIER = "34ty5jsd-u";
 	
 	private static final String PATIENT_UUID = "123456-abc5def-123456";
-
-	private static final String PATIENT_URI = FhirConstants.PATIENT +"/" + PATIENT_UUID;
-
-	private static final String NAME_DISPLAY = "Ricky Morty(identifier:34ty5jsd-u)";
-
+	
+	private static final String PATIENT_URI = FhirConstants.PATIENT + "/" + PATIENT_UUID;
+	
+	private static final String TEST_IDENTIFIER_TYPE_NAME = "Test IdentifierType Name";
+	
+	private static final String NAME_DISPLAY = "Ricky Morty(" + TEST_IDENTIFIER_TYPE_NAME + ":34ty5jsd-u)";
+	
 	private Patient patient;
-
+	
 	@Before
 	public void setUp() {
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
-
+		
 		PersonName name = new PersonName();
 		name.setFamilyName(FAMILY_NAME);
 		name.setGivenName(GIVEN_NAME);
-
+		
+		PatientIdentifierType identifierType = new PatientIdentifierType();
+		identifierType.setName(TEST_IDENTIFIER_TYPE_NAME);
+		
 		PatientIdentifier identifier = new PatientIdentifier();
 		identifier.setIdentifier(IDENTIFIER);
+		identifier.setIdentifierType(identifierType);
 		patient.addName(name);
 		patient.addIdentifier(identifier);
 	}

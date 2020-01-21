@@ -23,13 +23,14 @@ import static org.hibernate.criterion.Restrictions.eq;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirEncounterDaoImpl implements FhirEncounterDao {
-
+	
 	@Inject
 	@Named("sessionFactory")
 	private SessionFactory sessionFactory;
 	
 	@Override
 	public Encounter getEncounterByUuid(String uuid) {
-		return (Encounter) sessionFactory.getCurrentSession().createCriteria(Encounter.class).add(eq("uuid", uuid)).uniqueResult();
+		return (Encounter) sessionFactory.getCurrentSession().createCriteria(Encounter.class).add(eq("uuid", uuid))
+		        .uniqueResult();
 	}
 }

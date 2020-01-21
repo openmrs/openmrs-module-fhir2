@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -41,6 +42,8 @@ public class EncounterTranslatorImplTest {
 	
 	private static final String FAMILY_NAME = "sanchez";
 	
+	private static final String TEST_IDENTIFIER_TYPE_NAME = "test identifierType Name";
+	
 	@Mock
 	private PatientService patientService;
 	
@@ -61,6 +64,10 @@ public class EncounterTranslatorImplTest {
 		
 		PatientIdentifier identifier = new PatientIdentifier();
 		identifier.setIdentifier(PATIENT_IDENTIFIER);
+		
+		PatientIdentifierType identifierType = new PatientIdentifierType();
+		identifierType.setName(TEST_IDENTIFIER_TYPE_NAME);
+		identifier.setIdentifierType(identifierType);
 		
 		PersonName name = new PersonName();
 		name.setGivenName(GIVEN_NAME);
@@ -119,6 +126,9 @@ public class EncounterTranslatorImplTest {
 	public void shouldTranslatePatientToFhirSubjectAsReference() {
 		PatientIdentifier identifier = new PatientIdentifier();
 		identifier.setIdentifier(PATIENT_IDENTIFIER);
+		PatientIdentifierType identifierType = new PatientIdentifierType();
+		identifierType.setName(TEST_IDENTIFIER_TYPE_NAME);
+		identifier.setIdentifierType(identifierType);
 		PersonName name = new PersonName();
 		name.setGivenName(GIVEN_NAME);
 		name.setFamilyName(FAMILY_NAME);

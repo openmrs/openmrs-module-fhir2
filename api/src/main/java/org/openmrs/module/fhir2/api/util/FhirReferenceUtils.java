@@ -13,26 +13,20 @@ import javax.validation.constraints.NotNull;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang.StringUtils;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Patient;
 import org.openmrs.module.fhir2.FhirConstants;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FhirReferenceUtils {
-
 	
 	public static Reference addPatientReference(Patient patient) {
 		Reference reference = new Reference();
-		String patientUri = FhirConstants.PATIENT +"/" +patient.getUuid();
+		String patientUri = FhirConstants.PATIENT + "/" + patient.getUuid();
 		reference.setReference(patientUri);
-		String nameDisplay = patient.getPersonName().getFullName()
-				+ "("
-				+ FhirConstants.IDENTIFIER
-				+ ":"
-				+ patient.getPatientIdentifier().getIdentifier()
-				+ ")";
+		String nameDisplay = patient.getPersonName().getFullName() + "("
+		        + patient.getPatientIdentifier().getIdentifierType().getName() + ":"
+		        + patient.getPatientIdentifier().getIdentifier() + ")";
 		reference.setDisplay(nameDisplay);
 		return reference;
 	}
