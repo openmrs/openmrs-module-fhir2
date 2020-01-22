@@ -111,7 +111,7 @@
     </changeSet>
 
     <changeSet id="add_loinc_fhir_concept_source_20200105" author="ibacher" dbms="mysql">
-        <preConditions>
+        <preConditions onFail="CONTINUE">
             <and>
                 <tableExists tableName="fhir_concept_source" />
                 <tableExists tableName="concept_reference_source" />
@@ -127,7 +127,7 @@
     </changeSet>
 
     <changeSet id="add_ciel_fhir_concept_source_20200105" author="ibacher" dbms="mysql">
-        <preConditions>
+        <preConditions onFail="CONTINUE">
             <and>
                 <tableExists tableName="fhir_concept_source" />
                 <tableExists tableName="concept_reference_source" />
