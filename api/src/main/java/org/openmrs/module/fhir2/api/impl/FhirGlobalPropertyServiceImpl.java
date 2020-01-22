@@ -15,10 +15,12 @@ import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirGlobalPropertyDao;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 
 @Component
+@Transactional
 @Setter(AccessLevel.PACKAGE)
 public class FhirGlobalPropertyServiceImpl implements FhirGlobalPropertyService {
 	
@@ -26,6 +28,7 @@ public class FhirGlobalPropertyServiceImpl implements FhirGlobalPropertyService 
 	private FhirGlobalPropertyDao dao;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public String getGlobalProperty(String property) throws APIException {
 		return dao.getGlobalProperty(property);
 	}

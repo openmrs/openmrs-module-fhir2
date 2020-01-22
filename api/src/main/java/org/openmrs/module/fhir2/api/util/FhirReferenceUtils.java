@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Patient;
+import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -28,6 +29,18 @@ public class FhirReferenceUtils {
 		        + patient.getPatientIdentifier().getIdentifierType().getName() + ":"
 		        + patient.getPatientIdentifier().getIdentifier() + ")";
 		reference.setDisplay(nameDisplay);
+		return reference;
+	}
+	
+	public static Reference addPractitionerReference(Provider provider) {
+		Reference reference = new Reference();
+		String providerUri = FhirConstants.PROVIDER + "/" + provider.getUuid();
+		reference.setReference(providerUri);
+		if (provider.getPerson() != null) {
+			String nameDisplay = provider.getPerson().getPersonName().getFullName() + "(" + FhirConstants.IDENTIFIER + ":"
+			        + provider.getIdentifier() + ")";
+			reference.setDisplay(nameDisplay);
+		}
 		return reference;
 	}
 	
