@@ -9,6 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,12 +32,6 @@ import org.openmrs.api.PersonService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TelecomTranslatorImplTest {

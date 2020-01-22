@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Collection;
 import java.util.Optional;
 

@@ -9,10 +9,11 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import org.hl7.fhir.r4.model.Location;
-
 import javax.validation.constraints.NotNull;
+
 import java.util.Collection;
+
+import org.hl7.fhir.r4.model.Location;
 
 public interface FhirLocationService {
 	

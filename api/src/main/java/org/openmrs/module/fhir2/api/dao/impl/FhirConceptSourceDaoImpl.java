@@ -13,6 +13,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import java.util.Collection;
 import java.util.Optional;
 

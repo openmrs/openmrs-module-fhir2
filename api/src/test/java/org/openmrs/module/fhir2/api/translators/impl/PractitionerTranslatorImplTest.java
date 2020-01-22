@@ -9,6 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -34,16 +44,6 @@ import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PractitionerTranslatorImplTest {
@@ -86,7 +86,7 @@ public class PractitionerTranslatorImplTest {
 	private AddressTranslator addressTranslator;
 	
 	@Mock
-	private TelecomTranslator<ProviderAttribute> telecomTranslator;
+	private TelecomTranslator<Object> telecomTranslator;
 	
 	@Mock
 	private ProviderService providerService;

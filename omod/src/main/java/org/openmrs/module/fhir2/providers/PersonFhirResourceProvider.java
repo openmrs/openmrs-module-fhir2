@@ -9,6 +9,10 @@
  */
 package org.openmrs.module.fhir2.providers;
 
+import javax.inject.Inject;
+
+import java.time.LocalDate;
+
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -28,9 +32,6 @@ import org.openmrs.module.fhir2.api.FhirPersonService;
 import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.time.LocalDate;
 
 @Component
 @Qualifier("fhirResources")

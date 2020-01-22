@@ -9,10 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import org.openmrs.Location;
-
 import javax.validation.constraints.NotNull;
+
 import java.util.Collection;
+
+import org.openmrs.Location;
 
 public interface FhirLocationDao {
 	

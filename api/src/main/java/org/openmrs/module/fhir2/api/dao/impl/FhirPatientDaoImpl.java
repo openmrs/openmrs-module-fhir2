@@ -10,9 +10,9 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.ilike;
 import static org.hibernate.criterion.Restrictions.or;
-import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.inject.Inject;
 import javax.inject.Named;

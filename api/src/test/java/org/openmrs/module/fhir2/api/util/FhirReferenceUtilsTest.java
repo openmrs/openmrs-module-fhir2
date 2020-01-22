@@ -9,6 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.util;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,10 +24,6 @@ import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class FhirReferenceUtilsTest {
 	

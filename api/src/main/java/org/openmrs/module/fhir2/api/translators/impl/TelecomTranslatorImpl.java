@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.inject.Inject;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -22,8 +24,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 @Component
 @Setter(AccessLevel.PACKAGE)

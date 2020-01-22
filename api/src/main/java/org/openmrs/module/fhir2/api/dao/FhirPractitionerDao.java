@@ -9,10 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import org.openmrs.Provider;
-
 import javax.validation.constraints.NotNull;
+
 import java.util.Collection;
+
+import org.openmrs.Provider;
 
 public interface FhirPractitionerDao {
 	

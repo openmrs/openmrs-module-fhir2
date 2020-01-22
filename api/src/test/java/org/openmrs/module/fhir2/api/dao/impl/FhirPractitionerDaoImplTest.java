@@ -9,6 +9,20 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+
+import java.util.List;
+
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,19 +30,6 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest {
