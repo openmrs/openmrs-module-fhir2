@@ -9,20 +9,19 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Reference;
-import org.openmrs.Patient;
-import org.openmrs.PersonName;
+import org.openmrs.EncounterProvider;
 import org.openmrs.api.PatientService;
-import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.util.FhirReferenceUtils;
 import org.springframework.stereotype.Component;
-
 import static org.apache.commons.lang.Validate.notNull;
 
 @Component
@@ -32,14 +31,20 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 	@Inject
 	PatientService patientService;
 	
+	@Inject
+	EncounterParticipantTranslator participantTranslator;
+	
 	@Override
 	public Encounter toFhirResource(org.openmrs.Encounter openMrsEncounter) {
 		Encounter encounter = new Encounter();
 		encounter.setId(openMrsEncounter.getUuid());
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
-		
+
 		encounter.setSubject(FhirReferenceUtils.addPatientReference(openMrsEncounter.getPatient()));
-		
+		encounter.setParticipant(
+				openMrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource).collect(
+						Collectors.toList()));
+
 		return encounter;
 	}
 	
@@ -51,14 +56,17 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(org.openmrs.Encounter existingEncounter, Encounter encounter) {
 		notNull(existingEncounter, "Existing encounter cannot be null");
-		
+
 		if (encounter == null) {
 			return existingEncounter;
 		}
 		existingEncounter.setUuid(encounter.getId());
 		String patientUuid = FhirReferenceUtils.extractUuid(encounter.getSubject().getReference());
 		existingEncounter.setPatient(patientService.getPatientByUuid(patientUuid));
-		
+		existingEncounter.setEncounterProviders(encounter.getParticipant().stream()
+				.map(encounterParticipantComponent -> participantTranslator
+						.toOpenmrsType(new EncounterProvider(), encounterParticipantComponent)).collect(Collectors.toSet()));
+
 		return existingEncounter;
 	}
 }
