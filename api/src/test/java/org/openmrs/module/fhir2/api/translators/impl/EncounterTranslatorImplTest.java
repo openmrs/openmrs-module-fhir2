@@ -9,6 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
@@ -16,13 +22,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openmrs.EncounterProvider;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
+import org.openmrs.Provider;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
@@ -44,8 +55,15 @@ public class EncounterTranslatorImplTest {
 	
 	private static final String TEST_IDENTIFIER_TYPE_NAME = "test identifierType Name";
 	
+	private static final String PRACTITIONER_UUID = "2323hh34-2323kk3-23gh23-23k23";
+	
+	private static final String PRACTITIONER_URI = FhirConstants.PROVIDER + "/" + PRACTITIONER_UUID;
+	
 	@Mock
 	private PatientService patientService;
+	
+	@Mock
+	private EncounterParticipantTranslator participantTranslator;
 	
 	private Patient patient;
 	
@@ -61,6 +79,7 @@ public class EncounterTranslatorImplTest {
 		omrsEncounter = new org.openmrs.Encounter();
 		encounterTranslator = new EncounterTranslatorImpl();
 		encounterTranslator.setPatientService(patientService);
+		encounterTranslator.setParticipantTranslator(participantTranslator);
 		
 		PatientIdentifier identifier = new PatientIdentifier();
 		identifier.setIdentifier(PATIENT_IDENTIFIER);
@@ -144,4 +163,47 @@ public class EncounterTranslatorImplTest {
 		assertThat(result.getSubject().getReference(), equalTo(PATIENT_URI));
 	}
 	
+	@Test
+	public void shouldTranslateParticipantToEncounterProviderOpenMrsType() {
+		List<Encounter.EncounterParticipantComponent> participantComponents = new ArrayList<>();
+		Encounter.EncounterParticipantComponent participantComponent = new Encounter.EncounterParticipantComponent();
+		Reference practitionerRef = new Reference();
+		practitionerRef.setReference(PRACTITIONER_URI);
+		participantComponent.setIndividual(practitionerRef);
+		participantComponents.add(participantComponent);
+		fhirEncounter.setParticipant(participantComponents);
+		EncounterProvider encounterProvider = new EncounterProvider();
+		Provider provider = new Provider();
+		provider.setUuid(PRACTITIONER_UUID);
+		encounterProvider.setProvider(provider);
+		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(participantTranslator.toOpenmrsType(new EncounterProvider(), participantComponent)).thenReturn(encounterProvider);
+
+		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
+		assertThat(result, notNullValue());
+		assertThat(result.getEncounterProviders(), not(Collections.emptySet()));
+		assertThat(result.getEncounterProviders().size(), equalTo(1));
+	}
+	
+	@Test
+	public void shouldTranslateEncounterProviderToFhirParticipant() {
+		Set<EncounterProvider> providerList = new HashSet<>();
+		EncounterProvider encounterProvider = new EncounterProvider();
+		Provider provider = new Provider();
+		provider.setUuid(PRACTITIONER_UUID);
+		encounterProvider.setProvider(provider);
+		providerList.add(encounterProvider);
+		Encounter.EncounterParticipantComponent participantComponent = new Encounter.EncounterParticipantComponent();
+		Reference practitionerRef = new Reference();
+		practitionerRef.setReference(PRACTITIONER_URI);
+		participantComponent.setIndividual(practitionerRef);
+		omrsEncounter.setEncounterProviders(providerList);
+		when(participantTranslator.toFhirResource(encounterProvider)).thenReturn(participantComponent);
+
+		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		assertThat(result, notNullValue());
+		assertThat(result.getParticipant(), notNullValue());
+		assertThat(result.getParticipant().size(), is(1));
+		assertThat(result.getParticipant().get(0).getIndividual().getReference(), equalTo(PRACTITIONER_URI));
+	}
 }

@@ -15,7 +15,9 @@ import org.junit.Test;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.Person;
 import org.openmrs.PersonName;
+import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -38,7 +40,22 @@ public class FhirReferenceUtilsTest {
 	
 	private static final String NAME_DISPLAY = "Ricky Morty(" + TEST_IDENTIFIER_TYPE_NAME + ":34ty5jsd-u)";
 	
+	private static final String PROVIDER_UUID = "234hj34-34ty34-324k5-6uh034";
+	
+	private static final String PROVIDER_TEST_IDENTIFIER = "test-identifier";
+	
+	private static final String TEST_PROVIDER_NAME = "test provider name";
+	
+	private static final String PERSON_UUID = "12234-xx34xx-342823-342kk3";
+	
+	private static final String PROVIDER_URI = FhirConstants.PROVIDER + "/" + PROVIDER_UUID;
+	
+	private static final String PROVIDER_DISPLAY = "Ricky Morty(" + FhirConstants.IDENTIFIER + ":"
+	        + PROVIDER_TEST_IDENTIFIER + ")";
+	
 	private Patient patient;
+	
+	private Provider provider;
 	
 	@Before
 	public void setUp() {
@@ -57,6 +74,11 @@ public class FhirReferenceUtilsTest {
 		identifier.setIdentifierType(identifierType);
 		patient.addName(name);
 		patient.addIdentifier(identifier);
+		
+		provider = new Provider();
+		provider.setUuid(PROVIDER_UUID);
+		provider.setName(TEST_PROVIDER_NAME);
+		provider.setIdentifier(PROVIDER_TEST_IDENTIFIER);
 	}
 	
 	@Test
@@ -87,4 +109,34 @@ public class FhirReferenceUtilsTest {
 		assertThat(FhirReferenceUtils.extractUuid(null), nullValue());
 	}
 	
+	@Test
+	public void shouldAddPractitionerReference() {
+		Reference reference = FhirReferenceUtils.addPractitionerReference(provider);
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), notNullValue());
+		assertThat(reference.getReference(), equalTo(PROVIDER_URI));
+	}
+	
+	@Test
+	public void shouldReturnReferenceWithDisplayForProviderWithPerson() {
+		PersonName name = new PersonName();
+		name.setGivenName(GIVEN_NAME);
+		name.setFamilyName(FAMILY_NAME);
+		Person person = new Person();
+		person.setUuid(PERSON_UUID);
+		person.addName(name);
+		provider.setPerson(person);
+		Reference reference = FhirReferenceUtils.addPractitionerReference(provider);
+		assertThat(reference, notNullValue());
+		assertThat(reference.getDisplay(), notNullValue());
+		assertThat(reference.getReference(), equalTo(PROVIDER_URI));
+		assertThat(reference.getDisplay(), equalTo(PROVIDER_DISPLAY));
+	}
+	
+	@Test
+	public void shouldReturnNullDisplayForPractitionerWithNullPerson() {
+		Reference reference = FhirReferenceUtils.addPractitionerReference(provider);
+		assertThat(reference, notNullValue());
+		assertThat(reference.getDisplay(), nullValue());
+	}
 }
