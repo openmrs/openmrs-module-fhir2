@@ -19,8 +19,10 @@ import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Transactional
 @Setter(AccessLevel.PACKAGE)
 public class FhirTaskServiceImpl implements FhirTaskService {
 	
@@ -37,6 +39,7 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 	 * @return task with given internal identifier
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public Task getTaskByUuid(String uuid) {
 		return translator.toFhirResource(dao.getTaskByUuid(uuid));
 	}

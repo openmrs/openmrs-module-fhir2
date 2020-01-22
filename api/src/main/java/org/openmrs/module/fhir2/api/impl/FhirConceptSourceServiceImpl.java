@@ -19,8 +19,10 @@ import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Transactional
 @Setter(AccessLevel.PACKAGE)
 public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	
@@ -28,16 +30,19 @@ public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	private FhirConceptSourceDao dao;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<FhirConceptSource> getFhirConceptSources() {
 		return dao.getFhirConceptSources();
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(String url) {
 		return dao.getFhirConceptSourceByUrl(url);
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(String sourceName) {
 		return dao.getFhirConceptSourceByConceptSourceName(sourceName);
 	}
