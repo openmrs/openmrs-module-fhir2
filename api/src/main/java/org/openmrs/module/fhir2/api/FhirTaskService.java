@@ -10,12 +10,10 @@
 package org.openmrs.module.fhir2.api;
 
 import org.hl7.fhir.r4.model.Task;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Contains methods pertaining to creating/updating/voiding Tasks
  */
-@Transactional
 public interface FhirTaskService {
 	
 	/**
@@ -24,7 +22,6 @@ public interface FhirTaskService {
 	 * @param uuid
 	 * @return task with given internal identifier
 	 */
-	@Transactional(readOnly = true)
 	Task getTaskByUuid(String uuid);
 	
 	/**

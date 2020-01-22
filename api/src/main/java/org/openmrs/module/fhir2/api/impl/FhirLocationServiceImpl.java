@@ -16,12 +16,14 @@ import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Component
+@Transactional
 @Setter(AccessLevel.PACKAGE)
 public class FhirLocationServiceImpl implements FhirLocationService {
 	
@@ -32,11 +34,13 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	LocationTranslator locationTranslator;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Location getLocationByUuid(String uuid) {
 		return locationTranslator.toFhirResource(locationDao.getLocationByUuid(uuid));
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Location> findLocationByName(String name) {
 		return locationDao.findLocationByName(name).
 				stream().map(locationTranslator::toFhirResource)
@@ -44,6 +48,7 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Location> findLocationsByCity(String city) {
 		return locationDao.findLocationsByCity(city).stream()
 				.map(locationTranslator::toFhirResource)
@@ -51,6 +56,7 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Location> findLocationsByCountry(String country) {
 		return locationDao.findLocationsByCountry(country).stream()
 				.map(locationTranslator::toFhirResource)
@@ -58,6 +64,7 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Location> findLocationsByPostalCode(String postalCode) {
 		return locationDao.findLocationsByPostalCode(postalCode).stream()
 				.map(locationTranslator::toFhirResource)
@@ -65,6 +72,7 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Location> findLocationsByState(String state) {
 		return locationDao.findLocationsByState(state).stream()
 				.map(locationTranslator::toFhirResource)

@@ -16,6 +16,7 @@ import org.openmrs.module.fhir2.api.FhirPersonService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.util.Collection;
@@ -23,6 +24,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 @Component
+@Transactional
 @Setter(AccessLevel.PACKAGE)
 public class FhirPersonServiceImpl implements FhirPersonService {
 	
@@ -33,11 +35,13 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	private PersonTranslator personTranslator;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Person getPersonByUuid(String uuid) {
 		return personTranslator.toFhirResource(fhirPersonDao.getPersonByUuid(uuid));
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Person> findPersonsByName(String name) {
 		return fhirPersonDao.findPersonsByName(name)
 				.stream()
@@ -46,6 +50,7 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Person> findPersonsByBirthDate(Date birthDate) {
 		return fhirPersonDao.findPersonsByBirthDate(birthDate)
 				.stream()
@@ -54,6 +59,7 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender) {
 		return fhirPersonDao.findSimilarPeople(name, birthYear, gender)
 				.stream()
@@ -61,6 +67,7 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Person> findPersonsByGender(String gender) {
 		return fhirPersonDao.findPersonsByGender(gender)
 				.stream()

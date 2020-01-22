@@ -16,12 +16,14 @@ import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Component
+@Transactional
 @Setter(AccessLevel.PACKAGE)
 public class FhirPractitionerServiceImpl implements FhirPractitionerService {
 	
@@ -32,16 +34,19 @@ public class FhirPractitionerServiceImpl implements FhirPractitionerService {
 	private PractitionerTranslator translator;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Practitioner getPractitionerByUuid(String uuid) {
 		return translator.toFhirResource(dao.getProviderByUuid(uuid));
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Practitioner> findPractitionerByName(String name) {
 		return dao.findProviderByName(name).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Practitioner> findPractitionerByIdentifier(String identifier) {
 		return dao.findProviderByIdentifier(identifier).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}

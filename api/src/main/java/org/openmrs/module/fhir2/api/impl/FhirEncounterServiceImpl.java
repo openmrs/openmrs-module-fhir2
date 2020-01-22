@@ -18,8 +18,10 @@ import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Transactional
 @Setter(AccessLevel.PACKAGE)
 public class FhirEncounterServiceImpl implements FhirEncounterService {
 	
@@ -30,6 +32,7 @@ public class FhirEncounterServiceImpl implements FhirEncounterService {
 	EncounterTranslator translator;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Encounter getEncounterByUuid(String uuid) {
 		return translator.toFhirResource(dao.getEncounterByUuid(uuid));
 	}
