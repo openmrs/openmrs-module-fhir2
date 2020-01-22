@@ -23,8 +23,10 @@ import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Transactional
 @Setter(AccessLevel.PACKAGE)
 public class FhirPatientServiceImpl implements FhirPatientService {
 	
@@ -35,26 +37,31 @@ public class FhirPatientServiceImpl implements FhirPatientService {
 	private FhirPatientDao dao;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Patient getPatientByUuid(String uuid) {
 		return translator.toFhirResource(dao.getPatientByUuid(uuid));
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier) {
 		return dao.getPatientIdentifierTypeByNameOrUuid(identifier.getSystem(), null);
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Patient> findPatientsByName(String name) {
 		return dao.findPatientsByName(name).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Patient> findPatientsByGivenName(String given) {
 		return dao.findPatientsByGivenName(given).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Collection<Patient> findPatientsByFamilyName(String family) {
 		return dao.findPatientsByFamilyName(family).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
