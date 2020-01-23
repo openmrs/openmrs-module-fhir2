@@ -39,10 +39,6 @@ public class FhirRestServlet extends RestfulServer {
 	@Inject
 	FhirGlobalPropertyService globalPropertyService;
 	
-	@Inject
-	@Named("hapiLoggingInterceptor")
-	private LoggingInterceptor loggingInterceptor;
-	
 	@Override
 	protected void initialize() {
 		// ensure properties for this class are properly injected
@@ -59,6 +55,7 @@ public class FhirRestServlet extends RestfulServer {
 		
 		setPagingProvider(pp);
 		setDefaultResponseEncoding(EncodingEnum.JSON);
+		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		registerInterceptor(loggingInterceptor);
 	}
 	
