@@ -23,6 +23,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
+import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
 
 public class FhirReferenceUtilsTest {
@@ -54,9 +55,17 @@ public class FhirReferenceUtilsTest {
 	private static final String PROVIDER_DISPLAY = "Ricky Morty(" + FhirConstants.IDENTIFIER + ":"
 	        + PROVIDER_TEST_IDENTIFIER + ")";
 	
+	private static final String LOCATION_UUID = "2321gh23-kj34h45-34jk3-34k34k";
+	
+	private static final String TEST_LOCATION_NAME = "Test location name";
+	
+	private static final String LOCATION_URI = FhirConstants.LOCATION + "/" + LOCATION_UUID;
+	
 	private Patient patient;
 	
 	private Provider provider;
+	
+	private Location location;
 	
 	@Before
 	public void setUp() {
@@ -80,6 +89,10 @@ public class FhirReferenceUtilsTest {
 		provider.setUuid(PROVIDER_UUID);
 		provider.setName(TEST_PROVIDER_NAME);
 		provider.setIdentifier(PROVIDER_TEST_IDENTIFIER);
+		
+		location = new Location();
+		location.setUuid(LOCATION_UUID);
+		location.setName(TEST_LOCATION_NAME);
 	}
 	
 	@Test
@@ -137,6 +150,22 @@ public class FhirReferenceUtilsTest {
 	@Test
 	public void shouldReturnNullDisplayForPractitionerWithNullPerson() {
 		Reference reference = FhirReferenceUtils.addPractitionerReference(provider);
+		assertThat(reference, notNullValue());
+		assertThat(reference.getDisplay(), nullValue());
+	}
+	
+	@Test
+	public void shouldAddLocationReference() {
+		Reference reference = FhirReferenceUtils.addLocationReference(location);
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), equalTo(LOCATION_URI));
+		assertThat(reference.getDisplay(), equalTo(TEST_LOCATION_NAME));
+	}
+	
+	@Test
+	public void shouldReturnNullDisplayWhenLocationNameIsNull() {
+		location.setName(null);
+		Reference reference = FhirReferenceUtils.addLocationReference(location);
 		assertThat(reference, notNullValue());
 		assertThat(reference.getDisplay(), nullValue());
 	}
