@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -41,6 +42,15 @@ public class FhirReferenceUtils {
 			        + provider.getIdentifier() + ")";
 			reference.setDisplay(nameDisplay);
 		}
+		return reference;
+	}
+	
+	public static Reference addLocationReference(@NotNull Location location) {
+		Reference reference = new Reference();
+		String locationUri = FhirConstants.LOCATION + "/" + location.getUuid();
+		reference.setReference(locationUri);
+		reference.setDisplay(location.getName());
+		
 		return reference;
 	}
 	

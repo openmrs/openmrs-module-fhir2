@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang.Validate.notNull;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -20,21 +22,27 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
 import org.openmrs.api.PatientService;
+import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.util.FhirReferenceUtils;
 import org.springframework.stereotype.Component;
 
+import static org.apache.commons.lang.Validate.notNull;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class EncounterTranslatorImpl implements EncounterTranslator {
-	
+
 	@Inject
 	PatientService patientService;
-	
+
 	@Inject
 	EncounterParticipantTranslator participantTranslator;
-	
+
+	@Inject
+	EncounterLocationTranslator encounterLocationTranslator;
+
 	@Override
 	public Encounter toFhirResource(org.openmrs.Encounter openMrsEncounter) {
 		Encounter encounter = new Encounter();
@@ -45,15 +53,17 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		encounter.setParticipant(
 				openMrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource).collect(
 						Collectors.toList()));
+		encounter.setLocation(
+				Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
 
 		return encounter;
 	}
-	
+
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(Encounter fhirEncounter) {
 		return this.toOpenmrsType(new org.openmrs.Encounter(), fhirEncounter);
 	}
-	
+
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(org.openmrs.Encounter existingEncounter, Encounter encounter) {
 		notNull(existingEncounter, "Existing encounter cannot be null");
@@ -67,6 +77,7 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		existingEncounter.setEncounterProviders(encounter.getParticipant().stream()
 				.map(encounterParticipantComponent -> participantTranslator
 						.toOpenmrsType(new EncounterProvider(), encounterParticipantComponent)).collect(Collectors.toSet()));
+		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
 
 		return existingEncounter;
 	}
