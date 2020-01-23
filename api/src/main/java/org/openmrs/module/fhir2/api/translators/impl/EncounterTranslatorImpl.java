@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang.Validate.notNull;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
@@ -27,8 +26,6 @@ import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.util.FhirReferenceUtils;
 import org.springframework.stereotype.Component;
-
-import static org.apache.commons.lang.Validate.notNull;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
