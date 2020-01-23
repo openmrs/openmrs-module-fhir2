@@ -9,6 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
@@ -30,15 +40,6 @@ import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.Validate.notNull;
-
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class PersonTranslatorImpl implements PersonTranslator {
@@ -53,7 +54,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	private GenderTranslator genderTranslator;
 	
 	@Inject
-	private TelecomTranslator telecomTranslator;
+	private TelecomTranslator<Object> telecomTranslator;
 	
 	@Inject
 	private PersonService personService;

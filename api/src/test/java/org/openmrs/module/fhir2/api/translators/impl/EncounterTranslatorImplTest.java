@@ -9,6 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,12 +37,6 @@ import org.openmrs.Provider;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterTranslatorImplTest {
@@ -203,7 +203,7 @@ public class EncounterTranslatorImplTest {
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
 		assertThat(result, notNullValue());
 		assertThat(result.getParticipant(), notNullValue());
-		assertThat(result.getParticipant().size(), is(1));
+		assertThat(result.getParticipant().size(), equalTo(1));
 		assertThat(result.getParticipant().get(0).getIndividual().getReference(), equalTo(PRACTITIONER_URI));
 	}
 }

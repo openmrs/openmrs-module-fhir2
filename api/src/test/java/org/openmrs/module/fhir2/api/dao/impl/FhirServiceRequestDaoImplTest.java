@@ -22,10 +22,9 @@ import javax.inject.Provider;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.TestOrder;
 import org.openmrs.OrderType;
+import org.openmrs.TestOrder;
 import org.openmrs.api.OrderService;
-import org.openmrs.module.fhir2.FhirException;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -79,5 +78,6 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	@Test
 	public void shouldReturnNullIfUuidIsNotValidTestOrder() {
 		TestOrder result = dao.getTestOrderByUuid(OTHER_ORDER_UUID);
+		assertThat(result, nullValue());
 	}
 }

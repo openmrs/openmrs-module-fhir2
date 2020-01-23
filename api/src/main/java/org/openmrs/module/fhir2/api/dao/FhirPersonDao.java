@@ -9,11 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import org.openmrs.Person;
-
 import javax.validation.constraints.NotNull;
+
 import java.util.Collection;
 import java.util.Date;
+
+import org.openmrs.Person;
 
 public interface FhirPersonDao {
 	

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.inject.Inject;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.api.APIException;
@@ -16,8 +18,6 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirGlobalPropertyDao;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Inject;
 
 @Component
 @Transactional

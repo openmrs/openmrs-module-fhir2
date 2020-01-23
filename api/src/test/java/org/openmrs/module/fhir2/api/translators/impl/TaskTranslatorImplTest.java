@@ -9,14 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import org.junit.Before;
-import org.junit.Test;
 
 import org.hl7.fhir.r4.model.Task;
+import org.junit.Before;
+import org.junit.Test;
 
 public class TaskTranslatorImplTest {
 	

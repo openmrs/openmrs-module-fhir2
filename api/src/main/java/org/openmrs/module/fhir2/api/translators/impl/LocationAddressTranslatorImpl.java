@@ -9,6 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.validation.constraints.NotNull;
+
+import java.util.Optional;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.r4.model.Address;
@@ -18,9 +22,6 @@ import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.springframework.stereotype.Component;
-
-import javax.validation.constraints.NotNull;
-import java.util.Optional;
 
 @Component
 public class LocationAddressTranslatorImpl implements LocationAddressTranslator {

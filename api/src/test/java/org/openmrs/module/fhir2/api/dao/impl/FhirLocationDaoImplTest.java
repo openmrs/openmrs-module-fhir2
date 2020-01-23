@@ -9,28 +9,26 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+
+import java.util.Collection;
+
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
-
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import java.util.Collection;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
@@ -82,93 +80,95 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void getLocationByUuid_shouldReturnMatchingLocation() {
 		Location location = fhirLocationDao.getLocationByUuid(LOCATION_UUID);
-		assertNotNull(location);
-		assertEquals(location.getUuid(), LOCATION_UUID);
+		
+		assertThat(location, notNullValue());
+		assertThat(location.getUuid(), equalTo(LOCATION_UUID));
 	}
 	
 	@Test
 	public void getLocationByUuid_shouldReturnNullWithUnknownUuid() {
 		Location location = fhirLocationDao.getLocationByUuid(UNKNOWN_LOCATION_UUID);
-		assertNull(location);
+		
+		assertThat(location, nullValue());
 	}
 	
 	@Test
 	public void findLocationByName_shouldReturnCorrectLocation() {
 		Collection<Location> locations = fhirLocationDao.findLocationByName(LOCATION_NAME);
-		assertNotNull(locations);
-		assertEquals(locations.size(), 1);
-		assertThat(locations.stream().findAny().isPresent(), is(true));
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(1));
 	}
 	
 	@Test
-	public void findLocationByName_shouldReturnNullWhenCalledWithUnknownName() {
+	public void findLocationByName_shouldReturnEmptyCollectionWhenCalledWithUnknownName() {
 		Collection<Location> locations = fhirLocationDao.findLocationByName(UNKNOWN_LOCATION_NAME);
-		assertNotNull(locations);
-		assertEquals(locations.size(), 0);
-		assertThat(locations.stream().findAny().isPresent(), is(false));
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(0));
 	}
 	
 	@Test
 	public void findLocationByCity_shouldReturnCorrectLocation() {
 		Collection<Location> locations = fhirLocationDao.findLocationsByCity(LOCATION_CITY);
-		assertNotNull(locations);
+		
+		assertThat(locations, notNullValue());
 		assertThat(locations.size(), greaterThanOrEqualTo(1));
-		assertThat(locations.stream().findAny().isPresent(), is(true));
 	}
 	
 	@Test
-	public void findLocationByCity_shouldReturnNullWhenCalledWithUnknownCity() {
+	public void findLocationByCity_shouldReturnEmptyCollectionWhenCalledWithUnknownCity() {
 		Collection<Location> locations = fhirLocationDao.findLocationsByCity(UNKNOWN_LOCATION_CITY);
-		assertNotNull(locations);
-		assertEquals(locations.size(), 0);
-		assertThat(locations.stream().findAny().isPresent(), is(false));
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(0));
 	}
 	
 	@Test
 	public void findLocationByCountry_shouldReturnCorrectLocation() {
 		Collection<Location> locations = fhirLocationDao.findLocationsByCountry(LOCATION_COUNTRY);
-		assertNotNull(locations);
+		
+		assertThat(locations, notNullValue());
 		assertThat(locations.size(), greaterThanOrEqualTo(2));
-		assertThat(locations.stream().findAny().isPresent(), is(true));
 	}
 	
 	@Test
-	public void findLocationByCountry_shouldReturnNullWhenCalledWithUnknownCountry() {
+	public void findLocationByCountry_shouldReturnEmptyCollectionWhenCalledWithUnknownCountry() {
 		Collection<Location> locations = fhirLocationDao.findLocationsByCountry(UNKNOWN_LOCATION_COUNTRY);
-		assertNotNull(locations);
-		assertEquals(locations.size(), 0);
-		assertThat(locations.stream().findAny().isPresent(), is(false));
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(0));
 	}
 	
 	@Test
 	public void findLocationsByPostalCode_shouldReturnCorrectLocation() {
 		Collection<Location> locations = fhirLocationDao.findLocationsByPostalCode(POSTAL_CODE);
-		assertNotNull(locations);
+		
+		assertThat(locations, notNullValue());
 		assertThat(locations.size(), greaterThanOrEqualTo(2));
-		assertThat(locations.stream().findAny().isPresent(), is(true));
 	}
 	
 	@Test
-	public void findLocationsByPostalCode_shouldReturnNullWhenCalledWithUnknownCode() {
+	public void findLocationsByPostalCode_shouldReturnEmptyCollectionWhenCalledWithUnknownCode() {
 		Collection<Location> locations = fhirLocationDao.findLocationsByPostalCode(UNKNOWN_POSTAL_CODE);
-		assertNotNull(locations);
-		assertEquals(locations.size(), 0);
-		assertThat(locations.stream().findAny().isPresent(), is(false));
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(0));
 	}
 	
 	@Test
 	public void findLocationsByState_shouldReturnCorrectLocation() {
 		Collection<Location> locations = fhirLocationDao.findLocationsByState(LOCATION_STATE);
-		assertNotNull(locations);
+		
+		assertThat(locations, notNullValue());
 		assertThat(locations.size(), greaterThanOrEqualTo(1));
-		assertThat(locations.stream().findAny().isPresent(), is(true));
 	}
 	
 	@Test
-	public void findLocationsByState_shouldReturnNullWhenCalledWithUnknownState() {
+	public void findLocationsByState_shouldReturnEmptyCollectionWhenCalledWithUnknownState() {
 		Collection<Location> locations = fhirLocationDao.findLocationsByState(UNKNOWN_LOCATION_STATE);
-		assertNotNull(locations);
-		assertEquals(locations.size(), 0);
-		assertThat(locations.stream().findAny().isPresent(), is(false));
+		
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), equalTo(0));
 	}
 }

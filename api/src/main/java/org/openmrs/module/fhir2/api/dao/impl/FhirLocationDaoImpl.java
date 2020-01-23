@@ -9,6 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import java.util.Collection;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
@@ -17,10 +22,6 @@ import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Collection;
 
 @Component
 @Setter(AccessLevel.PACKAGE)

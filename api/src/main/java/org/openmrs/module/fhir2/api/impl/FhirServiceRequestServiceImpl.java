@@ -16,7 +16,6 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
-
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 import org.springframework.stereotype.Component;

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.eq;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -18,7 +20,6 @@ import org.hibernate.SessionFactory;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.springframework.stereotype.Component;
-import static org.hibernate.criterion.Restrictions.eq;
 
 @Component
 @Setter(AccessLevel.PACKAGE)

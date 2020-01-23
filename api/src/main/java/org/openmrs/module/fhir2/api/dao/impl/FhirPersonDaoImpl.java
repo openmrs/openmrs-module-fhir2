@@ -9,6 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import java.util.Collection;
+import java.util.Date;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
@@ -17,11 +23,6 @@ import org.openmrs.Person;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Collection;
-import java.util.Date;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
