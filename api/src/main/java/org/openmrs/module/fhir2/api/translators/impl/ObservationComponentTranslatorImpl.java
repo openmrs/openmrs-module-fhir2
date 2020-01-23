@@ -16,8 +16,8 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationComponentTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.springframework.stereotype.Component;
 
 @Component

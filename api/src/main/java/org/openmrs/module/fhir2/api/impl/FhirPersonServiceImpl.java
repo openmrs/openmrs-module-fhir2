@@ -9,6 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.inject.Inject;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Person;
@@ -17,11 +23,6 @@ import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Inject;
-import java.util.Collection;
-import java.util.Date;
-import java.util.stream.Collectors;
 
 @Component
 @Transactional

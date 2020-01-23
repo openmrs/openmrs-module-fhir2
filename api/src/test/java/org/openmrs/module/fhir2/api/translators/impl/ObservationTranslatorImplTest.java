@@ -32,9 +32,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationTranslatorImplTest {

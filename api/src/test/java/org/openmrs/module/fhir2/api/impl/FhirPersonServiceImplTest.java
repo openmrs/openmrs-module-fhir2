@@ -9,22 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import org.hl7.fhir.r4.model.Person;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.openmrs.PersonName;
-import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
-import org.openmrs.module.fhir2.api.translators.PersonTranslator;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
@@ -34,6 +18,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+
+import org.hl7.fhir.r4.model.Person;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.openmrs.PersonName;
+import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
+import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirPersonServiceImplTest {

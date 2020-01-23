@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
+
 import java.util.Collection;
 import java.util.Optional;
 

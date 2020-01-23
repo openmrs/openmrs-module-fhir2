@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.providers;
 
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -26,9 +29,6 @@ import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 @Component
 @Qualifier("fhirResources")

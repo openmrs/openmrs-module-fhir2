@@ -21,12 +21,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
+import java.util.Collection;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.openmrs.BaseOpenmrsData;
-
-import java.util.Collection;
 
 @Data(staticConstructor = "of")
 @NoArgsConstructor

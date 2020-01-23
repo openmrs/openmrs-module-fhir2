@@ -9,24 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import org.exparity.hamcrest.date.DateMatchers;
-import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
-import org.openmrs.Person;
-import org.openmrs.api.PersonService;
-import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
-import org.springframework.test.context.ContextConfiguration;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -37,6 +19,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+
+import org.exparity.hamcrest.date.DateMatchers;
+import org.hibernate.SessionFactory;
+import org.junit.Before;
+import org.junit.Test;
+import org.openmrs.Person;
+import org.openmrs.api.PersonService;
+import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
