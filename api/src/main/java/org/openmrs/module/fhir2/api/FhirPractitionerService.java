@@ -14,6 +14,8 @@ import java.util.Collection;
 import org.hl7.fhir.r4.model.Practitioner;
 
 public interface FhirPractitionerService {
+
+	Collection<Practitioner> getAllPractitioners();
 	
 	Practitioner getPractitionerByUuid(String uuid);
 	

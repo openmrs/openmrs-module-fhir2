@@ -14,18 +14,28 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+
 @Component
+@Setter(AccessLevel.PACKAGE)
 public class FhirObservationDaoImpl implements FhirObservationDao {
 	
 	@Inject
 	@Named("sessionFactory")
 	SessionFactory sessionFactory;
-	
+
+	@Override
+	public Collection<Obs> getAllObs() {
+		return sessionFactory.getCurrentSession().createCriteria(Obs.class).list();
+	}
+
 	@Override
 	public Obs getObsByUuid(String uuid) {
 		return (Obs) sessionFactory.getCurrentSession().createCriteria(Obs.class).add(eq("uuid", uuid)).uniqueResult();

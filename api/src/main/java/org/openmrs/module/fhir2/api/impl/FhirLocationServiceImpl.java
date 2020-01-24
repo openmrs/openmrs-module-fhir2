@@ -33,7 +33,15 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	
 	@Inject
 	LocationTranslator locationTranslator;
-	
+
+	@Override
+	@Transactional(readOnly = true)
+	public Collection<Location> getAllLocations() {
+		return locationDao.getAllLocations().stream()
+				.map(locationTranslator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+
 	@Override
 	@Transactional(readOnly = true)
 	public Location getLocationByUuid(String uuid) {

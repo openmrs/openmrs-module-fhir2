@@ -23,6 +23,7 @@ import org.openmrs.Person;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -34,7 +35,12 @@ public class FhirPersonDaoImpl implements FhirPersonDao {
 	@Inject
 	@Named("sessionFactory")
 	SessionFactory sessionFactory;
-	
+
+	@Override
+	public Collection<Person> getAllPeople() {
+		return sessionFactory.getCurrentSession().createCriteria(Person.class).list();
+	}
+
 	@Override
 	public Person getPersonByUuid(String uuid) {
 		return personService.getPersonByUuid(uuid);

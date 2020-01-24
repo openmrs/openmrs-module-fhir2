@@ -21,6 +21,8 @@ import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirEncounterDaoImpl implements FhirEncounterDao {
@@ -28,7 +30,12 @@ public class FhirEncounterDaoImpl implements FhirEncounterDao {
 	@Inject
 	@Named("sessionFactory")
 	private SessionFactory sessionFactory;
-	
+
+	@Override
+	public Collection<Encounter> getAllEncounters() {
+		return sessionFactory.getCurrentSession().createCriteria(Encounter.class).list();
+	}
+
 	@Override
 	public Encounter getEncounterByUuid(String uuid) {
 		return (Encounter) sessionFactory.getCurrentSession().createCriteria(Encounter.class).add(eq("uuid", uuid))

@@ -34,7 +34,15 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	
 	@Inject
 	private PersonTranslator personTranslator;
-	
+
+	@Override
+	@Transactional(readOnly = true)
+	public Collection<Person> getAllPeople() {
+		return fhirPersonDao.getAllPeople().stream()
+				.map(personTranslator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+
 	@Override
 	@Transactional(readOnly = true)
 	public Person getPersonByUuid(String uuid) {

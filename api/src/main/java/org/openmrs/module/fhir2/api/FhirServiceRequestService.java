@@ -11,7 +11,11 @@ package org.openmrs.module.fhir2.api;
 
 import org.hl7.fhir.r4.model.ServiceRequest;
 
+import java.util.Collection;
+
 public interface FhirServiceRequestService {
+
+	Collection<ServiceRequest> getAllServiceRequests();
 	
 	ServiceRequest getServiceRequestByUuid(String uuid);
 }

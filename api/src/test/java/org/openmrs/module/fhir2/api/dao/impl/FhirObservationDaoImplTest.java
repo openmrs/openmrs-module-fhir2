@@ -15,8 +15,11 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 
+import org.hibernate.SessionFactory;
+import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
@@ -29,13 +32,25 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
 	
 	private static final String BAD_OBS_UUID = "121b73a6-e1a4-4424-8610-d5765bf2fdf7";
+
+	private FhirObservationDaoImpl fhirObservationDao;
 	
 	@Inject
 	Provider<FhirObservationDaoImpl> daoProvider;
+
+	@Inject
+	@Named("sessionFactory")
+	private Provider<SessionFactory> sessionFactoryProvider;
+
+	@Before
+	public void setup() throws Exception {
+		fhirObservationDao = new FhirObservationDaoImpl();
+		fhirObservationDao.setSessionFactory(sessionFactoryProvider.get());
+	}
 	
 	@Test
 	public void shouldGetObsByUuid() {
-		Obs result = daoProvider.get().getObsByUuid(OBS_UUID);
+		Obs result = fhirObservationDao.getObsByUuid(OBS_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(OBS_UUID));
@@ -43,7 +58,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnNullIfObsNotFoundByUuid() {
-		Obs result = daoProvider.get().getObsByUuid(BAD_OBS_UUID);
+		Obs result = fhirObservationDao.getObsByUuid(BAD_OBS_UUID);
 		
 		assertThat(result, nullValue());
 	}

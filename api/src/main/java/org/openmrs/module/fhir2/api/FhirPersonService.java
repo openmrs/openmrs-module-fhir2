@@ -15,6 +15,8 @@ import java.util.Date;
 import org.hl7.fhir.r4.model.Person;
 
 public interface FhirPersonService {
+
+	Collection<Person> getAllPeople();
 	
 	Person getPersonByUuid(String uuid);
 	

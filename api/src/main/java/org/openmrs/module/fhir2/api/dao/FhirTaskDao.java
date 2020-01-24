@@ -13,7 +13,11 @@ import javax.validation.constraints.NotNull;
 
 import org.openmrs.module.fhir2.Task;
 
+import java.util.Collection;
+
 public interface FhirTaskDao {
+
+	public Collection<Task> getAllTasks();
 	
 	public Task saveTask(Task task);
 	

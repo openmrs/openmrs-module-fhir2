@@ -13,7 +13,11 @@ import javax.validation.constraints.NotNull;
 
 import org.hl7.fhir.r4.model.Encounter;
 
+import java.util.Collection;
+
 public interface FhirEncounterService {
+
+	Collection<Encounter> getAllEncounters();
 	
 	Encounter getEncounterByUuid(@NotNull String uuid);
 }

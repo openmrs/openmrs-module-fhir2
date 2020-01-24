@@ -33,7 +33,12 @@ public class FhirLocationDaoImpl implements FhirLocationDao {
 	@Inject
 	@Named("sessionFactory")
 	SessionFactory sessionFactory;
-	
+
+	@Override
+	public Collection<Location> getAllLocations() {
+		return sessionFactory.getCurrentSession().createCriteria(Location.class).list();
+	}
+
 	@Override
 	public Location getLocationByUuid(String uuid) {
 		return locationService.getLocationByUuid(uuid);

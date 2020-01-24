@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Task;
@@ -30,7 +33,15 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 	
 	@Inject
 	private TaskTranslator translator;
-	
+
+	@Override
+	@Transactional(readOnly = true)
+	public Collection<Task> getAllTasks() {
+		return dao.getAllTasks().stream()
+				.map(translator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+
 	/**
 	 * Get task by the UUID
 	 * 

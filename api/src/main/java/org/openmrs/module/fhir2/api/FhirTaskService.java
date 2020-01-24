@@ -11,10 +11,14 @@ package org.openmrs.module.fhir2.api;
 
 import org.hl7.fhir.r4.model.Task;
 
+import java.util.Collection;
+
 /**
  * Contains methods pertaining to creating/updating/voiding Tasks
  */
 public interface FhirTaskService {
+
+	Collection<Task> getAllTasks();
 	
 	/**
 	 * Get task by the UUID

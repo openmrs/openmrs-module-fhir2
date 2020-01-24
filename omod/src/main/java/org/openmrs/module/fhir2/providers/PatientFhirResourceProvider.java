@@ -41,6 +41,12 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	public Class<? extends IBaseResource> getResourceType() {
 		return Patient.class;
 	}
+
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle getAllPatients(){
+		return FhirUtils.convertSearchResultsToBundle(patientService.getAllPatients());
+	}
 	
 	@Read
 	@SuppressWarnings("unused")

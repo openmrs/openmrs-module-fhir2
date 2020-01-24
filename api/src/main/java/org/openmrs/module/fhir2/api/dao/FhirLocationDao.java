@@ -16,6 +16,8 @@ import java.util.Collection;
 import org.openmrs.Location;
 
 public interface FhirLocationDao {
+
+	Collection<Location> getAllLocations();
 	
 	Location getLocationByUuid(@NotNull String uuid);
 	

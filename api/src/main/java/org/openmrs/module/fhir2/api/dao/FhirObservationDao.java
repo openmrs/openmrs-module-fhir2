@@ -13,7 +13,11 @@ import javax.validation.constraints.NotNull;
 
 import org.openmrs.Obs;
 
+import java.util.Collection;
+
 public interface FhirObservationDao {
+
+	Collection<Obs> getAllObs();
 	
 	Obs getObsByUuid(@NotNull String uuid);
 }

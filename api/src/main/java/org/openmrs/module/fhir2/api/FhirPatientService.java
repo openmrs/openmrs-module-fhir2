@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifierType;
 
 public interface FhirPatientService {
+
+	Collection<Patient> getAllPatients();
 	
 	Patient getPatientByUuid(String uuid);
 	

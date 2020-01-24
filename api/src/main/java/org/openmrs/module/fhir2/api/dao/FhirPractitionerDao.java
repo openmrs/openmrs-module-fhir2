@@ -13,9 +13,12 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
 
+import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.Provider;
 
 public interface FhirPractitionerDao {
+
+	Collection<Provider> getAllProviders();
 	
 	Provider getProviderByUuid(@NotNull String uuid);
 	

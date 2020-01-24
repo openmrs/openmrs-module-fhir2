@@ -16,6 +16,8 @@ import java.util.Collection;
 import org.hl7.fhir.r4.model.Location;
 
 public interface FhirLocationService {
+
+	Collection<Location> getAllLocations();
 	
 	Location getLocationByUuid(@NotNull String uuid);
 	

@@ -17,6 +17,8 @@ import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 
 public interface FhirPatientDao {
+
+	Collection<Patient> getAllPatients();
 	
 	Patient getPatientByUuid(@NotNull String uuid);
 	

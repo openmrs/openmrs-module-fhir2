@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -31,7 +34,15 @@ public class FhirServiceRequestServiceImpl implements FhirServiceRequestService 
 	
 	@Inject
 	private FhirServiceRequestDao dao;
-	
+
+	@Override
+	@Transactional(readOnly = true)
+	public Collection<ServiceRequest> getAllServiceRequests() {
+		return dao.getAllTestOrders().stream()
+				.map(translator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+
 	@Transactional(readOnly = true)
 	public ServiceRequest getServiceRequestByUuid(String uuid) {
 		TestOrder openmrsOrder = dao.getTestOrderByUuid(uuid);

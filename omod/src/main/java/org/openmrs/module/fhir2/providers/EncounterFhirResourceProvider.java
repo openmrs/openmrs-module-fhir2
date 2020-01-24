@@ -14,14 +14,17 @@ import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
+import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +39,12 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {
 		return Encounter.class;
+	}
+
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle getAllEncounters(){
+		return FhirUtils.convertSearchResultsToBundle(encounterService.getAllEncounters());
 	}
 	
 	@Read

@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
@@ -30,7 +33,15 @@ public class FhirObservationServiceImpl implements FhirObservationService {
 	
 	@Inject
 	ObservationTranslator observationTranslator;
-	
+
+	@Override
+	@Transactional(readOnly = true)
+	public Collection<Observation> getAllObservations() {
+		return dao.getAllObs().stream()
+				.map(observationTranslator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+
 	@Override
 	@Transactional(readOnly = true)
 	public Observation getObservationByUuid(String uuid) {

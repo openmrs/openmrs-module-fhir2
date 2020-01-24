@@ -42,6 +42,12 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	public Class<? extends IBaseResource> getResourceType() {
 		return Location.class;
 	}
+
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle getAllLocations(){
+		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.getAllLocations());
+	}
 	
 	@Read
 	@SuppressWarnings("unused")

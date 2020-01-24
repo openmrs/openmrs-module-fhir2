@@ -45,6 +45,12 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	public Class<? extends IBaseResource> getResourceType() {
 		return Person.class;
 	}
+
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle getAllPeople(){
+		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.getAllPeople());
+	}
 	
 	@Read
 	@SuppressWarnings("unused")

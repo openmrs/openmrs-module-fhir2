@@ -14,14 +14,17 @@ import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.module.fhir2.api.FhirObservationService;
+import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +36,12 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Inject
 	FhirObservationService observationService;
+
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle getAllObservations(){
+		return FhirUtils.convertSearchResultsToBundle(observationService.getAllObservations());
+	}
 	
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {

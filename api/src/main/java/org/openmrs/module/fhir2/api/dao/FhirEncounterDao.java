@@ -13,7 +13,11 @@ import javax.validation.constraints.NotNull;
 
 import org.openmrs.Encounter;
 
+import java.util.Collection;
+
 public interface FhirEncounterDao {
+
+	Collection<Encounter> getAllEncounters();
 	
 	Encounter getEncounterByUuid(@NotNull String uuid);
 }

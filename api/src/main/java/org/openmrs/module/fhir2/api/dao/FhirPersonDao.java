@@ -17,6 +17,8 @@ import java.util.Date;
 import org.openmrs.Person;
 
 public interface FhirPersonDao {
+
+	Collection<Person> getAllPeople();
 	
 	Person getPersonByUuid(@NotNull String uuid);
 	

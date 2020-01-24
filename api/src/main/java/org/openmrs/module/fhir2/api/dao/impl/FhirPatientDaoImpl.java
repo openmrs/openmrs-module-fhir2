@@ -17,6 +17,7 @@ import static org.hibernate.criterion.Restrictions.or;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -41,7 +42,12 @@ public class FhirPatientDaoImpl implements FhirPatientDao {
 	@Inject
 	@Named("sessionFactory")
 	SessionFactory sessionFactory;
-	
+
+	@Override
+	public Collection<Patient> getAllPatients() {
+		return sessionFactory.getCurrentSession().createCriteria(Patient.class).list();
+	}
+
 	@Override
 	public Patient getPatientByUuid(String uuid) {
 		return patientService.getPatientByUuid(uuid);

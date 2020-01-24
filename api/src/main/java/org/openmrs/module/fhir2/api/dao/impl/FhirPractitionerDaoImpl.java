@@ -15,6 +15,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Collection;
 import java.util.List;
 
 import lombok.AccessLevel;
@@ -36,7 +37,12 @@ public class FhirPractitionerDaoImpl implements FhirPractitionerDao {
 	@Inject
 	@Named("sessionFactory")
 	private SessionFactory sessionFactory;
-	
+
+	@Override
+	public Collection<Provider> getAllProviders() {
+		return sessionFactory.getCurrentSession().createCriteria(Provider.class).list();
+	}
+
 	@Override
 	public Provider getProviderByUuid(String uuid) {
 		return providerService.getProviderByUuid(uuid);

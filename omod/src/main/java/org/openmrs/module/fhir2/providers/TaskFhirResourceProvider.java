@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -22,6 +23,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
@@ -40,6 +42,12 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {
 		return Task.class;
+	}
+
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle getAllTasks(){
+		return FhirUtils.convertSearchResultsToBundle(service.getAllTasks());
 	}
 	
 	@Read

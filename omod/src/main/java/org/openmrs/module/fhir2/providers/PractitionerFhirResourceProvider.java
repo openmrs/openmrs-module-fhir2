@@ -41,6 +41,12 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	public Class<? extends IBaseResource> getResourceType() {
 		return Practitioner.class;
 	}
+
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle getAllPractitioners(){
+		return FhirUtils.convertSearchResultsToBundle(practitionerService.getAllPractitioners());
+	}
 	
 	@Read
 	@SuppressWarnings("unused")

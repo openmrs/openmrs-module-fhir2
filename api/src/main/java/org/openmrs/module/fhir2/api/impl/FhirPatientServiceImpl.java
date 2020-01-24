@@ -35,7 +35,15 @@ public class FhirPatientServiceImpl implements FhirPatientService {
 	
 	@Inject
 	private FhirPatientDao dao;
-	
+
+	@Override
+	@Transactional(readOnly = true)
+	public Collection<Patient> getAllPatients() {
+		return dao.getAllPatients().stream()
+				.map(translator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+
 	@Override
 	@Transactional(readOnly = true)
 	public Patient getPatientByUuid(String uuid) {

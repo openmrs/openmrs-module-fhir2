@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirTaskDaoImpl implements FhirTaskDao {
@@ -33,7 +35,12 @@ public class FhirTaskDaoImpl implements FhirTaskDao {
 	@Inject
 	@Named("sessionFactory")
 	SessionFactory sessionFactory;
-	
+
+	@Override
+	public Collection<Task> getAllTasks() {
+		return sessionFactory.getCurrentSession().createCriteria(Task.class).list();
+	}
+
 	@Override
 	public Task saveTask(Task task) throws DAOException {
 		sessionFactory.getCurrentSession().saveOrUpdate(task);

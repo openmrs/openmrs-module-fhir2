@@ -13,7 +13,11 @@ import javax.validation.constraints.NotNull;
 
 import org.hl7.fhir.r4.model.Observation;
 
+import java.util.Collection;
+
 public interface FhirObservationService {
+
+	Collection<Observation> getAllObservations();
 	
 	Observation getObservationByUuid(@NotNull String uuid);
 }

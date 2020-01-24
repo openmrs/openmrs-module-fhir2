@@ -33,7 +33,15 @@ public class FhirPractitionerServiceImpl implements FhirPractitionerService {
 	
 	@Inject
 	private PractitionerTranslator translator;
-	
+
+	@Override
+	@Transactional(readOnly = true)
+	public Collection<Practitioner> getAllPractitioners() {
+		return dao.getAllProviders().stream()
+				.map(translator::toFhirResource)
+				.collect(Collectors.toList());
+	}
+
 	@Override
 	@Transactional(readOnly = true)
 	public Practitioner getPractitionerByUuid(String uuid) {

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import org.openmrs.Concept;

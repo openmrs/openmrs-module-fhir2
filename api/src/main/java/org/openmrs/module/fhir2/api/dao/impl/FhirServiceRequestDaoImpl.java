@@ -16,12 +16,12 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.openmrs.OrderType;
 import org.openmrs.TestOrder;
 import org.openmrs.api.OrderService;
-import org.openmrs.module.fhir2.FhirException;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -33,7 +33,12 @@ public class FhirServiceRequestDaoImpl implements FhirServiceRequestDao {
 	@Inject
 	@Named("sessionFactory")
 	SessionFactory sessionFactory;
-	
+
+	@Override
+	public Collection<TestOrder> getAllTestOrders() {
+		return sessionFactory.getCurrentSession().createCriteria(TestOrder.class).list();
+	}
+
 	@Override
 	public TestOrder getTestOrderByUuid(String uuid) {
 		return (TestOrder) sessionFactory.getCurrentSession().createCriteria(TestOrder.class)
