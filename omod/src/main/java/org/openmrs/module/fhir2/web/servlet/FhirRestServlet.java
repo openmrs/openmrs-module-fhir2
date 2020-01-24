@@ -37,7 +37,11 @@ public class FhirRestServlet extends RestfulServer {
 	private static final long serialVersionUID = 1L;
 	
 	@Inject
-	FhirGlobalPropertyService globalPropertyService;
+	private FhirGlobalPropertyService globalPropertyService;
+
+	@Inject
+	@Named("hapiLoggingInterceptor")
+	private LoggingInterceptor loggingInterceptor;
 	
 	@Override
 	protected void initialize() {
@@ -55,7 +59,6 @@ public class FhirRestServlet extends RestfulServer {
 		
 		setPagingProvider(pp);
 		setDefaultResponseEncoding(EncodingEnum.JSON);
-		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		registerInterceptor(loggingInterceptor);
 	}
 	

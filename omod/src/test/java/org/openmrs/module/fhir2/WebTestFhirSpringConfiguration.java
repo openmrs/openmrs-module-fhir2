@@ -9,11 +9,28 @@
  */
 package org.openmrs.module.fhir2;
 
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
-@ImportResource({ "classpath:applicationContext-service.xml", "classpath*:moduleApplicationContext.xml" })
+@ImportResource({ "classpath:applicationContext-service.xml", "classpath*:moduleApplicationContext.xml", "classpath*:webModuleApplicationContext.xml" })
 public class WebTestFhirSpringConfiguration {
 
+	@Bean
+	@Primary
+	FhirGlobalPropertyService getFhirGlobalPropertyService() {
+		return property -> {
+			switch(property) {
+				case FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE:
+					return "10";
+				case FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE:
+					return "100";
+				default:
+					return null;
+			}
+		};
+	}
 }

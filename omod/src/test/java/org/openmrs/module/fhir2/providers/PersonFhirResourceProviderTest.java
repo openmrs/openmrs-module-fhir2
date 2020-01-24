@@ -9,53 +9,43 @@
  */
 package org.openmrs.module.fhir2.providers;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.openmrs.module.fhir2.WebTestFhirSpringConfiguration;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirPersonService;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.mock.web.MockHttpServletResponse;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = WebTestFhirSpringConfiguration.class)
-public class PersonFhirResourceProviderTest {
+@RunWith(MockitoJUnitRunner.class)
+public class PersonFhirResourceProviderTest extends BaseFhirResourceProviderTest<PersonFhirResourceProvider> {
 
 	private static final String PERSON_UUID = "12e3rt-23kk90-dfj384k-34k23";
 
 	private static final String WRONG_PERSON_UUID = "34xxh45-xxx88xx-uu443-t4t2j5";
 
-	@InjectMocks
-	private PersonFhirResourceProvider personFhirResourceProvider;
-
 	@Mock
 	private FhirPersonService fhirPersonService;
 
-	private MockMvc mockMvc;
+	@Getter(AccessLevel.PACKAGE)
+	private PersonFhirResourceProvider resourceProvider;
 
 	private Person person;
 
 	@Before
-	public void setUp() {
-		personFhirResourceProvider = new PersonFhirResourceProvider();
-		personFhirResourceProvider.setFhirPersonService(fhirPersonService);
-		this.mockMvc = MockMvcBuilders.standaloneSetup(personFhirResourceProvider).build();
+	@Override
+	public void setup() throws Exception {
+		resourceProvider = new PersonFhirResourceProvider();
+		resourceProvider.setFhirPersonService(fhirPersonService);
+		super.setup();
 	}
 
 	@Before
@@ -67,31 +57,26 @@ public class PersonFhirResourceProviderTest {
 
 	@Test
 	public void shouldReturnResourceType() {
-		assertThat(personFhirResourceProvider.getResourceType(), equalTo(Person.class));
-		assertThat(personFhirResourceProvider.getResourceType().getName(), equalTo(Person.class.getName()));
+		assertThat(resourceProvider.getResourceType(), equalTo(Person.class));
+		assertThat(resourceProvider.getResourceType().getName(), equalTo(Person.class.getName()));
 	}
 
 	@Test
 	public void getPersonById_shouldReturnPerson() throws Exception {
 		when(fhirPersonService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
-		mockMvc.perform(get("/Person/{id}", PERSON_UUID)
-				.accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andDo(print())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.resourceType").exists())
-				.andExpect(MockMvcResultMatchers.jsonPath("$.resourceType").value("Person"))
-				.andExpect(MockMvcResultMatchers.jsonPath("$.id").value(PERSON_UUID))
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID)
+				.accept(FhirMediaTypes.JSON)
+				.go();
+
+		assertThat(response, isOk());
 	}
 
 	@Test
 	public void getPersonWithWrongUuid_shouldReturnIsNotFoundStatus() throws Exception {
-		mockMvc.perform(get("/Person/{id}", WRONG_PERSON_UUID)
-				.accept(MediaType.ALL_VALUE))
-				.andExpect(status().isNotFound());
+		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID).go();
 
+		assertThat(response, isNotFound());
 	}
 
 }
