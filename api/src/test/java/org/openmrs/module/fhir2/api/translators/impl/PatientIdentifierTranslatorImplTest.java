@@ -13,8 +13,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.argThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static org.mockito.Mockito.when;
 
 import org.hl7.fhir.r4.model.Identifier;
@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.FhirPatientService;
@@ -150,7 +150,7 @@ public class PatientIdentifierTranslatorImplTest {
 	}
 	
 	@Test
-	public void shuoldConvertNullIdentifierToNull() {
+	public void shouldConvertNullIdentifierToNull() {
 		assertThat(identifierTranslator.toOpenmrsType(null), nullValue());
 	}
 	

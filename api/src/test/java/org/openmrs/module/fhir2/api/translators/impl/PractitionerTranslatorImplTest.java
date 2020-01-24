@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import org.hamcrest.Matchers;
@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
@@ -237,11 +237,6 @@ public class PractitionerTranslatorImplTest {
 		contactPoint.setId(PERSON_ATTRIBUTE_UUID);
 		contactPoint.setValue(PERSON_ATTRIBUTE_VALUE);
 		practitioner.addTelecom(contactPoint);
-		
-		when(providerService.getProviderAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
-		when(telecomTranslator.toOpenmrsType(providerAttribute, contactPoint)).thenReturn(providerAttribute);
-		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
-		    PERSON_ATTRIBUTE_TYPE_UUID);
 		
 		Provider provider = practitionerTranslator.toOpenmrsType(practitioner);
 		assertThat(provider, Matchers.notNullValue());

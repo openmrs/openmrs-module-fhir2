@@ -15,7 +15,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
@@ -222,9 +222,7 @@ public class LocationTranslatorImplTest {
 		attributeType.setName(LOCATION_ATTRIBUTE_TYPE_NAME);
 		attributeType.setUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
 		locationAttribute.setAttributeType(attributeType);
-		
-		when(telecomTranslator.toFhirResource(locationAttribute)).thenReturn(contactPoint);
-		
+
 		org.hl7.fhir.r4.model.Location location = locationTranslator.toFhirResource(new Location());
 		assertThat(location, notNullValue());
 		assertThat(location.getTelecom(), notNullValue());
@@ -246,9 +244,7 @@ public class LocationTranslatorImplTest {
 		ContactPoint contactPoint = location.getTelecomFirstRep();
 		contactPoint.setId(LOCATION_ATTRIBUTE_UUID);
 		contactPoint.setValue(LOCATION_ATTRIBUTE_VALUE);
-		
-		when(telecomTranslator.toOpenmrsType(new LocationAttribute(), contactPoint)).thenReturn(locationAttribute);
-		
+
 		Location omrsLocation = locationTranslator.toOpenmrsType(location);
 		assertThat(omrsLocation, notNullValue());
 		assertThat(omrsLocation.getAttributes(), notNullValue());

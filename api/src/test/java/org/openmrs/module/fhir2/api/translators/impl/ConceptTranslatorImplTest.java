@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
@@ -136,7 +136,6 @@ public class ConceptTranslatorImplTest {
 		ConceptSource conceptSource = mock(ConceptSource.class);
 		when(conceptMap.getConceptReferenceTerm()).thenReturn(conceptReferenceTerm);
 		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
-		when(conceptReferenceTerm.getCode()).thenReturn("1650");
 		when(conceptSource.getName()).thenReturn("Unknown");
 		when(concept.getConceptMappings()).thenReturn(conceptMaps);
 		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("Unknown")).thenReturn(Optional.empty());

@@ -11,9 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -21,7 +19,6 @@ import javax.inject.Provider;
 
 import java.util.Optional;
 
-import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;

@@ -17,8 +17,8 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.argThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -31,7 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
@@ -304,13 +304,11 @@ public class PersonTranslatorImplTest {
 		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
 		personAttribute.setAttributeType(attributeType);
 		Person person = new Person();
-		
-		when(telecomTranslator.toFhirResource(personAttribute)).thenReturn(contactPoint);
-		
+
 		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
+
 		assertThat(result, notNullValue());
 		assertThat(result.getTelecom(), notNullValue());
-		
 	}
 	
 	@Test
@@ -329,12 +327,8 @@ public class PersonTranslatorImplTest {
 		contactPoint.setValue(PERSON_ATTRIBUTE_VALUE);
 		person.addTelecom(contactPoint);
 		
-		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
-		when(telecomTranslator.toOpenmrsType(personAttribute, contactPoint)).thenReturn(personAttribute);
-		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
-		    PERSON_ATTRIBUTE_TYPE_UUID);
-		
 		Person people = personTranslator.toOpenmrsType(person);
+
 		assertThat(people, notNullValue());
 		assertThat(people.getAttributes(), notNullValue());
 		assertThat(people.getAttributes().isEmpty(), is(false));
