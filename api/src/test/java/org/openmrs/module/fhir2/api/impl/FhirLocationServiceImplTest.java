@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Location;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
@@ -55,9 +55,7 @@ public class FhirLocationServiceImplTest {
 	private FhirLocationServiceImpl fhirLocationService;
 	
 	private Location location;
-	
-	private Address address;
-	
+
 	private org.hl7.fhir.r4.model.Location fhirLocation;
 	
 	@Before
@@ -77,8 +75,8 @@ public class FhirLocationServiceImplTest {
 		fhirLocation.setId(LOCATION_UUID);
 		fhirLocation.setName(LOCATION_NAME);
 		fhirLocation.setDescription(LOCATION_DESCRIPTION);
-		
-		address = new Address();
+
+		Address address = new Address();
 		address.setCity(LOCATION_CITY);
 		address.setPostalCode(POSTAL_CODE);
 		address.setCountry(LOCATION_COUNTRY);
@@ -92,11 +90,11 @@ public class FhirLocationServiceImplTest {
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 		
 		org.hl7.fhir.r4.model.Location result = fhirLocationService.getLocationByUuid(LOCATION_UUID);
-		assertNotNull(result);
-		assertEquals(result.getId(), fhirLocation.getId());
-		assertEquals(result.getName(), LOCATION_NAME);
-		assertEquals(result.getDescription(), LOCATION_DESCRIPTION);
-		
+
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), equalTo(LOCATION_UUID));
+		assertThat(result.getName(), equalTo(LOCATION_NAME));
+		assertThat(result.getDescription(), equalTo(LOCATION_DESCRIPTION));
 	}
 	
 	@Test
@@ -107,8 +105,9 @@ public class FhirLocationServiceImplTest {
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 
 		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationByName(LOCATION_NAME);
-		assertNotNull(results);
-		assertEquals(results.size(), 1);
+
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
 	}
 	
 	@Test
@@ -119,7 +118,8 @@ public class FhirLocationServiceImplTest {
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 
 		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByCity(LOCATION_CITY);
-		assertNotNull(results);
+
+		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 	
@@ -130,32 +130,35 @@ public class FhirLocationServiceImplTest {
 		when(locationDao.findLocationsByCountry(LOCATION_COUNTRY)).thenReturn(locations);
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 
-		Collection<org.hl7.fhir.r4.model.Location> collection = fhirLocationService.findLocationsByCountry(LOCATION_COUNTRY);
-		assertNotNull(collection);
-		assertThat(collection.size(), greaterThanOrEqualTo(1));
+		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByCountry(LOCATION_COUNTRY);
+
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void findLocationsByPostalCode_shouldfindLocationsByPostalCode(){
+	public void findLocationsByPostalCode_shouldFindLocationsByPostalCode(){
 		Collection<Location> locations = new ArrayList<>();
 		locations.add(location);
 		when(locationDao.findLocationsByPostalCode(POSTAL_CODE)).thenReturn(locations);
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 
-		Collection<org.hl7.fhir.r4.model.Location> collection = fhirLocationService.findLocationsByPostalCode(POSTAL_CODE);
-		assertNotNull(collection);
-		assertThat(collection.size(), greaterThanOrEqualTo(1));
+		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByPostalCode(POSTAL_CODE);
+
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void findLocationsBySsetCityVillagetate_shouldfindLocationsByState(){
+	public void findLocationsByCityState_shouldFindLocationsByState(){
 		Collection<Location> locations = new ArrayList<>();
 		locations.add(location);
 		when(locationDao.findLocationsByState(LOCATION_STATE)).thenReturn(locations);
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 
-		Collection<org.hl7.fhir.r4.model.Location> collection = fhirLocationService.findLocationsByState(LOCATION_STATE);
-		assertNotNull(collection);
-		assertThat(collection.size(), greaterThanOrEqualTo(1));
+		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByState(LOCATION_STATE);
+
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 }

@@ -9,17 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.dao.FhirGlobalPropertyDao;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,15 +45,17 @@ public class FhirGlobalPropertyServiceImplTest {
 	@Test
 	public void shouldReturnStringGlobalPropertyWhenPropertyMatched() {
 		when(fhirGlobalPropertyDao.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE)).thenReturn(PERSON_ATTRIBUTE_TYPE_UUID);
+
 		String personAttributeTypeUuid = globalPropertyService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE);
+
 		assertThat(personAttributeTypeUuid, notNullValue());
 		assertThat(personAttributeTypeUuid, equalTo(PERSON_ATTRIBUTE_TYPE_UUID));
 	}
 	
 	@Test
 	public void shouldReturnNullWhenGlobalPropertyNotFound() {
-		when(fhirGlobalPropertyDao.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE_NOT_FOUND)).thenReturn("");
 		String personAttributeTypeUuid = globalPropertyService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE);
+
 		assertThat(personAttributeTypeUuid, nullValue());
 	}
 	

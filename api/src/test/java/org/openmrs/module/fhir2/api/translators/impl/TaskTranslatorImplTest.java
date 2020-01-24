@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
@@ -138,13 +138,11 @@ public class TaskTranslatorImplTest {
 	
 	@Test
 	public void shouldCreateOpenmrsTaskWhenNull() {
-		org.openmrs.module.fhir2.Task task = null;
-		
 		Task fhirTask = new Task();
 		fhirTask.setId(TASK_UUID);
 		fhirTask.setStatus(FHIR_NEW_TASK_STATUS);
 		
-		org.openmrs.module.fhir2.Task result = taskTranslator.toOpenmrsType(task, fhirTask);
+		org.openmrs.module.fhir2.Task result = taskTranslator.toOpenmrsType(null, fhirTask);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getStatus(), equalTo(OPENMRS_NEW_TASK_STATUS));

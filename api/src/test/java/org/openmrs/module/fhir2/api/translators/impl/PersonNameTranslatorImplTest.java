@@ -15,14 +15,13 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
 

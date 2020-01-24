@@ -2,18 +2,29 @@
 		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.openmrs.maven.parents</groupId>
-        <artifactId>maven-parent-openmrs-module</artifactId>
-        <version>1.1.1</version>
-    </parent>
-
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>fhir2</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>FHIR2</name>
 	<description>Implementation of FHIR R4 for OpenMRS</description>
+
+	<issueManagement>
+		<system>JIRA</system>
+		<url>http://issues.openmrs.org/</url>
+	</issueManagement>
+
+	<licenses>
+		<license>
+			<name>OpenMRS Public License</name>
+			<url>http://openmrs.org/wiki/License</url>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>OpenMRS LLC.</name>
+		<url>http://openmrs.org</url>
+	</organization>
 
 	<url>https://wiki.openmrs.org/display/projects/OpenMRS+FHIR+Module</url>
 
@@ -54,6 +65,52 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.openmrs.api</groupId>
+				<artifactId>openmrs-api</artifactId>
+				<version>${openmrsPlatformVersion}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.web</groupId>
+				<artifactId>openmrs-web</artifactId>
+				<version>${openmrsPlatformVersion}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.api</groupId>
+				<artifactId>openmrs-api</artifactId>
+				<version>${openmrsPlatformVersion}</version>
+				<classifier>tests</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.web</groupId>
+				<artifactId>openmrs-web</artifactId>
+				<version>${openmrsPlatformVersion}</version>
+				<classifier>tests</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.test</groupId>
+				<artifactId>openmrs-test</artifactId>
+				<version>${openmrsPlatformVersion}</version>
+				<type>pom</type>
+				<exclusions>
+					<exclusion>
+						<groupId>org.mockito</groupId>
+						<artifactId>mockito-all</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.powermock</groupId>
+						<artifactId>powermock-module-junit4</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.powermock</groupId>
+						<artifactId>powermock-api-mockito</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-all</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-base</artifactId>
@@ -115,18 +172,271 @@
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.13</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>3.2.4</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-core</artifactId>
+				<version>2.2</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-library</artifactId>
+				<version>2.2</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-module-junit4</artifactId>
+				<version>2.0.4</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-api-mockito2</artifactId>
+				<version>2.0.4</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.exparity</groupId>
 				<artifactId>hamcrest-date</artifactId>
 				<version>2.0.7</version>
 				<scope>test</scope>
 			</dependency>
-
 		</dependencies>
 	</dependencyManagement>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.test</groupId>
+			<artifactId>openmrs-test</artifactId>
+			<type>pom</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito2</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.xml</include>
+					<include>**/*.txt</include>
+					<include>**/*.properties</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/*.xml</exclude>
+					<exclude>**/*.txt</exclude>
+					<exclude>**/*.properties</exclude>
+				</excludes>
+			</resource>
+
+			<resource>
+				<directory>src/main/webapp</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.xml</include>
+					<include>**/*.txt</include>
+					<include>**/*.properties</include>
+				</includes>
+				<targetPath>web/module</targetPath>
+			</resource>
+			<resource>
+				<directory>src/main/webapp</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/*.xml</exclude>
+					<exclude>**/*.txt</exclude>
+					<exclude>**/*.properties</exclude>
+				</excludes>
+				<targetPath>web/module</targetPath>
+			</resource>
+		</resources>
+
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.xml</include>
+					<include>**/*.txt</include>
+					<include>**/*.properties</include>
+				</includes>
+			</testResource>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/*.xml</exclude>
+					<exclude>**/*.txt</exclude>
+					<exclude>**/*.properties</exclude>
+				</excludes>
+			</testResource>
+		</testResources>
+
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+				</plugin>
+				<plugin>
+					<groupId>org.openmrs.maven.plugins</groupId>
+					<artifactId>maven-openmrs-plugin</artifactId>
+					<version>1.0.1</version>
+					<extensions>true</extensions>
+					<executions>
+						<execution>
+							<id>pack</id>
+							<phase>package</phase>
+							<goals>
+								<goal>package-module</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.2.0</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>test-jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.5.3</version>
+					<configuration>
+						<useReleaseProfile>false</useReleaseProfile>
+						<autoVersionSubmodules>true</autoVersionSubmodules>
+						<arguments>-Prelease</arguments>
+						<tagNameFormat>@{project.version}</tagNameFormat>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>buildnumber-maven-plugin</artifactId>
+					<version>1.1</version>
+					<configuration>
+						<buildNumberPropertyName>revisionNumber</buildNumberPropertyName>
+						<getRevisionOnlyOnce>true</getRevisionOnlyOnce>
+						<revisionOnScmFailure>0</revisionOnScmFailure>
+						<shortRevisionLength>6</shortRevisionLength>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>validate</phase>
+							<goals>
+								<goal>create</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<!-- Extracting messages and Spring configuration out of the API jar.
+					 It is needed due to a bug in OpenMRS, which prevents them from loading.
+					 See https://issues.openmrs.org/browse/TRUNK-3889 -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>Expand resources</id>
+							<goals>
+								<goal>unpack-dependencies</goal>
+							</goals>
+							<phase>generate-resources</phase>
+							<configuration>
+								<includeGroupIds>${project.parent.groupId}</includeGroupIds>
+								<includeArtifactIds>${project.parent.artifactId}-api,${project.parent.artifactId}-omod,${project.parent.artifactId}-omod-common</includeArtifactIds>
+								<includeScope>compile</includeScope>
+								<includes>*.xml,*.properties</includes>
+								<outputDirectory>${project.build.directory}/classes</outputDirectory>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.4.1</version>
+					<executions>
+						<execution>
+							<id>enforce-no-snapshots</id>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<configuration>
+								<rules>
+									<requireReleaseDeps>
+										<message>No snapshots allowed when releasing!</message>
+									</requireReleaseDeps>
+								</rules>
+								<fail>true</fail>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 				<plugin>
 					<groupId>com.mycila</groupId>
 					<artifactId>license-maven-plugin</artifactId>
@@ -198,16 +508,6 @@
 						</execution>
 					</executions>
 				</plugin>
-				<!-- disable base formatter -->
-				<plugin>
-					<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
-					<artifactId>maven-java-formatter-plugin</artifactId>
-					<executions>
-						<execution>
-							<phase />
-						</execution>
-					</executions>
-				</plugin>
 				<plugin>
 					<groupId>net.revelc.code.formatter</groupId>
 					<artifactId>formatter-maven-plugin</artifactId>
@@ -238,8 +538,10 @@
 	</build>
 
     <properties>
-		<javaCompilerSource>1.8</javaCompilerSource>
-		<javaCompilerTarget>1.8</javaCompilerTarget>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.build.outputEncoding>UTF-8</project.build.outputEncoding>
 		<lombokVersion>1.18.10</lombokVersion>
         <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
 		<openmrsPlatformToolsVersion>2.0.5</openmrsPlatformToolsVersion>

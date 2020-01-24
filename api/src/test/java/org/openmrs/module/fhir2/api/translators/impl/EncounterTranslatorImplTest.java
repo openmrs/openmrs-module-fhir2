@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 import static org.hamcrest.CoreMatchers.is;
 
@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.EncounterProvider;
 import org.openmrs.Location;
 import org.openmrs.Patient;
@@ -196,10 +196,9 @@ public class EncounterTranslatorImplTest {
 		provider.setUuid(PRACTITIONER_UUID);
 		encounterProvider.setProvider(provider);
 		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
-		when(participantTranslator.toOpenmrsType(new EncounterProvider(), participantComponent))
-				.thenReturn(encounterProvider);
 
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
+
 		assertThat(result, notNullValue());
 		assertThat(result.getEncounterProviders(), not(Collections.emptySet()));
 		assertThat(result.getEncounterProviders().size(), equalTo(1));

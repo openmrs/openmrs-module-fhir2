@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -64,7 +64,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final int WRONG_BIRTH_YEAR = 1000;
 	
-	private static SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	
 	private static final String BIRTH_DATE = "1999-12-20";
 	
@@ -141,7 +141,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnCollectionOfPersonsForMatchOnPersonBirthDate() throws ParseException {
-		Date personBirthDate = dateFormatter.parse(BIRTH_DATE);
+		Date personBirthDate = DATE_FORMAT.parse(BIRTH_DATE);
 		Collection<Person> people = fhirPersonDao.findPersonsByBirthDate(personBirthDate);
 		assertThat(people, notNullValue());
 		assertThat(people.size(), greaterThanOrEqualTo(1));
@@ -151,7 +151,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnEmptyCollectionForPersonBirthDateNotMatch() throws ParseException {
-		Date personBirthDate = dateFormatter.parse(NOT_FOUND_BIRTH_DATE);
+		Date personBirthDate = DATE_FORMAT.parse(NOT_FOUND_BIRTH_DATE);
 		Collection<Person> persons = fhirPersonDao.findPersonsByBirthDate(personBirthDate);
 		assertThat(persons, notNullValue());
 		assertThat(persons, empty());

@@ -19,8 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.openmrs.Order;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
@@ -56,7 +55,7 @@ public class FhirServiceRequestServiceImplTest {
 	}
 	
 	@Test
-	public void shouldRetrieveServiceRequestByUUID() throws Exception {
+	public void shouldRetrieveServiceRequestByUUID() {
 		when(dao.getTestOrderByUuid(SERVICE_REQUEST_UUID)).thenReturn(order);
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
 		
