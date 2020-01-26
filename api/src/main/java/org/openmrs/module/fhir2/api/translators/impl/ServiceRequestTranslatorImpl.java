@@ -9,23 +9,28 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.TestOrder;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator {
-	
+
+	@Inject
+	ConceptTranslator conceptTranslator;
+
 	@Override
 	public ServiceRequest toFhirResource(@NotNull TestOrder order) {
 		ServiceRequest serviceRequest = new ServiceRequest();
-		
+
 		if (order != null) {
 			serviceRequest.setId(order.getUuid());
 			
@@ -35,7 +40,8 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator {
 			} else if (orderAction == TestOrder.Action.DISCONTINUE) {
 				serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.REVOKED);
 			}
-			
+
+			serviceRequest.setCode(conceptTranslator.toFhirResource(order.getConcept()));
 			serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 		}
 		

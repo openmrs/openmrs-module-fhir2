@@ -14,6 +14,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,12 +25,19 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
+import org.openmrs.module.fhir2.FhirTestConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirServiceRequestServiceImplTest {
 	
 	private static final String SERVICE_REQUEST_UUID = "249b9094-b812-4b0c-a204-0052a05c657f";
-	
+
+	private static final ServiceRequest.ServiceRequestStatus STATUS = ServiceRequest.ServiceRequestStatus.ACTIVE;
+
+	private static final ServiceRequest.ServiceRequestPriority PRIORITY = ServiceRequest.ServiceRequestPriority.ROUTINE;
+
+	private static final String LOINC_CODE = "1000-1";
+
 	@Mock
 	private ServiceRequestTranslator translator;
 	
@@ -49,9 +58,16 @@ public class FhirServiceRequestServiceImplTest {
 		
 		order = new TestOrder();
 		order.setUuid(SERVICE_REQUEST_UUID);
+
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding loincCoding = codeableConcept.addCoding();
+		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
+		loincCoding.setCode(LOINC_CODE);
 		
 		fhirServiceRequest = new ServiceRequest();
 		fhirServiceRequest.setId(SERVICE_REQUEST_UUID);
+		fhirServiceRequest.setStatus(STATUS);
+		fhirServiceRequest.setPriority(PRIORITY);
 	}
 	
 	@Test
@@ -62,7 +78,6 @@ public class FhirServiceRequestServiceImplTest {
 		ServiceRequest result = serviceRequestService.getServiceRequestByUuid(SERVICE_REQUEST_UUID);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(SERVICE_REQUEST_UUID));
 	}
 	
