@@ -14,9 +14,13 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Collection;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.Task;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
@@ -44,5 +48,11 @@ public class FhirTaskDaoImpl implements FhirTaskDao {
 	@Override
 	public Task getTaskByUuid(String uuid) {
 		return (Task) sessionFactory.getCurrentSession().createCriteria(Task.class).add(eq("uuid", uuid)).uniqueResult();
+	}
+	
+	@Override
+	public Collection<Task> getTasksByBasedOnUuid(Class<? extends DomainResource> clazz, String uuid) {
+		return (Collection<Task>) sessionFactory.getCurrentSession().createCriteria(Task.class)
+		        .add(Restrictions.eq("basedOn", clazz.getSimpleName() + "/" + uuid)).list();
 	}
 }

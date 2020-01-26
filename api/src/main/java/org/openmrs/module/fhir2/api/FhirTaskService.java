@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import java.util.Collection;
+
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Task;
 
 /**
@@ -39,4 +42,13 @@ public interface FhirTaskService {
 	 * @return the saved task
 	 */
 	Task updateTask(String uuid, Task task);
+	
+	/**
+	 * Get list of tasks that reference the object type/UUID combo provided
+	 * 
+	 * @param obj FHIR ServiceRequest or MedicationRequest or CarePlan class
+	 * @param uuid
+	 * @return the collection of Tasks where the basedOn field points to the given object
+	 */
+	Collection<Task> getTasksByBasedOn(Class<? extends DomainResource> obj, String uuid);
 }

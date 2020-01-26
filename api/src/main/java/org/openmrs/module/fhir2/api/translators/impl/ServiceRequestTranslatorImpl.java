@@ -12,10 +12,14 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import java.util.Collection;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.Task;
 import org.openmrs.TestOrder;
+import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 import org.springframework.stereotype.Component;
@@ -27,6 +31,9 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator {
 	@Inject
 	ConceptTranslator conceptTranslator;
 	
+	@Inject
+	FhirTaskService taskService;
+	
 	@Override
 	public ServiceRequest toFhirResource(@NotNull TestOrder order) {
 		ServiceRequest serviceRequest = new ServiceRequest();
@@ -34,13 +41,7 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator {
 		if (order != null) {
 			serviceRequest.setId(order.getUuid());
 			
-			TestOrder.Action orderAction = order.getAction();
-			if (orderAction == TestOrder.Action.NEW || orderAction == TestOrder.Action.RENEW) {
-				serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.ACTIVE);
-			} else if (orderAction == TestOrder.Action.DISCONTINUE) {
-				serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.REVOKED);
-			}
-			
+			serviceRequest.setStatus(determineServiceRequestStatus(order.getUuid()));
 			serviceRequest.setCode(conceptTranslator.toFhirResource(order.getConcept()));
 			serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 		}
@@ -56,5 +57,32 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator {
 	@Override
 	public TestOrder toOpenmrsType(TestOrder currentOrder, ServiceRequest serviceRequest) {
 		return null;
+	}
+	
+	private ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(String orderUuid) {
+		Collection<Task> serviceRequestTasks = taskService.getTasksByBasedOn(ServiceRequest.class, orderUuid);
+		
+		ServiceRequest.ServiceRequestStatus serviceRequestStatus = ServiceRequest.ServiceRequestStatus.UNKNOWN;
+		
+		if (serviceRequestTasks.size() != 1)
+			return serviceRequestStatus;
+		
+		Task serviceRequestTask = serviceRequestTasks.iterator().next();
+		
+		if (serviceRequestTask.getStatus() != null) {
+			switch (serviceRequestTask.getStatus()) {
+				case ACCEPTED:
+				case REQUESTED:
+					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.ACTIVE;
+					break;
+				case REJECTED:
+					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.REVOKED;
+					break;
+				case COMPLETED:
+					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.COMPLETED;
+					break;
+			}
+		}
+		return serviceRequestStatus;
 	}
 }
