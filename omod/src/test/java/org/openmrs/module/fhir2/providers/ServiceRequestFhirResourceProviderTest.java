@@ -17,21 +17,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
-import lombok.Getter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ServiceRequestFhirResourceProviderTest
-		extends BaseFhirResourceProviderTest<ServiceRequestFhirResourceProvider> {
+public class ServiceRequestFhirResourceProviderTest {
 
 	private static final String SERVICE_REQUEST_UUID = "7d13b03b-58c2-43f5-b34d-08750c51aea9";
 
@@ -40,17 +36,14 @@ public class ServiceRequestFhirResourceProviderTest
 	@Mock
 	private FhirServiceRequestService serviceRequestService;
 
-	@Getter(AccessLevel.PACKAGE)
 	private ServiceRequestFhirResourceProvider resourceProvider;
 
 	private ServiceRequest serviceRequest;
 
-	@Override
+	@Before
 	public void setup() throws Exception {
-		serviceRequestService = Mockito.mock(FhirServiceRequestService.class);
 		resourceProvider = new ServiceRequestFhirResourceProvider();
 		resourceProvider.setServiceRequestService(serviceRequestService);
-		super.setup();
 	}
 
 	@Before

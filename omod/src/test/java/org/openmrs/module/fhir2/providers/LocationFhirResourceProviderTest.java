@@ -22,8 +22,6 @@ import java.util.Collections;
 
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
-import lombok.Getter;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -32,12 +30,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LocationFhirResourceProviderTest extends BaseFhirResourceProviderTest<LocationFhirResourceProvider> {
+public class LocationFhirResourceProviderTest {
 
 	private static final String LOCATION_UUID = "123xx34-623hh34-22hj89-23hjy5";
 
@@ -66,17 +63,14 @@ public class LocationFhirResourceProviderTest extends BaseFhirResourceProviderTe
 	@Mock
 	private FhirLocationService locationService;
 
-	@Getter(AccessLevel.PACKAGE)
 	private LocationFhirResourceProvider resourceProvider;
 
 	private Location location;
 
-	@Override
-	public void setup() throws Exception {
-		locationService = Mockito.mock(FhirLocationService.class);
+	@Before
+	public void setup() {
 		resourceProvider = new LocationFhirResourceProvider();
 		resourceProvider.setFhirLocationService(locationService);
-		super.setup();
 	}
 
 	@Before

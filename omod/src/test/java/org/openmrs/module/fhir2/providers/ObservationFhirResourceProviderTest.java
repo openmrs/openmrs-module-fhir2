@@ -27,9 +27,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirObservationService;
+import org.openmrs.module.fhir2.web.servlet.BaseFhirResourceProviderTest;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ObservationFhirResourceProviderTest extends BaseFhirResourceProviderTest<ObservationFhirResourceProvider> {
+public class ObservationFhirResourceProviderTest {
 
 	private static final String OBSERVATION_UUID = "1223h34-34nj3-34nj34-34nj";
 
@@ -38,17 +39,15 @@ public class ObservationFhirResourceProviderTest extends BaseFhirResourceProvide
 	@Mock
 	private FhirObservationService observationService;
 
-	@Getter(AccessLevel.PACKAGE)
+	@Getter(AccessLevel.PUBLIC)
 	private ObservationFhirResourceProvider resourceProvider;
 
 	private Observation observation;
 
-	@Override
-	public void setup() throws Exception {
-		observationService = Mockito.mock(FhirObservationService.class);
+	@Before
+	public void setup() {
 		resourceProvider = new ObservationFhirResourceProvider();
 		resourceProvider.setObservationService(observationService);
-		super.setup();
 	}
 
 	@Before

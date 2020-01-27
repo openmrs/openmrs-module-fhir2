@@ -16,20 +16,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
-import lombok.Getter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EncounterFhirResourceProviderTest extends BaseFhirResourceProviderTest<EncounterFhirResourceProvider> {
+public class EncounterFhirResourceProviderTest {
 
 	private static final String ENCOUNTER_UUID = "123xx34-623hh34-22hj89-23hjy5";
 
@@ -38,17 +35,14 @@ public class EncounterFhirResourceProviderTest extends BaseFhirResourceProviderT
 	@Mock
 	private FhirEncounterService encounterService;
 
-	@Getter(AccessLevel.PACKAGE)
 	private EncounterFhirResourceProvider resourceProvider;
 
 	private Encounter encounter;
 
-	@Override
-	public void setup() throws Exception {
-		encounterService = Mockito.mock(FhirEncounterService.class);
+	@Before
+	public void setup() {
 		resourceProvider = new EncounterFhirResourceProvider();
 		resourceProvider.setEncounterService(encounterService);
-		super.setup();
 	}
 
 	@Before

@@ -7,35 +7,38 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.providers;
+package org.openmrs.module.fhir2.web.servlet;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.validation.constraints.NotNull;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import com.google.common.reflect.TypeToken;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.openmrs.module.fhir2.WebTestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
-public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider> {
+public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, U extends IBaseResource> {
 
 	public static class FhirMediaTypes {
 
@@ -49,28 +52,6 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider> 
 		}
 
 		private FhirMediaTypes() {
-		}
-	}
-
-	public static class FhirRequestBuilder {
-
-		private final MockHttpServletRequest request;
-
-		private FhirRequestBuilder(RequestTypeEnum requestType, String uri) {
-			request = new MockHttpServletRequest();
-			request.setMethod(requestType.toString());
-			request.setRequestURI(uri);
-		}
-
-		public FhirRequestBuilder accept(@NotNull MediaType mediaType) {
-			request.addHeader(ACCEPT, mediaType.toString());
-			return this;
-		}
-
-		public MockHttpServletResponse go() throws ServletException, IOException {
-			MockHttpServletResponse response = new MockHttpServletResponse();
-			servlet.service(request, response);
-			return response;
 		}
 	}
 
@@ -131,37 +112,68 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider> 
 		return statusEquals(status.value());
 	}
 
-	private static final String SERVLET_NAME = "fhir2Servlet";
+	public class FhirRequestBuilder {
 
-	private static AnnotationConfigWebApplicationContext webApplicationContext;
+		private final MockHttpServletRequest request;
+
+		private FhirRequestBuilder(RequestTypeEnum requestType, String uri) {
+			request = new MockHttpServletRequest();
+			request.setMethod(requestType.toString());
+			request.setRequestURI(uri);
+		}
+
+		public FhirRequestBuilder accept(@NotNull MediaType mediaType) {
+			request.addHeader(ACCEPT, mediaType.toString());
+			return this;
+		}
+
+		public MockHttpServletResponse go() throws ServletException, IOException {
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			servlet.service(request, response);
+			return response;
+		}
+	}
+
+	private static final String SERVLET_NAME = "fhir2Servlet";
 
 	private static ServletConfig servletConfig;
 
-	private static boolean initialized = false;
+	private static IParser parser;
 
-	private static FhirRestServlet servlet;
+	private static LoggingInterceptor interceptor;
+
+	private FhirRestServlet servlet;
+
+	private TypeToken<U> typeToken = new TypeToken<U>(getClass()) {};
 
 	@BeforeClass
 	public static void setupServlet() {
-		webApplicationContext = new AnnotationConfigWebApplicationContext();
-		webApplicationContext.register(WebTestFhirSpringConfiguration.class);
-		webApplicationContext.refresh();
+		parser = FhirContext.forR4().newJsonParser();
 
-		MockServletContext servletContext = new MockServletContext(webApplicationContext);
-		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, webApplicationContext);
+		interceptor = new LoggingInterceptor();
+		interceptor.setLoggerName("org.openmrs.module.fhir2.accessLog");
 
+		MockServletContext servletContext = new MockServletContext();
 		servletConfig = new MockServletConfig(servletContext, SERVLET_NAME);
 	}
 
 	@Before
 	public void setup() throws Exception {
-		if (!initialized) {
-			T resourceProvider = getResourceProvider();
-			webApplicationContext.getBeanFactory().registerSingleton("fhirResources", resourceProvider);
-			servlet = webApplicationContext.getBean(FhirRestServlet.class);
-			servlet.init(servletConfig);
-			initialized = true;
-		}
+		servlet = new FhirRestServlet();
+		servlet.setFhirContext(FhirContext.forR4());
+		servlet.setLoggingInterceptor(interceptor);
+		servlet.setGlobalPropertyService(property -> {
+			switch (property) {
+				case FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE:
+					return "10";
+				case FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE:
+					return "100";
+			}
+
+			return null;
+		});
+		servlet.setResourceProviders(getResourceProvider());
+		servlet.init(servletConfig);
 	}
 
 	public FhirRequestBuilder get(@NotNull String uri) {
@@ -172,5 +184,9 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider> 
 		return new FhirRequestBuilder(RequestTypeEnum.POST, "/" + SERVLET_NAME + uri);
 	}
 
-	abstract T getResourceProvider();
+	public U readResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
+		return (U) parser.parseResource(response.getContentAsString());
+	}
+
+	public abstract T getResourceProvider();
 }

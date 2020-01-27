@@ -9,45 +9,37 @@
  */
 package org.openmrs.module.fhir2.providers;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 
-import javax.servlet.ServletException;
-
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
-import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirPersonService;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PersonFhirResourceProviderTest extends BaseFhirResourceProviderTest<PersonFhirResourceProvider> {
+public class PersonFhirResourceProviderTest {
 
 	private static final String PERSON_UUID = "8a849d5e-6011-4279-a124-40ada5a687de";
 
@@ -68,17 +60,14 @@ public class PersonFhirResourceProviderTest extends BaseFhirResourceProviderTest
 	@Mock
 	private FhirPersonService fhirPersonService;
 
-	@Getter(AccessLevel.PACKAGE)
 	private PersonFhirResourceProvider resourceProvider;
 
 	private Person person;
 
-	@Override
-	public void setup() throws Exception {
-		fhirPersonService = mock(FhirPersonService.class);
+	@Before
+	public void setup() {
 		resourceProvider = new PersonFhirResourceProvider();
 		resourceProvider.setFhirPersonService(fhirPersonService);
-		super.setup();
 	}
 
 	@Before
@@ -115,17 +104,6 @@ public class PersonFhirResourceProviderTest extends BaseFhirResourceProviderTest
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(PERSON_UUID));
-	}
-
-	@Ignore
-	@Test
-	public void getPersonById_shouldCheckIfResponseIsOk() throws ServletException, IOException {
-		MockHttpServletResponse response = get("/Person/" + PERSON_UUID)
-				.accept(FhirMediaTypes.JSON)
-				.go();
-
-		assertThat(response, isOk());
-		assertThat(response, statusEquals(200));
 	}
 
 	@Test(expected = ResourceNotFoundException.class)

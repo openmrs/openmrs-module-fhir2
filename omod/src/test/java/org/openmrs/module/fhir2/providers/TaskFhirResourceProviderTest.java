@@ -25,12 +25,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TaskFhirResourceProviderTest extends BaseFhirResourceProviderTest<TaskFhirResourceProvider> {
+public class TaskFhirResourceProviderTest {
 
 	private static final String TASK_UUID = "bdd7e368-3d1a-42a9-9538-395391b64adf";
 
@@ -39,17 +38,15 @@ public class TaskFhirResourceProviderTest extends BaseFhirResourceProviderTest<T
 	@Mock
 	private FhirTaskService taskService;
 
-	@Getter(AccessLevel.PACKAGE)
+	@Getter(AccessLevel.PUBLIC)
 	private TaskFhirResourceProvider resourceProvider;
 
 	private Task task;
 
-	@Override
-	public void setup() throws Exception {
-		taskService = Mockito.mock(FhirTaskService.class);
+	@Before
+	public void setup() {
 		resourceProvider = new TaskFhirResourceProvider();
 		resourceProvider.setService(taskService);
-		super.setup();
 	}
 
 	@Before

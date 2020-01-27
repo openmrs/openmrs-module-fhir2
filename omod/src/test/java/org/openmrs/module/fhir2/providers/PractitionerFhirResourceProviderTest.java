@@ -21,8 +21,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
-import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
@@ -32,12 +30,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PractitionerFhirResourceProviderTest extends BaseFhirResourceProviderTest<PractitionerFhirResourceProvider> {
+public class PractitionerFhirResourceProviderTest {
 
 	private static final String PRACTITIONER_UUID = "48fb709b-48aa-4902-b681-926df5156e88";
 
@@ -56,17 +53,14 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirResourceProvid
 	@Mock
 	private FhirPractitionerService practitionerService;
 
-	@Getter(AccessLevel.PACKAGE)
 	private PractitionerFhirResourceProvider resourceProvider;
 
 	private Practitioner practitioner;
 
-	@Override
-	public void setup() throws Exception {
-		practitionerService = Mockito.mock(FhirPractitionerService.class);
+	@Before
+	public void setup() {
 		resourceProvider = new PractitionerFhirResourceProvider();
 		resourceProvider.setPractitionerService(practitionerService);
-		super.setup();
 	}
 
 	@Before
