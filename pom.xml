@@ -132,6 +132,10 @@
 						<groupId>org.eclipse.jetty</groupId>
 						<artifactId>jetty-server</artifactId>
 					</exclusion>
+					<exclusion>
+						<artifactId>servlet-api</artifactId>
+						<groupId>javax.servlet</groupId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>

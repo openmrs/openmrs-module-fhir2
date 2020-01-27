@@ -42,16 +42,10 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	@Read
 	@SuppressWarnings("unused")
 	public ServiceRequest getServiceRequestById(@IdParam @NotNull IdType id) {
-		ServiceRequest serviceRequest = null;
-		try {
-			serviceRequest = serviceRequestService.getServiceRequestByUuid(id.getIdPart());
-		}
-		catch (FhirException ignored) {}
-		
+		ServiceRequest serviceRequest = serviceRequestService.getServiceRequestByUuid(id.getIdPart());
 		if (serviceRequest == null) {
 			throw new ResourceNotFoundException("Could not find Service Request with Id " + id.getIdPart());
 		}
-		
 		return serviceRequest;
 	}
 }
