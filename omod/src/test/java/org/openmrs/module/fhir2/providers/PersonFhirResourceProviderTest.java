@@ -9,15 +9,36 @@
  */
 package org.openmrs.module.fhir2.providers;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+
+import javax.servlet.ServletException;
+
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -28,9 +49,21 @@ import org.springframework.mock.web.MockHttpServletResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class PersonFhirResourceProviderTest extends BaseFhirResourceProviderTest<PersonFhirResourceProvider> {
 
-	private static final String PERSON_UUID = "12e3rt-23kk90-dfj384k-34k23";
+	private static final String PERSON_UUID = "8a849d5e-6011-4279-a124-40ada5a687de";
 
-	private static final String WRONG_PERSON_UUID = "34xxh45-xxx88xx-uu443-t4t2j5";
+	private static final String WRONG_PERSON_UUID = "9bf0d1ac-62a8-4440-a5a1-eb1015a7cc65";
+
+	private static final String GENDER = "M";
+
+	private static final String WRONG_GENDER = "wrong gender";
+
+	private static final String BIRTH_DATE = "1992-03-04";
+
+	private static final String WRONG_BIRTH_DATE = "0000-00-00";
+
+	private static final String GIVEN_NAME = "Jeanne";
+
+	private static final String FAMILY_NAME = "we";
 
 	@Mock
 	private FhirPersonService fhirPersonService;
@@ -40,9 +73,9 @@ public class PersonFhirResourceProviderTest extends BaseFhirResourceProviderTest
 
 	private Person person;
 
-	@Before
 	@Override
 	public void setup() throws Exception {
+		fhirPersonService = mock(FhirPersonService.class);
 		resourceProvider = new PersonFhirResourceProvider();
 		resourceProvider.setFhirPersonService(fhirPersonService);
 		super.setup();
@@ -50,33 +83,127 @@ public class PersonFhirResourceProviderTest extends BaseFhirResourceProviderTest
 
 	@Before
 	public void initPerson() {
+		HumanName name = new HumanName();
+		name.addGiven(GIVEN_NAME);
+		name.setFamily(FAMILY_NAME);
+
 		person = new Person();
 		person.setId(PERSON_UUID);
 		person.setGender(Enumerations.AdministrativeGender.MALE);
+		person.addName(name);
+	}
+
+	private static Date parseStringDate(String date) throws ParseException {
+		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+		return dateFormatter.parse(date);
 	}
 
 	@Test
-	public void shouldReturnResourceType() {
+	public void getResourceType_shouldReturnResourceType() {
 		assertThat(resourceProvider.getResourceType(), equalTo(Person.class));
 		assertThat(resourceProvider.getResourceType().getName(), equalTo(Person.class.getName()));
 	}
 
 	@Test
-	public void getPersonById_shouldReturnPerson() throws Exception {
+	public void getPersonById_shouldReturnPerson() {
+		IdType id = new IdType();
+		id.setValue(PERSON_UUID);
 		when(fhirPersonService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
 
+		Person result = resourceProvider.getPersonById(id);
+		assertThat(result.isResource(), is(true));
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(PERSON_UUID));
+	}
+
+	@Ignore
+	@Test
+	public void getPersonById_shouldCheckIfResponseIsOk() throws ServletException, IOException {
 		MockHttpServletResponse response = get("/Person/" + PERSON_UUID)
 				.accept(FhirMediaTypes.JSON)
 				.go();
 
 		assertThat(response, isOk());
+		assertThat(response, statusEquals(200));
+	}
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void getPersonByWithWrongId_shouldThrowResourceNotFoundException() {
+		IdType idType = new IdType();
+		idType.setValue(WRONG_PERSON_UUID);
+		assertThat(resourceProvider.getPersonById(idType).isResource(), is(true));
+		assertThat(resourceProvider.getPersonById(idType), nullValue());
 	}
 
 	@Test
-	public void getPersonWithWrongUuid_shouldReturnIsNotFoundStatus() throws Exception {
-		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID).go();
+	public void findPersonsByGender_shouldReturnMatchingBundleOfPersons() {
+		when(fhirPersonService.findPersonsByGender(GENDER)).thenReturn(Collections.singletonList(person));
+		StringParam param = new StringParam();
+		param.setValue(GENDER);
+		Bundle results = resourceProvider.findPersonsByGender(param);
+		assertThat(results, notNullValue());
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(results.getEntry().get(0).getResource().getChildByName("id").getValues().get(0).toString(),
+				equalTo(PERSON_UUID));
 
-		assertThat(response, isNotFound());
 	}
 
+	@Test
+	public void findPersonsByWrongGender_shouldReturnBundleWithEmptyEntries() {
+		StringParam param = new StringParam();
+		param.setValue(WRONG_GENDER);
+		Bundle results = resourceProvider.findPersonsByGender(param);
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry(), is(empty()));
+	}
+
+	@Test
+	public void findPersonsByBirthDate_shouldReturnMatchingBundleOfPersons() throws ParseException {
+		when(fhirPersonService.findPersonsByBirthDate(parseStringDate(BIRTH_DATE)))
+				.thenReturn(Collections.singletonList(person));
+		DateParam param = new DateParam();
+		param.setValue(parseStringDate(BIRTH_DATE));
+		Bundle results = resourceProvider.findPersonsByBirthDate(param);
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void findPersonsByWrongBirthDate_shouldReturnBundleWithEmptyEntries() throws ParseException {
+		DateParam param = new DateParam();
+		param.setValue(parseStringDate(WRONG_BIRTH_DATE));
+		Bundle results = resourceProvider.findPersonsByBirthDate(param);
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry(), is(empty()));
+	}
+
+	@Test
+	public void findSimilarPeople_ShouldReturnBundleOfMatchingPeople() {
+		when(fhirPersonService.findSimilarPeople(GIVEN_NAME, null, GENDER))
+				.thenReturn(Collections.singletonList(person));
+		StringParam nameParam = new StringParam();
+		nameParam.setValue(GIVEN_NAME);
+
+		Bundle results = resourceProvider.findSimilarPeople(nameParam, null, GENDER);
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+
+	@Test
+	public void findSimilarPeopleWithNullBirthDateAndGender_ShouldReturnBundleOfMatchingPeopleByName() {
+		when(fhirPersonService.findSimilarPeople(GIVEN_NAME, null, null))
+				.thenReturn(Collections.singletonList(person));
+		StringParam nameParam = new StringParam();
+		nameParam.setValue(GIVEN_NAME);
+
+		Bundle results = resourceProvider.findSimilarPeople(nameParam, null, null);
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
 }

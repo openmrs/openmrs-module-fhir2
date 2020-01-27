@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -40,6 +41,10 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	public Observation getObservationById(@IdParam @NotNull IdType id) {
-		return observationService.getObservationByUuid(id.getId());
+		Observation observation = observationService.getObservationByUuid(id.getId());
+		if (observation == null) {
+			throw new ResourceNotFoundException("Could not find Observation with Id " + id.getId());
+		}
+		return observation;
 	}
 }

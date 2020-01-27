@@ -11,11 +11,11 @@ package org.openmrs.module.fhir2.providers;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
 
+import java.io.IOException;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.validation.constraints.NotNull;
-
-import java.io.IOException;
 
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -48,7 +48,8 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider> 
 			XML = MediaType.valueOf("application/fhir+xml");
 		}
 
-		private FhirMediaTypes() {}
+		private FhirMediaTypes() {
+		}
 	}
 
 	public static class FhirRequestBuilder {
@@ -126,7 +127,7 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider> 
 		return new StatusEqualsMatcher(status);
 	}
 
-	public static Matcher<MockHttpServletResponse> statusEquals(HttpStatus status)  {
+	public static Matcher<MockHttpServletResponse> statusEquals(HttpStatus status) {
 		return statusEquals(status.value());
 	}
 
