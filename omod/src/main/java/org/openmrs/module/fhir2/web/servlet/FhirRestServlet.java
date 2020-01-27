@@ -31,14 +31,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 @Component
-@Setter(AccessLevel.MODULE)
+@Setter(AccessLevel.PACKAGE)
 public class FhirRestServlet extends RestfulServer {
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Inject
-	FhirGlobalPropertyService globalPropertyService;
-	
+	private FhirGlobalPropertyService globalPropertyService;
+
 	@Inject
 	@Named("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
@@ -46,7 +46,9 @@ public class FhirRestServlet extends RestfulServer {
 	@Override
 	protected void initialize() {
 		// ensure properties for this class are properly injected
-		SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, getServletContext());
+		if (globalPropertyService == null) {
+			SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, getServletContext());
+		}
 		
 		int defaultPageSize = NumberUtils.toInt(
 		    globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE), 10);
