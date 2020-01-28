@@ -9,13 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Extension;
@@ -170,8 +170,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress1(ADDRESS_1);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address1"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address1"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_1))));
 	}
 	
@@ -180,8 +181,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress2(ADDRESS_2);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address2"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address2"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_2))));
 	}
 	
@@ -190,8 +192,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress3(ADDRESS_3);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address3"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address3"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_3))));
 	}
 	
@@ -200,8 +203,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress4(ADDRESS_4);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address4"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address4"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_4))));
 	}
 	
@@ -210,8 +214,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress5(ADDRESS_5);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address5"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address5"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_5))));
 	}
 	
@@ -220,8 +225,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress6(ADDRESS_6);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address6"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address6"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_6))));
 	}
 	
@@ -230,8 +236,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress7(ADDRESS_7);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address7"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address7"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_7))));
 	}
 	
@@ -240,8 +247,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress8(ADDRESS_8);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address8"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address8"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_8))));
 	}
 	
@@ -250,8 +258,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress9(ADDRESS_9);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address9"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address9"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_9))));
 	}
 	
@@ -260,8 +269,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress10(ADDRESS_10);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address10"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address10"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_10))));
 	}
 	
@@ -270,8 +280,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress11(ADDRESS_11);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address11"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address11"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_11))));
 	}
 	
@@ -280,8 +291,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress12(ADDRESS_12);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address12"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address12"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_12))));
 	}
 	
@@ -290,8 +302,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress13(ADDRESS_13);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address13"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address13"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_13))));
 	}
 	
@@ -300,8 +313,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress14(ADDRESS_14);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address14"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address14"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_14))));
 	}
 	
@@ -310,8 +324,9 @@ public class LocationAddressTranslatorImplTest {
 		Location location = new Location();
 		location.setAddress15(ADDRESS_15);
 		
-		assertThat(translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address15"),
+		assertThat(
+		    translator.toFhirResource(location).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address15"),
 		    hasProperty("value", hasProperty("value", equalTo(ADDRESS_15))));
 	}
 	
@@ -321,8 +336,8 @@ public class LocationAddressTranslatorImplTest {
 		omrsLocation.setAddress2(ADDRESS_2);
 		omrsLocation.setAddress3(ADDRESS_3);
 		
-		Extension extension = translator.toFhirResource(omrsLocation).getExtensionByUrl(
-		    FhirConstants.OPENMRS_FHIR_EXT_ADDRESS);
+		Extension extension = translator.toFhirResource(omrsLocation)
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS);
 		assertThat(extension.getExtension().size(), greaterThan(1));
 		assertThat(extension.getExtension().size(), equalTo(3));
 	}

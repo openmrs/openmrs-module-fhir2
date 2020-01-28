@@ -23,14 +23,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator {
-
+	
 	@Inject
 	ConceptTranslator conceptTranslator;
-
+	
 	@Override
 	public ServiceRequest toFhirResource(@NotNull TestOrder order) {
 		ServiceRequest serviceRequest = new ServiceRequest();
-
+		
 		if (order != null) {
 			serviceRequest.setId(order.getUuid());
 			
@@ -40,7 +40,7 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator {
 			} else if (orderAction == TestOrder.Action.DISCONTINUE) {
 				serviceRequest.setStatus(ServiceRequest.ServiceRequestStatus.REVOKED);
 			}
-
+			
 			serviceRequest.setCode(conceptTranslator.toFhirResource(order.getConcept()));
 			serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 		}

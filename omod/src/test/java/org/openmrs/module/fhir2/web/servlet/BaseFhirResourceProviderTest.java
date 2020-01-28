@@ -11,12 +11,12 @@ package org.openmrs.module.fhir2.web.servlet;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.validation.constraints.NotNull;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -39,124 +39,124 @@ import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 
 public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, U extends IBaseResource> {
-
+	
 	public static class FhirMediaTypes {
-
+		
 		public static final MediaType JSON;
-
+		
 		public static final MediaType XML;
-
+		
 		static {
 			JSON = MediaType.valueOf("application/fhir+json");
 			XML = MediaType.valueOf("application/fhir+xml");
 		}
-
+		
 		private FhirMediaTypes() {
 		}
 	}
-
+	
 	private static abstract class HttpResponseMatcher extends TypeSafeMatcher<MockHttpServletResponse> {
-
+		
 		@Override
 		protected void describeMismatchSafely(MockHttpServletResponse item, Description mismatchDescription) {
 			mismatchDescription.appendText("response with status code ").appendValue(item.getStatus());
 		}
 	}
-
+	
 	private static class IsOkMatcher extends HttpResponseMatcher {
-
+		
 		@Override
 		protected boolean matchesSafely(MockHttpServletResponse item) {
 			int status = item.getStatus();
 			return status >= HttpStatus.OK.value() && status < HttpStatus.BAD_REQUEST.value();
 		}
-
+		
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("response with HTTP status indicating request was handled successfully");
 		}
 	}
-
+	
 	private static class StatusEqualsMatcher extends HttpResponseMatcher {
-
+		
 		private int status;
-
+		
 		private StatusEqualsMatcher(int status) {
 			this.status = status;
 		}
-
+		
 		@Override
 		protected boolean matchesSafely(MockHttpServletResponse item) {
 			return item.getStatus() == status;
 		}
-
+		
 		@Override
 		public void describeTo(Description description) {
 			description.appendText("response with HTTP status ").appendValue(status);
 		}
 	}
-
+	
 	public static Matcher<MockHttpServletResponse> isOk() {
 		return new IsOkMatcher();
 	}
-
+	
 	public static Matcher<MockHttpServletResponse> isNotFound() {
 		return statusEquals(HttpStatus.NOT_FOUND);
 	}
-
+	
 	public static Matcher<MockHttpServletResponse> statusEquals(final int status) {
 		return new StatusEqualsMatcher(status);
 	}
-
+	
 	public static Matcher<MockHttpServletResponse> statusEquals(HttpStatus status) {
 		return statusEquals(status.value());
 	}
-
+	
 	public class FhirRequestBuilder {
-
+		
 		private final MockHttpServletRequest request;
-
+		
 		private FhirRequestBuilder(RequestTypeEnum requestType, String uri) {
 			request = new MockHttpServletRequest();
 			request.setMethod(requestType.toString());
 			request.setRequestURI(uri);
 		}
-
+		
 		public FhirRequestBuilder accept(@NotNull MediaType mediaType) {
 			request.addHeader(ACCEPT, mediaType.toString());
 			return this;
 		}
-
+		
 		public MockHttpServletResponse go() throws ServletException, IOException {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			servlet.service(request, response);
 			return response;
 		}
 	}
-
+	
 	private static final String SERVLET_NAME = "fhir2Servlet";
-
+	
 	private static ServletConfig servletConfig;
-
+	
 	private static IParser parser;
-
+	
 	private static LoggingInterceptor interceptor;
-
+	
 	private FhirRestServlet servlet;
-
+	
 	private TypeToken<U> typeToken = new TypeToken<U>(getClass()) {};
-
+	
 	@BeforeClass
 	public static void setupServlet() {
 		parser = FhirContext.forR4().newJsonParser();
-
+		
 		interceptor = new LoggingInterceptor();
 		interceptor.setLoggerName("org.openmrs.module.fhir2.accessLog");
-
+		
 		MockServletContext servletContext = new MockServletContext();
 		servletConfig = new MockServletConfig(servletContext, SERVLET_NAME);
 	}
-
+	
 	@Before
 	public void setup() throws Exception {
 		servlet = new FhirRestServlet();
@@ -169,24 +169,24 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 				case FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE:
 					return "100";
 			}
-
+			
 			return null;
 		});
 		servlet.setResourceProviders(getResourceProvider());
 		servlet.init(servletConfig);
 	}
-
+	
 	public FhirRequestBuilder get(@NotNull String uri) {
 		return new FhirRequestBuilder(RequestTypeEnum.GET, "/" + SERVLET_NAME + uri);
 	}
-
+	
 	public FhirRequestBuilder post(@NotNull String uri) {
 		return new FhirRequestBuilder(RequestTypeEnum.POST, "/" + SERVLET_NAME + uri);
 	}
-
+	
 	public U readResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (U) parser.parseResource(response.getContentAsString());
 	}
-
+	
 	public abstract T getResourceProvider();
 }

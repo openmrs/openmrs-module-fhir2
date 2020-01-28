@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -17,10 +18,9 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.time.Instant;
 import java.util.Date;
@@ -166,9 +166,8 @@ public class PatientTranslatorImplTest {
 		HumanName humanName = new HumanName();
 		humanName.addGiven(PATIENT_GIVEN_NAME);
 		humanName.setFamily(PATIENT_FAMILY_NAME);
-		when(
-		    nameTranslator.toFhirResource(argThat(allOf(hasProperty("givenName", equalTo(PATIENT_GIVEN_NAME)),
-		        hasProperty("familyName", equalTo(PATIENT_FAMILY_NAME)))))).thenReturn(humanName);
+		when(nameTranslator.toFhirResource(argThat(allOf(hasProperty("givenName", equalTo(PATIENT_GIVEN_NAME)),
+		    hasProperty("familyName", equalTo(PATIENT_FAMILY_NAME)))))).thenReturn(humanName);
 		
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		PersonName name = new PersonName();

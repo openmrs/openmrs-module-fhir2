@@ -64,26 +64,26 @@ public class LocationAddressTranslatorImpl implements LocationAddressTranslator 
 	}
 	
 	@Override
-    public Location toOpenmrsType(Location omrsLocation, Address address) {
-        omrsLocation.setCityVillage(address.getCity());
-        omrsLocation.setStateProvince(address.getState());
-        omrsLocation.setCountry(address.getCountry());
-        omrsLocation.setPostalCode(address.getPostalCode());
-
-        getOpenmrsAddressExtension(address).ifPresent(ext ->
-                ext.getExtension().forEach(e -> addAddressComponent(omrsLocation, e.getUrl(), ((StringType) e.getValue()).getValue()))
-        );
-        return omrsLocation;
-    }
+	public Location toOpenmrsType(Location omrsLocation, Address address) {
+		omrsLocation.setCityVillage(address.getCity());
+		omrsLocation.setStateProvince(address.getState());
+		omrsLocation.setCountry(address.getCountry());
+		omrsLocation.setPostalCode(address.getPostalCode());
+		
+		getOpenmrsAddressExtension(address).ifPresent(ext -> ext.getExtension()
+		        .forEach(e -> addAddressComponent(omrsLocation, e.getUrl(), ((StringType) e.getValue()).getValue())));
+		return omrsLocation;
+	}
 	
 	private void addAddressExtension(@NotNull Address address, @NotNull String extensionProperty, @NotNull String value) {
-        if (value == null) {
-            return;
-        }
-
-        getOpenmrsAddressExtension(address).orElseGet(() -> address.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS))
-                .addExtension(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#" + extensionProperty, new StringType(value));
-    }
+		if (value == null) {
+			return;
+		}
+		
+		getOpenmrsAddressExtension(address)
+		        .orElseGet(() -> address.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS))
+		        .addExtension(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#" + extensionProperty, new StringType(value));
+	}
 	
 	public void addAddressComponent(@NotNull Location location, @NotNull String url, @NotNull String value) {
 		if (value == null || url == null || !url.startsWith(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#")) {
@@ -138,7 +138,7 @@ public class LocationAddressTranslatorImpl implements LocationAddressTranslator 
 			case "address15":
 				location.setAddress15(value);
 				break;
-		
+			
 		}
 	}
 	

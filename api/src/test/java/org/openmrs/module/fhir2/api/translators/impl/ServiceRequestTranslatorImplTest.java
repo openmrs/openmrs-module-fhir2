@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -16,7 +17,6 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -32,7 +32,6 @@ import org.openmrs.Concept;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceRequestTranslatorImplTest {
@@ -40,14 +39,14 @@ public class ServiceRequestTranslatorImplTest {
 	private static final String SERVICE_REQUEST_UUID = "4e4851c3-c265-400e-acc9-1f1b0ac7f9c4";
 	
 	private static final TestOrder.Action ORDER_ACTION = TestOrder.Action.NEW;
-
+	
 	private static final String LOINC_CODE = "1000-1";
-
+	
 	private ServiceRequestTranslatorImpl translator;
-
+	
 	@Mock
 	private ConceptTranslator conceptTranslator;
-
+	
 	@Before
 	public void setup() {
 		translator = new ServiceRequestTranslatorImpl();
@@ -95,7 +94,7 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.REVOKED));
 		assertThat(result.getIntent(), equalTo(ServiceRequest.ServiceRequestIntent.ORDER));
 	}
-
+	
 	@Ignore
 	@Test
 	public void shouldTranslateServiceRequestCode() {
@@ -103,45 +102,45 @@ public class ServiceRequestTranslatorImplTest {
 		Coding loincCoding = codeableConcept.addCoding();
 		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
 		loincCoding.setCode(LOINC_CODE);
-
+		
 		ServiceRequest fhirServiceRequest = new ServiceRequest();
 		fhirServiceRequest.setId(SERVICE_REQUEST_UUID);
 		fhirServiceRequest.setCode(codeableConcept);
-
+		
 		TestOrder translatedOrder = translator.toOpenmrsType(fhirServiceRequest);
 		assertThat(translatedOrder, notNullValue());
-
+		
 		Concept result = translatedOrder.getConcept();
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getConceptMappings(), notNullValue());
 		assertThat(result.getConceptMappings(), not(empty()));
-		assertThat(result.getConceptMappings(), hasItem((hasProperty("conceptReferenceTerm", hasProperty("code", equalTo(LOINC_CODE))))));
+		assertThat(result.getConceptMappings(),
+		    hasItem((hasProperty("conceptReferenceTerm", hasProperty("code", equalTo(LOINC_CODE))))));
 	}
-
+	
 	@Test
 	public void shouldTranslateOrderConcept() {
 		Concept openmrsConcept = new Concept();
 		TestOrder testOrder = new TestOrder();
-
+		
 		testOrder.setConcept(openmrsConcept);
-
+		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding loincCoding = codeableConcept.addCoding();
 		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
 		loincCoding.setCode(LOINC_CODE);
-
+		
 		when(conceptTranslator.toFhirResource(openmrsConcept)).thenReturn(codeableConcept);
-
+		
 		CodeableConcept result = translator.toFhirResource(testOrder).getCode();
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), notNullValue());
 		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
 		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo(LOINC_CODE))));
 	}
-
-
+	
 	@Test
 	public void shouldReturnNullForCreatingNewOrder() {
 		ServiceRequest serviceRequest = new ServiceRequest();

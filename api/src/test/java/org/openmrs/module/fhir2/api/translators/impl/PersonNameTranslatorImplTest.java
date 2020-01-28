@@ -9,13 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
@@ -90,8 +90,9 @@ public class PersonNameTranslatorImplTest {
 		PersonName name = new PersonName();
 		name.setPrefix(PERSON_MIDDLE_NAME);
 		
-		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#prefix"),
+		assertThat(
+		    personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#prefix"),
 		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
 	}
 	
@@ -100,8 +101,9 @@ public class PersonNameTranslatorImplTest {
 		PersonName name = new PersonName();
 		name.setFamilyNamePrefix(PERSON_MIDDLE_NAME);
 		
-		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix"),
+		assertThat(
+		    personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix"),
 		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
 	}
 	
@@ -110,8 +112,9 @@ public class PersonNameTranslatorImplTest {
 		PersonName name = new PersonName();
 		name.setFamilyName2(PERSON_MIDDLE_NAME);
 		
-		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2"),
+		assertThat(
+		    personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyName2"),
 		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
 	}
 	
@@ -120,8 +123,9 @@ public class PersonNameTranslatorImplTest {
 		PersonName name = new PersonName();
 		name.setFamilyNameSuffix(PERSON_MIDDLE_NAME);
 		
-		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix"),
+		assertThat(
+		    personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix"),
 		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
 	}
 	
@@ -130,8 +134,9 @@ public class PersonNameTranslatorImplTest {
 		PersonName name = new PersonName();
 		name.setDegree(PERSON_MIDDLE_NAME);
 		
-		assertThat(personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
-		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#degree"),
+		assertThat(
+		    personNameTranslator.toFhirResource(name).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#degree"),
 		    hasProperty("value", hasProperty("value", equalTo(PERSON_MIDDLE_NAME))));
 	}
 	
@@ -142,8 +147,8 @@ public class PersonNameTranslatorImplTest {
 		name.setFamilyNameSuffix(PERSON_MIDDLE_NAME);
 		
 		// note that this throws an IllegalArgumentException if more than extension with the same URL occurs
-		Extension extension = personNameTranslator.toFhirResource(name).getExtensionByUrl(
-		    FhirConstants.OPENMRS_FHIR_EXT_NAME);
+		Extension extension = personNameTranslator.toFhirResource(name)
+		        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
 		assertThat(extension.getExtension().size(), greaterThan(1));
 	}
 	
@@ -173,8 +178,8 @@ public class PersonNameTranslatorImplTest {
 		name.addGiven(PERSON_MIDDLE_NAME);
 		name.addGiven(PERSON_MIDDLE_NAME_2);
 		
-		assertThat(personNameTranslator.toOpenmrsType(name).getMiddleName(), equalTo(PERSON_MIDDLE_NAME + " "
-		        + PERSON_MIDDLE_NAME_2));
+		assertThat(personNameTranslator.toOpenmrsType(name).getMiddleName(),
+		    equalTo(PERSON_MIDDLE_NAME + " " + PERSON_MIDDLE_NAME_2));
 	}
 	
 	@Test
@@ -200,8 +205,8 @@ public class PersonNameTranslatorImplTest {
 		HumanName name = new HumanName();
 		Extension nameExtension = name.addExtension();
 		nameExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
-		nameExtension.addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix", new StringType(
-		        PERSON_MIDDLE_NAME));
+		nameExtension.addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNamePrefix",
+		    new StringType(PERSON_MIDDLE_NAME));
 		
 		assertThat(personNameTranslator.toOpenmrsType(name).getFamilyNamePrefix(), equalTo(PERSON_MIDDLE_NAME));
 	}
@@ -221,8 +226,8 @@ public class PersonNameTranslatorImplTest {
 		HumanName name = new HumanName();
 		Extension nameExtension = name.addExtension();
 		nameExtension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME);
-		nameExtension.addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix", new StringType(
-		        PERSON_MIDDLE_NAME));
+		nameExtension.addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#familyNameSuffix",
+		    new StringType(PERSON_MIDDLE_NAME));
 		
 		assertThat(personNameTranslator.toOpenmrsType(name).getFamilyNameSuffix(), equalTo(PERSON_MIDDLE_NAME));
 	}

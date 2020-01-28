@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -17,9 +18,8 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.List;
 
@@ -38,7 +38,6 @@ import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
 import org.openmrs.api.PersonService;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
@@ -169,9 +168,8 @@ public class PersonTranslatorImplTest {
 		HumanName humanName = new HumanName();
 		humanName.addGiven(PERSON_GIVEN_NAME);
 		humanName.setFamily(PERSON_FAMILY_NAME);
-		when(
-		    nameTranslator.toFhirResource(argThat(allOf(hasProperty("givenName", equalTo(PERSON_GIVEN_NAME)),
-		        hasProperty("familyName", equalTo(PERSON_FAMILY_NAME)))))).thenReturn(humanName);
+		when(nameTranslator.toFhirResource(argThat(allOf(hasProperty("givenName", equalTo(PERSON_GIVEN_NAME)),
+		    hasProperty("familyName", equalTo(PERSON_FAMILY_NAME)))))).thenReturn(humanName);
 		
 		Person person = new Person();
 		PersonName name = new PersonName();
@@ -192,9 +190,9 @@ public class PersonTranslatorImplTest {
 		Address address = new Address();
 		address.setId(ADDRESS_UUID);
 		address.setCity(ADDRESS_CITY);
-		when(
-		    addressTranslator.toFhirResource(argThat(allOf(hasProperty("uuid", equalTo(ADDRESS_UUID)),
-		        hasProperty("cityVillage", equalTo(ADDRESS_CITY)))))).thenReturn(address);
+		when(addressTranslator.toFhirResource(
+		    argThat(allOf(hasProperty("uuid", equalTo(ADDRESS_UUID)), hasProperty("cityVillage", equalTo(ADDRESS_CITY))))))
+		            .thenReturn(address);
 		
 		Person person = new Person();
 		PersonAddress personAddress = new PersonAddress();
@@ -304,9 +302,9 @@ public class PersonTranslatorImplTest {
 		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
 		personAttribute.setAttributeType(attributeType);
 		Person person = new Person();
-
+		
 		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getTelecom(), notNullValue());
 	}
@@ -328,7 +326,7 @@ public class PersonTranslatorImplTest {
 		person.addTelecom(contactPoint);
 		
 		Person people = personTranslator.toOpenmrsType(person);
-
+		
 		assertThat(people, notNullValue());
 		assertThat(people.getAttributes(), notNullValue());
 		assertThat(people.getAttributes().isEmpty(), is(false));

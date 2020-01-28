@@ -44,35 +44,28 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Person> findPersonsByName(String name) {
-		return fhirPersonDao.findPersonsByName(name)
-				.stream()
-				.map(personTranslator::toFhirResource)
-				.collect(Collectors.toList());
+		return fhirPersonDao.findPersonsByName(name).stream().map(personTranslator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Person> findPersonsByBirthDate(Date birthDate) {
-		return fhirPersonDao.findPersonsByBirthDate(birthDate)
-				.stream()
-				.map(personTranslator::toFhirResource)
-				.collect(Collectors.toList());
+		return fhirPersonDao.findPersonsByBirthDate(birthDate).stream().map(personTranslator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender) {
-		return fhirPersonDao.findSimilarPeople(name, birthYear, gender)
-				.stream()
-				.map(personTranslator::toFhirResource).collect(Collectors.toList());
+		return fhirPersonDao.findSimilarPeople(name, birthYear, gender).stream().map(personTranslator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Person> findPersonsByGender(String gender) {
-		return fhirPersonDao.findPersonsByGender(gender)
-				.stream()
-				.map(personTranslator::toFhirResource)
-				.collect(Collectors.toList());
+		return fhirPersonDao.findPersonsByGender(gender).stream().map(personTranslator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 }

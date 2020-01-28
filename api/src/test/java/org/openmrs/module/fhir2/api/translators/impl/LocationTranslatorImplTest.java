@@ -9,14 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -222,7 +221,7 @@ public class LocationTranslatorImplTest {
 		attributeType.setName(LOCATION_ATTRIBUTE_TYPE_NAME);
 		attributeType.setUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
 		locationAttribute.setAttributeType(attributeType);
-
+		
 		org.hl7.fhir.r4.model.Location location = locationTranslator.toFhirResource(new Location());
 		assertThat(location, notNullValue());
 		assertThat(location.getTelecom(), notNullValue());
@@ -244,7 +243,7 @@ public class LocationTranslatorImplTest {
 		ContactPoint contactPoint = location.getTelecomFirstRep();
 		contactPoint.setId(LOCATION_ATTRIBUTE_UUID);
 		contactPoint.setValue(LOCATION_ATTRIBUTE_VALUE);
-
+		
 		Location omrsLocation = locationTranslator.toOpenmrsType(location);
 		assertThat(omrsLocation, notNullValue());
 		assertThat(omrsLocation.getAttributes(), notNullValue());

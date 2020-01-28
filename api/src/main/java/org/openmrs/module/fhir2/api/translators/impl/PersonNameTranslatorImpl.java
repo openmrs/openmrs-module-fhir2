@@ -60,36 +60,35 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 	@Override
 	public PersonName toOpenmrsType(PersonName personName, HumanName name) {
 		notNull(personName, "personName cannot be null");
-
+		
 		if (name == null) {
 			return personName;
 		}
-
+		
 		personName.setUuid(name.getId());
 		List<StringType> givenNames = name.getGiven();
 		if (!givenNames.isEmpty()) {
 			personName.setGivenName(givenNames.get(0).getValue());
-
+			
 			StringBuilder sb = new StringBuilder();
 			for (int i = 1; i < givenNames.size(); i++) {
 				sb.append(givenNames.get(i).getValue()).append(" ");
 			}
-
+			
 			if (sb.length() > 0) {
 				sb.deleteCharAt(sb.length() - 1);
 			}
-
+			
 			personName.setMiddleName(sb.toString());
 		}
-
+		
 		if (name.getFamily() != null) {
 			personName.setFamilyName(name.getFamily());
 		}
-
-		getOpenmrsNameExtension(name).ifPresent(ext ->
-				ext.getExtension().forEach(e -> addNameComponent(personName, e.getUrl(), ((StringType) e.getValue()).getValue()))
-		);
-
+		
+		getOpenmrsNameExtension(name).ifPresent(ext -> ext.getExtension()
+		        .forEach(e -> addNameComponent(personName, e.getUrl(), ((StringType) e.getValue()).getValue())));
+		
 		return personName;
 	}
 	
@@ -98,8 +97,8 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 			return;
 		}
 		
-		getOpenmrsNameExtension(name).orElseGet(() -> name.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME)).addExtension(
-		    FhirConstants.OPENMRS_FHIR_EXT_NAME + "#" + extensionProperty, new StringType(value));
+		getOpenmrsNameExtension(name).orElseGet(() -> name.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME))
+		        .addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#" + extensionProperty, new StringType(value));
 	}
 	
 	private void addNameComponent(@NotNull PersonName name, @NotNull String url, @NotNull String value) {

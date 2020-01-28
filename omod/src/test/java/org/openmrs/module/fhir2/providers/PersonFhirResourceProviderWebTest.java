@@ -27,17 +27,17 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderTest<PersonFhirResourceProvider, Person> {
-
+	
 	private static final String PERSON_UUID = "8a849d5e-6011-4279-a124-40ada5a687de";
-
+	
 	private static final String WRONG_PERSON_UUID = "9bf0d1ac-62a8-4440-a5a1-eb1015a7cc65";
-
+	
 	@Mock
 	private FhirPersonService personService;
-
+	
 	@Getter(AccessLevel.PUBLIC)
 	private PersonFhirResourceProvider resourceProvider;
-
+	
 	@Before
 	@Override
 	public void setup() throws Exception {
@@ -45,32 +45,28 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderT
 		resourceProvider.setFhirPersonService(personService);
 		super.setup();
 	}
-
+	
 	@Test
 	public void shouldReturnPersonByUuid() throws Exception {
 		Person person = new Person();
 		person.setId(PERSON_UUID);
 		when(personService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
-
-		MockHttpServletResponse response = get("/Person/" + PERSON_UUID)
-				.accept(FhirMediaTypes.JSON)
-				.go();
-
+		
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-
+		
 		Person resource = readResponse(response);
 		assertThat(resource.getIdElement().getIdPart(), equalTo(PERSON_UUID));
 	}
-
+	
 	@Test
 	public void shouldReturn404IfPersonNotFound() throws Exception {
 		when(personService.getPersonByUuid(WRONG_PERSON_UUID)).thenReturn(null);
-
-		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID)
-				.accept(FhirMediaTypes.JSON)
-				.go();
-
+		
+		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isNotFound());
 	}
 }

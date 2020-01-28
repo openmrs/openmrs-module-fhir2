@@ -62,8 +62,8 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	 * @param name Name of the person to search
 	 * @param birthDate The year of birth
 	 * @param gender Gender field to search on (Typically just "M" or "F")
-	 * @return Returns a bundle list of people. This list may contain multiple matching * resources,
-	 *         or it may also be empty.
+	 * @return Returns a bundle list of people. This list may contain multiple matching * resources, or
+	 *         it may also be empty.
 	 */
 	@Search
 	@SuppressWarnings("unused")

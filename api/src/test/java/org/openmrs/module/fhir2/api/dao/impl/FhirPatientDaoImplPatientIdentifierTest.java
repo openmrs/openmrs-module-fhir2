@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -92,8 +92,8 @@ public class FhirPatientDaoImplPatientIdentifierTest extends BaseModuleContextSe
 	
 	@Test
 	public void shouldReturnRetiredPatientIdentifierByUuid() {
-		PatientIdentifierType result = dao
-		        .getPatientIdentifierTypeByNameOrUuid(null, "d62a8faa-c405-48f7-a2a7-f3d0f72b6d30");
+		PatientIdentifierType result = dao.getPatientIdentifierTypeByNameOrUuid(null,
+		    "d62a8faa-c405-48f7-a2a7-f3d0f72b6d30");
 		assertThat(result, notNullValue());
 	}
 	

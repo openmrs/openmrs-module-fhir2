@@ -9,8 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import org.openmrs.EncounterProvider;
 import org.hl7.fhir.r4.model.Encounter;
+import org.openmrs.EncounterProvider;
 
 public interface EncounterParticipantTranslator extends ToFhirTranslator<EncounterProvider, Encounter.EncounterParticipantComponent>, UpdatableOpenmrsTranslator<EncounterProvider, Encounter.EncounterParticipantComponent> {
 	

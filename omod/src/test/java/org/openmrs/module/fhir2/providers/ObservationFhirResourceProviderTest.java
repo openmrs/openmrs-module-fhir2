@@ -24,45 +24,43 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirObservationService;
-import org.openmrs.module.fhir2.web.servlet.BaseFhirResourceProviderTest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationFhirResourceProviderTest {
-
+	
 	private static final String OBSERVATION_UUID = "1223h34-34nj3-34nj34-34nj";
-
+	
 	private static final String WRONG_OBSERVATION_UUID = "hj243h34-cb4vsd-34xxx34-ope4jj";
-
+	
 	@Mock
 	private FhirObservationService observationService;
-
+	
 	@Getter(AccessLevel.PUBLIC)
 	private ObservationFhirResourceProvider resourceProvider;
-
+	
 	private Observation observation;
-
+	
 	@Before
 	public void setup() {
 		resourceProvider = new ObservationFhirResourceProvider();
 		resourceProvider.setObservationService(observationService);
 	}
-
+	
 	@Before
 	public void initObservation() {
 		observation = new Observation();
 		observation.setId(OBSERVATION_UUID);
 		observation.setStatus(Observation.ObservationStatus.UNKNOWN);
 	}
-
+	
 	@Test
 	public void getResourceType_shouldReturnResourceType() {
 		assertThat(resourceProvider.getResourceType(), equalTo(Observation.class));
 		assertThat(resourceProvider.getResourceType().getName(), equalTo(Observation.class.getName()));
 	}
-
+	
 	@Test
 	public void getObservationByUuid_shouldReturnMatchingObservation() {
 		when(observationService.getObservationByUuid(OBSERVATION_UUID)).thenReturn(observation);
@@ -73,7 +71,7 @@ public class ObservationFhirResourceProviderTest {
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(OBSERVATION_UUID));
 	}
-
+	
 	@Test(expected = ResourceNotFoundException.class)
 	public void getObservationWithWrongUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();

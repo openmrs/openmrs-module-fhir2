@@ -23,21 +23,21 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.TestOrder;
+import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
-import org.openmrs.module.fhir2.FhirTestConstants;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirServiceRequestServiceImplTest {
 	
 	private static final String SERVICE_REQUEST_UUID = "249b9094-b812-4b0c-a204-0052a05c657f";
-
+	
 	private static final ServiceRequest.ServiceRequestStatus STATUS = ServiceRequest.ServiceRequestStatus.ACTIVE;
-
+	
 	private static final ServiceRequest.ServiceRequestPriority PRIORITY = ServiceRequest.ServiceRequestPriority.ROUTINE;
-
+	
 	private static final String LOINC_CODE = "1000-1";
-
+	
 	@Mock
 	private ServiceRequestTranslator translator;
 	
@@ -58,7 +58,7 @@ public class FhirServiceRequestServiceImplTest {
 		
 		order = new TestOrder();
 		order.setUuid(SERVICE_REQUEST_UUID);
-
+		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding loincCoding = codeableConcept.addCoding();
 		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);

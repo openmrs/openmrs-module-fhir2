@@ -91,7 +91,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	public List<ContactPoint> getPersonContactDetails(@NotNull Person person) {
 		List<ContactPoint> contactPoints = new ArrayList<>();
 		PersonAttributeType contactAttributeType = personService.getPersonAttributeTypeByUuid(
-				globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY));
+		    globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY));
 		person.getActiveAttributes().forEach(personAttribute -> {
 			if (personAttribute.getAttributeType().equals(contactAttributeType)) {
 				contactPoints.add(telecomTranslator.toFhirResource(personAttribute));
@@ -114,7 +114,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			patientReference.setId(uri);
 			linkComponent.setTarget(patientReference);
 			links.add(linkComponent);
-
+			
 			person.setLink(links);
 		}
 	}
@@ -147,12 +147,11 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		for (Address address : person.getAddress()) {
 			openmrsPerson.addAddress(addressTranslator.toOpenmrsType(address));
 		}
-		Set<PersonAttribute> attributes = person.getTelecom()
-				.stream()
-				.map( contactPoint -> (PersonAttribute)telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
-				.collect(Collectors.toSet());
+		Set<PersonAttribute> attributes = person.getTelecom().stream()
+		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
+		        .collect(Collectors.toSet());
 		openmrsPerson.setAttributes(attributes);
-
+		
 		return openmrsPerson;
 	}
 }

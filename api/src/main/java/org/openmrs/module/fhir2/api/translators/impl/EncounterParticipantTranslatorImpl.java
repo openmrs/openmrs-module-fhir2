@@ -45,8 +45,8 @@ public class EncounterParticipantTranslatorImpl implements EncounterParticipantT
 		if (encounterParticipantComponent == null) {
 			return encounterProvider;
 		}
-		String practitionerUuid = FhirReferenceUtils.extractUuid(encounterParticipantComponent.getIndividual()
-		        .getReference());
+		String practitionerUuid = FhirReferenceUtils
+		        .extractUuid(encounterParticipantComponent.getIndividual().getReference());
 		Provider provider = practitionerTranslator
 		        .toOpenmrsType(practitionerService.getPractitionerByUuid(practitionerUuid));
 		encounterProvider.setProvider(provider);

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -16,7 +17,6 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -93,7 +93,7 @@ public class ConceptTranslatorImplTest {
 		loinc.setConceptSource(loincConceptSource);
 		loinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
 		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.of(loinc));
-
+		
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), not(empty()));
@@ -119,7 +119,7 @@ public class ConceptTranslatorImplTest {
 		ciel.setConceptSource(cielConceptSource);
 		ciel.setUrl(FhirTestConstants.CIEL_SYSTEM_URN);
 		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("CIEL")).thenReturn(Optional.of(ciel));
-
+		
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), not(empty()));
@@ -139,7 +139,7 @@ public class ConceptTranslatorImplTest {
 		when(conceptSource.getName()).thenReturn("Unknown");
 		when(concept.getConceptMappings()).thenReturn(conceptMaps);
 		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("Unknown")).thenReturn(Optional.empty());
-
+		
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), not(hasItem(hasProperty("code", equalTo("1650")))));
@@ -188,8 +188,8 @@ public class ConceptTranslatorImplTest {
 		FhirConceptSource fhirLoincSource = new FhirConceptSource();
 		fhirLoincSource.setConceptSource(loinc);
 		fhirLoincSource.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		when(conceptSourceService.getFhirConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL)).thenReturn(
-		    Optional.of(fhirLoincSource));
+		when(conceptSourceService.getFhirConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL))
+		        .thenReturn(Optional.of(fhirLoincSource));
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());
@@ -228,8 +228,8 @@ public class ConceptTranslatorImplTest {
 		FhirConceptSource fhirLoincSource = new FhirConceptSource();
 		fhirLoincSource.setConceptSource(loinc);
 		fhirLoincSource.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		when(conceptSourceService.getFhirConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL)).thenReturn(
-		    Optional.of(fhirLoincSource));
+		when(conceptSourceService.getFhirConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL))
+		        .thenReturn(Optional.of(fhirLoincSource));
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, equalTo(loincConcept));
@@ -258,8 +258,8 @@ public class ConceptTranslatorImplTest {
 		FhirConceptSource fhirCielSource = new FhirConceptSource();
 		fhirCielSource.setConceptSource(ciel);
 		fhirCielSource.setUrl(FhirTestConstants.CIEL_SYSTEM_URN);
-		when(conceptSourceService.getFhirConceptSourceByUrl(FhirTestConstants.CIEL_SYSTEM_URN)).thenReturn(
-		    Optional.of(fhirCielSource));
+		when(conceptSourceService.getFhirConceptSourceByUrl(FhirTestConstants.CIEL_SYSTEM_URN))
+		        .thenReturn(Optional.of(fhirCielSource));
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());

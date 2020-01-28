@@ -184,8 +184,8 @@ public class TelecomTranslatorImplTest {
 		contactPoint.setId(NEW_PERSON_ATTRIBUTE_UUID);
 		contactPoint.setValue(NEW_PERSON_ATTRIBUTE_VALUE);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
-		    PERSON_ATTRIBUTE_TYPE_UUID);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY))
+		        .thenReturn(PERSON_ATTRIBUTE_TYPE_UUID);
 		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
 		PersonAttribute result = (PersonAttribute) telecomTranslator.toOpenmrsType(personAttribute, contactPoint);
@@ -203,8 +203,8 @@ public class TelecomTranslatorImplTest {
 		attributeType.setName(ATTRIBUTE_TYPE_NAME);
 		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
-		    PERSON_ATTRIBUTE_TYPE_UUID);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY))
+		        .thenReturn(PERSON_ATTRIBUTE_TYPE_UUID);
 		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
 		PersonAttribute result = (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint);
@@ -300,8 +300,8 @@ public class TelecomTranslatorImplTest {
 		contactPoint.setId(TEST_LOCATION_ATTRIBUTE_UUID);
 		contactPoint.setValue(TEST_LOCATION_ATTRIBUTE_VALUE);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
-		    LOCATION_ATTRIBUTE_TYPE_UUID);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY))
+		        .thenReturn(LOCATION_ATTRIBUTE_TYPE_UUID);
 		when(locationService.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
 		LocationAttribute attribute = (LocationAttribute) telecomTranslator.toOpenmrsType(locationAttribute, contactPoint);
@@ -321,8 +321,8 @@ public class TelecomTranslatorImplTest {
 		attributeType.setUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
 		attributeType.setName(LOCATION_ATTRIBUTE_TYPE_NAME);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
-		    LOCATION_ATTRIBUTE_TYPE_UUID);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY))
+		        .thenReturn(LOCATION_ATTRIBUTE_TYPE_UUID);
 		when(locationService.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
 		LocationAttribute locationAttribute = (LocationAttribute) telecomTranslator.toOpenmrsType(new LocationAttribute(),
@@ -354,8 +354,8 @@ public class TelecomTranslatorImplTest {
 	public void shouldTranslateFhirContactPointIdToProviderAttributeUuid() {
 		ContactPoint contactPoint = new ContactPoint();
 		contactPoint.setId(CONTACT_POINT_ID);
-		ProviderAttribute result = (ProviderAttribute) telecomTranslator
-		        .toOpenmrsType(new ProviderAttribute(), contactPoint);
+		ProviderAttribute result = (ProviderAttribute) telecomTranslator.toOpenmrsType(new ProviderAttribute(),
+		    contactPoint);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(CONTACT_POINT_ID));
 	}
@@ -364,8 +364,8 @@ public class TelecomTranslatorImplTest {
 	public void shouldTranslateFhirContactPointValueToProviderAttributeValue() {
 		ContactPoint contactPoint = new ContactPoint();
 		contactPoint.setValue(CONTACT_POINT_VALUE);
-		ProviderAttribute result = (ProviderAttribute) telecomTranslator
-		        .toOpenmrsType(new ProviderAttribute(), contactPoint);
+		ProviderAttribute result = (ProviderAttribute) telecomTranslator.toOpenmrsType(new ProviderAttribute(),
+		    contactPoint);
 		assertThat(result, notNullValue());
 		assertThat(result.getValue(), equalTo(CONTACT_POINT_VALUE));
 	}
@@ -412,8 +412,8 @@ public class TelecomTranslatorImplTest {
 		contactPoint.setId(NEW_PERSON_ATTRIBUTE_UUID);
 		contactPoint.setValue(NEW_PERSON_ATTRIBUTE_VALUE);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
-		    PROVIDER_ATTRIBUTE_TYPE_UUID);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY))
+		        .thenReturn(PROVIDER_ATTRIBUTE_TYPE_UUID);
 		when(providerService.getProviderAttributeTypeByUuid(PROVIDER_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
 		ProviderAttribute result = (ProviderAttribute) telecomTranslator.toOpenmrsType(providerAttribute, contactPoint);
@@ -431,12 +431,12 @@ public class TelecomTranslatorImplTest {
 		attributeType.setName(PROVIDER_ATTRIBUTE_TYPE_NAME);
 		attributeType.setUuid(PROVIDER_ATTRIBUTE_TYPE_UUID);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY)).thenReturn(
-		    PROVIDER_ATTRIBUTE_TYPE_UUID);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY))
+		        .thenReturn(PROVIDER_ATTRIBUTE_TYPE_UUID);
 		when(providerService.getProviderAttributeTypeByUuid(PROVIDER_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
-		ProviderAttribute result = (ProviderAttribute) telecomTranslator
-		        .toOpenmrsType(new ProviderAttribute(), contactPoint);
+		ProviderAttribute result = (ProviderAttribute) telecomTranslator.toOpenmrsType(new ProviderAttribute(),
+		    contactPoint);
 		assertThat(result, notNullValue());
 		assertThat(result.getAttributeType().getUuid(), equalTo(PROVIDER_ATTRIBUTE_TYPE_UUID));
 	}

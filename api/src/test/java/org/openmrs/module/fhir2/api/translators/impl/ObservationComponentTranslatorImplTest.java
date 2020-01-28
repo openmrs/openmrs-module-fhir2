@@ -9,12 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.when;
@@ -168,10 +168,10 @@ public class ObservationComponentTranslatorImplTest {
 			((Obs) i.getArguments()[0]).setValueNumeric(((Quantity) i.getArguments()[1]).getValue().doubleValue());
 			return i.getArguments()[0];
 		});
-
+		
 		Obs obs = new Obs();
 		Obs result = observationComponentTranslator.toOpenmrsType(obs, component);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getValueNumeric(), notNullValue());
 		assertThat(result.getValueNumeric(), equalTo(130d));

@@ -43,40 +43,35 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Location> findLocationByName(String name) {
-		return locationDao.findLocationByName(name).
-				stream().map(locationTranslator::toFhirResource)
-				.collect(Collectors.toList());
+		return locationDao.findLocationByName(name).stream().map(locationTranslator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Location> findLocationsByCity(String city) {
-		return locationDao.findLocationsByCity(city).stream()
-				.map(locationTranslator::toFhirResource)
-				.collect(Collectors.toList());
+		return locationDao.findLocationsByCity(city).stream().map(locationTranslator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Location> findLocationsByCountry(String country) {
-		return locationDao.findLocationsByCountry(country).stream()
-				.map(locationTranslator::toFhirResource)
-				.collect(Collectors.toList());
+		return locationDao.findLocationsByCountry(country).stream().map(locationTranslator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Location> findLocationsByPostalCode(String postalCode) {
-		return locationDao.findLocationsByPostalCode(postalCode).stream()
-				.map(locationTranslator::toFhirResource)
-				.collect(Collectors.toList());
+		return locationDao.findLocationsByPostalCode(postalCode).stream().map(locationTranslator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Location> findLocationsByState(String state) {
-		return locationDao.findLocationsByState(state).stream()
-				.map(locationTranslator::toFhirResource)
-				.collect(Collectors.toList());
+		return locationDao.findLocationsByState(state).stream().map(locationTranslator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 }

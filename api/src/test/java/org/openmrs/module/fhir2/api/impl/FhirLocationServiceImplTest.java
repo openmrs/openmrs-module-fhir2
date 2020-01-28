@@ -9,9 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +55,7 @@ public class FhirLocationServiceImplTest {
 	private FhirLocationServiceImpl fhirLocationService;
 	
 	private Location location;
-
+	
 	private org.hl7.fhir.r4.model.Location fhirLocation;
 	
 	@Before
@@ -75,7 +75,7 @@ public class FhirLocationServiceImplTest {
 		fhirLocation.setId(LOCATION_UUID);
 		fhirLocation.setName(LOCATION_NAME);
 		fhirLocation.setDescription(LOCATION_DESCRIPTION);
-
+		
 		Address address = new Address();
 		address.setCity(LOCATION_CITY);
 		address.setPostalCode(POSTAL_CODE);
@@ -90,7 +90,7 @@ public class FhirLocationServiceImplTest {
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 		
 		org.hl7.fhir.r4.model.Location result = fhirLocationService.getLocationByUuid(LOCATION_UUID);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(LOCATION_UUID));
 		assertThat(result.getName(), equalTo(LOCATION_NAME));
@@ -103,9 +103,9 @@ public class FhirLocationServiceImplTest {
 		locations.add(location);
 		when(locationDao.findLocationByName(LOCATION_NAME)).thenReturn(locations);
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-
+		
 		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationByName(LOCATION_NAME);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 	}
@@ -116,48 +116,48 @@ public class FhirLocationServiceImplTest {
 		locations.add(location);
 		when(locationDao.findLocationsByCity(LOCATION_CITY)).thenReturn(locations);
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-
+		
 		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByCity(LOCATION_CITY);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void findLocationsByCountry_shouldFindLocationsByCountry(){
+	public void findLocationsByCountry_shouldFindLocationsByCountry() {
 		Collection<Location> locations = new ArrayList<>();
 		locations.add(location);
 		when(locationDao.findLocationsByCountry(LOCATION_COUNTRY)).thenReturn(locations);
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-
+		
 		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByCountry(LOCATION_COUNTRY);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void findLocationsByPostalCode_shouldFindLocationsByPostalCode(){
+	public void findLocationsByPostalCode_shouldFindLocationsByPostalCode() {
 		Collection<Location> locations = new ArrayList<>();
 		locations.add(location);
 		when(locationDao.findLocationsByPostalCode(POSTAL_CODE)).thenReturn(locations);
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-
+		
 		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByPostalCode(POSTAL_CODE);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void findLocationsByCityState_shouldFindLocationsByState(){
+	public void findLocationsByCityState_shouldFindLocationsByState() {
 		Collection<Location> locations = new ArrayList<>();
 		locations.add(location);
 		when(locationDao.findLocationsByState(LOCATION_STATE)).thenReturn(locations);
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-
+		
 		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByState(LOCATION_STATE);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}

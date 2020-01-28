@@ -17,13 +17,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
-import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
 
 public class FhirReferenceUtilsTest {
@@ -52,8 +52,8 @@ public class FhirReferenceUtilsTest {
 	
 	private static final String PROVIDER_URI = FhirConstants.PROVIDER + "/" + PROVIDER_UUID;
 	
-	private static final String PROVIDER_DISPLAY = "Ricky Morty(" + FhirConstants.IDENTIFIER + ":"
-	        + PROVIDER_TEST_IDENTIFIER + ")";
+	private static final String PROVIDER_DISPLAY = "Ricky Morty(" + FhirConstants.IDENTIFIER + ":" + PROVIDER_TEST_IDENTIFIER
+	        + ")";
 	
 	private static final String LOCATION_UUID = "2321gh23-kj34h45-34jk3-34k34k";
 	

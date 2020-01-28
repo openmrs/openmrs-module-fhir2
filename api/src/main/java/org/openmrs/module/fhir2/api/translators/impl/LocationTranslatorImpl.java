@@ -82,12 +82,12 @@ public class LocationTranslatorImpl implements LocationTranslator {
 		return fhirLocation;
 	}
 	
-	protected List<ContactPoint> getLocationContactDetails(@NotNull org.openmrs.Location location){
+	protected List<ContactPoint> getLocationContactDetails(@NotNull org.openmrs.Location location) {
 		List<ContactPoint> contactPoints = new ArrayList<>();
 		LocationAttributeType locationAttributeType = locationService.getLocationAttributeTypeByUuid(
-				propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY));
-		for (LocationAttribute attribute : location.getActiveAttributes()){
-			if (attribute.getAttributeType().equals(locationAttributeType)){
+		    propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY));
+		for (LocationAttribute attribute : location.getActiveAttributes()) {
+			if (attribute.getAttributeType().equals(locationAttributeType)) {
 				contactPoints.add(telecomTranslator.toFhirResource(attribute));
 			}
 		}
@@ -109,11 +109,10 @@ public class LocationTranslatorImpl implements LocationTranslator {
 			openmrsLocation.setStateProvince(fhirLocation.getAddress().getState());
 			openmrsLocation.setCountry(fhirLocation.getAddress().getCountry());
 			openmrsLocation.setPostalCode(fhirLocation.getAddress().getPostalCode());
-
-			Set<LocationAttribute> attributes = fhirLocation.getTelecom()
-					.stream()
-					.map(contactPoint -> (LocationAttribute)telecomTranslator.toOpenmrsType(new LocationAttribute(),contactPoint))
-					.collect(Collectors.toSet());
+			
+			Set<LocationAttribute> attributes = fhirLocation.getTelecom().stream().map(
+			    contactPoint -> (LocationAttribute) telecomTranslator.toOpenmrsType(new LocationAttribute(), contactPoint))
+			        .collect(Collectors.toSet());
 			openmrsLocation.setAttributes(attributes);
 		}
 		return openmrsLocation;

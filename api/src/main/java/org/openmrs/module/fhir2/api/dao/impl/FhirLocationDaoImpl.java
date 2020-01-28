@@ -64,7 +64,7 @@ public class FhirLocationDaoImpl implements FhirLocationDao {
 	
 	@Override
 	public Collection<Location> findLocationsByState(String state) {
-		return sessionFactory.getCurrentSession().createCriteria(Location.class)
-		        .add(Restrictions.eq("stateProvince", state)).list();
+		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(Restrictions.eq("stateProvince", state))
+		        .list();
 	}
 }

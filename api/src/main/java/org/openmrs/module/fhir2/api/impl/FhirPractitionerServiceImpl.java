@@ -49,6 +49,7 @@ public class FhirPractitionerServiceImpl implements FhirPractitionerService {
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Practitioner> findPractitionerByIdentifier(String identifier) {
-		return dao.findProviderByIdentifier(identifier).stream().map(translator::toFhirResource).collect(Collectors.toList());
+		return dao.findProviderByIdentifier(identifier).stream().map(translator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 }

@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -45,9 +45,9 @@ public class FhirGlobalPropertyServiceImplTest {
 	@Test
 	public void shouldReturnStringGlobalPropertyWhenPropertyMatched() {
 		when(fhirGlobalPropertyDao.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE)).thenReturn(PERSON_ATTRIBUTE_TYPE_UUID);
-
+		
 		String personAttributeTypeUuid = globalPropertyService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE);
-
+		
 		assertThat(personAttributeTypeUuid, notNullValue());
 		assertThat(personAttributeTypeUuid, equalTo(PERSON_ATTRIBUTE_TYPE_UUID));
 	}
@@ -55,7 +55,7 @@ public class FhirGlobalPropertyServiceImplTest {
 	@Test
 	public void shouldReturnNullWhenGlobalPropertyNotFound() {
 		String personAttributeTypeUuid = globalPropertyService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_VALUE);
-
+		
 		assertThat(personAttributeTypeUuid, nullValue());
 	}
 	

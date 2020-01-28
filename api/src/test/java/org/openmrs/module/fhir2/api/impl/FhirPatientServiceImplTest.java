@@ -104,7 +104,7 @@ public class FhirPatientServiceImplTest {
 		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.findPatientsByName(PATIENT_GIVEN_NAME);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(),equalTo(1));
+		assertThat(results.size(), equalTo(1));
 	}
 	
 	@Test
@@ -115,7 +115,7 @@ public class FhirPatientServiceImplTest {
 		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.findPatientsByGivenName(PATIENT_GIVEN_NAME);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(),equalTo(1));
+		assertThat(results.size(), equalTo(1));
 	}
 	
 	@Test
@@ -126,7 +126,7 @@ public class FhirPatientServiceImplTest {
 		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.findPatientsByFamilyName(PATIENT_FAMILY_NAME);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(),equalTo(1));
+		assertThat(results.size(), equalTo(1));
 	}
 	
 	@Test
@@ -134,7 +134,8 @@ public class FhirPatientServiceImplTest {
 		Collection<Patient> patients = new ArrayList<>();
 		patients.add(patient);
 		when(dao.findPatientsByGivenName(PATIENT_PARTIAL_GIVEN_NAME)).thenReturn(patients);
-		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.findPatientsByGivenName(PATIENT_PARTIAL_GIVEN_NAME);
+		Collection<org.hl7.fhir.r4.model.Patient> results = patientService
+		        .findPatientsByGivenName(PATIENT_PARTIAL_GIVEN_NAME);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -145,7 +146,8 @@ public class FhirPatientServiceImplTest {
 		Collection<Patient> patients = new ArrayList<>();
 		patients.add(patient);
 		when(dao.findPatientsByGivenName(PATIENT_PARTIAL_FAMILY_NAME)).thenReturn(patients);
-		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.findPatientsByGivenName(PATIENT_PARTIAL_FAMILY_NAME);
+		Collection<org.hl7.fhir.r4.model.Patient> results = patientService
+		        .findPatientsByGivenName(PATIENT_PARTIAL_FAMILY_NAME);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.size(), greaterThanOrEqualTo(1));

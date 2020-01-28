@@ -52,9 +52,8 @@ public class FhirPatientDaoImpl implements FhirPatientDao {
 	@SuppressWarnings("unchecked")
 	public PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid) {
 		List<PatientIdentifierType> identifierTypes = (List<PatientIdentifierType>) sessionFactory.getCurrentSession()
-				.createCriteria(PatientIdentifierType.class).add(or(
-					and(eq("name", name), eq("retired", false)),
-						eq("uuid", uuid))).list();
+		        .createCriteria(PatientIdentifierType.class)
+		        .add(or(and(eq("name", name), eq("retired", false)), eq("uuid", uuid))).list();
 		
 		if (identifierTypes.isEmpty()) {
 			return null;
@@ -63,7 +62,8 @@ public class FhirPatientDaoImpl implements FhirPatientDao {
 			if (uuid != null) {
 				try {
 					return identifierTypes.stream().filter((idType) -> uuid.equals(idType.getUuid())).findFirst().get();
-				} catch (NoSuchElementException ignored) {}
+				}
+				catch (NoSuchElementException ignored) {}
 			}
 			
 			return identifierTypes.get(0);

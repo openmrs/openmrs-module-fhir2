@@ -30,50 +30,50 @@ import org.openmrs.module.fhir2.api.FhirTaskService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskFhirResourceProviderTest {
-
+	
 	private static final String TASK_UUID = "bdd7e368-3d1a-42a9-9538-395391b64adf";
-
+	
 	private static final String WRONG_TASK_UUID = "df34a1c1-f57b-4c33-bee5-e601b56b9d5b";
-
+	
 	@Mock
 	private FhirTaskService taskService;
-
+	
 	@Getter(AccessLevel.PUBLIC)
 	private TaskFhirResourceProvider resourceProvider;
-
+	
 	private Task task;
-
+	
 	@Before
 	public void setup() {
 		resourceProvider = new TaskFhirResourceProvider();
 		resourceProvider.setService(taskService);
 	}
-
+	
 	@Before
 	public void initTask() {
 		task = new Task();
 		task.setId(TASK_UUID);
 	}
-
+	
 	@Test
 	public void getResourceType_shouldReturnResourceType() {
 		assertThat(resourceProvider.getResourceType(), equalTo(Task.class));
 		assertThat(resourceProvider.getResourceType().getName(), equalTo(Task.class.getName()));
 	}
-
+	
 	@Test
 	public void getTaskById_shouldReturnMatchingTask() {
 		IdType id = new IdType();
 		id.setValue(TASK_UUID);
 		when(taskService.getTaskByUuid(TASK_UUID)).thenReturn(task);
-
+		
 		Task result = resourceProvider.getTaskById(id);
 		assertThat(result.isResource(), is(true));
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(TASK_UUID));
 	}
-
+	
 	@Test(expected = ResourceNotFoundException.class)
 	public void getTaskByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
@@ -81,5 +81,5 @@ public class TaskFhirResourceProviderTest {
 		assertThat(resourceProvider.getTaskById(idType).isResource(), is(true));
 		assertThat(resourceProvider.getTaskById(idType), nullValue());
 	}
-
+	
 }

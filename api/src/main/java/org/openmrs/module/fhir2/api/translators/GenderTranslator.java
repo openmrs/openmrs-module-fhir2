@@ -14,8 +14,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 public interface GenderTranslator extends OpenmrsFhirTranslator<String, Enumerations.AdministrativeGender> {
 	
 	/**
-	 * Maps an OpenMRS gender code to an
-	 * {@link org.hl7.fhir.r4.model.Enumerations.AdministrativeGender}
+	 * Maps an OpenMRS gender code to an {@link org.hl7.fhir.r4.model.Enumerations.AdministrativeGender}
 	 * 
 	 * @param gender the gender to translate
 	 * @return the corresponding FHIR gender
@@ -24,8 +23,7 @@ public interface GenderTranslator extends OpenmrsFhirTranslator<String, Enumerat
 	Enumerations.AdministrativeGender toFhirResource(String gender);
 	
 	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.Enumerations.AdministrativeGender} to an OpenMRS gender
-	 * code
+	 * Maps an {@link org.hl7.fhir.r4.model.Enumerations.AdministrativeGender} to an OpenMRS gender code
 	 * 
 	 * @param gender the gender to translate
 	 * @return the corresponding OpenMRS gender code

@@ -75,13 +75,12 @@ public class PractitionerTranslatorImpl implements PractitionerTranslator {
 			existingProvider.setDateRetired(new Date());
 			existingProvider.setRetireReason("Retired By FHIR module");
 		}
-
-		Set<ProviderAttribute> attributes = practitioner.getTelecom()
-				.stream()
-				.map( contactPoint -> (ProviderAttribute)telecomTranslator.toOpenmrsType(new ProviderAttribute(), contactPoint))
-				.collect(Collectors.toSet());
+		
+		Set<ProviderAttribute> attributes = practitioner.getTelecom().stream().map(
+		    contactPoint -> (ProviderAttribute) telecomTranslator.toOpenmrsType(new ProviderAttribute(), contactPoint))
+		        .collect(Collectors.toSet());
 		existingProvider.setAttributes(attributes);
-
+		
 		return existingProvider;
 	}
 	
@@ -117,7 +116,7 @@ public class PractitionerTranslatorImpl implements PractitionerTranslator {
 	public List<ContactPoint> getProviderContactDetails(@NotNull Provider provider) {
 		List<ContactPoint> contactPoints = new ArrayList<>();
 		ProviderAttributeType providerAttributeType = providerService.getProviderAttributeTypeByUuid(
-				globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY));
+		    globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY));
 		provider.getAttributes().forEach(providerAttribute -> {
 			if (providerAttribute.getAttributeType().equals(providerAttributeType)) {
 				contactPoints.add(telecomTranslator.toFhirResource(providerAttribute));

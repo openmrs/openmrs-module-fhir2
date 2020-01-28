@@ -42,10 +42,10 @@ public interface ObservationTranslator extends ToFhirTranslator<Obs, Observation
 			return obs;
 		});
 	}
-
+	
 	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.Observation} to an existing {@link org.openmrs.Obs}, but provides a means
-	 * to update an existing Obs in the Obs group
+	 * Maps an {@link org.hl7.fhir.r4.model.Observation} to an existing {@link org.openmrs.Obs}, but
+	 * provides a means to update an existing Obs in the Obs group
 	 *
 	 * @param existingObs the observation to update
 	 * @param observation the observation to translate

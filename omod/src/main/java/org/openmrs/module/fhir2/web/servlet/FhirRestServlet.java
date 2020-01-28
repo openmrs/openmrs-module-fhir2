@@ -38,7 +38,7 @@ public class FhirRestServlet extends RestfulServer {
 	
 	@Inject
 	private FhirGlobalPropertyService globalPropertyService;
-
+	
 	@Inject
 	@Named("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
@@ -50,10 +50,10 @@ public class FhirRestServlet extends RestfulServer {
 			SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, getServletContext());
 		}
 		
-		int defaultPageSize = NumberUtils.toInt(
-		    globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE), 10);
-		int maximumPageSize = NumberUtils.toInt(
-		    globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE), 100);
+		int defaultPageSize = NumberUtils
+		        .toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE), 10);
+		int maximumPageSize = NumberUtils
+		        .toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE), 100);
 		
 		FifoMemoryPagingProvider pp = new FifoMemoryPagingProvider(defaultPageSize);
 		pp.setDefaultPageSize(defaultPageSize);
@@ -71,8 +71,8 @@ public class FhirRestServlet extends RestfulServer {
 	
 	@Override
 	protected String getRequestPath(String requestFullPath, String servletContextPath, String servletPath) {
-		return requestFullPath.substring(escapedLength(servletContextPath) + escapedLength(servletPath)
-		        + escapedLength("/fhir2Servlet"));
+		return requestFullPath
+		        .substring(escapedLength(servletContextPath) + escapedLength(servletPath) + escapedLength("/fhir2Servlet"));
 	}
 	
 	@Override

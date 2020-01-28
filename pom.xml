@@ -554,11 +554,18 @@
 					</configuration>
 					<dependencies>
 						<dependency>
-							<groupId>org.openmrs.test</groupId>
-							<artifactId>openmrs-test</artifactId>
+							<groupId>org.openmrs.tools</groupId>
+							<artifactId>openmrs-tools</artifactId>
 							<version>${openmrsPlatformVersion}</version>
 						</dependency>
 					</dependencies>
+					<executions>
+						<execution>
+							<goals>
+								<goal>format</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>net.revelc.code</groupId>
@@ -568,6 +575,13 @@
 						<groups>javax, java, *</groups>
 						<removeUnused>true</removeUnused>
 					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>sort</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>

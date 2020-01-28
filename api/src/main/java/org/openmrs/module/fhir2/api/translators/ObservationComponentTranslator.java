@@ -15,8 +15,7 @@ import org.openmrs.Obs;
 public interface ObservationComponentTranslator extends ToFhirTranslator<Obs, Observation.ObservationComponentComponent>, UpdatableOpenmrsTranslator<Obs, Observation.ObservationComponentComponent> {
 	
 	/**
-	 * Maps an {@link Obs} to an
-	 * {@link org.hl7.fhir.r4.model.Observation.ObservationComponentComponent}
+	 * Maps an {@link Obs} to an {@link org.hl7.fhir.r4.model.Observation.ObservationComponentComponent}
 	 * 
 	 * @param obs the observation to translate
 	 * @return the corresponding FHIR observation component
@@ -25,8 +24,7 @@ public interface ObservationComponentTranslator extends ToFhirTranslator<Obs, Ob
 	Observation.ObservationComponentComponent toFhirResource(Obs obs);
 	
 	/**
-	 * Maps an {@link org.hl7.fhir.r4.model.Observation.ObservationComponentComponent} to an
-	 * {@link Obs}
+	 * Maps an {@link org.hl7.fhir.r4.model.Observation.ObservationComponentComponent} to an {@link Obs}
 	 * 
 	 * @param obs the existing observation
 	 * @param observationComponent the observation to translate

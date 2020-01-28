@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
@@ -16,7 +17,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
@@ -90,9 +90,9 @@ public class FhirPersonServiceImplTest {
 		person.setGender("M");
 		person.addName(name);
 		people.add(person);
-
+		
 		when(dao.findPersonsByName(GIVEN_NAME)).thenReturn(people);
-
+		
 		Collection<Person> personCollection = personService.findPersonsByName(GIVEN_NAME);
 		assertNotNull(personCollection);
 		assertEquals(personCollection.size(), 1);
@@ -110,7 +110,7 @@ public class FhirPersonServiceImplTest {
 		person.addName(name);
 		people.add(person);
 		when(dao.findPersonsByName(PERSON_PARTIAL_NAME)).thenReturn(people);
-
+		
 		Collection<Person> personCollection = personService.findPersonsByName(PERSON_PARTIAL_NAME);
 		assertNotNull(personCollection);
 		assertThat(personCollection, not(empty()));
@@ -134,9 +134,9 @@ public class FhirPersonServiceImplTest {
 		person.setGender(GENDER);
 		person.addName(name);
 		people.add(person);
-
+		
 		when(dao.findSimilarPeople(GIVEN_NAME, PERSON_BIRTH_YEAR, GENDER)).thenReturn(people);
-
+		
 		Collection<Person> personCollection = personService.findSimilarPeople(GIVEN_NAME, PERSON_BIRTH_YEAR, GENDER);
 		assertNotNull(personCollection);
 		assertThat(personCollection.size(), greaterThanOrEqualTo(1));
@@ -145,10 +145,10 @@ public class FhirPersonServiceImplTest {
 	@Test
 	public void shouldReturnEmptyListWhenPersonNameGenderBirthYearNotMatched() {
 		Collection<org.openmrs.Person> people = new ArrayList<>();
-
-		when(dao.findSimilarPeople(NOT_FOUND_NAME,NON_PERSON_BIRTH_YEAR,GENDER)).thenReturn(people);
-
-		Collection<Person> results = personService.findSimilarPeople(NOT_FOUND_NAME,NON_PERSON_BIRTH_YEAR,GENDER);
+		
+		when(dao.findSimilarPeople(NOT_FOUND_NAME, NON_PERSON_BIRTH_YEAR, GENDER)).thenReturn(people);
+		
+		Collection<Person> results = personService.findSimilarPeople(NOT_FOUND_NAME, NON_PERSON_BIRTH_YEAR, GENDER);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
 	}
@@ -167,7 +167,7 @@ public class FhirPersonServiceImplTest {
 		person.addName(name);
 		people.add(person);
 		when(dao.findPersonsByBirthDate(birthDate)).thenReturn(people);
-
+		
 		Collection<Person> results = personService.findPersonsByBirthDate(birthDate);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -196,7 +196,7 @@ public class FhirPersonServiceImplTest {
 		person.addName(name);
 		people.add(person);
 		when(dao.findPersonsByGender(GENDER)).thenReturn(people);
-
+		
 		Collection<Person> results = personService.findPersonsByGender(GENDER);
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
@@ -205,9 +205,9 @@ public class FhirPersonServiceImplTest {
 	@Test
 	public void shouldReturnEmptyCollectionWhenPersonGenderNotMatched() {
 		Collection<org.openmrs.Person> people = new ArrayList<>();
-
+		
 		when(dao.findPersonsByGender(WRONG_GENDER)).thenReturn(people);
-
+		
 		Collection<Person> results = personService.findPersonsByGender(WRONG_GENDER);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());

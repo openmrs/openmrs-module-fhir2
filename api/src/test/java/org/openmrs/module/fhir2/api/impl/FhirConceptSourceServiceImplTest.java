@@ -9,12 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -58,9 +58,9 @@ public class FhirConceptSourceServiceImplTest {
 	@Test
 	public void getFhirConceptSources_shouldReturnEmptyCollectionWhenNoSourcesFound() {
 		when(dao.getFhirConceptSources()).thenReturn(new ArrayList<>());
-
+		
 		Collection<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSources();
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result, empty());
 	}

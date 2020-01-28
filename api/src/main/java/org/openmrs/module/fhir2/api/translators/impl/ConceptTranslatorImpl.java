@@ -98,7 +98,8 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	
 	private String conceptSourceToURL(String conceptSourceName) {
 		final AtomicReference<String> url = new AtomicReference<>(null);
-		conceptSourceService.getFhirConceptSourceByConceptSourceName(conceptSourceName).ifPresent(cs -> url.set(cs.getUrl()));
+		conceptSourceService.getFhirConceptSourceByConceptSourceName(conceptSourceName)
+		        .ifPresent(cs -> url.set(cs.getUrl()));
 		return url.get();
 	}
 	

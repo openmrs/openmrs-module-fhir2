@@ -16,10 +16,8 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.openmrs.OrderType;
 import org.openmrs.TestOrder;
 import org.openmrs.api.OrderService;
-import org.openmrs.module.fhir2.FhirException;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.springframework.stereotype.Component;
 
