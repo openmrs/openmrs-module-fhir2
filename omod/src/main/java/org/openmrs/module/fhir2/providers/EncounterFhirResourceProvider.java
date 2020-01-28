@@ -52,10 +52,11 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		}
 		return encounter;
 	}
-
+	
 	@Search
-	public Bundle findEncountersByPatientIdentifier(@RequiredParam(name = Encounter.SP_PATIENT,
-			chainWhitelist = { Patient.SP_IDENTIFIER }) ReferenceParam identifier) {
-		return FhirUtils.convertSearchResultsToBundle(encounterService.findEncountersByPatientIdentifier(identifier.getIdPart()));
+	public Bundle findEncountersByPatientIdentifier(@RequiredParam(name = Encounter.SP_PATIENT, chainWhitelist = {
+	        Patient.SP_IDENTIFIER }) ReferenceParam identifier) {
+		return FhirUtils
+		        .convertSearchResultsToBundle(encounterService.findEncountersByPatientIdentifier(identifier.getIdPart()));
 	}
 }

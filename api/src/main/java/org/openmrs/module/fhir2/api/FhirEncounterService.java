@@ -9,15 +9,15 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.Collection;
-
 import javax.validation.constraints.NotNull;
+
+import java.util.Collection;
 
 import org.hl7.fhir.r4.model.Encounter;
 
 public interface FhirEncounterService {
 	
 	Encounter getEncounterByUuid(@NotNull String uuid);
-
+	
 	Collection<Encounter> findEncountersByPatientIdentifier(@NotNull String patientIdentifier);
 }

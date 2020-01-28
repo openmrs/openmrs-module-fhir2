@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.inject.Inject;
+
 import java.util.Collection;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -39,12 +39,10 @@ public class FhirEncounterServiceImpl implements FhirEncounterService {
 	public Encounter getEncounterByUuid(String uuid) {
 		return translator.toFhirResource(dao.getEncounterByUuid(uuid));
 	}
-
+	
 	@Override
 	public Collection<Encounter> findEncountersByPatientIdentifier(String patientIdentifier) {
-		return dao.findEncountersByPatientIdentifier(patientIdentifier)
-				.stream()
-				.map(translator::toFhirResource)
-				.collect(Collectors.toList());
+		return dao.findEncountersByPatientIdentifier(patientIdentifier).stream().map(translator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 }
