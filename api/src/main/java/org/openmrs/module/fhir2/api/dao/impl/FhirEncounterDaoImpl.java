@@ -40,9 +40,9 @@ public class FhirEncounterDaoImpl implements FhirEncounterDao {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Encounter> findEncountersByPatientIdentifier(String patientIdentifier) {
-		return sessionFactory.getCurrentSession().createQuery("FROM Encounter e "
-				+ "LEFT JOIN e.patient p "
-				+ "INNER JOIN p.identifiers pi where pi.identifier=:identifier")
-				.setParameter("identifier", patientIdentifier).list();
+		return (List<Encounter>) sessionFactory.getCurrentSession().createCriteria(Encounter.class).createAlias("patient", "p")
+				.createAlias("p.identifiers", "pi")
+				.add(eq("pi.identifier", patientIdentifier))
+				.list();
 	}
 }

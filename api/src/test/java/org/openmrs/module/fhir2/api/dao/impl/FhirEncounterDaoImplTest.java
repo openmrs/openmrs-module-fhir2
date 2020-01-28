@@ -77,6 +77,8 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(encounters, notNullValue());
 		assertThat(encounters.size(), greaterThanOrEqualTo(1));
 		assertThat(encounters.stream().findFirst().isPresent(), is(true));
+		assertThat(encounters.stream().findFirst().get().getPatient(), notNullValue());
+		assertThat(encounters.stream().findFirst().get().getPatient().getPatientIdentifier().getIdentifier(), equalTo(PATIENT_IDENTIFIER));
 	}
 
 	@Test
