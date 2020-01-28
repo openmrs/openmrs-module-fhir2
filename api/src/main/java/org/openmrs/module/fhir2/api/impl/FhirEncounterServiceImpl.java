@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
@@ -35,5 +38,11 @@ public class FhirEncounterServiceImpl implements FhirEncounterService {
 	@Transactional(readOnly = true)
 	public Encounter getEncounterByUuid(String uuid) {
 		return translator.toFhirResource(dao.getEncounterByUuid(uuid));
+	}
+	
+	@Override
+	public Collection<Encounter> findEncountersByPatientIdentifier(String patientIdentifier) {
+		return dao.findEncountersByPatientIdentifier(patientIdentifier).stream().map(translator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 }

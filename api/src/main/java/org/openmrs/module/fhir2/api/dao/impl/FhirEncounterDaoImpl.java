@@ -14,6 +14,8 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
@@ -33,5 +35,13 @@ public class FhirEncounterDaoImpl implements FhirEncounterDao {
 	public Encounter getEncounterByUuid(String uuid) {
 		return (Encounter) sessionFactory.getCurrentSession().createCriteria(Encounter.class).add(eq("uuid", uuid))
 		        .uniqueResult();
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Encounter> findEncountersByPatientIdentifier(String patientIdentifier) {
+		return (List<Encounter>) sessionFactory.getCurrentSession().createCriteria(Encounter.class)
+		        .createAlias("patient", "p").createAlias("p.identifiers", "pi").add(eq("pi.identifier", patientIdentifier))
+		        .list();
 	}
 }

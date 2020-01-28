@@ -14,14 +14,20 @@ import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
+import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -45,5 +51,12 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());
 		}
 		return encounter;
+	}
+	
+	@Search
+	public Bundle findEncountersByPatientIdentifier(@RequiredParam(name = Encounter.SP_PATIENT, chainWhitelist = {
+	        Patient.SP_IDENTIFIER }) ReferenceParam identifier) {
+		return FhirUtils
+		        .convertSearchResultsToBundle(encounterService.findEncountersByPatientIdentifier(identifier.getIdPart()));
 	}
 }

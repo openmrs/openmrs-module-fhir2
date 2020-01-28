@@ -10,12 +10,18 @@
 package org.openmrs.module.fhir2.providers;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.Before;
@@ -31,6 +37,8 @@ public class EncounterFhirResourceProviderTest {
 	private static final String ENCOUNTER_UUID = "123xx34-623hh34-22hj89-23hjy5";
 	
 	private static final String WRONG_ENCOUNTER_UUID = "c3467w-hi4jer83-56hj34-23hjy5";
+	
+	private static final String PATIENT_IDENTIFIER = "1003DE";
 	
 	@Mock
 	private FhirEncounterService encounterService;
@@ -76,5 +84,25 @@ public class EncounterFhirResourceProviderTest {
 		id.setValue(WRONG_ENCOUNTER_UUID);
 		Encounter result = resourceProvider.getEncounterByUuid(id);
 		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void findEncountersByPatientIdentifier_shouldReturnMatchingBundleOfEncounters() {
+		when(encounterService.findEncountersByPatientIdentifier(PATIENT_IDENTIFIER))
+		        .thenReturn(Collections.singletonList(encounter));
+		ReferenceParam param = new ReferenceParam();
+		param.setValue(PATIENT_IDENTIFIER);
+		Bundle encounterBundle = resourceProvider.findEncountersByPatientIdentifier(param);
+		assertThat(encounterBundle, notNullValue());
+		assertThat(encounterBundle.getEntry().size(), equalTo(1));
+	}
+	
+	@Test
+	public void findEncountersByWrongPatientIdentifier_shouldReturnBundleWithEmptyEntries() {
+		ReferenceParam param = new ReferenceParam();
+		param.setValue(PATIENT_IDENTIFIER);
+		Bundle bundle = resourceProvider.findEncountersByPatientIdentifier(param);
+		assertThat(bundle, notNullValue());
+		assertThat(bundle.getEntry(), is(empty()));
 	}
 }
