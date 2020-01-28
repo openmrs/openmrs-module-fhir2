@@ -10,9 +10,13 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
+
+import java.util.Collection;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +31,9 @@ import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 public class FhirEncounterServiceImplTest {
 	
 	private static final String ENCOUNTER_UUID = "344kk343-45hj45-34jk34-34ui33";
-	
+
+	private static final String PATIENT_IDENTIFIER = "1003GH";
+
 	@Mock
 	private FhirEncounterDao dao;
 	
@@ -61,6 +67,17 @@ public class FhirEncounterServiceImplTest {
 		assertThat(fhirEncounter, notNullValue());
 		assertThat(fhirEncounter.getId(), notNullValue());
 		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));
+	}
+
+	@Test
+	public void findEncountersByPatientIdentifier_shouldReturnCollectionOfEncounters() {
+		when(dao.findEncountersByPatientIdentifier(PATIENT_IDENTIFIER)).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+
+		Collection<org.hl7.fhir.r4.model.Encounter> results = encounterService.findEncountersByPatientIdentifier(PATIENT_IDENTIFIER);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		assertThat(results.stream().findFirst().isPresent(), is(true));
 	}
 	
 }

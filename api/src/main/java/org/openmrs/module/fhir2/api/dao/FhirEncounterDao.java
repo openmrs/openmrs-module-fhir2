@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import org.openmrs.Encounter;
@@ -16,4 +18,6 @@ import org.openmrs.Encounter;
 public interface FhirEncounterDao {
 	
 	Encounter getEncounterByUuid(@NotNull String uuid);
+
+	List<Encounter> findEncountersByPatientIdentifier(@NotNull String patientIdentifier);
 }

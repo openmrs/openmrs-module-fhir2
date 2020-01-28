@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -24,14 +26,23 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirEncounterDaoImpl implements FhirEncounterDao {
-	
+
 	@Inject
 	@Named("sessionFactory")
 	private SessionFactory sessionFactory;
-	
+
 	@Override
 	public Encounter getEncounterByUuid(String uuid) {
 		return (Encounter) sessionFactory.getCurrentSession().createCriteria(Encounter.class).add(eq("uuid", uuid))
-		        .uniqueResult();
+				.uniqueResult();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Encounter> findEncountersByPatientIdentifier(String patientIdentifier) {
+		return sessionFactory.getCurrentSession().createQuery("FROM Encounter e "
+				+ "LEFT JOIN e.patient p "
+				+ "INNER JOIN p.identifiers pi where pi.identifier=:identifier")
+				.setParameter("identifier", patientIdentifier).list();
 	}
 }
