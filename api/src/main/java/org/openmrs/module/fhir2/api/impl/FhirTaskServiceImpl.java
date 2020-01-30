@@ -11,8 +11,14 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
@@ -72,4 +78,23 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 		return translator.toFhirResource(dao.saveTask(translator.toOpenmrsType(openmrsTask, task)));
 	}
 	
+	/**
+	 * Get a list of Tasks associated with the given Resource with the given Uuid through the basedOn
+	 * relation
+	 *
+	 * @param uuid the uuid of the associated resource
+	 * @param clazz the class of the associated resource
+	 * @return the saved task
+	 */
+	@Override
+	public Collection<Task> getTasksByBasedOn(Class<? extends DomainResource> clazz, String uuid) {
+		Collection<Task> associatedTasks = new ArrayList<>();
+		
+		if (clazz == ServiceRequest.class) {
+			associatedTasks = dao.getTasksByBasedOnUuid(clazz, uuid).stream().map(translator::toFhirResource)
+			        .collect(Collectors.toList());
+		}
+		
+		return associatedTasks;
+	}
 }

@@ -19,9 +19,15 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,6 +37,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.FhirTestConstants;
+import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,12 +52,16 @@ public class ServiceRequestTranslatorImplTest {
 	private ServiceRequestTranslatorImpl translator;
 	
 	@Mock
+	private FhirTaskService taskService;
+	
+	@Mock
 	private ConceptTranslator conceptTranslator;
 	
 	@Before
 	public void setup() {
 		translator = new ServiceRequestTranslatorImpl();
 		translator.setConceptTranslator(conceptTranslator);
+		translator.setTaskService(taskService);
 	}
 	
 	@Test
@@ -59,40 +70,121 @@ public class ServiceRequestTranslatorImplTest {
 		ServiceRequest result = translator.toFhirResource(order);
 		
 		assertThat(result, notNullValue());
-	}
-	
-	@Test
-	public void shouldTranslateNewOrderToActiveServiceRequest() {
-		TestOrder newOrder = new TestOrder();
-		newOrder.setAction(ORDER_ACTION);
-		
-		ServiceRequest result = translator.toFhirResource(newOrder);
-		assertThat(result, notNullValue());
-		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.ACTIVE));
-		assertThat(result.getIntent(), equalTo(ServiceRequest.ServiceRequestIntent.ORDER));
-	}
-	
-	@Ignore
-	@Test
-	public void shouldTranslateRevisedOrderToActiveServiceRequest() {
-		TestOrder newOrder = new TestOrder();
-		newOrder.setAction(TestOrder.Action.REVISE);
-		
-		ServiceRequest result = translator.toFhirResource(newOrder);
-		assertThat(result, notNullValue());
-		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.ACTIVE));
 		assertThat(result.getIntent(), equalTo(ServiceRequest.ServiceRequestIntent.ORDER));
 	}
 	
 	@Test
-	public void shouldTranslateDiscontinuedOrderToRevokedServiceRequest() {
+	public void shouldTranslateOrderFromRequestedTaskToActiveServiceRequest() {
 		TestOrder newOrder = new TestOrder();
-		newOrder.setAction(TestOrder.Action.DISCONTINUE);
+		newOrder.setUuid(SERVICE_REQUEST_UUID);
+		
+		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REQUESTED);
+		
+		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.ACTIVE));
+	}
+	
+	@Test
+	public void shouldTranslateOrderFromRejectedTaskToRevokedServiceRequest() {
+		TestOrder newOrder = new TestOrder();
+		newOrder.setUuid(SERVICE_REQUEST_UUID);
+		
+		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REJECTED);
+		
+		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.REVOKED));
-		assertThat(result.getIntent(), equalTo(ServiceRequest.ServiceRequestIntent.ORDER));
+	}
+	
+	@Test
+	public void shouldTranslateOrderFromAcceptedTaskToActiveServiceRequest() {
+		TestOrder newOrder = new TestOrder();
+		newOrder.setUuid(SERVICE_REQUEST_UUID);
+		
+		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.ACCEPTED);
+		
+		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.ACTIVE));
+	}
+	
+	@Test
+	public void shouldTranslateOrderFromCompletedTaskToCompletedServiceRequest() {
+		TestOrder newOrder = new TestOrder();
+		newOrder.setUuid(SERVICE_REQUEST_UUID);
+		
+		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.COMPLETED);
+		
+		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.COMPLETED));
+	}
+	
+	@Test
+	public void shouldTranslateOrderFromOtherTaskToUnknownServiceRequest() {
+		TestOrder newOrder = new TestOrder();
+		newOrder.setUuid(SERVICE_REQUEST_UUID);
+		
+		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.DRAFT);
+		
+		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.UNKNOWN));
+	}
+	
+	@Test
+	public void shouldTranslateOrderWithoutTaskToUnknownServiceRequest() {
+		TestOrder newOrder = new TestOrder();
+		newOrder.setUuid(SERVICE_REQUEST_UUID);
+		
+		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID))
+		        .thenReturn(Collections.<Task> emptyList());
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.UNKNOWN));
+	}
+	
+	@Test
+	public void shouldTranslateOrderWithMultipleTasksToUnknownServiceRequest() {
+		TestOrder newOrder = new TestOrder();
+		newOrder.setUuid(SERVICE_REQUEST_UUID);
+		
+		Task firstTask = new Task();
+		Task secondTask = new Task();
+		
+		Reference basedOnRef = new Reference();
+		basedOnRef.setReference("ServiceRequest/" + SERVICE_REQUEST_UUID);
+		basedOnRef.setType("ServiceRequest");
+		
+		firstTask.addBasedOn(basedOnRef);
+		secondTask.addBasedOn(basedOnRef);
+		
+		Collection<Task> tasks = Arrays.asList(firstTask, secondTask);
+		
+		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.UNKNOWN));
 	}
 	
 	@Ignore
@@ -161,5 +253,16 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder result = translator.toOpenmrsType(existingOrder, serviceRequest);
 		
 		assertThat(result, nullValue());
+	}
+	
+	private Collection<Task> setUpBasedOnScenario(Task.TaskStatus status) {
+		Reference basedOnRef = new Reference();
+		Task task = new Task();
+		task.setStatus(status);
+		basedOnRef.setReference("ServiceRequest/" + SERVICE_REQUEST_UUID);
+		basedOnRef.setType("ServiceRequest");
+		task.addBasedOn(basedOnRef);
+		
+		return Arrays.asList(task);
 	}
 }

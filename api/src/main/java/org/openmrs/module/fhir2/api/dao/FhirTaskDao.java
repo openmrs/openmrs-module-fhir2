@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Collection;
+
+import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.module.fhir2.Task;
 
 public interface FhirTaskDao {
@@ -19,4 +22,5 @@ public interface FhirTaskDao {
 	
 	public Task getTaskByUuid(@NotNull String taskUUID);
 	
+	public Collection<Task> getTasksByBasedOnUuid(Class<? extends DomainResource> resourceType, String uuid);
 }

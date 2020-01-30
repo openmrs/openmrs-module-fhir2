@@ -10,4 +10,11 @@
 -->
 <dataset>
 	<fhir_task task_id="1" status="REQUESTED" intent="ORDER" creator="1" date_created="2012-01-01 00:00:00.0" voided="false" uuid="d899333c-5bd4-45cc-b1e7-2f9542dbcbf6"/>
+
+	<order_type order_type_id="100" name="some Order Type" parent="2" java_class_name="org.openmrs.TestOrder" description="Some lab order" creator="1" date_created="2008-08-15 15:49:04.0" retired="1" retired_by="1" retire_reason="None" date_retired="2008-08-15 00:00:00.0" uuid="dd3fb1d0-ae06-22e3-a5e2-0800211c9a66"/>
+	<orders order_id="101" order_type_id="100" order_number="ORD-101" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" patient_id="2" care_setting="1" encounter_id="6" uuid="7d96f25c-4949-4f72-9931-d808fbc226de" date_created="2008-11-19 09:24:10.0" creator="1" voided="0" />
+	<orders order_id="102" order_type_id="100" order_number="ORD-101" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" patient_id="2" care_setting="1" encounter_id="6" uuid="cbcb84f3-4576-452f-ba74-7cdeaa9aa602" date_created="2008-11-19 09:24:10.0" creator="1" voided="0" />
+	<test_order order_id="101"  />
+
+	<fhir_task task_id="2" status="REQUESTED" intent="ORDER" based_on="ServiceRequest/7d96f25c-4949-4f72-9931-d808fbc226de" creator="1" date_created="2012-01-01 00:00:00.0" voided="false" uuid="3dc9f4a7-44dc-4b29-adfd-a8b297a41f33"/>
 </dataset>
