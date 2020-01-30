@@ -17,17 +17,20 @@ import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
-import com.google.common.reflect.TypeToken;
+import lombok.SneakyThrows;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -57,6 +60,7 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 	
 	private static abstract class HttpResponseMatcher extends TypeSafeMatcher<MockHttpServletResponse> {
 		
+		@SneakyThrows
 		@Override
 		protected void describeMismatchSafely(MockHttpServletResponse item, Description mismatchDescription) {
 			mismatchDescription.appendText("response with status code ").appendValue(item.getStatus());
@@ -116,10 +120,12 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 		
 		private final MockHttpServletRequest request;
 		
-		private FhirRequestBuilder(RequestTypeEnum requestType, String uri) {
+		private FhirRequestBuilder(RequestTypeEnum requestType, String uri) throws MalformedURLException {
 			request = new MockHttpServletRequest();
 			request.setMethod(requestType.toString());
-			request.setRequestURI(uri);
+			URL url = new URL(uri);
+			request.setRequestURI(url.getPath());
+			request.setQueryString(url.getQuery());
 		}
 		
 		public FhirRequestBuilder accept(@NotNull MediaType mediaType) {
@@ -143,8 +149,6 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 	private static LoggingInterceptor interceptor;
 	
 	private FhirRestServlet servlet;
-	
-	private TypeToken<U> typeToken = new TypeToken<U>(getClass()) {};
 	
 	@BeforeClass
 	public static void setupServlet() {
@@ -176,16 +180,20 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 		servlet.init(servletConfig);
 	}
 	
-	public FhirRequestBuilder get(@NotNull String uri) {
-		return new FhirRequestBuilder(RequestTypeEnum.GET, "/" + SERVLET_NAME + uri);
+	public FhirRequestBuilder get(@NotNull String uri) throws MalformedURLException {
+		return new FhirRequestBuilder(RequestTypeEnum.GET, "http://localhost:8080/" + SERVLET_NAME + uri);
 	}
 	
-	public FhirRequestBuilder post(@NotNull String uri) {
-		return new FhirRequestBuilder(RequestTypeEnum.POST, "/" + SERVLET_NAME + uri);
+	public FhirRequestBuilder post(@NotNull String uri) throws MalformedURLException {
+		return new FhirRequestBuilder(RequestTypeEnum.POST, "http://localhost:8080/" + SERVLET_NAME + uri);
 	}
 	
 	public U readResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (U) parser.parseResource(response.getContentAsString());
+	}
+	
+	public Bundle readBundleResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
+		return (Bundle) parser.parseResource(response.getContentAsString());
 	}
 	
 	public abstract T getResourceProvider();
