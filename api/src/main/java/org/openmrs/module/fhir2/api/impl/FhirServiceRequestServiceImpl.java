@@ -38,5 +38,4 @@ public class FhirServiceRequestServiceImpl implements FhirServiceRequestService 
 		
 		return translator.toFhirResource(openmrsOrder);
 	}
-	
 }
