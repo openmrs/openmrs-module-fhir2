@@ -64,8 +64,9 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator {
 		
 		ServiceRequest.ServiceRequestStatus serviceRequestStatus = ServiceRequest.ServiceRequestStatus.UNKNOWN;
 		
-		if (serviceRequestTasks.size() != 1)
+		if (serviceRequestTasks.size() != 1) {
 			return serviceRequestStatus;
+		}
 		
 		Task serviceRequestTask = serviceRequestTasks.iterator().next();
 		
