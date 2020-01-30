@@ -35,7 +35,7 @@ public class EncounterParticipantTranslatorImplTest {
 	
 	private static final String PROVIDER_UUID = "122344-234xx23-2323kk-232k2h2";
 	
-	private static final String PROVIDER_URI = FhirConstants.PROVIDER + "/" + PROVIDER_UUID;
+	private static final String PROVIDER_URI = FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID;
 	
 	@Mock
 	FhirPractitionerService practitionerService;

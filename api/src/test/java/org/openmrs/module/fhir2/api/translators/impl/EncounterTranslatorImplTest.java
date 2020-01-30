@@ -40,6 +40,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterTranslatorImplTest {
@@ -60,7 +61,7 @@ public class EncounterTranslatorImplTest {
 	
 	private static final String PRACTITIONER_UUID = "2323hh34-2323kk3-23gh23-23k23";
 	
-	private static final String PRACTITIONER_URI = FhirConstants.PROVIDER + "/" + PRACTITIONER_UUID;
+	private static final String PRACTITIONER_URI = FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID;
 	
 	private static final String LOCACTION_UUID = "123hh34-23jk23-23jk213-23jkl";
 	
@@ -76,6 +77,9 @@ public class EncounterTranslatorImplTest {
 	
 	@Mock
 	private EncounterLocationTranslator encounterLocationTranslator;
+	
+	@Mock
+	private PatientIdentifierTranslator patientIdentifierTranslator;
 	
 	private Patient patient;
 	
@@ -94,6 +98,7 @@ public class EncounterTranslatorImplTest {
 		encounterTranslator = new EncounterTranslatorImpl();
 		encounterTranslator.setPatientService(patientService);
 		encounterTranslator.setParticipantTranslator(participantTranslator);
+		encounterTranslator.setPatientIdentifierTranslator(patientIdentifierTranslator);
 		encounterTranslator.setEncounterLocationTranslator(encounterLocationTranslator);
 		
 		PatientIdentifier identifier = new PatientIdentifier();
@@ -111,6 +116,7 @@ public class EncounterTranslatorImplTest {
 		patient.setUuid(PATIENT_UUID);
 		patient.addIdentifier(identifier);
 		patient.addName(name);
+		patient.setPersonId(0);
 		omrsEncounter.setPatient(patient);
 		
 		Reference patientRef = new Reference();
@@ -132,7 +138,7 @@ public class EncounterTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateIdToOpenMrsType() {
+	public void shouldTranslateIdToOpenmrsType() {
 		fhirEncounter.setId(ENCOUNTER_UUID);
 		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
@@ -230,7 +236,9 @@ public class EncounterTranslatorImplTest {
 	@Test
 	public void shouldTranslateLocationToEncounterLocationComponentFhirType() {
 		omrsEncounter.setLocation(location);
+		
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getLocation(), notNullValue());
 		assertThat(result.getLocation().size(), is(1));

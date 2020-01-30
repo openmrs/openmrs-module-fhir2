@@ -7,7 +7,7 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api.util;
+package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -17,6 +17,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -25,8 +29,10 @@ import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 
-public class FhirReferenceUtilsTest {
+@RunWith(MockitoJUnitRunner.class)
+public class AbstractReferenceHandlingTranslatorTest {
 	
 	private static final String GIVEN_NAME = "Ricky";
 	
@@ -50,7 +56,7 @@ public class FhirReferenceUtilsTest {
 	
 	private static final String PERSON_UUID = "12234-xx34xx-342823-342kk3";
 	
-	private static final String PROVIDER_URI = FhirConstants.PROVIDER + "/" + PROVIDER_UUID;
+	private static final String PROVIDER_URI = FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID;
 	
 	private static final String PROVIDER_DISPLAY = "Ricky Morty(" + FhirConstants.IDENTIFIER + ":" + PROVIDER_TEST_IDENTIFIER
 	        + ")";
@@ -61,14 +67,28 @@ public class FhirReferenceUtilsTest {
 	
 	private static final String LOCATION_URI = FhirConstants.LOCATION + "/" + LOCATION_UUID;
 	
+	private static final String ENCOUNTER_UUID = "9878asdh-jlkasdf8-1u387kjd";
+	
+	private static final String ENCOUNTER_URI = FhirConstants.ENCOUNTER + "/" + ENCOUNTER_UUID;
+	
 	private Patient patient;
 	
 	private Provider provider;
 	
 	private Location location;
 	
+	private org.openmrs.Encounter encounter;
+	
+	@Mock
+	private PatientIdentifierTranslator patientIdentifierTranslator;
+	
+	private AbstractReferenceHandlingTranslator referenceHandlingTranslator;
+	
 	@Before
 	public void setUp() {
+		referenceHandlingTranslator = new AbstractReferenceHandlingTranslator() {};
+		referenceHandlingTranslator.setPatientIdentifierTranslator(patientIdentifierTranslator);
+		
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
 		
@@ -93,42 +113,85 @@ public class FhirReferenceUtilsTest {
 		location = new Location();
 		location.setUuid(LOCATION_UUID);
 		location.setName(TEST_LOCATION_NAME);
+		
+		encounter = new Encounter();
+		encounter.setUuid(ENCOUNTER_UUID);
+	}
+	
+	@Test
+	public void shouldExtractIdFromReference() {
+		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(PATIENT_URI)),
+		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void shouldReturnNullIdForNullReference() {
+		assertThat(referenceHandlingTranslator.getReferenceId(new Reference()), nullValue());
+	}
+	
+	@Test
+	public void shouldNotExtractIdWhenIdMissingFromReference() {
+		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(FhirConstants.PATIENT + "/")),
+		    nullValue());
+	}
+	
+	@Test
+	public void shouldReturnNullIdWhenNoSlashFound() {
+		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(PATIENT_UUID)), nullValue());
+	}
+	
+	@Test
+	public void shouldExtractReferenceTypeFromReference() {
+		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setReference(PATIENT_URI)),
+		    equalTo(FhirConstants.PATIENT));
+	}
+	
+	@Test
+	public void shouldReturnNullTypeForNullReference() {
+		assertThat(referenceHandlingTranslator.getReferenceType(new Reference()), nullValue());
+	}
+	
+	@Test
+	public void shouldReturnNullTypeWhenTypeMissing() {
+		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setReference("/" + PATIENT_UUID)),
+		    nullValue());
+	}
+	
+	@Test
+	public void shouldReturnNullTypeWhenNoSlashFound() {
+		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setReference(PATIENT_UUID)), nullValue());
+	}
+	
+	@Test
+	public void shouldUseExplicitType() {
+		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setType(FhirConstants.PATIENT)),
+		    equalTo(FhirConstants.PATIENT));
 	}
 	
 	@Test
 	public void shouldReturnPatientReference() {
-		Reference reference = FhirReferenceUtils.addPatientReference(patient);
+		Reference reference = referenceHandlingTranslator.createPatientReference(patient);
+		
 		assertThat(reference, notNullValue());
-		assertThat(reference.getReference(), notNullValue());
 		assertThat(reference.getReference(), equalTo(PATIENT_URI));
+		assertThat(reference.getType(), equalTo(FhirConstants.PATIENT));
 	}
 	
 	@Test
-	public void shouldReturnReferenceWithCorrectDisplayName() {
-		Reference reference = FhirReferenceUtils.addPatientReference(patient);
+	public void shouldReturnPatientReferenceWithCorrectDisplayName() {
+		Reference reference = referenceHandlingTranslator.createPatientReference(patient);
+		
 		assertThat(reference, notNullValue());
-		assertThat(reference.getDisplay(), notNullValue());
 		assertThat(reference.getDisplay(), equalTo(NAME_DISPLAY));
 	}
 	
 	@Test
-	public void shouldExtractUuidFromUri() {
-		String uuid = FhirReferenceUtils.extractUuid(PATIENT_URI);
-		assertThat(uuid, notNullValue());
-		assertThat(uuid, equalTo(PATIENT_UUID));
-	}
-	
-	@Test
-	public void shouldNotExtractUuidFromNullUri() {
-		assertThat(FhirReferenceUtils.extractUuid(null), nullValue());
-	}
-	
-	@Test
 	public void shouldAddPractitionerReference() {
-		Reference reference = FhirReferenceUtils.addPractitionerReference(provider);
+		Reference reference = referenceHandlingTranslator.createPractitionerReference(provider);
+		
 		assertThat(reference, notNullValue());
-		assertThat(reference.getReference(), notNullValue());
 		assertThat(reference.getReference(), equalTo(PROVIDER_URI));
+		assertThat(reference.getType(), equalTo(FhirConstants.PRACTITIONER));
 	}
 	
 	@Test
@@ -140,33 +203,46 @@ public class FhirReferenceUtilsTest {
 		person.setUuid(PERSON_UUID);
 		person.addName(name);
 		provider.setPerson(person);
-		Reference reference = FhirReferenceUtils.addPractitionerReference(provider);
+		
+		Reference reference = referenceHandlingTranslator.createPractitionerReference(provider);
+		
 		assertThat(reference, notNullValue());
-		assertThat(reference.getDisplay(), notNullValue());
-		assertThat(reference.getReference(), equalTo(PROVIDER_URI));
 		assertThat(reference.getDisplay(), equalTo(PROVIDER_DISPLAY));
 	}
 	
 	@Test
 	public void shouldReturnNullDisplayForPractitionerWithNullPerson() {
-		Reference reference = FhirReferenceUtils.addPractitionerReference(provider);
+		Reference reference = referenceHandlingTranslator.createPractitionerReference(provider);
 		assertThat(reference, notNullValue());
 		assertThat(reference.getDisplay(), nullValue());
 	}
 	
 	@Test
 	public void shouldAddLocationReference() {
-		Reference reference = FhirReferenceUtils.addLocationReference(location);
+		Reference reference = referenceHandlingTranslator.createLocationReference(location);
+		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(LOCATION_URI));
+		assertThat(reference.getType(), equalTo(FhirConstants.LOCATION));
 		assertThat(reference.getDisplay(), equalTo(TEST_LOCATION_NAME));
 	}
 	
 	@Test
 	public void shouldReturnNullDisplayWhenLocationNameIsNull() {
 		location.setName(null);
-		Reference reference = FhirReferenceUtils.addLocationReference(location);
+		
+		Reference reference = referenceHandlingTranslator.createLocationReference(location);
+		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getDisplay(), nullValue());
+	}
+	
+	@Test
+	public void shouldAddEncounterReference() {
+		Reference reference = referenceHandlingTranslator.createEncounterReference(encounter);
+		
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), equalTo(ENCOUNTER_URI));
+		assertThat(reference.getType(), equalTo(FhirConstants.ENCOUNTER));
 	}
 }

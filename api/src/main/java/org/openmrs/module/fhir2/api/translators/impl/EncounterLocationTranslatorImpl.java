@@ -18,12 +18,11 @@ import org.openmrs.Location;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
-import org.openmrs.module.fhir2.api.util.FhirReferenceUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterLocationTranslatorImpl implements EncounterLocationTranslator {
+public class EncounterLocationTranslatorImpl extends AbstractReferenceHandlingTranslator implements EncounterLocationTranslator {
 	
 	@Inject
 	FhirLocationService locationService;
@@ -34,13 +33,13 @@ public class EncounterLocationTranslatorImpl implements EncounterLocationTransla
 	@Override
 	public Encounter.EncounterLocationComponent toFhirResource(Location location) {
 		Encounter.EncounterLocationComponent locationComponent = new Encounter.EncounterLocationComponent();
-		locationComponent.setLocation(FhirReferenceUtils.addLocationReference(location));
+		locationComponent.setLocation(createLocationReference(location));
 		return locationComponent;
 	}
 	
 	@Override
 	public Location toOpenmrsType(Encounter.EncounterLocationComponent encounterLocationComponent) {
-		String locationUuid = FhirReferenceUtils.extractUuid(encounterLocationComponent.getLocation().getReference());
+		String locationUuid = getReferenceId(encounterLocationComponent.getLocation());
 		return locationTranslator.toOpenmrsType(locationService.getLocationByUuid(locationUuid));
 	}
 }

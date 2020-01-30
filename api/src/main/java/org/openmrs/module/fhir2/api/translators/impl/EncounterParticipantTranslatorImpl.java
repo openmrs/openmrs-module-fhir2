@@ -19,12 +19,11 @@ import org.openmrs.Provider;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
-import org.openmrs.module.fhir2.api.util.FhirReferenceUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterParticipantTranslatorImpl implements EncounterParticipantTranslator {
+public class EncounterParticipantTranslatorImpl extends AbstractReferenceHandlingTranslator implements EncounterParticipantTranslator {
 	
 	@Inject
 	FhirPractitionerService practitionerService;
@@ -35,7 +34,7 @@ public class EncounterParticipantTranslatorImpl implements EncounterParticipantT
 	@Override
 	public Encounter.EncounterParticipantComponent toFhirResource(EncounterProvider encounter) {
 		Encounter.EncounterParticipantComponent participantComponent = new Encounter.EncounterParticipantComponent();
-		participantComponent.setIndividual(FhirReferenceUtils.addPractitionerReference(encounter.getProvider()));
+		participantComponent.setIndividual(createPractitionerReference(encounter.getProvider()));
 		return participantComponent;
 	}
 	
@@ -45,8 +44,7 @@ public class EncounterParticipantTranslatorImpl implements EncounterParticipantT
 		if (encounterParticipantComponent == null) {
 			return encounterProvider;
 		}
-		String practitionerUuid = FhirReferenceUtils
-		        .extractUuid(encounterParticipantComponent.getIndividual().getReference());
+		String practitionerUuid = getReferenceId(encounterParticipantComponent.getIndividual());
 		Provider provider = practitionerTranslator
 		        .toOpenmrsType(practitionerService.getPractitionerByUuid(practitionerUuid));
 		encounterProvider.setProvider(provider);

@@ -18,23 +18,31 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
+import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Patient;
+import org.openmrs.Person;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationTranslatorImplTest {
@@ -42,6 +50,10 @@ public class ObservationTranslatorImplTest {
 	private static final String OBS_UUID = "12345-abcde-12345";
 	
 	private static final String CONCEPT_UUID = "54321-abcde-54321";
+	
+	private static final String ENCOUNTER_UUID = "12345-abcde-54321";
+	
+	private static final String PATIENT_UUID = "12345-edcba-12345";
 	
 	@Mock
 	private ObservationStatusTranslator observationStatusTranslator;
@@ -55,6 +67,12 @@ public class ObservationTranslatorImplTest {
 	@Mock
 	private ConceptTranslator conceptTranslator;
 	
+	@Mock
+	private EncounterReferenceTranslator encounterReferenceTranslator;
+	
+	@Mock
+	private PatientReferenceTranslator patientReferenceTranslator;
+	
 	private ObservationTranslatorImpl observationTranslator;
 	
 	@Before
@@ -62,8 +80,10 @@ public class ObservationTranslatorImplTest {
 		observationTranslator = new ObservationTranslatorImpl();
 		observationTranslator.setObservationStatusTranslator(observationStatusTranslator);
 		observationTranslator.setObservationComponentTranslator(observationComponentTranslator);
-		observationTranslator.setConceptTranslator(conceptTranslator);
 		observationTranslator.setObservationValueTranslator(observationValueTranslator);
+		observationTranslator.setConceptTranslator(conceptTranslator);
+		observationTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
+		observationTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 	}
 	
 	@Test
@@ -93,6 +113,55 @@ public class ObservationTranslatorImplTest {
 		Observation result = observationTranslator.toFhirResource(observation);
 		
 		assertThat(result.getStatus(), is(Observation.ObservationStatus.UNKNOWN));
+	}
+	
+	@Test
+	public void toFhirResource_shouldConvertEncounterToReference() {
+		Obs observation = new Obs();
+		Encounter encounter = new Encounter();
+		encounter.setUuid(ENCOUNTER_UUID);
+		observation.setEncounter(encounter);
+		Reference encounterReference = new Reference();
+		encounterReference.setType("Encounter");
+		encounterReference.setId(ENCOUNTER_UUID);
+		when(encounterReferenceTranslator.toFhirResource(encounter)).thenReturn(encounterReference);
+		
+		Observation result = observationTranslator.toFhirResource(observation);
+		
+		assertThat(result.getEncounter(), notNullValue());
+		assertThat(result.getEncounter().getType(), equalTo("Encounter"));
+		assertThat(result.getEncounter().getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldConvertPatientToReference() {
+		Obs observation = new Obs();
+		Patient patient = new Patient();
+		patient.setUuid(PATIENT_UUID);
+		observation.setPerson(patient);
+		Reference patientReference = new Reference();
+		patientReference.setType("Patient");
+		patientReference.setId(PATIENT_UUID);
+		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientReference);
+		
+		Observation result = observationTranslator.toFhirResource(observation);
+		
+		assertThat(result.getSubject(), notNullValue());
+		assertThat(result.getSubject().getType(), equalTo("Patient"));
+		assertThat(result.getSubject().getId(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldNotConvertAPersonToSubject() {
+		Obs observation = new Obs();
+		Person person = new Person();
+		person.setUuid(PATIENT_UUID);
+		observation.setPerson(person);
+		
+		Observation result = observationTranslator.toFhirResource(observation);
+		
+		assertThat(result.hasSubject(), is(false));
+		verify(patientReferenceTranslator, never()).toFhirResource(any());
 	}
 	
 	@Test

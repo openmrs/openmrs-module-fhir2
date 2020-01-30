@@ -24,12 +24,11 @@ import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
-import org.openmrs.module.fhir2.api.util.FhirReferenceUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterTranslatorImpl implements EncounterTranslator {
+public class EncounterTranslatorImpl extends AbstractReferenceHandlingTranslator implements EncounterTranslator {
 	
 	@Inject
 	PatientService patientService;
@@ -46,7 +45,7 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		encounter.setId(openMrsEncounter.getUuid());
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
 		
-		encounter.setSubject(FhirReferenceUtils.addPatientReference(openMrsEncounter.getPatient()));
+		encounter.setSubject(createPatientReference(openMrsEncounter.getPatient()));
 		encounter.setParticipant(openMrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource)
 		        .collect(Collectors.toList()));
 		encounter.setLocation(
@@ -68,7 +67,7 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 			return existingEncounter;
 		}
 		existingEncounter.setUuid(encounter.getId());
-		String patientUuid = FhirReferenceUtils.extractUuid(encounter.getSubject().getReference());
+		String patientUuid = getReferenceId(encounter.getSubject());
 		existingEncounter.setPatient(patientService.getPatientByUuid(patientUuid));
 		existingEncounter
 		        .setEncounterProviders(encounter
