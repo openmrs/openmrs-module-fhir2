@@ -11,9 +11,17 @@ package org.openmrs.module.fhir2.api;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Collection;
+
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Observation;
 
 public interface FhirObservationService {
 	
 	Observation getObservationByUuid(@NotNull String uuid);
+	
+	Collection<Observation> searchForObservations(ReferenceParam encounterReference, ReferenceParam patientReference,
+	        TokenAndListParam code, SortSpec sort);
 }

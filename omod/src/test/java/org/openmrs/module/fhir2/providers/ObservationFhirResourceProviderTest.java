@@ -11,13 +11,19 @@ package org.openmrs.module.fhir2.providers;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.Before;
@@ -65,8 +71,10 @@ public class ObservationFhirResourceProviderTest {
 	public void getObservationByUuid_shouldReturnMatchingObservation() {
 		when(observationService.getObservationByUuid(OBSERVATION_UUID)).thenReturn(observation);
 		IdType id = new IdType();
-		id.setId(OBSERVATION_UUID);
+		id.setValue(OBSERVATION_UUID);
+		
 		Observation result = resourceProvider.getObservationById(id);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(OBSERVATION_UUID));
@@ -76,7 +84,26 @@ public class ObservationFhirResourceProviderTest {
 	public void getObservationWithWrongUuid_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
 		id.setValue(WRONG_OBSERVATION_UUID);
-		Observation result = resourceProvider.getObservationById(id);
-		assertThat(result, nullValue());
+		
+		resourceProvider.getObservationById(id);
+	}
+	
+	@Test
+	public void searchObservations_shouldReturnMatchingObservations() {
+		List<Observation> obs = new ArrayList<>();
+		obs.add(observation);
+		when(observationService.searchForObservations(any(), any(), any(), any())).thenReturn(obs);
+		TokenAndListParam code = new TokenAndListParam();
+		TokenParam codingToken = new TokenParam();
+		codingToken.setValue("1000");
+		code.addAnd(codingToken);
+		
+		Bundle results = resourceProvider.searchObservations(null, null, code, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getTotal(), equalTo(1));
+		assertThat(results.getEntry(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("Observation"));
+		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(OBSERVATION_UUID));
 	}
 }

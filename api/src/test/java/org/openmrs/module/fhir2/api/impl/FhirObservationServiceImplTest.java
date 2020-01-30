@@ -10,9 +10,17 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.Before;
@@ -45,7 +53,7 @@ public class FhirObservationServiceImplTest {
 	}
 	
 	@Test
-	public void shouldReturnObservationByUuid() {
+	public void getObservationByUuid_shouldReturnObservationByUuid() {
 		Obs obs = new Obs();
 		obs.setUuid(OBS_UUID);
 		Observation observation = new Observation();
@@ -57,5 +65,23 @@ public class FhirObservationServiceImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(OBS_UUID));
+	}
+	
+	@Test
+	public void searchForObservations_shouldReturnObservationsByParameters() {
+		Collection<Obs> obs = new ArrayList<>();
+		Obs ob = new Obs();
+		ob.setUuid(OBS_UUID);
+		obs.add(ob);
+		Observation observation = new Observation();
+		observation.setId(OBS_UUID);
+		when(dao.searchForObservations(any(), any(), any(), any())).thenReturn(obs);
+		when(observationTranslator.toFhirResource(ob)).thenReturn(observation);
+		
+		Collection<Observation> results = fhirObservationService.searchForObservations(null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results, hasItem(hasProperty("id", equalTo(OBS_UUID))));
 	}
 }

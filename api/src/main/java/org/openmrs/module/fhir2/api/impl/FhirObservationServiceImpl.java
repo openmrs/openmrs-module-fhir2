@@ -11,6 +11,12 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
@@ -35,5 +41,13 @@ public class FhirObservationServiceImpl implements FhirObservationService {
 	@Transactional(readOnly = true)
 	public Observation getObservationByUuid(String uuid) {
 		return observationTranslator.toFhirResource(dao.getObsByUuid(uuid));
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public Collection<Observation> searchForObservations(ReferenceParam encounterReference, ReferenceParam patientReference,
+	        TokenAndListParam code, SortSpec sort) {
+		return dao.searchForObservations(encounterReference, patientReference, code, sort).stream()
+		        .map(observationTranslator::toFhirResource).collect(Collectors.toList());
 	}
 }
