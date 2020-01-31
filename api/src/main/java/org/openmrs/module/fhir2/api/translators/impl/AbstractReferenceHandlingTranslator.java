@@ -1,0 +1,128 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.fhir2.api.translators.impl;
+
+import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
+import lombok.AccessLevel;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.Encounter;
+import org.openmrs.Location;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.Person;
+import org.openmrs.Provider;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
+
+@Setter(AccessLevel.PACKAGE)
+public abstract class AbstractReferenceHandlingTranslator {
+	
+	@Inject
+	private PatientIdentifierTranslator patientIdentifierTranslator;
+	
+	protected Reference createEncounterReference(@NotNull Encounter encounter) {
+		return new Reference().setReference(FhirConstants.ENCOUNTER + "/" + encounter.getUuid())
+		        .setType(FhirConstants.ENCOUNTER);
+	}
+	
+	protected Reference createLocationReference(@NotNull Location location) {
+		return new Reference().setReference(FhirConstants.LOCATION + "/" + location.getUuid())
+		        .setType(FhirConstants.LOCATION).setDisplay(location.getName());
+	}
+	
+	protected Reference createPatientReference(@NotNull Patient patient) {
+		Reference reference = new Reference().setReference(FhirConstants.PATIENT + "/" + patient.getUuid())
+		        .setType(FhirConstants.PATIENT);
+		
+		StringBuilder sb = new StringBuilder();
+		if (patient.getPersonName() != null) {
+			sb.append(patient.getPersonName().getFullName());
+		}
+		
+		PatientIdentifier identifier = patient.getPatientIdentifier();
+		if (identifier != null) {
+			reference.setIdentifier(patientIdentifierTranslator.toFhirResource(identifier));
+			try {
+				sb.append("(").append(identifier.getIdentifierType().getName()).append(":")
+				        .append(identifier.getIdentifier()).append(")");
+			}
+			catch (NullPointerException ignored) {}
+		}
+		reference.setDisplay(sb.toString());
+		
+		return reference;
+	}
+	
+	protected Reference createPractitionerReference(@NotNull Provider provider) {
+		Reference reference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + provider.getUuid())
+		        .setType(FhirConstants.PRACTITIONER);
+		
+		if (provider.getPerson() != null) {
+			StringBuilder sb = new StringBuilder();
+			
+			Person person = provider.getPerson();
+			if (person.getPersonName() != null) {
+				sb.append(person.getPersonName().getFullName());
+			}
+			
+			if (provider.getIdentifier() != null) {
+				reference.setIdentifier(new Identifier().setValue(provider.getIdentifier()));
+				sb.append("(").append(FhirConstants.IDENTIFIER).append(":").append(provider.getIdentifier()).append(")");
+			}
+			
+			reference.setDisplay(sb.toString());
+		}
+		
+		return reference;
+	}
+	
+	protected String getReferenceType(Reference reference) {
+		if (reference.getType() != null) {
+			return reference.getType();
+		}
+		
+		return referenceToType(reference.getReference());
+	}
+	
+	protected String getReferenceId(Reference reference) {
+		return referenceToId(reference.getReference());
+	}
+	
+	private String referenceToType(String fhirReference) {
+		if (fhirReference == null) {
+			return null;
+		}
+		
+		int split = fhirReference.indexOf('/');
+		if (split < 0) {
+			return null;
+		}
+		
+		return StringUtils.trimToNull(fhirReference.substring(0, split));
+	}
+	
+	private static String referenceToId(String fhirReference) {
+		if (fhirReference == null) {
+			return null;
+		}
+		
+		int split = fhirReference.indexOf('/');
+		if (split < 0 || split == fhirReference.length() - 1) {
+			return null;
+		}
+		
+		return StringUtils.trimToNull(fhirReference.substring(split + 1));
+	}
+}

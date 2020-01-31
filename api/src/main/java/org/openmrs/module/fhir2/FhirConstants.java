@@ -32,11 +32,13 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
 	
-	public static final String PATIENT = "Patient";
-	
-	public static final String PROVIDER = "Provider";
+	public static final String ENCOUNTER = "Encounter";
 	
 	public static final String LOCATION = "Location";
+	
+	public static final String PATIENT = "Patient";
+	
+	public static final String PRACTITIONER = "Practitioner";
 	
 	public static final String IDENTIFIER = "identifier";
 	

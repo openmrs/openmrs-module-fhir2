@@ -17,11 +17,15 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
+import org.openmrs.Patient;
+import org.openmrs.Person;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -40,6 +44,12 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	@Inject
 	private ConceptTranslator conceptTranslator;
 	
+	@Inject
+	private EncounterReferenceTranslator encounterReferenceTranslator;
+	
+	@Inject
+	private PatientReferenceTranslator patientReferenceTranslator;
+	
 	@Override
 	public Observation toFhirResource(Obs observation) {
 		if (observation == null) {
@@ -49,6 +59,16 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		Observation obs = new Observation();
 		obs.setId(observation.getUuid());
 		obs.setStatus(observationStatusTranslator.toFhirResource(observation));
+		
+		obs.setEncounter(encounterReferenceTranslator.toFhirResource(observation.getEncounter()));
+		
+		Person obsPerson = observation.getPerson();
+		if (obsPerson != null) {
+			try {
+				obs.setSubject(patientReferenceTranslator.toFhirResource((Patient) observation.getPerson()));
+			}
+			catch (ClassCastException ignored) {}
+		}
 		
 		obs.setCode(conceptTranslator.toFhirResource(observation.getConcept()));
 		
@@ -75,6 +95,10 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		existingObs.setUuid(observation.getId());
 		observationStatusTranslator.toOpenmrsType(existingObs, observation.getStatus());
+		
+		existingObs.setEncounter(encounterReferenceTranslator.toOpenmrsType(observation.getEncounter()));
+		existingObs.setPerson(patientReferenceTranslator.toOpenmrsType(observation.getSubject()));
+		
 		existingObs.setConcept(conceptTranslator.toOpenmrsType(observation.getCode()));
 		
 		for (Observation.ObservationComponentComponent component : observation.getComponent()) {
