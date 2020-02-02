@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
+import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.Person;
@@ -35,6 +36,11 @@ public abstract class AbstractReferenceHandlingTranslator {
 	protected Reference createEncounterReference(@NotNull Encounter encounter) {
 		return new Reference().setReference(FhirConstants.ENCOUNTER + "/" + encounter.getUuid())
 		        .setType(FhirConstants.ENCOUNTER);
+	}
+	
+	protected Reference createObservationReference(@NotNull Obs obs) {
+		return new Reference().setReference(FhirConstants.OBSERVATION + "/" + obs.getUuid())
+		        .setType(FhirConstants.OBSERVATION);
 	}
 	
 	protected Reference createLocationReference(@NotNull Location location) {

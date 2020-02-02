@@ -19,6 +19,8 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_URI = "http://openmrs.org";
 	
+	public static final String DIAGNOSTIC_SERVICE_SECTIONS_VALUESET_URI = "http://hl7.org/fhir/ValueSet/diagnostic-service-sections";
+	
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	
@@ -38,6 +40,8 @@ public class FhirConstants {
 	
 	public static final String ENCOUNTER = "Encounter";
 	
+	public static final String OBSERVATION = "Observation";
+	
 	public static final String LOCATION = "Location";
 	
 	public static final String PATIENT = "Patient";
@@ -45,6 +49,8 @@ public class FhirConstants {
 	public static final String PRACTITIONER = "Practitioner";
 	
 	public static final String IDENTIFIER = "identifier";
+	
+	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
 	
 	@Value("${project.parent.artifactId}.personAttributeTypeUuid")
 	public static String PERSON_ATTRIBUTE_TYPE_PROPERTY;
