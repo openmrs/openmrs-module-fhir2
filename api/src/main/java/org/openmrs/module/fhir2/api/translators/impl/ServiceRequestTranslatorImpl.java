@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator {
+public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<TestOrder> {
 	
 	@Inject
 	ConceptTranslator conceptTranslator;
@@ -47,16 +47,6 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator {
 		}
 		
 		return serviceRequest;
-	}
-	
-	@Override
-	public TestOrder toOpenmrsType(ServiceRequest serviceRequest) {
-		return null;
-	}
-	
-	@Override
-	public TestOrder toOpenmrsType(TestOrder currentOrder, ServiceRequest serviceRequest) {
-		return null;
 	}
 	
 	private ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(String orderUuid) {

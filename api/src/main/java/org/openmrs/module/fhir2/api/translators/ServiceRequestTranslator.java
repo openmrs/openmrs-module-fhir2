@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.TestOrder;
 
-public interface ServiceRequestTranslator extends OpenmrsFhirUpdatableTranslator<TestOrder, ServiceRequest> {
+public interface ServiceRequestTranslator<T> extends ToFhirTranslator<T, ServiceRequest> {
 	
 	/**
 	 * Maps a {@link TestOrder} to a {@link ServiceRequest}
@@ -21,24 +21,5 @@ public interface ServiceRequestTranslator extends OpenmrsFhirUpdatableTranslator
 	 * @return the corresponding FHIR ServiceRequest
 	 */
 	@Override
-	ServiceRequest toFhirResource(TestOrder order);
-	
-	/**
-	 * Maps a {@link ServiceRequest} to a {@link org.openmrs.TestOrder}
-	 * 
-	 * @param serviceRequest the FHIR serviceRequest to translate
-	 * @return the corresponding OpenMRS order
-	 */
-	@Override
-	TestOrder toOpenmrsType(ServiceRequest serviceRequest);
-	
-	/**
-	 * Maps a {@link ServiceRequest} to an existing {@link TestOrder}
-	 * 
-	 * @param currentOrder the existing OpenMRS order to update
-	 * @param serviceRequest the FHIR Service Request to translate
-	 * @return the updated OpenMRS order
-	 */
-	@Override
-	TestOrder toOpenmrsType(TestOrder currentOrder, ServiceRequest serviceRequest);
+	ServiceRequest toFhirResource(T order);
 }
