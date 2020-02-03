@@ -17,6 +17,8 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_SERVER_NAME = "OpenMRS FHIR Server";
 	
+	public static final String OPENMRS_URI = "http://openmrs.org";
+	
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	
