@@ -22,7 +22,7 @@
 			${project.parent.description}
 	</description>
 
-	<activator>@MODULE_PACKAGE@.FhirActivator</activator>
+	<activator>${project.parent.groupId}.${project.parent.artifactId}.FhirActivator</activator>
 	
 	<!-- <updateURL>https://modules.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
