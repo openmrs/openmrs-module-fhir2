@@ -15,6 +15,7 @@ import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.ilike;
+import static org.hibernate.criterion.Restrictions.in;
 import static org.hibernate.criterion.Restrictions.or;
 import static org.hibernate.criterion.Subqueries.propertyEq;
 
@@ -24,6 +25,7 @@ import javax.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -77,24 +79,54 @@ public class FhirObservationDaoImpl implements FhirObservationDao {
 			for (TokenOrListParam tokenList : code.getValuesAsQueryTokens()) {
 				List<Criterion> codedConcepts = new ArrayList<>();
 				
-				for (TokenParam coding : tokenList.getValuesAsQueryTokens()) {
+				List<TokenParam> paramList = tokenList.getValuesAsQueryTokens();
+				paramList.sort(
+				    Comparator.comparing(tokenParam -> tokenParam.getSystem() == null ? "" : tokenParam.getSystem()));
+				
+				String previousSystem = null;
+				List<String> codes = new ArrayList<>();
+				for (TokenParam coding : paramList) {
 					if (coding.getSystem() != null) {
 						if (!addedMappingAliases) {
 							criteria.createAlias("c.conceptMappings", "cm").createAlias("cm.conceptReferenceTerm", "crt");
 							addedMappingAliases = true;
 						}
 						
-						DetachedCriteria conceptSourceCriteria = DetachedCriteria.forClass(FhirConceptSource.class)
-						        .add(eq("url", coding.getSystem())).setProjection(property("conceptSource"));
-						codedConcepts.add(
-						    and(propertyEq("crt.conceptSource", conceptSourceCriteria), eq("crt.code", coding.getValue())));
+						if (!coding.getSystem().equals(previousSystem)) {
+							if (codes.size() > 0) {
+								generateSystemQuery(previousSystem, codes, codedConcepts);
+								codes.clear();
+							}
+							
+							previousSystem = coding.getSystem();
+						}
+						
+						codes.add(coding.getValue());
 					} else {
-						codedConcepts.add(eq("c.conceptId", NumberUtils.toInt(coding.getValue())));
+						// note that since we sort a null system to an empty string, we should never get coded mappings
+						// before the system-specific codes.
+						codedConcepts.add(
+						    or(eq("c.conceptId", NumberUtils.toInt(coding.getValue())), eq("c.uuid", coding.getValue())));
 					}
+				}
+				
+				if (codes.size() > 0) {
+					generateSystemQuery(previousSystem, codes, codedConcepts);
 				}
 				
 				criteria.add(or(codedConcepts.toArray(new Criterion[0])));
 			}
+		}
+	}
+	
+	private void generateSystemQuery(String system, List<String> codes, List<Criterion> codedConcepts) {
+		DetachedCriteria conceptSourceCriteria = DetachedCriteria.forClass(FhirConceptSource.class).add(eq("url", system))
+		        .setProjection(property("conceptSource"));
+		
+		if (codes.size() > 1) {
+			codedConcepts.add(and(propertyEq("crt.conceptSource", conceptSourceCriteria), in("crt.code", codes)));
+		} else {
+			codedConcepts.add(and(propertyEq("crt.conceptSource", conceptSourceCriteria), eq("crt.code", codes.get(0))));
 		}
 	}
 	
@@ -144,9 +176,9 @@ public class FhirObservationDaoImpl implements FhirObservationDao {
 	private void handleSort(Criteria criteria, SortSpec sort) {
 		SortSpec sortSpec = sort;
 		while (sortSpec != null) {
-			String prop = paramToProp(sort.getParamName());
+			String prop = paramToProp(sortSpec.getParamName());
 			if (prop != null) {
-				switch (sort.getOrder()) {
+				switch (sortSpec.getOrder()) {
 					case DESC:
 						criteria.addOrder(desc(prop));
 						break;
@@ -156,7 +188,7 @@ public class FhirObservationDaoImpl implements FhirObservationDao {
 				}
 			}
 			
-			sortSpec = sort.getChain();
+			sortSpec = sortSpec.getChain();
 		}
 	}
 	
