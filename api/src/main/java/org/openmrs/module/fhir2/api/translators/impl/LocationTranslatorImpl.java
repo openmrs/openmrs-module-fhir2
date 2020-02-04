@@ -19,10 +19,12 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
+import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
@@ -78,6 +80,13 @@ public class LocationTranslatorImpl implements LocationTranslator {
 			}
 			
 			fhirLocation.setTelecom(getLocationContactDetails(openmrsLocation));
+			
+			if (openmrsLocation.getTags() != null) {
+				for (LocationTag tag : openmrsLocation.getTags()) {
+					fhirLocation.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, tag.getName(),
+					    tag.getDescription());
+				}
+			}
 		}
 		return fhirLocation;
 	}
@@ -114,6 +123,12 @@ public class LocationTranslatorImpl implements LocationTranslator {
 			    contactPoint -> (LocationAttribute) telecomTranslator.toOpenmrsType(new LocationAttribute(), contactPoint))
 			        .collect(Collectors.toSet());
 			openmrsLocation.setAttributes(attributes);
+			
+			if (fhirLocation.getMeta().getTag() != null) {
+				for (Coding tag : fhirLocation.getMeta().getTag()) {
+					openmrsLocation.addTag(new LocationTag(tag.getCode(), tag.getDisplay()));
+				}
+			}
 		}
 		return openmrsLocation;
 	}
