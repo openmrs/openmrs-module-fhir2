@@ -12,13 +12,17 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +32,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
+import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
@@ -57,6 +62,14 @@ public class LocationTranslatorImplTest {
 	private static final String LOCATION_ATTRIBUTE_TYPE_UUID = "abcde432-1691-11df-97a5-7038c432abcd";
 	
 	private static final String LOCATION_ATTRIBUTE_TYPE_NAME = "street name";
+	
+	private static final String LOGIN_TAG_NAME = "Login location";
+	
+	private static final String LOGIN_TAG_DESCRIPTION = "Used to identify login locations";
+	
+	private static final String LAB_TAG_NAME = "Lab location";
+	
+	private static final String LAB_TAG_DESCRIPTION = "Used to identify lab locations";
 	
 	@Mock
 	private LocationAddressTranslator locationAddressTranslator;
@@ -270,5 +283,30 @@ public class LocationTranslatorImplTest {
 		assertThat(contactPoints, notNullValue());
 		assertThat(omrsLocation.getActiveAttributes().size(), equalTo(1));
 		
+	}
+	
+	@Test
+	public void toFhirResource_shoudTranslateOpenmrsTagsToFhirLocationTags() {
+		LocationTag tag = new LocationTag(LOGIN_TAG_NAME, LOGIN_TAG_DESCRIPTION);
+		omrsLocation.addTag(tag);
+		org.hl7.fhir.r4.model.Location fhirLocation = locationTranslator.toFhirResource(omrsLocation);
+		assertThat(fhirLocation.getMeta().getTag(), notNullValue());
+		assertThat(fhirLocation.getMeta().getTag(), hasSize(greaterThanOrEqualTo(1)));
+		assertThat(fhirLocation.getMeta().getTag().get(0).getCode(), is(LOGIN_TAG_NAME));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateFhirTagsToOpenmrsLocationTags() {
+		List<Coding> tags = new ArrayList<>();
+		Coding tag = new Coding();
+		tag.setCode(LAB_TAG_NAME);
+		tag.setDisplay(LAB_TAG_DESCRIPTION);
+		tags.add(tag);
+		org.hl7.fhir.r4.model.Location fhirLocation = new org.hl7.fhir.r4.model.Location();
+		fhirLocation.getMeta().setTag(tags);
+		omrsLocation = locationTranslator.toOpenmrsType(fhirLocation);
+		assertThat(omrsLocation.getTags(), notNullValue());
+		assertThat(omrsLocation.getTags(), hasSize(greaterThanOrEqualTo(1)));
+		assertThat(omrsLocation.getTags().iterator().next().getName(), is(LAB_TAG_NAME));
 	}
 }
