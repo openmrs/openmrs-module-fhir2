@@ -27,7 +27,7 @@
 	<!-- <updateURL>https://modules.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
 	
-	<require_version>2.3.*, 2.2.*, 2.0.5 - 2.0.*</require_version>
+	<require_version>2.3.*, 2.2.*, 2.0.5 - 2.1.*</require_version>
 	
 	<!-- Extensions -->
 
