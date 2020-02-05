@@ -44,14 +44,10 @@
         <dependency>
             <groupId>org.openmrs.module</groupId>
             <artifactId>emrapi-condition-list</artifactId>
-            <version>${emrApiConditionModuleApiVersion}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openmrs.module</groupId>
             <artifactId>emrapi-api</artifactId>
-            <version>${emrApiConditionModuleApiVersion}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -90,7 +86,6 @@
 
     <properties>
         <openmrsPlatformVersion>2.1.4</openmrsPlatformVersion>
-        <emrApiConditionModuleApiVersion>1.27.0</emrApiConditionModuleApiVersion>
     </properties>
 
 </project>
