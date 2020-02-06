@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Location;
@@ -72,6 +73,12 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	@Transactional(readOnly = true)
 	public Collection<Location> findLocationsByState(String state) {
 		return locationDao.findLocationsByState(state).stream().map(locationTranslator::toFhirResource)
+		        .collect(Collectors.toList());
+	}
+	
+	@Override
+	public Collection<Location> findLocationsByTag(TokenParam tag) {
+		return locationDao.findLocationsByTag(tag).stream().map(locationTranslator::toFhirResource)
 		        .collect(Collectors.toList());
 	}
 }

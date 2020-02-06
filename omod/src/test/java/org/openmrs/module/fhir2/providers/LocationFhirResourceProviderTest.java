@@ -21,9 +21,11 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.junit.Before;
@@ -31,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,6 +63,10 @@ public class LocationFhirResourceProviderTest {
 	
 	private static final String WRONG_POSTAL_CODE = "wrong postal code";
 	
+	private static final String LOGIN_LOCATION_TAG_NAME = "login";
+	
+	private static final String LOGIN_LOCATION_TAG_DESCRIPTION = "Identify login locations";
+	
 	@Mock
 	private FhirLocationService locationService;
 	
@@ -85,6 +92,8 @@ public class LocationFhirResourceProviderTest {
 		location.setId(LOCATION_UUID);
 		location.setName(LOCATION_NAME);
 		location.setAddress(address);
+		location.getMeta().addTag(new Coding(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME,
+		        LOGIN_LOCATION_TAG_DESCRIPTION));
 	}
 	
 	@Test
@@ -220,6 +229,17 @@ public class LocationFhirResourceProviderTest {
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry(), is(empty()));
+	}
+	
+	@Test
+	public void findLocationsByTags_shouldReturnLocationsContainingGivenTag() {
+		TokenParam tag = new TokenParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME);
+		when(locationService.findLocationsByTag(tag)).thenReturn(Collections.singletonList(location));
+		
+		Bundle results = resourceProvider.findLocationsByTag(tag);
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
 	}
 	
 }
