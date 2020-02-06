@@ -25,7 +25,6 @@ import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-
 @Component
 @Qualifier("fhirResources")
 @Setter(AccessLevel.PACKAGE)

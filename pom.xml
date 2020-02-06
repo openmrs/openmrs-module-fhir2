@@ -183,13 +183,6 @@
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>emrapi-condition-list</artifactId>
 				<version>${emrApiConditionModuleApiVersion}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>emrapi-api</artifactId>
-				<version>${emrApiConditionModuleApiVersion}</version>
-				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>

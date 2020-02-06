@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.Impl;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 public class FhirConditionDaoImpl_2_0 implements FhirConditionDao<Condition> {
 	
 	@Inject
+	@Named("emrConditionService")
 	private ConditionService conditionService;
 	
 	/**
