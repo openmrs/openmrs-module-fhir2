@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -81,5 +82,11 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	@SuppressWarnings("unused")
 	public Bundle findLocationByState(@RequiredParam(name = Location.SP_ADDRESS_STATE) StringParam state) {
 		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByState(state.getValue()));
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle findLocationsByTag(@RequiredParam(name = "_tag") TokenParam tag) {
+		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByTag(tag));
 	}
 }

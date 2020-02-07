@@ -21,11 +21,13 @@ import javax.inject.Provider;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -56,6 +58,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String LOCATION_STATE = "province";
 	
 	private static final String UNKNOWN_LOCATION_STATE = "province state";
+	
+	private static final String LOGIN_LOCATION_TAG_NAME = "login";
 	
 	private static final String LOCATION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirLocationDaoImplTest_initial_data.xml";
 	
@@ -170,5 +174,13 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(locations, notNullValue());
 		assertThat(locations.size(), equalTo(0));
+	}
+	
+	@Test
+	public void findLocationsByTag_shouldReturnLocationsContainingGivenTag() {
+		TokenParam locationTag = new TokenParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME);
+		Collection<Location> locations = fhirLocationDao.findLocationsByTag(locationTag);
+		assertThat(locations, notNullValue());
+		assertThat(locations.size(), greaterThanOrEqualTo(2));
 	}
 }

@@ -14,6 +14,7 @@ import javax.inject.Named;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
@@ -66,5 +67,11 @@ public class FhirLocationDaoImpl implements FhirLocationDao {
 	public Collection<Location> findLocationsByState(String state) {
 		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(Restrictions.eq("stateProvince", state))
 		        .list();
+	}
+	
+	@Override
+	public Collection<Location> findLocationsByTag(TokenParam tag) {
+		return sessionFactory.getCurrentSession().createCriteria(Location.class).createAlias("tags", "t")
+		        .add(Restrictions.eq("t.name", tag.getValue())).list();
 	}
 }
