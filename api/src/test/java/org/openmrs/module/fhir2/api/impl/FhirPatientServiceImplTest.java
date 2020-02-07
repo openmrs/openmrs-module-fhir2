@@ -16,11 +16,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.r4.model.HumanName;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,89 +86,129 @@ public class FhirPatientServiceImplTest {
 		fhirPatient = new org.hl7.fhir.r4.model.Patient();
 		fhirPatient.setId(PATIENT_UUID);
 		fhirPatient.addName(humanName);
-		
 	}
 	
 	@Test
-	public void shouldRetrievePatientByUuid() {
+	public void getPatientByUuid_shouldRetrievePatientByUuid() {
 		when(dao.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
 		org.hl7.fhir.r4.model.Patient result = patientService.getPatientByUuid(PATIENT_UUID);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(PATIENT_UUID));
 	}
 	
 	@Test
-	public void shouldSearchForPatientsByName() {
+	public void searchForPatients_shouldSearchForPatientsByName() {
 		Collection<Patient> patients = new ArrayList<>();
 		patients.add(patient);
-		when(dao.findPatientsByName(PATIENT_GIVEN_NAME)).thenReturn(patients);
-		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.findPatientsByName(PATIENT_GIVEN_NAME);
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PATIENT_GIVEN_NAME));
+		when(dao.searchForPatients(argThat(equalTo(stringOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(patients);
+		
+		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.searchForPatients(stringOrListParam, null, null,
+		    null, null, null, null, null, null, null, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.size(), equalTo(1));
 	}
 	
 	@Test
-	public void shouldSearchForPatientsByGivenName() {
+	public void searchForPatients_shouldSearchForPatientsByGivenName() {
 		Collection<Patient> patients = new ArrayList<>();
 		patients.add(patient);
-		when(dao.findPatientsByGivenName(PATIENT_GIVEN_NAME)).thenReturn(patients);
-		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.findPatientsByGivenName(PATIENT_GIVEN_NAME);
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PATIENT_GIVEN_NAME));
+		when(dao.searchForPatients(isNull(), argThat(equalTo(stringOrListParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(patients);
+		
+		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.searchForPatients(null, stringOrListParam, null,
+		    null, null, null, null, null, null, null, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.size(), equalTo(1));
 	}
 	
 	@Test
-	public void shouldSearchForPatientsByFamilyName() {
+	public void searchForPatients_shouldSearchForPatientsByFamilyName() {
 		Collection<Patient> patients = new ArrayList<>();
 		patients.add(patient);
-		when(dao.findPatientsByFamilyName(PATIENT_FAMILY_NAME)).thenReturn(patients);
-		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.findPatientsByFamilyName(PATIENT_FAMILY_NAME);
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PATIENT_FAMILY_NAME));
+		when(dao.searchForPatients(isNull(), isNull(), argThat(equalTo(stringOrListParam)), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(patients);
+		
+		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.searchForPatients(null, null, stringOrListParam,
+		    null, null, null, null, null, null, null, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.size(), equalTo(1));
 	}
 	
 	@Test
-	public void shouldReturnCollectionOfPatientsForPartialMatchOnGivenName() {
+	public void searchForPatients_shouldReturnCollectionOfPatientsForPartialMatchOnGivenName() {
 		Collection<Patient> patients = new ArrayList<>();
 		patients.add(patient);
-		when(dao.findPatientsByGivenName(PATIENT_PARTIAL_GIVEN_NAME)).thenReturn(patients);
-		Collection<org.hl7.fhir.r4.model.Patient> results = patientService
-		        .findPatientsByGivenName(PATIENT_PARTIAL_GIVEN_NAME);
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PATIENT_PARTIAL_GIVEN_NAME));
+		when(dao.searchForPatients(isNull(), argThat(equalTo(stringOrListParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(patients);
+		
+		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.searchForPatients(null, stringOrListParam, null,
+		    null, null, null, null, null, null, null, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void shouldReturnCollectionOfPatientsForPartialMatchOnFamilyName() {
+	public void searchForPatients_shouldReturnCollectionOfPatientsForPartialMatchOnFamilyName() {
 		Collection<Patient> patients = new ArrayList<>();
 		patients.add(patient);
-		when(dao.findPatientsByGivenName(PATIENT_PARTIAL_FAMILY_NAME)).thenReturn(patients);
-		Collection<org.hl7.fhir.r4.model.Patient> results = patientService
-		        .findPatientsByGivenName(PATIENT_PARTIAL_FAMILY_NAME);
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PATIENT_PARTIAL_FAMILY_NAME));
+		when(dao.searchForPatients(isNull(), isNull(), argThat(equalTo(stringOrListParam)), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(patients);
+		
+		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.searchForPatients(null, null, stringOrListParam,
+		    null, null, null, null, null, null, null, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void shouldReturnEmptyCollectionWhenPatientGivenNameNotMatched() {
-		Collection<org.hl7.fhir.r4.model.Patient> results = patientService
-		        .findPatientsByGivenName(PATIENT_GIVEN_NAME_NOT_MATCHED);
+	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientNameNotMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PATIENT_GIVEN_NAME_NOT_MATCHED));
+		
+		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.searchForPatients(stringOrListParam, null, null,
+		    null, null, null, null, null, null, null, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results, is(empty()));
 	}
 	
 	@Test
-	public void shouldReturnEmptyCollectionWhenPatientFamilyNameNotMatched() {
-		Collection<org.hl7.fhir.r4.model.Patient> results = patientService
-		        .findPatientsByFamilyName(PATIENT_FAMILY_NAME_NOT_MATCHED);
+	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientGivenNameNotMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PATIENT_GIVEN_NAME_NOT_MATCHED));
+		
+		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.searchForPatients(null, stringOrListParam, null,
+		    null, null, null, null, null, null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, is(empty()));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientFamilyNameNotMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PATIENT_FAMILY_NAME_NOT_MATCHED));
+		
+		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.searchForPatients(null, null, stringOrListParam,
+		    null, null, null, null, null, null, null, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results, is(empty()));
 	}
