@@ -31,8 +31,7 @@ public class FhirDiagnosticReportDaoImpl implements FhirDiagnosticReportDao {
 	
 	@Override
 	public Obs getObsGroupByUuid(String uuid) {
-		Obs result = (Obs) sessionFactory.getCurrentSession().createCriteria(Obs.class).add(eq("uuid", uuid)).uniqueResult();
-		
-		return result;
+		return (Obs) sessionFactory.getCurrentSession().createCriteria(Obs.class).createAlias("groupMembers", "group")
+		        .add(eq("uuid", uuid)).uniqueResult();
 	}
 }
