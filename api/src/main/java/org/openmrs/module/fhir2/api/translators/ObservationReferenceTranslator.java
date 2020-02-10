@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Obs;
 
-public interface ObservationReferenceTranslator extends ToFhirTranslator<Obs, Reference> {
+public interface ObservationReferenceTranslator extends OpenmrsFhirTranslator<Obs, Reference> {
 	
 	/**
 	 * Maps an {@link Obs} to a FHIR reference
@@ -22,4 +22,7 @@ public interface ObservationReferenceTranslator extends ToFhirTranslator<Obs, Re
 	 */
 	@Override
 	Reference toFhirResource(Obs obs);
+	
+	@Override
+	Obs toOpenmrsType(Reference obsReference);
 }

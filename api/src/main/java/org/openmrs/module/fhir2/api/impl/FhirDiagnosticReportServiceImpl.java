@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
@@ -34,5 +35,21 @@ public class FhirDiagnosticReportServiceImpl implements FhirDiagnosticReportServ
 	@Override
 	public DiagnosticReport getDiagnosticReportByUuid(String uuid) {
 		return translator.toFhirResource(dao.getObsGroupByUuid(uuid));
+	}
+	
+	@Override
+	public DiagnosticReport saveDiagnosticReport(DiagnosticReport diagnosticReport) {
+		return translator.toFhirResource(dao.saveObsGroup(translator.toOpenmrsType(diagnosticReport)));
+	}
+	
+	@Override
+	public DiagnosticReport updateDiagnosticReport(String uuid, DiagnosticReport diagnosticReport) {
+		Obs obsGroup = new Obs();
+		
+		if (uuid != null) {
+			obsGroup = dao.getObsGroupByUuid(uuid);
+		}
+		
+		return translator.toFhirResource(dao.saveObsGroup(translator.toOpenmrsType(obsGroup, diagnosticReport)));
 	}
 }

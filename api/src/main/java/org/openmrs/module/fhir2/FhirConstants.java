@@ -50,6 +50,8 @@ public class FhirConstants {
 	
 	public static final String IDENTIFIER = "identifier";
 	
+	public static final String DIAGNOSTIC_REPORT = "DiagnosticReport";
+	
 	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
 	
 	@Value("${project.parent.artifactId}.personAttributeTypeUuid")

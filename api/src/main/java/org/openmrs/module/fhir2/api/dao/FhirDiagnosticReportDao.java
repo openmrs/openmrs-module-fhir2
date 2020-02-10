@@ -16,4 +16,6 @@ import org.openmrs.Obs;
 public interface FhirDiagnosticReportDao {
 	
 	Obs getObsGroupByUuid(@NotNull String uuid);
+	
+	Obs saveObsGroup(Obs newObs);
 }

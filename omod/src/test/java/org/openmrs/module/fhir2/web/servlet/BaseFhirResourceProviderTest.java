@@ -108,6 +108,14 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 		return statusEquals(HttpStatus.NOT_FOUND);
 	}
 	
+	public static Matcher<MockHttpServletResponse> isCreated() {
+		return statusEquals(HttpStatus.CREATED);
+	}
+	
+	public static Matcher<MockHttpServletResponse> isBadRequest() {
+		return statusEquals(HttpStatus.BAD_REQUEST);
+	}
+	
 	public static Matcher<MockHttpServletResponse> statusEquals(final int status) {
 		return new StatusEqualsMatcher(status);
 	}
@@ -186,6 +194,10 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 	
 	public FhirRequestBuilder post(@NotNull String uri) throws MalformedURLException {
 		return new FhirRequestBuilder(RequestTypeEnum.POST, "http://localhost:8080/" + SERVLET_NAME + uri);
+	}
+	
+	public FhirRequestBuilder put(@NotNull String uri) throws MalformedURLException {
+		return new FhirRequestBuilder(RequestTypeEnum.PUT, "http://localhost:8080/" + SERVLET_NAME + uri);
 	}
 	
 	public U readResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {

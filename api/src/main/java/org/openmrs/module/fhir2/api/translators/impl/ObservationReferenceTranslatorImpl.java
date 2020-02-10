@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Obs;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
 import org.springframework.stereotype.Component;
@@ -33,5 +34,23 @@ public class ObservationReferenceTranslatorImpl extends AbstractReferenceHandlin
 		}
 		
 		return createObservationReference(obs);
+	}
+	
+	@Override
+	public Obs toOpenmrsType(Reference obsReference) {
+		if (obsReference == null) {
+			return null;
+		}
+		
+		if (!obsReference.getType().equals(FhirConstants.OBSERVATION)) {
+			throw new IllegalArgumentException("Reference must be to an Observation not a " + obsReference.getType());
+		}
+		
+		String uuid = getReferenceId(obsReference);
+		if (uuid == null) {
+			return null;
+		}
+		
+		return observationDao.getObsByUuid(uuid);
 	}
 }

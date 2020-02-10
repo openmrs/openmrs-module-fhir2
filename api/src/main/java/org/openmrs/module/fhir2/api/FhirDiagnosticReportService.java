@@ -16,8 +16,24 @@ public interface FhirDiagnosticReportService {
 	/**
 	 * Get diagnostic report by the UUID
 	 *
-	 * @param uuid
+	 * @param uuid Identifier for requested diagnostic report
 	 * @return diagnostic report with given internal identifier
 	 */
 	DiagnosticReport getDiagnosticReportByUuid(String uuid);
+	
+	/**
+	 * Get diagnostic report by the UUID
+	 *
+	 * @return Created diagnostic report
+	 */
+	DiagnosticReport saveDiagnosticReport(DiagnosticReport diagnosticReport);
+	
+	/**
+	 * Get diagnostic report by the UUID
+	 *
+	 * @param uuid Target DiagnosticReport identifier
+	 * @param diagnosticReport DiagnosticReport to update
+	 * @return Updated diagnostic report
+	 */
+	DiagnosticReport updateDiagnosticReport(String uuid, DiagnosticReport diagnosticReport);
 }
