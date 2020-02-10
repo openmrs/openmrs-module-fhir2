@@ -38,6 +38,7 @@
 		<module>api</module>
         <module>api-2.0</module>
 		<module>omod</module>
+        <module>api-2.1</module>
     </modules>
 
 	<repositories>
