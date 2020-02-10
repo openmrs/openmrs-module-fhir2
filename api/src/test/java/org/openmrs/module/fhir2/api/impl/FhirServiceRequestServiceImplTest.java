@@ -72,7 +72,7 @@ public class FhirServiceRequestServiceImplTest {
 	
 	@Test
 	public void shouldRetrieveServiceRequestByUUID() {
-		when(dao.getTestOrderByUuid(SERVICE_REQUEST_UUID)).thenReturn(order);
+		when(dao.getServiceRequestByUuid(SERVICE_REQUEST_UUID)).thenReturn(order);
 		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
 		
 		ServiceRequest result = serviceRequestService.getServiceRequestByUuid(SERVICE_REQUEST_UUID);

@@ -17,23 +17,19 @@ import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.TestOrder;
-import org.openmrs.api.OrderService;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirServiceRequestDaoImpl implements FhirServiceRequestDao {
-	
-	@Inject
-	private OrderService orderService;
+public class FhirServiceRequestDaoImpl implements FhirServiceRequestDao<TestOrder> {
 	
 	@Inject
 	@Named("sessionFactory")
 	SessionFactory sessionFactory;
 	
 	@Override
-	public TestOrder getTestOrderByUuid(String uuid) {
+	public TestOrder getServiceRequestByUuid(String uuid) {
 		return (TestOrder) sessionFactory.getCurrentSession().createCriteria(TestOrder.class)
 		        .add(Restrictions.eq("uuid", uuid)).uniqueResult();
 	}

@@ -27,14 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirServiceRequestServiceImpl implements FhirServiceRequestService {
 	
 	@Inject
-	private ServiceRequestTranslator translator;
+	private ServiceRequestTranslator<TestOrder> translator;
 	
 	@Inject
-	private FhirServiceRequestDao dao;
+	private FhirServiceRequestDao<TestOrder> dao;
 	
 	@Transactional(readOnly = true)
 	public ServiceRequest getServiceRequestByUuid(String uuid) {
-		TestOrder openmrsOrder = dao.getTestOrderByUuid(uuid);
+		TestOrder openmrsOrder = dao.getServiceRequestByUuid(uuid);
 		
 		return translator.toFhirResource(openmrsOrder);
 	}
