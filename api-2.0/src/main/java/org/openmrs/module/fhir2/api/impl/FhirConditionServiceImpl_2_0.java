@@ -20,10 +20,12 @@ import org.openmrs.module.fhir2.api.dao.Impl.FhirConditionDaoImpl_2_0;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Primary
 @Component
 @Setter(AccessLevel.PACKAGE)
+@Transactional
 @OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.1.*")
 public class FhirConditionServiceImpl_2_0 implements FhirConditionService {
 	
@@ -34,6 +36,7 @@ public class FhirConditionServiceImpl_2_0 implements FhirConditionService {
 	private ConditionTranslator<org.openmrs.module.emrapi.conditionslist.Condition> conditionTranslator;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Condition getConditionByUuid(String uuid) {
 		return conditionTranslator.toFhirResource(dao.getConditionByUuid(uuid));
 	}

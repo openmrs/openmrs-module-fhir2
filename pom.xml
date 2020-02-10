@@ -180,6 +180,11 @@
 				<version>${hapifhirVersion}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>emrapi-condition-list</artifactId>
+				<version>${emrApiConditionModuleApiVersion}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
 				<version>${lombokVersion}</version>
@@ -596,5 +601,6 @@
         <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
 		<openmrsPlatformToolsVersion>2.0.5</openmrsPlatformToolsVersion>
 		<hapifhirVersion>4.0.3</hapifhirVersion>
+		<emrApiConditionModuleApiVersion>1.27.0</emrApiConditionModuleApiVersion>
     </properties>
 </project>
