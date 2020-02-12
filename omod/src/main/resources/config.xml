@@ -28,6 +28,17 @@
 	<!-- /Base Module Properties -->
 	
 	<require_version>2.3.*, 2.2.*, 2.0.5 - 2.1.*</require_version>
+
+    <conditionalResources>
+        <conditionalResource>
+            <path>/lib/fhir2-api-2.2-${project.parent.version}.jar</path>
+            <openmrsVersion>2.2.* - 2.3.*</openmrsVersion>
+        </conditionalResource>
+        <conditionalResource>
+            <path>/lib/fhir2-api-2.0-${project.parent.version}.jar</path>
+            <openmrsVersion>2.0.5 - 2.1.*</openmrsVersion>
+        </conditionalResource>
+    </conditionalResources>
 	
 	<!-- Extensions -->
 
