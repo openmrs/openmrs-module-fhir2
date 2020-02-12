@@ -22,6 +22,7 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
@@ -35,7 +36,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class LocationTranslatorImpl implements LocationTranslator {
+public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator implements LocationTranslator {
 	
 	@Inject
 	private LocationAddressTranslator locationAddressTranslator;
@@ -87,6 +88,9 @@ public class LocationTranslatorImpl implements LocationTranslator {
 					    tag.getDescription());
 				}
 			}
+			if (openmrsLocation.getParentLocation() != null) {
+				fhirLocation.setPartOf(createLocationReference(openmrsLocation.getParentLocation()));
+			}
 		}
 		return fhirLocation;
 	}
@@ -119,6 +123,18 @@ public class LocationTranslatorImpl implements LocationTranslator {
 			openmrsLocation.setCountry(fhirLocation.getAddress().getCountry());
 			openmrsLocation.setPostalCode(fhirLocation.getAddress().getPostalCode());
 			
+			if (fhirLocation.getStatus() != null && fhirLocation.getStatus().equals(Location.LocationStatus.INACTIVE)) {
+				openmrsLocation.setRetired(true);
+				openmrsLocation.setRetireReason("Retired by FHIR module");
+			}
+			
+			if (fhirLocation.getPosition().getLatitude() != null) {
+				openmrsLocation.setLatitude(fhirLocation.getPosition().getLatitude().toString());
+			}
+			if (fhirLocation.getPosition().getLongitude() != null) {
+				openmrsLocation.setLongitude(fhirLocation.getPosition().getLongitude().toString());
+			}
+			
 			Set<LocationAttribute> attributes = fhirLocation.getTelecom().stream().map(
 			    contactPoint -> (LocationAttribute) telecomTranslator.toOpenmrsType(new LocationAttribute(), contactPoint))
 			        .collect(Collectors.toSet());
@@ -129,7 +145,26 @@ public class LocationTranslatorImpl implements LocationTranslator {
 					openmrsLocation.addTag(new LocationTag(tag.getCode(), tag.getDisplay()));
 				}
 			}
+			
+			openmrsLocation.setParentLocation(getOpenmrsParentLocation(fhirLocation.getPartOf()));
 		}
 		return openmrsLocation;
+	}
+	
+	public org.openmrs.Location getOpenmrsParentLocation(Reference location) {
+		if (location == null) {
+			return null;
+		}
+		
+		if (location.getType() != null && !location.getType().equals("Location")) {
+			throw new IllegalArgumentException("Reference must be to a Location not a " + location.getType());
+		}
+		
+		String uuid = getReferenceId(location);
+		if (uuid == null) {
+			return null;
+		}
+		
+		return locationService.getLocationByUuid(uuid);
 	}
 }
