@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.openmrs.Obs;
+import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.springframework.stereotype.Component;
 
@@ -33,5 +34,16 @@ public class FhirDiagnosticReportDaoImpl implements FhirDiagnosticReportDao {
 	public Obs getObsGroupByUuid(String uuid) {
 		return (Obs) sessionFactory.getCurrentSession().createCriteria(Obs.class).createAlias("groupMembers", "group")
 		        .add(eq("uuid", uuid)).uniqueResult();
+	}
+	
+	@Override
+	public Obs saveObsGroup(Obs obs) throws DAOException {
+		if (!obs.isObsGrouping()) {
+			throw new IllegalArgumentException("Provided Obs must be an Obs grouping.");
+		}
+		
+		sessionFactory.getCurrentSession().saveOrUpdate(obs);
+		
+		return obs;
 	}
 }

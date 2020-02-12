@@ -13,7 +13,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,6 +57,46 @@ public class ObservationReferenceTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldReturnNullIfObservationNull() {
 		Reference result = observationReferenceTranslator.toFhirResource(null);
+		
+		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertReferenceToObs() {
+		Reference observationReference = new Reference().setReference(FhirConstants.OBSERVATION + "/" + UUID)
+		        .setType(FhirConstants.OBSERVATION).setIdentifier(new Identifier().setValue(UUID));
+		
+		Obs obs = new Obs();
+		obs.setUuid(UUID);
+		
+		when(dao.getObsByUuid(UUID)).thenReturn(obs);
+		
+		Obs result = observationReferenceTranslator.toOpenmrsType(observationReference);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldReturnNullIfReferenceNull() {
+		Obs result = observationReferenceTranslator.toOpenmrsType(null);
+		
+		assertThat(result, nullValue());
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void toOpenmrsType_shouldErrorIfReferenceNotObsType() {
+		Reference otherReference = new Reference().setType(FhirConstants.PATIENT)
+		        .setIdentifier(new Identifier().setValue(UUID));
+		
+		observationReferenceTranslator.toOpenmrsType(otherReference);
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldReturnNullIfReferenceMissingUuid() {
+		Reference observationReference = new Reference().setType(FhirConstants.OBSERVATION);
+		
+		Obs result = observationReferenceTranslator.toOpenmrsType(observationReference);
 		
 		assertThat(result, nullValue());
 	}

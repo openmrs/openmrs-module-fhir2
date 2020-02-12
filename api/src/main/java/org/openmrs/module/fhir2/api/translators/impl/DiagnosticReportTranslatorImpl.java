@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
@@ -54,12 +55,48 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		
-		setFhirFields(obsGroup, diagnosticReport);
+		setResourceElements(obsGroup, diagnosticReport);
 		
 		return diagnosticReport;
 	}
 	
-	private void setFhirFields(Obs obsGroup, DiagnosticReport diagnosticReport) {
+	@Override
+	public Obs toOpenmrsType(DiagnosticReport diagnosticReport) {
+		if (diagnosticReport == null) {
+			return null;
+		}
+		
+		if (!diagnosticReport.hasResult()) {
+			throw new IllegalArgumentException("Diagnostic Report must have at least one result");
+		}
+		
+		Obs translatedObs = new Obs();
+		
+		setOpenmrsFields(diagnosticReport, translatedObs);
+		
+		return translatedObs;
+	}
+	
+	@Override
+	public Obs toOpenmrsType(Obs existingObs, DiagnosticReport diagnosticReport) {
+		if (existingObs == null) {
+			existingObs = new Obs();
+		}
+		
+		if (diagnosticReport == null) {
+			return existingObs;
+		}
+		
+		if (!diagnosticReport.hasResult()) {
+			throw new IllegalArgumentException("Diagnostic Report must have at least one result");
+		}
+		
+		setOpenmrsFields(diagnosticReport, existingObs);
+		
+		return existingObs;
+	}
+	
+	private void setResourceElements(Obs obsGroup, DiagnosticReport diagnosticReport) {
 		// DiagnosticReport.id
 		diagnosticReport.setId(obsGroup.getUuid());
 		
@@ -98,5 +135,45 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		for (Obs obs : obsGroup.getGroupMembers()) {
 			diagnosticReport.addResult(observationReferenceTranslator.toFhirResource(obs));
 		}
+	}
+	
+	private void setOpenmrsFields(DiagnosticReport diagnosticReport, Obs translatedObs) {
+		
+		// DiagnosticReport.id
+		if (translatedObs.getUuid() != null) {
+			translatedObs.setUuid(diagnosticReport.getId());
+		}
+		
+		// DiagnosticReport.status (Constant)
+		
+		// DiagnosticReport.encounter
+		if (diagnosticReport.hasEncounter()) {
+			translatedObs.setEncounter(encounterReferenceTranslator.toOpenmrsType(diagnosticReport.getEncounter()));
+		}
+		
+		// DiagnosticReport.subject
+		if (diagnosticReport.hasSubject()) {
+			translatedObs.setPerson(patientReferenceTranslator.toOpenmrsType(diagnosticReport.getSubject()));
+		}
+		
+		// DiagnosticReport.code
+		if (diagnosticReport.hasCode()) {
+			translatedObs.setConcept(conceptTranslator.toOpenmrsType(diagnosticReport.getCode()));
+		}
+		
+		// DiagnosticReport.category (Constant)
+		
+		// DiagnosticReport.issued
+		translatedObs.setDateCreated(diagnosticReport.getIssued());
+		
+		// DiagnosticReport.result
+		for (Reference observationReference : diagnosticReport.getResult()) {
+			translatedObs.addGroupMember(observationReferenceTranslator.toOpenmrsType(observationReference));
+		}
+		
+		// Tag as diagnostic report
+		// TODO: distinguish between DianosticReport and Observation mapping for a given Obs
+		translatedObs.setComment("mapped DiagnosticReport");
+		
 	}
 }

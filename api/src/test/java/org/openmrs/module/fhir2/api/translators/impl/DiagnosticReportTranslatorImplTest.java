@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -32,6 +33,7 @@ import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
@@ -44,7 +46,7 @@ public class DiagnosticReportTranslatorImplTest {
 	
 	private static final String CHILD_UUID = "faf75a02-5083-454c-a4ec-9a4babf26558";
 	
-	private static final String PATIENT_UUID = "249b9094-5083-454c-a4ec-9a4babf26558";
+	private static final String CODE = "249b9094-5083-454c-a4ec-9a4babf26558";
 	
 	@Mock
 	private EncounterReferenceTranslator encounterReferenceTranslator;
@@ -62,6 +64,12 @@ public class DiagnosticReportTranslatorImplTest {
 	
 	Obs obsGroup;
 	
+	Obs childObs;
+	
+	DiagnosticReport diagnosticReport;
+	
+	Reference obsReference;
+	
 	@Before
 	public void setup() {
 		translator = new DiagnosticReportTranslatorImpl();
@@ -70,17 +78,23 @@ public class DiagnosticReportTranslatorImplTest {
 		translator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		translator.setPatientReferenceTranslator(patientReferenceTranslator);
 		
+		// OpenMRS setup
 		obsGroup = new Obs();
-		Obs childObs = new Obs();
-		obsGroup.setUuid(PARENT_UUID);
+		childObs = new Obs();
 		childObs.setUuid(CHILD_UUID);
+		obsGroup.setUuid(PARENT_UUID);
 		obsGroup.addGroupMember(childObs);
 		
-		Reference obsReference = new Reference();
-		obsReference.setType("Observation");
-		obsReference.setReference("Observation/" + CHILD_UUID);
+		// FHIR setup
+		obsReference = new Reference().setType("Observation").setReference("Observation/" + CHILD_UUID);
+		diagnosticReport = new DiagnosticReport();
+		diagnosticReport.setId(PARENT_UUID);
+		diagnosticReport.addResult(obsReference);
 		
+		// Mocks for DiagnosticReport.result
 		when(observationReferenceTranslator.toFhirResource(childObs)).thenReturn(obsReference);
+		when(observationReferenceTranslator.toOpenmrsType(obsReference)).thenReturn(childObs);
+		
 	}
 	
 	@Test
@@ -97,6 +111,13 @@ public class DiagnosticReportTranslatorImplTest {
 		DiagnosticReport result = translator.toFhirResource(obs);
 		
 		assertThat(result, notNullValue());
+	}
+	
+	@Test
+	public void toFhirResource_shouldReturnNullForNullObsGroup() {
+		DiagnosticReport result = translator.toFhirResource(null);
+		
+		assertThat(result, nullValue());
 	}
 	
 	@Test
@@ -185,5 +206,150 @@ public class DiagnosticReportTranslatorImplTest {
 		assertThat(result.getResult(), notNullValue());
 		assertThat(result.getResult().size(), equalTo(1));
 		assertThat(result.getResult(), contains(hasProperty("reference", equalTo("Observation/" + CHILD_UUID))));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void toOpenmrsType_shouldErrorOnCreatingEmptyDiagnosticReport() {
+		DiagnosticReport emptyDiagnosticReport = new DiagnosticReport();
+		emptyDiagnosticReport.setId(PARENT_UUID);
+		
+		translator.toOpenmrsType(emptyDiagnosticReport);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void toOpenmrsType_shouldErrorOnUpdatingEmptyDiagnosticReport() {
+		DiagnosticReport emptyDiagnosticReport = new DiagnosticReport();
+		emptyDiagnosticReport.setId(PARENT_UUID);
+		
+		translator.toOpenmrsType(obsGroup, emptyDiagnosticReport);
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertDiagnosticReportToObsGroup() {
+		Obs result = translator.toOpenmrsType(diagnosticReport);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.isObsGrouping(), equalTo(true));
+		assertThat(result.getGroupMembers().iterator().next().getUuid(), equalTo(CHILD_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldReturnNullForCreatingNullDiagnosticReport() {
+		Obs result = translator.toOpenmrsType(null);
+		
+		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldReturnObsGroupForUpdatingDiagnosticReport() {
+		Obs result = translator.toOpenmrsType(obsGroup, null);
+		
+		assertThat(result, equalTo(obsGroup));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertUuid() {
+		Obs result = translator.toOpenmrsType(diagnosticReport);
+		
+		assertThat(result.getUuid(), equalTo(PARENT_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertSubject() {
+		Patient subject = new Patient();
+		Reference subjectReference = new Reference();
+		subjectReference.setType(FhirConstants.PATIENT);
+		
+		diagnosticReport.setSubject(subjectReference);
+		
+		when(patientReferenceTranslator.toOpenmrsType(subjectReference)).thenReturn(subject);
+		
+		Obs result = translator.toOpenmrsType(diagnosticReport);
+		
+		assertThat(result.getPerson(), equalTo(subject));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertEncounter() {
+		Encounter encounter = new Encounter();
+		Reference encounterReference = new Reference();
+		encounterReference.setType(FhirConstants.ENCOUNTER);
+		
+		diagnosticReport.setEncounter(encounterReference);
+		
+		when(encounterReferenceTranslator.toOpenmrsType(encounterReference)).thenReturn(encounter);
+		
+		Obs result = translator.toOpenmrsType(diagnosticReport);
+		
+		assertThat(result.getEncounter(), equalTo(encounter));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertCode() {
+		CodeableConcept code = new CodeableConcept();
+		Concept translatedCode = new Concept();
+		
+		code.addCoding().setCode(CODE);
+		diagnosticReport.setCode(code);
+		
+		when(conceptTranslator.toOpenmrsType(code)).thenReturn(translatedCode);
+		
+		Obs result = translator.toOpenmrsType(diagnosticReport);
+		
+		assertThat(result.getConcept(), equalTo(translatedCode));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertIssued() {
+		Date issuedDate = new Date();
+		diagnosticReport.setIssued(issuedDate);
+		
+		Obs result = translator.toOpenmrsType(diagnosticReport);
+		
+		assertThat(result.getDateCreated(), notNullValue());
+		assertThat(result.getDateCreated(), equalTo(issuedDate));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertResult() {
+		Obs result = translator.toOpenmrsType(diagnosticReport);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getGroupMembers(), notNullValue());
+		assertThat(result.getGroupMembers().size(), equalTo(1));
+		assertThat(result.getGroupMembers(), contains(hasProperty("uuid", equalTo(CHILD_UUID))));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldUpdateExistingObsGroup() {
+		CodeableConcept newCode = new CodeableConcept();
+		Concept translatedCode = new Concept();
+		
+		newCode.addCoding().setCode(CODE);
+		diagnosticReport.setCode(newCode);
+		
+		when(conceptTranslator.toOpenmrsType(newCode)).thenReturn(translatedCode);
+		
+		Obs result = translator.toOpenmrsType(obsGroup, diagnosticReport);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(obsGroup.getUuid()));
+		assertThat(result.getConcept(), equalTo(translatedCode));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldCreateObsGroupWhenNoneProvided() {
+		CodeableConcept newCode = new CodeableConcept();
+		Concept translatedCode = new Concept();
+		
+		newCode.addCoding().setCode(CODE);
+		diagnosticReport.setCode(newCode);
+		
+		when(conceptTranslator.toOpenmrsType(newCode)).thenReturn(translatedCode);
+		
+		Obs result = translator.toOpenmrsType(null, diagnosticReport);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getConcept(), equalTo(translatedCode));
 	}
 }

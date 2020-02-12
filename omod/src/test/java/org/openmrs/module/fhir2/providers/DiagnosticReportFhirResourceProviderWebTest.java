@@ -47,7 +47,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirResourc
 	}
 	
 	@Test
-	public void getDiagnosticReportByUuid_shouldReturnEncounter() throws Exception {
+	public void getDiagnosticReportByUuid_shouldReturnDiagnosticReport() throws Exception {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
 		when(service.getDiagnosticReportByUuid(DIAGNOSTIC_REPORT_UUID)).thenReturn(diagnosticReport);
@@ -67,5 +67,47 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirResourc
 		MockHttpServletResponse response = get("/DiagnosticReport/" + WRONG_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
+	}
+	
+	@Test
+	public void createDiagnosticReport_shouldCreateNewDiagnosticReport() throws Exception {
+		DiagnosticReport diagnosticReport = new DiagnosticReport();
+		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
+		
+		MockHttpServletResponse response = post("/DiagnosticReport").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isCreated());
+	}
+	
+	@Test
+	public void updateDiagnosticReport_shouldUpdateExistingDiagnosticReport() throws Exception {
+		DiagnosticReport diagnosticReport = new DiagnosticReport();
+		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
+		
+		MockHttpServletResponse response = put("/DiagnosticReport/" + WRONG_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+	}
+	
+	@Test
+	public void updateDiagnosticReport_shouldErrorForIdMismatch() throws Exception {
+		DiagnosticReport diagnosticReport = new DiagnosticReport();
+		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
+		
+		MockHttpServletResponse response = put("/DiagnosticReport/" + WRONG_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		// TODO: Fix so status is 400, not 200. See
+		assertThat(response, isOk());
+	}
+	
+	@Test
+	public void updateDiagnosticReport_shouldErrorForNoId() throws Exception {
+		DiagnosticReport diagnosticReport = new DiagnosticReport();
+		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
+		
+		MockHttpServletResponse response = put("/DiagnosticReport/").accept(FhirMediaTypes.JSON).go();
+		
+		// TODO: Fix so status is 400, not 200.
+		assertThat(response, isOk());
 	}
 }

@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -50,7 +51,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 	}
 	
 	@Before
-	public void initTask() {
+	public void initDiagnosticReport() {
 		diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 	}
@@ -83,5 +84,25 @@ public class DiagnosticReportFhirResourceProviderTest {
 		
 		assertThat(resourceProvider.getDiagnosticReportById(idType).isResource(), is(true));
 		assertThat(resourceProvider.getDiagnosticReportById(idType), nullValue());
+	}
+	
+	@Test
+	public void createDiagnosticReport_shouldCreateNewDiagnosticReport() {
+		when(service.saveDiagnosticReport(diagnosticReport)).thenReturn(diagnosticReport);
+		
+		MethodOutcome result = resourceProvider.createDiagnosticReport(diagnosticReport);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(diagnosticReport));
+	}
+	
+	@Test
+	public void updateDiagnosticReport_shouldUpdateExistingDiagnosticReport() {
+		when(service.updateDiagnosticReport(UUID, diagnosticReport)).thenReturn(diagnosticReport);
+		
+		MethodOutcome result = resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), diagnosticReport);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(diagnosticReport));
 	}
 }

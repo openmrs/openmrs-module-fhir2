@@ -12,8 +12,12 @@ package org.openmrs.module.fhir2.providers;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -22,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
+import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -47,5 +52,21 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return diagnosticReport;
+	}
+	
+	@Create
+	public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport diagnosticReport) {
+		return FhirUtils.buildCreate(service.saveDiagnosticReport(diagnosticReport));
+	}
+	
+	@Update
+	public MethodOutcome updateDiagnosticReport(@IdParam IdType id, @ResourceParam DiagnosticReport diagnosticReport) {
+		String idPart = null;
+		
+		if (id != null) {
+			idPart = id.getIdPart();
+		}
+		
+		return FhirUtils.buildUpdate(service.updateDiagnosticReport(idPart, diagnosticReport));
 	}
 }
