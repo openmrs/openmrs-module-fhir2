@@ -15,15 +15,20 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +39,7 @@ import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
@@ -70,6 +76,10 @@ public class LocationTranslatorImplTest {
 	private static final String LAB_TAG_NAME = "Lab location";
 	
 	private static final String LAB_TAG_DESCRIPTION = "Used to identify lab locations";
+	
+	private static final String PARENT_LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432u4e6";
+	
+	private static final String PARENT_LOCATION_NAME = "Parent Location";
 	
 	@Mock
 	private LocationAddressTranslator locationAddressTranslator;
@@ -309,4 +319,86 @@ public class LocationTranslatorImplTest {
 		assertThat(omrsLocation.getTags(), hasSize(greaterThanOrEqualTo(1)));
 		assertThat(omrsLocation.getTags().iterator().next().getName(), is(LAB_TAG_NAME));
 	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateOpenmrsParentLocationToFhirReference() {
+		Location parentLocation = new Location();
+		parentLocation.setUuid(PARENT_LOCATION_UUID);
+		parentLocation.setName(PARENT_LOCATION_NAME);
+		omrsLocation.setParentLocation(parentLocation);
+		Reference locationReference = locationTranslator.toFhirResource(omrsLocation).getPartOf();
+		assertThat(locationReference, notNullValue());
+		assertThat(locationReference.getType(), is(FhirConstants.LOCATION));
+		assertThat(locationReference.getDisplay(), is(PARENT_LOCATION_NAME));
+		assertThat(locationTranslator.getReferenceId(locationReference), equalTo(PARENT_LOCATION_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldReturnNullReferenceIfParentLocationIsNull() {
+		omrsLocation.setParentLocation(null);
+		Reference locationReference = locationTranslator.toFhirResource(omrsLocation).getPartOf();
+		assertThat(locationReference.getDisplay(), nullValue());
+	}
+	
+	@Test
+	public void getOpenmrsParentLocation_shouldReturnNullIfReferenceIsNull() {
+		Location result = locationTranslator.getOpenmrsParentLocation(null);
+		
+		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void getOpenmrsParentLocation_shouldReturnCorrectParentLocation() {
+		Reference locationReference = new Reference().setReference(FhirConstants.LOCATION + "/" + PARENT_LOCATION_UUID)
+		        .setType(FhirConstants.LOCATION).setIdentifier(new Identifier().setValue(PARENT_LOCATION_UUID));
+		
+		Location parentLocation = new Location();
+		parentLocation.setUuid(PARENT_LOCATION_UUID);
+		when(locationService.getLocationByUuid(PARENT_LOCATION_UUID)).thenReturn(parentLocation);
+		Location result = locationTranslator.getOpenmrsParentLocation(locationReference);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), is(PARENT_LOCATION_UUID));
+	}
+	
+	@Test
+	public void getOpenmrsParentLocation_shouldReturnNullIfLocationHasNoIdentifier() {
+		Reference locationReference = new Reference().setReference(FhirConstants.LOCATION + "/" + PARENT_LOCATION_UUID)
+		        .setType(FhirConstants.LOCATION);
+		
+		Location result = locationTranslator.getOpenmrsParentLocation(locationReference);
+		
+		assertThat(result, nullValue());
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void getOpenmrsParentLocation_shouldThrowExceptionIfReferenceIsntForLocation() {
+		Reference reference = new Reference().setReference("Unknown" + "/" + PARENT_LOCATION_NAME).setType("Unknown");
+		
+		locationTranslator.getOpenmrsParentLocation(reference);
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldRetireLocationIfFhirLocationIsInActive() {
+		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
+		location.setStatus(org.hl7.fhir.r4.model.Location.LocationStatus.INACTIVE);
+		
+		Location omrsLocation = locationTranslator.toOpenmrsType(location);
+		assertThat(omrsLocation, notNullValue());
+		assertThat(omrsLocation.getRetired(), is(true));
+		assertThat(omrsLocation.getRetireReason(), is("Retired by FHIR module"));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateFhirPositionToLocationLatitude() {
+		org.hl7.fhir.r4.model.Location.LocationPositionComponent position = new org.hl7.fhir.r4.model.Location.LocationPositionComponent();
+		position.setLatitude(new BigDecimal(LOCATION_LATITUDE));
+		position.setLongitude(new BigDecimal(LOCATION_LONGITUDE));
+		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
+		location.setPosition(position);
+		org.openmrs.Location omrsLocation = locationTranslator.toOpenmrsType(location);
+		assertThat(omrsLocation, notNullValue());
+		assertThat(omrsLocation.getLatitude(), is(LOCATION_LATITUDE));
+		assertThat(omrsLocation.getLongitude(), is(LOCATION_LONGITUDE));
+	}
+	
 }
