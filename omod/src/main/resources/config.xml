@@ -39,6 +39,10 @@
             <openmrsVersion>2.0.5 - 2.1.*</openmrsVersion>
         </conditionalResource>
     </conditionalResources>
+
+	<mappingFiles>
+		Condition.hbm.xml
+	</mappingFiles>
 	
 	<!-- Extensions -->
 

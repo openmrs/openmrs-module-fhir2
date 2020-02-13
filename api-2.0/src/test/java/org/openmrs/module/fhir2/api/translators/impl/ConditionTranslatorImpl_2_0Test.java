@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -150,6 +151,20 @@ public class ConditionTranslatorImpl_2_0Test {
 		assertThat(condition, notNullValue());
 		assertThat(condition.getClinicalStatus(), notNullValue());
 		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode().toLowerCase(), equalTo("active"));
+	}
+	
+	@Test
+	public void shouldReturnNullWhenTranslateNullConditionToFhirType() {
+		assertThat(conditionTranslator.toFhirResource(null), nullValue());
+	}
+	
+	@Test
+	public void shouldReturnExistingConditionWhenTranslateNullConditionToOpenMrsType() {
+		Condition existingCondition = new Condition();
+		existingCondition.setUuid(CONDITION_UUID);
+		Condition condition = conditionTranslator.toOpenmrsType(existingCondition, null);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getUuid(), equalTo(CONDITION_UUID));
 	}
 	
 }

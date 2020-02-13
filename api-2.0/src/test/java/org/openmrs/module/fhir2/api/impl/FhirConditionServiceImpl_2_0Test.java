@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.emrapi.conditionslist.Condition;
-import org.openmrs.module.fhir2.api.dao.Impl.FhirConditionDaoImpl_2_0;
+import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,7 +32,7 @@ public class FhirConditionServiceImpl_2_0Test {
 	private static final String WRONG_CONDITION_UUID = "tx0dfd38-ee20-41a6-909e-7d84247c8340";
 	
 	@Mock
-	private FhirConditionDaoImpl_2_0 dao;
+	private FhirConditionDao<Condition> dao;
 	
 	@Mock
 	private ConditionTranslator<Condition> conditionTranslator;
