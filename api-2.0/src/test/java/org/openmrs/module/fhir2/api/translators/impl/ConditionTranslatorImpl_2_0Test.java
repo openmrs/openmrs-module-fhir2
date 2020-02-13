@@ -54,7 +54,7 @@ public class ConditionTranslatorImpl_2_0Test {
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Mock
-	private ConditionClinicalStatusTranslator clinicalStatusTranslator;
+	private ConditionClinicalStatusTranslator<Condition.Status> clinicalStatusTranslator;
 	
 	private ConditionTranslatorImpl_2_0 conditionTranslator;
 	
