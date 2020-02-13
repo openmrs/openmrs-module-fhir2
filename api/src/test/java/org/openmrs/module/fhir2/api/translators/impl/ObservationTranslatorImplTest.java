@@ -40,6 +40,7 @@ import org.openmrs.Person;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationComponentTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -73,6 +74,9 @@ public class ObservationTranslatorImplTest {
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
+	@Mock
+	private ObservationInterpretationTranslator interpretationTranslator;
+	
 	private ObservationTranslatorImpl observationTranslator;
 	
 	@Before
@@ -84,6 +88,7 @@ public class ObservationTranslatorImplTest {
 		observationTranslator.setConceptTranslator(conceptTranslator);
 		observationTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		observationTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
+		observationTranslator.setInterpretationTranslator(interpretationTranslator);
 	}
 	
 	@Test

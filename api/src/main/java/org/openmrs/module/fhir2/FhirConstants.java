@@ -21,6 +21,8 @@ public class FhirConstants {
 	
 	public static final String DIAGNOSTIC_SERVICE_SECTIONS_VALUESET_URI = "http://hl7.org/fhir/ValueSet/diagnostic-service-sections";
 	
+	public static final String INTERPRETATION_VALUE_SET_URI = "http://hl7.org/fhir/ValueSet/observation-interpretation";
+	
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	
@@ -33,6 +35,8 @@ public class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_ADDRESS = OPENMRS_FHIR_EXT_PREFIX + "/address";
 	
 	public static final String OPENMRS_FHIR_EXT_LOCATION_TAG = OPENMRS_FHIR_EXT_PREFIX + "/location-tag";
+	
+	public static final String OPENMRS_FHIR_EXT_VS_INTERPRETATION = OPENMRS_FHIR_EXT_PREFIX + "/obs/interpretations";
 	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
