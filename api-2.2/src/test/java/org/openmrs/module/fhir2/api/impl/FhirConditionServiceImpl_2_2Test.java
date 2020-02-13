@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Condition;
-import org.openmrs.module.fhir2.api.dao.Impl.FhirConditionDaoImpl_2_2;
+import org.openmrs.module.fhir2.api.dao.impl.FhirConditionDaoImpl_2_2;
 import org.openmrs.module.fhir2.api.translators.impl.ConditionTranslatorImpl_2_2;
 
 @RunWith(MockitoJUnitRunner.class)

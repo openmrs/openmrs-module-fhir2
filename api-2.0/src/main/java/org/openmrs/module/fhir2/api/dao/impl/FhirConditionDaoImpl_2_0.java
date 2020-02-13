@@ -7,16 +7,18 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api.dao.Impl;
+package org.openmrs.module.fhir2.api.dao.impl;
+
+import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.SessionFactory;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.emrapi.conditionslist.Condition;
-import org.openmrs.module.emrapi.conditionslist.ConditionService;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -28,16 +30,13 @@ import org.springframework.stereotype.Component;
 public class FhirConditionDaoImpl_2_0 implements FhirConditionDao<Condition> {
 	
 	@Inject
-	@Named("emrConditionService")
-	private ConditionService conditionService;
+	@Named("sessionFactory")
+	private SessionFactory sessionFactory;
 	
-	/**
-	 * todo -> Refactor this to use: return (Condition)
-	 * sessionFactory.getCurrentSession().createCriteria(Condition.class).add(eq("uuid", uuid))
-	 * .uniqueResult();
-	 */
 	@Override
 	public Condition getConditionByUuid(String uuid) {
-		return this.conditionService.getConditionByUuid(uuid);
+		return (Condition) sessionFactory.getCurrentSession()
+		        .createCriteria(org.openmrs.module.emrapi.conditionslist.Condition.class).add(eq("uuid", uuid))
+		        .uniqueResult();
 	}
 }

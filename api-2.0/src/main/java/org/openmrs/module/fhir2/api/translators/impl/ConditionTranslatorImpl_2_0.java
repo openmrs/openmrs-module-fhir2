@@ -33,6 +33,9 @@ public class ConditionTranslatorImpl_2_0 implements ConditionTranslator<Conditio
 	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(Condition condition) {
+		if (condition == null) {
+			return null;
+		}
 		org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
 		fhirCondition.setId(condition.getUuid());
 		fhirCondition.setSubject(patientReferenceTranslator.toFhirResource(condition.getPatient()));

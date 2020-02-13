@@ -16,7 +16,7 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.FhirConditionService;
-import org.openmrs.module.fhir2.api.dao.Impl.FhirConditionDaoImpl_2_2;
+import org.openmrs.module.fhir2.api.dao.impl.FhirConditionDaoImpl_2_2;
 import org.openmrs.module.fhir2.api.translators.impl.ConditionTranslatorImpl_2_2;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;

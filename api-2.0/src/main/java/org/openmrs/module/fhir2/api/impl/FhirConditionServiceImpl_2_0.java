@@ -16,7 +16,7 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.FhirConditionService;
-import org.openmrs.module.fhir2.api.dao.Impl.FhirConditionDaoImpl_2_0;
+import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirConditionServiceImpl_2_0 implements FhirConditionService {
 	
 	@Inject
-	private FhirConditionDaoImpl_2_0 dao;
+	private FhirConditionDao<org.openmrs.module.emrapi.conditionslist.Condition> dao;
 	
 	@Inject
 	private ConditionTranslator<org.openmrs.module.emrapi.conditionslist.Condition> conditionTranslator;

@@ -1,0 +1,147 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <person person_id="3" gender="M" dead="false" creator="1" birthdate_estimated="0"
+            date_created="2008-08-15 15:57:09.0" voided="false" void_reason=""
+            uuid="86s04d42-3ca8-11e3-bf2b-0x7009861s97"/>
+    <person_name person_name_id="3" person_id="3" preferred="true" prefix="" given_name="Lab System" middle_name=""
+                 family_name="OpenMRS" family_name_suffix="" creator="1" date_created="2005-09-22 00:00:00.0"
+                 voided="false" void_reason="" uuid="Xv9e3a7b-6482-487d-94ce-c07b123CxfP8"/>
+    <users user_id="7777" person_id="3" system_id="3-6" username="superman" retired="false"
+           password="ff6d1655327d385e11a04e1632b4f33ceb8fafd2" salt="5d32c5fd9fde391c755f1f4dfd5e1d6e3ssbe6"
+           secret_question="" creator="1" date_created="2008-08-15 15:46:47.0"
+           uuid="s9fd3a7b-6482-487d-87eR-c07b123sxs99"/>
+
+    <patient patient_id="1" creator="1" date_created="2015-01-01 00:00:00" voided="false"/>
+
+    <patient patient_id="2" creator="1" date_created="2015-01-01 00:00:00" voided="false"/>
+
+    <patient patient_id="3" creator="1" date_created="2015-01-01 00:00:00" voided="false"/>
+
+    <concept concept_id="408" retired="false" datatype_id="2" class_id="11" is_set="false" creator="501"
+             date_created="2004-08-12 00:00:00" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0"
+             uuid="d102c80f-1yz9-4da3-bb88-8122ce8868df"/>
+    <concept_name concept_id="408" concept_name_id="1408" name="Angina" locale="en" creator="1"
+                  date_created="2004-08-12 00:00:00" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"
+                  voided="false" uuid="d102c80f-1yz9-4da3-bb88-8122ce8868df"/>
+
+    <concept concept_id="409" retired="false" datatype_id="2" class_id="11" is_set="false" creator="501"
+             date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0"
+             uuid="d584c80f-1yz9-4da3-bb88-8122ce8868df"/>
+    <concept_name concept_id="409" concept_name_id="1409" name="Tuberculosis" locale="en" creator="1"
+                  date_created="2004-08-12 00:00:00" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"
+                  voided="false" uuid="d584c80f-1yz9-4da3-bb88-8122ce8868df"/>
+
+    <concept concept_id="410" retired="false" datatype_id="3" class_id="11" is_set="false" creator="501"
+             date_created="2004-08-12 00:00:00" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0"
+             uuid="s102c80f-1yz9-4da3-bb88-8122ce8868ss"/>
+    <concept_name concept_id="410" concept_name_id="1410" name="OTHER, NON-CODED" locale="en" creator="1"
+                  date_created="2004-08-12 00:00:00" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"
+                  voided="false" uuid="s102c80f-1yz9-4da3-bb88-8122ce8868df"/>
+
+    <concept concept_id="411" retired="false" datatype_id="2" class_id="11" is_set="false" creator="501"
+             date_created="2004-08-12 00:00:00" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0"
+             uuid="s584584f-1yz9-4da3-bb88-8122ce8868ss"/>
+    <concept_name concept_id="411" concept_name_id="1411" name="Fever" locale="en" creator="1"
+                  date_created="2004-08-12 00:00:00" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"
+                  voided="false" uuid="s584584f-1yz9-4da3-bb88-8122ce8868df"/>
+
+    <concept concept_id="412" retired="false" datatype_id="2" class_id="11" is_set="false" creator="501"
+             date_created="2004-08-12 00:00:00" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0"
+             uuid="cured84f-1yz9-4da3-bb88-8122ce8868ss"/>
+    <concept_name concept_id="412" concept_name_id="1412" name="Cured" locale="en" creator="1"
+                  date_created="2004-08-12 00:00:00" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"
+                  voided="false" uuid="cured84f-1yz9-4da3-bb88-8122ce8868df"/>
+
+    <concept concept_id="413" retired="false" datatype_id="2" class_id="11" is_set="false" creator="501"
+             date_created="2004-08-12 00:00:00" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0"
+             uuid="ruled84f-1yz9-4da3-bb88-8122ce8868ss"/>
+    <concept_name concept_id="413" concept_name_id="1413" name="Ruled out" locale="en" creator="1"
+                  date_created="2004-08-12 00:00:00" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"
+                  voided="false" uuid="ruled84f-1yz9-4da3-bb88-8122ce8868df"/>
+
+    <concept concept_id="414" retired="false" datatype_id="2" class_id="11" is_set="true" creator="501"
+             date_created="2004-08-12 00:00:00" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0"
+             uuid="reason4f-1yz9-4da3-bb88-8122ce8868ss"/>
+    <concept_name concept_id="414" concept_name_id="1414" name="endReason" locale="en" creator="1"
+                  date_created="2004-08-12 00:00:00" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"
+                  voided="false" uuid="reason4f-1yz9-4da3-bb88-8122ce8868df"/>
+
+    <concept_set concept_set_id="5844" concept_id="412" concept_set="414" creator="1"
+                 date_created="2004-08-12 00:00:00.0"
+                 sort_weight="3"/>
+    <concept_set concept_set_id="5845" concept_id="413" concept_set="414" creator="1"
+                 date_created="2004-08-12 00:00:00.0"
+                 sort_weight="2"/>
+
+    <concept concept_id="415" retired="false" datatype_id="2" class_id="11" is_set="false" creator="501"
+             date_created="2004-08-12 00:00:00" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0"
+             uuid="fe9ca84f-1yz9-4da3-bb88-8122ce8868ss"/>
+    <concept_name concept_id="415" concept_name_id="1415" name="invalid end reason" locale="en" creator="1"
+                  date_created="2004-08-12 00:00:00" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"
+                  voided="false" uuid="fd9ac84f-1yz9-4da3-bb88-8122ce8868df"/>
+
+    <conditions condition_id="1" patient_id="1" status="INACTIVE" concept_id="409" creator="1"
+                date_created="2015-01-12 00:00:00" voided="false" uuid="2cc6880e-2c46-11e4-9038-a6c5e4d22fb7"/>
+
+    <conditions condition_id="2" patient_id="1" status="INACTIVE" concept_id="408" creator="1"
+                date_created="2015-01-12 00:00:00" uuid="2cc5840e-2c84-11e4-9038-a6c5e4d22fb7"
+                voided="false"/>
+
+    <conditions condition_id="3" patient_id="1" status="ACTIVE" concept_id="410" creator="1"
+                date_created="2015-01-12 00:00:00" voided="false" uuid="2ss6880e-2c46-11e4-9038-a6c5e4d22fb7"/>
+
+    <conditions condition_id="4" patient_id="1" status="ACTIVE" concept_id="411" creator="1"
+                date_created="2015-01-12 00:00:00" uuid="2ss6880e-2c46-11e4-5844-a6c5e4d22fb7"
+                voided="false" condition_non_coded="NON-CODED-CONDITION"/>
+
+    <conditions condition_id="5" patient_id="2" status="ACTIVE" concept_id="410" creator="1"
+                date_created="2015-01-12 00:00:00" voided="false" uuid="9ff6880e-2c46-11e4-5844-a6c5e4d22fb7"
+                condition_non_coded="pain"/>
+
+    <conditions condition_id="6" patient_id="2" status="ACTIVE" concept_id="410" creator="1"
+                date_created="2015-01-12 00:00:00" uuid="9845840e-2c46-11e4-5844-a6c5e4d22fb7" voided="false"
+                condition_non_coded="fracture"/>
+
+    <conditions condition_id="7" patient_id="3" status="HISTORY_OF" concept_id="410" creator="1"
+                date_created="2015-01-12 00:00:00" uuid="h84i840e-2h46-11e4-5844-a6c5e4d22fb7"
+                condition_non_coded="pregnancy" voided="true" date_voided="2015-01-13 00:00:00"
+                void_reason="voiding"/>
+
+    <conditions condition_id="8" patient_id="3" status="ACTIVE" concept_id="408" creator="1"
+                date_created="2015-02-12 00:00:00" uuid="c84i8o0e-2n46-11e4-58f4-a6i5e4d22fb7"
+                voided="false"/>
+
+    <conditions condition_id="9" patient_id="3" status="INACTIVE" concept_id="409" creator="1"
+                date_created="2015-01-13 00:00:00" voided="false" uuid="p84i8o0r-2n46-mse4-58f4-a6i5e4du2fb7"
+                end_date="2015-01-12 00:00:00" end_reason="413"/>
+
+    <conditions condition_id="10" patient_id="3" status="INACTIVE" concept_id="410" creator="1"
+                date_created="2015-02-12 01:00:00" uuid="p8ri8o0s-2m46-11e4-5df4-a6p5e4dh2fb7"
+                condition_non_coded="pain" voided="false"/>
+
+    <conditions condition_id="11" patient_id="3" status="INACTIVE" concept_id="411" creator="1"
+                date_created="2015-01-12 00:00:00" uuid="z8qi8o0w-2e46-11g4-5df4-a6p5e4dh2fb7"
+                voided="true" date_voided="2015-01-13 00:00:00" void_reason="unknown" end_date="2015-01-12 00:00:00"
+                end_reason="413"/>
+
+    <conditions condition_id="12" patient_id="3" status="ACTIVE" concept_id="410" creator="1"
+                date_created="2015-02-14 00:00:00" uuid="wq4i8o0e-2n46-1zx4-58f4-a6i5trd22fb7"
+                condition_non_coded="severe" voided="false"/>
+
+
+    <global_property property="conditionList.nonCodedUuid" property_value="s102c80f-1yz9-4da3-bb88-8122ce8868ss"
+                     uuid="35584f40-d9c5-11e3-9c1a-0800200c9a66"/>
+
+    <global_property property="conditionList.endReasonConceptSetUuid"
+                     property_value="reason4f-1yz9-4da3-bb88-8122ce8868ss"
+                     uuid="58584f40-d9c5-55e3-9c1a-0800200c9584"/>
+</dataset>
