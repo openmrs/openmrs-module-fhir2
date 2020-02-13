@@ -22,6 +22,7 @@ import org.openmrs.Person;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationComponentTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
@@ -49,6 +50,9 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	
 	@Inject
 	private PatientReferenceTranslator patientReferenceTranslator;
+	
+	@Inject
+	private ObservationInterpretationTranslator interpretationTranslator;
 	
 	@Override
 	public Observation toFhirResource(Obs observation) {
@@ -80,6 +84,8 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		obs.setValue(observationValueTranslator.toFhirResource(observation));
 		
+		obs.addInterpretation(interpretationTranslator.toFhirResource(observation));
+		
 		return obs;
 	}
 	
@@ -103,6 +109,10 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		for (Observation.ObservationComponentComponent component : observation.getComponent()) {
 			existingObs.addGroupMember(observationComponentTranslator.toOpenmrsType(groupedObsFactory.get(), component));
+		}
+		
+		if (observation.getInterpretation().size() > 0) {
+			interpretationTranslator.toOpenmrsType(existingObs, observation.getInterpretation().get(0));
 		}
 		
 		return existingObs;
