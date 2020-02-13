@@ -15,9 +15,11 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
+import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
+import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
 @Setter(AccessLevel.PACKAGE)
@@ -30,13 +32,16 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 	@Inject
 	private ConditionClinicalStatusTranslator<ConditionClinicalStatus> clinicalStatusTranslator;
 	
+	@Inject
+	private ConditionVerificationStatusTranslator<ConditionVerificationStatus> verificationStatusTranslator;
+	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(Condition condition) {
 		org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
 		fhirCondition.setId(condition.getUuid());
 		fhirCondition.setSubject(patientReferenceTranslator.toFhirResource(condition.getPatient()));
 		fhirCondition.setClinicalStatus(clinicalStatusTranslator.toFhirResource(condition.getClinicalStatus()));
-		
+		fhirCondition.setVerificationStatus(verificationStatusTranslator.toFhirResource(condition.getVerificationStatus()));
 		return fhirCondition;
 	}
 	
@@ -54,6 +59,8 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		existingCondition.setPatient(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));
 		existingCondition.setClinicalStatus(clinicalStatusTranslator.toOpenmrsType(condition.getClinicalStatus()));
 		
+		existingCondition
+		        .setVerificationStatus(verificationStatusTranslator.toOpenmrsType(condition.getVerificationStatus()));
 		return existingCondition;
 	}
 }
