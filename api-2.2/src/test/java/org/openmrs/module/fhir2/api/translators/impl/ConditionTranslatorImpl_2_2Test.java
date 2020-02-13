@@ -24,9 +24,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.ConditionClinicalStatus;
+import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.Patient;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
+import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -43,8 +45,15 @@ public class ConditionTranslatorImpl_2_2Test {
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
+	private static final String CONFIRMED = "confirmed";
+	
+	private static final String PROVISIONAL = "provisional";
+	
 	@Mock
 	private ConditionClinicalStatusTranslator<ConditionClinicalStatus> clinicalStatusTranslator;
+	
+	@Mock
+	private ConditionVerificationStatusTranslator<ConditionVerificationStatus> verificationStatusTranslator;
 	
 	private ConditionTranslatorImpl_2_2 conditionTranslator;
 	
@@ -61,6 +70,7 @@ public class ConditionTranslatorImpl_2_2Test {
 		conditionTranslator = new ConditionTranslatorImpl_2_2();
 		conditionTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		conditionTranslator.setClinicalStatusTranslator(clinicalStatusTranslator);
+		conditionTranslator.setVerificationStatusTranslator(verificationStatusTranslator);
 		
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
@@ -135,5 +145,29 @@ public class ConditionTranslatorImpl_2_2Test {
 		assertThat(condition, notNullValue());
 		assertThat(condition.getClinicalStatus(), notNullValue());
 		assertThat(condition.getClinicalStatus(), equalTo(codeableConcept));
+	}
+	
+	@Test
+	public void shouldTranslateConditionVerificationStatusToFhirType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(CONFIRMED).setSystem(FhirConstants.OPENMRS_URI));
+		openmrsCondition.setVerificationStatus(ConditionVerificationStatus.CONFIRMED);
+		when(verificationStatusTranslator.toFhirResource(ConditionVerificationStatus.CONFIRMED)).thenReturn(codeableConcept);
+		Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getVerificationStatus(), equalTo(codeableConcept));
+		assertThat(condition.getVerificationStatus().getCodingFirstRep().getCode().toLowerCase(), equalTo(CONFIRMED));
+	}
+	
+	@Test
+	public void shouldTranslateConditionVerificationStatusToOpenMrsType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(PROVISIONAL).setSystem(FhirConstants.OPENMRS_URI));
+		fhirCondition.setVerificationStatus(codeableConcept);
+		when(verificationStatusTranslator.toOpenmrsType(codeableConcept))
+		        .thenReturn(ConditionVerificationStatus.PROVISIONAL);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getVerificationStatus(), equalTo(ConditionVerificationStatus.PROVISIONAL));
 	}
 }
