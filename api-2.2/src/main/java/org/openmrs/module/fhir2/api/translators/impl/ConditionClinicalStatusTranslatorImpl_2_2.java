@@ -11,42 +11,44 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.annotation.OpenmrsProfile;
-import org.openmrs.module.emrapi.conditionslist.Condition;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+@Primary
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.1.*")
-public class ConditionClinicalStatusTranslatorImpl_2_0 implements ConditionClinicalStatusTranslator<Condition.Status> {
+@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.3.*")
+public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClinicalStatusTranslator<ConditionClinicalStatus> {
 	
 	@Override
-	public CodeableConcept toFhirResource(org.openmrs.module.emrapi.conditionslist.Condition.Status status) {
-		return setClinicalStatus(status.toString());
+	public CodeableConcept toFhirResource(ConditionClinicalStatus clinicalStatus) {
+		return this.setClinicalStatus(clinicalStatus.toString());
 	}
 	
 	@Override
-	public Condition.Status toOpenmrsType(CodeableConcept codeableConcept) {
+	public ConditionClinicalStatus toOpenmrsType(CodeableConcept codeableConcept) {
 		return codeableConcept.getCoding().stream().filter(coding -> coding.getSystem().equals(FhirConstants.OPENMRS_URI))
 		        .map(this::getClinicalStatus).findFirst().get();
 	}
 	
-	private Condition.Status getClinicalStatus(Coding coding) {
-		switch (coding.getDisplay().trim().toLowerCase()) {
+	private ConditionClinicalStatus getClinicalStatus(Coding coding) {
+		switch (coding.getCode().trim().toLowerCase()) {
 			case "active":
-				return Condition.Status.ACTIVE;
+				return ConditionClinicalStatus.ACTIVE;
 			case "history_of":
-				return Condition.Status.HISTORY_OF;
+				return ConditionClinicalStatus.HISTORY_OF;
 			case "inactive":
 			default:
-				return Condition.Status.INACTIVE;
+				return ConditionClinicalStatus.INACTIVE;
 		}
 	}
 	
 	private CodeableConcept setClinicalStatus(String text) {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding().setCode(text).setDisplay(text).setSystem(FhirConstants.OPENMRS_URI);
+		codeableConcept.addCoding().setCode(text).setSystem(FhirConstants.OPENMRS_URI);
 		return codeableConcept;
 	}
 }

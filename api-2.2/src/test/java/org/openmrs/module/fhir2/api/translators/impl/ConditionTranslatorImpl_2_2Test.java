@@ -14,6 +14,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
@@ -21,7 +23,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.Patient;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -33,8 +38,13 @@ public class ConditionTranslatorImpl_2_2Test {
 	
 	private static final String PATIENT_REF = "Patient/" + PATIENT_UUID;
 	
+	private static final String ACTIVE = "active";
+	
 	@Mock
-	PatientReferenceTranslator patientReferenceTranslator;
+	private PatientReferenceTranslator patientReferenceTranslator;
+	
+	@Mock
+	private ConditionClinicalStatusTranslator<ConditionClinicalStatus> clinicalStatusTranslator;
 	
 	private ConditionTranslatorImpl_2_2 conditionTranslator;
 	
@@ -50,6 +60,7 @@ public class ConditionTranslatorImpl_2_2Test {
 	public void setup() {
 		conditionTranslator = new ConditionTranslatorImpl_2_2();
 		conditionTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
+		conditionTranslator.setClinicalStatusTranslator(clinicalStatusTranslator);
 		
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
@@ -97,5 +108,32 @@ public class ConditionTranslatorImpl_2_2Test {
 		assertThat(condition.getSubject(), notNullValue());
 		assertThat(condition.getSubject(), equalTo(patientRef));
 		assertThat(condition.getSubject().getReference(), equalTo(PATIENT_REF));
+	}
+	
+	@Test
+	public void shouldTranslateConditionClinicalStatusToOpenMrsType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(ACTIVE).setSystem(FhirConstants.OPENMRS_URI));
+		fhirCondition.setClinicalStatus(codeableConcept);
+		when(clinicalStatusTranslator.toOpenmrsType(codeableConcept)).thenReturn(ConditionClinicalStatus.ACTIVE);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus(), equalTo(ConditionClinicalStatus.ACTIVE));
+		
+	}
+	
+	@Test
+	public void shouldTranslateConditionClinicalStatusToFhirType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(ACTIVE).setSystem(FhirConstants.OPENMRS_URI));
+		openmrsCondition.setClinicalStatus(ConditionClinicalStatus.ACTIVE);
+		when(clinicalStatusTranslator.toFhirResource(ConditionClinicalStatus.ACTIVE)).thenReturn(codeableConcept);
+		
+		Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getClinicalStatus(), equalTo(codeableConcept));
 	}
 }

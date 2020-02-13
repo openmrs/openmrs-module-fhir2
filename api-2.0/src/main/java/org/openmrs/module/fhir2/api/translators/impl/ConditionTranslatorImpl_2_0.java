@@ -29,7 +29,7 @@ public class ConditionTranslatorImpl_2_0 implements ConditionTranslator<Conditio
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Inject
-	private ConditionClinicalStatusTranslator clinicalStatusTranslator;
+	private ConditionClinicalStatusTranslator<Condition.Status> clinicalStatusTranslator;
 	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(Condition condition) {
