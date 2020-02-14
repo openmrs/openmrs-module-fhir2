@@ -63,7 +63,7 @@
     </build>
 
     <properties>
-        <openmrsPlatformVersion>2.3.0</openmrsPlatformVersion>
+        <openmrsPlatformVersion>2.1.4</openmrsPlatformVersion>
     </properties>
 </project>
 
