@@ -26,28 +26,29 @@ public class ConditionVerificationStatusTranslatorImpl_2_2 implements ConditionV
 		if (verificationStatus == null) {
 			return null;
 		}
-		return this.setVerificationStatus(verificationStatus.toString());
+		return new CodeableConcept().addCoding(addVerificationStatusCoding(verificationStatus.toString()));
 	}
 	
 	@Override
 	public ConditionVerificationStatus toOpenmrsType(CodeableConcept codeableConcept) {
-		return codeableConcept.getCoding().stream().filter(coding -> coding.getSystem().equals(FhirConstants.OPENMRS_URI))
-		        .map(this::getVerificationStatus).findFirst().get();
-	}
-	
-	private CodeableConcept setVerificationStatus(String text) {
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding().setCode(text).setDisplay(text).setSystem(FhirConstants.OPENMRS_URI);
-		return codeableConcept;
-	}
-	
-	private ConditionVerificationStatus getVerificationStatus(Coding coding) {
-		switch (coding.getCode().trim().toLowerCase()) {
-			case "confirmed":
-				return ConditionVerificationStatus.CONFIRMED;
-			case "provisional":
-			default:
-				return ConditionVerificationStatus.PROVISIONAL;
+		if (codeableConcept.getCoding().isEmpty()) {
+			return null;
 		}
+		switch (codeableConcept.getCoding().get(0).getCode().toUpperCase()) {
+			case "CONFIRMED":
+				return ConditionVerificationStatus.CONFIRMED;
+			case "PROVISIONAL":
+				return ConditionVerificationStatus.PROVISIONAL;
+			default:
+				return null;
+		}
+	}
+	
+	private Coding addVerificationStatusCoding(String verificationStatus) {
+		Coding coding = new Coding();
+		coding.setCode(verificationStatus);
+		coding.setDisplay(verificationStatus.replaceAll("_", " ").toUpperCase());
+		coding.setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_VALUE_SET_URI);
+		return coding;
 	}
 }
