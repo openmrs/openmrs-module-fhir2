@@ -28,6 +28,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
+import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 
@@ -71,11 +72,17 @@ public class AbstractReferenceHandlingTranslatorTest {
 	
 	private static final String ENCOUNTER_URI = FhirConstants.ENCOUNTER + "/" + ENCOUNTER_UUID;
 	
+	private static final String USER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
+	
+	private static final String CREATOR_REFERENCE = FhirConstants.CREATOR + "/" + USER_UUID;
+	
 	private Patient patient;
 	
 	private Provider provider;
 	
 	private Location location;
+	
+	private User user;
 	
 	private org.openmrs.Encounter encounter;
 	
@@ -116,6 +123,14 @@ public class AbstractReferenceHandlingTranslatorTest {
 		
 		encounter = new Encounter();
 		encounter.setUuid(ENCOUNTER_UUID);
+		
+		Person person = new Person();
+		person.setUuid(PERSON_UUID);
+		person.addName(name);
+		
+		user = new User();
+		user.setUuid(USER_UUID);
+		user.setPerson(person);
 	}
 	
 	@Test
@@ -244,5 +259,24 @@ public class AbstractReferenceHandlingTranslatorTest {
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(ENCOUNTER_URI));
 		assertThat(reference.getType(), equalTo(FhirConstants.ENCOUNTER));
+	}
+	
+	@Test
+	public void shouldAddCreatorReference() {
+		Reference reference = referenceHandlingTranslator.createCreatorReference(user);
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), equalTo(CREATOR_REFERENCE));
+		assertThat(reference.getType(), equalTo(FhirConstants.CREATOR));
+		assertThat(reference.getDisplay(), notNullValue());
+	}
+	
+	@Test
+	public void shouldReturnReferenceWithNullDisplayIfUserPersonNameIsNull() {
+		User user = new User();
+		user.setUuid(USER_UUID);
+		Reference reference = referenceHandlingTranslator.createCreatorReference(user);
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), equalTo(CREATOR_REFERENCE));
+		assertThat(reference.getDisplay(), nullValue());
 	}
 }

@@ -52,6 +52,8 @@ public class FhirConstants {
 	
 	public static final String PRACTITIONER = "Practitioner";
 	
+	public static final String CREATOR = "Creator";
+	
 	public static final String IDENTIFIER = "identifier";
 	
 	public static final String DIAGNOSTIC_REPORT = "DiagnosticReport";
