@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationComponentTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,9 @@ public class ObservationComponentTranslatorImpl implements ObservationComponentT
 	@Inject
 	private ConceptTranslator conceptTranslator;
 	
+	@Inject
+	private ObservationInterpretationTranslator interpretationTranslator;
+	
 	@Override
 	public Observation.ObservationComponentComponent toFhirResource(Obs obs) {
 		if (obs == null) {
@@ -40,6 +44,7 @@ public class ObservationComponentTranslatorImpl implements ObservationComponentT
 		component.setId(obs.getUuid());
 		component.setCode(conceptTranslator.toFhirResource(obs.getConcept()));
 		component.setValue(observationValueTranslator.toFhirResource(obs));
+		component.addInterpretation(interpretationTranslator.toFhirResource(obs));
 		
 		return component;
 	}
@@ -57,7 +62,9 @@ public class ObservationComponentTranslatorImpl implements ObservationComponentT
 		obs.setUuid(observationComponent.getId());
 		obs.setConcept(conceptTranslator.toOpenmrsType(observationComponent.getCode()));
 		observationValueTranslator.toOpenmrsType(obs, observationComponent.getValue());
-		
+		if (observationComponent.getInterpretation().size() > 0) {
+			interpretationTranslator.toOpenmrsType(obs, observationComponent.getInterpretation().get(0));
+		}
 		return obs;
 	}
 }

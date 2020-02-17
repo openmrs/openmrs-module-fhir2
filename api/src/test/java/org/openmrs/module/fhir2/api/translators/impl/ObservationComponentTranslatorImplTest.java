@@ -20,6 +20,7 @@ import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.when;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.junit.Before;
@@ -29,7 +30,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,6 +48,9 @@ public class ObservationComponentTranslatorImplTest {
 	@Mock
 	private ConceptTranslator conceptTranslator;
 	
+	@Mock
+	private ObservationInterpretationTranslator interpretationTranslator;
+	
 	private ObservationComponentTranslatorImpl observationComponentTranslator;
 	
 	@Before
@@ -52,6 +58,7 @@ public class ObservationComponentTranslatorImplTest {
 		observationComponentTranslator = new ObservationComponentTranslatorImpl();
 		observationComponentTranslator.setObservationValueTranslator(observationValueTranslator);
 		observationComponentTranslator.setConceptTranslator(conceptTranslator);
+		observationComponentTranslator.setInterpretationTranslator(interpretationTranslator);
 	}
 	
 	@Test
@@ -108,6 +115,16 @@ public class ObservationComponentTranslatorImplTest {
 		assertThat(result.getValue(), notNullValue());
 		assertThat(result.getValue(), instanceOf(Quantity.class));
 		assertThat(((Quantity) result.getValue()).getValue().doubleValue(), equalTo(130d));
+	}
+	
+	@Test
+	public void toFhirResource_shouldReturnNullValueForInterpretation() {
+		Obs observation = new Obs();
+		when(interpretationTranslator.toFhirResource(observation)).thenReturn(null);
+		
+		CodeableConcept result = interpretationTranslator.toFhirResource(observation);
+		
+		assertThat(result, nullValue());
 	}
 	
 	@Test
@@ -175,5 +192,16 @@ public class ObservationComponentTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getValueNumeric(), notNullValue());
 		assertThat(result.getValueNumeric(), equalTo(130d));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldReturnObsAsItIsForAddInterpretation() {
+		Obs obs = new Obs();
+		CodeableConcept interpretation = new CodeableConcept()
+		        .addCoding(new Coding(FhirConstants.INTERPRETATION_VALUE_SET_URI, "N", "Normal"));
+		when(interpretationTranslator.toOpenmrsType(obs, interpretation)).thenReturn(obs);
+		Obs result = interpretationTranslator.toOpenmrsType(obs, interpretation);
+		
+		assertThat(result, equalTo(obs));
 	}
 }
