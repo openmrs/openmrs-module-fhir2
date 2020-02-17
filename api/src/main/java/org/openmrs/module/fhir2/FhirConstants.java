@@ -19,9 +19,15 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_URI = "http://openmrs.org";
 	
-	public static final String DIAGNOSTIC_SERVICE_SECTIONS_VALUESET_URI = "http://hl7.org/fhir/ValueSet/diagnostic-service-sections";
+	public static final String HL7_FHIR_VALUE_SET_PREFIX = "http://hl7.org/fhir/ValueSet";
 	
-	public static final String INTERPRETATION_VALUE_SET_URI = "http://hl7.org/fhir/ValueSet/observation-interpretation";
+	public static final String DIAGNOSTIC_SERVICE_SECTIONS_VALUESET_URI = HL7_FHIR_VALUE_SET_PREFIX
+	        + "/diagnostic-service-sections";
+	
+	public static final String INTERPRETATION_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/observation-interpretation";
+	
+	public static final String CONDITION_VERIFICATION_STATUS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX
+	        + "/condition-ver-status";
 	
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
