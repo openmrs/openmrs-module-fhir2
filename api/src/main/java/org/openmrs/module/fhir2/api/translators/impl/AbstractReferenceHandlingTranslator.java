@@ -24,6 +24,7 @@ import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.Person;
 import org.openmrs.Provider;
+import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 
@@ -46,6 +47,16 @@ public abstract class AbstractReferenceHandlingTranslator {
 	protected Reference createLocationReference(@NotNull Location location) {
 		return new Reference().setReference(FhirConstants.LOCATION + "/" + location.getUuid())
 		        .setType(FhirConstants.LOCATION).setDisplay(location.getName());
+	}
+	
+	protected Reference createCreatorReference(@NotNull User user) {
+		Reference reference = new Reference().setReference(FhirConstants.CREATOR + "/" + user.getUuid())
+		        .setType(FhirConstants.CREATOR);
+		
+		if (user.getPerson() != null) {
+			reference.setDisplay(user.getPersonName().getFullName());
+		}
+		return reference;
 	}
 	
 	protected Reference createPatientReference(@NotNull Patient patient) {
