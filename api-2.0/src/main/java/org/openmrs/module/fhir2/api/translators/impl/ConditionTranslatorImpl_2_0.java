@@ -13,10 +13,17 @@ import javax.inject.Inject;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.openmrs.Concept;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.emrapi.conditionslist.Condition;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
+import org.openmrs.module.fhir2.api.translators.CreatorReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +38,12 @@ public class ConditionTranslatorImpl_2_0 implements ConditionTranslator<Conditio
 	@Inject
 	private ConditionClinicalStatusTranslator<Condition.Status> clinicalStatusTranslator;
 	
+	@Inject
+	private ConceptTranslator conceptTranslator;
+	
+	@Inject
+	private CreatorReferenceTranslator creatorReferenceTranslator;
+	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(Condition condition) {
 		if (condition == null) {
@@ -40,6 +53,17 @@ public class ConditionTranslatorImpl_2_0 implements ConditionTranslator<Conditio
 		fhirCondition.setId(condition.getUuid());
 		fhirCondition.setSubject(patientReferenceTranslator.toFhirResource(condition.getPatient()));
 		fhirCondition.setClinicalStatus(clinicalStatusTranslator.toFhirResource(condition.getStatus()));
+		if (condition.getConcept() == null) {
+			CodeableConcept codeableConcept = new CodeableConcept();
+			codeableConcept
+			        .addCoding(new Coding().setCode(condition.getConditionNonCoded()).setSystem(FhirConstants.OPENMRS_URI));
+			fhirCondition.setCode(codeableConcept);
+		} else {
+			fhirCondition.setCode(conceptTranslator.toFhirResource(condition.getConcept()));
+		}
+		fhirCondition.setOnset(new DateTimeType().setValue(condition.getOnsetDate()));
+		fhirCondition.setRecorder(creatorReferenceTranslator.toFhirResource(condition.getCreator()));
+		fhirCondition.setRecordedDate(condition.getDateCreated());
 		
 		return fhirCondition;
 	}
@@ -57,6 +81,17 @@ public class ConditionTranslatorImpl_2_0 implements ConditionTranslator<Conditio
 		existingCondition.setUuid(condition.getId());
 		existingCondition.setPatient(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));
 		existingCondition.setStatus(clinicalStatusTranslator.toOpenmrsType(condition.getClinicalStatus()));
+		if (!condition.getCode().getCoding().isEmpty()) {
+			Concept concept = conceptTranslator.toOpenmrsType(condition.getCode());
+			if (concept == null) {
+				existingCondition.setConditionNonCoded(condition.getCode().getCoding().get(0).getCode());
+			} else {
+				existingCondition.setConcept(concept);
+			}
+		}
+		existingCondition.setOnsetDate(condition.getOnsetDateTimeType().getValue());
+		existingCondition.setCreator(creatorReferenceTranslator.toOpenmrsType(condition.getRecorder()));
+		existingCondition.setDateCreated(condition.getRecordedDate());
 		
 		return existingCondition;
 	}
