@@ -37,8 +37,8 @@ import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
 import org.openmrs.ProviderAttributeType;
-import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
@@ -88,7 +88,7 @@ public class PractitionerTranslatorImplTest {
 	private TelecomTranslator<Object> telecomTranslator;
 	
 	@Mock
-	private ProviderService providerService;
+	private FhirPractitionerDao fhirPractitionerDao;
 	
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
@@ -106,7 +106,7 @@ public class PractitionerTranslatorImplTest {
 		practitionerTranslator.setGenderTranslator(genderTranslator);
 		practitionerTranslator.setNameTranslator(nameTranslator);
 		practitionerTranslator.setTelecomTranslator(telecomTranslator);
-		practitionerTranslator.setProviderService(providerService);
+		practitionerTranslator.setFhirPractitionerDao(fhirPractitionerDao);
 		practitionerTranslator.setGlobalPropertyService(globalPropertyService);
 		
 		Person person = new Person();

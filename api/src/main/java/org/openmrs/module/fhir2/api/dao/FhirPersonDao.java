@@ -13,8 +13,10 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.openmrs.Person;
+import org.openmrs.PersonAttribute;
 
 public interface FhirPersonDao {
 	
@@ -27,4 +29,7 @@ public interface FhirPersonDao {
 	Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender);
 	
 	Collection<Person> findPersonsByGender(@NotNull String gender);
+	
+	List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@NotNull Person person,
+	        @NotNull String personAttributeTypeUuid);
 }

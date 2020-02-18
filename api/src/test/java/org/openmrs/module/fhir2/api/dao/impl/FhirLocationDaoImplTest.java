@@ -197,6 +197,5 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 		    LOCATION_ATTRIBUTE_TYPE_UUID);
 		
 		assertThat(attributeList, notNullValue());
-		//		assertThat(attributeList.size(), greaterThanOrEqualTo(2));
 	}
 }

@@ -28,11 +28,10 @@ import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
-import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
-import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
@@ -57,7 +56,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	private TelecomTranslator<Object> telecomTranslator;
 	
 	@Inject
-	private PersonService personService;
+	private FhirPersonDao fhirPersonDao;
 	
 	@Inject
 	private FhirGlobalPropertyService globalPropertyService;
@@ -89,15 +88,10 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	}
 	
 	public List<ContactPoint> getPersonContactDetails(@NotNull Person person) {
-		List<ContactPoint> contactPoints = new ArrayList<>();
-		PersonAttributeType contactAttributeType = personService.getPersonAttributeTypeByUuid(
-		    globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY));
-		person.getActiveAttributes().forEach(personAttribute -> {
-			if (personAttribute.getAttributeType().equals(contactAttributeType)) {
-				contactPoints.add(telecomTranslator.toFhirResource(personAttribute));
-			}
-		});
-		return contactPoints;
+		return fhirPersonDao
+		        .getActiveAttributesByPersonAndAttributeTypeUuid(person,
+		            globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY))
+		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	/**

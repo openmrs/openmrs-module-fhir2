@@ -28,10 +28,9 @@ import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
-import org.openmrs.ProviderAttributeType;
-import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
@@ -56,7 +55,7 @@ public class PractitionerTranslatorImpl implements PractitionerTranslator {
 	private TelecomTranslator<Object> telecomTranslator;
 	
 	@Inject
-	private ProviderService providerService;
+	private FhirPractitionerDao fhirPractitionerDao;
 	
 	@Inject
 	private FhirGlobalPropertyService globalPropertyService;
@@ -114,15 +113,10 @@ public class PractitionerTranslatorImpl implements PractitionerTranslator {
 	}
 	
 	public List<ContactPoint> getProviderContactDetails(@NotNull Provider provider) {
-		List<ContactPoint> contactPoints = new ArrayList<>();
-		ProviderAttributeType providerAttributeType = providerService.getProviderAttributeTypeByUuid(
-		    globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY));
-		provider.getAttributes().forEach(providerAttribute -> {
-			if (providerAttribute.getAttributeType().equals(providerAttributeType)) {
-				contactPoints.add(telecomTranslator.toFhirResource(providerAttribute));
-			}
-		});
-		return contactPoints;
+		return fhirPractitionerDao
+		        .getActiveAttributesByPractitionerAndAttributeTypeUuid(provider,
+		            globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY))
+		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Override

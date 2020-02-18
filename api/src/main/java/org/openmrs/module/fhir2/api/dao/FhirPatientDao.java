@@ -12,9 +12,11 @@ package org.openmrs.module.fhir2.api.dao;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.PersonAttribute;
 
 public interface FhirPatientDao {
 	
@@ -27,4 +29,7 @@ public interface FhirPatientDao {
 	Collection<Patient> findPatientsByGivenName(String given);
 	
 	Collection<Patient> findPatientsByFamilyName(String family);
+	
+	List<PersonAttribute> getActiveAttributesByPatientAndAttributeTypeUuid(@NotNull Patient patient,
+	        @NotNull String patientAttributeTypeUuid);
 }
