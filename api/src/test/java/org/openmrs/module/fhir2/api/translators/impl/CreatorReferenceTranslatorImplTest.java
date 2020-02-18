@@ -23,8 +23,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.User;
-import org.openmrs.api.UserService;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirUserService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreatorReferenceTranslatorImplTest {
@@ -32,7 +32,7 @@ public class CreatorReferenceTranslatorImplTest {
 	private static final String CREATOR_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
 	
 	@Mock
-	private UserService userService;
+	private FhirUserService userService;
 	
 	private CreatorReferenceTranslatorImpl creatorReferenceTranslator;
 	
