@@ -24,10 +24,8 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.MatchMode;
-import org.hibernate.sql.JoinType;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
-import org.openmrs.PersonAttribute;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.springframework.stereotype.Component;
@@ -90,14 +88,5 @@ public class FhirPatientDaoImpl implements FhirPatientDao {
 	public List<Patient> findPatientsByFamilyName(String family) {
 		return sessionFactory.getCurrentSession().createCriteria(Patient.class).createAlias("names", "names")
 		        .add(ilike("names.familyName", family, MatchMode.START)).list();
-	}
-	
-	@Override
-	public List<PersonAttribute> getActiveAttributesByPatientAndAttributeTypeUuid(Patient patient,
-	        String patientAttributeTypeUuid) {
-		return (List<PersonAttribute>) sessionFactory.getCurrentSession().createCriteria(PersonAttribute.class)
-		        .createAlias("person", "p", JoinType.INNER_JOIN, eq("p.id", patient.getId()))
-		        .createAlias("attributeType", "pat").add(eq("pat.uuid", patientAttributeTypeUuid)).add(eq("voided", false))
-		        .list();
 	}
 }

@@ -34,7 +34,7 @@ import org.openmrs.PersonAttribute;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
@@ -63,7 +63,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Inject
-	private FhirPatientDao fhirPatientDao;
+	private FhirPersonDao fhirPersonDao;
 	
 	@Inject
 	private TelecomTranslator<Object> telecomTranslator;
@@ -108,8 +108,8 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	}
 	
 	public List<ContactPoint> getPatientContactDetails(@NotNull org.openmrs.Patient patient) {
-		return fhirPatientDao
-		        .getActiveAttributesByPatientAndAttributeTypeUuid(patient,
+		return fhirPersonDao
+		        .getActiveAttributesByPersonAndAttributeTypeUuid(patient,
 		            globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY))
 		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}

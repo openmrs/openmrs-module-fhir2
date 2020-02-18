@@ -26,7 +26,6 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Patient;
-import org.openmrs.PersonAttribute;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
@@ -48,8 +47,6 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String PATIENT_PARTIAL_FAMILY_NAME = "Claud";
 	
 	private static final String PATIENT_NOT_FOUND_NAME = "Igor";
-	
-	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
 	
 	private FhirPatientDaoImpl dao;
 	
@@ -142,16 +139,5 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 		List<Patient> results = dao.findPatientsByFamilyName(PATIENT_NOT_FOUND_NAME);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
-	}
-	
-	@Test
-	public void getActiveAttributesByPersonAndAttributeTypeUuid_shouldReturnPersonAttribute() {
-		Patient patient = new Patient();
-		patient.setUuid(PATIENT_UUID);
-		
-		List<PersonAttribute> attributeList = dao.getActiveAttributesByPatientAndAttributeTypeUuid(patient,
-		    PERSON_ATTRIBUTE_TYPE_UUID);
-		
-		assertThat(attributeList, notNullValue());
 	}
 }
