@@ -24,10 +24,12 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
@@ -40,11 +42,16 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PersonAddress;
+import org.openmrs.PersonAttribute;
+import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
+import org.openmrs.api.PersonService;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientTranslatorImplTest {
@@ -61,6 +68,14 @@ public class PatientTranslatorImplTest {
 	
 	private static final String ADDRESS_CITY = "Maputo";
 	
+	private static final String PERSON_ATTRIBUTE_TYPE_NAME = "Contact";
+	
+	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
+	
+	private static final String PERSON_ATTRIBUTE_UUID = "12o3et5kl3-2e323-23g23-232h3y343s";
+	
+	private static final String PERSON_ATTRIBUTE_VALUE = "254723723456";
+	
 	private static final Date PATIENT_DEATH_DATE = Date.from(Instant.ofEpochSecond(872986980L));
 	
 	@Mock
@@ -75,6 +90,15 @@ public class PatientTranslatorImplTest {
 	@Mock
 	private AddressTranslator addressTranslator;
 	
+	@Mock
+	private PersonService personService;
+	
+	@Mock
+	private TelecomTranslator<Object> telecomTranslator;
+	
+	@Mock
+	private FhirGlobalPropertyService globalPropertyService;
+	
 	private PatientTranslatorImpl patientTranslator;
 	
 	@Before
@@ -84,6 +108,9 @@ public class PatientTranslatorImplTest {
 		patientTranslator.setNameTranslator(nameTranslator);
 		patientTranslator.setGenderTranslator(genderTranslator);
 		patientTranslator.setAddressTranslator(addressTranslator);
+		patientTranslator.setTelecomTranslator(telecomTranslator);
+		patientTranslator.setPersonService(personService);
+		patientTranslator.setGlobalPropertyService(globalPropertyService);
 	}
 	
 	@Test
@@ -327,6 +354,23 @@ public class PatientTranslatorImplTest {
 		assertThat(result.getAddresses(), not(empty()));
 		assertThat(result.getAddresses(), hasItem(hasProperty("uuid", equalTo(ADDRESS_UUID))));
 		assertThat(result.getAddresses(), hasItem(hasProperty("cityVillage", equalTo(ADDRESS_CITY))));
+	}
+	
+	@Test
+	public void shouldReturnPatientContactPointGivenOpenMrsPatient() {
+		PersonAttributeType attributeType = new PersonAttributeType();
+		attributeType.setName(PERSON_ATTRIBUTE_TYPE_NAME);
+		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
+		PersonAttribute personAttribute = new PersonAttribute();
+		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
+		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
+		personAttribute.setAttributeType(attributeType);
+		
+		org.openmrs.Patient patient = new org.openmrs.Patient();
+		patient.addAttribute(personAttribute);
+		
+		List<ContactPoint> contactPoints = patientTranslator.getPatientContactDetails(patient);
+		assertThat(contactPoints, notNullValue());
 	}
 	
 }
