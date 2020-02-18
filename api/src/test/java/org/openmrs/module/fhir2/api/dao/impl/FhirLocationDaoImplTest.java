@@ -62,7 +62,7 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String UNKNOWN_LOCATION_STATE = "province state";
 	
 	private static final String LOGIN_LOCATION_TAG_NAME = "login";
-
+	
 	private static final String LOCATION_ATTRIBUTE_TYPE_UUID = "abcde432-1691-11df-97a5-7038c432abcd";
 	
 	private static final String LOCATION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirLocationDaoImplTest_initial_data.xml";
@@ -187,15 +187,16 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(locations, notNullValue());
 		assertThat(locations.size(), greaterThanOrEqualTo(2));
 	}
-
+	
 	@Test
-	public void getActiveAttributesByLocationAndAttributeTypeUuid_shouldReturnLocationAttribute(){
+	public void getActiveAttributesByLocationAndAttributeTypeUuid_shouldReturnLocationAttribute() {
 		Location location = new Location();
 		location.setUuid(LOCATION_UUID);
-
-		List<LocationAttribute> attributeList=fhirLocationDao.getActiveAttributesByLocationAndAttributeTypeUuid(location,LOCATION_ATTRIBUTE_TYPE_UUID);
-
+		
+		List<LocationAttribute> attributeList = fhirLocationDao.getActiveAttributesByLocationAndAttributeTypeUuid(location,
+		    LOCATION_ATTRIBUTE_TYPE_UUID);
+		
 		assertThat(attributeList, notNullValue());
-//		assertThat(attributeList.size(), greaterThanOrEqualTo(2));
+		//		assertThat(attributeList.size(), greaterThanOrEqualTo(2));
 	}
 }

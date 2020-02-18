@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,9 +23,7 @@ import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.LocationAttribute;
-import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
-import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
@@ -97,7 +94,8 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 	}
 	
 	protected List<ContactPoint> getLocationContactDetails(@NotNull org.openmrs.Location location) {
-		return fhirLocationDao.getActiveAttributesByLocationAndAttributeTypeUuid(location,
+		return fhirLocationDao
+		        .getActiveAttributesByLocationAndAttributeTypeUuid(location,
 		            propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY))
 		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}

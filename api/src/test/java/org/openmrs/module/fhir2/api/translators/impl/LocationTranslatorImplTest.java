@@ -38,14 +38,11 @@ import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
-import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
-
-import javax.inject.Inject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationTranslatorImplTest {
@@ -89,7 +86,7 @@ public class LocationTranslatorImplTest {
 	
 	@Mock
 	private TelecomTranslator<Object> telecomTranslator;
-
+	
 	@Mock
 	private FhirLocationDao fhirLocationDao;
 	

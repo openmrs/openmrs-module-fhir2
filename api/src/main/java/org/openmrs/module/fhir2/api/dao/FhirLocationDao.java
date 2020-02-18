@@ -33,6 +33,7 @@ public interface FhirLocationDao {
 	Collection<Location> findLocationsByState(@NotNull String state);
 	
 	Collection<Location> findLocationsByTag(@NotNull TokenParam tag);
-
-	List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@NotNull Location location,@NotNull String locationAttributeTypeUuid);
+	
+	List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@NotNull Location location,
+	        @NotNull String locationAttributeTypeUuid);
 }
