@@ -13,16 +13,21 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.Collection;
+import java.util.List;
 
 import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
+import org.openmrs.LocationAttribute;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.springframework.stereotype.Component;
+
+import static org.hibernate.criterion.Restrictions.eq;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -47,31 +52,42 @@ public class FhirLocationDaoImpl implements FhirLocationDao {
 	
 	@Override
 	public Collection<Location> findLocationsByCity(String city) {
-		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(Restrictions.eq("cityVillage", city))
+		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(eq("cityVillage", city))
 		        .list();
 	}
 	
 	@Override
 	public Collection<Location> findLocationsByCountry(String country) {
-		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(Restrictions.eq("country", country))
+		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(eq("country", country))
 		        .list();
 	}
 	
 	@Override
 	public Collection<Location> findLocationsByPostalCode(String postalCode) {
 		return sessionFactory.getCurrentSession().createCriteria(Location.class)
-		        .add(Restrictions.eq("postalCode", postalCode)).list();
+		        .add(eq("postalCode", postalCode)).list();
 	}
 	
 	@Override
 	public Collection<Location> findLocationsByState(String state) {
-		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(Restrictions.eq("stateProvince", state))
+		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(eq("stateProvince", state))
 		        .list();
 	}
 	
 	@Override
 	public Collection<Location> findLocationsByTag(TokenParam tag) {
 		return sessionFactory.getCurrentSession().createCriteria(Location.class).createAlias("tags", "t")
-		        .add(Restrictions.eq("t.name", tag.getValue())).list();
+		        .add(eq("t.name", tag.getValue())).list();
 	}
+
+	@Override
+	public List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(Location location, String locationAttributeTypeUuid) {
+		return (List<LocationAttribute>) sessionFactory.getCurrentSession().createCriteria(LocationAttribute.class)
+				.createAlias("location", "l", JoinType.INNER_JOIN, eq("l.id", location.getId()))
+				.createAlias("attributeType", "lat")
+				.add(eq("lat.uuid", locationAttributeTypeUuid))
+				.add(eq("voided", false))
+				.list();
+	}
+
 }

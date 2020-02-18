@@ -41,8 +41,11 @@ import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+
+import javax.inject.Inject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationTranslatorImplTest {
@@ -86,9 +89,9 @@ public class LocationTranslatorImplTest {
 	
 	@Mock
 	private TelecomTranslator<Object> telecomTranslator;
-	
+
 	@Mock
-	private LocationService locationService;
+	private FhirLocationDao fhirLocationDao;
 	
 	@Mock
 	private FhirGlobalPropertyService propertyService;
@@ -103,7 +106,7 @@ public class LocationTranslatorImplTest {
 		locationTranslator = new LocationTranslatorImpl();
 		locationTranslator.setLocationAddressTranslator(locationAddressTranslator);
 		locationTranslator.setTelecomTranslator(telecomTranslator);
-		locationTranslator.setLocationService(locationService);
+		locationTranslator.setFhirLocationDao(fhirLocationDao);
 		locationTranslator.setPropertyService(propertyService);
 		
 	}
@@ -354,7 +357,7 @@ public class LocationTranslatorImplTest {
 		
 		Location parentLocation = new Location();
 		parentLocation.setUuid(PARENT_LOCATION_UUID);
-		when(locationService.getLocationByUuid(PARENT_LOCATION_UUID)).thenReturn(parentLocation);
+		when(fhirLocationDao.getLocationByUuid(PARENT_LOCATION_UUID)).thenReturn(parentLocation);
 		Location result = locationTranslator.getOpenmrsParentLocation(locationReference);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), is(PARENT_LOCATION_UUID));
