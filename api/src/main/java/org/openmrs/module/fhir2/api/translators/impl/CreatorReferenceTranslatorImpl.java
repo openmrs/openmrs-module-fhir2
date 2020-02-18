@@ -15,7 +15,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.User;
-import org.openmrs.api.UserService;
+import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.translators.CreatorReferenceTranslator;
 import org.springframework.stereotype.Component;
 
@@ -23,9 +23,8 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 public class CreatorReferenceTranslatorImpl extends AbstractReferenceHandlingTranslator implements CreatorReferenceTranslator {
 	
-	// Todo Implement fhirDao for openmrs user
 	@Inject
-	private UserService userService;
+	private FhirUserService userService;
 	
 	@Override
 	public Reference toFhirResource(User user) {
