@@ -13,14 +13,23 @@ import javax.inject.Inject;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.openmrs.CodedOrFreeText;
+import org.openmrs.Concept;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.ConditionVerificationStatus;
+import org.openmrs.User;
 import org.openmrs.annotation.OpenmrsProfile;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.stereotype.Component;
 
 @Setter(AccessLevel.PACKAGE)
@@ -37,6 +46,12 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 	@Inject
 	private ConditionVerificationStatusTranslator<ConditionVerificationStatus> verificationStatusTranslator;
 	
+	@Inject
+	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
+	
+	@Inject
+	private ConceptTranslator conceptTranslator;
+	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(Condition condition) {
 		org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
@@ -44,6 +59,20 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		fhirCondition.setSubject(patientReferenceTranslator.toFhirResource(condition.getPatient()));
 		fhirCondition.setClinicalStatus(clinicalStatusTranslator.toFhirResource(condition.getClinicalStatus()));
 		fhirCondition.setVerificationStatus(verificationStatusTranslator.toFhirResource(condition.getVerificationStatus()));
+		
+		if (condition.getCondition().getCoded() != null) {
+			fhirCondition.setCode(conceptTranslator.toFhirResource(condition.getCondition().getCoded()));
+		} else {
+			CodeableConcept codeableConcept = new CodeableConcept();
+			codeableConcept.addCoding(
+			    new Coding().setCode(condition.getCondition().getNonCoded()).setSystem(FhirConstants.OPENMRS_URI));
+			fhirCondition.setCode(codeableConcept);
+		}
+		
+		fhirCondition.setOnset(new DateTimeType().setValue(condition.getOnsetDate()));
+		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
+		fhirCondition.setRecordedDate(condition.getDateCreated());
+		
 		return fhirCondition;
 	}
 	
@@ -63,6 +92,22 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		
 		existingCondition
 		        .setVerificationStatus(verificationStatusTranslator.toOpenmrsType(condition.getVerificationStatus()));
+		
+		if (!condition.getCode().getCoding().isEmpty()) {
+			Concept concept = conceptTranslator.toOpenmrsType(condition.getCode());
+			CodedOrFreeText conditionCodedOrText = new CodedOrFreeText();
+			if (concept == null) {
+				conditionCodedOrText.setNonCoded(condition.getCode().getCoding().get(0).getCode());
+				existingCondition.setCondition(conditionCodedOrText);
+			} else {
+				conditionCodedOrText.setCoded(concept);
+				existingCondition.setCondition(conditionCodedOrText);
+			}
+		}
+		existingCondition.setOnsetDate(condition.getOnsetDateTimeType().getValue());
+		existingCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));
+		existingCondition.setDateCreated(condition.getRecordedDate());
+		
 		return existingCondition;
 	}
 }
