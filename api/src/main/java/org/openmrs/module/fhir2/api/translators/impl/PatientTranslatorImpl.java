@@ -12,24 +12,37 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PersonAddress;
+import org.openmrs.PersonAttribute;
+import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
+import org.openmrs.api.PersonService;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -47,6 +60,15 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	
 	@Inject
 	private AddressTranslator addressTranslator;
+	
+	@Inject
+	private FhirGlobalPropertyService globalPropertyService;
+	
+	@Inject
+	private PersonService personService;
+	
+	@Inject
+	private TelecomTranslator<Object> telecomTranslator;
 	
 	@Override
 	public Patient toFhirResource(org.openmrs.Patient openmrsPatient) {
@@ -81,9 +103,22 @@ public class PatientTranslatorImpl implements PatientTranslator {
 			for (PersonAddress address : openmrsPatient.getAddresses()) {
 				patient.addAddress(addressTranslator.toFhirResource(address));
 			}
+			patient.setTelecom(getPatientContactDetails(openmrsPatient));
 		}
 		
 		return patient;
+	}
+	
+	public List<ContactPoint> getPatientContactDetails(@NotNull org.openmrs.Patient patient) {
+		List<ContactPoint> contactPoints = new ArrayList<>();
+		PersonAttributeType contactAttributeType = personService.getPersonAttributeTypeByUuid(
+		    globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY));
+		patient.getActiveAttributes().forEach(personAttribute -> {
+			if (personAttribute.getAttributeType().equals(contactAttributeType)) {
+				contactPoints.add(telecomTranslator.toFhirResource(personAttribute));
+			}
+		});
+		return contactPoints;
 	}
 	
 	@Override
@@ -139,6 +174,10 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		for (Address address : patient.getAddress()) {
 			currentPatient.addAddress(addressTranslator.toOpenmrsType(address));
 		}
+		Set<PersonAttribute> attributes = patient.getTelecom().stream()
+		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
+		        .collect(Collectors.toSet());
+		currentPatient.setAttributes(attributes);
 		
 		return currentPatient;
 	}
