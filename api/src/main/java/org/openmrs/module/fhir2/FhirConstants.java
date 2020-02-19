@@ -52,6 +52,10 @@ public class FhirConstants {
 	public static final String ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/allergyintolerance-clinical";
 	
+	public static final String TASK_STATUS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/task-status";
+	
+	public static final String RESOURCE_TYPES_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/resource-types";
+	
 	public static final String OBSERVATION_REFERENCE_NORMAL = "normal";
 	
 	public static final String OBSERVATION_REFERENCE_TREATMENT = "treatment";
@@ -85,6 +89,8 @@ public class FhirConstants {
 	
 	public static final String OBSERVATION = "Observation";
 	
+	public static final String ORGANIZATION = "Organization";
+	
 	public static final String LOCATION = "Location";
 	
 	public static final String PATIENT = "Patient";
@@ -94,6 +100,10 @@ public class FhirConstants {
 	public static final String IDENTIFIER = "identifier";
 	
 	public static final String DIAGNOSTIC_REPORT = "DiagnosticReport";
+	
+	public static final String SERVICE_REQUEST = "ServiceRequest";
+	
+	public static final String TASK = "Task";
 	
 	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
 	

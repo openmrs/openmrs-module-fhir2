@@ -12,9 +12,15 @@ package org.openmrs.module.fhir2.api.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +29,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,7 +76,7 @@ public class FhirTaskServiceImplTest {
 	}
 	
 	@Test
-	public void shouldRetrieveTaskByUuid() {
+	public void getTaskByUuid_shouldRetrieveTaskByUuid() {
 		FhirTask task = new FhirTask();
 		org.hl7.fhir.r4.model.Task translatedTask = new org.hl7.fhir.r4.model.Task();
 		
@@ -80,6 +87,7 @@ public class FhirTaskServiceImplTest {
 		when(translator.toFhirResource(task)).thenReturn(translatedTask);
 		
 		org.hl7.fhir.r4.model.Task result = fhirTaskService.getTaskByUuid(TASK_UUID);
+		
 		assertNotNull(result);
 		assertThat(result, equalTo(translatedTask));
 	}
@@ -161,7 +169,7 @@ public class FhirTaskServiceImplTest {
 	}
 	
 	@Test
-	public void shouldGetTasksByBasedOnServiceRequest() {
+	public void getTaskByBasedOn_shouldGetTasksByBasedOnServiceRequest() {
 		Collection<FhirTask> basedOnTasks;
 		Collection<org.hl7.fhir.r4.model.Task> basedOnFhirTasks;
 		
@@ -205,4 +213,24 @@ public class FhirTaskServiceImplTest {
 		assertThat(result, empty());
 	}
 	
+	@Test
+	public void searchForTasks_shouldReturnTasksByParameters() {
+		Collection<FhirTask> openmrsTasks = new ArrayList<>();
+		FhirTask openmrsTask = new FhirTask();
+		
+		openmrsTask.setUuid(TASK_UUID);
+		openmrsTasks.add(openmrsTask);
+		
+		Task task = new Task();
+		task.setId(TASK_UUID);
+		
+		when(dao.searchForTasks(any(), any(), any(), any())).thenReturn(openmrsTasks);
+		when(translator.toFhirResource(openmrsTask)).thenReturn(task);
+		
+		Collection<Task> results = fhirTaskService.searchForTasks(null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results, hasItem(hasProperty("id", equalTo(TASK_UUID))));
+	}
 }
