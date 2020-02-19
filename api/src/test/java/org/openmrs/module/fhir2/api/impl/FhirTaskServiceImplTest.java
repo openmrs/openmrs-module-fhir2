@@ -31,7 +31,7 @@ import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FhirFhirTaskServiceImplTest {
+public class FhirTaskServiceImplTest {
 	
 	private static final String TASK_UUID = "dc9ce8be-3155-4adf-b28f-29436ec30a30";
 	
