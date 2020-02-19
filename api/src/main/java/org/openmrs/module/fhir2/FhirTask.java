@@ -71,20 +71,47 @@ public class FhirTask extends BaseOpenmrsData {
 	 * Referenced resources represented with relative resource identifier string in the format of
 	 * <ResourceName>/<ResourceId>.
 	 */
+	@ElementCollection
+	@CollectionTable(name = "fhir_task_based_on", joinColumns = @JoinColumn(name = "task_id"))
 	@Column(name = "based_on")
-	private String basedOn;
+	private Collection<String> basedOnReferences;
 	
+	/**
+	 * Referenced resources represented with relative resource identifier string in the format of
+	 * <ResourceName>/<ResourceId>.
+	 */
+	@Column(name = "for")
+	private String forReference;
+	
+	/**
+	 * Referenced resources represented with relative resource identifier string in the format of
+	 * <ResourceName>/<ResourceId>.
+	 */
+	@Column(name = "encounter")
+	private String encounterReference;
+	
+	/**
+	 * Referenced resources represented with relative resource identifier string in the format of
+	 * <ResourceName>/<ResourceId>.
+	 */
+	@Column(name = "owner")
+	private String ownerReference;
+	
+	/**
+	 * Referenced resources represented with relative resource identifier string in the format of
+	 * <ResourceName>/<ResourceId>.
+	 */
 	@ElementCollection
-	@CollectionTable(name = "fhir_task_inputs", joinColumns = @JoinColumn(name = "task_input_id"))
+	@CollectionTable(name = "fhir_task_inputs", joinColumns = @JoinColumn(name = "task_id"))
 	@Column(name = "input")
-	private Collection<String> inputs;
+	private Collection<String> inputReferences;
 	
+	/**
+	 * Referenced resources represented with relative resource identifier string in the format of
+	 * <ResourceName>/<ResourceId>.
+	 */
 	@ElementCollection
-	@CollectionTable(name = "fhir_task_outputs", joinColumns = @JoinColumn(name = "task_output_id"))
+	@CollectionTable(name = "fhir_task_outputs", joinColumns = @JoinColumn(name = "task_id"))
 	@Column(name = "output")
-	private Collection<String> outputs;
-	
-	@Column(name = "description")
-	private String description;
-	
+	private Collection<String> outputReferences;
 }

@@ -15,6 +15,8 @@ import java.util.Collection;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
@@ -51,5 +53,19 @@ public class BaseServiceRequestTranslatorImpl {
 			}
 		}
 		return serviceRequestStatus;
+	}
+
+	protected Reference determineServiceRequestPerformer(String orderUuid) {
+		Collection<Task> serviceRequestTasks = taskService.getTasksByBasedOn(ServiceRequest.class, orderUuid);
+
+		if (serviceRequestTasks.size() != 1) {
+			return null;
+		}
+
+		Task serviceRequestTask = serviceRequestTasks.iterator().next();
+
+
+
+		return serviceRequestTasks.iterator().next().getOwner();
 	}
 }

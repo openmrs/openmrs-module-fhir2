@@ -141,4 +141,43 @@
             where name = 'CIEL' and retired = 0
         ]]></sql>
     </changeSet>
+
+	<changeSet id="update_fhir_task_20200219" author="pmanko">
+		<preConditions onFail="CONTINUE">
+			<tableExists tableName="fhir_task"/>
+		</preConditions>
+
+		<comment>
+			Update FhirTask table with elements for https://issues.openmrs.org/browse/FM2-75
+		</comment>
+
+		<dropColumn tableName="fhir_task" columnName="based_on" />
+
+		<addColumn tableName="fhir_task">
+			<column name="owner" type="varchar(255)"/>
+			<column name="encounter" type="varchar(255)"/>
+			<column name="for" type="varchar(255)"/>
+		</addColumn>
+
+		<createTable tableName="fhir_task_based_on">
+			<column name="task_id">
+				<constraints nullable="false" />
+			</column>
+			<column name="based_on" type="varchar(255)" />
+		</createTable>
+
+		<createTable tableName="fhir_task_output">
+			<column name="task_id">
+				<constraints nullable="false" />
+			</column>
+			<column name="output" type="varchar(255)" />
+		</createTable>
+
+		<createTable tableName="fhir_task_input">
+			<column name="task_id">
+				<constraints nullable="false" />
+			</column>
+			<column name="input" type="varchar(255)" />
+		</createTable>
+	</changeSet>
 </databaseChangeLog>

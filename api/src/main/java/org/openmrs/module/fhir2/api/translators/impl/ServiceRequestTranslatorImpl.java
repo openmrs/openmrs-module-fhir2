@@ -11,11 +11,16 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.inject.Inject;
 
+import java.util.Collections;
+
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +30,13 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 	
 	@Inject
 	private ConceptTranslator conceptTranslator;
-	
+
+	@Inject
+	private PatientReferenceTranslator patientReferenceTranslator;
+
+	@Inject
+	private PractitionerReferenceTranslator practitionerReferenceTranslator;
+
 	@Override
 	public ServiceRequest toFhirResource(TestOrder order) {
 		if (order == null) {
@@ -35,11 +46,21 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 		ServiceRequest serviceRequest = new ServiceRequest();
 		
 		serviceRequest.setId(order.getUuid());
-		
+
 		serviceRequest.setStatus(determineServiceRequestStatus(order.getUuid()));
+
 		serviceRequest.setCode(conceptTranslator.toFhirResource(order.getConcept()));
+
 		serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
-		
+
+		serviceRequest.setSubject(patientReferenceTranslator.toFhirResource(order.getPatient()));
+
+		serviceRequest.setRequester(practitionerReferenceTranslator.toFhirResource(order.getOrderer()));
+
+		serviceRequest.setPerformer(Collections.singletonList(determineServiceRequestPerformer(order.getUuid())));
+
+		serviceRequest.setOccurrence(new Period().setStart(order.getEffectiveStartDate()).setEnd(order.getEffectiveStopDate()));
+
 		return serviceRequest;
 	}
 }

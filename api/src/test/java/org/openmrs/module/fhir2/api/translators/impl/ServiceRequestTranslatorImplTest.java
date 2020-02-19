@@ -10,31 +10,46 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
+import org.openmrs.Order;
+import org.openmrs.Patient;
+import org.openmrs.Provider;
 import org.openmrs.TestOrder;
+import org.openmrs.api.ObsService;
+import org.openmrs.api.OrderService;
+import org.openmrs.api.impl.ObsServiceImpl;
+import org.openmrs.api.impl.OrderServiceImpl;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceRequestTranslatorImplTest {
@@ -44,7 +59,13 @@ public class ServiceRequestTranslatorImplTest {
 	private static final TestOrder.Action ORDER_ACTION = TestOrder.Action.NEW;
 	
 	private static final String LOINC_CODE = "1000-1";
-	
+
+	private static final String PATIENT_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
+
+	private static final String PRACTITIONER_UUID = "b156e76e-b87a-4458-964c-a48e64a20fbb";
+
+	private static final String ORGANIZATION_UUID = "44f7a79e-1de6-4b0b-9daf-bbcb7ed18b7e";
+
 	private ServiceRequestTranslatorImpl translator;
 	
 	@Mock
@@ -52,16 +73,24 @@ public class ServiceRequestTranslatorImplTest {
 	
 	@Mock
 	private ConceptTranslator conceptTranslator;
+
+	@Mock
+	private PatientReferenceTranslator patientReferenceTranslator;
+
+	@Mock
+	private PractitionerReferenceTranslator practitionerReferenceTranslator;
 	
 	@Before
 	public void setup() {
 		translator = new ServiceRequestTranslatorImpl();
 		translator.setConceptTranslator(conceptTranslator);
 		translator.setTaskService(taskService);
+		translator.setPatientReferenceTranslator(patientReferenceTranslator);
+		translator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 	}
 	
 	@Test
-	public void shouldTranslateOpenmrsTestOrderToFhirServiceRequest() {
+	public void toFhirResource_shouldTranslateOpenmrsTestOrderToFhirServiceRequest() {
 		TestOrder order = new TestOrder();
 		ServiceRequest result = translator.toFhirResource(order);
 		
@@ -70,7 +99,7 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateOrderFromRequestedTaskToActiveServiceRequest() {
+	public void toFhirResource_shouldTranslateOrderFromRequestedTaskToActiveServiceRequest() {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
@@ -85,7 +114,7 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateOrderFromRejectedTaskToRevokedServiceRequest() {
+	public void toFhirResource_shouldTranslateOrderFromRejectedTaskToRevokedServiceRequest() {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
@@ -100,7 +129,7 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateOrderFromAcceptedTaskToActiveServiceRequest() {
+	public void toFhirResource_shouldTranslateOrderFromAcceptedTaskToActiveServiceRequest() {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
@@ -115,7 +144,7 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateOrderFromCompletedTaskToCompletedServiceRequest() {
+	public void toFhirResource_shouldTranslateOrderFromCompletedTaskToCompletedServiceRequest() {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
@@ -130,7 +159,7 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateOrderFromOtherTaskToUnknownServiceRequest() {
+	public void toFhirResource_shouldTranslateOrderFromOtherTaskToUnknownServiceRequest() {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
@@ -145,7 +174,7 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateOrderWithoutTaskToUnknownServiceRequest() {
+	public void toFhirResource_shouldTranslateOrderWithoutTaskToUnknownServiceRequest() {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
@@ -159,7 +188,7 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateOrderWithMultipleTasksToUnknownServiceRequest() {
+	public void toFhirResource_shouldTranslateOrderWithMultipleTasksToUnknownServiceRequest() {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
@@ -184,7 +213,7 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateOrderConcept() {
+	public void toFhirResource_shouldTranslateCode() {
 		Concept openmrsConcept = new Concept();
 		TestOrder testOrder = new TestOrder();
 		
@@ -204,7 +233,93 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
 		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo(LOINC_CODE))));
 	}
-	
+
+	@Test
+	public void toFhirResource_shouldTranslateOccurrence() {
+		TestOrder testOrder = new TestOrder();
+		Date fromDate = new Date();
+		Date toDate = new Date();
+
+		testOrder.setDateActivated(fromDate);
+		testOrder.setAutoExpireDate(toDate);
+
+		Period result = translator.toFhirResource(testOrder).getOccurrencePeriod();
+
+		assertThat(result, notNullValue());
+		assertThat(result.getStart(), equalTo(fromDate));
+		assertThat(result.getEnd(), equalTo(toDate));
+	}
+
+	@Test
+	public void toFhirResource_shouldTranslateOccurrenceFromScheduled() {
+		TestOrder testOrder = new TestOrder();
+		Date fromDate = new Date();
+		Date toDate = new Date();
+
+		testOrder.setUrgency(TestOrder.Urgency.ON_SCHEDULED_DATE);
+		testOrder.setScheduledDate(fromDate);
+		testOrder.setAutoExpireDate(toDate);
+
+		Period result = translator.toFhirResource(testOrder).getOccurrencePeriod();
+
+		assertThat(result, notNullValue());
+		assertThat(result.getStart(), equalTo(fromDate));
+		assertThat(result.getEnd(), equalTo(toDate));
+	}
+
+	@Test
+	public void toFhirResource_shouldTranslateSubject() {
+		TestOrder order = new TestOrder();
+		Patient subject = new Patient();
+		Reference subjectReference = new Reference();
+		
+		subject.setUuid(PATIENT_UUID);
+		order.setUuid(SERVICE_REQUEST_UUID);
+		order.setPatient(subject);
+		subjectReference.setType(FhirConstants.PATIENT).setReference(FhirConstants.PATIENT+"/"+PATIENT_UUID);
+
+		when(patientReferenceTranslator.toFhirResource(subject)).thenReturn(subjectReference);
+
+		Reference result = translator.toFhirResource(order).getSubject();
+
+		assertThat(result, notNullValue());
+		assertThat(result.getReference(), containsString(PATIENT_UUID));
+	}
+
+	@Test
+	public void toFhirResource_shouldInheritPerformerFromTaskOwner() {
+		TestOrder order = new TestOrder();
+		order.setUuid(SERVICE_REQUEST_UUID);
+
+		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(setUpPerformerScenario(ORGANIZATION_UUID));
+
+		Collection<Reference> result = translator.toFhirResource(order).getPerformer();
+
+		assertThat(result, notNullValue());
+		assertThat(result, hasSize(1));
+		assertThat(result.iterator().next().getReference(), containsString(ORGANIZATION_UUID));
+	}
+
+	@Test
+	public void toFhirResource_shouldTranslateRequester() {
+
+		TestOrder order = new TestOrder();
+		Provider requester = new Provider();
+		Reference requesterReference = new Reference();
+
+		requester.setUuid(PRACTITIONER_UUID);
+		order.setUuid(SERVICE_REQUEST_UUID);
+		order.setOrderer(requester);
+		requesterReference.setType(FhirConstants.PRACTITIONER).setReference(FhirConstants.PRACTITIONER+"/"+PRACTITIONER_UUID);
+
+		when(practitionerReferenceTranslator.toFhirResource(requester)).thenReturn(requesterReference);
+
+		Reference result = translator.toFhirResource(order).getRequester();
+
+		assertThat(result, notNullValue());
+		assertThat(result.getReference(), containsString(PRACTITIONER_UUID));
+	}
+
 	private Collection<Task> setUpBasedOnScenario(Task.TaskStatus status) {
 		Reference basedOnRef = new Reference();
 		Task task = new Task();
@@ -215,4 +330,18 @@ public class ServiceRequestTranslatorImplTest {
 		
 		return Collections.singletonList(task);
 	}
+
+	private Collection<Task> setUpPerformerScenario(String performerUUID) {
+		Reference performerRef = new Reference();
+		Task task = new Task();
+
+		performerRef.setReference(FhirConstants.ORGANIZATION + "/" + performerUUID);
+		performerRef.setType(FhirConstants.ORGANIZATION);
+
+		task.setOwner(performerRef);
+
+		return Collections.singletonList(task);
+	}
+
+
 }
