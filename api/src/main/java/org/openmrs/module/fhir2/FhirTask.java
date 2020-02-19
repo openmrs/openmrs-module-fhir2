@@ -33,7 +33,7 @@ import org.openmrs.BaseOpenmrsData;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "fhir_task")
-public class Task extends BaseOpenmrsData {
+public class FhirTask extends BaseOpenmrsData {
 	
 	// Based on https://www.hl7.org/fhir/task.html v4.0.1
 	// TODO: Support this valueset: https://www.hl7.org/fhir/valueset-task-status.html

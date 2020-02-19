@@ -10,31 +10,32 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import org.hl7.fhir.r4.model.Task;
+import org.openmrs.module.fhir2.FhirTask;
 
-public interface TaskTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.module.fhir2.Task, Task> {
+public interface TaskTranslator extends OpenmrsFhirUpdatableTranslator<FhirTask, Task> {
 	
 	/**
-	 * Maps a {@link org.openmrs.module.fhir2.Task} to a {@link Task}
+	 * Maps a {@link FhirTask} to a {@link Task}
 	 * 
 	 * @param openmrsTask the Task to translate
 	 * @return the corresponding FHIR Task
 	 */
-	Task toFhirResource(org.openmrs.module.fhir2.Task openmrsTask);
+	Task toFhirResource(FhirTask openmrsTask);
 	
 	/**
-	 * Maps a {@link Task} to a {@link org.openmrs.module.fhir2.Task}
+	 * Maps a {@link Task} to a {@link FhirTask}
 	 * 
 	 * @param fhirTask the FHIR Task to map
 	 * @return the corresponding OpenMRS Task
 	 */
-	org.openmrs.module.fhir2.Task toOpenmrsType(Task fhirTask);
+	FhirTask toOpenmrsType(Task fhirTask);
 	
 	/**
-	 * Maps a {@link Task} to an existing {@link org.openmrs.module.fhir2.Task}
+	 * Maps a {@link Task} to an existing {@link FhirTask}
 	 * 
 	 * @param currentTask the openMRS Task to update
 	 * @param fhirTask the FHIR patient to map
 	 * @return the updated OpenMRS Task
 	 */
-	org.openmrs.module.fhir2.Task toOpenmrsType(org.openmrs.module.fhir2.Task currentTask, Task fhirTask);
+	FhirTask toOpenmrsType(FhirTask currentTask, Task fhirTask);
 }

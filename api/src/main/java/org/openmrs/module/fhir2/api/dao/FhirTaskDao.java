@@ -14,13 +14,13 @@ import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
 import org.hl7.fhir.r4.model.DomainResource;
-import org.openmrs.module.fhir2.Task;
+import org.openmrs.module.fhir2.FhirTask;
 
 public interface FhirTaskDao {
 	
-	public Task saveTask(Task task);
+	public FhirTask saveTask(FhirTask task);
 	
-	public Task getTaskByUuid(@NotNull String taskUUID);
+	public FhirTask getTaskByUuid(@NotNull String taskUUID);
 	
-	public Collection<Task> getTasksByBasedOnUuid(Class<? extends DomainResource> resourceType, String uuid);
+	public Collection<FhirTask> getTasksByBasedOnUuid(Class<? extends DomainResource> resourceType, String uuid);
 }

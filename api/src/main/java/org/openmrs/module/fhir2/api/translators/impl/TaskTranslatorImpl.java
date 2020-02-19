@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Task;
+import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class TaskTranslatorImpl implements TaskTranslator {
 	
 	@Override
-	public Task toFhirResource(org.openmrs.module.fhir2.Task openmrsTask) {
+	public Task toFhirResource(FhirTask openmrsTask) {
 		Task fhirTask = new Task();
 		
 		if (openmrsTask != null) {
@@ -31,8 +32,8 @@ public class TaskTranslatorImpl implements TaskTranslator {
 	}
 	
 	@Override
-	public org.openmrs.module.fhir2.Task toOpenmrsType(Task fhirTask) {
-		org.openmrs.module.fhir2.Task openmrsTask = new org.openmrs.module.fhir2.Task();
+	public FhirTask toOpenmrsType(Task fhirTask) {
+		FhirTask openmrsTask = new FhirTask();
 		
 		if (fhirTask != null) {
 			setOpenmrsTaskFields(openmrsTask, fhirTask);
@@ -42,10 +43,10 @@ public class TaskTranslatorImpl implements TaskTranslator {
 	}
 	
 	@Override
-	public org.openmrs.module.fhir2.Task toOpenmrsType(org.openmrs.module.fhir2.Task openmrsTask, Task fhirTask) {
+	public FhirTask toOpenmrsType(FhirTask openmrsTask, Task fhirTask) {
 		if (fhirTask != null) {
 			if (openmrsTask == null) {
-				openmrsTask = new org.openmrs.module.fhir2.Task();
+				openmrsTask = new FhirTask();
 			}
 			setOpenmrsTaskFields(openmrsTask, fhirTask);
 		}
@@ -53,7 +54,7 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		return openmrsTask;
 	}
 	
-	private void setFhirTaskFields(org.openmrs.module.fhir2.Task openmrsTask, Task fhirTask) {
+	private void setFhirTaskFields(FhirTask openmrsTask, Task fhirTask) {
 		fhirTask.setId(openmrsTask.getUuid());
 		if (openmrsTask.getStatus() != null) {
 			fhirTask.setStatus(Task.TaskStatus.valueOf(openmrsTask.getStatus().name()));
@@ -63,15 +64,15 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		}
 	}
 	
-	private void setOpenmrsTaskFields(org.openmrs.module.fhir2.Task openmrsTask, Task fhirTask) {
+	private void setOpenmrsTaskFields(FhirTask openmrsTask, Task fhirTask) {
 		if (openmrsTask.getUuid() == null) {
 			openmrsTask.setUuid(fhirTask.getId());
 		}
 		if (fhirTask.getStatus() != null) {
-			openmrsTask.setStatus(org.openmrs.module.fhir2.Task.TaskStatus.valueOf(fhirTask.getStatus().name()));
+			openmrsTask.setStatus(FhirTask.TaskStatus.valueOf(fhirTask.getStatus().name()));
 		}
 		if (fhirTask.getIntent() != null) {
-			openmrsTask.setIntent(org.openmrs.module.fhir2.Task.TaskIntent.valueOf(fhirTask.getIntent().name()));
+			openmrsTask.setIntent(FhirTask.TaskIntent.valueOf(fhirTask.getIntent().name()));
 		}
 	}
 	

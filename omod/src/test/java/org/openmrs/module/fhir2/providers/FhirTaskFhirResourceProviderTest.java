@@ -29,7 +29,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TaskFhirResourceProviderTest {
+public class FhirTaskFhirResourceProviderTest {
 	
 	private static final String TASK_UUID = "bdd7e368-3d1a-42a9-9538-395391b64adf";
 	
