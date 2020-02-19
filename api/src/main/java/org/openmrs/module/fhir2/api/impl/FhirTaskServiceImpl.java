@@ -20,6 +20,7 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
+import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
@@ -69,7 +70,7 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 	 */
 	@Override
 	public Task updateTask(String uuid, Task task) {
-		org.openmrs.module.fhir2.Task openmrsTask = null;
+		FhirTask openmrsTask = null;
 		
 		if (uuid != null) {
 			openmrsTask = dao.getTaskByUuid(task.getId());

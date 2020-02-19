@@ -23,7 +23,7 @@ import org.hibernate.SessionFactory;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.module.fhir2.Task;
+import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,11 +41,11 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String OTHER_ORDER_UUID = "cbcb84f3-4576-452f-ba74-7cdeaa9aa602";
 	
-	private static final Task.TaskStatus TASK_STATUS = Task.TaskStatus.REQUESTED;
+	private static final FhirTask.TaskStatus TASK_STATUS = FhirTask.TaskStatus.REQUESTED;
 	
-	private static final Task.TaskStatus NEW_STATUS = Task.TaskStatus.ACCEPTED;
+	private static final FhirTask.TaskStatus NEW_STATUS = FhirTask.TaskStatus.ACCEPTED;
 	
-	private static final Task.TaskIntent TASK_INTENT = Task.TaskIntent.ORDER;
+	private static final FhirTask.TaskIntent TASK_INTENT = FhirTask.TaskIntent.ORDER;
 	
 	private FhirTaskDaoImpl dao;
 	
@@ -61,7 +61,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldRetrieveTaskByUuid() {
-		Task result = dao.getTaskByUuid(TASK_UUID);
+		FhirTask result = dao.getTaskByUuid(TASK_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(TASK_UUID));
@@ -69,7 +69,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldUpdateTaskStatus() {
-		Task toUpdate = dao.getTaskByUuid(TASK_UUID);
+		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
 		toUpdate.setStatus(NEW_STATUS);
 		
 		dao.saveTask(toUpdate);
@@ -79,7 +79,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldRetrieveTasksByBasedOn() {
-		Collection<Task> results = dao.getTasksByBasedOnUuid(ServiceRequest.class, BASED_ON_ORDER_UUID);
+		Collection<FhirTask> results = dao.getTasksByBasedOnUuid(ServiceRequest.class, BASED_ON_ORDER_UUID);
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		assertThat(results.iterator().next().getUuid(), equalTo(BASED_ON_TASK_UUID));
@@ -87,7 +87,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnEmptyTaskListForOrderWithNoTask() {
-		Collection<Task> results = dao.getTasksByBasedOnUuid(ServiceRequest.class, OTHER_ORDER_UUID);
+		Collection<FhirTask> results = dao.getTasksByBasedOnUuid(ServiceRequest.class, OTHER_ORDER_UUID);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
 	}
