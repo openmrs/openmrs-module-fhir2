@@ -26,6 +26,7 @@ import java.util.List;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.ProviderAttribute;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
@@ -45,6 +46,8 @@ public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest 
 	private static final String NOT_FOUND_PRACTITIONER_NAME = "waf";
 	
 	private static final String NOT_FOUND_PRACTITIONER_IDENTIFIER = "38934-t";
+	
+	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "FF89DD99-OOX78-KKG89D-XX89CC8";
 	
 	@Inject
 	@Named("providerService")
@@ -102,5 +105,16 @@ public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest 
 		List<org.openmrs.Provider> results = dao.findProviderByIdentifier(NOT_FOUND_PRACTITIONER_IDENTIFIER);
 		assertThat(results, notNullValue());
 		assertThat(results, is(empty()));
+	}
+	
+	@Test
+	public void getActiveAttributesByPractitionerAndAttributeTypeUuid_shouldReturnPractitionerAttribute() {
+		org.openmrs.Provider provider = new org.openmrs.Provider();
+		provider.setUuid(PRACTITIONER_UUID);
+		
+		List<ProviderAttribute> attributeList = dao.getActiveAttributesByPractitionerAndAttributeTypeUuid(provider,
+		    PERSON_ATTRIBUTE_TYPE_UUID);
+		
+		assertThat(attributeList, notNullValue());
 	}
 }

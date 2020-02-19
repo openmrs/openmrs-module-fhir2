@@ -28,12 +28,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Person;
+import org.openmrs.PersonAttribute;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
@@ -69,6 +71,8 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String BIRTH_DATE = "1999-12-20";
 	
 	private static final String NOT_FOUND_BIRTH_DATE = "1000-00-00";
+	
+	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
 	
 	private FhirPersonDaoImpl fhirPersonDao;
 	
@@ -171,5 +175,16 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		Collection<Person> results = fhirPersonDao.findPersonsByGender(WRONG_GENDER);
 		assertThat(results, notNullValue());
 		assertThat(results, is(empty()));
+	}
+	
+	@Test
+	public void getActiveAttributesByPersonAndAttributeTypeUuid_shouldReturnPersonAttribute() {
+		Person person = new Person();
+		person.setUuid(PERSON_UUID);
+		
+		List<PersonAttribute> attributeList = fhirPersonDao.getActiveAttributesByPersonAndAttributeTypeUuid(person,
+		    PERSON_ATTRIBUTE_TYPE_UUID);
+		
+		assertThat(attributeList, notNullValue());
 	}
 }

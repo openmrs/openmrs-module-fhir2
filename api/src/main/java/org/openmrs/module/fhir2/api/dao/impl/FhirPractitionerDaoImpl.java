@@ -21,7 +21,9 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.openmrs.Provider;
+import org.openmrs.ProviderAttribute;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.springframework.stereotype.Component;
@@ -54,5 +56,14 @@ public class FhirPractitionerDaoImpl implements FhirPractitionerDao {
 	public List<Provider> findProviderByIdentifier(String identifier) {
 		return sessionFactory.getCurrentSession().createCriteria(Provider.class)
 		        .add(Restrictions.eq("identifier", identifier)).list();
+	}
+	
+	@Override
+	public List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(Provider provider,
+	        String providerAttributeTypeUuid) {
+		return (List<ProviderAttribute>) sessionFactory.getCurrentSession().createCriteria(ProviderAttribute.class)
+		        .createAlias("provider", "p", JoinType.INNER_JOIN, eq("p.id", provider.getId()))
+		        .createAlias("attributeType", "pat").add(eq("pat.uuid", providerAttributeTypeUuid)).add(eq("voided", false))
+		        .list();
 	}
 }

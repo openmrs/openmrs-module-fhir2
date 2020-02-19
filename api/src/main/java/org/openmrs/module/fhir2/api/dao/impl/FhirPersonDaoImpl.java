@@ -9,17 +9,21 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.eq;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.openmrs.Person;
+import org.openmrs.PersonAttribute;
 import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.springframework.stereotype.Component;
@@ -48,8 +52,7 @@ public class FhirPersonDaoImpl implements FhirPersonDao {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Collection<Person> findPersonsByBirthDate(Date birthDate) {
-		return sessionFactory.getCurrentSession().createCriteria(Person.class).add(Restrictions.eq("birthdate", birthDate))
-		        .list();
+		return sessionFactory.getCurrentSession().createCriteria(Person.class).add(eq("birthdate", birthDate)).list();
 	}
 	
 	@Override
@@ -60,6 +63,15 @@ public class FhirPersonDaoImpl implements FhirPersonDao {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Collection<Person> findPersonsByGender(String gender) {
-		return sessionFactory.getCurrentSession().createCriteria(Person.class).add(Restrictions.eq("gender", gender)).list();
+		return sessionFactory.getCurrentSession().createCriteria(Person.class).add(eq("gender", gender)).list();
+	}
+	
+	@Override
+	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(Person person,
+	        String personAttributeTypeUuid) {
+		return (List<PersonAttribute>) sessionFactory.getCurrentSession().createCriteria(PersonAttribute.class)
+		        .createAlias("person", "p", JoinType.INNER_JOIN, eq("p.id", person.getId()))
+		        .createAlias("attributeType", "pat").add(eq("pat.uuid", personAttributeTypeUuid)).add(eq("voided", false))
+		        .list();
 	}
 }

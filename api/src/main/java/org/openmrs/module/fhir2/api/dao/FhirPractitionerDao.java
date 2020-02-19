@@ -12,8 +12,10 @@ package org.openmrs.module.fhir2.api.dao;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.openmrs.Provider;
+import org.openmrs.ProviderAttribute;
 
 public interface FhirPractitionerDao {
 	
@@ -22,4 +24,7 @@ public interface FhirPractitionerDao {
 	Collection<Provider> findProviderByName(@NotNull String name);
 	
 	Collection<Provider> findProviderByIdentifier(@NotNull String identifier);
+	
+	List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(@NotNull Provider provider,
+	        @NotNull String providerAttributeTypeUuid);
 }

@@ -12,9 +12,11 @@ package org.openmrs.module.fhir2.api.dao;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
+import java.util.List;
 
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.openmrs.Location;
+import org.openmrs.LocationAttribute;
 
 public interface FhirLocationDao {
 	
@@ -31,4 +33,7 @@ public interface FhirLocationDao {
 	Collection<Location> findLocationsByState(@NotNull String state);
 	
 	Collection<Location> findLocationsByTag(@NotNull TokenParam tag);
+	
+	List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@NotNull Location location,
+	        @NotNull String locationAttributeTypeUuid);
 }

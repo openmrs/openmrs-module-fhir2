@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,11 +23,10 @@ import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.LocationAttribute;
-import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
-import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
@@ -48,7 +46,7 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 	private FhirGlobalPropertyService propertyService;
 	
 	@Inject
-	private LocationService locationService;
+	private FhirLocationDao fhirLocationDao;
 	
 	/**
 	 * @see org.openmrs.module.fhir2.api.translators.LocationTranslator#toFhirResource(org.openmrs.Location)
@@ -96,15 +94,10 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 	}
 	
 	protected List<ContactPoint> getLocationContactDetails(@NotNull org.openmrs.Location location) {
-		List<ContactPoint> contactPoints = new ArrayList<>();
-		LocationAttributeType locationAttributeType = locationService.getLocationAttributeTypeByUuid(
-		    propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY));
-		for (LocationAttribute attribute : location.getActiveAttributes()) {
-			if (attribute.getAttributeType().equals(locationAttributeType)) {
-				contactPoints.add(telecomTranslator.toFhirResource(attribute));
-			}
-		}
-		return contactPoints;
+		return fhirLocationDao
+		        .getActiveAttributesByLocationAndAttributeTypeUuid(location,
+		            propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY))
+		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	/**
@@ -165,6 +158,6 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 			return null;
 		}
 		
-		return locationService.getLocationByUuid(uuid);
+		return fhirLocationDao.getLocationByUuid(uuid);
 	}
 }
