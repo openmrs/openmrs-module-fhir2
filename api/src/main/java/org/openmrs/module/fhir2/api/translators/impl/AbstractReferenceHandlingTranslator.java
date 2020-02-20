@@ -49,16 +49,6 @@ public abstract class AbstractReferenceHandlingTranslator {
 		        .setType(FhirConstants.LOCATION).setDisplay(location.getName());
 	}
 	
-	protected Reference createCreatorReference(@NotNull User user) {
-		Reference reference = new Reference().setReference(FhirConstants.CREATOR + "/" + user.getUuid())
-		        .setType(FhirConstants.CREATOR);
-		
-		if (user.getPerson() != null) {
-			reference.setDisplay(user.getPersonName().getFullName());
-		}
-		return reference;
-	}
-	
 	protected Reference createPatientReference(@NotNull Patient patient) {
 		Reference reference = new Reference().setReference(FhirConstants.PATIENT + "/" + patient.getUuid())
 		        .setType(FhirConstants.PATIENT);
@@ -78,6 +68,20 @@ public abstract class AbstractReferenceHandlingTranslator {
 			catch (NullPointerException ignored) {}
 		}
 		reference.setDisplay(sb.toString());
+		
+		return reference;
+	}
+	
+	protected Reference createPractitionerReference(@NotNull User user) {
+		Reference reference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + user.getUuid())
+		        .setType(FhirConstants.PRACTITIONER);
+		
+		if (user.getPerson() != null) {
+			
+			if (user.getPerson().getPersonName() != null) {
+				reference.setDisplay(user.getPerson().getPersonName().getFullName());
+			}
+		}
 		
 		return reference;
 	}

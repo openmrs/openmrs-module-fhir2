@@ -45,7 +45,7 @@ public class FhirPractitionerServiceImplTest {
 	private static final String PRACTITIONER_IDENTIFIER = "3r34g346-tk";
 	
 	@Mock
-	private PractitionerTranslator practitionerTranslator;
+	private PractitionerTranslator<Provider> practitionerTranslator;
 	
 	@Mock
 	private FhirPractitionerDao practitionerDao;

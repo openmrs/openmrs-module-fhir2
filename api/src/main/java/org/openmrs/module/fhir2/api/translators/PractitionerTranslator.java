@@ -10,35 +10,37 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import org.hl7.fhir.r4.model.Practitioner;
-import org.openmrs.Provider;
 
-public interface PractitionerTranslator extends OpenmrsFhirUpdatableTranslator<Provider, Practitioner> {
+public interface PractitionerTranslator<T> extends OpenmrsFhirUpdatableTranslator<T, Practitioner> {
 	
 	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Practitioner} to an existing {@link org.openmrs.Provider}
+	 * Maps a {@link org.hl7.fhir.r4.model.Practitioner} to an existing generic type <T> it can be
+	 * {@link org.openmrs.Provider} or {@link org.openmrs.User}
 	 * 
-	 * @param existingProvider the existingProvider to update
+	 * @param existingUserOrProvider the existingUserOrProvider to update
 	 * @param practitioner the FHIR practitioner to map
-	 * @return an updated version of the OpenMrs existingProvider
+	 * @return an updated version of the OpenMrs existingUserOrProvider
 	 */
 	@Override
-	Provider toOpenmrsType(Provider existingProvider, Practitioner practitioner);
+	T toOpenmrsType(T existingUserOrProvider, Practitioner practitioner);
 	
 	/**
-	 * Maps {@link org.openmrs.Provider}to a {@link org.hl7.fhir.r4.model.Practitioner} resource
+	 * Maps {@link org.openmrs.Provider} or {@link org.openmrs.User} to a
+	 * {@link org.hl7.fhir.r4.model.Practitioner} resource
 	 * 
-	 * @param provider the OpenMRS provider to translate
+	 * @param userOrProvider the OpenMRS userOrProvider to translate
 	 * @return the corresponding FHIR practitioner resource
 	 */
 	@Override
-	Practitioner toFhirResource(Provider provider);
+	Practitioner toFhirResource(T userOrProvider);
 	
 	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Practitioner} to {@link org.openmrs.Provider}
+	 * Maps a {@link org.hl7.fhir.r4.model.Practitioner} to {@link org.openmrs.Provider} or
+	 * {@link org.openmrs.User}
 	 * 
 	 * @param practitioner the FHIR practitioner to translate
 	 * @return the corresponding OpenMrs provider
 	 */
 	@Override
-	Provider toOpenmrsType(Practitioner practitioner);
+	T toOpenmrsType(Practitioner practitioner);
 }

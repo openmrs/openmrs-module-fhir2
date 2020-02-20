@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.openmrs.Provider;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
@@ -32,7 +33,7 @@ public class FhirPractitionerServiceImpl implements FhirPractitionerService {
 	private FhirPractitionerDao dao;
 	
 	@Inject
-	private PractitionerTranslator translator;
+	private PractitionerTranslator<Provider> translator;
 	
 	@Override
 	@Transactional(readOnly = true)
