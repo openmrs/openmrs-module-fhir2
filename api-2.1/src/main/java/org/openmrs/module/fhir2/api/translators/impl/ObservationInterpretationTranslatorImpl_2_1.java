@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Primary
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.3.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.*")
 public class ObservationInterpretationTranslatorImpl_2_1 extends ObservationInterpretationTranslatorImpl {
 	
 	@Override

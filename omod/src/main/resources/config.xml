@@ -27,16 +27,16 @@
 	<!-- <updateURL>https://modules.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
 	
-	<require_version>2.3.*, 2.2.*, 2.0.5 - 2.1.*</require_version>
+	<require_version>2.0.5 - 2.*</require_version>
 
     <conditionalResources>
 		<conditionalResource>
 			<path>/lib/fhir2-api-2.1-${project.parent.version}.jar</path>
-			<openmrsVersion>2.1.* - 2.3.*</openmrsVersion>
+			<openmrsVersion>2.1.* - 2.*</openmrsVersion>
 		</conditionalResource>
         <conditionalResource>
             <path>/lib/fhir2-api-2.2-${project.parent.version}.jar</path>
-            <openmrsVersion>2.2.* - 2.3.*</openmrsVersion>
+            <openmrsVersion>2.2.* - 2.*</openmrsVersion>
         </conditionalResource>
         <conditionalResource>
             <path>/lib/fhir2-api-2.0-${project.parent.version}.jar</path>

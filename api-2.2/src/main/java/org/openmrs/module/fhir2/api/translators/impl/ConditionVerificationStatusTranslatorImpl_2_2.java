@@ -18,7 +18,7 @@ import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTrans
 import org.springframework.stereotype.Component;
 
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.3.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
 public class ConditionVerificationStatusTranslatorImpl_2_2 implements ConditionVerificationStatusTranslator<ConditionVerificationStatus> {
 	
 	@Override

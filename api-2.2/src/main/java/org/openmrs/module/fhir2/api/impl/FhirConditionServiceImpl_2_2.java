@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.3.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
 public class FhirConditionServiceImpl_2_2 implements FhirConditionService {
 	
 	@Inject

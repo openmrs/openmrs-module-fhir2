@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Primary
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.3.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
 public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClinicalStatusTranslator<ConditionClinicalStatus> {
 	
 	@Override
