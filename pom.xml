@@ -602,7 +602,7 @@
 		<lombokVersion>1.18.10</lombokVersion>
         <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
 		<openmrsPlatformToolsVersion>2.0.5</openmrsPlatformToolsVersion>
-		<hapifhirVersion>4.0.3</hapifhirVersion>
+		<hapifhirVersion>4.2.0</hapifhirVersion>
 		<emrApiConditionModuleApiVersion>1.27.0</emrApiConditionModuleApiVersion>
     </properties>
 </project>
