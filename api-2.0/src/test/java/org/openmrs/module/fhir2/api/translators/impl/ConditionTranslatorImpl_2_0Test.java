@@ -40,8 +40,8 @@ import org.openmrs.module.emrapi.conditionslist.Condition;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
-import org.openmrs.module.fhir2.api.translators.CreatorReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConditionTranslatorImpl_2_0Test {
@@ -50,7 +50,7 @@ public class ConditionTranslatorImpl_2_0Test {
 	
 	private static final String PATIENT_UUID = "258797db-1524-4a13-9f09-2881580b0f5b";
 	
-	private static final String CREATOR_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
+	private static final String PRACTITIONER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
 	
 	private static final String PATIENT_REFERENCE = "Patient/" + PATIENT_UUID;
 	
@@ -72,7 +72,7 @@ public class ConditionTranslatorImpl_2_0Test {
 	
 	private static final String CONCEPT_UUID = "31d754f5-3e9e-4ca3-805c-87f97a1f5e4b";
 	
-	private static final String CREATOR_REFERENCE = FhirConstants.CREATOR + "/" + CREATOR_UUID;
+	private static final String PRACTITIONER_REFERENCE = FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID;
 	
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -84,7 +84,7 @@ public class ConditionTranslatorImpl_2_0Test {
 	private ConceptTranslator conceptTranslator;
 	
 	@Mock
-	private CreatorReferenceTranslator creatorReferenceTranslator;
+	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
 	private ConditionTranslatorImpl_2_0 conditionTranslator;
 	
@@ -100,7 +100,7 @@ public class ConditionTranslatorImpl_2_0Test {
 		conditionTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		conditionTranslator.setClinicalStatusTranslator(clinicalStatusTranslator);
 		conditionTranslator.setConceptTranslator(conceptTranslator);
-		conditionTranslator.setCreatorReferenceTranslator(creatorReferenceTranslator);
+		conditionTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 	}
 	
 	@Before
@@ -305,28 +305,28 @@ public class ConditionTranslatorImpl_2_0Test {
 	@Test
 	public void shouldTranslateConditionRecorderToOpenmrsUser() {
 		Reference userRef = new Reference();
-		userRef.setReference(FhirConstants.CREATOR + "/" + CREATOR_UUID);
+		userRef.setReference(FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID);
 		fhirCondition.setRecorder(userRef);
 		User user = new User();
-		user.setUuid(CREATOR_UUID);
-		when(creatorReferenceTranslator.toOpenmrsType(userRef)).thenReturn(user);
+		user.setUuid(PRACTITIONER_UUID);
+		when(practitionerReferenceTranslator.toOpenmrsType(userRef)).thenReturn(user);
 		Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
 		assertThat(condition, notNullValue());
 		assertThat(condition.getCreator(), notNullValue());
-		assertThat(condition.getCreator().getUuid(), equalTo(CREATOR_UUID));
+		assertThat(condition.getCreator().getUuid(), equalTo(PRACTITIONER_UUID));
 	}
 	
 	@Test
 	public void shouldTranslateConditionCreatorToRecorderFhirType() {
 		User user = new User();
-		user.setUuid(CREATOR_UUID);
+		user.setUuid(PRACTITIONER_UUID);
 		Reference userRef = new Reference();
-		userRef.setReference(CREATOR_REFERENCE);
+		userRef.setReference(PRACTITIONER_REFERENCE);
 		openMrsCondition.setCreator(user);
-		when(creatorReferenceTranslator.toFhirResource(user)).thenReturn(userRef);
+		when(practitionerReferenceTranslator.toFhirResource(user)).thenReturn(userRef);
 		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openMrsCondition);
 		assertThat(condition, notNullValue());
 		assertThat(condition.getRecorder(), notNullValue());
-		assertThat(condition.getRecorder().getReference(), equalTo(CREATOR_REFERENCE));
+		assertThat(condition.getRecorder().getReference(), equalTo(PRACTITIONER_REFERENCE));
 	}
 }

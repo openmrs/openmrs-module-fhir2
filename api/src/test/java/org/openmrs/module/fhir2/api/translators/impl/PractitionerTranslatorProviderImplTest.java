@@ -45,7 +45,7 @@ import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PractitionerTranslatorImplTest {
+public class PractitionerTranslatorProviderImplTest {
 	
 	private static final String PROVIDER_UUID = "328934-34ni23-23j34-23923";
 	
@@ -93,7 +93,7 @@ public class PractitionerTranslatorImplTest {
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	private PractitionerTranslatorImpl practitionerTranslator;
+	private PractitionerTranslatorProviderImpl practitionerTranslator;
 	
 	private Provider provider;
 	
@@ -101,7 +101,7 @@ public class PractitionerTranslatorImplTest {
 	
 	@Before
 	public void setUp() {
-		practitionerTranslator = new PractitionerTranslatorImpl();
+		practitionerTranslator = new PractitionerTranslatorProviderImpl();
 		practitionerTranslator.setAddressTranslator(addressTranslator);
 		practitionerTranslator.setGenderTranslator(genderTranslator);
 		practitionerTranslator.setNameTranslator(nameTranslator);

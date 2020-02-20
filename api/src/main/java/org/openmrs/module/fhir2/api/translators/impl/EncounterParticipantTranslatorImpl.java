@@ -26,10 +26,10 @@ import org.springframework.stereotype.Component;
 public class EncounterParticipantTranslatorImpl extends AbstractReferenceHandlingTranslator implements EncounterParticipantTranslator {
 	
 	@Inject
-	FhirPractitionerService practitionerService;
+	private FhirPractitionerService practitionerService;
 	
 	@Inject
-	PractitionerTranslator practitionerTranslator;
+	private PractitionerTranslator<Provider> practitionerTranslator;
 	
 	@Override
 	public Encounter.EncounterParticipantComponent toFhirResource(EncounterProvider encounter) {
