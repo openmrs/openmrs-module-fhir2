@@ -17,14 +17,15 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.openmrs.Concept;
+import org.openmrs.User;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.emrapi.conditionslist.Condition;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
-import org.openmrs.module.fhir2.api.translators.CreatorReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -42,7 +43,7 @@ public class ConditionTranslatorImpl_2_0 implements ConditionTranslator<Conditio
 	private ConceptTranslator conceptTranslator;
 	
 	@Inject
-	private CreatorReferenceTranslator creatorReferenceTranslator;
+	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(Condition condition) {
@@ -62,7 +63,7 @@ public class ConditionTranslatorImpl_2_0 implements ConditionTranslator<Conditio
 			fhirCondition.setCode(conceptTranslator.toFhirResource(condition.getConcept()));
 		}
 		fhirCondition.setOnset(new DateTimeType().setValue(condition.getOnsetDate()));
-		fhirCondition.setRecorder(creatorReferenceTranslator.toFhirResource(condition.getCreator()));
+		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
 		fhirCondition.setRecordedDate(condition.getDateCreated());
 		
 		return fhirCondition;
@@ -90,7 +91,7 @@ public class ConditionTranslatorImpl_2_0 implements ConditionTranslator<Conditio
 			}
 		}
 		existingCondition.setOnsetDate(condition.getOnsetDateTimeType().getValue());
-		existingCondition.setCreator(creatorReferenceTranslator.toOpenmrsType(condition.getRecorder()));
+		existingCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));
 		existingCondition.setDateCreated(condition.getRecordedDate());
 		
 		return existingCondition;

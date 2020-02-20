@@ -12,23 +12,25 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.User;
 
-public interface CreatorReferenceTranslator extends OpenmrsFhirTranslator<User, Reference> {
+public interface PractitionerReferenceTranslator<T> extends OpenmrsFhirTranslator<T, Reference> {
 	
 	/**
-	 * Maps an {@link org.openmrs.User} to a FHIR {@link org.hl7.fhir.r4.model.Reference}
+	 * Maps an {@link org.openmrs.User} or {@link org.openmrs.Provider} to a FHIR
+	 * {@link org.hl7.fhir.r4.model.Reference}
 	 *
-	 * @param user the OpenMRS user to translate
+	 * @param userOrProvider the OpenMRS userOrProvider to translate
 	 * @return the corresponding FHIR Reference
 	 */
 	@Override
-	Reference toFhirResource(User user);
+	Reference toFhirResource(T userOrProvider);
 	
 	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Reference} to an {@link org.openmrs.User}
+	 * Maps a {@link org.hl7.fhir.r4.model.Reference} to an {@link org.openmrs.User} or
+	 * {@link org.openmrs.Provider}
 	 *
 	 * @param reference the FHIR reference to translate
-	 * @return the corresponding OpenMRS user
+	 * @return the corresponding OpenMRS user or provider
 	 */
 	@Override
-	User toOpenmrsType(Reference reference);
+	T toOpenmrsType(Reference reference);
 }

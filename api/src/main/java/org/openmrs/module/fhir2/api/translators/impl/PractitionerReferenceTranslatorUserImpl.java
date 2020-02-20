@@ -16,12 +16,12 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.FhirUserService;
-import org.openmrs.module.fhir2.api.translators.CreatorReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class CreatorReferenceTranslatorImpl extends AbstractReferenceHandlingTranslator implements CreatorReferenceTranslator {
+public class PractitionerReferenceTranslatorUserImpl extends AbstractReferenceHandlingTranslator implements PractitionerReferenceTranslator<User> {
 	
 	@Inject
 	private FhirUserService userService;
@@ -31,7 +31,7 @@ public class CreatorReferenceTranslatorImpl extends AbstractReferenceHandlingTra
 		if (user == null) {
 			return null;
 		}
-		return createCreatorReference(user);
+		return createPractitionerReference(user);
 	}
 	
 	@Override
@@ -39,7 +39,7 @@ public class CreatorReferenceTranslatorImpl extends AbstractReferenceHandlingTra
 		if (reference == null) {
 			return null;
 		}
-		if (!getReferenceType(reference).equals("Creator")) {
+		if (!getReferenceType(reference).equals("Practitioner")) {
 			throw new IllegalArgumentException("Reference must be to an User not a " + reference.getType());
 		}
 		

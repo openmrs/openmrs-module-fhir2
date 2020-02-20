@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +39,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class PractitionerTranslatorImpl implements PractitionerTranslator {
+public class PractitionerTranslatorProviderImpl implements PractitionerTranslator<Provider> {
 	
 	@Inject
 	private PersonNameTranslator nameTranslator;
@@ -89,11 +88,12 @@ public class PractitionerTranslatorImpl implements PractitionerTranslator {
 		if (provider == null) {
 			return practitioner;
 		}
-		List<Identifier> identifiers = new ArrayList<Identifier>();
+		
 		Identifier identifier = new Identifier();
+		identifier.setSystem(FhirConstants.OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER);
 		identifier.setValue(provider.getIdentifier());
-		identifiers.add(identifier);
-		practitioner.setIdentifier(identifiers);
+		practitioner.addIdentifier(identifier);
+		
 		practitioner.setId(provider.getUuid());
 		practitioner.setActive(provider.getRetired());
 		practitioner.setTelecom(getProviderContactDetails(provider));

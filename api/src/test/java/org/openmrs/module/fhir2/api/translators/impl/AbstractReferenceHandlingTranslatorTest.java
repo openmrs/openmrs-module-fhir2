@@ -74,7 +74,7 @@ public class AbstractReferenceHandlingTranslatorTest {
 	
 	private static final String USER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
 	
-	private static final String CREATOR_REFERENCE = FhirConstants.CREATOR + "/" + USER_UUID;
+	private static final String PRACTITIONER_REFERENCE = FhirConstants.PRACTITIONER + "/" + USER_UUID;
 	
 	private Patient patient;
 	
@@ -262,11 +262,11 @@ public class AbstractReferenceHandlingTranslatorTest {
 	}
 	
 	@Test
-	public void shouldAddCreatorReference() {
-		Reference reference = referenceHandlingTranslator.createCreatorReference(user);
+	public void shouldAddPractitionerGivenOpenMrsUserReference() {
+		Reference reference = referenceHandlingTranslator.createPractitionerReference(user);
 		assertThat(reference, notNullValue());
-		assertThat(reference.getReference(), equalTo(CREATOR_REFERENCE));
-		assertThat(reference.getType(), equalTo(FhirConstants.CREATOR));
+		assertThat(reference.getReference(), equalTo(PRACTITIONER_REFERENCE));
+		assertThat(reference.getType(), equalTo(FhirConstants.PRACTITIONER));
 		assertThat(reference.getDisplay(), notNullValue());
 	}
 	
@@ -274,9 +274,9 @@ public class AbstractReferenceHandlingTranslatorTest {
 	public void shouldReturnReferenceWithNullDisplayIfUserPersonNameIsNull() {
 		User user = new User();
 		user.setUuid(USER_UUID);
-		Reference reference = referenceHandlingTranslator.createCreatorReference(user);
+		Reference reference = referenceHandlingTranslator.createPractitionerReference(user);
 		assertThat(reference, notNullValue());
-		assertThat(reference.getReference(), equalTo(CREATOR_REFERENCE));
+		assertThat(reference.getReference(), equalTo(PRACTITIONER_REFERENCE));
 		assertThat(reference.getDisplay(), nullValue());
 	}
 }
