@@ -19,8 +19,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -31,6 +33,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -43,62 +46,15 @@ import org.springframework.mock.web.MockServletContext;
 
 public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, U extends IBaseResource> {
 	
-	public static class FhirMediaTypes {
-		
-		public static final MediaType JSON;
-		
-		public static final MediaType XML;
-		
-		static {
-			JSON = MediaType.valueOf("application/fhir+json");
-			XML = MediaType.valueOf("application/fhir+xml");
-		}
-		
-		private FhirMediaTypes() {
-		}
-	}
+	private static final String SERVLET_NAME = "fhir2Servlet";
 	
-	private static abstract class HttpResponseMatcher extends TypeSafeMatcher<MockHttpServletResponse> {
-		
-		@SneakyThrows
-		@Override
-		protected void describeMismatchSafely(MockHttpServletResponse item, Description mismatchDescription) {
-			mismatchDescription.appendText("response with status code ").appendValue(item.getStatus());
-		}
-	}
+	private static ServletConfig servletConfig;
 	
-	private static class IsOkMatcher extends HttpResponseMatcher {
-		
-		@Override
-		protected boolean matchesSafely(MockHttpServletResponse item) {
-			int status = item.getStatus();
-			return status >= HttpStatus.OK.value() && status < HttpStatus.BAD_REQUEST.value();
-		}
-		
-		@Override
-		public void describeTo(Description description) {
-			description.appendText("response with HTTP status indicating request was handled successfully");
-		}
-	}
+	private static IParser parser;
 	
-	private static class StatusEqualsMatcher extends HttpResponseMatcher {
-		
-		private int status;
-		
-		private StatusEqualsMatcher(int status) {
-			this.status = status;
-		}
-		
-		@Override
-		protected boolean matchesSafely(MockHttpServletResponse item) {
-			return item.getStatus() == status;
-		}
-		
-		@Override
-		public void describeTo(Description description) {
-			description.appendText("response with HTTP status ").appendValue(status);
-		}
-	}
+	private static LoggingInterceptor interceptor;
+	
+	private FhirRestServlet servlet;
 	
 	public static Matcher<MockHttpServletResponse> isOk() {
 		return new IsOkMatcher();
@@ -123,40 +79,6 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 	public static Matcher<MockHttpServletResponse> statusEquals(HttpStatus status) {
 		return statusEquals(status.value());
 	}
-	
-	public class FhirRequestBuilder {
-		
-		private final MockHttpServletRequest request;
-		
-		private FhirRequestBuilder(RequestTypeEnum requestType, String uri) throws MalformedURLException {
-			request = new MockHttpServletRequest();
-			request.setMethod(requestType.toString());
-			URL url = new URL(uri);
-			request.setRequestURI(url.getPath());
-			request.setQueryString(url.getQuery());
-		}
-		
-		public FhirRequestBuilder accept(@NotNull MediaType mediaType) {
-			request.addHeader(ACCEPT, mediaType.toString());
-			return this;
-		}
-		
-		public MockHttpServletResponse go() throws ServletException, IOException {
-			MockHttpServletResponse response = new MockHttpServletResponse();
-			servlet.service(request, response);
-			return response;
-		}
-	}
-	
-	private static final String SERVLET_NAME = "fhir2Servlet";
-	
-	private static ServletConfig servletConfig;
-	
-	private static IParser parser;
-	
-	private static LoggingInterceptor interceptor;
-	
-	private FhirRestServlet servlet;
 	
 	@BeforeClass
 	public static void setupServlet() {
@@ -209,4 +131,103 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 	}
 	
 	public abstract T getResourceProvider();
+	
+	public static class FhirMediaTypes {
+		
+		public static final MediaType JSON;
+		
+		public static final MediaType XML;
+		
+		static {
+			JSON = MediaType.valueOf("application/fhir+json");
+			XML = MediaType.valueOf("application/fhir+xml");
+		}
+		
+		private FhirMediaTypes() {
+		}
+	}
+	
+	private static abstract class HttpResponseMatcher extends TypeSafeMatcher<MockHttpServletResponse> {
+		
+		@SneakyThrows
+		@Override
+		protected void describeMismatchSafely(MockHttpServletResponse item, Description mismatchDescription) {
+			FhirContext fhirContext = FhirContext.forR4();
+			IParser parser = fhirContext.newJsonParser();
+			
+			OperationOutcome operationOutcome = null;
+			try {
+				operationOutcome = parser.parseResource(OperationOutcome.class, item.getContentAsString());
+			}
+			catch (DataFormatException ignored) {}
+			
+			mismatchDescription.appendText("response with status code ").appendValue(item.getStatus());
+			
+			if (operationOutcome != null && operationOutcome.hasIssue() && operationOutcome.getIssue().stream()
+			        .anyMatch(o -> o.getSeverity().ordinal() <= OperationOutcome.IssueSeverity.WARNING.ordinal())) {
+				mismatchDescription.appendText(" with message ");
+				mismatchDescription.appendValue(operationOutcome.getIssue().stream()
+				        .filter(o -> o.getSeverity().ordinal() <= OperationOutcome.IssueSeverity.WARNING.ordinal())
+				        .map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+				        .collect(Collectors.joining(". ")));
+			}
+		}
+	}
+	
+	private static class IsOkMatcher extends HttpResponseMatcher {
+		
+		@Override
+		protected boolean matchesSafely(MockHttpServletResponse item) {
+			int status = item.getStatus();
+			return status >= HttpStatus.OK.value() && status < HttpStatus.BAD_REQUEST.value();
+		}
+		
+		@Override
+		public void describeTo(Description description) {
+			description.appendText("response with HTTP status indicating request was handled successfully");
+		}
+	}
+	
+	private static class StatusEqualsMatcher extends HttpResponseMatcher {
+		
+		private int status;
+		
+		private StatusEqualsMatcher(int status) {
+			this.status = status;
+		}
+		
+		@Override
+		protected boolean matchesSafely(MockHttpServletResponse item) {
+			return item.getStatus() == status;
+		}
+		
+		@Override
+		public void describeTo(Description description) {
+			description.appendText("response with HTTP status ").appendValue(status);
+		}
+	}
+	
+	public class FhirRequestBuilder {
+		
+		private final MockHttpServletRequest request;
+		
+		private FhirRequestBuilder(RequestTypeEnum requestType, String uri) throws MalformedURLException {
+			request = new MockHttpServletRequest();
+			request.setMethod(requestType.toString());
+			URL url = new URL(uri);
+			request.setRequestURI(url.getPath());
+			request.setQueryString(url.getQuery());
+		}
+		
+		public FhirRequestBuilder accept(@NotNull MediaType mediaType) {
+			request.addHeader(ACCEPT, mediaType.toString());
+			return this;
+		}
+		
+		public MockHttpServletResponse go() throws ServletException, IOException {
+			MockHttpServletResponse response = new MockHttpServletResponse();
+			servlet.service(request, response);
+			return response;
+		}
+	}
 }
