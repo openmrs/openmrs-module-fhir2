@@ -34,6 +34,12 @@ public class FhirConstants {
 	public static final String ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/allergyintolerance-clinical";
 	
+	public static final String OBSERVATION_REFERENCE_NORMAL = "normal";
+	
+	public static final String OBSERVATION_REFERENCE_TREATMENT = "treatment";
+	
+	public static final String OBSERVATION_REFERENCE_RANGE_URI = "http://terminology.hl7.org/CodeSystem/referencerange-meaning";
+	
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	

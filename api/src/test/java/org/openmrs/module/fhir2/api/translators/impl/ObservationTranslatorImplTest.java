@@ -21,6 +21,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
@@ -31,6 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
+import org.openmrs.ConceptNumeric;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
@@ -39,6 +44,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationReferenceRangeTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
@@ -46,7 +52,7 @@ import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationTranslatorImplTest {
-	
+
 	private static final String OBS_UUID = "12345-abcde-12345";
 	
 	private static final String CONCEPT_UUID = "54321-abcde-54321";
@@ -54,6 +60,10 @@ public class ObservationTranslatorImplTest {
 	private static final String ENCOUNTER_UUID = "12345-abcde-54321";
 	
 	private static final String PATIENT_UUID = "12345-edcba-12345";
+	
+	private static final Double LOW_NORMAL_VALUE = 1.0;
+	
+	private static final Double HIGH_NORMAL_VALUE = 2.0;
 	
 	@Mock
 	private ObservationStatusTranslator observationStatusTranslator;
@@ -76,6 +86,9 @@ public class ObservationTranslatorImplTest {
 	@Mock
 	private ObservationInterpretationTranslator interpretationTranslator;
 	
+	@Mock
+	private ObservationReferenceRangeTranslator referenceRangeTranslator;
+	
 	private ObservationTranslatorImpl observationTranslator;
 	
 	@Before
@@ -88,6 +101,7 @@ public class ObservationTranslatorImplTest {
 		observationTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		observationTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		observationTranslator.setInterpretationTranslator(interpretationTranslator);
+		observationTranslator.setReferenceRangeTranslator(referenceRangeTranslator);
 	}
 	
 	@Test
@@ -166,6 +180,32 @@ public class ObservationTranslatorImplTest {
 		
 		assertThat(result.hasSubject(), is(false));
 		verify(patientReferenceTranslator, never()).toFhirResource(any());
+	}
+	
+	@Test
+	public void toFhirResource_shouldAddReferenceRange() {
+		ConceptNumeric conceptNumeric = new ConceptNumeric();
+		conceptNumeric.setLowNormal(LOW_NORMAL_VALUE);
+		conceptNumeric.setHiNormal(HIGH_NORMAL_VALUE);
+		
+		Obs observation = new Obs();
+		observation.setConcept(conceptNumeric);
+		observation.setValueNumeric((HIGH_NORMAL_VALUE + LOW_NORMAL_VALUE) / 2);
+		
+		Observation.ObservationReferenceRangeComponent referenceRangeComponent = new Observation.ObservationReferenceRangeComponent();
+		referenceRangeComponent.setLow(new Quantity().setValue(LOW_NORMAL_VALUE));
+		referenceRangeComponent.setHigh(new Quantity().setValue(HIGH_NORMAL_VALUE));
+		
+		List<Observation.ObservationReferenceRangeComponent> referenceRangeComponentList = new ArrayList<>();
+		referenceRangeComponentList.add(referenceRangeComponent);
+		
+		when(referenceRangeTranslator.toFhirResource(conceptNumeric)).thenReturn(referenceRangeComponentList);
+		
+		Observation result = observationTranslator.toFhirResource(observation);
+		
+		assertThat(result.getReferenceRange(), notNullValue());
+		assertThat(result.getReferenceRange(),
+		    hasItem(hasProperty("low", hasProperty("value", equalTo(BigDecimal.valueOf(LOW_NORMAL_VALUE))))));
 	}
 	
 	@Test
