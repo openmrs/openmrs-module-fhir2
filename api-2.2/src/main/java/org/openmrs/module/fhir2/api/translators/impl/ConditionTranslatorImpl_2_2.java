@@ -21,9 +21,11 @@ import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslato
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.springframework.stereotype.Component;
 
 @Setter(AccessLevel.PACKAGE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.3.*")
+@Component
+@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
 public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Condition> {
 	
 	@Inject

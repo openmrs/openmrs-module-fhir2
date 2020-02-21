@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Primary
 @Component
 @Setter(AccessLevel.PACKAGE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.3.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
 public class FhirConditionDaoImpl_2_2 implements FhirConditionDao<Condition> {
 	
 	@Inject
