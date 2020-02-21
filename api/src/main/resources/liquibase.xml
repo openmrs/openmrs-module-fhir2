@@ -110,8 +110,8 @@
                                  referencedTableName="users" referencedColumnNames="user_id" />
     </changeSet>
 
-    <changeSet id="add_loinc_fhir_concept_source_20200105" author="ibacher" dbms="mysql">
-        <preConditions onFail="CONTINUE">
+    <changeSet id="add_loinc_fhir_concept_source_20200221" author="ibacher" dbms="mysql">
+        <preConditions onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source" />
                 <tableExists tableName="concept_reference_source" />
@@ -126,8 +126,8 @@
         ]]></sql>
     </changeSet>
 
-    <changeSet id="add_ciel_fhir_concept_source_20200105" author="ibacher" dbms="mysql">
-        <preConditions onFail="CONTINUE">
+    <changeSet id="add_ciel_fhir_concept_source_20200221" author="ibacher" dbms="mysql">
+        <preConditions onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source" />
                 <tableExists tableName="concept_reference_source" />
