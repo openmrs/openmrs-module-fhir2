@@ -10,26 +10,37 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.Date;
+
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.CodedOrFreeText;
+import org.openmrs.Concept;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.Patient;
+import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConditionTranslatorImpl_2_2Test {
@@ -41,6 +52,18 @@ public class ConditionTranslatorImpl_2_2Test {
 	private static final String PATIENT_REF = "Patient/" + PATIENT_UUID;
 	
 	private static final String ACTIVE = "active";
+	
+	private static final String SYSTEM = "urn:oid:2.16.840.1.113883.3.7201";
+	
+	private static final Integer CODE = 102309;
+	
+	private static final String CONDITION_NON_CODED = "condition non coded";
+	
+	private static final String CONCEPT_UUID = "31d754f5-3e9e-4ca3-805c-87f97a1f5e4b";
+	
+	private static final String PRACTITIONER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
+	
+	private static final String PRACTITIONER_REFERENCE = FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID;
 	
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -54,6 +77,12 @@ public class ConditionTranslatorImpl_2_2Test {
 	
 	@Mock
 	private ConditionVerificationStatusTranslator<ConditionVerificationStatus> verificationStatusTranslator;
+	
+	@Mock
+	private ConceptTranslator conceptTranslator;
+	
+	@Mock
+	private PractitionerReferenceTranslator<User> creatorReferenceTranslator;
 	
 	private ConditionTranslatorImpl_2_2 conditionTranslator;
 	
@@ -71,6 +100,8 @@ public class ConditionTranslatorImpl_2_2Test {
 		conditionTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		conditionTranslator.setClinicalStatusTranslator(clinicalStatusTranslator);
 		conditionTranslator.setVerificationStatusTranslator(verificationStatusTranslator);
+		conditionTranslator.setConceptTranslator(conceptTranslator);
+		conditionTranslator.setPractitionerReferenceTranslator(creatorReferenceTranslator);
 		
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
@@ -78,9 +109,17 @@ public class ConditionTranslatorImpl_2_2Test {
 		patientRef = new Reference();
 		patientRef.setReference(PATIENT_REF);
 		
+		Concept concept = new Concept();
+		concept.setUuid(CONDITION_UUID);
+		concept.setConceptId(CODE);
+		
+		CodedOrFreeText conditionCoded = new CodedOrFreeText();
+		conditionCoded.setCoded(concept);
+		
 		openmrsCondition = new org.openmrs.Condition();
 		openmrsCondition.setUuid(CONDITION_UUID);
 		openmrsCondition.setPatient(patient);
+		openmrsCondition.setCondition(conditionCoded);
 		
 		fhirCondition = new Condition();
 		fhirCondition.setId(CONDITION_UUID);
@@ -169,5 +208,141 @@ public class ConditionTranslatorImpl_2_2Test {
 		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
 		assertThat(condition, notNullValue());
 		assertThat(condition.getVerificationStatus(), equalTo(ConditionVerificationStatus.PROVISIONAL));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsConditionOnsetDateToFhirType() {
+		openmrsCondition.setOnsetDate(new Date());
+		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getOnsetDateTimeType().getValue(), notNullValue());
+		assertThat(condition.getOnsetDateTimeType().getValue(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateFhirConditionOnsetToOpenMrsOnsetDate() {
+		DateTimeType theDateTime = new DateTimeType();
+		theDateTime.setValue(new Date());
+		fhirCondition.setOnset(theDateTime);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getOnsetDate(), notNullValue());
+		assertThat(condition.getOnsetDate(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateConditionCodeToOpenMrsConcept() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = new Coding();
+		coding.setCode(CODE.toString());
+		coding.setSystem(SYSTEM);
+		codeableConcept.addCoding(coding);
+		fhirCondition.setCode(codeableConcept);
+		Concept concept = new Concept();
+		concept.setUuid(CONCEPT_UUID);
+		concept.setConceptId(CODE);
+		when(conceptTranslator.toOpenmrsType(codeableConcept)).thenReturn(concept);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCondition(), notNullValue());
+		assertThat(condition.getCondition().getCoded().getConceptId(), equalTo(CODE));
+	}
+	
+	@Test
+	public void shouldTranslateConditionConceptToFhirType() {
+		Concept concept = new Concept();
+		concept.setUuid(CONCEPT_UUID);
+		concept.setConceptId(CODE);
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = new Coding();
+		coding.setCode(CODE.toString());
+		coding.setSystem(SYSTEM);
+		codeableConcept.addCoding(coding);
+		CodedOrFreeText conceptCodeOrFreeText = new CodedOrFreeText();
+		conceptCodeOrFreeText.setCoded(concept);
+		openmrsCondition.setCondition(conceptCodeOrFreeText);
+		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
+		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCode(), notNullValue());
+		assertThat(condition.getCode().getCoding(), not(Collections.emptyList()));
+		assertThat(condition.getCode().getCoding().get(0).getCode(), equalTo(CODE.toString()));
+		assertThat(condition.getCode().getCoding().get(0).getSystem(), equalTo(SYSTEM));
+	}
+	
+	@Test
+	public void shouldTranslateConditionNonCodedToOpenMrsType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = new Coding();
+		coding.setCode(CONDITION_NON_CODED);
+		codeableConcept.addCoding(coding);
+		when(conceptTranslator.toOpenmrsType(codeableConcept)).thenReturn(null);
+		fhirCondition.setCode(codeableConcept);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCondition().getNonCoded(), notNullValue());
+		assertThat(condition.getCondition().getNonCoded(), equalTo(CONDITION_NON_CODED));
+	}
+	
+	@Test
+	public void shouldTranslateConditionNonCodedToFhirType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding coding = new Coding();
+		coding.setCode(CONDITION_NON_CODED);
+		codeableConcept.addCoding(coding);
+		CodedOrFreeText conditionNonCoded = new CodedOrFreeText();
+		conditionNonCoded.setNonCoded(CONDITION_NON_CODED);
+		openmrsCondition.setCondition(conditionNonCoded);
+		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCode(), notNullValue());
+		assertThat(condition.getCode().getCoding(), not(Collections.emptyList()));
+		assertThat(condition.getCode().getCoding().get(0).getCode(), equalTo(CONDITION_NON_CODED));
+	}
+	
+	@Test
+	public void shouldTranslateConditionDateCreatedToRecordedDateFhirType() {
+		openmrsCondition.setDateCreated(new Date());
+		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getRecordedDate(), notNullValue());
+		assertThat(condition.getRecordedDate(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateConditionRecordedDateToDateCreatedOpenMrsType() {
+		fhirCondition.setRecordedDate(new Date());
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getDateCreated(), notNullValue());
+		assertThat(condition.getDateCreated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateConditionRecorderToOpenmrsUser() {
+		Reference userRef = new Reference();
+		userRef.setReference(FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID);
+		fhirCondition.setRecorder(userRef);
+		User user = new User();
+		user.setUuid(PRACTITIONER_UUID);
+		when(creatorReferenceTranslator.toOpenmrsType(userRef)).thenReturn(user);
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getCreator(), notNullValue());
+		assertThat(condition.getCreator().getUuid(), equalTo(PRACTITIONER_UUID));
+	}
+	
+	@Test
+	public void shouldTranslateConditionCreatorToRecorderFhirType() {
+		User user = new User();
+		user.setUuid(PRACTITIONER_UUID);
+		Reference userRef = new Reference();
+		userRef.setReference(PRACTITIONER_REFERENCE);
+		openmrsCondition.setCreator(user);
+		when(creatorReferenceTranslator.toFhirResource(user)).thenReturn(userRef);
+		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		assertThat(condition, notNullValue());
+		assertThat(condition.getRecorder(), notNullValue());
+		assertThat(condition.getRecorder().getReference(), equalTo(PRACTITIONER_REFERENCE));
 	}
 }
