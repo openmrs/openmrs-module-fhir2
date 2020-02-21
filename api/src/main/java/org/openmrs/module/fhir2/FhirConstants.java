@@ -21,6 +21,8 @@ public class FhirConstants {
 	
 	public static final String HL7_FHIR_VALUE_SET_PREFIX = "http://hl7.org/fhir/ValueSet";
 	
+	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX = "http://terminology.hl7.org/CodeSystem";
+	
 	public static final String DIAGNOSTIC_SERVICE_SECTIONS_VALUESET_URI = HL7_FHIR_VALUE_SET_PREFIX
 	        + "/diagnostic-service-sections";
 	
@@ -28,6 +30,9 @@ public class FhirConstants {
 	
 	public static final String CONDITION_VERIFICATION_STATUS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX
 	        + "/condition-ver-status";
+	
+	public static final String ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET = HL7_FHIR_CODE_SYSTEM_PREFIX
+	        + "/allergyintolerance-clinical";
 	
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;

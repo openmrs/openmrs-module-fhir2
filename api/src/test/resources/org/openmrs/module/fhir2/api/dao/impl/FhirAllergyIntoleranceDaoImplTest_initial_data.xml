@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <concept concept_id="5085" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept concept_id="5086" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept concept_id="5087" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+    <allergy allergy_id="1010" patient_id="7" allergen_type="DRUG" coded_allergen="5085" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+    <allergy_reaction allergy_reaction_id="2020" allergy_id="1010"  reaction_concept_id="5087" reaction_non_coded="" uuid="9950AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <allergy_reaction allergy_reaction_id="2021" allergy_id="1010"  reaction_concept_id="5086" reaction_non_coded="" uuid="5099AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+</dataset>
