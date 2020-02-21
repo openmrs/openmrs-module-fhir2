@@ -16,13 +16,14 @@ import java.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ObservationComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
@@ -37,7 +38,7 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	private ObservationStatusTranslator observationStatusTranslator;
 	
 	@Inject
-	private ObservationComponentTranslator observationComponentTranslator;
+	private ObservationReferenceTranslator observationReferenceTranslator;
 	
 	@Inject
 	private ObservationValueTranslator observationValueTranslator;
@@ -81,7 +82,7 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		if (observation.isObsGrouping()) {
 			for (Obs groupObs : observation.getGroupMembers()) {
-				obs.addComponent(observationComponentTranslator.toFhirResource(groupObs));
+				obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
 			}
 		}
 		
@@ -110,8 +111,8 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		existingObs.setConcept(conceptTranslator.toOpenmrsType(observation.getCode()));
 		
-		for (Observation.ObservationComponentComponent component : observation.getComponent()) {
-			existingObs.addGroupMember(observationComponentTranslator.toOpenmrsType(groupedObsFactory.get(), component));
+		for (Reference reference : observation.getHasMember()) {
+			existingObs.addGroupMember(observationReferenceTranslator.toOpenmrsType(reference));
 		}
 		
 		if (observation.getInterpretation().size() > 0) {

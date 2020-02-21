@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -19,7 +18,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,10 +35,11 @@ import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ObservationComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -60,7 +59,7 @@ public class ObservationTranslatorImplTest {
 	private ObservationStatusTranslator observationStatusTranslator;
 	
 	@Mock
-	private ObservationComponentTranslator observationComponentTranslator;
+	private ObservationReferenceTranslator observationReferenceTranslator;
 	
 	@Mock
 	private ObservationValueTranslator observationValueTranslator;
@@ -83,7 +82,7 @@ public class ObservationTranslatorImplTest {
 	public void setup() {
 		observationTranslator = new ObservationTranslatorImpl();
 		observationTranslator.setObservationStatusTranslator(observationStatusTranslator);
-		observationTranslator.setObservationComponentTranslator(observationComponentTranslator);
+		observationTranslator.setObservationReferenceTranslator(observationReferenceTranslator);
 		observationTranslator.setObservationValueTranslator(observationValueTranslator);
 		observationTranslator.setConceptTranslator(conceptTranslator);
 		observationTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
@@ -199,21 +198,23 @@ public class ObservationTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldConvertObsGroupToComponent() {
+	public void toFhirResource_shouldConvertObsGroupToHasMemberReferences() {
 		Obs observation = new Obs();
 		Obs childObs = new Obs();
+		String referencePath = FhirConstants.OBSERVATION + "/" + OBS_UUID;
 		childObs.setUuid(OBS_UUID);
 		observation.addGroupMember(childObs);
 		
-		Observation.ObservationComponentComponent component = new Observation.ObservationComponentComponent();
-		component.setId(OBS_UUID);
-		when(observationComponentTranslator.toFhirResource(childObs)).thenReturn(component);
+		Reference reference = new Reference();
+		reference.setType(FhirConstants.OBSERVATION).setReference(referencePath);
+		when(observationReferenceTranslator.toFhirResource(childObs)).thenReturn(reference);
 		
 		Observation result = observationTranslator.toFhirResource(observation);
 		
-		assertThat(result.getComponent(), notNullValue());
-		assertThat(result.getComponent().size(), equalTo(1));
-		assertThat(result.getComponent(), contains(hasProperty("id", equalTo(OBS_UUID))));
+		assertThat(result.getHasMember(), notNullValue());
+		assertThat(result.getHasMember().size(), equalTo(1));
+		assertThat(result.getHasMember(), hasItem(hasProperty("reference", equalTo(referencePath))));
+		assertThat(result.getHasMember(), hasItem(hasProperty("type", equalTo(FhirConstants.OBSERVATION))));
 	}
 	
 	@Test
@@ -252,13 +253,13 @@ public class ObservationTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateComponentsToGroupObs() {
+	public void toOpenmrsType_shouldTranslateHasMemberReferencesToGroupObs() {
 		Observation observation = new Observation();
-		Observation.ObservationComponentComponent component = observation.addComponent();
-		component.setId(OBS_UUID);
+		Reference reference = observation.addHasMember();
+		reference.setType(FhirConstants.OBSERVATION).setReference(FhirConstants.OBSERVATION + "/" + OBS_UUID);
 		Obs groupedObs = new Obs();
 		groupedObs.setUuid(OBS_UUID);
-		when(observationComponentTranslator.toOpenmrsType(any(), same(component))).thenReturn(groupedObs);
+		when(observationReferenceTranslator.toOpenmrsType(reference)).thenReturn(groupedObs);
 		
 		Obs result = observationTranslator.toOpenmrsType(new Obs(), observation);
 		
