@@ -14,6 +14,8 @@ import javax.inject.Inject;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
@@ -41,8 +43,10 @@ public class FhirEncounterServiceImpl implements FhirEncounterService {
 	}
 	
 	@Override
-	public Collection<Encounter> findEncountersByPatientIdentifier(String patientIdentifier) {
-		return dao.findEncountersByPatientIdentifier(patientIdentifier).stream().map(translator::toFhirResource)
+	@Transactional(readOnly = true)
+	public Collection<Encounter> searchForEncounters(DateRangeParam date, ReferenceParam location,
+	        ReferenceParam participant, ReferenceParam subject) {
+		return dao.searchForEncounters(date, location, participant, subject).stream().map(translator::toFhirResource)
 		        .collect(Collectors.toList());
 	}
 }

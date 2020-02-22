@@ -59,7 +59,9 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.internal.CriteriaImpl;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
 
 /**
@@ -438,6 +440,73 @@ public abstract class BaseDaoImpl {
 			
 			return Optional.empty();
 		});
+	}
+	
+	protected void handleLocationReference(Criteria criteria, ReferenceParam locationReference) {
+		if (locationReference != null) {
+			criteria.createAlias("location", "l");
+			
+			if (locationReference.getChain() != null) {
+				switch (locationReference.getChain()) {
+					case Location.SP_ADDRESS_CITY:
+						criteria.add(ilike("l.cityVillage", locationReference.getValue(), MatchMode.START));
+						break;
+					case Location.SP_ADDRESS_STATE:
+						criteria.add(ilike("l.stateProvince", locationReference.getValue(), MatchMode.START));
+						break;
+					case Location.SP_ADDRESS_POSTALCODE:
+						criteria.add(ilike("l.postalCode", locationReference.getValue(), MatchMode.START));
+						break;
+					case Location.SP_ADDRESS_COUNTRY:
+						criteria.add(ilike("l.country", locationReference.getValue(), MatchMode.START));
+						break;
+					case "":
+						criteria.add(eq("l.uuid", locationReference.getValue()));
+						break;
+				}
+			}
+		}
+	}
+	
+	protected void handleParticipantReference(Criteria criteria, ReferenceParam participantReference) {
+		if (participantReference != null) {
+			criteria.createAlias("encounterProviders", "ep");
+			
+			if (participantReference.getChain() != null) {
+				switch (participantReference.getChain()) {
+					case Practitioner.SP_IDENTIFIER:
+						criteria.createAlias("ep.provider", "p").add(ilike("p.identifier", participantReference.getValue()));
+						break;
+					case Practitioner.SP_GIVEN:
+						criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
+						        .createAlias("ps.names", "pn")
+						        .add(ilike("pn.givenName", participantReference.getValue(), MatchMode.START));
+						break;
+					case Practitioner.SP_FAMILY:
+						criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
+						        .createAlias("ps.names", "pn")
+						        .add(ilike("pn.familyName", participantReference.getValue(), MatchMode.START));
+						break;
+					case Practitioner.SP_NAME:
+						criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps").createAlias("ps.names",
+						    "pn");
+						
+						List<Optional<Criterion>> criterionList = new ArrayList<>();
+						
+						for (String token : StringUtils.split(participantReference.getValue(), " \t,")) {
+							criterionList.add(propertyLike("pn.givenName", token));
+							criterionList.add(propertyLike("pn.middleName", token));
+							criterionList.add(propertyLike("pn.familyName", token));
+						}
+						
+						criteria.add(or(toCriteriaArray(criterionList)));
+						break;
+					case "":
+						criteria.add(eq("ep.uuid", participantReference.getValue()));
+						break;
+				}
+			}
+		}
 	}
 	
 	protected void handlePatientReference(Criteria criteria, ReferenceParam patientReference) {

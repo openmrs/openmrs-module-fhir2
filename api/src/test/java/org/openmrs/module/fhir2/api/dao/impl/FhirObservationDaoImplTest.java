@@ -220,8 +220,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldReturnObsByPatientUuid() {
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setValue(PATIENT_UUID);
 		patientReference.setChain("");
+		patientReference.setValue(PATIENT_UUID);
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -233,8 +233,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldReturnObsByPatientGivenName() {
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setValue(PATIENT_GIVEN_NAME);
 		patientReference.setChain(Patient.SP_GIVEN);
+		patientReference.setValue(PATIENT_GIVEN_NAME);
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -246,8 +246,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldReturnObsByPatientFamilyName() {
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setValue(PATIENT_FAMILY_NAME);
 		patientReference.setChain(Patient.SP_FAMILY);
+		patientReference.setValue(PATIENT_FAMILY_NAME);
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -259,8 +259,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldReturnObsByPatientName() {
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
 		patientReference.setChain(Patient.SP_NAME);
+		patientReference.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -272,8 +272,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldReturnObsByPatientIdentifier() {
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setValue(PATIENT_IDENTIFIER);
 		patientReference.setChain(Patient.SP_IDENTIFIER);
+		patientReference.setValue(PATIENT_IDENTIFIER);
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		

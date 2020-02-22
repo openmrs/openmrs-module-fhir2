@@ -13,9 +13,10 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -25,7 +26,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,9 +57,18 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	public Bundle findEncountersByPatientIdentifier(@RequiredParam(name = Encounter.SP_PATIENT, chainWhitelist = {
-	        Patient.SP_IDENTIFIER }) ReferenceParam identifier) {
-		return FhirUtils
-		        .convertSearchResultsToBundle(encounterService.findEncountersByPatientIdentifier(identifier.getIdPart()));
+	public Bundle searchEncounter(@OptionalParam(name = Encounter.SP_DATE) DateRangeParam date,
+	        @OptionalParam(name = Encounter.SP_LOCATION, chainWhitelist = { "", Location.SP_ADDRESS_CITY,
+	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
+	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceParam location,
+	        @OptionalParam(name = Encounter.SP_PARTICIPANT, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
+	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
+	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceParam participantReference,
+	        @OptionalParam(name = Encounter.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
+	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceParam subjectReference) {
+		return FhirUtils.convertSearchResultsToBundle(
+		    encounterService.searchForEncounters(date, location, participantReference, subjectReference));
+		
 	}
+	
 }
