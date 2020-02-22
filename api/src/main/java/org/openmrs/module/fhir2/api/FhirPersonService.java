@@ -10,19 +10,19 @@
 package org.openmrs.module.fhir2.api;
 
 import java.util.Collection;
-import java.util.Date;
 
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.r4.model.Person;
 
 public interface FhirPersonService {
 	
 	Person getPersonByUuid(String uuid);
 	
-	Collection<Person> findPersonsByName(String name);
+	Collection<Person> searchForPeople(StringOrListParam name, TokenOrListParam gender, DateRangeParam birthDate,
+	        StringOrListParam city, StringOrListParam state, StringOrListParam postalCode, StringOrListParam country,
+	        SortSpec sort);
 	
-	Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender);
-	
-	Collection<Person> findPersonsByGender(String gender);
-	
-	Collection<Person> findPersonsByBirthDate(Date birthDate);
 }

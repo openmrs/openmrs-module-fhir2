@@ -11,15 +11,15 @@ package org.openmrs.module.fhir2.providers;
 
 import javax.inject.Inject;
 
-import java.time.LocalDate;
-
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -56,38 +56,17 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		return person;
 	}
 	
-	/**
-	 * Find similar people by Name, birthday and gender
-	 * 
-	 * @param name Name of the person to search
-	 * @param birthDate The year of birth
-	 * @param gender Gender field to search on (Typically just "M" or "F")
-	 * @return Returns a bundle list of people. This list may contain multiple matching * resources, or
-	 *         it may also be empty.
-	 */
 	@Search
 	@SuppressWarnings("unused")
-	public Bundle findSimilarPeople(@RequiredParam(name = Person.SP_NAME) StringParam name,
-	        @OptionalParam(name = Person.SP_BIRTHDATE) DateParam birthDate,
-	        @OptionalParam(name = Person.SP_GENDER) String gender) {
-		Integer year = null;
-		if (birthDate != null) {
-			year = LocalDate.from(birthDate.getValue().toInstant()).getYear();
-		}
-		
-		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findSimilarPeople(name.getValue(), year, gender));
-		
+	public Bundle searchPeople(@OptionalParam(name = Person.SP_NAME) StringOrListParam name,
+	        @OptionalParam(name = Person.SP_GENDER) TokenOrListParam gender,
+	        @OptionalParam(name = Person.SP_BIRTHDATE) DateRangeParam birthDate,
+	        @OptionalParam(name = Person.SP_ADDRESS_CITY) StringOrListParam city,
+	        @OptionalParam(name = Person.SP_ADDRESS_STATE) StringOrListParam state,
+	        @OptionalParam(name = Person.SP_ADDRESS_POSTALCODE) StringOrListParam postalCode,
+	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringOrListParam country, @Sort SortSpec sort) {
+		return FhirUtils.convertSearchResultsToBundle(
+		    fhirPersonService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort));
 	}
 	
-	@Search
-	@SuppressWarnings("unused")
-	public Bundle findPersonsByBirthDate(@RequiredParam(name = Person.SP_BIRTHDATE) DateParam birthDate) {
-		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByBirthDate(birthDate.getValue()));
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public Bundle findPersonsByGender(@RequiredParam(name = Person.SP_GENDER) StringParam gender) {
-		return FhirUtils.convertSearchResultsToBundle(fhirPersonService.findPersonsByGender(gender.getValueNotNull()));
-	}
 }

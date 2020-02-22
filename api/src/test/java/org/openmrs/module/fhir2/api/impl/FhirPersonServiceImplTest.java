@@ -9,28 +9,34 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
@@ -50,19 +56,27 @@ public class FhirPersonServiceImplTest {
 	
 	private static final String WRONG_GENDER = "wrong-gender";
 	
-	private static final int PERSON_BIRTH_YEAR = 1999;
-	
-	private static final int NON_PERSON_BIRTH_YEAR = 1000;
-	
 	private static final String PERSON_UUID = "1223-2323-2323-nd23";
 	
 	private static final String PERSON_NAME_UUID = "test-uuid-1223-2312";
 	
 	private static final String PERSON_BIRTH_DATE = "1996-12-12";
 	
-	private static final String NOT_FOUND_PERSON_BIRTH_DATE = "0000-00-00";
+	private static final String NOT_FOUND_PERSON_BIRTH_DATE = "0001-10-10";
+	
+	private static final String CITY = "Washington";
+	
+	private static final String STATE = "Washington";
+	
+	private static final String POSTAL_CODE = "98136";
+	
+	private static final String COUNTRY = "Washington";
+	
+	private static final String NOT_ADDRESS_FIELD = "not an address field";
 	
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+	
+	private org.openmrs.Person person;
 	
 	@Mock
 	private FhirPersonDao dao;
@@ -77,139 +91,214 @@ public class FhirPersonServiceImplTest {
 		personService = new FhirPersonServiceImpl();
 		personService.setFhirPersonDao(dao);
 		personService.setPersonTranslator(personTranslator);
-	}
-	
-	@Test
-	public void shouldReturnCollectionOfPersonForMatchOnPersonName() {
-		Collection<org.openmrs.Person> people = new ArrayList<>();
-		PersonName name = new PersonName();
-		name.setUuid("test-uuid-1223-2312");
-		name.setGivenName(GIVEN_NAME);
-		org.openmrs.Person person = new org.openmrs.Person();
-		person.setUuid("1223-2323-2323-nd23");
-		person.setGender("M");
-		person.addName(name);
-		people.add(person);
 		
-		when(dao.findPersonsByName(GIVEN_NAME)).thenReturn(people);
-		
-		Collection<Person> personCollection = personService.findPersonsByName(GIVEN_NAME);
-		assertNotNull(personCollection);
-		assertEquals(personCollection.size(), 1);
-	}
-	
-	@Test
-	public void shouldReturnCollectionOfPersonsForPartialMatchOnPersonName() {
-		Collection<org.openmrs.Person> people = new ArrayList<>();
-		PersonName name = new PersonName();
-		name.setUuid("test-uuid-1223-2312");
-		name.setFamilyName(FAMILY_NAME);
-		org.openmrs.Person person = new org.openmrs.Person();
-		person.setUuid("1223-2323-2323-nd23");
-		person.setGender("M");
-		person.addName(name);
-		people.add(person);
-		when(dao.findPersonsByName(PERSON_PARTIAL_NAME)).thenReturn(people);
-		
-		Collection<Person> personCollection = personService.findPersonsByName(PERSON_PARTIAL_NAME);
-		assertNotNull(personCollection);
-		assertThat(personCollection, not(empty()));
-		assertThat(personCollection.size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findPersonsByNonExistingName_shouldReturnEmptyCollection() {
-		Collection<Person> people = personService.findPersonsByName(NOT_FOUND_NAME);
-		assertThat(people, is(empty()));
-	}
-	
-	@Test
-	public void shouldReturnCollectionOfPersonForMatchOnSimilarPeople() {
-		Collection<org.openmrs.Person> people = new ArrayList<>();
 		PersonName name = new PersonName();
 		name.setUuid(PERSON_NAME_UUID);
 		name.setGivenName(GIVEN_NAME);
-		org.openmrs.Person person = new org.openmrs.Person();
+		name.setFamilyName(FAMILY_NAME);
+		
+		PersonAddress address = new PersonAddress();
+		address.setCityVillage(CITY);
+		address.setStateProvince(STATE);
+		address.setPostalCode(POSTAL_CODE);
+		address.setCountry(COUNTRY);
+		
+		person = new org.openmrs.Person();
 		person.setUuid(PERSON_UUID);
-		person.setGender(GENDER);
+		person.setGender("M");
 		person.addName(name);
-		people.add(person);
-		
-		when(dao.findSimilarPeople(GIVEN_NAME, PERSON_BIRTH_YEAR, GENDER)).thenReturn(people);
-		
-		Collection<Person> personCollection = personService.findSimilarPeople(GIVEN_NAME, PERSON_BIRTH_YEAR, GENDER);
-		assertNotNull(personCollection);
-		assertThat(personCollection.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void shouldReturnEmptyListWhenPersonNameGenderBirthYearNotMatched() {
-		Collection<org.openmrs.Person> people = new ArrayList<>();
+	public void searchForPeople_shouldReturnCollectionOfPersonForGivenNameMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(GIVEN_NAME));
+		when(dao.searchForPeople(argThat(is(stringOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		when(dao.findSimilarPeople(NOT_FOUND_NAME, NON_PERSON_BIRTH_YEAR, GENDER)).thenReturn(people);
-		
-		Collection<Person> results = personService.findSimilarPeople(NOT_FOUND_NAME, NON_PERSON_BIRTH_YEAR, GENDER);
+		Collection<Person> results = personService.searchForPeople(stringOrListParam, null, null, null, null, null, null,
+		    null);
 		assertThat(results, notNullValue());
-		assertThat(results, empty());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), equalTo(1));
 	}
 	
 	@Test
-	public void shouldReturnCollectionOfPersonWhenPersonBirthDateMatched() throws ParseException {
-		Date birthDate = dateFormatter.parse(PERSON_BIRTH_DATE);
-		Collection<org.openmrs.Person> people = new ArrayList<>();
-		PersonName name = new PersonName();
-		name.setUuid(PERSON_NAME_UUID);
-		name.setFamilyName(FAMILY_NAME);
-		org.openmrs.Person person = new org.openmrs.Person();
-		person.setUuid(PERSON_UUID);
-		person.setGender(GENDER);
-		person.setBirthdate(birthDate);
-		person.addName(name);
-		people.add(person);
-		when(dao.findPersonsByBirthDate(birthDate)).thenReturn(people);
+	public void searchForPeople_shouldReturnCollectionOfPersonForPartialMatchOnName() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PERSON_PARTIAL_NAME));
+		when(dao.searchForPeople(argThat(is(stringOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.findPersonsByBirthDate(birthDate);
+		Collection<Person> results = personService.searchForPeople(stringOrListParam, null, null, null, null, null, null,
+		    null);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonNameNotMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_FOUND_NAME));
+		when(dao.searchForPeople(argThat(is(stringOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.singletonList(person));
+		
+		Collection<Person> results = personService.searchForPeople(stringOrListParam, null, null, null, null, null, null,
+		    null);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonGenderMatched() {
+		TokenOrListParam tokenOrListParam = new TokenOrListParam().add(GENDER);
+		when(dao.searchForPeople(isNull(), argThat(is(tokenOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.singletonList(person));
+		
+		Collection<Person> results = personService.searchForPeople(null, tokenOrListParam, null, null, null, null, null,
+		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void shouldReturnEmptyCollectionWhenPersonBirthDateNotMatched() throws ParseException {
-		Date birthDate = dateFormatter.parse(NOT_FOUND_PERSON_BIRTH_DATE);
-		Collection<org.openmrs.Person> people = new ArrayList<>();
-		when(dao.findPersonsByBirthDate(birthDate)).thenReturn(people);
-		Collection<Person> results = personService.findPersonsByBirthDate(birthDate);
+	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonGenderNotMatched() {
+		TokenOrListParam tokenOrListParam = new TokenOrListParam().add(WRONG_GENDER);
+		when(dao.searchForPeople(isNull(), argThat(is(tokenOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.emptyList());
+		
+		Collection<Person> results = personService.searchForPeople(null, tokenOrListParam, null, null, null, null, null,
+		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
 	}
 	
 	@Test
-	public void shouldReturnCollectionOfPersonWhenPersonGenderMatched() {
-		Collection<org.openmrs.Person> people = new ArrayList<>();
-		PersonName name = new PersonName();
-		name.setUuid(PERSON_NAME_UUID);
-		name.setGivenName(GIVEN_NAME);
-		org.openmrs.Person person = new org.openmrs.Person();
-		person.setUuid(PERSON_UUID);
-		person.setGender(GENDER);
-		person.addName(name);
-		people.add(person);
-		when(dao.findPersonsByGender(GENDER)).thenReturn(people);
+	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonBirthDateMatched() throws ParseException {
+		Date birthDate = dateFormatter.parse(PERSON_BIRTH_DATE);
+		person.setBirthdate(birthDate);
 		
-		Collection<Person> results = personService.findPersonsByGender(GENDER);
+		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(PERSON_BIRTH_DATE)
+		        .setUpperBound(PERSON_BIRTH_DATE);
+		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.singletonList(person));
+		
+		Collection<Person> results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
 		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void shouldReturnEmptyCollectionWhenPersonGenderNotMatched() {
-		Collection<org.openmrs.Person> people = new ArrayList<>();
+	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonBirthDateNotMatched() throws ParseException {
+		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(NOT_FOUND_PERSON_BIRTH_DATE)
+		        .setUpperBound(NOT_FOUND_PERSON_BIRTH_DATE);
+		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.emptyList());
 		
-		when(dao.findPersonsByGender(WRONG_GENDER)).thenReturn(people);
-		
-		Collection<Person> results = personService.findPersonsByGender(WRONG_GENDER);
+		Collection<Person> results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
 	}
+	
+	@Test
+	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonCityMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(CITY));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.singletonList(person));
+		
+		Collection<Person> results = personService.searchForPeople(null, null, null, stringOrListParam, null, null, null,
+		    null);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonCityNotMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.emptyList());
+		
+		Collection<Person> results = personService.searchForPeople(null, null, null, stringOrListParam, null, null, null,
+		    null);
+		assertThat(results, notNullValue());
+		assertThat(results, empty());
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonStateMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(STATE));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.singletonList(person));
+		
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, stringOrListParam, null, null,
+		    null);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonStateNotMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.emptyList());
+		
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, stringOrListParam, null, null,
+		    null);
+		assertThat(results, notNullValue());
+		assertThat(results, empty());
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonPostalCodeMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(),
+		    isNull())).thenReturn(Collections.singletonList(person));
+		
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, stringOrListParam, null,
+		    null);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonPostalCodeNotMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(),
+		    isNull())).thenReturn(Collections.emptyList());
+		
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, stringOrListParam, null,
+		    null);
+		assertThat(results, notNullValue());
+		assertThat(results, empty());
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonCountryMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(COUNTRY));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)),
+		    isNull())).thenReturn(Collections.singletonList(person));
+		
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, null, stringOrListParam,
+		    null);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonCountryNotMatched() {
+		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)),
+		    isNull())).thenReturn(Collections.emptyList());
+		
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, null, stringOrListParam,
+		    null);
+		assertThat(results, notNullValue());
+		assertThat(results, empty());
+	}
+	
 }

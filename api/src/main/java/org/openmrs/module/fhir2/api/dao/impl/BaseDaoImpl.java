@@ -16,6 +16,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.ge;
 import static org.hibernate.criterion.Restrictions.gt;
 import static org.hibernate.criterion.Restrictions.ilike;
+import static org.hibernate.criterion.Restrictions.in;
 import static org.hibernate.criterion.Restrictions.le;
 import static org.hibernate.criterion.Restrictions.lt;
 import static org.hibernate.criterion.Restrictions.not;
@@ -24,6 +25,7 @@ import static org.hibernate.criterion.Restrictions.or;
 import javax.validation.constraints.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -46,7 +48,6 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -58,6 +59,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.internal.CriteriaImpl;
+import org.hibernate.sql.JoinType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
@@ -509,6 +511,53 @@ public abstract class BaseDaoImpl {
 		}
 	}
 	
+	protected void handleIdentifier(Criteria criteria, TokenOrListParam identifier) {
+		if (identifier == null) {
+			return;
+		}
+		
+		criteria.createAlias("identifiers", "pi", JoinType.INNER_JOIN, eq("pi.voided", false));
+		
+		handleOrListParamBySystem(identifier, (system, tokens) -> {
+			if (system.isEmpty()) {
+				return Optional.of(in("pi.identifier", tokensToList(tokens)));
+			} else {
+				if (!containsAlias(criteria, "pit")) {
+					criteria.createAlias("pi.identifierType", "pit");
+				}
+				
+				return Optional.of(and(eq("pit.name", system), in("pi.identifier", tokensToList(tokens))));
+			}
+		}).ifPresent(criteria::add);
+	}
+	
+	protected void handleNames(Criteria criteria, StringOrListParam name, StringOrListParam given,
+	        StringOrListParam family) {
+		if (name == null && given == null && family == null) {
+			return;
+		}
+		
+		criteria.createAlias("names", "pn");
+		
+		if (name != null) {
+			handleOrListParamAsStream(name,
+			    (nameParam) -> Arrays.stream(StringUtils.split(nameParam.getValue(), " \t,"))
+			            .map(token -> new StringParam().setValue(token).setExact(nameParam.isExact())
+			                    .setContains(nameParam.isContains()))
+			            .map(tokenParam -> Arrays.asList(propertyLike("pn.givenName", tokenParam),
+			                propertyLike("pn.middleName", tokenParam), propertyLike("pn.familyName", tokenParam)))
+			            .flatMap(Collection::stream)).ifPresent(criteria::add);
+		}
+		
+		if (given != null) {
+			handleOrListParam(given, (givenName) -> propertyLike("pn.givenName", givenName)).ifPresent(criteria::add);
+		}
+		
+		if (family != null) {
+			handleOrListParam(family, (familyName) -> propertyLike("pn.familyName", familyName)).ifPresent(criteria::add);
+		}
+	}
+	
 	protected void handlePatientReference(Criteria criteria, ReferenceParam patientReference) {
 		handlePatientReference(criteria, patientReference, "patient");
 	}
@@ -552,8 +601,8 @@ public abstract class BaseDaoImpl {
 	}
 	
 	protected Optional<Criterion> handlePersonAddress(String aliasPrefix, StringOrListParam city, StringOrListParam state,
-	        StringOrListParam postalCode) {
-		if (city == null && state == null && postalCode == null) {
+	        StringOrListParam postalCode, StringOrListParam country) {
+		if (city == null && state == null && postalCode == null && country == null) {
 			return Optional.empty();
 		}
 		
@@ -565,13 +614,18 @@ public abstract class BaseDaoImpl {
 		}
 		
 		if (state != null) {
-			criterionList.add(
-			    handleOrListParam(city, c -> Optional.of(eq(String.format("%s.stateProvence", aliasPrefix), c.getValue()))));
+			criterionList.add(handleOrListParam(state,
+			    c -> Optional.of(eq(String.format("%s.stateProvince", aliasPrefix), c.getValue()))));
 		}
 		
 		if (postalCode != null) {
+			criterionList.add(handleOrListParam(postalCode,
+			    c -> Optional.of(eq(String.format("%s.postalCode", aliasPrefix), c.getValue()))));
+		}
+		
+		if (country != null) {
 			criterionList.add(
-			    handleOrListParam(city, c -> Optional.of(eq(String.format("%s.postalCode", aliasPrefix), c.getValue()))));
+			    handleOrListParam(country, c -> Optional.of(eq(String.format("%s.country", aliasPrefix), c.getValue()))));
 		}
 		
 		if (criterionList.size() == 0) {
