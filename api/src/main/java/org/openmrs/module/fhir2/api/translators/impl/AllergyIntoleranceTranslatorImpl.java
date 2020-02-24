@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.inject.Inject;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -17,13 +19,22 @@ import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Allergen;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
+import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class AllergyIntoleranceTranslatorImpl implements AllergyIntoleranceTranslator {
+public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingTranslator implements AllergyIntoleranceTranslator {
+	
+	@Inject
+	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
+	
+	@Inject
+	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Override
 	public AllergyIntolerance toFhirResource(Allergy omrsAllergy) {
@@ -50,6 +61,9 @@ public class AllergyIntoleranceTranslatorImpl implements AllergyIntoleranceTrans
 			}
 		}
 		allergy.setClinicalStatus(setClinicalStatus(omrsAllergy.getVoided()));
+		allergy.setPatient(patientReferenceTranslator.toFhirResource(omrsAllergy.getPatient()));
+		allergy.setRecorder(practitionerReferenceTranslator.toFhirResource(omrsAllergy.getCreator()));
+		allergy.setRecordedDate(omrsAllergy.getDateCreated());
 		
 		return allergy;
 	}
@@ -83,6 +97,9 @@ public class AllergyIntoleranceTranslatorImpl implements AllergyIntoleranceTrans
 			}
 		}
 		allergy.setVoided(isAllergyInactive(fhirAllergy.getClinicalStatus()));
+		allergy.setPatient(patientReferenceTranslator.toOpenmrsType(fhirAllergy.getPatient()));
+		allergy.setCreator(practitionerReferenceTranslator.toOpenmrsType(fhirAllergy.getRecorder()));
+		allergy.setDateCreated(fhirAllergy.getRecordedDate());
 		
 		return allergy;
 	}
@@ -97,6 +114,7 @@ public class AllergyIntoleranceTranslatorImpl implements AllergyIntoleranceTrans
 			status.setText("Active");
 			status.addCoding(new Coding(FhirConstants.ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET, "active", "Active"));
 		}
+		
 		return status;
 	}
 	
@@ -105,4 +123,5 @@ public class AllergyIntoleranceTranslatorImpl implements AllergyIntoleranceTrans
 		        .filter(c -> FhirConstants.ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET.equals(c.getSystem()))
 		        .anyMatch(c -> "inactive".equals(c.getCode()));
 	}
+	
 }

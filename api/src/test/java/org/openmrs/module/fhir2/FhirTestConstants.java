@@ -15,4 +15,8 @@ public class FhirTestConstants {
 	
 	public static final String CIEL_SYSTEM_URN = "urn:oid:2.16.840.1.113883.3.7201";
 	
+	public static final String PATIENT = "Patient";
+	
+	public static final String PRACTITIONER = "Practitioner";
+	
 }
