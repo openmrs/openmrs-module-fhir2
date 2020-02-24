@@ -439,10 +439,14 @@ public abstract class BaseDaoImpl {
 			return Optional.empty();
 		});
 	}
-	
+
 	protected void handlePatientReference(Criteria criteria, ReferenceParam patientReference) {
+		handlePatientReference(criteria, patientReference, "patient");
+	}
+	
+	protected void handlePatientReference(Criteria criteria, ReferenceParam patientReference, String associationPath) {
 		if (patientReference != null) {
-			criteria.createAlias("person", "p");
+			criteria.createAlias(associationPath, "p");
 			
 			if (patientReference.getChain() != null) {
 				switch (patientReference.getChain()) {

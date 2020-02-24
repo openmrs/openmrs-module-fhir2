@@ -56,7 +56,7 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Obs.class);
 		
 		handleEncounterReference("e", encounterReference).ifPresent(c -> criteria.createAlias("encounter", "e").add(c));
-		handlePatientReference(criteria, patientReference);
+		handlePatientReference(criteria, patientReference, "person");
 		handleCodedConcept(criteria, code);
 		handleSort(criteria, sort);
 		
