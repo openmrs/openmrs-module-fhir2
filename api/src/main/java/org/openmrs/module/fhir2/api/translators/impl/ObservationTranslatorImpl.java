@@ -17,12 +17,15 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.Concept;
+import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationReferenceRangeTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
@@ -54,6 +57,9 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	
 	@Inject
 	private ObservationInterpretationTranslator interpretationTranslator;
+	
+	@Inject
+	private ObservationReferenceRangeTranslator referenceRangeTranslator;
 	
 	@Override
 	public Observation toFhirResource(Obs observation) {
@@ -89,6 +95,14 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		obs.setValue(observationValueTranslator.toFhirResource(observation));
 		
 		obs.addInterpretation(interpretationTranslator.toFhirResource(observation));
+		
+		if (observation.getValueNumeric() != null) {
+			Concept concept = observation.getConcept();
+			if (concept instanceof ConceptNumeric) {
+				obs.setReferenceRange(referenceRangeTranslator.toFhirResource((ConceptNumeric) concept));
+			}
+			
+		}
 		
 		return obs;
 	}
