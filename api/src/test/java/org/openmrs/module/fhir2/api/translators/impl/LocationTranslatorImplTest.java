@@ -23,8 +23,10 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
@@ -341,6 +343,15 @@ public class LocationTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		omrsLocation.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Location location = locationTranslator.toFhirResource(omrsLocation);
+		assertThat(location, notNullValue());
+		assertThat(location.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
 	public void getOpenmrsParentLocation_shouldReturnNullIfReferenceIsNull() {
 		Location result = locationTranslator.getOpenmrsParentLocation(null);
 		
@@ -399,6 +410,16 @@ public class LocationTranslatorImplTest {
 		assertThat(omrsLocation, notNullValue());
 		assertThat(omrsLocation.getLatitude(), is(LOCATION_LATITUDE));
 		assertThat(omrsLocation.getLongitude(), is(LOCATION_LONGITUDE));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateLastUpdatedDateToDateChanged() {
+		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
+		location.getMeta().setLastUpdated(new Date());
+		
+		Location omrsLocation = locationTranslator.toOpenmrsType(location);
+		assertThat(omrsLocation, notNullValue());
+		assertThat(omrsLocation.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 	
 }

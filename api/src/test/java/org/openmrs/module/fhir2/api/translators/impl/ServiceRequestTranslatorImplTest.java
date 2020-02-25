@@ -19,7 +19,9 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
@@ -214,5 +216,15 @@ public class ServiceRequestTranslatorImplTest {
 		task.addBasedOn(basedOnRef);
 		
 		return Collections.singletonList(task);
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		TestOrder order = new TestOrder();
+		order.setDateChanged(new Date());
+		
+		ServiceRequest result = translator.toFhirResource(order);
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
 	}
 }

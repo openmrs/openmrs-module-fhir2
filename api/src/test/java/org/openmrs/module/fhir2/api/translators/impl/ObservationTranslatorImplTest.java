@@ -23,8 +23,10 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
@@ -52,7 +54,7 @@ import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationTranslatorImplTest {
-
+	
 	private static final String OBS_UUID = "12345-abcde-12345";
 	
 	private static final String CONCEPT_UUID = "54321-abcde-54321";
@@ -265,6 +267,16 @@ public class ObservationTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		Obs observation = new Obs();
+		observation.setDateChanged(new Date());
+		Observation result = observationTranslator.toFhirResource(observation);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
 	public void toOpenmrsType_shouldTranslateIdToUuid() {
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
@@ -325,5 +337,17 @@ public class ObservationTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(expected));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateLastUpdatedDateToDateChanged() {
+		Observation observation = new Observation();
+		observation.getMeta().setLastUpdated(new Date());
+		
+		Obs expected = new Obs();
+		
+		observationTranslator.toOpenmrsType(expected, observation);
+		assertThat(expected, notNullValue());
+		assertThat(expected.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 }

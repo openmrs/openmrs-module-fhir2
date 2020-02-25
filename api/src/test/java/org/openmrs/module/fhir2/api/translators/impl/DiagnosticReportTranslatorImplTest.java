@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import java.util.Date;
 import java.util.List;
 
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -208,6 +209,15 @@ public class DiagnosticReportTranslatorImplTest {
 		assertThat(result.getResult(), contains(hasProperty("reference", equalTo("Observation/" + CHILD_UUID))));
 	}
 	
+	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		obsGroup.setDateChanged(new Date());
+		DiagnosticReport result = translator.toFhirResource(obsGroup);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
 	@Test(expected = IllegalArgumentException.class)
 	public void toOpenmrsType_shouldErrorOnCreatingEmptyDiagnosticReport() {
 		DiagnosticReport emptyDiagnosticReport = new DiagnosticReport();
@@ -351,5 +361,14 @@ public class DiagnosticReportTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getConcept(), equalTo(translatedCode));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateLastUpdatedDateToDateChanged() {
+		diagnosticReport.getMeta().setLastUpdated(new Date());
+		
+		Obs obs = translator.toOpenmrsType(diagnosticReport);
+		assertThat(obs, notNullValue());
+		assertThat(obs.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 }

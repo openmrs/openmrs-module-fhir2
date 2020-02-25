@@ -50,6 +50,7 @@ public class EncounterTranslatorImpl extends AbstractReferenceHandlingTranslator
 		        .collect(Collectors.toList()));
 		encounter.setLocation(
 		    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
+		encounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());
 		
 		return encounter;
 	}
@@ -75,6 +76,7 @@ public class EncounterTranslatorImpl extends AbstractReferenceHandlingTranslator
 		                        .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
 		                .collect(Collectors.toSet()));
 		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
+		existingEncounter.setDateChanged(encounter.getMeta().getLastUpdated());
 		
 		return existingEncounter;
 	}

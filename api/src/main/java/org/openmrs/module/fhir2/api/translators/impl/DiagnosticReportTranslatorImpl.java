@@ -57,6 +57,8 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		
 		setResourceElements(obsGroup, diagnosticReport);
 		
+		diagnosticReport.getMeta().setLastUpdated(obsGroup.getDateChanged());
+		
 		return diagnosticReport;
 	}
 	
@@ -174,6 +176,8 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		// Tag as diagnostic report
 		// TODO: distinguish between DianosticReport and Observation mapping for a given Obs
 		translatedObs.setComment("mapped DiagnosticReport");
+		
+		translatedObs.setDateChanged(diagnosticReport.getMeta().getLastUpdated());
 		
 	}
 }

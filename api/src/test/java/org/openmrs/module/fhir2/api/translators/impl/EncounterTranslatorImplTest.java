@@ -18,10 +18,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
@@ -291,5 +293,24 @@ public class EncounterTranslatorImplTest {
 		assertThat(result.getLocation(), notNullValue());
 		assertThat(result.getLocation().getUuid(), equalTo(LOCACTION_UUID));
 		assertThat(result.getLocation().getName(), equalTo(TEST_LOCATION_NAME));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		omrsEncounter.setDateChanged(new Date());
+		
+		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateLastUpdatedDateToDateChanged() {
+		fhirEncounter.getMeta().setLastUpdated(new Date());
+		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		
+		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
+		assertThat(result, notNullValue());
+		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 }

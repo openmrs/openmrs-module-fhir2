@@ -103,6 +103,7 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 			}
 			
 		}
+		obs.getMeta().setLastUpdated(observation.getDateChanged());
 		
 		return obs;
 	}
@@ -132,6 +133,7 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		if (observation.getInterpretation().size() > 0) {
 			interpretationTranslator.toOpenmrsType(existingObs, observation.getInterpretation().get(0));
 		}
+		existingObs.setDateChanged(observation.getMeta().getLastUpdated());
 		
 		return existingObs;
 	}

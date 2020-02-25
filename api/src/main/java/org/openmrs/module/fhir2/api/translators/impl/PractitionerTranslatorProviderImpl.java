@@ -78,6 +78,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 		    contactPoint -> (ProviderAttribute) telecomTranslator.toOpenmrsType(new ProviderAttribute(), contactPoint))
 		        .collect(Collectors.toSet());
 		existingProvider.setAttributes(attributes);
+		existingProvider.setDateChanged(practitioner.getMeta().getLastUpdated());
 		
 		return existingProvider;
 	}
@@ -108,6 +109,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 				practitioner.addAddress(addressTranslator.toFhirResource(address));
 			}
 		}
+		practitioner.getMeta().setLastUpdated(provider.getDateChanged());
 		
 		return practitioner;
 	}
