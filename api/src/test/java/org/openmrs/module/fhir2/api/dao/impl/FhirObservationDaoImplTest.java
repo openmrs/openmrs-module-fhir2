@@ -220,8 +220,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldReturnObsByPatientUuid() {
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain("");
 		patientReference.setValue(PATIENT_UUID);
+		patientReference.setChain("");
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -233,8 +233,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldReturnObsByPatientGivenName() {
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain(Patient.SP_GIVEN);
 		patientReference.setValue(PATIENT_GIVEN_NAME);
+		patientReference.setChain(Patient.SP_GIVEN);
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -246,8 +246,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldReturnObsByPatientFamilyName() {
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain(Patient.SP_FAMILY);
 		patientReference.setValue(PATIENT_FAMILY_NAME);
+		patientReference.setChain(Patient.SP_FAMILY);
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -259,8 +259,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldReturnObsByPatientName() {
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain(Patient.SP_NAME);
 		patientReference.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
+		patientReference.setChain(Patient.SP_NAME);
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -272,8 +272,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldReturnObsByPatientIdentifier() {
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain(Patient.SP_IDENTIFIER);
 		patientReference.setValue(PATIENT_IDENTIFIER);
+		patientReference.setChain(Patient.SP_IDENTIFIER);
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -339,9 +339,9 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(baselineObs, not(empty()));
 		
 		SortSpec subSort = new SortSpec();
+		sort.setChain(subSort);
 		subSort.setParamName("dummy");
 		subSort.setOrder(SortOrderEnum.ASC);
-		sort.setChain(subSort);
 		
 		Collection<Obs> results = dao.searchForObservations(null, null, null, sort);
 		
@@ -364,8 +364,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		}
 		
 		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain("");
 		patientReference.setValue(PATIENT_UUID);
+		patientReference.setChain("");
 		
 		SortSpec sort = new SortSpec();
 		sort.setParamName("date");

@@ -439,7 +439,7 @@ public abstract class BaseDaoImpl {
 			return Optional.empty();
 		});
 	}
-
+	
 	protected void handlePatientReference(Criteria criteria, ReferenceParam patientReference) {
 		handlePatientReference(criteria, patientReference, "patient");
 	}
