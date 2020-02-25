@@ -89,6 +89,8 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 			if (openmrsLocation.getParentLocation() != null) {
 				fhirLocation.setPartOf(createLocationReference(openmrsLocation.getParentLocation()));
 			}
+			
+			fhirLocation.getMeta().setLastUpdated(openmrsLocation.getDateChanged());
 		}
 		return fhirLocation;
 	}
@@ -140,6 +142,7 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 			}
 			
 			openmrsLocation.setParentLocation(getOpenmrsParentLocation(fhirLocation.getPartOf()));
+			openmrsLocation.setDateChanged(fhirLocation.getMeta().getLastUpdated());
 		}
 		return openmrsLocation;
 	}

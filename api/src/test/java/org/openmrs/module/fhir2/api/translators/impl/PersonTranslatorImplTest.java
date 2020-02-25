@@ -21,8 +21,10 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
+import java.util.Date;
 import java.util.List;
 
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -347,5 +349,25 @@ public class PersonTranslatorImplTest {
 		
 		List<ContactPoint> contactPoints = personTranslator.getPersonContactDetails(person);
 		assertThat(contactPoints, notNullValue());
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		Person person = new Person();
+		person.setDateChanged(new Date());
+		
+		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateLastUpdatedDateToDateChanged() {
+		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
+		person.getMeta().setLastUpdated(new Date());
+		
+		Person result = personTranslator.toOpenmrsType(person);
+		assertThat(result, notNullValue());
+		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 }

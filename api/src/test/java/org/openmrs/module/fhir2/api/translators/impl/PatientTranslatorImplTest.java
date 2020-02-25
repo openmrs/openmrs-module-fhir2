@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.common.collect.Sets;
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -371,6 +372,26 @@ public class PatientTranslatorImplTest {
 		
 		List<ContactPoint> contactPoints = patientTranslator.getPatientContactDetails(patient);
 		assertThat(contactPoints, notNullValue());
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		org.openmrs.Patient patient = new org.openmrs.Patient();
+		patient.setDateChanged(new Date());
+		
+		Patient result = patientTranslator.toFhirResource(patient);
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateLastUpdatedDateToDateChanged() {
+		Patient patient = new Patient();
+		patient.getMeta().setLastUpdated(new Date());
+		
+		org.openmrs.Patient result = patientTranslator.toOpenmrsType(patient);
+		assertThat(result, notNullValue());
+		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 	
 }

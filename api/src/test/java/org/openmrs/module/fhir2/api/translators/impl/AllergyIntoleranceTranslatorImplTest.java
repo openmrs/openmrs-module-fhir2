@@ -185,6 +185,15 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		omrsAllergy.setDateChanged(new Date());
+		
+		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
 	public void toOpenmrsType_shouldTranslateAllergenTypeFoodCorrectly() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.addCategory(AllergyIntolerance.AllergyIntoleranceCategory.FOOD);
@@ -290,5 +299,16 @@ public class AllergyIntoleranceTranslatorImplTest {
 		assertThat(omrsAllergy, notNullValue());
 		assertThat(omrsAllergy.getCreator(), is(user));
 		assertThat(omrsAllergy.getCreator().getUuid(), is(CREATOR_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateLastUpdatedDateToDateChanged() {
+		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
+		allergyIntolerance.getMeta().setLastUpdated(new Date());
+		
+		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergyIntolerance);
+		assertThat(omrsAllergy, notNullValue());
+		assertThat(omrsAllergy.getDateChanged(), DateMatchers.sameDay(new Date()));
+		assertThat(omrsAllergy.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 }

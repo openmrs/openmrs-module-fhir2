@@ -39,6 +39,7 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 		serviceRequest.setStatus(determineServiceRequestStatus(order.getUuid()));
 		serviceRequest.setCode(conceptTranslator.toFhirResource(order.getConcept()));
 		serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
+		serviceRequest.getMeta().setLastUpdated(order.getDateChanged());
 		
 		return serviceRequest;
 	}

@@ -14,6 +14,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.util.Date;
+
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
@@ -178,5 +181,25 @@ public class FhirTaskTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getStatus(), equalTo(OPENMRS_NEW_TASK_STATUS));
 		assertThat(result.getIntent(), equalTo(OPENMRS_TASK_INTENT));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		FhirTask task = new FhirTask();
+		task.setDateChanged(new Date());
+		
+		Task result = taskTranslator.toFhirResource(task);
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateLastUpdatedDateToDateChanged() {
+		Task task = new Task();
+		task.getMeta().setLastUpdated(new Date());
+		
+		FhirTask result = taskTranslator.toOpenmrsType(task);
+		assertThat(result, notNullValue());
+		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 }

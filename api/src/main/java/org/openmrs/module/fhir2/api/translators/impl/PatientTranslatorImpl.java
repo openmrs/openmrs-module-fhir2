@@ -102,6 +102,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 				patient.addAddress(addressTranslator.toFhirResource(address));
 			}
 			patient.setTelecom(getPatientContactDetails(openmrsPatient));
+			patient.getMeta().setLastUpdated(openmrsPatient.getDateChanged());
 		}
 		
 		return patient;
@@ -171,6 +172,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .collect(Collectors.toSet());
 		currentPatient.setAttributes(attributes);
+		currentPatient.setDateChanged(patient.getMeta().getLastUpdated());
 		
 		return currentPatient;
 	}

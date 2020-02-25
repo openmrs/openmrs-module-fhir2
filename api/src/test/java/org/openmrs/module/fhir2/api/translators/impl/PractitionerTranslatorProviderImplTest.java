@@ -19,6 +19,9 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
+
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -242,5 +245,24 @@ public class PractitionerTranslatorProviderImplTest {
 		assertThat(provider.getAttributes(), Matchers.notNullValue());
 		assertThat(provider.getAttributes().isEmpty(), Matchers.is(false));
 		assertThat(provider.getAttributes().size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		Provider provider = new Provider();
+		provider.setDateChanged(new Date());
+		
+		Practitioner result = practitionerTranslator.toFhirResource(provider);
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateLastUpdatedDateToDateChanged() {
+		practitioner.getMeta().setLastUpdated(new Date());
+		
+		Provider result = practitionerTranslator.toOpenmrsType(practitioner);
+		assertThat(result, notNullValue());
+		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 }

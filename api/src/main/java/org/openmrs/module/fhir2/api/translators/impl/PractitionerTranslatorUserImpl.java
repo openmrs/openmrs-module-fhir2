@@ -60,6 +60,7 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 				practitioner.addAddress(addressTranslator.toFhirResource(address));
 			}
 		}
+		practitioner.getMeta().setLastUpdated(user.getDateChanged());
 		
 		return practitioner;
 	}
@@ -71,6 +72,7 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 		}
 		user.setUuid(practitioner.getId());
 		user.setUserId(getUserId(practitioner));
+		user.setDateChanged(practitioner.getMeta().getLastUpdated());
 		
 		return user;
 	}

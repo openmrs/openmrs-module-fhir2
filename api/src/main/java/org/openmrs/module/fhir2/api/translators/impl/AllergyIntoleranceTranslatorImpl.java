@@ -64,6 +64,7 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 		allergy.setPatient(patientReferenceTranslator.toFhirResource(omrsAllergy.getPatient()));
 		allergy.setRecorder(practitionerReferenceTranslator.toFhirResource(omrsAllergy.getCreator()));
 		allergy.setRecordedDate(omrsAllergy.getDateCreated());
+		allergy.getMeta().setLastUpdated(omrsAllergy.getDateChanged());
 		
 		return allergy;
 	}
@@ -100,6 +101,7 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 		allergy.setPatient(patientReferenceTranslator.toOpenmrsType(fhirAllergy.getPatient()));
 		allergy.setCreator(practitionerReferenceTranslator.toOpenmrsType(fhirAllergy.getRecorder()));
 		allergy.setDateCreated(fhirAllergy.getRecordedDate());
+		allergy.setDateChanged(fhirAllergy.getMeta().getLastUpdated());
 		
 		return allergy;
 	}

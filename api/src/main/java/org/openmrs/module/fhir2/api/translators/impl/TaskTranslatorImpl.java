@@ -62,6 +62,7 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		if (openmrsTask.getIntent() != null) {
 			fhirTask.setIntent(Task.TaskIntent.valueOf(openmrsTask.getIntent().name()));
 		}
+		fhirTask.getMeta().setLastUpdated(openmrsTask.getDateChanged());
 	}
 	
 	private void setOpenmrsTaskFields(FhirTask openmrsTask, Task fhirTask) {
@@ -74,6 +75,7 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		if (fhirTask.getIntent() != null) {
 			openmrsTask.setIntent(FhirTask.TaskIntent.valueOf(fhirTask.getIntent().name()));
 		}
+		openmrsTask.setDateChanged(fhirTask.getMeta().getLastUpdated());
 	}
 	
 }

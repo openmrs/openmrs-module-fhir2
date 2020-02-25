@@ -72,6 +72,7 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		fhirCondition.setOnset(new DateTimeType().setValue(condition.getOnsetDate()));
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
 		fhirCondition.setRecordedDate(condition.getDateCreated());
+		fhirCondition.getMeta().setLastUpdated(condition.getDateChanged());
 		
 		return fhirCondition;
 	}
@@ -107,6 +108,7 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		existingCondition.setOnsetDate(condition.getOnsetDateTimeType().getValue());
 		existingCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));
 		existingCondition.setDateCreated(condition.getRecordedDate());
+		existingCondition.setDateChanged(condition.getMeta().getLastUpdated());
 		
 		return existingCondition;
 	}

@@ -83,6 +83,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			person.setTelecom(getPersonContactDetails(openmrsPerson));
 			
 			buildPersonLinks(openmrsPerson, person);
+			person.getMeta().setLastUpdated(openmrsPerson.getDateChanged());
 		}
 		return person;
 	}
@@ -145,6 +146,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .collect(Collectors.toSet());
 		openmrsPerson.setAttributes(attributes);
+		openmrsPerson.setDateChanged(person.getMeta().getLastUpdated());
 		
 		return openmrsPerson;
 	}

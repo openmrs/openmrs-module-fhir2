@@ -16,6 +16,9 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
+
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
@@ -178,6 +181,24 @@ public class PractitionerTranslatorUserImplTest {
 		assertThat(practitioner, notNullValue());
 		assertThat(practitioner.getGender(), notNullValue());
 		assertThat(practitioner.getGender(), equalTo(Enumerations.AdministrativeGender.MALE));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
+		user.setDateChanged(new Date());
+		
+		Practitioner result = practitionerTranslatorUser.toFhirResource(user);
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateLastUpdatedDateToDateChanged() {
+		practitioner.getMeta().setLastUpdated(new Date());
+		
+		User result = practitionerTranslatorUser.toOpenmrsType(practitioner);
+		assertThat(result, notNullValue());
+		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 	
 }
