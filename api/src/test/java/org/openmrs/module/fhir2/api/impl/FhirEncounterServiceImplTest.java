@@ -108,13 +108,13 @@ public class FhirEncounterServiceImplTest {
 	
 	@Test
 	public void searchForEncounter_shouldReturnCollectionOfEncounterByLocation() {
-		Collection<Encounter> encounters = new ArrayList<>();
-		encounters.add(openMrsEncounter);
-		fhirEncounter.setId(ENCOUNTER_UUID);
-		
 		ReferenceParam location = new ReferenceParam();
 		location.setValue(ENCOUNTER_ADDRESS_STATE);
 		location.setChain(Location.SP_ADDRESS_CITY);
+		
+		Collection<Encounter> encounters = new ArrayList<>();
+		encounters.add(openMrsEncounter);
+		fhirEncounter.setId(ENCOUNTER_UUID);
 		
 		when(dao.searchForEncounters(any(), argThat(is(location)), any(), any())).thenReturn(encounters);
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
@@ -129,13 +129,14 @@ public class FhirEncounterServiceImplTest {
 	
 	@Test
 	public void searchForEncounter_shouldReturnCollectionOfEncounterByParticipant() {
-		Collection<Encounter> encounters = new ArrayList<>();
-		encounters.add(openMrsEncounter);
-		fhirEncounter.setId(ENCOUNTER_UUID);
-		
 		ReferenceParam participant = new ReferenceParam();
 		participant.setValue(PARTICIPANT_IDENTIFIER);
 		participant.setChain(Practitioner.SP_IDENTIFIER);
+		
+		Collection<Encounter> encounters = new ArrayList<>();
+		encounters.add(openMrsEncounter);
+		
+		fhirEncounter.setId(ENCOUNTER_UUID);
 		
 		when(dao.searchForEncounters(any(), any(), argThat(is(participant)), any())).thenReturn(encounters);
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
@@ -150,13 +151,14 @@ public class FhirEncounterServiceImplTest {
 	
 	@Test
 	public void searchForEncounter_shouldReturnCollectionOfEncounterBySubject() {
-		Collection<Encounter> encounters = new ArrayList<>();
-		encounters.add(openMrsEncounter);
-		fhirEncounter.setId(ENCOUNTER_UUID);
-		
 		ReferenceParam subject = new ReferenceParam();
 		subject.setValue(PATIENT_FAMILY_NAME);
 		subject.setChain(Patient.SP_FAMILY);
+		
+		Collection<Encounter> encounters = new ArrayList<>();
+		encounters.add(openMrsEncounter);
+		
+		fhirEncounter.setId(ENCOUNTER_UUID);
 		
 		when(dao.searchForEncounters(any(), any(), any(), argThat(is(subject)))).thenReturn(encounters);
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
