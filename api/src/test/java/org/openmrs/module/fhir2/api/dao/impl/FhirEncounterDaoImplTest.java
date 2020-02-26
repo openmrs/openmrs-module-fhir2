@@ -52,6 +52,8 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PATIENT_FULL_NAME = "Mr. John Doe";
 	
+	private static final String PARTICIPANT_FULL_NAME = "John Doe";
+	
 	private static final String ENCOUNTER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml";
 	
 	private static final String ENCOUNTER_DATETIME = "2005-01-01T00:00:00.0";
@@ -62,15 +64,15 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PATIENT_FAMILY_NAME = "Doe";
 	
-	private static final String ADDRESS_CITY = "Boston";
+	private static final String ENCOUNTER_ADDRESS_CITY = "Boston";
 	
 	private static final String ENCOUNTER_ADDRESS_STATE = "MA";
 	
-	private static final String PARTICIPANT_IDENTIFIER = "1";
+	private static final String PARTICIPANT_IDENTIFIER = "1000WF";
 	
-	private static final String PARTICIPANT_FAMILY_NAME = "Tim";
+	private static final String PARTICIPANT_FAMILY_NAME = "Doe";
 	
-	private static final String PARTICIPANT_GIVEN_NAME = "Him";
+	private static final String PARTICIPANT_GIVEN_NAME = "John";
 	
 	@Inject
 	@Named("sessionFactory")
@@ -186,8 +188,8 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForEncounters_shouldSearchForEncountersByParticipantIdentifier() {
 		ReferenceParam participantReference = new ReferenceParam();
 		
+		participantReference.setValue(PARTICIPANT_IDENTIFIER);
 		participantReference.setChain(Practitioner.SP_IDENTIFIER);
-		participantReference.setValue(PATIENT_IDENTIFIER);
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, null, participantReference, null);
 		
@@ -239,31 +241,34 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersByParticipantName() {
-		ReferenceParam subjectReference = new ReferenceParam();
+		ReferenceParam participantReference = new ReferenceParam();
 		
-		subjectReference.setValue(PATIENT_FULL_NAME);
-		subjectReference.setChain(Practitioner.SP_NAME);
+		participantReference.setValue(PARTICIPANT_FULL_NAME);
+		participantReference.setChain(Practitioner.SP_NAME);
 		
-		Collection<Encounter> results = dao.searchForEncounters(null, null, null, subjectReference);
+		Collection<Encounter> results = dao.searchForEncounters(null, null, participantReference, null);
 		
 		assertThat(results, Matchers.notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.iterator().next().getPatient().getPerson().getPersonName().getFullName(),
-		    equalTo(PATIENT_FULL_NAME));
+		assertThat(results.iterator().next().getEncounterProviders().size(), greaterThanOrEqualTo(1));
+		assertThat(results.iterator().next().getEncounterProviders().iterator().next().getProvider(), notNullValue());
+		assertThat(results.iterator().next().getEncounterProviders().iterator().next().getProvider().getPerson()
+		        .getPersonName().getFullName(),
+		    equalTo(PARTICIPANT_FULL_NAME));
 	}
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersByEncounterLocationCity() {
 		ReferenceParam locationReference = new ReferenceParam();
 		
-		locationReference.setValue(ADDRESS_CITY);
+		locationReference.setValue(ENCOUNTER_ADDRESS_CITY);
 		locationReference.setChain(Location.SP_ADDRESS_CITY);
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, locationReference, null, null);
 		
 		assertThat(results, Matchers.notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.iterator().next().getLocation().getCityVillage(), equalTo(ADDRESS_CITY));
+		assertThat(results.iterator().next().getLocation().getCityVillage(), equalTo(ENCOUNTER_ADDRESS_CITY));
 	}
 	
 	@Test
