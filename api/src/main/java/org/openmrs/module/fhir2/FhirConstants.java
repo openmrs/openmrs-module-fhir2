@@ -31,6 +31,10 @@ public class FhirConstants {
 	public static final String CONDITION_VERIFICATION_STATUS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX
 	        + "/condition-ver-status";
 	
+	public static final String ALLERGY_SUBSTANCE_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/substance-code";
+	
+	public static final String CLINICAL_FINDINGS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/clinical-findings";
+	
 	public static final String ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/allergyintolerance-clinical";
 	
@@ -87,5 +91,13 @@ public class FhirConstants {
 	
 	@Value("${project.parent.artifactId}.providerAttributeTypeUuid")
 	public static String PROVIDER_ATTRIBUTE_TYPE_PROPERTY;
+	
+	public static final String GLOBAL_PROPERTY_MILD = "allergy.concept.severity.mild";
+	
+	public static final String GLOBAL_PROPERTY_SEVERE = "allergy.concept.severity.severe";
+	
+	public static final String GLOBAL_PROPERTY_MODERATE = "allergy.concept.severity.moderate";
+	
+	public static final String GLOBAL_PROPERTY_OTHER = "allergy.concept.severity.other";
 	
 }
