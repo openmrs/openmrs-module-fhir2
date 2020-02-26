@@ -136,7 +136,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 			currentPatient.setVoidReason("Voided by FHIR module");
 		}
 		
-		if (patient.getDeceased() != null) {
+		if (patient.hasDeceased()) {
 			try {
 				patient.getDeceasedBooleanType();
 				
@@ -161,7 +161,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 			currentPatient.addName(nameTranslator.toOpenmrsType(name));
 		}
 		
-		if (patient.getGender() != null) {
+		if (patient.hasGender()) {
 			currentPatient.setGender(genderTranslator.toOpenmrsType(patient.getGender()));
 		}
 		
