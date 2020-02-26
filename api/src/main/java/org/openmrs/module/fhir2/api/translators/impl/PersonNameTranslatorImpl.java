@@ -82,7 +82,7 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 			personName.setMiddleName(sb.toString());
 		}
 		
-		if (name.getFamily() != null) {
+		if (name.hasFamily()) {
 			personName.setFamilyName(name.getFamily());
 		}
 		

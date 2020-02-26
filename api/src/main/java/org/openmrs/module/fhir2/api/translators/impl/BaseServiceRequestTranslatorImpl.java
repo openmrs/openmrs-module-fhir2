@@ -36,7 +36,7 @@ public class BaseServiceRequestTranslatorImpl {
 		
 		Task serviceRequestTask = serviceRequestTasks.iterator().next();
 		
-		if (serviceRequestTask.getStatus() != null) {
+		if (serviceRequestTask.hasStatus()) {
 			switch (serviceRequestTask.getStatus()) {
 				case ACCEPTED:
 				case REQUESTED:
