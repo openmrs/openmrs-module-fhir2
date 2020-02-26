@@ -118,15 +118,15 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 			openmrsLocation.setCountry(fhirLocation.getAddress().getCountry());
 			openmrsLocation.setPostalCode(fhirLocation.getAddress().getPostalCode());
 			
-			if (fhirLocation.getStatus() != null && fhirLocation.getStatus().equals(Location.LocationStatus.INACTIVE)) {
+			if (fhirLocation.hasStatus() && fhirLocation.getStatus().equals(Location.LocationStatus.INACTIVE)) {
 				openmrsLocation.setRetired(true);
 				openmrsLocation.setRetireReason("Retired by FHIR module");
 			}
 			
-			if (fhirLocation.getPosition().getLatitude() != null) {
+			if (fhirLocation.getPosition().hasLatitude()) {
 				openmrsLocation.setLatitude(fhirLocation.getPosition().getLatitude().toString());
 			}
-			if (fhirLocation.getPosition().getLongitude() != null) {
+			if (fhirLocation.getPosition().hasLongitude()) {
 				openmrsLocation.setLongitude(fhirLocation.getPosition().getLongitude().toString());
 			}
 			
@@ -135,7 +135,7 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 			        .collect(Collectors.toSet());
 			openmrsLocation.setAttributes(attributes);
 			
-			if (fhirLocation.getMeta().getTag() != null) {
+			if (fhirLocation.getMeta().hasTag()) {
 				for (Coding tag : fhirLocation.getMeta().getTag()) {
 					openmrsLocation.addTag(new LocationTag(tag.getCode(), tag.getDisplay()));
 				}
@@ -152,7 +152,7 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 			return null;
 		}
 		
-		if (location.getType() != null && !location.getType().equals("Location")) {
+		if (location.hasType() && !location.getType().equals("Location")) {
 			throw new IllegalArgumentException("Reference must be to a Location not a " + location.getType());
 		}
 		

@@ -131,7 +131,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		openmrsPerson.setVoided(person.getActive());
 		openmrsPerson.setBirthdate(person.getBirthDate());
 		
-		if (person.getGender() != null) {
+		if (person.hasGender()) {
 			openmrsPerson.setGender(genderTranslator.toOpenmrsType(person.getGender()));
 		}
 		
