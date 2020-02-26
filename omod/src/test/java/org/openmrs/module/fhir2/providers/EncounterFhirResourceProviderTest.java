@@ -10,20 +10,21 @@
 package org.openmrs.module.fhir2.providers;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,22 +88,19 @@ public class EncounterFhirResourceProviderTest {
 	}
 	
 	@Test
-	public void findEncountersByPatientIdentifier_shouldReturnMatchingBundleOfEncounters() {
-		when(encounterService.findEncountersByPatientIdentifier(PATIENT_IDENTIFIER))
-		        .thenReturn(Collections.singletonList(encounter));
-		ReferenceParam param = new ReferenceParam();
-		param.setValue(PATIENT_IDENTIFIER);
-		Bundle encounterBundle = resourceProvider.findEncountersByPatientIdentifier(param);
-		assertThat(encounterBundle, notNullValue());
-		assertThat(encounterBundle.getEntry().size(), equalTo(1));
-	}
-	
-	@Test
-	public void findEncountersByWrongPatientIdentifier_shouldReturnBundleWithEmptyEntries() {
-		ReferenceParam param = new ReferenceParam();
-		param.setValue(PATIENT_IDENTIFIER);
-		Bundle bundle = resourceProvider.findEncountersByPatientIdentifier(param);
-		assertThat(bundle, notNullValue());
-		assertThat(bundle.getEntry(), is(empty()));
+	public void searchEncounters_shouldReturnMatchingEncounters() {
+		List<Encounter> encounters = new ArrayList<>();
+		encounters.add(encounter);
+		when(encounterService.searchForEncounters(any(), any(), any(), any())).thenReturn(encounters);
+		
+		ReferenceParam subjectreference = new ReferenceParam();
+		subjectreference.setChain(Patient.SP_NAME);
+		
+		Bundle results = resourceProvider.searchEncounter(null, null, null, subjectreference);
+		assertThat(results, notNullValue());
+		assertThat(results.getTotal(), equalTo(1));
+		assertThat(results.getEntry(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("Encounter"));
+		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(ENCOUNTER_UUID));
 	}
 }

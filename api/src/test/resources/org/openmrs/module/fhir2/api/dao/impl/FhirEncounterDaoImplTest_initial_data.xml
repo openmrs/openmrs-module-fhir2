@@ -38,6 +38,10 @@
 
     <encounter encounter_id="1" encounter_type="1" form_id="1" encounter_datetime="2005-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="430bbb70-6a9c-4e1e-badb-9d1034b1b5e9"/>
     <encounter_provider encounter_provider_id="2" encounter_id="1" provider_id="2" encounter_role_id="2" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="b566821c-1ad9-473b-836b-9e9c67688e02" />
+    <provider provider_id="2" person_id="3" name="physician" identifier="1000WF" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="c2879800-cca9-11e0-9572-0800200c9a66" />
+
+    <person person_id="3" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" gender="M"  uuid="b654be38-271a-44cb-ba3f-f2dbf4831fe9"/>
+    <person_name person_id="3" person_name_id="5" preferred="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" given_name="John" middle_name=" " family_name="Doe"  uuid="896b882e-db79-498b-aff7-b5b53f12caf1"/>
 
     <obs obs_id="1" person_id="2" encounter_id="1" concept_id="1" obs_datetime="2005-01-01 00:00:00.0" location_id="1" value_numeric="1.0" creator="1" date_created="2006-02-10 15:57:35.0" voided="false" uuid="f0b5fbfb-6c8b-43fd-918d-41d578d571ec"/>
     <obs obs_id="2" person_id="2" encounter_id="1" concept_id="1" obs_datetime="2005-01-01 00:00:00.0" location_id="1" value_numeric="2.0" creator="1" date_created="2006-02-11 15:57:35.0" voided="false" uuid="96d6835c-c038-4ca1-bead-4bfa36bd7fa0"/>

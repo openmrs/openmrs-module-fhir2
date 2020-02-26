@@ -13,11 +13,14 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.r4.model.Encounter;
 
 public interface FhirEncounterService {
 	
 	Encounter getEncounterByUuid(@NotNull String uuid);
 	
-	Collection<Encounter> findEncountersByPatientIdentifier(@NotNull String patientIdentifier);
+	Collection<Encounter> searchForEncounters(DateRangeParam date, ReferenceParam location, ReferenceParam participant,
+	        ReferenceParam subject);
 }

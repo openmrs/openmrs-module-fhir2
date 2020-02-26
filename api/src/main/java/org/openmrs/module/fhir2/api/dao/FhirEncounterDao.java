@@ -11,13 +11,16 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.List;
+import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.openmrs.Encounter;
 
 public interface FhirEncounterDao {
 	
 	Encounter getEncounterByUuid(@NotNull String uuid);
 	
-	List<Encounter> findEncountersByPatientIdentifier(@NotNull String patientIdentifier);
+	Collection<Encounter> searchForEncounters(DateRangeParam date, ReferenceParam location, ReferenceParam participant,
+	        ReferenceParam subject);
 }

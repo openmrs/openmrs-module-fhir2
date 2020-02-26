@@ -12,22 +12,29 @@ package org.openmrs.module.fhir2.providers;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.ServletException;
-
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.lang.time.DateUtils;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
@@ -43,13 +50,43 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	
 	private static final String PATIENT_IDENTIFIER = "h43489-h";
 	
-	private static final String WRONG_PATIENT_IDENTIFIER = "xx78xx-h";
+	private static final String PATIENT_UUID = "d9bc6c12-6adc-4ca6-8bde-441ec1a1c344";
+	
+	private static final String PATIENT_GIVEN_NAME = "Hannibal";
+	
+	private static final String PATIENT_FAMILY_NAME = "Sid";
+	
+	private static final String ENCOUNTER_ADDRESS_CITY = "Boston";
+	
+	private static final String ENCOUNTER_ADDRESS_COUNTRY = "INDIA";
+	
+	private static final String ENCOUNTER_ADDRESS_STATE = "MA";
+	
+	private static final String ENCOUNTER_POSTALCODE = "248001";
+	
+	private static final String PARTICIPANT_GIVEN_NAME = "John";
+	
+	private static final String PARTICIPANT_FAMILY_NAME = "Doe";
+	
+	private static final String PARTICIPANT_IDENTIFIER = "1000WF";
 	
 	@Mock
 	private FhirEncounterService encounterService;
 	
 	@Getter(AccessLevel.PUBLIC)
 	private EncounterFhirResourceProvider resourceProvider;
+	
+	@Captor
+	private ArgumentCaptor<ReferenceParam> locationCaptor;
+	
+	@Captor
+	private ArgumentCaptor<ReferenceParam> participantCaptor;
+	
+	@Captor
+	private ArgumentCaptor<ReferenceParam> subjectCaptor;
+	
+	@Captor
+	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;
 	
 	@Before
 	@Override
@@ -82,31 +119,193 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void findEncountersByPatientIdentifier_shouldReturnBundleOfEncounters() throws IOException, ServletException {
-		Encounter encounter = new Encounter();
-		encounter.setId(ENCOUNTER_UUID);
-		when(encounterService.findEncountersByPatientIdentifier(PATIENT_IDENTIFIER))
-		        .thenReturn(Collections.singletonList(encounter));
+	public void shouldGetEncountersBySubjectUuid() throws Exception {
+		verifyUri(String.format("/Encounter?subject:Patient=%s", PATIENT_UUID));
 		
-		MockHttpServletResponse response = get("/Encounter?patient.identifier=" + PATIENT_IDENTIFIER)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
+		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
+		assertThat(subjectCaptor.getValue(), notNullValue());
+		assertThat(subjectCaptor.getValue().getIdPart(), equalTo(PATIENT_UUID));
 	}
 	
 	@Test
-	public void findEncountersByWrongPatientIdentifier_shouldReturnBundleWithEmptyEntries()
-	        throws IOException, ServletException {
-		when(encounterService.findEncountersByPatientIdentifier(WRONG_PATIENT_IDENTIFIER)).thenReturn(new ArrayList<>());
+	public void shouldGetEncountersByDate() throws Exception {
+		verifyUri("/Encounter/?date=ge1975-02-02");
 		
-		MockHttpServletResponse response = get("/Encounter?patient.identifier=" + WRONG_PATIENT_IDENTIFIER)
-		        .accept(FhirMediaTypes.JSON).go();
+		verify(encounterService).searchForEncounters(dateRangeCaptor.capture(), isNull(), isNull(), isNull());
+		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(1975, 1, 2);
+		
+		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeCaptor.getValue().getUpperBound(), nullValue());
+	}
+	
+	@Test
+	public void shouldGetEncountersByLocationCityVillage() throws Exception {
+		verifyUri(String.format("/Encounter/?location.address-city=%s", ENCOUNTER_ADDRESS_CITY));
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(locationCaptor.getValue().getChain(), equalTo("address-city"));
+		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_ADDRESS_CITY));
+	}
+	
+	@Test
+	public void shouldGetEncountersByLocationState() throws Exception {
+		verifyUri(String.format("/Encounter/?location.address-state=%s", ENCOUNTER_ADDRESS_STATE));
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(locationCaptor.getValue().getChain(), equalTo("address-state"));
+		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_ADDRESS_STATE));
+	}
+	
+	@Test
+	public void shouldGetEncountersByLocationPostalCode() throws Exception {
+		verifyUri(String.format("/Encounter/?location.address-postalcode=%s", ENCOUNTER_POSTALCODE));
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(locationCaptor.getValue().getChain(), equalTo("address-postalcode"));
+		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_POSTALCODE));
+	}
+	
+	@Test
+	public void shouldGetEncountersByLocationCountry() throws Exception {
+		verifyUri(String.format("/Encounter/?location.address-country=%s", ENCOUNTER_ADDRESS_COUNTRY));
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(locationCaptor.getValue().getChain(), equalTo("address-country"));
+		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_ADDRESS_COUNTRY));
+	}
+	
+	@Test
+	public void shouldGetEncountersByParticipantGivenName() throws Exception {
+		verifyUri(String.format("/Encounter/?participant:Practitioner.given=%s", PARTICIPANT_GIVEN_NAME));
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
+		assertThat(participantCaptor.getValue(), notNullValue());
+		assertThat(participantCaptor.getValue().getChain(), equalTo("given"));
+		assertThat(participantCaptor.getValue().getValue(), equalTo(PARTICIPANT_GIVEN_NAME));
+	}
+	
+	@Test
+	public void shouldGetEncountersByParticipantFamilyName() throws Exception {
+		verifyUri(String.format("/Encounter/?participant:Practitioner.family=%s", PARTICIPANT_FAMILY_NAME));
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
+		assertThat(participantCaptor.getValue(), notNullValue());
+		assertThat(participantCaptor.getValue().getChain(), equalTo("family"));
+		assertThat(participantCaptor.getValue().getValue(), equalTo(PARTICIPANT_FAMILY_NAME));
+	}
+	
+	@Test
+	public void shouldGetEncountersByParticipantIdentifier() throws Exception {
+		verifyUri(String.format("/Encounter/?participant:Practitioner.identifier=%s", PARTICIPANT_IDENTIFIER));
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
+		assertThat(participantCaptor.getValue(), notNullValue());
+		assertThat(participantCaptor.getValue().getChain(), equalTo("identifier"));
+		assertThat(participantCaptor.getValue().getValue(), equalTo(PARTICIPANT_IDENTIFIER));
+	}
+	
+	@Test
+	public void shouldGetEncountersBySubjectGivenName() throws Exception {
+		verifyUri(String.format("/Encounter/?subject.given=%s", PATIENT_GIVEN_NAME));
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
+		assertThat(subjectCaptor.getValue(), notNullValue());
+		assertThat(subjectCaptor.getValue().getChain(), equalTo("given"));
+		assertThat(subjectCaptor.getValue().getValue(), equalTo(PATIENT_GIVEN_NAME));
+	}
+	
+	@Test
+	public void shouldGetEncountersBySubjectFamilyName() throws Exception {
+		verifyUri(String.format("/Encounter?subject.family=%s", PATIENT_FAMILY_NAME));
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
+		assertThat(subjectCaptor.getValue(), notNullValue());
+		assertThat(subjectCaptor.getValue().getChain(), equalTo("family"));
+		assertThat(subjectCaptor.getValue().getValue(), equalTo(PATIENT_FAMILY_NAME));
+	}
+	
+	@Test
+	public void shouldGetEncountersBySubjectIdentifier() throws Exception {
+		verifyUri(String.format("/Encounter?subject.identifier=%s", PATIENT_IDENTIFIER));
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
+		assertThat(subjectCaptor.getValue(), notNullValue());
+		assertThat(subjectCaptor.getValue().getChain(), equalTo("identifier"));
+		assertThat(subjectCaptor.getValue().getValue(), equalTo(PATIENT_IDENTIFIER));
+	}
+	
+	@Test
+	public void shouldGetEncountersBySubjectGivenNameAndLocationPostalCode() throws Exception {
+		verifyUri("/Encounter?subject.given=Hannibal&location.address-postalcode=248001");
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), subjectCaptor.capture());
+		
+		assertThat(subjectCaptor.getValue(), notNullValue());
+		assertThat(subjectCaptor.getValue().getChain(), equalTo("given"));
+		assertThat(subjectCaptor.getValue().getValue(), equalTo(PATIENT_GIVEN_NAME));
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(locationCaptor.getValue().getChain(), equalTo("address-postalcode"));
+		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_POSTALCODE));
+	}
+	
+	@Test
+	public void shouldGetEncountersByParticipantIdentifierAndLocationPostalCode() throws Exception {
+		verifyUri("/Encounter?participant:Practitioner.identifier=1000WF&location.address-postalcode=248001");
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), participantCaptor.capture(),
+		    isNull());
+		
+		assertThat(participantCaptor.getValue(), notNullValue());
+		assertThat(participantCaptor.getValue().getChain(), equalTo("identifier"));
+		assertThat(participantCaptor.getValue().getValue(), equalTo(PARTICIPANT_IDENTIFIER));
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(locationCaptor.getValue().getChain(), equalTo("address-postalcode"));
+		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_POSTALCODE));
+	}
+	
+	@Test
+	public void shouldGetEncountersByParticipantIdentifierAndDate() throws Exception {
+		verifyUri("/Encounter?participant:Practitioner.identifier=1000WF&date=ge1975-02-02");
+		
+		verify(encounterService).searchForEncounters(dateRangeCaptor.capture(), isNull(), participantCaptor.capture(),
+		    isNull());
+		
+		assertThat(participantCaptor.getValue(), notNullValue());
+		assertThat(participantCaptor.getValue().getChain(), equalTo("identifier"));
+		assertThat(participantCaptor.getValue().getValue(), equalTo(PARTICIPANT_IDENTIFIER));
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(1975, 1, 2);
+		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeCaptor.getValue().getUpperBound(), nullValue());
+	}
+	
+	private void verifyUri(String uri) throws Exception {
+		Encounter encounter = new Encounter();
+		encounter.setId(ENCOUNTER_UUID);
+		when(encounterService.searchForEncounters(any(), any(), any(), any()))
+		        .thenReturn(Collections.singletonList(encounter));
+		
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-		assertThat(readBundleResponse(response).getEntry(), is(empty()));
+		
+		Bundle results = readBundleResponse(response);
+		assertThat(results.getEntry(), notNullValue());
+		assertThat(results.getEntry(), not(empty()));
+		assertThat(results.getEntry().get(0).getResource(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
 	}
 	
 }
