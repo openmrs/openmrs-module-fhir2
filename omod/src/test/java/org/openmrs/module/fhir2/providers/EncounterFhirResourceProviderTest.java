@@ -92,14 +92,11 @@ public class EncounterFhirResourceProviderTest {
 		List<Encounter> encounters = new ArrayList<>();
 		encounters.add(encounter);
 		when(encounterService.searchForEncounters(any(), any(), any(), any())).thenReturn(encounters);
+		
 		ReferenceParam subjectreference = new ReferenceParam();
 		subjectreference.setChain(Patient.SP_NAME);
 		
-		org.hl7.fhir.r4.model.Encounter enc = new org.hl7.fhir.r4.model.Encounter();
-		enc.setId(ENCOUNTER_UUID);
-		
 		Bundle results = resourceProvider.searchEncounter(null, null, null, subjectreference);
-		
 		assertThat(results, notNullValue());
 		assertThat(results.getTotal(), equalTo(1));
 		assertThat(results.getEntry(), notNullValue());

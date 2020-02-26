@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import javax.inject.Inject;
@@ -46,6 +47,8 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String UNKNOWN_ENCOUNTER_UUID = "xx923xx-3423kk-2323-232jk23";
 	
 	private static final String PATIENT_IDENTIFIER = "1000WF";
+	
+	private static final String WRONG_PATIENT_IDENTIFIER = "12334HD";
 	
 	private static final String PATIENT_FULL_NAME = "Mr. John Doe";
 	
@@ -164,6 +167,19 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, not(empty()));
 		assertThat(results.iterator().next().getPatient().getPatientIdentifier().getIdentifier(),
 		    equalTo(PATIENT_IDENTIFIER));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyCollectionOfEncountersByWrongSubjectIdentifier() {
+		ReferenceParam subjectReference = new ReferenceParam();
+		
+		subjectReference.setValue(WRONG_PATIENT_IDENTIFIER);
+		subjectReference.setChain(Patient.SP_IDENTIFIER);
+		
+		Collection<Encounter> results = dao.searchForEncounters(null, null, null, subjectReference);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(results, is(empty()));
 	}
 	
 	@Test

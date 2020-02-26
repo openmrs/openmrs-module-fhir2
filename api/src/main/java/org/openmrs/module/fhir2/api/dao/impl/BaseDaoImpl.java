@@ -449,16 +449,16 @@ public abstract class BaseDaoImpl {
 			if (locationReference.getChain() != null) {
 				switch (locationReference.getChain()) {
 					case Location.SP_ADDRESS_CITY:
-						criteria.add(ilike("l.cityVillage", locationReference.getValue(), MatchMode.START));
+						propertyLike("l.cityVillage", locationReference.getValue()).ifPresent(criteria::add);
 						break;
 					case Location.SP_ADDRESS_STATE:
-						criteria.add(ilike("l.stateProvince", locationReference.getValue(), MatchMode.START));
+						propertyLike("l.stateProvince", locationReference.getValue()).ifPresent(criteria::add);
 						break;
 					case Location.SP_ADDRESS_POSTALCODE:
-						criteria.add(ilike("l.postalCode", locationReference.getValue(), MatchMode.START));
+						propertyLike("l.postalCode", locationReference.getValue()).ifPresent(criteria::add);
 						break;
 					case Location.SP_ADDRESS_COUNTRY:
-						criteria.add(ilike("l.country", locationReference.getValue(), MatchMode.START));
+						propertyLike("l.country", locationReference.getValue()).ifPresent(criteria::add);
 						break;
 					case "":
 						criteria.add(eq("l.uuid", locationReference.getValue()));

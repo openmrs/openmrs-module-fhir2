@@ -20,6 +20,8 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Collections;
 
@@ -50,17 +52,11 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	
 	private static final String PATIENT_IDENTIFIER = "h43489-h";
 	
-	private static final String WRONG_PATIENT_IDENTIFIER = "xx78xx-h";
-	
 	private static final String PATIENT_UUID = "d9bc6c12-6adc-4ca6-8bde-441ec1a1c344";
 	
 	private static final String PATIENT_GIVEN_NAME = "Hannibal";
 	
 	private static final String PATIENT_FAMILY_NAME = "Sid";
-	
-	private static final String ENCOUNTER_DATE = "eq2013-01-14";
-	
-	private static final String ENCOUNTER_DATETIME = "2005-01-01T00:00:00.0";
 	
 	private static final String ENCOUNTER_ADDRESS_CITY = "Boston";
 	
@@ -68,13 +64,20 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	
 	private static final String ENCOUNTER_ADDRESS_STATE = "MA";
 	
-	private static final String PARTICIPANT_IDENTIFIER = "1";
-	
-	private static final String PARTICIPANT_FAMILY_NAME = "Tim";
-	
-	private static final String PARTICIPANT_GIVEN_NAME = "Him";
-	
 	private static final String ENCOUNTER_POSTALCODE = "248001";
+	
+	private static final String CIEL_URN = "urn:oid:2.16.840.1.113883.3.7201";
+	
+	private static final String URL_ENCODED_CIEL_URN;
+	
+	static {
+		try {
+			URL_ENCODED_CIEL_URN = URLEncoder.encode(CIEL_URN, "utf-8");
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 	@Mock
 	private FhirEncounterService encounterService;
@@ -125,7 +128,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsBySubjectUuid() throws Exception {
+	public void shouldGetEncountersBySubjectUuid() throws Exception {
 		verifyUri(String.format("/Encounter?subject:Patient=%s", PATIENT_UUID));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
@@ -134,7 +137,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsByDate() throws Exception {
+	public void shouldGetEncountersByDate() throws Exception {
 		verifyUri("/Encounter/?date=ge1975-02-02");
 		
 		verify(encounterService).searchForEncounters(dateRangeCaptor.capture(), isNull(), isNull(), isNull());
@@ -149,7 +152,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsByLocationCityVillage() throws Exception {
+	public void shouldGetEncountersByLocationCityVillage() throws Exception {
 		verifyUri(String.format("/Encounter/?location.address-city=%s", ENCOUNTER_ADDRESS_CITY));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
@@ -159,7 +162,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsByLocationState() throws Exception {
+	public void shouldGetEncountersByLocationState() throws Exception {
 		verifyUri(String.format("/Encounter/?location.address-state=%s", ENCOUNTER_ADDRESS_STATE));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
@@ -169,7 +172,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsByLocationPostalCode() throws Exception {
+	public void shouldGetEncountersByLocationPostalCode() throws Exception {
 		verifyUri(String.format("/Encounter/?location.address-postalcode=%s", ENCOUNTER_POSTALCODE));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
@@ -179,7 +182,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsByLocationCountry() throws Exception {
+	public void shouldGetEncountersByLocationCountry() throws Exception {
 		verifyUri(String.format("/Encounter/?location.address-country=%s", ENCOUNTER_ADDRESS_COUNTRY));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
@@ -189,7 +192,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsByParticipantGivenName() throws Exception {
+	public void shouldGetEncountersByParticipantGivenName() throws Exception {
 		verifyUri(String.format("/Encounter/?participant:Practitioner.given=%s", PATIENT_GIVEN_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
@@ -199,7 +202,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsByParticipantFamilyName() throws Exception {
+	public void shouldGetEncountersByParticipantFamilyName() throws Exception {
 		verifyUri(String.format("/Encounter/?participant:Practitioner.family=%s", PATIENT_FAMILY_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
@@ -209,7 +212,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsByParticipantIdentifier() throws Exception {
+	public void shouldGetEncountersByParticipantIdentifier() throws Exception {
 		verifyUri(String.format("/Encounter/?participant:Practitioner.identifier=%s", PATIENT_IDENTIFIER));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
@@ -219,7 +222,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsBySubjectGivenName() throws Exception {
+	public void shouldGetEncountersBySubjectGivenName() throws Exception {
 		verifyUri(String.format("/Encounter/?subject.given=%s", PATIENT_GIVEN_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
@@ -229,7 +232,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsBySubjectFamilyName() throws Exception {
+	public void shouldGetEncountersBySubjectFamilyName() throws Exception {
 		verifyUri(String.format("/Encounter?subject.family=%s", PATIENT_FAMILY_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
@@ -239,13 +242,61 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldGetObservationsBySubjectIdentifier() throws Exception {
+	public void shouldGetEncountersBySubjectIdentifier() throws Exception {
 		verifyUri(String.format("/Encounter?subject.identifier=%s", PATIENT_IDENTIFIER));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
 		assertThat(subjectCaptor.getValue(), notNullValue());
 		assertThat(subjectCaptor.getValue().getChain(), equalTo("identifier"));
 		assertThat(subjectCaptor.getValue().getValue(), equalTo(PATIENT_IDENTIFIER));
+	}
+	
+	@Test
+	public void shouldGetEncountersBySubjectGivenNameAndLocationPostalCode() throws Exception {
+		verifyUri("/Encounter?subject.given=Hannibal&location.address-postalcode=248001");
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), subjectCaptor.capture());
+		
+		assertThat(subjectCaptor.getValue(), notNullValue());
+		assertThat(subjectCaptor.getValue().getChain(), equalTo("given"));
+		assertThat(subjectCaptor.getValue().getValue(), equalTo(PATIENT_GIVEN_NAME));
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(locationCaptor.getValue().getChain(), equalTo("address-postalcode"));
+		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_POSTALCODE));
+	}
+	
+	@Test
+	public void shouldGetEncountersByParticipantIdentifierAndLocationPostalCode() throws Exception {
+		verifyUri("/Encounter?participant:Practitioner.identifier=h43489-h&location.address-postalcode=248001");
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), participantCaptor.capture(),
+		    isNull());
+		
+		assertThat(participantCaptor.getValue(), notNullValue());
+		assertThat(participantCaptor.getValue().getChain(), equalTo("identifier"));
+		assertThat(participantCaptor.getValue().getValue(), equalTo(PATIENT_IDENTIFIER));
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(locationCaptor.getValue().getChain(), equalTo("address-postalcode"));
+		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_POSTALCODE));
+	}
+	
+	@Test
+	public void shouldGetEncountersByParticipantIdentifierAndDate() throws Exception {
+		verifyUri("/Encounter?participant:Practitioner.identifier=h43489-h&date=ge1975-02-02");
+		
+		verify(encounterService).searchForEncounters(dateRangeCaptor.capture(), isNull(), participantCaptor.capture(),
+		    isNull());
+		
+		assertThat(participantCaptor.getValue(), notNullValue());
+		assertThat(participantCaptor.getValue().getChain(), equalTo("identifier"));
+		assertThat(participantCaptor.getValue().getValue(), equalTo(PATIENT_IDENTIFIER));
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(1975, 1, 2);
+		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeCaptor.getValue().getUpperBound(), nullValue());
 	}
 	
 	private void verifyUri(String uri) throws Exception {

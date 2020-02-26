@@ -66,13 +66,13 @@ public class AllergyIntoleranceTranslatorImplTest {
 	private static final String CONCEPT_UUID = "162553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String NON_CODED_REACTION = "Test Reaction";
-
+	
 	private static final String GLOBAL_PROPERTY_MILD_VALUE = "102553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
+	
 	private static final String GLOBAL_PROPERTY_SEVERE_VALUE = "202553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
+	
 	private static final String GLOBAL_PROPERTY_MODERATE_VALUE = "302553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
+	
 	private static final String GLOBAL_PROPERTY_OTHER_VALUE = "402553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	@Mock
@@ -278,7 +278,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		mildConcept.setUuid(GLOBAL_PROPERTY_MILD_VALUE);
 		omrsAllergy.setSeverity(mildConcept);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MILD, "")).thenReturn(GLOBAL_PROPERTY_MILD_VALUE);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MILD, ""))
+		        .thenReturn(GLOBAL_PROPERTY_MILD_VALUE);
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(),
@@ -293,8 +294,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		
 		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MODERATE, ""))
 		        .thenReturn(GLOBAL_PROPERTY_MODERATE_VALUE);
-		when(globalPropertyService.getGlobalProperty(MockitoHamcrest.argThat(not(equalTo(FhirConstants.GLOBAL_PROPERTY_MODERATE))),
-		    anyString())).thenReturn("");
+		when(globalPropertyService.getGlobalProperty(
+		    MockitoHamcrest.argThat(not(equalTo(FhirConstants.GLOBAL_PROPERTY_MODERATE))), anyString())).thenReturn("");
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(),
@@ -307,9 +308,11 @@ public class AllergyIntoleranceTranslatorImplTest {
 		severeConcept.setUuid(GLOBAL_PROPERTY_SEVERE_VALUE);
 		omrsAllergy.setSeverity(severeConcept);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_SEVERE, "")).thenReturn(GLOBAL_PROPERTY_SEVERE_VALUE);
-		when(globalPropertyService.getGlobalProperty(MockitoHamcrest.argThat(not(equalTo(FhirConstants.GLOBAL_PROPERTY_SEVERE))),
-		    anyString())).thenReturn("");
+		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_SEVERE, ""))
+		        .thenReturn(GLOBAL_PROPERTY_SEVERE_VALUE);
+		when(globalPropertyService
+		        .getGlobalProperty(MockitoHamcrest.argThat(not(equalTo(FhirConstants.GLOBAL_PROPERTY_SEVERE))), anyString()))
+		                .thenReturn("");
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(),
@@ -322,8 +325,9 @@ public class AllergyIntoleranceTranslatorImplTest {
 		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
 		omrsAllergy.setSeverity(otherConcept);
 		
-		when(globalPropertyService.getGlobalProperty(MockitoHamcrest.argThat(not(equalTo(FhirConstants.GLOBAL_PROPERTY_OTHER))),
-		    anyString())).thenReturn("");
+		when(globalPropertyService
+		        .getGlobalProperty(MockitoHamcrest.argThat(not(equalTo(FhirConstants.GLOBAL_PROPERTY_OTHER))), anyString()))
+		                .thenReturn("");
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(),
@@ -505,7 +509,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		
 		Concept mildConcept = new Concept();
 		mildConcept.setUuid(GLOBAL_PROPERTY_MILD_VALUE);
-		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MILD)).thenReturn(GLOBAL_PROPERTY_MILD_VALUE);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MILD))
+		        .thenReturn(GLOBAL_PROPERTY_MILD_VALUE);
 		when(conceptService.getConceptByUuid(GLOBAL_PROPERTY_MILD_VALUE)).thenReturn(Optional.of(mildConcept));
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
@@ -523,7 +528,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		
 		Concept moderateConcept = new Concept();
 		moderateConcept.setUuid(GLOBAL_PROPERTY_MODERATE_VALUE);
-		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MODERATE)).thenReturn(GLOBAL_PROPERTY_MODERATE_VALUE);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MODERATE))
+		        .thenReturn(GLOBAL_PROPERTY_MODERATE_VALUE);
 		when(conceptService.getConceptByUuid(GLOBAL_PROPERTY_MODERATE_VALUE)).thenReturn(Optional.of(moderateConcept));
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
@@ -541,7 +547,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		
 		Concept severeConcept = new Concept();
 		severeConcept.setUuid(GLOBAL_PROPERTY_SEVERE_VALUE);
-		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_SEVERE)).thenReturn(GLOBAL_PROPERTY_SEVERE_VALUE);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_SEVERE))
+		        .thenReturn(GLOBAL_PROPERTY_SEVERE_VALUE);
 		when(conceptService.getConceptByUuid(GLOBAL_PROPERTY_SEVERE_VALUE)).thenReturn(Optional.of(severeConcept));
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
@@ -559,7 +566,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		
 		Concept otherConcept = new Concept();
 		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
-		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(GLOBAL_PROPERTY_OTHER_VALUE);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_OTHER))
+		        .thenReturn(GLOBAL_PROPERTY_OTHER_VALUE);
 		when(conceptService.getConceptByUuid(GLOBAL_PROPERTY_OTHER_VALUE)).thenReturn(Optional.of(otherConcept));
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);

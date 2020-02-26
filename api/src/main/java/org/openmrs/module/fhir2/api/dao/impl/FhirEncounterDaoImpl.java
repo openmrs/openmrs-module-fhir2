@@ -49,7 +49,6 @@ public class FhirEncounterDaoImpl extends BaseDaoImpl implements FhirEncounterDa
 		handleLocationReference(criteria, location);
 		handleParticipantReference(criteria, participant);
 		handlePatientReference(criteria, subject);
-		//TODO: handle ReferenceParam for participant, subject, location
 		
 		return criteria.list();
 	}
