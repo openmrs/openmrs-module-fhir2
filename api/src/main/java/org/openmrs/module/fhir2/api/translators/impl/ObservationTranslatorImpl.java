@@ -73,9 +73,6 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		obs.setEncounter(encounterReferenceTranslator.toFhirResource(observation.getEncounter()));
 		
-		obs.addInterpretation().addCoding().setSystem("http://www.hl7.org/fhir/valueset-observation-interpretation")
-		        .setCode("HH");
-		
 		Person obsPerson = observation.getPerson();
 		if (obsPerson != null) {
 			try {
