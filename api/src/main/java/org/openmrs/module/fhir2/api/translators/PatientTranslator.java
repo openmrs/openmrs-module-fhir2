@@ -10,12 +10,13 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Provenance;
 
-public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Patient, Patient> {
+public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Patient, Patient>, ToFhirProvenance<org.openmrs.Patient> {
 	
 	/**
 	 * Maps a {@link org.openmrs.Patient} to a {@link Patient}
-	 * 
+	 *
 	 * @param patient the patient to translate
 	 * @return the corresponding FHIR patient
 	 */
@@ -24,7 +25,7 @@ public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.op
 	
 	/**
 	 * Maps a {@link Patient} to a {@link org.openmrs.Patient}
-	 * 
+	 *
 	 * @param patient the FHIR patient to map
 	 * @return the corresponding OpenMRS patient
 	 */
@@ -33,11 +34,29 @@ public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.op
 	
 	/**
 	 * Maps a {@link Patient} to an existing {@link org.openmrs.Patient}
-	 * 
+	 *
 	 * @param currentPatient the patient to update
 	 * @param patient the FHIR patient to map
 	 * @return the updated OpenMRS patient
 	 */
 	@Override
 	org.openmrs.Patient toOpenmrsType(org.openmrs.Patient currentPatient, Patient patient);
+	
+	/**
+	 * Maps a {@link org.openmrs.Patient} to a {@link org.hl7.fhir.r4.model.Provenance} resource
+	 *
+	 * @param patient the OpenMRS object to translate
+	 * @return the corresponding {@link org.hl7.fhir.r4.model.Provenance} resource
+	 */
+	@Override
+	Provenance getUpdateProvenance(org.openmrs.Patient patient);
+	
+	/**
+	 * Maps a {@link org.openmrs.Patient} to a {@link org.hl7.fhir.r4.model.Provenance} resource
+	 *
+	 * @param patient the OpenMRS object to translate
+	 * @return the corresponding {@link org.hl7.fhir.r4.model.Provenance} resource
+	 */
+	@Override
+	Provenance getCreateProvenance(org.openmrs.Patient patient);
 }

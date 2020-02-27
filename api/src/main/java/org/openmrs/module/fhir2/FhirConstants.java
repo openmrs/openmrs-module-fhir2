@@ -23,6 +23,13 @@ public class FhirConstants {
 	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX = "http://terminology.hl7.org/CodeSystem";
 	
+	public static final String FHIR_TERMINOLOGY_DATA_OPERATION = HL7_FHIR_CODE_SYSTEM_PREFIX + "v3-DataOperation";
+	
+	public static final String FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE = HL7_FHIR_CODE_SYSTEM_PREFIX
+	        + "provenance-participant-type";
+	
+	public static final String FHIR_TERMINOLOGY_PARTICIPATION_TYPE = HL7_FHIR_CODE_SYSTEM_PREFIX + "v3-ParticipationType";
+	
 	public static final String DIAGNOSTIC_SERVICE_SECTIONS_VALUESET_URI = HL7_FHIR_VALUE_SET_PREFIX
 	        + "/diagnostic-service-sections";
 	
