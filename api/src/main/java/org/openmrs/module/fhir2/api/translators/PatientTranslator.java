@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 
-public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Patient, Patient>, ToFhirProvenance<org.openmrs.Patient, Provenance> {
+public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Patient, Patient>, ToFhirProvenance<org.openmrs.Patient> {
 	
 	/**
 	 * Maps a {@link org.openmrs.Patient} to a {@link Patient}
@@ -49,7 +49,7 @@ public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.op
 	 * @return the corresponding {@link org.hl7.fhir.r4.model.Provenance} resource
 	 */
 	@Override
-	Provenance onUpdate(org.openmrs.Patient patient);
+	Provenance getUpdateProvenance(org.openmrs.Patient patient);
 	
 	/**
 	 * Maps a {@link org.openmrs.Patient} to a {@link org.hl7.fhir.r4.model.Provenance} resource
@@ -58,5 +58,5 @@ public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.op
 	 * @return the corresponding {@link org.hl7.fhir.r4.model.Provenance} resource
 	 */
 	@Override
-	Provenance onCreate(org.openmrs.Patient patient);
+	Provenance getCreateProvenance(org.openmrs.Patient patient);
 }

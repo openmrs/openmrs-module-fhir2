@@ -420,7 +420,7 @@ public class PatientTranslatorImplTest {
 		patient.setUuid(PATIENT_UUID);
 		patient.setDateCreated(new Date());
 		
-		Provenance provenance = patientTranslator.onCreate(patient);
+		Provenance provenance = patientTranslator.getCreateProvenance(patient);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getRecorded(), notNullValue());
 		assertThat(provenance.getRecorded(), DateMatchers.sameDay(new Date()));
@@ -431,7 +431,7 @@ public class PatientTranslatorImplTest {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setUuid(PATIENT_UUID);
 		
-		Provenance provenance = patientTranslator.onCreate(patient);
+		Provenance provenance = patientTranslator.getCreateProvenance(patient);
 		
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getActivity(), notNullValue());
@@ -453,7 +453,7 @@ public class PatientTranslatorImplTest {
 		Reference practitionerRef = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + USER_UUID);
 		
 		when(practitionerReferenceTranslator.toFhirResource(user)).thenReturn(practitionerRef);
-		Provenance provenance = patientTranslator.onCreate(patient);
+		Provenance provenance = patientTranslator.getCreateProvenance(patient);
 		
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getAgent(), not(empty()));
@@ -467,7 +467,7 @@ public class PatientTranslatorImplTest {
 		patient.setUuid(PATIENT_UUID);
 		patient.setDateChanged(new Date());
 		
-		Provenance provenance = patientTranslator.onUpdate(patient);
+		Provenance provenance = patientTranslator.getUpdateProvenance(patient);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getRecorded(), notNullValue());
 		assertThat(provenance.getRecorded(), DateMatchers.sameDay(new Date()));
@@ -478,7 +478,7 @@ public class PatientTranslatorImplTest {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setUuid(PATIENT_UUID);
 		
-		Provenance provenance = patientTranslator.onUpdate(patient);
+		Provenance provenance = patientTranslator.getUpdateProvenance(patient);
 		
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getActivity(), notNullValue());
@@ -499,7 +499,7 @@ public class PatientTranslatorImplTest {
 		practitionerRef.setReference(FhirConstants.PRACTITIONER + "/" + USER_UUID);
 		
 		when(practitionerReferenceTranslator.toFhirResource(user)).thenReturn(practitionerRef);
-		Provenance provenance = patientTranslator.onUpdate(patient);
+		Provenance provenance = patientTranslator.getUpdateProvenance(patient);
 		
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getAgent(), not(empty()));

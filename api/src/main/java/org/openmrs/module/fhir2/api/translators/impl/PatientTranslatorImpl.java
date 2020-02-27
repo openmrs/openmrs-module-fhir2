@@ -106,8 +106,8 @@ public class PatientTranslatorImpl extends AbstractProvenanceHandlingTranslator 
 			}
 			patient.setTelecom(getPatientContactDetails(openmrsPatient));
 			patient.getMeta().setLastUpdated(openmrsPatient.getDateChanged());
-			patient.addContained(onCreate(openmrsPatient));
-			patient.addContained(onUpdate(openmrsPatient));
+			patient.addContained(getCreateProvenance(openmrsPatient));
+			patient.addContained(getUpdateProvenance(openmrsPatient));
 		}
 		
 		return patient;
@@ -183,7 +183,7 @@ public class PatientTranslatorImpl extends AbstractProvenanceHandlingTranslator 
 	}
 	
 	@Override
-	public Provenance onCreate(org.openmrs.Patient patient) {
+	public Provenance getCreateProvenance(org.openmrs.Patient patient) {
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
 		provenance.setRecorded(patient.getDateCreated());
@@ -193,7 +193,7 @@ public class PatientTranslatorImpl extends AbstractProvenanceHandlingTranslator 
 	}
 	
 	@Override
-	public Provenance onUpdate(org.openmrs.Patient patient) {
+	public Provenance getUpdateProvenance(org.openmrs.Patient patient) {
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
 		provenance.setRecorded(patient.getDateChanged());

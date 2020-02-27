@@ -9,13 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import org.hl7.fhir.r4.model.Provenance;
+
 /**
  * Generic interface for a translator between OpenMRS data and FHIR provenance resource
  *
  * @param <T> OpenMRS data type
- * @param <U> FHIR Provenance resource type
  */
-public interface ToFhirProvenance<T, U> {
+public interface ToFhirProvenance<T> {
 	
 	/**
 	 * Maps an OpenMRS Object to a {@link org.hl7.fhir.r4.model.Provenance} resource
@@ -23,7 +24,7 @@ public interface ToFhirProvenance<T, U> {
 	 * @param openMrsObject the OpenMRS object to translate
 	 * @return the corresponding {@link org.hl7.fhir.r4.model.Provenance} resource
 	 */
-	U onCreate(T openMrsObject);
+	Provenance getCreateProvenance(T openMrsObject);
 	
 	/**
 	 * Maps an OpenMRS Object to a {@link org.hl7.fhir.r4.model.Provenance} resource
@@ -31,6 +32,6 @@ public interface ToFhirProvenance<T, U> {
 	 * @param openMrsObject the OpenMRS object to translate
 	 * @return the corresponding {@link org.hl7.fhir.r4.model.Provenance} resource
 	 */
-	U onUpdate(T openMrsObject);
+	Provenance getUpdateProvenance(T openMrsObject);
 	
 }
