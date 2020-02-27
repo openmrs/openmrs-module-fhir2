@@ -12,6 +12,9 @@ package org.openmrs.module.fhir2.providers;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import java.util.List;
+
+import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -29,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -72,5 +76,15 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringOrListParam postalCode, @Sort SortSpec sort) {
 		return FhirUtils.convertSearchResultsToBundle(patientService.searchForPatients(name, given, family, identifier,
 		    gender, birthDate, deathDate, deceased, city, state, postalCode, sort));
+	}
+	
+	@History
+	@SuppressWarnings("unused")
+	public List<Resource> getPatientResourceHistory(@IdParam @NotNull IdType id) {
+		Patient patient = patientService.getPatientByUuid(id.getIdPart());
+		if (patient == null) {
+			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
+		}
+		return patient.getContained();
 	}
 }

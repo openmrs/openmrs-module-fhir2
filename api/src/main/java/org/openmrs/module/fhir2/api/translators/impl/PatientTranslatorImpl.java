@@ -26,8 +26,10 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Provenance;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
@@ -41,11 +43,12 @@ import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class PatientTranslatorImpl implements PatientTranslator {
+public class PatientTranslatorImpl extends AbstractProvenanceHandlingTranslator implements PatientTranslator {
 	
 	@Inject
 	private PatientIdentifierTranslator identifierTranslator;
@@ -103,6 +106,8 @@ public class PatientTranslatorImpl implements PatientTranslator {
 			}
 			patient.setTelecom(getPatientContactDetails(openmrsPatient));
 			patient.getMeta().setLastUpdated(openmrsPatient.getDateChanged());
+			patient.addContained(onCreate(openmrsPatient));
+			patient.addContained(onUpdate(openmrsPatient));
 		}
 		
 		return patient;
@@ -175,5 +180,25 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		currentPatient.setDateChanged(patient.getMeta().getLastUpdated());
 		
 		return currentPatient;
+	}
+	
+	@Override
+	public Provenance onCreate(org.openmrs.Patient patient) {
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setRecorded(patient.getDateCreated());
+		provenance.setActivity(createActivity());
+		provenance.addAgent(createAgentComponent(patient.getCreator()));
+		return provenance;
+	}
+	
+	@Override
+	public Provenance onUpdate(org.openmrs.Patient patient) {
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setRecorded(patient.getDateChanged());
+		provenance.setActivity(updateActivity());
+		provenance.addAgent(createAgentComponent(patient.getChangedBy()));
+		return provenance;
 	}
 }
