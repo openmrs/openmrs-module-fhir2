@@ -12,9 +12,12 @@ package org.openmrs.module.fhir2.api.impl;
 import javax.inject.Inject;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Person;
@@ -42,30 +45,11 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	}
 	
 	@Override
-	@Transactional(readOnly = true)
-	public Collection<Person> findPersonsByName(String name) {
-		return fhirPersonDao.findPersonsByName(name).stream().map(personTranslator::toFhirResource)
-		        .collect(Collectors.toList());
+	public Collection<Person> searchForPeople(StringOrListParam name, TokenOrListParam gender, DateRangeParam birthDate,
+	        StringOrListParam city, StringOrListParam state, StringOrListParam postalCode, StringOrListParam country,
+	        SortSpec sort) {
+		return fhirPersonDao.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort).stream()
+		        .map(personTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
-	@Override
-	@Transactional(readOnly = true)
-	public Collection<Person> findPersonsByBirthDate(Date birthDate) {
-		return fhirPersonDao.findPersonsByBirthDate(birthDate).stream().map(personTranslator::toFhirResource)
-		        .collect(Collectors.toList());
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender) {
-		return fhirPersonDao.findSimilarPeople(name, birthYear, gender).stream().map(personTranslator::toFhirResource)
-		        .collect(Collectors.toList());
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Collection<Person> findPersonsByGender(String gender) {
-		return fhirPersonDao.findPersonsByGender(gender).stream().map(personTranslator::toFhirResource)
-		        .collect(Collectors.toList());
-	}
 }

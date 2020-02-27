@@ -15,11 +15,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Person;
@@ -30,7 +34,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirPersonDaoImpl implements FhirPersonDao {
+public class FhirPersonDaoImpl extends BaseDaoImpl implements FhirPersonDao {
 	
 	@Inject
 	PersonService personService;
@@ -45,28 +49,6 @@ public class FhirPersonDaoImpl implements FhirPersonDao {
 	}
 	
 	@Override
-	public Collection<Person> findPersonsByName(String name) {
-		return personService.getPeople(name, false);
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public Collection<Person> findPersonsByBirthDate(Date birthDate) {
-		return sessionFactory.getCurrentSession().createCriteria(Person.class).add(eq("birthdate", birthDate)).list();
-	}
-	
-	@Override
-	public Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender) {
-		return personService.getSimilarPeople(name, birthYear, gender);
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public Collection<Person> findPersonsByGender(String gender) {
-		return sessionFactory.getCurrentSession().createCriteria(Person.class).add(eq("gender", gender)).list();
-	}
-	
-	@Override
 	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(Person person,
 	        String personAttributeTypeUuid) {
 		return (List<PersonAttribute>) sessionFactory.getCurrentSession().createCriteria(PersonAttribute.class)
@@ -74,4 +56,51 @@ public class FhirPersonDaoImpl implements FhirPersonDao {
 		        .createAlias("attributeType", "pat").add(eq("pat.uuid", personAttributeTypeUuid)).add(eq("voided", false))
 		        .list();
 	}
+	
+	@Override
+	public Collection<Person> searchForPeople(StringOrListParam name, TokenOrListParam gender, DateRangeParam birthDate,
+	        StringOrListParam city, StringOrListParam state, StringOrListParam postalCode, StringOrListParam country,
+	        SortSpec sort) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Person.class);
+		
+		handleNames(criteria, name, null, null);
+		handleGender("gender", gender).ifPresent(criteria::add);
+		handleDateRange("birthdate", birthDate).ifPresent(criteria::add);
+		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
+			criteria.createAlias("addresses", "pad");
+			criteria.add(c);
+		});
+		if (sort != null) {
+			if (sort.getParamName().equals("name") && !containsAlias(criteria, "pn")) {
+				criteria.createAlias("names", "pn");
+			}
+			if (sort.getParamName().startsWith("address") && !containsAlias(criteria, "pad")) {
+				criteria.createAlias("addresses", "pad");
+			}
+		}
+		handleSort(criteria, sort);
+		
+		return criteria.list();
+	}
+	
+	@Override
+	protected String paramToProp(String param) {
+		switch (param) {
+			case "name":
+				return "pn.givenName";
+			case "birthdate":
+				return "birthdate";
+			case "address-city":
+				return "pad.cityVillage";
+			case "address-state":
+				return "pad.stateProvince";
+			case "address-postalCode":
+				return "pad.postalCode";
+			case "address-country":
+				return "pad.country";
+			default:
+				return null;
+		}
+	}
+	
 }

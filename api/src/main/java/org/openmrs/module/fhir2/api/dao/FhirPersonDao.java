@@ -12,9 +12,12 @@ package org.openmrs.module.fhir2.api.dao;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 
@@ -22,14 +25,11 @@ public interface FhirPersonDao {
 	
 	Person getPersonByUuid(@NotNull String uuid);
 	
-	Collection<Person> findPersonsByName(@NotNull String name);
-	
-	Collection<Person> findPersonsByBirthDate(@NotNull Date birthDate);
-	
-	Collection<Person> findSimilarPeople(String name, Integer birthYear, String gender);
-	
-	Collection<Person> findPersonsByGender(@NotNull String gender);
-	
 	List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@NotNull Person person,
 	        @NotNull String personAttributeTypeUuid);
+	
+	Collection<Person> searchForPeople(StringOrListParam name, TokenOrListParam gender, DateRangeParam birthDate,
+	        StringOrListParam city, StringOrListParam state, StringOrListParam postalCode, StringOrListParam country,
+	        SortSpec sort);
+	
 }

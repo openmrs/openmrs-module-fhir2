@@ -10,21 +10,21 @@
 package org.openmrs.module.fhir2.providers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 
-import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -47,15 +47,19 @@ public class PersonFhirResourceProviderTest {
 	
 	private static final String GENDER = "M";
 	
-	private static final String WRONG_GENDER = "wrong gender";
-	
 	private static final String BIRTH_DATE = "1992-03-04";
-	
-	private static final String WRONG_BIRTH_DATE = "0000-00-00";
 	
 	private static final String GIVEN_NAME = "Jeanne";
 	
 	private static final String FAMILY_NAME = "we";
+	
+	private static final String CITY = "Seattle";
+	
+	private static final String STATE = "Washington";
+	
+	private static final String POSTAL_CODE = "98136";
+	
+	private static final String COUNTRY = "Canada";
 	
 	@Mock
 	private FhirPersonService fhirPersonService;
@@ -80,11 +84,6 @@ public class PersonFhirResourceProviderTest {
 		person.setId(PERSON_UUID);
 		person.setGender(Enumerations.AdministrativeGender.MALE);
 		person.addName(name);
-	}
-	
-	private static Date parseStringDate(String date) throws ParseException {
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-		return dateFormatter.parse(date);
 	}
 	
 	@Test
@@ -115,71 +114,94 @@ public class PersonFhirResourceProviderTest {
 	}
 	
 	@Test
-	public void findPersonsByGender_shouldReturnMatchingBundleOfPersons() {
-		when(fhirPersonService.findPersonsByGender(GENDER)).thenReturn(Collections.singletonList(person));
-		StringParam param = new StringParam();
-		param.setValue(GENDER);
-		Bundle results = resourceProvider.findPersonsByGender(param);
-		assertThat(results, notNullValue());
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-		assertThat(results.getEntry().get(0).getResource().getChildByName("id").getValues().get(0).toString(),
-		    equalTo(PERSON_UUID));
+	public void searchPeople_shouldReturnMatchingBundleOfPeopleByName() {
+		StringOrListParam nameParam = new StringOrListParam().add(new StringParam(GIVEN_NAME));
+		when(fhirPersonService.searchForPeople(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
 		
-	}
-	
-	@Test
-	public void findPersonsByWrongGender_shouldReturnBundleWithEmptyEntries() {
-		StringParam param = new StringParam();
-		param.setValue(WRONG_GENDER);
-		Bundle results = resourceProvider.findPersonsByGender(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry(), is(empty()));
-	}
-	
-	@Test
-	public void findPersonsByBirthDate_shouldReturnMatchingBundleOfPersons() throws ParseException {
-		when(fhirPersonService.findPersonsByBirthDate(parseStringDate(BIRTH_DATE)))
-		        .thenReturn(Collections.singletonList(person));
-		DateParam param = new DateParam();
-		param.setValue(parseStringDate(BIRTH_DATE));
-		Bundle results = resourceProvider.findPersonsByBirthDate(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findPersonsByWrongBirthDate_shouldReturnBundleWithEmptyEntries() throws ParseException {
-		DateParam param = new DateParam();
-		param.setValue(parseStringDate(WRONG_BIRTH_DATE));
-		Bundle results = resourceProvider.findPersonsByBirthDate(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry(), is(empty()));
-	}
-	
-	@Test
-	public void findSimilarPeople_ShouldReturnBundleOfMatchingPeople() {
-		when(fhirPersonService.findSimilarPeople(GIVEN_NAME, null, GENDER)).thenReturn(Collections.singletonList(person));
-		StringParam nameParam = new StringParam();
-		nameParam.setValue(GIVEN_NAME);
+		Bundle results = resourceProvider.searchPeople(nameParam, null, null, null, null, null, null, null);
 		
-		Bundle results = resourceProvider.findSimilarPeople(nameParam, null, GENDER);
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
-	public void findSimilarPeopleWithNullBirthDateAndGender_ShouldReturnBundleOfMatchingPeopleByName() {
-		when(fhirPersonService.findSimilarPeople(GIVEN_NAME, null, null)).thenReturn(Collections.singletonList(person));
-		StringParam nameParam = new StringParam();
-		nameParam.setValue(GIVEN_NAME);
+	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByGender() {
+		TokenOrListParam genderParam = new TokenOrListParam().add(GENDER);
+		when(fhirPersonService.searchForPeople(isNull(), argThat(is(genderParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
 		
-		Bundle results = resourceProvider.findSimilarPeople(nameParam, null, null);
+		Bundle results = resourceProvider.searchPeople(null, genderParam, null, null, null, null, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
 	}
+	
+	@Test
+	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByBirthDate() {
+		DateRangeParam birthDateParam = new DateRangeParam().setLowerBound(BIRTH_DATE).setUpperBound(BIRTH_DATE);
+		when(fhirPersonService.searchForPeople(isNull(), isNull(), argThat(is(birthDateParam)), isNull(), isNull(), isNull(),
+		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		
+		Bundle results = resourceProvider.searchPeople(null, null, birthDateParam, null, null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByCity() {
+		StringOrListParam cityParam = new StringOrListParam().add(new StringParam(CITY));
+		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), argThat(is(cityParam)), isNull(), isNull(),
+		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		
+		Bundle results = resourceProvider.searchPeople(null, null, null, cityParam, null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByState() {
+		StringOrListParam stateParam = new StringOrListParam().add(new StringParam(STATE));
+		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stateParam)), isNull(),
+		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		
+		Bundle results = resourceProvider.searchPeople(null, null, null, null, stateParam, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByPostalCode() {
+		StringOrListParam postalCodeParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
+		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(),
+		    argThat(is(postalCodeParam)), isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		
+		Bundle results = resourceProvider.searchPeople(null, null, null, null, null, postalCodeParam, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByCountry() {
+		StringOrListParam countryParam = new StringOrListParam().add(new StringParam(COUNTRY));
+		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    argThat(is(countryParam)), isNull())).thenReturn(Collections.singletonList(person));
+		
+		Bundle results = resourceProvider.searchPeople(null, null, null, null, null, null, countryParam, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+	
 }
