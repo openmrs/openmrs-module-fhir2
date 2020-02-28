@@ -9,22 +9,31 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
+import static org.exparity.hamcrest.date.DateMatchers.sameOrBefore;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 import javax.inject.Inject;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -35,6 +44,7 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Patient;
+import org.openmrs.PersonAddress;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -46,7 +56,9 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String BAD_PATIENT_UUID = "282390a6-3608-496d-9025-aecbc1235670";
 	
-	private static final String PATIENT_SEARCH_DATA_XML = "org/openmrs/api/include/PatientServiceTest-findPatients.xml";
+	private static final String PATIENT_SEARCH_DATA_FILES[] = {
+	        "org/openmrs/api/include/PatientServiceTest-findPatients.xml",
+	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_address_data.xml" };
 	
 	private static final String PATIENT_GIVEN_NAME = "Jeannette";
 	
@@ -101,7 +113,9 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	public void setup() throws Exception {
 		dao = new FhirPatientDaoImpl();
 		dao.setSessionFactory(sessionFactory);
-		executeDataSet(PATIENT_SEARCH_DATA_XML);
+		for (String search_data : PATIENT_SEARCH_DATA_FILES) {
+			executeDataSet(search_data);
+		}
 	}
 	
 	@Test
@@ -378,5 +392,227 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.iterator().next().getUuid(), equalTo(PATIENT_ADDRESS_PATIENT_UUID));
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPatientsSortedByName() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName("name");
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		List<Patient> patients = getPatientListForSorting(sort);
+		
+		// Smallest given name of patient i should be less than the largest given name of next patient.
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getNames(), not(empty())); // Not sure why this test is failing
+			String currentSmallestGivenName = patients.get(i - 1).getNames().stream()
+			        .min(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
+			String nextLargestGivenName = patients.get(i).getNames().stream()
+			        .max(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
+			
+			assertThat(currentSmallestGivenName, lessThanOrEqualTo(nextLargestGivenName));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		patients = getPatientListForSorting(sort);
+		
+		// Largest given name of patient i + 1 i should be greater than the smallest given name of previous patient.
+		for (int i = 1; i < patients.size(); i++) {
+			String largestGivenName = patients.get(i - 1).getNames().stream()
+			        .max(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
+			String nextSmallestGivenName = patients.get(i).getNames().stream()
+			        .min(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
+			
+			assertThat(largestGivenName, greaterThanOrEqualTo(nextSmallestGivenName));
+		}
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPatientsSortedByBirthDate() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName("birthdate");
+		sort.setOrder(SortOrderEnum.ASC);
+		List<Patient> patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getBirthdate(), sameOrBefore(patients.get(i).getBirthdate()));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getBirthdate(), sameOrAfter(patients.get(i).getBirthdate()));
+		}
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPatientsSortedByDeathDate() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName("deathdate");
+		sort.setOrder(SortOrderEnum.ASC);
+		List<Patient> patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getDeathDate(), sameOrBefore(patients.get(i).getDeathDate()));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getDeathDate(), sameOrAfter(patients.get(i).getDeathDate()));
+		}
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPatientsSortedByCity() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName("address-city");
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		List<Patient> patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getPersonAddress().getCityVillage(),
+			    lessThanOrEqualTo(patients.get(i).getPersonAddress().getCityVillage()));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getPersonAddress().getCityVillage(),
+			    greaterThanOrEqualTo(patients.get(i).getPersonAddress().getCityVillage()));
+		}
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPatientsSortedByState() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName("address-state");
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		List<Patient> patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getPersonAddress().getStateProvince(),
+			    lessThanOrEqualTo(patients.get(i).getPersonAddress().getStateProvince()));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getPersonAddress().getStateProvince(),
+			    greaterThanOrEqualTo(patients.get(i).getPersonAddress().getStateProvince()));
+		}
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPatientsSortedByPostalCode() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName("address-postalCode");
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		List<Patient> patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getPersonAddress().getPostalCode(),
+			    lessThanOrEqualTo(patients.get(i).getPersonAddress().getPostalCode()));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getPersonAddress().getPostalCode(),
+			    greaterThanOrEqualTo(patients.get(i).getPersonAddress().getPostalCode()));
+		}
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPatientsSortedByCountry() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName("address-country");
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		List<Patient> patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getPersonAddress().getCountry(),
+			    lessThanOrEqualTo(patients.get(i).getPersonAddress().getCountry()));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		patients = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < patients.size(); i++) {
+			assertThat(patients.get(i - 1).getPersonAddress().getCountry(),
+			    greaterThanOrEqualTo(patients.get(i).getPersonAddress().getCountry()));
+		}
+	}
+	
+	private List<Patient> getPatientListForSorting(SortSpec sort) {
+		Collection<Patient> patients = dao.searchForPatients(null, null, null, null, null, null, null, null, null, null,
+		    null, null, sort);
+		
+		assertThat(patients, notNullValue());
+		assertThat(patients, not(empty()));
+		assertThat(patients.size(), greaterThan(1));
+		
+		List<Patient> patientList = new ArrayList<>(patients);
+		// remove patients with sort parameter value null, to allow comparison while asserting. 
+		switch (sort.getParamName()) {
+			case "name":
+				patientList.removeIf(p -> p.getGivenName() == null);
+				break;
+			case "birthdate":
+				patientList.removeIf(p -> p.getBirthdate() == null);
+				break;
+			case "deathdate":
+				patientList.removeIf(p -> p.getDeathDate() == null);
+				break;
+			case "address-city":
+				patientList.removeIf(p -> addressComponentNullorEmtpy(p.getPersonAddress(), "city"));
+				break;
+			case "address-state":
+				patientList.removeIf(p -> addressComponentNullorEmtpy(p.getPersonAddress(), "state"));
+				break;
+			case "address-postalcode":
+				patientList.removeIf(p -> addressComponentNullorEmtpy(p.getPersonAddress(), "postalCode"));
+				break;
+			case "address-country":
+				patientList.removeIf(p -> addressComponentNullorEmtpy(p.getPersonAddress(), "country"));
+				break;
+		}
+		
+		assertThat(patientList.size(), greaterThan(1));
+		
+		return patientList;
+	}
+	
+	private boolean addressComponentNullorEmtpy(PersonAddress address, String component) {
+		if (address == null) {
+			return true;
+		}
+		
+		switch (component) {
+			case "city":
+				return address.getCityVillage() == null || address.getCityVillage().isEmpty();
+			case "state":
+				return address.getStateProvince() == null || address.getStateProvince().isEmpty();
+			case "postalCode":
+				return address.getPostalCode() == null || address.getPostalCode().isEmpty();
+			case "country":
+				return address.getCountry() == null || address.getCountry().isEmpty();
+		}
+		
+		return false;
 	}
 }

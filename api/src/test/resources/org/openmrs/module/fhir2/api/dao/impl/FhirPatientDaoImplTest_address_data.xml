@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+  <person person_id="8" gender="F" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="5456995a-6862-11ea-bc55-0242ac130003"/>
+  <person person_id="9" gender="M" dead="true" death_date="2001-01-01" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="54569b76-6862-11ea-bc55-0242ac130003"/>
+  <person person_id="10" gender="F" dead="true" death_date="2003-01-01" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="54569c70-6862-11ea-bc55-0242ac130003"/>
+  <person person_id="11" gender="M" dead="true" death_date="2001-08-01" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="54569fa4-6862-11ea-bc55-0242ac130003"/>
+  <patient patient_id="8" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+  <patient patient_id="9" creator="1" date_created="2005-01-01 00:00:00.0" voided="true"/>
+  <patient patient_id="10" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+  <patient patient_id="11" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+  <person_address person_address_id="8" preferred="true" person_id="8" city_village="Johnson City" state_province="TN" postal_code="37601" country="FakeB" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="da5931e4-67b7-11ea-bc55-0242ac130003"/>
+  <person_address person_address_id="9" preferred="true" person_id="9" city_village="Edison" state_province="NJ" postal_code="08817" country="FakeC" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="da5932f2-67b7-11ea-bc55-0242ac130003"/>
+  <person_address person_address_id="10" preferred="true" person_id="10" city_village="Santa Cruz" state_province="CA" postal_code="95060" country="FakeD" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="da5933ce-67b7-11ea-bc55-0242ac130003"/>
+  <person_address person_address_id="11" preferred="true" person_id="11" city_village="Peabody" state_province="MA" postal_code="01960" country="FakeAB" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="da593572-67b7-11ea-bc55-0242ac130003"/>
+</dataset>

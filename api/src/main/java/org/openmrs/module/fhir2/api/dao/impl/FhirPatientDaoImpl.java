@@ -86,9 +86,44 @@ public class FhirPatientDaoImpl extends BaseDaoImpl implements FhirPatientDao {
 			criteria.createAlias("addresses", "pad");
 			criteria.add(c);
 		});
+		if (sort != null) {
+			String paramName = sort.getParamName();
+			if ((paramName.equals("name") || paramName.equals("given") || paramName.equals("family"))
+			        && !containsAlias(criteria, "pn")) {
+				criteria.createAlias("names", "pn");
+			}
+			if (paramName.startsWith("address") && !containsAlias(criteria, "pad")) {
+				criteria.createAlias("addresses", "pad");
+			}
+		}
 		handleSort(criteria, sort);
 		
 		return criteria.list();
+	}
+	
+	@Override
+	protected String paramToProp(String param) {
+		switch (param) {
+			case "name":
+			case "given":
+				return "pn.givenName";
+			case "family":
+				return "pn.familyName";
+			case "birthdate":
+				return "birthdate";
+			case "deathdate":
+				return "deathDate";
+			case "address-city":
+				return "pad.cityVillage";
+			case "address-state":
+				return "pad.stateProvince";
+			case "address-postalCode":
+				return "pad.postalCode";
+			case "address-country":
+				return "pad.country";
+			default:
+				return null;
+		}
 	}
 	
 }
