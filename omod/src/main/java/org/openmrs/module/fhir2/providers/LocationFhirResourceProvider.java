@@ -31,7 +31,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirLocationService;
-import org.openmrs.module.fhir2.util.FhirUtils;
+import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -61,37 +61,38 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle findLocationByName(@RequiredParam(name = Location.SP_NAME) StringParam name) {
-		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationByName(name.getValue()));
+		return FhirServerUtils.convertSearchResultsToBundle(fhirLocationService.findLocationByName(name.getValue()));
 	}
 	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle findLocationByCity(@RequiredParam(name = Location.SP_ADDRESS_CITY) StringParam city) {
-		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByCity(city.getValue()));
+		return FhirServerUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByCity(city.getValue()));
 	}
 	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle findLocationByCountry(@RequiredParam(name = Location.SP_ADDRESS_COUNTRY) StringParam country) {
-		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByCountry(country.getValue()));
+		return FhirServerUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByCountry(country.getValue()));
 	}
 	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle findLocationByPostalCode(@RequiredParam(name = Location.SP_ADDRESS_POSTALCODE) StringParam postalCode) {
-		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByPostalCode(postalCode.getValue()));
+		return FhirServerUtils
+		        .convertSearchResultsToBundle(fhirLocationService.findLocationsByPostalCode(postalCode.getValue()));
 	}
 	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle findLocationByState(@RequiredParam(name = Location.SP_ADDRESS_STATE) StringParam state) {
-		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByState(state.getValue()));
+		return FhirServerUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByState(state.getValue()));
 	}
 	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle findLocationsByTag(@RequiredParam(name = "_tag") TokenParam tag) {
-		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByTag(tag));
+		return FhirServerUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByTag(tag));
 	}
 	
 	@History

@@ -19,7 +19,7 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Resource;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class FhirUtils {
+public class FhirServerUtils {
 	
 	public static MethodOutcome buildUpdate(DomainResource resource) {
 		MethodOutcome methodOutcome = new MethodOutcome();
@@ -46,7 +46,7 @@ public class FhirUtils {
 	}
 	
 	public static <T extends Resource> Bundle convertSearchResultsToBundle(Collection<T> resources) {
-		Bundle bundle = FhirUtils.convertIterableToBundle(resources);
+		Bundle bundle = FhirServerUtils.convertIterableToBundle(resources);
 		bundle.setType(Bundle.BundleType.SEARCHSET);
 		bundle.setTotal(resources.size());
 		return bundle;

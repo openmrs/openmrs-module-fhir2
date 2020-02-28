@@ -34,7 +34,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirPersonService;
-import org.openmrs.module.fhir2.util.FhirUtils;
+import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -70,7 +70,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Person.SP_ADDRESS_STATE) StringOrListParam state,
 	        @OptionalParam(name = Person.SP_ADDRESS_POSTALCODE) StringOrListParam postalCode,
 	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringOrListParam country, @Sort SortSpec sort) {
-		return FhirUtils.convertSearchResultsToBundle(
+		return FhirServerUtils.convertSearchResultsToBundle(
 		    fhirPersonService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort));
 	}
 	

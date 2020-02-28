@@ -30,7 +30,7 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
-import org.openmrs.module.fhir2.util.FhirUtils;
+import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -66,7 +66,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceParam participantReference,
 	        @OptionalParam(name = Encounter.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceParam subjectReference) {
-		return FhirUtils.convertSearchResultsToBundle(
+		return FhirServerUtils.convertSearchResultsToBundle(
 		    encounterService.searchForEncounters(date, location, participantReference, subjectReference));
 		
 	}

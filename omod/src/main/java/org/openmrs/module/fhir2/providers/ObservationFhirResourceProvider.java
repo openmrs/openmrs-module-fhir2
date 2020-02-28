@@ -34,7 +34,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirObservationService;
-import org.openmrs.module.fhir2.util.FhirUtils;
+import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -66,7 +66,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceParam patientReference,
 	        @OptionalParam(name = Observation.SP_CODE) TokenAndListParam code, @Sort SortSpec sort) {
-		return FhirUtils.convertSearchResultsToBundle(
+		return FhirServerUtils.convertSearchResultsToBundle(
 		    observationService.searchForObservations(encounterReference, patientReference, code, sort));
 	}
 	
