@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.providers;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -19,10 +20,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.FhirConstants.AUT;
+import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
 
+import javax.servlet.ServletException;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -30,7 +38,11 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +50,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.web.servlet.BaseFhirResourceProviderTest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -266,5 +280,71 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirResourceProv
 		assertThat(results.getEntry(), not(empty()));
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(OBS_UUID));
+	}
+	
+	@Test
+	public void shouldVerifyGetObservationHistoryByIdUri() throws Exception {
+		Observation observation = new Observation();
+		observation.setId(OBS_UUID);
+		when(observationService.getObservationByUuid(OBS_UUID)).thenReturn(observation);
+		
+		MockHttpServletResponse response = getPatientHistoryRequest();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(BaseFhirResourceProviderTest.FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void shouldGetObservationHistoryById() throws IOException, ServletException {
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setRecorded(new Date());
+		provenance.setActivity(new CodeableConcept().addCoding(
+		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
+		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
+		        .setType(new CodeableConcept().addCoding(new Coding().setCode(AUT).setDisplay(AUTHOR)
+		                .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
+		        .addRole(new CodeableConcept().addCoding(
+		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
+		Observation observation = new Observation();
+		observation.setId(OBS_UUID);
+		observation.addContained(provenance);
+		
+		when(observationService.getObservationByUuid(OBS_UUID)).thenReturn(observation);
+		
+		MockHttpServletResponse response = getPatientHistoryRequest();
+		
+		Bundle results = readBundleResponse(response);
+		assertThat(results, notNullValue());
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results.getEntry().get(0).getResource(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().getResourceType().name(),
+		    equalTo(Provenance.class.getSimpleName()));
+		
+	}
+	
+	@Test
+	public void getObservationHistoryById_shouldReturnBundleWithEmptyEntriesIfObservationContainedIsEmpty()
+	        throws Exception {
+		Observation observation = new Observation();
+		observation.setId(OBS_UUID);
+		observation.setContained(new ArrayList<>());
+		when(observationService.getObservationByUuid(OBS_UUID)).thenReturn(observation);
+		
+		MockHttpServletResponse response = getPatientHistoryRequest();
+		Bundle results = readBundleResponse(response);
+		assertThat(results.hasEntry(), is(false));
+	}
+	
+	@Test
+	public void getObservationHistoryById_shouldReturn404IfObservationIdIsWrong() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + BAD_OBS_UUID + "/_history")
+		        .accept(BaseFhirResourceProviderTest.FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+	}
+	
+	private MockHttpServletResponse getPatientHistoryRequest() throws IOException, ServletException {
+		return get("/Observation/" + OBS_UUID + "/_history").accept(BaseFhirResourceProviderTest.FhirMediaTypes.JSON).go();
 	}
 }

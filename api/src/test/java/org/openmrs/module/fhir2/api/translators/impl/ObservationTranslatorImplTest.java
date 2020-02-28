@@ -10,10 +10,13 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.any;
@@ -28,7 +31,9 @@ import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
@@ -51,6 +56,8 @@ import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationTranslatorImplTest {
@@ -91,6 +98,9 @@ public class ObservationTranslatorImplTest {
 	@Mock
 	private ObservationReferenceRangeTranslator referenceRangeTranslator;
 	
+	@Mock
+	private ProvenanceTranslator<Obs> provenanceTranslator;
+	
 	private ObservationTranslatorImpl observationTranslator;
 	
 	@Before
@@ -104,6 +114,7 @@ public class ObservationTranslatorImplTest {
 		observationTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		observationTranslator.setInterpretationTranslator(interpretationTranslator);
 		observationTranslator.setReferenceRangeTranslator(referenceRangeTranslator);
+		observationTranslator.setProvenanceTranslator(provenanceTranslator);
 	}
 	
 	@Test
@@ -349,5 +360,22 @@ public class ObservationTranslatorImplTest {
 		observationTranslator.toOpenmrsType(expected, observation);
 		assertThat(expected, notNullValue());
 		assertThat(expected.getDateChanged(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldAddProvenanceResources() {
+		Obs obs = new Obs();
+		obs.setUuid(OBS_UUID);
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		when(provenanceTranslator.getCreateProvenance(obs)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(obs)).thenReturn(provenance);
+		org.hl7.fhir.r4.model.Observation result = observationTranslator.toFhirResource(obs);
+		assertThat(result, notNullValue());
+		assertThat(result.getContained(), not(empty()));
+		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
+		assertThat(result.getContained().stream()
+		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
+		    is(true));
 	}
 }

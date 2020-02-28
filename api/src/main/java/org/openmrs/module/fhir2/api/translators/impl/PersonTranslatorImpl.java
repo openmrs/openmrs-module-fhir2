@@ -36,6 +36,7 @@ import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.stereotype.Component;
 
@@ -61,6 +62,9 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	@Inject
 	private FhirGlobalPropertyService globalPropertyService;
 	
+	@Inject
+	private ProvenanceTranslator<Person> provenanceTranslator;
+	
 	@Override
 	public org.hl7.fhir.r4.model.Person toFhirResource(@NotNull Person openmrsPerson) {
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
@@ -84,6 +88,8 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			
 			buildPersonLinks(openmrsPerson, person);
 			person.getMeta().setLastUpdated(openmrsPerson.getDateChanged());
+			person.addContained(provenanceTranslator.getCreateProvenance(openmrsPerson));
+			person.addContained(provenanceTranslator.getUpdateProvenance(openmrsPerson));
 		}
 		return person;
 	}

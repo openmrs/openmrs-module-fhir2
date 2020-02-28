@@ -107,4 +107,8 @@ public class FhirConstants {
 	
 	public static final String GLOBAL_PROPERTY_OTHER = "allergy.concept.severity.other";
 	
+	public static final String AUTHOR = "author";
+	
+	public static final String AUT = "AUT";
+	
 }

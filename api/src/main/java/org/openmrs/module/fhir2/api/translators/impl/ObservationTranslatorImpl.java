@@ -31,6 +31,7 @@ import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -60,6 +61,9 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	
 	@Inject
 	private ObservationReferenceRangeTranslator referenceRangeTranslator;
+	
+	@Inject
+	private ProvenanceTranslator<Obs> provenanceTranslator;
 	
 	@Override
 	public Observation toFhirResource(Obs observation) {
@@ -101,6 +105,8 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 			
 		}
 		obs.getMeta().setLastUpdated(observation.getDateChanged());
+		obs.addContained(provenanceTranslator.getCreateProvenance(observation));
+		obs.addContained(provenanceTranslator.getUpdateProvenance(observation));
 		
 		return obs;
 	}
