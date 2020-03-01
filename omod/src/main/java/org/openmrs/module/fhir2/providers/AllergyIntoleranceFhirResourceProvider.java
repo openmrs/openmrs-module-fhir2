@@ -13,15 +13,25 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
+import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +39,8 @@ import org.springframework.stereotype.Component;
 @Qualifier("fhirResources")
 @Setter(AccessLevel.PACKAGE)
 public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider {
+	
+	private Log log = LogFactory.getLog(AllergyIntoleranceFhirResourceProvider.class);
 	
 	@Inject
 	private FhirAllergyIntoleranceService fhirAllergyIntoleranceService;
@@ -46,5 +58,18 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 			throw new ResourceNotFoundException("Could not find allergy with Id " + id.getIdPart());
 		}
 		return allergy;
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle searchForAllergies(
+	        @OptionalParam(name = AllergyIntolerance.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
+	                Patient.SP_GIVEN, Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceParam patientReference,
+	        @OptionalParam(name = AllergyIntolerance.SP_CATEGORY) StringOrListParam category,
+	        @OptionalParam(name = AllergyIntolerance.SP_SEVERITY) StringOrListParam severity,
+	        @OptionalParam(name = AllergyIntolerance.SP_MANIFESTATION) TokenOrListParam manifestationCode) {
+		return FhirUtils.convertSearchResultsToBundle(
+		    fhirAllergyIntoleranceService.searchForAllergies(patientReference, category, severity, manifestationCode));
 	}
 }
