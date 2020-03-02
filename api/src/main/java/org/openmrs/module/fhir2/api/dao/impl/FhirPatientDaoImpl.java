@@ -19,6 +19,7 @@ import javax.inject.Named;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
+
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
