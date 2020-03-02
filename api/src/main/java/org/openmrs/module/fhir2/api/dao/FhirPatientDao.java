@@ -29,5 +29,5 @@ public interface FhirPatientDao {
 	Collection<Patient> searchForPatients(StringOrListParam name, StringOrListParam given, StringOrListParam family,
 	        TokenOrListParam identifier, TokenOrListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
 	        TokenOrListParam deceased, StringOrListParam city, StringOrListParam state, StringOrListParam postalCode,
-	        SortSpec sort);
+	        StringOrListParam country, SortSpec sort);
 }
