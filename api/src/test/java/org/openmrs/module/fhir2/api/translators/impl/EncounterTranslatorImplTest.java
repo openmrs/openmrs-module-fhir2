@@ -38,11 +38,11 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
-import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterTranslatorImplTest {
@@ -72,9 +72,6 @@ public class EncounterTranslatorImplTest {
 	private static final String LOCATION_URI = FhirConstants.LOCATION + "" + LOCACTION_UUID;
 	
 	@Mock
-	private PatientService patientService;
-	
-	@Mock
 	private EncounterParticipantTranslator participantTranslator;
 	
 	@Mock
@@ -83,11 +80,16 @@ public class EncounterTranslatorImplTest {
 	@Mock
 	private PatientIdentifierTranslator patientIdentifierTranslator;
 	
+	@Mock
+	private PatientReferenceTranslator patientReferenceTranslator;
+	
 	private Patient patient;
 	
 	private Encounter fhirEncounter;
 	
 	private Location location;
+	
+	private Reference patientRef;
 	
 	private org.openmrs.Encounter omrsEncounter;
 	
@@ -98,9 +100,8 @@ public class EncounterTranslatorImplTest {
 		fhirEncounter = new Encounter();
 		omrsEncounter = new org.openmrs.Encounter();
 		encounterTranslator = new EncounterTranslatorImpl();
-		encounterTranslator.setPatientService(patientService);
+		encounterTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		encounterTranslator.setParticipantTranslator(participantTranslator);
-		encounterTranslator.setPatientIdentifierTranslator(patientIdentifierTranslator);
 		encounterTranslator.setEncounterLocationTranslator(encounterLocationTranslator);
 		
 		PatientIdentifier identifier = new PatientIdentifier();
@@ -121,7 +122,7 @@ public class EncounterTranslatorImplTest {
 		patient.setPersonId(0);
 		omrsEncounter.setPatient(patient);
 		
-		Reference patientRef = new Reference();
+		patientRef = new Reference();
 		patientRef.setReference(PATIENT_URI);
 		fhirEncounter.setSubject(patientRef);
 		
@@ -142,7 +143,7 @@ public class EncounterTranslatorImplTest {
 	@Test
 	public void shouldTranslateIdToOpenmrsType() {
 		fhirEncounter.setId(ENCOUNTER_UUID);
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), notNullValue());
@@ -161,7 +162,9 @@ public class EncounterTranslatorImplTest {
 		patientRef.setReference(PATIENT_URI);
 		fhirEncounter.setId(ENCOUNTER_UUID);
 		fhirEncounter.setSubject(patientRef);
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		Patient patient = new Patient();
+		patient.setUuid(PATIENT_UUID);
+		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
 		assertThat(result, notNullValue());
 		assertThat(result.getPatient(), notNullValue());
@@ -185,6 +188,7 @@ public class EncounterTranslatorImplTest {
 		patient.addName(name);
 		omrsEncounter.setUuid(ENCOUNTER_UUID);
 		omrsEncounter.setPatient(patient);
+		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientRef);
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
 		assertThat(result, notNullValue());
 		assertThat(result.getSubject(), notNullValue());
@@ -204,8 +208,9 @@ public class EncounterTranslatorImplTest {
 		Provider provider = new Provider();
 		provider.setUuid(PRACTITIONER_UUID);
 		encounterProvider.setProvider(provider);
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
-		
+		Patient patient = new Patient();
+		patient.setUuid(PATIENT_UUID);
+		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
 		
 		assertThat(result, notNullValue());
@@ -272,8 +277,14 @@ public class EncounterTranslatorImplTest {
 		locationComponent.setLocation(locationRef);
 		locationComponents.add(locationComponent);
 		fhirEncounter.setLocation(locationComponents);
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
-		assertThat(encounterTranslator.toOpenmrsType(fhirEncounter), notNullValue());
+		Patient patient = new Patient();
+		patient.setUuid(PATIENT_UUID);
+		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
+		when(encounterLocationTranslator.toOpenmrsType(locationComponent)).thenReturn(location);
+		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
+		assertThat(result, notNullValue());
+		assertThat(result.getLocation(), notNullValue());
+		assertThat(result.getLocation().getName(), equalTo(TEST_LOCATION_NAME));
 	}
 	
 	@Test
@@ -286,7 +297,7 @@ public class EncounterTranslatorImplTest {
 		locationComponent.setLocation(locationRef);
 		locationComponents.add(locationComponent);
 		fhirEncounter.setLocation(locationComponents);
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
 		when(encounterLocationTranslator.toOpenmrsType(locationComponent)).thenReturn(location);
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
 		assertThat(result, notNullValue());
@@ -307,8 +318,7 @@ public class EncounterTranslatorImplTest {
 	@Test
 	public void shouldTranslateLastUpdatedDateToDateChanged() {
 		fhirEncounter.getMeta().setLastUpdated(new Date());
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
-		
+		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
 		assertThat(result, notNullValue());
 		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
