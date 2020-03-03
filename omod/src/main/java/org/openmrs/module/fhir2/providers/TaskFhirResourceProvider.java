@@ -29,7 +29,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
-import org.openmrs.module.fhir2.util.FhirUtils;
+import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -59,13 +59,13 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createTask(@ResourceParam Task newTask) {
-		return FhirUtils.buildCreate(service.saveTask(newTask));
+		return FhirServerUtils.buildCreate(service.saveTask(newTask));
 	}
 	
 	@Update
 	@SuppressWarnings("unused")
 	public MethodOutcome updateTask(@IdParam IdType id, @ResourceParam Task task) {
-		return FhirUtils.buildUpdate(service.updateTask(id.getIdPart(), task));
+		return FhirServerUtils.buildUpdate(service.updateTask(id.getIdPart(), task));
 	}
 	
 	@History
