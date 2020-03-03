@@ -73,9 +73,10 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Patient.SP_DECEASED) TokenOrListParam deceased,
 	        @OptionalParam(name = Patient.SP_ADDRESS_CITY) StringOrListParam city,
 	        @OptionalParam(name = Patient.SP_ADDRESS_STATE) StringOrListParam state,
-	        @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringOrListParam postalCode, @Sort SortSpec sort) {
+	        @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringOrListParam postalCode,
+	        @OptionalParam(name = Patient.SP_ADDRESS_COUNTRY) StringOrListParam country, @Sort SortSpec sort) {
 		return FhirUtils.convertSearchResultsToBundle(patientService.searchForPatients(name, given, family, identifier,
-		    gender, birthDate, deathDate, deceased, city, state, postalCode, sort));
+		    gender, birthDate, deathDate, deceased, city, state, postalCode, country, sort));
 	}
 	
 	@History
