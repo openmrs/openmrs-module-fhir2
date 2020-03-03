@@ -9,10 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.inject.Inject;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.FhirTask;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +23,17 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 public class TaskTranslatorImpl implements TaskTranslator {
 	
+	@Inject
+	private ProvenanceTranslator<FhirTask> provenanceTranslator;
+	
 	@Override
 	public Task toFhirResource(FhirTask openmrsTask) {
 		Task fhirTask = new Task();
 		
 		if (openmrsTask != null) {
 			setFhirTaskFields(openmrsTask, fhirTask);
+			fhirTask.addContained(provenanceTranslator.getCreateProvenance(openmrsTask));
+			fhirTask.addContained(provenanceTranslator.getUpdateProvenance(openmrsTask));
 		}
 		
 		return fhirTask;

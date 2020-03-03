@@ -10,18 +10,30 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
 import org.exparity.hamcrest.date.DateMatchers;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirTask;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
+@RunWith(MockitoJUnitRunner.class)
 public class FhirTaskTranslatorImplTest {
 	
 	private static final String TASK_UUID = "d899333c-5bd4-45cc-b1e7-2f9542dbcbf6";
@@ -42,11 +54,15 @@ public class FhirTaskTranslatorImplTest {
 	
 	private static final FhirTask.TaskIntent OPENMRS_NEW_TASK_INTENT = FhirTask.TaskIntent.ORDER;
 	
+	@Mock
+	private ProvenanceTranslator<FhirTask> provenanceTranslator;
+	
 	private TaskTranslatorImpl taskTranslator;
 	
 	@Before
 	public void setup() {
 		taskTranslator = new TaskTranslatorImpl();
+		taskTranslator.setProvenanceTranslator(provenanceTranslator);
 		
 	}
 	
@@ -201,5 +217,22 @@ public class FhirTaskTranslatorImplTest {
 		FhirTask result = taskTranslator.toOpenmrsType(task);
 		assertThat(result, notNullValue());
 		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void toFhirResource_shouldAddProvenanceResources() {
+		FhirTask task = new FhirTask();
+		task.setUuid(TASK_UUID);
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		when(provenanceTranslator.getCreateProvenance(task)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(task)).thenReturn(provenance);
+		org.hl7.fhir.r4.model.Task result = taskTranslator.toFhirResource(task);
+		assertThat(result, notNullValue());
+		assertThat(result.getContained(), not(empty()));
+		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
+		assertThat(result.getContained().stream()
+		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
+		    is(true));
 	}
 }

@@ -12,6 +12,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
@@ -22,8 +24,10 @@ import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +41,8 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PractitionerTranslatorUserImplTest {
@@ -64,6 +70,9 @@ public class PractitionerTranslatorUserImplTest {
 	@Mock
 	private AddressTranslator addressTranslator;
 	
+	@Mock
+	private ProvenanceTranslator<User> provenanceTranslator;
+	
 	private PractitionerTranslatorUserImpl practitionerTranslatorUser;
 	
 	private User user;
@@ -76,6 +85,7 @@ public class PractitionerTranslatorUserImplTest {
 		practitionerTranslatorUser.setNameTranslator(nameTranslator);
 		practitionerTranslatorUser.setAddressTranslator(addressTranslator);
 		practitionerTranslatorUser.setGenderTranslator(genderTranslator);
+		practitionerTranslatorUser.setProvenanceTranslator(provenanceTranslator);
 		
 		user = new User();
 		user.setUuid(USER_UUID);
@@ -199,6 +209,24 @@ public class PractitionerTranslatorUserImplTest {
 		User result = practitionerTranslatorUser.toOpenmrsType(practitioner);
 		assertThat(result, notNullValue());
 		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void toFhirResource_shouldAddProvenanceResources() {
+		User user = new User();
+		user.setUuid(USER_UUID);
+		user.setUserId(USER_ID);
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		when(provenanceTranslator.getCreateProvenance(user)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(user)).thenReturn(provenance);
+		org.hl7.fhir.r4.model.Practitioner result = practitionerTranslatorUser.toFhirResource(user);
+		assertThat(result, notNullValue());
+		assertThat(result.getContained(), not(empty()));
+		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
+		assertThat(result.getContained().stream()
+		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
+		    is(true));
 	}
 	
 }

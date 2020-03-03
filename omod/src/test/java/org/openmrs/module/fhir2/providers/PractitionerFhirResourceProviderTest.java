@@ -16,25 +16,31 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
+import org.openmrs.module.fhir2.web.servlet.BaseFhirProvenanceResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PractitionerFhirResourceProviderTest {
+public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Practitioner> {
 	
 	private static final String PRACTITIONER_UUID = "48fb709b-48aa-4902-b681-926df5156e88";
 	
@@ -76,6 +82,7 @@ public class PractitionerFhirResourceProviderTest {
 		practitioner.setId(PRACTITIONER_UUID);
 		practitioner.addName(name);
 		practitioner.addIdentifier(theIdentifier);
+		setProvenanceResources(practitioner);
 	}
 	
 	@Test
@@ -142,5 +149,38 @@ public class PractitionerFhirResourceProviderTest {
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry(), is(empty()));
+	}
+	
+	@Test
+	public void getPractitionerHistoryById_shouldReturnListOfResource() {
+		IdType id = new IdType();
+		id.setValue(PRACTITIONER_UUID);
+		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		
+		List<Resource> resources = resourceProvider.getPractitionerHistoryById(id);
+		assertThat(resources, Matchers.notNullValue());
+		assertThat(resources, not(empty()));
+		assertThat(resources.size(), Matchers.equalTo(2));
+	}
+	
+	@Test
+	public void getPractitionerHistoryById_shouldReturnProvenanceResources() {
+		IdType id = new IdType();
+		id.setValue(PRACTITIONER_UUID);
+		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		
+		List<Resource> resources = resourceProvider.getPractitionerHistoryById(id);
+		assertThat(resources, not(empty()));
+		assertThat(resources.stream().findAny().isPresent(), Matchers.is(true));
+		assertThat(resources.stream().findAny().get().getResourceType().name(),
+		    Matchers.equalTo(Provenance.class.getSimpleName()));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void getPractitionerHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
+		IdType idType = new IdType();
+		idType.setValue(WRONG_PRACTITIONER_UUID);
+		assertThat(resourceProvider.getPractitionerHistoryById(idType).isEmpty(), Matchers.is(true));
+		assertThat(resourceProvider.getPractitionerHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 }

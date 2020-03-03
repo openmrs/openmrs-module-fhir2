@@ -12,6 +12,9 @@ package org.openmrs.module.fhir2.providers;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import java.util.List;
+
+import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -29,6 +32,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -64,5 +68,14 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Observation.SP_CODE) TokenAndListParam code, @Sort SortSpec sort) {
 		return FhirUtils.convertSearchResultsToBundle(
 		    observationService.searchForObservations(encounterReference, patientReference, code, sort));
+	}
+	
+	@History
+	public List<Resource> getObservationHistoryById(@IdParam @NotNull IdType id) {
+		Observation observation = observationService.getObservationByUuid(id.getIdPart());
+		if (observation == null) {
+			throw new ResourceNotFoundException("Could not find Observation with Id " + id.getIdPart());
+		}
+		return observation.getContained();
 	}
 }

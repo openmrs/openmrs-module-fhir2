@@ -29,6 +29,8 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,12 +41,15 @@ import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
+import org.openmrs.User;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PersonTranslatorImplTest {
@@ -71,6 +76,10 @@ public class PersonTranslatorImplTest {
 	
 	private static final String CONTACT_ID = "uu23823gf-3834sd-s934n-34nss";
 	
+	private static final String GENDER = "M";
+	
+	private static final String USER_UUID = "68b1e787-e68d-424e-8aac-c3387a0ab7b5";
+	
 	@Mock
 	private GenderTranslator genderTranslator;
 	
@@ -89,7 +98,14 @@ public class PersonTranslatorImplTest {
 	@Mock
 	private FhirPersonDao fhirPersonDao;
 	
+	@Mock
+	private ProvenanceTranslator<Person> provenanceTranslator;
+	
 	private PersonTranslatorImpl personTranslator;
+	
+	private Person personMock;
+	
+	private User user;
 	
 	@Before
 	public void setup() {
@@ -100,6 +116,21 @@ public class PersonTranslatorImplTest {
 		personTranslator.setTelecomTranslator(telecomTranslator);
 		personTranslator.setFhirPersonDao(fhirPersonDao);
 		personTranslator.setGlobalPropertyService(globalPropertyService);
+		personTranslator.setProvenanceTranslator(provenanceTranslator);
+	}
+	
+	@Before
+	public void initPersonMock() {
+		user = new User();
+		user.setUuid(USER_UUID);
+		
+		personMock = new Person();
+		personMock.setUuid(PERSON_UUID);
+		personMock.setGender(GENDER);
+		personMock.setCreator(user);
+		personMock.setDateCreated(new Date());
+		personMock.setChangedBy(user);
+		personMock.setDateChanged(new Date());
 	}
 	
 	@Test
@@ -369,5 +400,20 @@ public class PersonTranslatorImplTest {
 		Person result = personTranslator.toOpenmrsType(person);
 		assertThat(result, notNullValue());
 		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldAddProvenanceResources() {
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		when(provenanceTranslator.getCreateProvenance(personMock)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(personMock)).thenReturn(provenance);
+		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(personMock);
+		assertThat(result, notNullValue());
+		assertThat(result.getContained(), not(empty()));
+		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
+		assertThat(result.getContained().stream()
+		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
+		    is(true));
 	}
 }

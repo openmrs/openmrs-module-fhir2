@@ -12,6 +12,9 @@ package org.openmrs.module.fhir2.providers;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import java.util.List;
+
+import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -26,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -88,5 +92,15 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	@SuppressWarnings("unused")
 	public Bundle findLocationsByTag(@RequiredParam(name = "_tag") TokenParam tag) {
 		return FhirUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByTag(tag));
+	}
+	
+	@History
+	@SuppressWarnings("unused")
+	public List<Resource> getLocationHistoryById(@IdParam @NotNull IdType id) {
+		Location location = fhirLocationService.getLocationByUuid(id.getIdPart());
+		if (location == null) {
+			throw new ResourceNotFoundException("Could not find location with Id " + id.getIdPart());
+		}
+		return location.getContained();
 	}
 }

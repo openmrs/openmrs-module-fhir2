@@ -10,7 +10,11 @@
 package org.openmrs.module.fhir2.providers;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
+import java.util.List;
+
+import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -28,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Person;
+import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirPersonService;
 import org.openmrs.module.fhir2.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -67,6 +72,16 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringOrListParam country, @Sort SortSpec sort) {
 		return FhirUtils.convertSearchResultsToBundle(
 		    fhirPersonService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort));
+	}
+	
+	@History
+	@SuppressWarnings("unused")
+	public List<Resource> getPatientHistoryById(@IdParam @NotNull IdType id) {
+		Person person = fhirPersonService.getPersonByUuid(id.getIdPart());
+		if (person == null) {
+			throw new ResourceNotFoundException("Could not find person with Id " + id.getIdPart());
+		}
+		return person.getContained();
 	}
 	
 }

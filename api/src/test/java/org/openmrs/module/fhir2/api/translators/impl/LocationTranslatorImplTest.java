@@ -10,10 +10,12 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
@@ -29,7 +31,9 @@ import java.util.List;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +48,9 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationTranslatorImplTest {
@@ -95,6 +101,9 @@ public class LocationTranslatorImplTest {
 	@Mock
 	private FhirGlobalPropertyService propertyService;
 	
+	@Mock
+	private ProvenanceTranslator<Location> provenanceTranslator;
+	
 	private LocationTranslatorImpl locationTranslator;
 	
 	private Location omrsLocation;
@@ -107,6 +116,7 @@ public class LocationTranslatorImplTest {
 		locationTranslator.setTelecomTranslator(telecomTranslator);
 		locationTranslator.setFhirLocationDao(fhirLocationDao);
 		locationTranslator.setPropertyService(propertyService);
+		locationTranslator.setProvenanceTranslator(provenanceTranslator);
 		
 	}
 	
@@ -420,6 +430,23 @@ public class LocationTranslatorImplTest {
 		Location omrsLocation = locationTranslator.toOpenmrsType(location);
 		assertThat(omrsLocation, notNullValue());
 		assertThat(omrsLocation.getDateChanged(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void toFhirResource_shouldAddProvenanceResources() {
+		Location location = new Location();
+		location.setUuid(LOCATION_UUID);
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		when(provenanceTranslator.getCreateProvenance(location)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(location)).thenReturn(provenance);
+		org.hl7.fhir.r4.model.Location result = locationTranslator.toFhirResource(location);
+		assertThat(result, notNullValue());
+		assertThat(result.getContained(), not(empty()));
+		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
+		assertThat(result.getContained().stream()
+		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
+		    is(true));
 	}
 	
 }

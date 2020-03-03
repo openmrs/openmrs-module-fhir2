@@ -29,6 +29,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +48,9 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 	
 	@Inject
 	private FhirLocationDao fhirLocationDao;
+	
+	@Inject
+	private ProvenanceTranslator<org.openmrs.Location> provenanceTranslator;
 	
 	/**
 	 * @see org.openmrs.module.fhir2.api.translators.LocationTranslator#toFhirResource(org.openmrs.Location)
@@ -91,6 +95,8 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 			}
 			
 			fhirLocation.getMeta().setLastUpdated(openmrsLocation.getDateChanged());
+			fhirLocation.addContained(provenanceTranslator.getCreateProvenance(openmrsLocation));
+			fhirLocation.addContained(provenanceTranslator.getUpdateProvenance(openmrsLocation));
 		}
 		return fhirLocation;
 	}
