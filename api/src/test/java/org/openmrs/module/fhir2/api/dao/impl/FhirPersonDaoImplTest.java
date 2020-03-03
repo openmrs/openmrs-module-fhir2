@@ -62,7 +62,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String GENDER = "M";
 	
-	private static final String WRONG_GENDER = "other";
+	private static final String WRONG_GENDER = "wrong-gender";
 	
 	private static final String GIVEN_NAME = "John";
 	

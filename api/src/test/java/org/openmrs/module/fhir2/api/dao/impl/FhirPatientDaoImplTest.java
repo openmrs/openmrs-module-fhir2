@@ -69,6 +69,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String BAD_PATIENT_IDENTIFIER_TYPE = "Non-Existent Identifier";
 	
+	private static final String PATIENT_WRONG_GENDER = "wrong-gender";
+	
 	private static final String PATIENT_BIRTHDATE = "1976-08-25";
 	
 	private static final String PATIENT_BIRTHDATE_WITH_TIME = "1976-08-25T13:44:57.0";
@@ -271,7 +273,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenGenderNotMatched() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null, null,
-		    new TokenOrListParam().add(new TokenParam("other")), null, null, null, null, null, null, null, null);
+		    new TokenOrListParam().add(new TokenParam(PATIENT_WRONG_GENDER)), null, null, null, null, null, null, null,
+		    null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
