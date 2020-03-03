@@ -70,6 +70,8 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	private static final String STATE = "Washington";
 	
+	private static final String COUNTRY = "Washington";
+	
 	private static final String POSTAL_CODE = "98136";
 	
 	@Mock
@@ -131,10 +133,11 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByName() {
 		StringOrListParam nameParam = new StringOrListParam().add(new StringParam(NAME));
 		when(patientService.searchForPatients(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		            .thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(nameParam, null, null, null, null, null, null, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -145,10 +148,11 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByGivenName() {
 		StringOrListParam givenNameParam = new StringOrListParam().add(new StringParam(NAME));
 		when(patientService.searchForPatients(isNull(), argThat(is(givenNameParam)), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		            .thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(null, givenNameParam, null, null, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -159,10 +163,11 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByFamilyName() {
 		StringOrListParam familyNameParam = new StringOrListParam().add(new StringParam(FAMILY_NAME));
 		when(patientService.searchForPatients(isNull(), isNull(), argThat(is(familyNameParam)), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		            .thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(null, null, familyNameParam, null, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -173,10 +178,11 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByIdentifier() {
 		TokenOrListParam identifierParam = new TokenOrListParam().add(IDENTIFIER);
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), argThat(is(identifierParam)), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		            .thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(null, null, null, identifierParam, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -187,10 +193,11 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByGender() {
 		TokenOrListParam genderParam = new TokenOrListParam().add(GENDER);
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), argThat(is(genderParam)), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		            .thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(null, null, null, null, genderParam, null, null, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -201,10 +208,11 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByBirthDate() {
 		DateRangeParam birthDateParam = new DateRangeParam().setLowerBound(BIRTH_DATE).setUpperBound(BIRTH_DATE);
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(birthDateParam)),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		            .thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(null, null, null, null, null, birthDateParam, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -215,11 +223,11 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByDeathDate() {
 		DateRangeParam deathDateParam = new DateRangeParam().setLowerBound(DEATH_DATE).setUpperBound(DEATH_DATE);
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(deathDateParam)), isNull(), isNull(), isNull(), isNull(), isNull()))
+		    argThat(is(deathDateParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(null, null, null, null, null, null, deathDateParam, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -230,11 +238,11 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByDeceased() {
 		TokenOrListParam deceasedParam = new TokenOrListParam().add("true");
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(deceasedParam)), isNull(), isNull(), isNull(), isNull()))
+		    argThat(is(deceasedParam)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(null, null, null, null, null, null, null, deceasedParam, null, null,
-		    null, null);
+		    null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -245,10 +253,10 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByCity() {
 		StringOrListParam cityParam = new StringOrListParam().add(new StringParam(CITY));
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(cityParam)), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
+		    argThat(is(cityParam)), isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, cityParam, null,
-		    null, null);
+		    null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -259,10 +267,10 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByState() {
 		StringOrListParam stateParam = new StringOrListParam().add(new StringParam(STATE));
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), argThat(is(stateParam)), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
+		    isNull(), argThat(is(stateParam)), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, stateParam,
-		    null, null);
+		    null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -273,10 +281,26 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByPostalCode() {
 		StringOrListParam postalCodeParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), argThat(is(postalCodeParam)), isNull())).thenReturn(Collections.singletonList(patient));
+		    isNull(), isNull(), argThat(is(postalCodeParam)), isNull(), isNull()))
+		            .thenReturn(Collections.singletonList(patient));
 		
 		Bundle results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
-		    postalCodeParam, null);
+		    postalCodeParam, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByCountry() {
+		StringOrListParam countryParam = new StringOrListParam().add(new StringParam(COUNTRY));
+		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), argThat(is(countryParam)), isNull()))
+		            .thenReturn(Collections.singletonList(patient));
+		
+		Bundle results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null, null,
+		    countryParam, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));

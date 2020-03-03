@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
@@ -34,11 +35,10 @@ import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,16 +49,15 @@ import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
-import org.openmrs.User;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
-import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientTranslatorImplTest {
@@ -117,7 +116,7 @@ public class PatientTranslatorImplTest {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
+	private ProvenanceTranslator<org.openmrs.Patient> provenanceTranslator;
 	
 	private PatientTranslatorImpl patientTranslator;
 	
@@ -131,7 +130,7 @@ public class PatientTranslatorImplTest {
 		patientTranslator.setTelecomTranslator(telecomTranslator);
 		patientTranslator.setFhirPersonDao(fhirPersonDao);
 		patientTranslator.setGlobalPropertyService(globalPropertyService);
-		patientTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
+		patientTranslator.setProvenanceTranslator(provenanceTranslator);
 	}
 	
 	@Test
@@ -415,96 +414,19 @@ public class PatientTranslatorImplTest {
 	}
 	
 	@Test
-	public void onCreate_shouldCreateProvenanceWithRecordedDate() {
+	public void shouldAddProvenanceResources() {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setUuid(PATIENT_UUID);
-		patient.setDateCreated(new Date());
-		
-		Provenance provenance = patientTranslator.getCreateProvenance(patient);
-		assertThat(provenance, notNullValue());
-		assertThat(provenance.getRecorded(), notNullValue());
-		assertThat(provenance.getRecorded(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
-	public void onCreate_shouldCreateProvenanceWithActivity() {
-		org.openmrs.Patient patient = new org.openmrs.Patient();
-		patient.setUuid(PATIENT_UUID);
-		
-		Provenance provenance = patientTranslator.getCreateProvenance(patient);
-		
-		assertThat(provenance, notNullValue());
-		assertThat(provenance.getActivity(), notNullValue());
-		assertThat(provenance.getActivity().getCodingFirstRep().getCode(), equalTo(CREATE));
-		assertThat(provenance.getActivity().getCodingFirstRep().getDisplay(), equalTo("create"));
-		assertThat(provenance.getActivity().getCodingFirstRep().getSystem(),
-		    equalTo(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION));
-	}
-	
-	@Test
-	public void onCreate_shouldCreateProvenanceWithAgent() {
-		User user = new User();
-		user.setUuid(USER_UUID);
-		Practitioner practitioner = new Practitioner();
-		practitioner.setId(USER_UUID);
-		org.openmrs.Patient patient = new org.openmrs.Patient();
-		patient.setUuid(PATIENT_UUID);
-		patient.setCreator(user);
-		Reference practitionerRef = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + USER_UUID);
-		
-		when(practitionerReferenceTranslator.toFhirResource(user)).thenReturn(practitionerRef);
-		Provenance provenance = patientTranslator.getCreateProvenance(patient);
-		
-		assertThat(provenance, notNullValue());
-		assertThat(provenance.getAgent(), not(empty()));
-		assertThat(provenance.getAgent().get(0).getWho(), equalTo(practitionerRef));
-		assertThat(provenance.getAgent().get(0).getRoleFirstRep().getCodingFirstRep().getCode(), equalTo(AGENT_ROLE_CODE));
-	}
-	
-	@Test
-	public void onUpdate_shouldCreateProvenanceWithRecordedDate() {
-		org.openmrs.Patient patient = new org.openmrs.Patient();
-		patient.setUuid(PATIENT_UUID);
-		patient.setDateChanged(new Date());
-		
-		Provenance provenance = patientTranslator.getUpdateProvenance(patient);
-		assertThat(provenance, notNullValue());
-		assertThat(provenance.getRecorded(), notNullValue());
-		assertThat(provenance.getRecorded(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
-	public void onUpdate_shouldCreateProvenanceWithActivity() {
-		org.openmrs.Patient patient = new org.openmrs.Patient();
-		patient.setUuid(PATIENT_UUID);
-		
-		Provenance provenance = patientTranslator.getUpdateProvenance(patient);
-		
-		assertThat(provenance, notNullValue());
-		assertThat(provenance.getActivity(), notNullValue());
-		assertThat(provenance.getActivity().getCodingFirstRep().getCode(), equalTo(UPDATE));
-		assertThat(provenance.getActivity().getCodingFirstRep().getDisplay(), equalTo(REVISE));
-		assertThat(provenance.getActivity().getCodingFirstRep().getSystem(),
-		    equalTo(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION));
-	}
-	
-	@Test
-	public void onUpdate_shouldCreateProvenanceWithAgent() {
-		User user = new User();
-		user.setUuid(USER_UUID);
-		org.openmrs.Patient patient = new org.openmrs.Patient();
-		patient.setUuid(PATIENT_UUID);
-		patient.setChangedBy(user);
-		Reference practitionerRef = new Reference();
-		practitionerRef.setReference(FhirConstants.PRACTITIONER + "/" + USER_UUID);
-		
-		when(practitionerReferenceTranslator.toFhirResource(user)).thenReturn(practitionerRef);
-		Provenance provenance = patientTranslator.getUpdateProvenance(patient);
-		
-		assertThat(provenance, notNullValue());
-		assertThat(provenance.getAgent(), not(empty()));
-		assertThat(provenance.getAgent().get(0).getWho().getReference(),
-		    equalTo(FhirConstants.PRACTITIONER + "/" + USER_UUID));
-		assertThat(provenance.getAgent().get(0).getRoleFirstRep().getCodingFirstRep().getCode(), equalTo(AGENT_ROLE_CODE));
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		when(provenanceTranslator.getCreateProvenance(patient)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(patient)).thenReturn(provenance);
+		org.hl7.fhir.r4.model.Patient result = patientTranslator.toFhirResource(patient);
+		assertThat(result, notNullValue());
+		assertThat(result.getContained(), not(empty()));
+		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
+		assertThat(result.getContained().stream()
+		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
+		    is(true));
 	}
 }

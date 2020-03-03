@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
-import org.openmrs.module.fhir2.util.FhirUtils;
+import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -56,7 +56,7 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport diagnosticReport) {
-		return FhirUtils.buildCreate(service.saveDiagnosticReport(diagnosticReport));
+		return FhirServerUtils.buildCreate(service.saveDiagnosticReport(diagnosticReport));
 	}
 	
 	@Update
@@ -67,6 +67,6 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 			idPart = id.getIdPart();
 		}
 		
-		return FhirUtils.buildUpdate(service.updateDiagnosticReport(idPart, diagnosticReport));
+		return FhirServerUtils.buildUpdate(service.updateDiagnosticReport(idPart, diagnosticReport));
 	}
 }

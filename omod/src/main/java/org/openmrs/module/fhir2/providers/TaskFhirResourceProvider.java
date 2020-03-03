@@ -11,7 +11,10 @@ package org.openmrs.module.fhir2.providers;
 
 import javax.inject.Inject;
 
+import java.util.List;
+
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -23,9 +26,10 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
-import org.openmrs.module.fhir2.util.FhirUtils;
+import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -55,12 +59,22 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createTask(@ResourceParam Task newTask) {
-		return FhirUtils.buildCreate(service.saveTask(newTask));
+		return FhirServerUtils.buildCreate(service.saveTask(newTask));
 	}
 	
 	@Update
 	@SuppressWarnings("unused")
 	public MethodOutcome updateTask(@IdParam IdType id, @ResourceParam Task task) {
-		return FhirUtils.buildUpdate(service.updateTask(id.getIdPart(), task));
+		return FhirServerUtils.buildUpdate(service.updateTask(id.getIdPart(), task));
+	}
+	
+	@History
+	@SuppressWarnings("unused")
+	public List<Resource> getTaskHistoryById(@IdParam IdType id) {
+		Task task = service.getTaskByUuid(id.getIdPart());
+		if (task == null) {
+			throw new ResourceNotFoundException("Could not find Task with Id " + id.getIdPart());
+		}
+		return task.getContained();
 	}
 }

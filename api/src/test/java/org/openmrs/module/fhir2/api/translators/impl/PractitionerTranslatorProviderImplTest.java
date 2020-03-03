@@ -27,8 +27,10 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +47,9 @@ import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PractitionerTranslatorProviderImplTest {
@@ -96,6 +100,9 @@ public class PractitionerTranslatorProviderImplTest {
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
+	@Mock
+	private ProvenanceTranslator<Provider> provenanceTranslator;
+	
 	private PractitionerTranslatorProviderImpl practitionerTranslator;
 	
 	private Provider provider;
@@ -111,6 +118,7 @@ public class PractitionerTranslatorProviderImplTest {
 		practitionerTranslator.setTelecomTranslator(telecomTranslator);
 		practitionerTranslator.setFhirPractitionerDao(fhirPractitionerDao);
 		practitionerTranslator.setGlobalPropertyService(globalPropertyService);
+		practitionerTranslator.setProvenanceTranslator(provenanceTranslator);
 		
 		Person person = new Person();
 		person.setGender(GENDER);
@@ -264,5 +272,22 @@ public class PractitionerTranslatorProviderImplTest {
 		Provider result = practitionerTranslator.toOpenmrsType(practitioner);
 		assertThat(result, notNullValue());
 		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void toFhirResource_shouldAddProvenanceResources() {
+		Provider provider = new Provider();
+		provider.setUuid(PRACTITIONER_UUID);
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		when(provenanceTranslator.getCreateProvenance(provider)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(provider)).thenReturn(provenance);
+		org.hl7.fhir.r4.model.Practitioner result = practitionerTranslator.toFhirResource(provider);
+		assertThat(result, notNullValue());
+		assertThat(result.getContained(), not(empty()));
+		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
+		assertThat(result.getContained().stream()
+		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
+		    is(true));
 	}
 }

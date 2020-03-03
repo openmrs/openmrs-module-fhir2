@@ -57,8 +57,8 @@ public class FhirPatientServiceImpl implements FhirPatientService {
 	public Collection<Patient> searchForPatients(StringOrListParam name, StringOrListParam given, StringOrListParam family,
 	        TokenOrListParam identifier, TokenOrListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
 	        TokenOrListParam deceased, StringOrListParam city, StringOrListParam state, StringOrListParam postalCode,
-	        SortSpec sort) {
+	        StringOrListParam country, SortSpec sort) {
 		return dao.searchForPatients(name, given, family, identifier, gender, birthDate, deathDate, deceased, city, state,
-		    postalCode, sort).stream().map(translator::toFhirResource).collect(Collectors.toList());
+		    postalCode, country, sort).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
 }

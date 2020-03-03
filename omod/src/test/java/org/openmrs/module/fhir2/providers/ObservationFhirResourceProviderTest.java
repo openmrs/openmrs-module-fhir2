@@ -12,6 +12,9 @@ package org.openmrs.module.fhir2.providers;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -23,18 +26,22 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirObservationService;
+import org.openmrs.module.fhir2.web.servlet.BaseFhirProvenanceResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ObservationFhirResourceProviderTest {
+public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Observation> {
 	
 	private static final String OBSERVATION_UUID = "1223h34-34nj3-34nj34-34nj";
 	
@@ -59,6 +66,7 @@ public class ObservationFhirResourceProviderTest {
 		observation = new Observation();
 		observation.setId(OBSERVATION_UUID);
 		observation.setStatus(Observation.ObservationStatus.UNKNOWN);
+		setProvenanceResources(observation);
 	}
 	
 	@Test
@@ -105,5 +113,38 @@ public class ObservationFhirResourceProviderTest {
 		assertThat(results.getEntry(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("Observation"));
 		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(OBSERVATION_UUID));
+	}
+	
+	@Test
+	public void getPatientResourceHistory_shouldReturnListOfResource() {
+		IdType id = new IdType();
+		id.setValue(OBSERVATION_UUID);
+		when(observationService.getObservationByUuid(OBSERVATION_UUID)).thenReturn(observation);
+		
+		List<Resource> resources = resourceProvider.getObservationHistoryById(id);
+		assertThat(resources, Matchers.notNullValue());
+		assertThat(resources, not(empty()));
+		assertThat(resources.size(), Matchers.equalTo(2));
+	}
+	
+	@Test
+	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
+		IdType id = new IdType();
+		id.setValue(OBSERVATION_UUID);
+		when(observationService.getObservationByUuid(OBSERVATION_UUID)).thenReturn(observation);
+		
+		List<Resource> resources = resourceProvider.getObservationHistoryById(id);
+		assertThat(resources, not(empty()));
+		assertThat(resources.stream().findAny().isPresent(), is(true));
+		assertThat(resources.stream().findAny().get().getResourceType().name(),
+		    Matchers.equalTo(Provenance.class.getSimpleName()));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
+		IdType idType = new IdType();
+		idType.setValue(WRONG_OBSERVATION_UUID);
+		assertThat(resourceProvider.getObservationHistoryById(idType).isEmpty(), is(true));
+		assertThat(resourceProvider.getObservationHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 }

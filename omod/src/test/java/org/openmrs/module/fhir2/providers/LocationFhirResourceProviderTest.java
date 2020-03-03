@@ -16,18 +16,23 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,9 +40,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
+import org.openmrs.module.fhir2.web.servlet.BaseFhirProvenanceResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LocationFhirResourceProviderTest {
+public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Location> {
 	
 	private static final String LOCATION_UUID = "123xx34-623hh34-22hj89-23hjy5";
 	
@@ -94,6 +100,7 @@ public class LocationFhirResourceProviderTest {
 		location.setAddress(address);
 		location.getMeta().addTag(new Coding(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME,
 		        LOGIN_LOCATION_TAG_DESCRIPTION));
+		setProvenanceResources(location);
 	}
 	
 	@Test
@@ -240,6 +247,39 @@ public class LocationFhirResourceProviderTest {
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void getLocationHistoryById_shouldReturnListOfResource() {
+		IdType id = new IdType();
+		id.setValue(LOCATION_UUID);
+		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		
+		List<Resource> resources = resourceProvider.getLocationHistoryById(id);
+		assertThat(resources, Matchers.notNullValue());
+		assertThat(resources, not(empty()));
+		assertThat(resources.size(), Matchers.equalTo(2));
+	}
+	
+	@Test
+	public void getLocationHistoryById_shouldReturnProvenanceResources() {
+		IdType id = new IdType();
+		id.setValue(LOCATION_UUID);
+		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		
+		List<Resource> resources = resourceProvider.getLocationHistoryById(id);
+		assertThat(resources, not(empty()));
+		assertThat(resources.stream().findAny().isPresent(), Matchers.is(true));
+		assertThat(resources.stream().findAny().get().getResourceType().name(),
+		    Matchers.equalTo(Provenance.class.getSimpleName()));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void getLocationHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
+		IdType idType = new IdType();
+		idType.setValue(LOCATION_UUID);
+		assertThat(resourceProvider.getLocationHistoryById(idType).isEmpty(), Matchers.is(true));
+		assertThat(resourceProvider.getLocationHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 	
 }

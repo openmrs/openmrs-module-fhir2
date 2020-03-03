@@ -14,22 +14,33 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.FhirConstants.AUT;
+import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
 
 import javax.servlet.ServletException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.web.servlet.BaseFhirResourceProviderTest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -132,4 +143,72 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirResourcePro
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry(), is(empty()));
 	}
+	
+	@Test
+	public void shouldVerifyGetPractitionerHistoryByIdUri() throws Exception {
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId(PRACTITIONER_UUID);
+		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		
+		MockHttpServletResponse response = getPractitionerHistoryByIdRequest();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(BaseFhirResourceProviderTest.FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void shouldGetPractitionerHistoryById() throws IOException, ServletException {
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setRecorded(new Date());
+		provenance.setActivity(new CodeableConcept().addCoding(
+		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
+		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
+		        .setType(new CodeableConcept().addCoding(new Coding().setCode(AUT).setDisplay(AUTHOR)
+		                .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
+		        .addRole(new CodeableConcept().addCoding(
+		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId(PRACTITIONER_UUID);
+		practitioner.addContained(provenance);
+		
+		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		
+		MockHttpServletResponse response = getPractitionerHistoryByIdRequest();
+		
+		Bundle results = readBundleResponse(response);
+		assertThat(results, notNullValue());
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results.getEntry().get(0).getResource(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().getResourceType().name(),
+		    equalTo(Provenance.class.getSimpleName()));
+		
+	}
+	
+	@Test
+	public void getPractitionerHistoryById_shouldReturnBundleWithEmptyEntriesIfPractitionerContainedIsEmpty()
+	        throws Exception {
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId(PRACTITIONER_UUID);
+		practitioner.setContained(new ArrayList<>());
+		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		
+		MockHttpServletResponse response = getPractitionerHistoryByIdRequest();
+		Bundle results = readBundleResponse(response);
+		assertThat(results.hasEntry(), is(false));
+	}
+	
+	@Test
+	public void getPractitionerHistoryById_shouldReturn404IfPractitionerIdIsWrong() throws Exception {
+		MockHttpServletResponse response = get("/Practitioner/" + WRONG_PRACTITIONER_UUID + "/_history")
+		        .accept(BaseFhirResourceProviderTest.FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+	}
+	
+	private MockHttpServletResponse getPractitionerHistoryByIdRequest() throws IOException, ServletException {
+		return get("/Practitioner/" + PRACTITIONER_UUID + "/_history")
+		        .accept(BaseFhirResourceProviderTest.FhirMediaTypes.JSON).go();
+	}
+	
 }
