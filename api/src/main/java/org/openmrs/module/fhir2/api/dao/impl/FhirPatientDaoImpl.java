@@ -73,7 +73,7 @@ public class FhirPatientDaoImpl extends BaseDaoImpl implements FhirPatientDao {
 	public Collection<Patient> searchForPatients(StringOrListParam name, StringOrListParam given, StringOrListParam family,
 	        TokenOrListParam identifier, TokenOrListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
 	        TokenOrListParam deceased, StringOrListParam city, StringOrListParam state, StringOrListParam postalCode,
-	        SortSpec sort) {
+	        StringOrListParam country, SortSpec sort) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Patient.class);
 		
 		handleNames(criteria, name, given, family);
@@ -82,7 +82,7 @@ public class FhirPatientDaoImpl extends BaseDaoImpl implements FhirPatientDao {
 		handleDateRange("birthdate", birthDate).ifPresent(criteria::add);
 		handleDateRange("deathdate", deathDate).ifPresent(criteria::add);
 		handleBoolean("dead", deceased).ifPresent(criteria::add);
-		handlePersonAddress("pad", city, state, postalCode, null).ifPresent(c -> {
+		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
 			criteria.createAlias("addresses", "pad");
 			criteria.add(c);
 		});
