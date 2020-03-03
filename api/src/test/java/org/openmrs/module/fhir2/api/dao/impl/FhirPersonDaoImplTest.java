@@ -246,6 +246,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		// Smallest given name of person i should be less than the largest given name of person i + 1.
 		for (int i = 1; i < people.size(); i++) {
+			assertThat(people.get(i - 1).getNames(), not(empty())); // Not sure why this test is failing
 			String currentSmallestGivenName = people.get(i - 1).getNames().stream()
 			        .min(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
 			String nextLargestGivenName = people.get(i).getNames().stream()

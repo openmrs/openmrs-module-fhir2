@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -70,10 +72,22 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 	 */
 	@Override
 	public Task updateTask(String uuid, Task task) {
+		if (task.getId() == null) {
+			throw new InvalidRequestException("Task resource is missing id.");
+		}
+		
+		if (task.getId() != uuid) {
+			throw new InvalidRequestException("Task id and provided uuid do not match");
+		}
+		
 		FhirTask openmrsTask = null;
 		
 		if (uuid != null) {
 			openmrsTask = dao.getTaskByUuid(task.getId());
+		}
+		
+		if (openmrsTask == null) {
+			throw new MethodNotAllowedException("No Task found to update. Use Post to create new Tasks.");
 		}
 		
 		return translator.toFhirResource(dao.saveTask(translator.toOpenmrsType(openmrsTask, task)));

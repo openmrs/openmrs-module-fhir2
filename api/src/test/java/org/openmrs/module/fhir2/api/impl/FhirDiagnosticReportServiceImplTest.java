@@ -11,14 +11,13 @@ package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +34,8 @@ public class FhirDiagnosticReportServiceImplTest {
 	private static final String UUID = "249b9094-b812-4b0c-a204-0052a05c657f";
 	
 	private static final String CHILD_UUID = "07b76ea1-f1b1-4d2c-9958-bf1f6856cf9c";
+	
+	private static final String WRONG_UUID = "dd0649b4-efa1-4288-a317-e4c141d89859";
 	
 	private static final DiagnosticReport.DiagnosticReportStatus INITIAL_STATUS = DiagnosticReport.DiagnosticReportStatus.PRELIMINARY;
 	
@@ -124,25 +125,28 @@ public class FhirDiagnosticReportServiceImplTest {
 		assertThat(result, equalTo(diagnosticReport));
 	}
 	
-	@Test
-	public void updateDiagnosticReport_shouldCreateNewDiagnosticReportWhenUuidNull() {
+	@Test(expected = InvalidRequestException.class)
+	public void updateTask_shouldThrowInvalidRequestForUuidMismatch() {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 		
-		Obs obsGroup = new Obs();
-		Obs childObs = new Obs();
-		childObs.setUuid(CHILD_UUID);
-		obsGroup.setUuid(UUID);
+		service.updateDiagnosticReport(WRONG_UUID, diagnosticReport);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateTask_shouldThrowInvalidRequestForMissingUuid() {
+		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		
-		obsGroup.addGroupMember(childObs);
+		service.updateDiagnosticReport(UUID, diagnosticReport);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateTask_shouldThrowMethodNotAllowedIfTaskDoesNotExist() {
+		DiagnosticReport diagnosticReport = new DiagnosticReport();
+		diagnosticReport.setId(WRONG_UUID);
 		
-		when(translator.toOpenmrsType(any(Obs.class), eq(diagnosticReport))).thenReturn(obsGroup);
-		when(dao.saveObsGroup(obsGroup)).thenReturn(obsGroup);
-		when(translator.toFhirResource(obsGroup)).thenReturn(diagnosticReport);
+		when(dao.getObsGroupByUuid(WRONG_UUID)).thenReturn(null);
 		
-		DiagnosticReport result = service.updateDiagnosticReport(null, diagnosticReport);
-		
-		assertThat(result, notNullValue());
-		assertThat(result, equalTo(diagnosticReport));
+		service.updateDiagnosticReport(WRONG_UUID, diagnosticReport);
 	}
 }

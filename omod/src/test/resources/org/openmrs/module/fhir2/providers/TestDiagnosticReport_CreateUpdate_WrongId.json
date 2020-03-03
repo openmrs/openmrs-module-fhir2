@@ -1,0 +1,35 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "9bf0d1ac-62a8-4440-a5a1-eb1015a7cc65",
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/ValueSet/diagnostic-service-sections",
+          "code": "LAB"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "58410-2",
+        "display": "Complete blood count (hemogram) panel - Blood by Automated count"
+      }
+    ],
+    "text": "Complete Blood Count"
+  },
+  "issued": "2011-03-04T11:45:33+11:00",
+
+  "result": [
+    {
+      "reference": "Observation/r1"
+    },
+    {
+      "reference": "Observation/r2"
+    }
+  ]
+}

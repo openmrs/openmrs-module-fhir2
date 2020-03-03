@@ -20,6 +20,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -77,6 +80,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		when(taskService.getTaskByUuid(TASK_UUID)).thenReturn(task);
 		
 		Task result = resourceProvider.getTaskById(id);
+		
 		assertThat(result.isResource(), is(true));
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
@@ -87,6 +91,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	public void getTaskByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_TASK_UUID);
+		
 		assertThat(resourceProvider.getTaskById(idType).isResource(), is(true));
 		assertThat(resourceProvider.getTaskById(idType), nullValue());
 	}
@@ -124,4 +129,48 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		assertThat(resourceProvider.getTaskHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 	
+	@Test
+	public void createTask_shouldCreateNewTask() {
+		when(taskService.saveTask(task)).thenReturn(task);
+		
+		MethodOutcome result = resourceProvider.createTask(task);
+		assertThat(result.getResource(), equalTo(task));
+	}
+	
+	@Test
+	public void updateTask_shouldUpdateTask() {
+		when(taskService.updateTask(TASK_UUID, task)).thenReturn(task);
+		
+		IdType uuid = new IdType();
+		uuid.setValue(TASK_UUID);
+		
+		MethodOutcome result = resourceProvider.updateTask(uuid, task);
+		assertThat(result.getResource(), equalTo(task));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateTask_shouldThrowInvalidRequestForTaskUuidMismatch() {
+		when(taskService.updateTask(WRONG_TASK_UUID, task)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), task);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateTask_shouldThrowInvalidRequestIfTaskHasNoUuid() {
+		Task noIdTask = new Task();
+		
+		when(taskService.updateTask(TASK_UUID, noIdTask)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateTask(new IdType().setValue(TASK_UUID), noIdTask);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateTask_shouldThrowMethodNotAllowedIfTaskDoesNotExist() {
+		Task wrongTask = new Task();
+		wrongTask.setId(WRONG_TASK_UUID);
+		
+		when(taskService.updateTask(WRONG_TASK_UUID, wrongTask)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), wrongTask);
+	}
 }
