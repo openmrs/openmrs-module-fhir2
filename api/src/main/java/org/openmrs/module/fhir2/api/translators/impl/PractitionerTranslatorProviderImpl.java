@@ -31,10 +31,10 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.AddressTranslator;
+import org.openmrs.module.fhir2.api.translators.CustomizableMetadataTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.stereotype.Component;
 
@@ -61,7 +61,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Inject
-	private ProvenanceTranslator<Provider> provenanceTranslator;
+	private CustomizableMetadataTranslator<ProviderAttribute, Provider> customizableMetadataTranslator;
 	
 	@Override
 	public Provider toOpenmrsType(Provider existingProvider, Practitioner practitioner) {
@@ -114,8 +114,8 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 			}
 		}
 		practitioner.getMeta().setLastUpdated(provider.getDateChanged());
-		practitioner.addContained(provenanceTranslator.getCreateProvenance(provider));
-		practitioner.addContained(provenanceTranslator.getUpdateProvenance(provider));
+		practitioner.addContained(customizableMetadataTranslator.getCreateProvenance(provider));
+		practitioner.addContained(customizableMetadataTranslator.getUpdateProvenance(provider));
 		
 		return practitioner;
 	}
