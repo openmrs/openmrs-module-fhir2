@@ -17,6 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -104,5 +106,32 @@ public class DiagnosticReportFhirResourceProviderTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(diagnosticReport));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateDiagnosticReport_shouldThrowInvalidRequestForUuidMismatch() {
+		when(service.updateDiagnosticReport(WRONG_UUID, diagnosticReport)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), diagnosticReport);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateDiagnosticReport_shouldThrowInvalidRequestForMissingId() {
+		DiagnosticReport noIdDiagnostiReport = new DiagnosticReport();
+		
+		when(service.updateDiagnosticReport(UUID, noIdDiagnostiReport)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), noIdDiagnostiReport);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateDiagnosticReport_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		DiagnosticReport wrongDiagnosticReport = new DiagnosticReport();
+		
+		wrongDiagnosticReport.setId(WRONG_UUID);
+		
+		when(service.updateDiagnosticReport(WRONG_UUID, wrongDiagnosticReport)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport);
 	}
 }

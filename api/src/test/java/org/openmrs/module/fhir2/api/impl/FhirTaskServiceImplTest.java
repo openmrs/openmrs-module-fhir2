@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
@@ -34,6 +36,8 @@ import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 public class FhirTaskServiceImplTest {
 	
 	private static final String TASK_UUID = "dc9ce8be-3155-4adf-b28f-29436ec30a30";
+	
+	private static final String WRONG_TASK_UUID = "df34a1c1-f57b-4c33-bee5-e601b56b9d5b";
 	
 	private static final String SERVICE_REQUEST_UUID = "9bf48663-be75-49d1-91a8-16b71287db1a";
 	
@@ -81,7 +85,7 @@ public class FhirTaskServiceImplTest {
 	}
 	
 	@Test
-	public void shouldSaveNewTask() {
+	public void saveTask_shouldSaveNewTask() {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		FhirTask openmrsTask = new FhirTask();
 		
@@ -103,7 +107,7 @@ public class FhirTaskServiceImplTest {
 	}
 	
 	@Test
-	public void shouldUpdateExistingTask() {
+	public void updateTask_shouldUpdateExistingTask() {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		FhirTask openmrsTask = new FhirTask();
 		FhirTask updatedOpenmrsTask = new FhirTask();
@@ -129,7 +133,31 @@ public class FhirTaskServiceImplTest {
 		
 		assertNotNull(result);
 		assertThat(result, equalTo(fhirTask));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateTask_shouldThrowInvalidRequestForUuidMismatch() {
+		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
+		fhirTask.setId(TASK_UUID);
 		
+		fhirTaskService.updateTask(WRONG_TASK_UUID, fhirTask);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateTask_shouldThrowInvalidRequestForMissingUuid() {
+		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
+		
+		fhirTaskService.updateTask(TASK_UUID, fhirTask);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateTask_shouldThrowMethodNotAllowedIfTaskDoesNotExist() {
+		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
+		fhirTask.setId(WRONG_TASK_UUID);
+		
+		when(dao.getTaskByUuid(WRONG_TASK_UUID)).thenReturn(null);
+		
+		fhirTaskService.updateTask(WRONG_TASK_UUID, fhirTask);
 	}
 	
 	@Test

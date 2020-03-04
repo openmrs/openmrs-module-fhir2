@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -44,10 +46,22 @@ public class FhirDiagnosticReportServiceImpl implements FhirDiagnosticReportServ
 	
 	@Override
 	public DiagnosticReport updateDiagnosticReport(String uuid, DiagnosticReport diagnosticReport) {
+		if (diagnosticReport.getId() == null) {
+			throw new InvalidRequestException("Diagnostic Report resource is missing id.");
+		}
+		
+		if (!diagnosticReport.getId().equals(uuid)) {
+			throw new InvalidRequestException("Diagnostic Report id and provided id do not match.");
+		}
+		
 		Obs obsGroup = new Obs();
 		
 		if (uuid != null) {
 			obsGroup = dao.getObsGroupByUuid(uuid);
+		}
+		
+		if (obsGroup == null) {
+			throw new MethodNotAllowedException("No Diagnostic Report found to update.");
 		}
 		
 		return translator.toFhirResource(dao.saveObsGroup(translator.toOpenmrsType(obsGroup, diagnosticReport)));

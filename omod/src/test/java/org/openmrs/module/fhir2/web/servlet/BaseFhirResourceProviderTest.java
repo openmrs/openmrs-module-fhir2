@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.web.servlet;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -70,6 +71,10 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 	
 	public static Matcher<MockHttpServletResponse> isBadRequest() {
 		return statusEquals(HttpStatus.BAD_REQUEST);
+	}
+	
+	public static Matcher<MockHttpServletResponse> isMethodNotAllowed() {
+		return statusEquals(HttpStatus.METHOD_NOT_ALLOWED);
 	}
 	
 	public static Matcher<MockHttpServletResponse> statusEquals(final int status) {
@@ -221,6 +226,12 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 		
 		public FhirRequestBuilder accept(@NotNull MediaType mediaType) {
 			request.addHeader(ACCEPT, mediaType.toString());
+			return this;
+		}
+		
+		public FhirRequestBuilder jsonContent(@NotNull String json) {
+			request.addHeader(CONTENT_TYPE, FhirMediaTypes.JSON.toString());
+			request.setContent(json.getBytes());
 			return this;
 		}
 		
