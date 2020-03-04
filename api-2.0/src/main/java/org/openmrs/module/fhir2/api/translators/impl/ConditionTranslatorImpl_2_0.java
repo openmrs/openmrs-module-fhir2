@@ -26,6 +26,7 @@ import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslato
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -44,6 +45,9 @@ public class ConditionTranslatorImpl_2_0 implements ConditionTranslator<Conditio
 	
 	@Inject
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
+	
+	@Inject
+	private ProvenanceTranslator<Condition> provenanceTranslator;
 	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(Condition condition) {
@@ -66,6 +70,8 @@ public class ConditionTranslatorImpl_2_0 implements ConditionTranslator<Conditio
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
 		fhirCondition.setRecordedDate(condition.getDateCreated());
 		fhirCondition.getMeta().setLastUpdated(condition.getDateChanged());
+		fhirCondition.addContained(provenanceTranslator.getCreateProvenance(condition));
+		fhirCondition.addContained(provenanceTranslator.getUpdateProvenance(condition));
 		
 		return fhirCondition;
 	}

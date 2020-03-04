@@ -24,6 +24,7 @@ import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,6 +40,9 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 	@Inject
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
+	@Inject
+	private ProvenanceTranslator<org.openmrs.Encounter> provenanceTranslator;
+	
 	@Override
 	public Encounter toFhirResource(org.openmrs.Encounter openMrsEncounter) {
 		Encounter encounter = new Encounter();
@@ -51,6 +55,8 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		encounter.setLocation(
 		    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
 		encounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());
+		encounter.addContained(provenanceTranslator.getCreateProvenance(openMrsEncounter));
+		encounter.addContained(provenanceTranslator.getUpdateProvenance(openMrsEncounter));
 		
 		return encounter;
 	}

@@ -11,17 +11,34 @@ package org.openmrs.module.fhir2.providers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.FhirConstants.AUT;
+import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
+
+import javax.servlet.ServletException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.web.servlet.BaseFhirResourceProviderTest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -68,5 +85,71 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		MockHttpServletResponse response = get("/Condition/" + WRONG_CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
+	}
+	
+	@Test
+	public void shouldVerifyConditionHistoryByIdUri() throws Exception {
+		Condition condition = new Condition();
+		condition.setId(CONDITION_UUID);
+		when(conditionService.getConditionByUuid(CONDITION_UUID)).thenReturn(condition);
+		
+		MockHttpServletResponse response = getConditionHistoryRequest();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(BaseFhirResourceProviderTest.FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void shouldGetConditionHistoryById() throws IOException, ServletException {
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setRecorded(new Date());
+		provenance.setActivity(new CodeableConcept().addCoding(
+		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
+		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
+		        .setType(new CodeableConcept().addCoding(new Coding().setCode(AUT).setDisplay(AUTHOR)
+		                .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
+		        .addRole(new CodeableConcept().addCoding(
+		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
+		Condition condition = new Condition();
+		condition.setId(CONDITION_UUID);
+		condition.addContained(provenance);
+		
+		when(conditionService.getConditionByUuid(CONDITION_UUID)).thenReturn(condition);
+		
+		MockHttpServletResponse response = getConditionHistoryRequest();
+		
+		Bundle results = readBundleResponse(response);
+		assertThat(results, notNullValue());
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results.getEntry().get(0).getResource(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().getResourceType().name(),
+		    equalTo(Provenance.class.getSimpleName()));
+		
+	}
+	
+	@Test
+	public void getConditionHistoryById_shouldReturnBundleWithEmptyEntriesIfConditionContainedIsEmpty() throws Exception {
+		Condition condition = new Condition();
+		condition.setId(CONDITION_UUID);
+		condition.setContained(new ArrayList<>());
+		when(conditionService.getConditionByUuid(CONDITION_UUID)).thenReturn(condition);
+		
+		MockHttpServletResponse response = getConditionHistoryRequest();
+		Bundle results = readBundleResponse(response);
+		assertThat(results.hasEntry(), is(false));
+	}
+	
+	@Test
+	public void getConditionHistoryById_shouldReturn404IfConditionIdIsWrong() throws Exception {
+		MockHttpServletResponse response = get("/Condition/" + WRONG_CONDITION_UUID + "/_history")
+		        .accept(BaseFhirResourceProviderTest.FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+	}
+	
+	private MockHttpServletResponse getConditionHistoryRequest() throws IOException, ServletException {
+		return get("/Condition/" + CONDITION_UUID + "/_history").accept(BaseFhirResourceProviderTest.FhirMediaTypes.JSON)
+		        .go();
 	}
 }
