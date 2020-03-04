@@ -24,7 +24,6 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
-import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.springframework.stereotype.Component;
 
@@ -33,15 +32,13 @@ import org.springframework.stereotype.Component;
 public class FhirPractitionerDaoImpl implements FhirPractitionerDao {
 	
 	@Inject
-	private ProviderService providerService;
-	
-	@Inject
 	@Named("sessionFactory")
 	private SessionFactory sessionFactory;
 	
 	@Override
 	public Provider getProviderByUuid(String uuid) {
-		return providerService.getProviderByUuid(uuid);
+		return (Provider) sessionFactory.getCurrentSession().createCriteria(Provider.class).add(eq("uuid", uuid))
+		        .uniqueResult();
 	}
 	
 	@Override

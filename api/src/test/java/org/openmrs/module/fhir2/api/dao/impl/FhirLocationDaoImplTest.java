@@ -28,7 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
-import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
@@ -70,17 +69,12 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	private FhirLocationDaoImpl fhirLocationDao;
 	
 	@Inject
-	@Named("locationService")
-	private Provider<LocationService> locationServiceProvider;
-	
-	@Inject
 	@Named("sessionFactory")
 	private Provider<SessionFactory> sessionFactoryProvider;
 	
 	@Before
 	public void setup() throws Exception {
 		fhirLocationDao = new FhirLocationDaoImpl();
-		fhirLocationDao.setLocationService(locationServiceProvider.get());
 		fhirLocationDao.setSessionFactory(sessionFactoryProvider.get());
 		executeDataSet(LOCATION_INITIAL_DATA_XML);
 	}
