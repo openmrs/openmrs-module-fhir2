@@ -24,7 +24,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
-import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.springframework.stereotype.Component;
 
@@ -33,20 +32,18 @@ import org.springframework.stereotype.Component;
 public class FhirLocationDaoImpl implements FhirLocationDao {
 	
 	@Inject
-	LocationService locationService;
-	
-	@Inject
 	@Named("sessionFactory")
 	SessionFactory sessionFactory;
 	
 	@Override
 	public Location getLocationByUuid(String uuid) {
-		return locationService.getLocationByUuid(uuid);
+		return (Location) sessionFactory.getCurrentSession().createCriteria(Location.class).add(eq("uuid", uuid))
+		        .uniqueResult();
 	}
 	
 	@Override
 	public Collection<Location> findLocationByName(String name) {
-		return locationService.getLocations(name);
+		return sessionFactory.getCurrentSession().createCriteria(Location.class).add(eq("name", name)).list();
 	}
 	
 	@Override

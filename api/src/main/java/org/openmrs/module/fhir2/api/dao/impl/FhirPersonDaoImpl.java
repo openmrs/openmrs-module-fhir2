@@ -28,7 +28,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
-import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.springframework.stereotype.Component;
 
@@ -37,15 +36,12 @@ import org.springframework.stereotype.Component;
 public class FhirPersonDaoImpl extends BaseDaoImpl implements FhirPersonDao {
 	
 	@Inject
-	PersonService personService;
-	
-	@Inject
 	@Named("sessionFactory")
-	SessionFactory sessionFactory;
+	private SessionFactory sessionFactory;
 	
 	@Override
 	public Person getPersonByUuid(String uuid) {
-		return personService.getPersonByUuid(uuid);
+		return (Person) sessionFactory.getCurrentSession().createCriteria(Person.class).add(eq("uuid", uuid)).uniqueResult();
 	}
 	
 	@Override
