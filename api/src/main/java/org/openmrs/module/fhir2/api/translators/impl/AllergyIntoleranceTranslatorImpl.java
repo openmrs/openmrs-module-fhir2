@@ -32,6 +32,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -49,6 +50,9 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 	
 	@Inject
 	private FhirConceptService conceptService;
+	
+	@Inject
+	private ProvenanceTranslator<Allergy> provenanceTranslator;
 	
 	@Override
 	public AllergyIntolerance toFhirResource(Allergy omrsAllergy) {
@@ -89,6 +93,8 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 		reactionComponent.setDescription(omrsAllergy.getReactionNonCoded());
 		reactionComponent.setSeverity(getFhirSeverity(omrsAllergy.getSeverity()));
 		allergy.addReaction(reactionComponent);
+		allergy.addContained(provenanceTranslator.getCreateProvenance(omrsAllergy));
+		allergy.addContained(provenanceTranslator.getUpdateProvenance(omrsAllergy));
 		
 		return allergy;
 	}

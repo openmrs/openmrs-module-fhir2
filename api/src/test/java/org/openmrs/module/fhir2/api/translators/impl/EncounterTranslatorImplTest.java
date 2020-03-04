@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -25,7 +26,10 @@ import java.util.Set;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +47,8 @@ import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterTranslatorImplTest {
@@ -83,6 +89,9 @@ public class EncounterTranslatorImplTest {
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
+	@Mock
+	private ProvenanceTranslator<org.openmrs.Encounter> provenanceTranslator;
+	
 	private Patient patient;
 	
 	private Encounter fhirEncounter;
@@ -103,6 +112,7 @@ public class EncounterTranslatorImplTest {
 		encounterTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		encounterTranslator.setParticipantTranslator(participantTranslator);
 		encounterTranslator.setEncounterLocationTranslator(encounterLocationTranslator);
+		encounterTranslator.setProvenanceTranslator(provenanceTranslator);
 		
 		PatientIdentifier identifier = new PatientIdentifier();
 		identifier.setIdentifier(PATIENT_IDENTIFIER);
@@ -322,5 +332,24 @@ public class EncounterTranslatorImplTest {
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
 		assertThat(result, notNullValue());
 		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldAddProvenances() {
+		org.openmrs.Encounter encounter = new org.openmrs.Encounter();
+		encounter.setUuid(ENCOUNTER_UUID);
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setRecorded(new Date());
+		when(provenanceTranslator.getCreateProvenance(encounter)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(encounter)).thenReturn(provenance);
+		
+		Encounter result = encounterTranslator.toFhirResource(encounter);
+		List<Resource> resources = result.getContained();
+		assertThat(resources, notNullValue());
+		assertThat(resources, not(empty()));
+		assertThat(resources.stream().findAny().isPresent(), is(true));
+		assertThat(resources.stream().findAny().get().isResource(), is(true));
+		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
 	}
 }
