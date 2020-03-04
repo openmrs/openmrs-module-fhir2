@@ -47,7 +47,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
-import org.openmrs.api.PersonService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -94,17 +93,12 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	private FhirPersonDaoImpl fhirPersonDao;
 	
 	@Inject
-	@Named("personService")
-	private Provider<PersonService> personServiceProvider;
-	
-	@Inject
 	@Named("sessionFactory")
 	private Provider<SessionFactory> sessionFactoryProvider;
 	
 	@Before
 	public void setup() throws Exception {
 		fhirPersonDao = new FhirPersonDaoImpl();
-		fhirPersonDao.setPersonService(personServiceProvider.get());
 		fhirPersonDao.setSessionFactory(sessionFactoryProvider.get());
 		executeDataSet(PERSON_INITIAL_DATA_XML);
 	}

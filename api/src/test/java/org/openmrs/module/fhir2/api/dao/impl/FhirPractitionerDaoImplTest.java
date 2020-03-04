@@ -27,7 +27,6 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.ProviderAttribute;
-import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -50,10 +49,6 @@ public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest 
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "FF89DD99-OOX78-KKG89D-XX89CC8";
 	
 	@Inject
-	@Named("providerService")
-	private Provider<ProviderService> providerServiceProvider;
-	
-	@Inject
 	@Named("sessionFactory")
 	private Provider<SessionFactory> sessionFactoryProvider;
 	
@@ -62,7 +57,6 @@ public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest 
 	@Before
 	public void setUp() throws Exception {
 		dao = new FhirPractitionerDaoImpl();
-		dao.setProviderService(providerServiceProvider.get());
 		dao.setSessionFactory(sessionFactoryProvider.get());
 		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
 	}
