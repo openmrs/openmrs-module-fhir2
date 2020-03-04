@@ -25,7 +25,6 @@ import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -40,9 +39,6 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 	
 	@Inject
 	private GenderTranslator genderTranslator;
-	
-	@Inject
-	private ProvenanceTranslator<User> provenanceTranslator;
 	
 	@Override
 	public Practitioner toFhirResource(User user) {
@@ -65,8 +61,6 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 			}
 		}
 		practitioner.getMeta().setLastUpdated(user.getDateChanged());
-		practitioner.addContained(provenanceTranslator.getCreateProvenance(user));
-		practitioner.addContained(provenanceTranslator.getUpdateProvenance(user));
 		
 		return practitioner;
 	}

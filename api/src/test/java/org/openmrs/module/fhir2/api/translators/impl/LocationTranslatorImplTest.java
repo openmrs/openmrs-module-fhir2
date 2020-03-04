@@ -47,8 +47,8 @@ import org.openmrs.LocationTag;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
+import org.openmrs.module.fhir2.api.translators.CustomizableMetadataTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 
@@ -102,7 +102,7 @@ public class LocationTranslatorImplTest {
 	private FhirGlobalPropertyService propertyService;
 	
 	@Mock
-	private ProvenanceTranslator<Location> provenanceTranslator;
+	private CustomizableMetadataTranslator<LocationAttribute, Location> customizableMetadataTranslator;
 	
 	private LocationTranslatorImpl locationTranslator;
 	
@@ -116,7 +116,7 @@ public class LocationTranslatorImplTest {
 		locationTranslator.setTelecomTranslator(telecomTranslator);
 		locationTranslator.setFhirLocationDao(fhirLocationDao);
 		locationTranslator.setPropertyService(propertyService);
-		locationTranslator.setProvenanceTranslator(provenanceTranslator);
+		locationTranslator.setCustomizableMetadataTranslator(customizableMetadataTranslator);
 		
 	}
 	
@@ -438,8 +438,8 @@ public class LocationTranslatorImplTest {
 		location.setUuid(LOCATION_UUID);
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
-		when(provenanceTranslator.getCreateProvenance(location)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(location)).thenReturn(provenance);
+		when(customizableMetadataTranslator.getCreateProvenance(location)).thenReturn(provenance);
+		when(customizableMetadataTranslator.getUpdateProvenance(location)).thenReturn(provenance);
 		org.hl7.fhir.r4.model.Location result = locationTranslator.toFhirResource(location);
 		assertThat(result, notNullValue());
 		assertThat(result.getContained(), not(empty()));
