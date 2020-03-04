@@ -185,6 +185,7 @@
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>emrapi-condition-list</artifactId>
 				<version>${emrApiConditionModuleApiVersion}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
@@ -196,6 +197,7 @@
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<version>28.1-jre</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>javax.inject</groupId>
