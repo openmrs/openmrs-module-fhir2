@@ -70,11 +70,6 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 	@Getter(AccessLevel.PUBLIC)
 	private TaskFhirResourceProvider resourceProvider;
 	
-	@Override
-	public TaskFhirResourceProvider getResourceProvider() {
-		return resourceProvider;
-	}
-	
 	@Before
 	public void setup() throws Exception {
 		resourceProvider = new TaskFhirResourceProvider();

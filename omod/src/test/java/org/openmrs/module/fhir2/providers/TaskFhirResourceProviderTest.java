@@ -16,17 +16,22 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
@@ -172,5 +177,26 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		when(taskService.updateTask(WRONG_TASK_UUID, wrongTask)).thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), wrongTask);
+	}
+	
+	@Test
+	public void searchTasks_shouldReturnMatchingTasks() {
+		List<Task> tasks = new ArrayList<>();
+		tasks.add(task);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
+		
+		TokenOrListParam status = new TokenOrListParam();
+		TokenParam statusToken = new TokenParam();
+		statusToken.setValue("ACCEPTED");
+		status.add(statusToken);
+		
+		Bundle results = resourceProvider.searchTasks(null, null, status, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getTotal(), equalTo(1));
+		assertThat(results.getEntry(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("Task"));
+		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(TASK_UUID));
 	}
 }

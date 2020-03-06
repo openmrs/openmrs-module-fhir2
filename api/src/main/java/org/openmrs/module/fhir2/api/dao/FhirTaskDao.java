@@ -13,6 +13,9 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.module.fhir2.FhirTask;
 
@@ -23,4 +26,7 @@ public interface FhirTaskDao {
 	public FhirTask getTaskByUuid(@NotNull String taskUUID);
 	
 	public Collection<FhirTask> getTasksByBasedOnUuid(Class<? extends DomainResource> resourceType, String uuid);
+	
+	public Collection<FhirTask> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
+	        TokenOrListParam status, SortSpec sort);
 }

@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Task;
 
@@ -51,4 +54,16 @@ public interface FhirTaskService {
 	 * @return the collection of Tasks where the basedOn field points to the given object
 	 */
 	Collection<Task> getTasksByBasedOn(Class<? extends DomainResource> obj, String uuid);
+	
+	/**
+	 * Get list of tasks that reference the object type/UUID combo provided
+	 *
+	 * @param basedOnReference
+	 * @param ownerReference
+	 * @param status
+	 * @param sort
+	 * @return the collection of Tasks that match the search parameters
+	 */
+	Collection<Task> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference, TokenOrListParam status,
+	        SortSpec sort);
 }

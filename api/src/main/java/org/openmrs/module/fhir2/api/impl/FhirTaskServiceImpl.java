@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
@@ -111,5 +114,22 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 		}
 		
 		return associatedTasks;
+	}
+	
+	/**
+	 * Get a list of Tasks that match the given search and sort criteria
+	 *
+	 * @param basedOnReference A reference to a basedOn resource
+	 * @param ownerReference A reference to an owner resource
+	 * @param status The list of statuses for requested Tasks
+	 * @param sort
+	 * @return the saved task
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public Collection<Task> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
+	        TokenOrListParam status, SortSpec sort) {
+		return dao.searchForTasks(basedOnReference, ownerReference, status, sort).stream().map(translator::toFhirResource)
+		        .collect(Collectors.toList());
 	}
 }
