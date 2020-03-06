@@ -30,6 +30,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
@@ -53,6 +54,9 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 	
 	@Inject
 	private ProvenanceTranslator<Allergy> provenanceTranslator;
+	
+	@Inject
+	private ConceptTranslator conceptTranslator;
 	
 	@Override
 	public AllergyIntolerance toFhirResource(Allergy omrsAllergy) {
@@ -108,14 +112,13 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 		allergy.setUuid(fhirAllergy.getId());
 		if (allergy.getAllergen() == null) {
 			Allergen allergen = new Allergen();
-			if (!fhirAllergy.getCode().getCoding().isEmpty()) {
-				allergen.setCodedAllergen(
-				    conceptService.getConceptByUuid(fhirAllergy.getCode().getCoding().get(0).getCode()).orElse(null));
-				allergen.setNonCodedAllergen(fhirAllergy.getCode().getCoding().get(0).getDisplay());
+			if (fhirAllergy.hasCode()) {
+				allergen.setCodedAllergen(conceptTranslator.toOpenmrsType(fhirAllergy.getCode()));
+				allergen.setNonCodedAllergen(fhirAllergy.getCode().getText());
 			}
 			allergy.setAllergen(allergen);
 		}
-		if (fhirAllergy.getCategory().size() > 0) {
+		if (fhirAllergy.hasCategory()) {
 			switch (fhirAllergy.getCategory().get(0).getValue()) {
 				case MEDICATION:
 					allergy.getAllergen().setAllergenType(AllergenType.DRUG);
@@ -140,14 +143,14 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 		
 		List<AllergyReaction> reactions = new ArrayList<>();
 		
-		if (!fhirAllergy.getReaction().isEmpty()) {
+		if (fhirAllergy.hasReaction()) {
 			allergy.setSeverity(getOpenmrsSeverity(fhirAllergy.getReaction().get(0).getSeverity()));
 			
 			for (AllergyIntolerance.AllergyIntoleranceReactionComponent reaction : fhirAllergy.getReaction()) {
-				if (!reaction.getManifestation().isEmpty()) {
-					reactions.add(new AllergyReaction(allergy, conceptService
-					        .getConceptByUuid(reaction.getManifestation().get(0).getCoding().get(0).getCode()).orElse(null),
-					        reaction.getManifestation().get(0).getText()));
+				if (reaction.hasManifestation()) {
+					reactions.add(
+					    new AllergyReaction(allergy, conceptTranslator.toOpenmrsType(reaction.getManifestation().get(0)),
+					            reaction.getManifestation().get(0).getText()));
 				}
 			}
 		}
@@ -180,14 +183,19 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 	}
 	
 	private CodeableConcept getAllergySubstance(Allergen allergen) {
-		if (allergen.getCodedAllergen() == null) {
+		if (allergen == null) {
 			return null;
 		}
+		
 		CodeableConcept allergySubstance = new CodeableConcept();
-		Coding code = new Coding(FhirConstants.ALLERGY_SUBSTANCE_VALUE_SET_URI, allergen.getCodedAllergen().getUuid(),
-		        allergen.getNonCodedAllergen());
-		allergySubstance.addCoding(code);
-		allergySubstance.setText(allergen.getNonCodedAllergen());
+		
+		if (allergen.getCodedAllergen() != null) {
+			allergySubstance = conceptTranslator.toFhirResource(allergen.getCodedAllergen());
+		}
+		
+		if (allergen.getNonCodedAllergen() != null) {
+			allergySubstance.setText(allergen.getNonCodedAllergen());
+		}
 		
 		return allergySubstance;
 	}
