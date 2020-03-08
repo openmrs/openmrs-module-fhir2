@@ -12,57 +12,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-	<changeSet id="add_fhir_task_20191214" author="pmanko">
-		<preConditions onFail="MARK_RAN">
-			<not>
-				<tableExists tableName="fhir_task"/>
-			</not>
-		</preConditions>
-		<comment>
-			Create Task table for the Task FHIR resource
-		</comment>
-		<createTable tableName="fhir_task">
-			<column name="task_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" />
-			</column>
-			<column name="status" type="varchar(255)"/>
-            <column name="status_reason" type="varchar(255)" />
-			<column name="description" type="text" />
-			<column name="uuid" type="char(38)">
-				<constraints nullable="false" unique="true"/>
-			</column>
-			<column name="intent" type="varchar(255)">
-				<constraints nullable="false" />
-			</column>
-            <column name="based_on" type="varchar(255)" />
-			<column name="creator" type="int" >
-				<constraints nullable="false" />
-			</column>
-			<column name="date_created" type="datetime" >
-				<constraints nullable="false"/>
-			</column>
-			<column name="changed_by" type="int" />
-			<column name="date_changed" type="datetime" />
-			<column name="voided" type="tinyint" defaultValueNumeric="0">
-				<constraints nullable="false"/>
-			</column>
-			<column name="voided_by" type="int" />
-			<column name="date_voided" type="datetime" />
-			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
-		</createTable>
-
-		<addForeignKeyConstraint constraintName="task_creator"
-								 baseTableName="fhir_task" baseColumnNames="creator"
-								 referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="task_changed_by"
-								 baseTableName="fhir_task" baseColumnNames="changed_by"
-								 referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="task_voided_by"
-								 baseTableName="fhir_task" baseColumnNames="voided_by"
-								 referencedTableName="users" referencedColumnNames="user_id"/>
-	</changeSet>
-
-    <changeSet id="add_fhir_concept_source_20200105" author="ibacher">
+	<changeSet id="add_fhir_concept_source_20200105" author="ibacher">
         <preConditions onFail="MARK_RAN">
             <not><tableExists tableName="fhir_concept_source"/></not>
         </preConditions>
@@ -142,65 +92,39 @@
         ]]></sql>
     </changeSet>
 
-	<changeSet id="update_fhir_task_20200219" author="pmanko">
-		<preConditions onFail="CONTINUE">
-			<tableExists tableName="fhir_task"/>
+	<changeSet id="add_fhir_task_20200311" author="pmanko">
+		<preConditions onFail="WARN">
+			<not>
+				<tableExists tableName="fhir_task"/>
+			</not>
 		</preConditions>
-
 		<comment>
-			Update FhirTask table with elements for https://issues.openmrs.org/browse/FM2-75
+			Create Task table for the Task FHIR resource
 		</comment>
-
-		<dropColumn tableName="fhir_task" columnName="based_on" />
-		<dropColumn tableName="fhir_task" columnName="voided"/>
-		<dropColumn tableName="fhir_task" columnName="voided_by"/>
-		<dropColumn tableName="fhir_task" columnName="date_voided"/>
-		<dropColumn tableName="fhir_task" columnName="void_reason"/>
-
-		<addNotNullConstraint tableName="fhir_task" columnName="status"/>
-
-		<addColumn tableName="fhir_task">
-			<column name="name" type="varchar(255)">
-				<constraints nullable="false" />
+		<createTable tableName="fhir_task">
+			<column name="task_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" />
 			</column>
-			<column name="owner_reference_id" type="varchar(255)"/>
-			<column name="encounter_reference_id" type="varchar(255)"/>
-			<column name="for_reference_id" type="varchar(255)"/>
-			<column name="retired" type="boolean" defaultValueBoolean="false">
-				<constraints nullable="false" />
-			</column>
-			<column name="retired_by" type="int" />
-			<column name="date_retired" type="datetime" />
-			<column name="retire_reason" type="varchar(255)" defaultValue="null" />
-		</addColumn>
-
-		<createTable tableName="fhir_task_based_on_reference">
-			<column name="task_id">
-				<constraints nullable="false" primaryKey="true"/>
-			</column>
-			<column name="reference_id">
-				<constraints nullable="false" unique="true" primaryKey="true"/>
-			</column>
-		</createTable>
-<!--		<addPrimaryKey tableName="fhir_task_based_on_reference" columnNames="task_id,reference_id"/>-->
-
-		<createTable tableName="fhir_task_output">
-			<column name="task_output_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="task_id"/>
-			<column name="type_id" type="int">
+			<column name="status" type="varchar(255)" defaultValue="UNKNOWN">
 				<constraints nullable="false"/>
 			</column>
-			<column name="value_datetime" type="datetime"/>
-			<column name="value_numeric" type="double"/>
-			<column name="value_text" type="varchar(255)"/>
-			<column name="value_reference_id" type="int"/>
-			<column name="creator" type="int">
+			<column name="status_reason" type="varchar(255)" />
+			<column name="description" type="text" />
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="intent" type="varchar(255)">
 				<constraints nullable="false" />
 			</column>
-			<column name="date_created" type="datetime">
+			<column name="owner_reference_id" type="int"/>
+			<column name="encounter_reference_id" type="int"/>
+			<column name="for_reference_id" type="int"/>
+			<column name="based_on" type="varchar(255)" />
+			<column name="creator" type="int" >
 				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="datetime" >
+				<constraints nullable="false"/>
 			</column>
 			<column name="changed_by" type="int" />
 			<column name="date_changed" type="datetime" />
@@ -213,60 +137,26 @@
 			<column name="retired_by" type="int" />
 			<column name="date_retired" type="datetime" />
 			<column name="retire_reason" type="varchar(255)" defaultValue="null" />
-			<column name="uuid" type="varchar(38)">
-				<constraints nullable="false" unique="true" />
-			</column>
 		</createTable>
-		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="creator"
-								 constraintName="fhir_task_output_creator_fk"
-								 referencedTableName="users" referencedColumnNames="user_id" />
-		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="changed_by"
-								 constraintName="fhir_task_output_changed_by_fk"
-								 referencedTableName="users" referencedColumnNames="user_id" />
-		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="retired_by"
-								 constraintName="fhir_task_output_retired_by_fk"
-								 referencedTableName="users" referencedColumnNames="user_id" />
 
-		<createTable tableName="fhir_task_input">
-			<column name="task_input_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="task_id"/>
-			<column name="type_id" type="int"></column>
-			<column name="value_datetime" type="datetime"/>
-			<column name="value_numeric" type="double"/>
-			<column name="value_text" type="varchar(255)"/>
-			<column name="value_reference_id" type="int"/>
-			<column name="creator" type="int">
-				<constraints nullable="false" />
-			</column>
-			<column name="date_created" type="datetime">
-				<constraints nullable="false" />
-			</column>
-			<column name="changed_by" type="int" />
-			<column name="date_changed" type="datetime" />
-			<column name="name" type="varchar(255)">
-				<constraints nullable="false" />
-			</column>
-			<column name="retired" type="boolean" defaultValueBoolean="false">
-				<constraints nullable="false" />
-			</column>
-			<column name="retired_by" type="int" />
-			<column name="date_retired" type="datetime" />
-			<column name="retire_reason" type="varchar(255)" defaultValue="null" />
-			<column name="uuid" type="varchar(38)">
-				<constraints nullable="false" unique="true" />
-			</column>
-		</createTable>
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="creator"
-								 constraintName="fhir_task_input_creator_fk"
-								 referencedTableName="users" referencedColumnNames="user_id" />
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="changed_by"
-								 constraintName="fhir_task_input_changed_by_fk"
-								 referencedTableName="users" referencedColumnNames="user_id" />
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="retired_by"
-								 constraintName="fhir_task_input_retired_by_fk"
-								 referencedTableName="users" referencedColumnNames="user_id" />
+		<addForeignKeyConstraint constraintName="task_creator"
+								 baseTableName="fhir_task" baseColumnNames="creator"
+								 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="task_changed_by"
+								 baseTableName="fhir_task" baseColumnNames="changed_by"
+								 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="fhir_task_retired_by_fk"
+								 baseTableName="fhir_task" baseColumnNames="retired_by"
+								 referencedTableName="users" referencedColumnNames="user_id"/>
+	</changeSet>
+
+	<changeSet id="add_fhir_reference_20200311" author="pmanko">
+		<preConditions onFail="WARN">
+			<not>
+				<tableExists tableName="fhir_reference"/>
+			</not>
+			<tableExists tableName="fhir_task"/>
+		</preConditions>
 
 		<createTable tableName="fhir_reference">
 			<column name="reference_id" type="int" autoIncrement="true">
@@ -309,9 +199,6 @@
 								 constraintName="fhir_reference_retired_by_fk"
 								 referencedTableName="users" referencedColumnNames="user_id" />
 
-		<addForeignKeyConstraint constraintName="fhir_task_retired_by_fk"
-								 baseTableName="fhir_task" baseColumnNames="retired_by"
-								 referencedTableName="users" referencedColumnNames="user_id"/>
 		<addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="owner_reference_id"
 								 constraintName="task_owner_reference_fk"
 								 referencedTableName="fhir_reference"
@@ -324,7 +211,26 @@
 								 constraintName="task_encounter_reference_fk"
 								 referencedTableName="fhir_reference"
 								 referencedColumnNames="reference_id"/>
-		
+	</changeSet>
+
+	<changeSet id="add_based_on_reference_join_table_20200311" author="pmanko">
+		<preConditions onFail="WARN">
+			<not>
+				<tableExists tableName="fhir_task_based_on_reference"/>
+			</not>
+			<tableExists tableName="fhir_task"/>
+			<tableExists tableName="fhir_reference"/>
+		</preConditions>
+
+		<createTable tableName="fhir_task_based_on_reference">
+			<column name="task_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="reference_id" type="int">
+				<constraints nullable="false" unique="true"/>
+			</column>
+		</createTable>
+
 		<addForeignKeyConstraint baseTableName="fhir_task_based_on_reference" baseColumnNames="task_id" constraintName="task_based_on_fk"
 								 referencedTableName="fhir_task"
 								 referencedColumnNames="task_id"/>
@@ -332,23 +238,136 @@
 								 constraintName="reference_based_on_fk"
 								 referencedTableName="fhir_reference"
 								 referencedColumnNames="reference_id"/>
-		
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="type_id"
-								 constraintName="input_type_fk"
-								 referencedTableName="concept"
-								 referencedColumnNames="concept_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="value_reference_id"
-								 constraintName="input_reference_fk"
-								 referencedTableName="fhir_reference"
-								 referencedColumnNames="reference_id"/>
+	</changeSet>
 
+
+
+	<changeSet id="add_fhir_task_output_20200311" author="pmanko">
+		<preConditions onFail="WARN">
+			<not>
+				<tableExists tableName="fhir_task_output"/>
+			</not>
+			<tableExists tableName="fhir_task"/>
+			<tableExists tableName="fhir_reference"/>
+		</preConditions>
+
+		<createTable tableName="fhir_task_output">
+			<column name="task_output_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="task_id" type="int"/>
+			<column name="type_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="value_datetime" type="datetime"/>
+			<column name="value_numeric" type="double"/>
+			<column name="value_text" type="varchar(255)"/>
+			<column name="value_reference_id" type="int"/>
+			<column name="creator" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="changed_by" type="int" />
+			<column name="date_changed" type="datetime" />
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="retired" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false" />
+			</column>
+			<column name="retired_by" type="int" />
+			<column name="date_retired" type="datetime" />
+			<column name="retire_reason" type="varchar(255)" defaultValue="null" />
+			<column name="uuid" type="varchar(38)">
+				<constraints nullable="false" unique="true" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="creator"
+								 constraintName="fhir_task_output_creator_fk"
+								 referencedTableName="users" referencedColumnNames="user_id" />
+		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="changed_by"
+								 constraintName="fhir_task_output_changed_by_fk"
+								 referencedTableName="users" referencedColumnNames="user_id" />
+		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="retired_by"
+								 constraintName="fhir_task_output_retired_by_fk"
+								 referencedTableName="users" referencedColumnNames="user_id" />
 		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="type_id"
 								 constraintName="output_type_fk"
 								 referencedTableName="concept"
 								 referencedColumnNames="concept_id"/>
+
 		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="value_reference_id"
 								 constraintName="output_reference_fk"
 								 referencedTableName="fhir_reference"
 								 referencedColumnNames="reference_id"/>
+		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="task_id"
+								 constraintName="output_task_fk"
+								 referencedTableName="fhir_task"
+								 referencedColumnNames="task_id"/>
+	</changeSet>
+
+	<changeSet id="add_fhir_task_input_20200308" author="pmanko">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="fhir_task_input"/>
+			</not>
+		</preConditions>
+
+		<createTable tableName="fhir_task_input">
+			<column name="task_input_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="task_id" type="int"/>
+			<column name="type_id" type="int"></column>
+			<column name="value_datetime" type="datetime"/>
+			<column name="value_numeric" type="double"/>
+			<column name="value_text" type="varchar(255)"/>
+			<column name="value_reference_id" type="int"/>
+			<column name="creator" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="changed_by" type="int" />
+			<column name="date_changed" type="datetime" />
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="retired" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false" />
+			</column>
+			<column name="retired_by" type="int" />
+			<column name="date_retired" type="datetime" />
+			<column name="retire_reason" type="varchar(255)" defaultValue="null" />
+			<column name="uuid" type="varchar(38)">
+				<constraints nullable="false" unique="true" />
+			</column>
+		</createTable>
+		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="creator"
+								 constraintName="fhir_task_input_creator_fk"
+								 referencedTableName="users" referencedColumnNames="user_id" />
+		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="changed_by"
+								 constraintName="fhir_task_input_changed_by_fk"
+								 referencedTableName="users" referencedColumnNames="user_id" />
+		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="retired_by"
+								 constraintName="fhir_task_input_retired_by_fk"
+								 referencedTableName="users" referencedColumnNames="user_id" />
+		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="type_id"
+								 constraintName="input_type_fk"
+								 referencedTableName="concept"
+								 referencedColumnNames="concept_id"/>
+
+		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="value_reference_id"
+								 constraintName="input_reference_fk"
+								 referencedTableName="fhir_reference"
+								 referencedColumnNames="reference_id"/>
+		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="task_id"
+								 constraintName="input_task_fk"
+								 referencedTableName="fhir_task"
+								 referencedColumnNames="task_id"/>
 	</changeSet>
 </databaseChangeLog>

@@ -16,8 +16,6 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mockitoSession;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -26,9 +24,7 @@ import java.util.Date;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,13 +46,13 @@ public class MedicationTranslatorImplTest {
 	private static final String DRUG_CONCEPT_UUID = "172553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String INGREDIENT_CONCEPT_UUID = "182553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
+	
 	private static final Double MAX_DAILY_DOSE = 3.5;
-
+	
 	private static final Double MIN_DAILY_DOSE = 2.0;
-
+	
 	private static final String DOSE_STRENGTH = "500mg";
-
+	
 	@Mock
 	private ConceptTranslator conceptTranslator;
 	
@@ -309,21 +305,24 @@ public class MedicationTranslatorImplTest {
 	
 	@Test
 	public void addAddressComponent_shouldSetMaximumDailyDoseCorrectly() {
-		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#maximumDailyDose", "3.5");
+		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#maximumDailyDose",
+		    "3.5");
 		assertThat(drug.getMaximumDailyDose(), notNullValue());
 		assertThat(drug.getMaximumDailyDose(), equalTo(MAX_DAILY_DOSE));
 	}
 	
 	@Test
 	public void addAddressComponent_shouldSetMinimumDailyDoseCorrectly() {
-		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#minimumDailyDose", "2.0");
+		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#minimumDailyDose",
+		    "2.0");
 		assertThat(drug.getMinimumDailyDose(), notNullValue());
 		assertThat(drug.getMinimumDailyDose(), equalTo(MIN_DAILY_DOSE));
 	}
 	
 	@Test
 	public void addAddressComponent_shouldSetStrengthCorrectly() {
-		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE  + "#strength", DOSE_STRENGTH);
+		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#strength",
+		    DOSE_STRENGTH);
 		assertThat(drug.getStrength(), notNullValue());
 		assertThat(drug.getStrength(), equalTo(DOSE_STRENGTH));
 	}
