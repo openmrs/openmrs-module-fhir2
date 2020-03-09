@@ -11,9 +11,17 @@ package org.openmrs.module.fhir2.api;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Collection;
+
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 
 public interface FhirAllergyIntoleranceService {
 	
 	AllergyIntolerance getAllergyIntoleranceByUuid(@NotNull String uuid);
+	
+	Collection<AllergyIntolerance> searchForAllergies(ReferenceParam patientReference, TokenOrListParam category,
+	        TokenOrListParam allergen, TokenOrListParam severity, TokenOrListParam manifestationCode,
+	        TokenOrListParam clinicalStatus);
 }

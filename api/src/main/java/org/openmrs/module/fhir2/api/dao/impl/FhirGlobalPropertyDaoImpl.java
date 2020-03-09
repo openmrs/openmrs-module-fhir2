@@ -12,6 +12,10 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
@@ -40,5 +44,13 @@ public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
 	public GlobalProperty getGlobalPropertyObject(String property) {
 		return (GlobalProperty) sessionFactory.getCurrentSession().createCriteria(GlobalProperty.class)
 		        .add(Restrictions.eq("property", property)).uniqueResult();
+	}
+	
+	@Override
+	public List<String> getGlobalProperties(String... properties) {
+		Collection<GlobalProperty> globalProperties = (sessionFactory.getCurrentSession()
+		        .createCriteria(GlobalProperty.class).add(Restrictions.in("property", properties)).list());
+		return globalProperties.stream().filter(p -> p != null).map(GlobalProperty::getPropertyValue)
+		        .collect(Collectors.toList());
 	}
 }

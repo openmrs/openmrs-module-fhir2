@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Order.asc;
 import static org.hibernate.criterion.Order.desc;
+import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.ge;
@@ -21,6 +22,7 @@ import static org.hibernate.criterion.Restrictions.le;
 import static org.hibernate.criterion.Restrictions.lt;
 import static org.hibernate.criterion.Restrictions.not;
 import static org.hibernate.criterion.Restrictions.or;
+import static org.hibernate.criterion.Subqueries.propertyEq;
 
 import javax.validation.constraints.NotNull;
 
@@ -56,6 +58,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.internal.CriteriaImpl;
@@ -65,6 +68,7 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
+import org.openmrs.module.fhir2.FhirConceptSource;
 
 /**
  * <p>
@@ -662,6 +666,17 @@ public abstract class BaseDaoImpl {
 			return Optional.empty();
 		} else {
 			return Optional.of(orderings);
+		}
+	}
+	
+	protected Criterion generateSystemQuery(String system, List<String> codes) {
+		DetachedCriteria conceptSourceCriteria = DetachedCriteria.forClass(FhirConceptSource.class).add(eq("url", system))
+		        .setProjection(property("conceptSource"));
+		
+		if (codes.size() > 1) {
+			return and(propertyEq("crt.conceptSource", conceptSourceCriteria), in("crt.code", codes));
+		} else {
+			return and(propertyEq("crt.conceptSource", conceptSourceCriteria), eq("crt.code", codes.get(0)));
 		}
 	}
 	
