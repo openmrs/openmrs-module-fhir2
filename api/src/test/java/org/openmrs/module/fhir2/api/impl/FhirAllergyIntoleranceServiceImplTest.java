@@ -13,9 +13,21 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +43,12 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	private static final String ALLERGY_UUID = "1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String WRONG_ALLERGY_UUID = "2085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String CODED_ALLERGEN_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String SEVERITY_CONCEPT_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String CODED_REACTION_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	@Mock
 	private FhirAllergyIntoleranceDao allergyIntoleranceDao;
@@ -74,4 +92,143 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		assertThat(result, nullValue());
 	}
 	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByIdentifier() {
+		Collection<Allergy> allergies = new ArrayList<>();
+		allergies.add(omrsAllergy);
+		ReferenceParam patientParam = new ReferenceParam().setChain(Patient.SP_IDENTIFIER).setValue("M4001-1");
+		
+		when(allergyIntoleranceDao.searchForAllergies(argThat(equalTo(patientParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(allergies);
+		Collection<org.hl7.fhir.r4.model.AllergyIntolerance> results = service.searchForAllergies(patientParam, null, null,
+		    null, null, null);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByPatientGivenName() {
+		Collection<Allergy> allergies = new ArrayList<>();
+		allergies.add(omrsAllergy);
+		ReferenceParam patientParam = new ReferenceParam().setChain(Patient.SP_GIVEN).setValue("John");
+		
+		when(allergyIntoleranceDao.searchForAllergies(argThat(equalTo(patientParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(allergies);
+		Collection<org.hl7.fhir.r4.model.AllergyIntolerance> results = service.searchForAllergies(patientParam, null, null,
+		    null, null, null);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyName() {
+		Collection<Allergy> allergies = new ArrayList<>();
+		allergies.add(omrsAllergy);
+		ReferenceParam patientParam = new ReferenceParam().setChain(Patient.SP_FAMILY).setValue("John");
+		
+		when(allergyIntoleranceDao.searchForAllergies(argThat(equalTo(patientParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(allergies);
+		Collection<org.hl7.fhir.r4.model.AllergyIntolerance> results = service.searchForAllergies(patientParam, null, null,
+		    null, null, null);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByPatientName() {
+		Collection<Allergy> allergies = new ArrayList<>();
+		allergies.add(omrsAllergy);
+		ReferenceParam patientParam = new ReferenceParam().setChain(Patient.SP_NAME).setValue("John Doe");
+		
+		when(allergyIntoleranceDao.searchForAllergies(argThat(equalTo(patientParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(allergies);
+		Collection<org.hl7.fhir.r4.model.AllergyIntolerance> results = service.searchForAllergies(patientParam, null, null,
+		    null, null, null);
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByCategory() {
+		Collection<Allergy> allergies = new ArrayList<>();
+		allergies.add(omrsAllergy);
+		
+		TokenOrListParam category = new TokenOrListParam();
+		category.addOr(new TokenParam().setValue("food"));
+		
+		when(allergyIntoleranceDao.searchForAllergies(isNull(), argThat(equalTo(category)), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(allergies);
+		Collection<org.hl7.fhir.r4.model.AllergyIntolerance> results = service.searchForAllergies(null, category, null, null,
+		    null, null);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByAllergen() {
+		Collection<Allergy> allergies = new ArrayList<>();
+		allergies.add(omrsAllergy);
+		
+		TokenOrListParam allergen = new TokenOrListParam();
+		allergen.addOr(new TokenParam().setValue(CODED_ALLERGEN_UUID));
+		
+		when(allergyIntoleranceDao.searchForAllergies(isNull(), isNull(), argThat(equalTo(allergen)), isNull(), isNull(),
+		    isNull())).thenReturn(allergies);
+		Collection<org.hl7.fhir.r4.model.AllergyIntolerance> results = service.searchForAllergies(null, null, allergen, null,
+		    null, null);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesBySeverity() {
+		Collection<Allergy> allergies = new ArrayList<>();
+		allergies.add(omrsAllergy);
+		
+		TokenOrListParam severity = new TokenOrListParam();
+		severity.addOr(new TokenParam().setValue(SEVERITY_CONCEPT_UUID));
+		
+		when(allergyIntoleranceDao.searchForAllergies(isNull(), isNull(), isNull(), argThat(equalTo(severity)), isNull(),
+		    isNull())).thenReturn(allergies);
+		Collection<org.hl7.fhir.r4.model.AllergyIntolerance> results = service.searchForAllergies(null, null, null, severity,
+		    null, null);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByManifestation() {
+		Collection<Allergy> allergies = new ArrayList<>();
+		allergies.add(omrsAllergy);
+		
+		TokenOrListParam manifestation = new TokenOrListParam();
+		manifestation.addOr(new TokenParam().setValue(CODED_REACTION_UUID));
+		
+		when(allergyIntoleranceDao.searchForAllergies(isNull(), isNull(), isNull(), isNull(),
+		    argThat(equalTo(manifestation)), isNull())).thenReturn(allergies);
+		Collection<org.hl7.fhir.r4.model.AllergyIntolerance> results = service.searchForAllergies(null, null, null, null,
+		    manifestation, null);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByClinicalStatus() {
+		Collection<Allergy> allergies = new ArrayList<>();
+		allergies.add(omrsAllergy);
+		
+		TokenOrListParam status = new TokenOrListParam();
+		status.addOr(new TokenParam().setValue("active"));
+		
+		when(allergyIntoleranceDao.searchForAllergies(isNull(), isNull(), isNull(), isNull(), isNull(),
+		    argThat(equalTo(status)))).thenReturn(allergies);
+		Collection<org.hl7.fhir.r4.model.AllergyIntolerance> results = service.searchForAllergies(null, null, null, null,
+		    null, status);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
 }

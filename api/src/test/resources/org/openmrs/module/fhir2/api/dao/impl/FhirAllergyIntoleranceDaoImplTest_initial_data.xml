@@ -12,10 +12,22 @@
     <concept concept_id="5085" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
     <concept concept_id="5086" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
     <concept concept_id="5087" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept concept_id="5088" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
 
-    <allergy allergy_id="1010" patient_id="7" allergen_type="DRUG" coded_allergen="5085" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <allergy allergy_id="1010" patient_id="6" severity_concept_id="5088" allergen_type="FOOD" coded_allergen="5085" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
 
     <allergy_reaction allergy_reaction_id="2020" allergy_id="1010"  reaction_concept_id="5087" reaction_non_coded="" uuid="9950AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
     <allergy_reaction allergy_reaction_id="2021" allergy_id="1010"  reaction_concept_id="5086" reaction_non_coded="" uuid="5099AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+
+    <person person_id="6" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="8d703ff2-c3e2-4070-9737-73e713d5a50d"/>
+    <person person_id="7" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="ca17fcc5-ec96-487f-b9ea-42973c8973e3"/>
+    <person_name person_name_id="2" preferred="true" person_id="6" given_name="John" middle_name="F" family_name="Doe" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="7e2acadc-5073-4a39-914a-debcbec8c1c9"/>
+    <person_name person_name_id="3" preferred="true" person_id="7" given_name="I" middle_name="am" family_name="voided" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="37e60810-0ba9-4f32-ba80-0af59f59e966"/>
+    <patient patient_id="6" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+    <patient patient_id="7" creator="1" date_created="2005-01-01 00:00:00.0" voided="true"/>
+
+    <patient_identifier patient_identifier_id="1" patient_id="6" identifier="M4001-1" identifier_type="1" preferred="0" location_id="1" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689f"/>
+    <patient_identifier patient_identifier_id="2" patient_id="7" identifier="M4001-2" identifier_type="1" preferred="0" location_id="1" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689g"/>
 
 </dataset>

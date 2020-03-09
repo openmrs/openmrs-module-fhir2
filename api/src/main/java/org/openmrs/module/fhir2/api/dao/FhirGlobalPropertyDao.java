@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import java.util.List;
+
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.APIException;
 
@@ -17,4 +19,6 @@ public interface FhirGlobalPropertyDao {
 	String getGlobalProperty(String property) throws APIException;
 	
 	GlobalProperty getGlobalPropertyObject(String property);
+	
+	List<String> getGlobalProperties(String... properties);
 }

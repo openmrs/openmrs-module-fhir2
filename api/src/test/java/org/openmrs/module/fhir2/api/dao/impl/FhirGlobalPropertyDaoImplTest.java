@@ -13,14 +13,18 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.GlobalProperty;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -37,6 +41,8 @@ public class FhirGlobalPropertyDaoImplTest extends BaseModuleContextSensitiveTes
 	private static final String PERSON_ATTRIBUTE_TYPE_PROPERTY_NOT_FOUND = "fhir2.non-found";
 	
 	private static final String GLOBAL_PROPERTY_UUID = "cd9d0baa-a88b-4553-907a-b4ea7811ebf8";
+	
+	private static final String GLOBAL_PROPERTY_MODERATE = "1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	@Inject
 	private Provider<SessionFactory> sessionFactoryProvider;
@@ -83,5 +89,14 @@ public class FhirGlobalPropertyDaoImplTest extends BaseModuleContextSensitiveTes
 	public void shouldReturnNullGlobalPropertyObjectWhenPropertyNotMatched() {
 		GlobalProperty property = dao.getGlobalPropertyObject(PERSON_ATTRIBUTE_TYPE_PROPERTY_NOT_FOUND);
 		assertThat(property, nullValue());
+	}
+	
+	@Test
+	public void shouldReturnListOfGlobalPropertyValues() {
+		List<String> values = dao.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MODERATE,
+		    FhirConstants.GLOBAL_PROPERTY_SEVERE);
+		assertThat(values, notNullValue());
+		assertThat(values.size(), greaterThanOrEqualTo(1));
+		assertThat(values.get(0), equalTo(GLOBAL_PROPERTY_MODERATE));
 	}
 }

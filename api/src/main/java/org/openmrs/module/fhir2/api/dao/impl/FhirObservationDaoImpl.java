@@ -9,19 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Projections.property;
-import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.in;
 import static org.hibernate.criterion.Restrictions.or;
-import static org.hibernate.criterion.Subqueries.propertyEq;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,10 +27,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.DetachedCriteria;
 import org.openmrs.Obs;
-import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.springframework.stereotype.Component;
 
@@ -93,14 +86,4 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 		}
 	}
 	
-	private Criterion generateSystemQuery(String system, List<String> codes) {
-		DetachedCriteria conceptSourceCriteria = DetachedCriteria.forClass(FhirConceptSource.class).add(eq("url", system))
-		        .setProjection(property("conceptSource"));
-		
-		if (codes.size() > 1) {
-			return and(propertyEq("crt.conceptSource", conceptSourceCriteria), in("crt.code", codes));
-		} else {
-			return and(propertyEq("crt.conceptSource", conceptSourceCriteria), eq("crt.code", codes.get(0)));
-		}
-	}
 }
