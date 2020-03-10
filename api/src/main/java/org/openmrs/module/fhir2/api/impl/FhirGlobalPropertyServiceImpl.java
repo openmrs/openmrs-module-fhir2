@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.api.APIException;
@@ -31,5 +33,11 @@ public class FhirGlobalPropertyServiceImpl implements FhirGlobalPropertyService 
 	@Transactional(readOnly = true)
 	public String getGlobalProperty(String property) throws APIException {
 		return dao.getGlobalProperty(property);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<String> getGlobalProperties(String... properties) {
+		return dao.getGlobalProperties(properties);
 	}
 }
