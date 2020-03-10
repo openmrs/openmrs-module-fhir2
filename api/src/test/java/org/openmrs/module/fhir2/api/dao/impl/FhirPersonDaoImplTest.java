@@ -14,12 +14,15 @@ import static org.exparity.hamcrest.date.DateMatchers.sameOrBefore;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -60,9 +63,17 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PERSON_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPersonDaoImplTest_initial_data.xml";
 	
-	private static final String GENDER = "M";
+	private static final String MALE_GENDER = "male";
 	
-	private static final String WRONG_GENDER = "other";
+	private static final String FEMALE_GENDER = "female";
+	
+	private static final String OTHER_GENDER = "other";
+	
+	private static final String UNKNOWN_GENDER = "unknown";
+	
+	private static final String NULL_GENDER = null;
+	
+	private static final String WRONG_GENDER = "wrong-gender";
 	
 	private static final String GIVEN_NAME = "John";
 	
@@ -108,7 +119,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		Person person = fhirPersonDao.getPersonByUuid(PERSON_UUID);
 		assertNotNull(person);
 		assertEquals(person.getUuid(), PERSON_UUID);
-		assertEquals(person.getGender(), GENDER);
+		assertEquals(person.getGender(), "M");
 		assertEquals(person.getGivenName(), GIVEN_NAME);
 	}
 	
@@ -148,14 +159,41 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnCollectionOfPeopleForMatchingGender() {
-		TokenOrListParam tokenOrListParam = new TokenOrListParam().add(GENDER);
-		Collection<Person> people = fhirPersonDao.searchForPeople(null, tokenOrListParam, null, null, null, null, null,
+		final String GENDER_PROPERTY = "gender";
+		Collection<Person> people = fhirPersonDao.searchForPeople(null, new TokenOrListParam().add(MALE_GENDER), null, null,
+		    null, null, null, null);
+		
+		assertThat(people, notNullValue());
+		assertThat(people, not(empty()));
+		assertThat(people, everyItem(hasProperty(GENDER_PROPERTY, equalTo("M"))));
+		
+		people = fhirPersonDao.searchForPeople(null, new TokenOrListParam().add(FEMALE_GENDER), null, null, null, null, null,
 		    null);
 		
 		assertThat(people, notNullValue());
-		assertThat(people.size(), greaterThanOrEqualTo(1));
-		assertThat(people.stream().findAny().isPresent(), is(true));
-		assertThat(people.stream().findAny().get().getGender(), equalTo(GENDER));
+		assertThat(people, not(empty()));
+		assertThat(people, everyItem(hasProperty(GENDER_PROPERTY, equalTo("F"))));
+		
+		people = fhirPersonDao.searchForPeople(null, new TokenOrListParam().add(OTHER_GENDER), null, null, null, null, null,
+		    null);
+		
+		assertThat(people, notNullValue());
+		assertThat(people, not(empty()));
+		assertThat(people, everyItem(hasProperty(GENDER_PROPERTY, nullValue())));
+		
+		people = fhirPersonDao.searchForPeople(null, new TokenOrListParam().add(NULL_GENDER), null, null, null, null, null,
+		    null);
+		
+		assertThat(people, notNullValue());
+		assertThat(people, not(empty()));
+		assertThat(people, everyItem(hasProperty(GENDER_PROPERTY, nullValue())));
+		
+		people = fhirPersonDao.searchForPeople(null, new TokenOrListParam().add(UNKNOWN_GENDER), null, null, null, null,
+		    null, null);
+		
+		assertThat(people, notNullValue());
+		assertThat(people, not(empty()));
+		assertThat(people, everyItem(hasProperty(GENDER_PROPERTY, nullValue())));
 	}
 	
 	@Test
@@ -384,7 +422,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void shouldHandleComplexQuery() throws ParseException {
 		StringOrListParam nameParam = new StringOrListParam().add(new StringParam(PERSON_NAME));
-		TokenOrListParam genderParam = new TokenOrListParam().add(GENDER);
+		TokenOrListParam genderParam = new TokenOrListParam().add(MALE_GENDER);
 		DateRangeParam birthDateParam = new DateRangeParam().setLowerBound(BIRTH_DATE).setUpperBound(BIRTH_DATE);
 		StringOrListParam cityParam = new StringOrListParam().add(new StringParam(CITY));
 		StringOrListParam stateParam = new StringOrListParam().add(new StringParam(STATE));
@@ -398,7 +436,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(people, not(empty()));
 		assertThat(people.size(), greaterThanOrEqualTo(1));
 		assertThat(people.iterator().next().getGivenName(), equalTo(PERSON_NAME));
-		assertThat(people.iterator().next().getGender(), equalTo(GENDER));
+		assertThat(people.iterator().next().getGender(), equalTo("M"));
 		assertThat(people.iterator().next().getBirthdate(), DateMatchers.sameDay(DATE_FORMAT.parse(BIRTH_DATE)));
 		assertThat(people.iterator().next().getUuid(), equalTo(PERSON_ADDRESS_PERSON_UUID));
 	}

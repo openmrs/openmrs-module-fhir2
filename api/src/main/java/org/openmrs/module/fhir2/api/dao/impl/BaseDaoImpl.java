@@ -18,6 +18,7 @@ import static org.hibernate.criterion.Restrictions.ge;
 import static org.hibernate.criterion.Restrictions.gt;
 import static org.hibernate.criterion.Restrictions.ilike;
 import static org.hibernate.criterion.Restrictions.in;
+import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.le;
 import static org.hibernate.criterion.Restrictions.lt;
 import static org.hibernate.criterion.Restrictions.not;
@@ -430,21 +431,23 @@ public abstract class BaseDaoImpl {
 		return handleOrListParam(gender, token -> {
 			try {
 				AdministrativeGender administrativeGender = AdministrativeGender.fromCode(token.getValue());
+				if (administrativeGender == null) {
+					return Optional.of(isNull(propertyName));
+				}
 				switch (administrativeGender) {
 					case MALE:
 						return Optional.of(ilike(propertyName, "M", MatchMode.EXACT));
 					case FEMALE:
 						return Optional.of(ilike(propertyName, "F", MatchMode.EXACT));
 					case OTHER:
-						return Optional.of(not(or(eq(propertyName, "M"), eq(propertyName, "F"))));
 					case UNKNOWN:
 					case NULL:
-						return Optional.empty();
+						return Optional.of(isNull(propertyName));
 				}
 			}
 			catch (FHIRException ignored) {}
 			
-			return Optional.empty();
+			return Optional.of(ilike(propertyName, token.getValue(), MatchMode.EXACT));
 		});
 	}
 	

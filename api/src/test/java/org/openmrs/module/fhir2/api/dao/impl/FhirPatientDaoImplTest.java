@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -45,8 +46,6 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String BAD_PATIENT_UUID = "282390a6-3608-496d-9025-aecbc1235670";
 	
-	private static final String PATIENT_FEMALE_UUID = "8adf539e-4b5a-47aa-80c0-ba1025c957fa";
-	
 	private static final String PATIENT_SEARCH_DATA_XML = "org/openmrs/api/include/PatientServiceTest-findPatients.xml";
 	
 	private static final String PATIENT_GIVEN_NAME = "Jeannette";
@@ -68,6 +67,12 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String PATIENT_IDENTIFIER_TYPE = "Test Identifier Type";
 	
 	private static final String BAD_PATIENT_IDENTIFIER_TYPE = "Non-Existent Identifier";
+	
+	private static final String PATIENT_MALE_GENDER = "male";
+	
+	private static final String PATIENT_FEMALE_GENDER = "female";
+	
+	private static final String PATIENT_WRONG_GENDER = "wrong-gender";
 	
 	private static final String PATIENT_BIRTHDATE = "1976-08-25";
 	
@@ -253,25 +258,29 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForPatients_shouldReturnPatientsByGender() {
+		final String GENDER_PROPERTY = "gender";
+		
 		Collection<Patient> results = dao.searchForPatients(null, null, null, null,
-		    new TokenOrListParam().add(new TokenParam("male")), null, null, null, null, null, null, null, null);
+		    new TokenOrListParam().add(new TokenParam(PATIENT_MALE_GENDER)), null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("uuid", equalTo(PATIENT_UUID))));
+		assertThat(results, everyItem(hasProperty(GENDER_PROPERTY, equalTo("M"))));
 		
-		results = dao.searchForPatients(null, null, null, null, new TokenOrListParam().add(new TokenParam("female")), null,
-		    null, null, null, null, null, null, null);
+		results = dao.searchForPatients(null, null, null, null,
+		    new TokenOrListParam().add(new TokenParam(PATIENT_FEMALE_GENDER)), null, null, null, null, null, null, null,
+		    null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("uuid", equalTo(PATIENT_FEMALE_UUID))));
+		assertThat(results, everyItem(hasProperty(GENDER_PROPERTY, equalTo("F"))));
 	}
 	
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenGenderNotMatched() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null, null,
-		    new TokenOrListParam().add(new TokenParam("other")), null, null, null, null, null, null, null, null);
+		    new TokenOrListParam().add(new TokenParam(PATIENT_WRONG_GENDER)), null, null, null, null, null, null, null,
+		    null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
