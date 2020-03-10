@@ -10,19 +10,21 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.Drug;
 import org.openmrs.DrugIngredient;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 import org.springframework.stereotype.Component;
@@ -30,9 +32,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class MedicationTranslatorImpl implements MedicationTranslator {
-	
-	@Inject
-	private FhirConceptService conceptService;
 	
 	@Inject
 	private ConceptTranslator conceptTranslator;
@@ -46,14 +45,29 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		Medication medication = new Medication();
 		medication.setId(drug.getUuid());
 		medication.setCode(conceptTranslator.toFhirResource(drug.getConcept()));
-		medication.setForm(new CodeableConcept().addCoding(new Coding(FhirConstants.MEDICATION_FORM_VALUE_SET_URI,
-		        drug.getDosageForm().getUuid(), drug.getDosageForm().getDisplayString())));
+		medication.setForm(conceptTranslator.toFhirResource(drug.getDosageForm()));
 		
 		Medication.MedicationIngredientComponent ingredient = new Medication.MedicationIngredientComponent();
+		CodeableConcept codeableConcept;
 		for (DrugIngredient val : drug.getIngredients()) {
-			ingredient.setItem(conceptTranslator.toFhirResource(val.getIngredient()));
+			codeableConcept = conceptTranslator.toFhirResource(val.getIngredient());
+			if (val.getStrength() != null) {
+				codeableConcept.setText(val.getStrength().toString());
+			}
+			medication.addIngredient(ingredient.setItem(codeableConcept));
 		}
-		medication.addIngredient(ingredient);
+		
+		medication.getMeta().setLastUpdated(drug.getDateChanged());
+		
+		if (drug.getRetired()) {
+			medication.setStatus(Medication.MedicationStatus.INACTIVE);
+		} else {
+			medication.setStatus(Medication.MedicationStatus.ACTIVE);
+		}
+		
+		addMedicineExtension(medication, "maximumDailyDose", drug.getMaximumDailyDose().toString());
+		addMedicineExtension(medication, "minimumDailyDose", drug.getMinimumDailyDose().toString());
+		addMedicineExtension(medication, "strength", drug.getStrength());
 		
 		return medication;
 	}
@@ -61,7 +75,7 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 	@Override
 	public Drug toOpenmrsType(Drug existingDrug, Medication med) {
 		if (med == null) {
-			return null;
+			return existingDrug;
 		}
 		existingDrug.setUuid(med.getId());
 		
@@ -77,14 +91,57 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 			for (Medication.MedicationIngredientComponent ingredient : med.getIngredient()) {
 				DrugIngredient omrsIngredient = new DrugIngredient();
 				omrsIngredient.setDrug(existingDrug);
-				for (Coding code : ingredient.getItemCodeableConcept().getCoding()) {
-					omrsIngredient.setIngredient(conceptService.getConceptByUuid(code.getCode()).orElse(null));
-				}
+				omrsIngredient.setIngredient(conceptTranslator.toOpenmrsType(ingredient.getItemCodeableConcept()));
 				ingredients.add(omrsIngredient);
 			}
 			existingDrug.setIngredients(ingredients);
 		}
 		
+		if (med.getStatus() == Medication.MedicationStatus.ACTIVE) {
+			existingDrug.setRetired(false);
+		} else if (med.getStatus() == Medication.MedicationStatus.INACTIVE) {
+			existingDrug.setRetired(true);
+		}
+		
+		getOpenmrsMedicineExtension(med).ifPresent(ext -> ext.getExtension()
+		        .forEach(e -> addMedicineComponent(existingDrug, e.getUrl(), ((StringType) e.getValue()).getValue())));
+		
 		return existingDrug;
+	}
+	
+	public void addMedicineComponent(@NotNull Drug drug, @NotNull String url, @NotNull String value) {
+		if (value == null || url == null || !url.startsWith(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#")) {
+			return;
+		}
+		
+		String val = url.substring(url.lastIndexOf('#') + 1);
+		
+		switch (val) {
+			case "maximumDailyDose":
+				drug.setMaximumDailyDose(Double.valueOf(value));
+				break;
+			case "minimumDailyDose":
+				drug.setMinimumDailyDose(Double.valueOf(value));
+				break;
+			case "strength":
+				drug.setStrength(value);
+				break;
+		}
+	}
+	
+	private void addMedicineExtension(@NotNull Medication medication, @NotNull java.lang.String extensionProperty,
+	        @NotNull String value) {
+		if (value == null) {
+			return;
+		}
+		
+		getOpenmrsMedicineExtension(medication)
+		        .orElseGet(() -> medication.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE))
+		        .addExtension(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#" + extensionProperty, new StringType(value));
+	}
+	
+	private Optional<Extension> getOpenmrsMedicineExtension(@NotNull Medication medication) {
+		return Optional.ofNullable(medication.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE));
+		
 	}
 }
