@@ -16,11 +16,14 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -58,43 +61,6 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 		return location;
 	}
 	
-	@Search
-	@SuppressWarnings("unused")
-	public Bundle findLocationByName(@RequiredParam(name = Location.SP_NAME) StringParam name) {
-		return FhirServerUtils.convertSearchResultsToBundle(fhirLocationService.findLocationByName(name.getValue()));
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public Bundle findLocationByCity(@RequiredParam(name = Location.SP_ADDRESS_CITY) StringParam city) {
-		return FhirServerUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByCity(city.getValue()));
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public Bundle findLocationByCountry(@RequiredParam(name = Location.SP_ADDRESS_COUNTRY) StringParam country) {
-		return FhirServerUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByCountry(country.getValue()));
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public Bundle findLocationByPostalCode(@RequiredParam(name = Location.SP_ADDRESS_POSTALCODE) StringParam postalCode) {
-		return FhirServerUtils
-		        .convertSearchResultsToBundle(fhirLocationService.findLocationsByPostalCode(postalCode.getValue()));
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public Bundle findLocationByState(@RequiredParam(name = Location.SP_ADDRESS_STATE) StringParam state) {
-		return FhirServerUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByState(state.getValue()));
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public Bundle findLocationsByTag(@RequiredParam(name = "_tag") TokenParam tag) {
-		return FhirServerUtils.convertSearchResultsToBundle(fhirLocationService.findLocationsByTag(tag));
-	}
-	
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getLocationHistoryById(@IdParam @NotNull IdType id) {
@@ -103,5 +69,17 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find location with Id " + id.getIdPart());
 		}
 		return location.getContained();
+	}
+	
+	@Search
+	public Bundle searchLocations(@OptionalParam(name = Location.SP_NAME) StringOrListParam name,
+	        @OptionalParam(name = Location.SP_ADDRESS_CITY) StringOrListParam city,
+	        @OptionalParam(name = Location.SP_ADDRESS_COUNTRY) StringOrListParam country,
+	        @OptionalParam(name = Location.SP_ADDRESS_POSTALCODE) StringOrListParam postalCode,
+	        @OptionalParam(name = Location.SP_ADDRESS_STATE) StringOrListParam state,
+	        @OptionalParam(name = "_tag") TokenOrListParam tag,
+	        @OptionalParam(name = Location.SP_PARTOF) ReferenceOrListParam parent, @Sort SortSpec sort) {
+		return FhirServerUtils.convertSearchResultsToBundle(
+		    fhirLocationService.searchForLocations(name, city, country, postalCode, state, tag, parent, sort));
 	}
 }
