@@ -17,12 +17,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
@@ -51,23 +57,13 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	private static final String LOCATION_NAME = "chulaimbo";
 	
-	private static final String WRONG_LOCATION_NAME = "wrong location name";
-	
 	private static final String CITY = "kakamega";
-	
-	private static final String WRONG_CITY = "kakamega";
 	
 	private static final String COUNTRY = "Kenya";
 	
-	private static final String WRONG_COUNTRY = "wrong country";
-	
 	private static final String STATE = "Pan villa";
 	
-	private static final String WRONG_STATE = "wrong  state";
-	
 	private static final String POSTAL_CODE = "234-30100";
-	
-	private static final String WRONG_POSTAL_CODE = "wrong postal code";
 	
 	private static final String LOGIN_LOCATION_TAG_NAME = "login";
 	
@@ -130,123 +126,100 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Test
 	public void findLocationsByName_shouldReturnMatchingBundleOfLocations() {
-		when(locationService.findLocationByName(LOCATION_NAME)).thenReturn(Collections.singletonList(location));
-		StringParam param = new StringParam();
-		param.setValue(LOCATION_NAME);
+		StringOrListParam nameParam = new StringOrListParam().add(new StringParam(LOCATION_NAME));
+		when(locationService.searchForLocations(argThat(Matchers.is(nameParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
-		Bundle results = resourceProvider.findLocationByName(param);
+		Bundle results = resourceProvider.searchLocations(nameParam, null, null, null, null, null, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findLocationsByWrongLocationName_shouldReturnBundleWithEmptyEntries() {
-		StringParam param = new StringParam();
-		param.setValue(WRONG_LOCATION_NAME);
-		Bundle results = resourceProvider.findLocationByName(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry(), is(empty()));
 	}
 	
 	@Test
 	public void findLocationsByCity_shouldReturnMatchingBundleOfLocations() {
-		when(locationService.findLocationsByCity(CITY)).thenReturn(Collections.singletonList(location));
-		StringParam param = new StringParam();
-		param.setValue(CITY);
+		StringOrListParam cityParam = new StringOrListParam().add(new StringParam(CITY));
+		when(locationService.searchForLocations(isNull(), argThat(Matchers.is(cityParam)), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
-		Bundle results = resourceProvider.findLocationByCity(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
+		Bundle results = resourceProvider.searchLocations(null, cityParam, null, null, null, null, null, null);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(results.isResource(), Matchers.is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findLocationsByWrongCityName_shouldReturnBundleWithEmptyEntries() {
-		StringParam param = new StringParam();
-		param.setValue(WRONG_CITY);
-		Bundle results = resourceProvider.findLocationByCity(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry(), is(empty()));
 	}
 	
 	@Test
 	public void findLocationsByCountry_shouldReturnMatchingBundleOfLocations() {
-		when(locationService.findLocationsByCountry(COUNTRY)).thenReturn(Collections.singletonList(location));
-		StringParam param = new StringParam();
-		param.setValue(COUNTRY);
+		StringOrListParam countryParam = new StringOrListParam().add(new StringParam(COUNTRY));
+		when(locationService.searchForLocations(isNull(), isNull(), argThat(Matchers.is(countryParam)), isNull(), isNull(),
+		    isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
-		Bundle results = resourceProvider.findLocationByCountry(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
+		Bundle results = resourceProvider.searchLocations(null, null, countryParam, null, null, null, null, null);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(results.isResource(), Matchers.is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findLocationsByWrongCountryName_shouldReturnBundleWithEmptyEntries() {
-		StringParam param = new StringParam();
-		param.setValue(WRONG_COUNTRY);
-		Bundle results = resourceProvider.findLocationByCountry(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry(), is(empty()));
 	}
 	
 	@Test
 	public void findLocationsByState_shouldReturnMatchingBundleOfLocations() {
-		when(locationService.findLocationsByState(STATE)).thenReturn(Collections.singletonList(location));
-		StringParam param = new StringParam();
-		param.setValue(STATE);
+		StringOrListParam stateParam = new StringOrListParam().add(new StringParam(STATE));
+		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), argThat(Matchers.is(stateParam)),
+		    isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
-		Bundle results = resourceProvider.findLocationByState(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
+		Bundle results = resourceProvider.searchLocations(null, null, null, null, stateParam, null, null, null);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(results.isResource(), Matchers.is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findLocationsByWrongStateName_shouldReturnBundleWithEmptyEntries() {
-		StringParam param = new StringParam();
-		param.setValue(WRONG_STATE);
-		Bundle results = resourceProvider.findLocationByState(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry(), is(empty()));
 	}
 	
 	@Test
 	public void findLocationsByPostalCode_shouldReturnMatchingBundleOfLocations() {
-		when(locationService.findLocationsByPostalCode(POSTAL_CODE)).thenReturn(Collections.singletonList(location));
-		StringParam param = new StringParam();
-		param.setValue(POSTAL_CODE);
+		StringOrListParam postalCodeParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
+		when(locationService.searchForLocations(isNull(), isNull(), isNull(), argThat(Matchers.is(postalCodeParam)),
+		    isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
-		Bundle results = resourceProvider.findLocationByPostalCode(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
+		Bundle results = resourceProvider.searchLocations(null, null, null, postalCodeParam, null, null, null, null);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(results.isResource(), Matchers.is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findLocationsByWrongPostalCode_shouldReturnBundleWithEmptyEntries() {
-		StringParam param = new StringParam();
-		param.setValue(WRONG_POSTAL_CODE);
-		Bundle results = resourceProvider.findLocationByPostalCode(param);
-		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry(), is(empty()));
 	}
 	
 	@Test
 	public void findLocationsByTags_shouldReturnLocationsContainingGivenTag() {
-		TokenParam tag = new TokenParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME);
-		when(locationService.findLocationsByTag(tag)).thenReturn(Collections.singletonList(location));
+		TokenOrListParam tag = new TokenOrListParam()
+		        .add(new TokenParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME));
+		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(Matchers.is(tag)),
+		    isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
-		Bundle results = resourceProvider.findLocationsByTag(tag);
+		Bundle results = resourceProvider.searchLocations(null, null, null, null, null, tag, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchLocations_shouldReturnMatchingBundleOfLocations() {
+		List<Location> locations = new ArrayList<>();
+		locations.add(location);
+		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any()))
+		        .thenReturn(locations);
+		
+		StringOrListParam location = new StringOrListParam().add(new StringParam(LOCATION_NAME));
+		
+		Bundle resultLocations = resourceProvider.searchLocations(location, null, null, null, null, null, null, null);
+		
+		assertThat(resultLocations, notNullValue());
+		assertThat(resultLocations.isResource(), is(true));
+		assertThat(resultLocations.getTotal(), equalTo(1));
+		assertThat(resultLocations.getEntry(), notNullValue());
+		assertThat(resultLocations.getEntry().get(0).getResource().fhirType(), equalTo("Location"));
+		assertThat(resultLocations.getEntry().get(0).getResource().getId(), equalTo(LOCATION_UUID));
 	}
 	
 	@Test
@@ -281,5 +254,4 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		assertThat(resourceProvider.getLocationHistoryById(idType).isEmpty(), Matchers.is(true));
 		assertThat(resourceProvider.getLocationHistoryById(idType).size(), Matchers.equalTo(0));
 	}
-	
 }

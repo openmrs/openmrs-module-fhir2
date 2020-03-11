@@ -14,7 +14,10 @@ import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
 
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 
@@ -22,17 +25,9 @@ public interface FhirLocationDao {
 	
 	Location getLocationByUuid(@NotNull String uuid);
 	
-	Collection<Location> findLocationByName(@NotNull String name);
-	
-	Collection<Location> findLocationsByCity(@NotNull String city);
-	
-	Collection<Location> findLocationsByCountry(@NotNull String country);
-	
-	Collection<Location> findLocationsByPostalCode(@NotNull String postalCode);
-	
-	Collection<Location> findLocationsByState(@NotNull String state);
-	
-	Collection<Location> findLocationsByTag(@NotNull TokenParam tag);
+	Collection<Location> searchForLocations(StringOrListParam name, StringOrListParam city, StringOrListParam country,
+	        StringOrListParam postalCode, StringOrListParam state, TokenOrListParam tag, ReferenceOrListParam parent,
+	        SortSpec sort);
 	
 	List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@NotNull Location location,
 	        @NotNull String locationAttributeTypeUuid);

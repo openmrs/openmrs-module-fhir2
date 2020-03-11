@@ -14,7 +14,10 @@ import javax.inject.Inject;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Location;
@@ -43,42 +46,10 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Collection<Location> findLocationByName(String name) {
-		return locationDao.findLocationByName(name).stream().map(locationTranslator::toFhirResource)
-		        .collect(Collectors.toList());
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Collection<Location> findLocationsByCity(String city) {
-		return locationDao.findLocationsByCity(city).stream().map(locationTranslator::toFhirResource)
-		        .collect(Collectors.toList());
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Collection<Location> findLocationsByCountry(String country) {
-		return locationDao.findLocationsByCountry(country).stream().map(locationTranslator::toFhirResource)
-		        .collect(Collectors.toList());
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Collection<Location> findLocationsByPostalCode(String postalCode) {
-		return locationDao.findLocationsByPostalCode(postalCode).stream().map(locationTranslator::toFhirResource)
-		        .collect(Collectors.toList());
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Collection<Location> findLocationsByState(String state) {
-		return locationDao.findLocationsByState(state).stream().map(locationTranslator::toFhirResource)
-		        .collect(Collectors.toList());
-	}
-	
-	@Override
-	public Collection<Location> findLocationsByTag(TokenParam tag) {
-		return locationDao.findLocationsByTag(tag).stream().map(locationTranslator::toFhirResource)
-		        .collect(Collectors.toList());
+	public Collection<Location> searchForLocations(StringOrListParam name, StringOrListParam city, StringOrListParam country,
+	        StringOrListParam postalCode, StringOrListParam state, TokenOrListParam tag, ReferenceOrListParam parent,
+	        SortSpec sort) {
+		return locationDao.searchForLocations(name, city, country, postalCode, state, tag, parent, sort).stream()
+		        .map(locationTranslator::toFhirResource).collect(Collectors.toList());
 	}
 }

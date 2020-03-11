@@ -344,13 +344,17 @@ public abstract class BaseDaoImpl {
 		// the string matches "true". We could potentially be passed a non-valid Boolean value here.
 		return handleOrListParam(booleanToken, token -> {
 			if (token.getValue().equalsIgnoreCase("true")) {
-				return Optional.of(eq(propertyName, true));
+				return handleBooleanProperty(propertyName, true);
 			} else if (token.getValue().equalsIgnoreCase("false")) {
-				return Optional.of(eq(propertyName, false));
+				return handleBooleanProperty(propertyName, false);
 			}
 			
 			return Optional.empty();
 		});
+	}
+	
+	protected Optional<Criterion> handleBooleanProperty(String propertyName, boolean booleanVal) {
+		return Optional.of(eq(propertyName, booleanVal));
 	}
 	
 	/**
@@ -667,9 +671,9 @@ public abstract class BaseDaoImpl {
 		
 		if (orderings.size() == 0) {
 			return Optional.empty();
-		} else {
-			return Optional.of(orderings);
 		}
+		
+		return Optional.of(orderings);
 	}
 	
 	protected Criterion generateSystemQuery(String system, List<String> codes) {
@@ -711,9 +715,9 @@ public abstract class BaseDaoImpl {
 			return Optional.of(ilike(propertyName, param.getValue(), MatchMode.EXACT));
 		} else if (param.isContains()) {
 			return Optional.of(ilike(propertyName, param.getValue(), MatchMode.ANYWHERE));
-		} else {
-			return Optional.of(ilike(propertyName, param.getValue(), MatchMode.START));
 		}
+		
+		return Optional.of(ilike(propertyName, param.getValue(), MatchMode.START));
 	}
 	
 	protected Optional<CriteriaImpl> asImpl(Criteria criteria) {
@@ -721,9 +725,9 @@ public abstract class BaseDaoImpl {
 			return Optional.of((CriteriaImpl) criteria);
 		} else if (CriteriaImpl.Subcriteria.class.isAssignableFrom(criteria.getClass())) {
 			return Optional.of((CriteriaImpl) ((CriteriaImpl.Subcriteria) criteria).getParent());
-		} else {
-			return Optional.empty();
 		}
+		
+		return Optional.empty();
 	}
 	
 	protected List<String> tokensToList(List<TokenParam> tokens) {

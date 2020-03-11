@@ -10,18 +10,22 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Address;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 
@@ -110,83 +113,17 @@ public class FhirLocationServiceImplTest {
 	}
 	
 	@Test
-	public void findLocationByName_shouldFindLocationByName() {
-		Collection<Location> locations = new ArrayList<>();
+	public void searchForLocations_shouldReturnLocationsByParameters() {
+		List<Location> locations = new ArrayList<>();
 		locations.add(location);
-		when(locationDao.findLocationByName(LOCATION_NAME)).thenReturn(locations);
+		when(locationDao.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(locations);
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 		
-		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationByName(LOCATION_NAME);
+		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.searchForLocations(null, null, null, null,
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
+		assertThat(results, not(empty()));
+		assertThat(results, hasItem(hasProperty("id", equalTo(LOCATION_UUID))));
 	}
-	
-	@Test
-	public void findLocationByCity_shouldFindLocationByCity() {
-		Collection<Location> locations = new ArrayList<>();
-		locations.add(location);
-		when(locationDao.findLocationsByCity(LOCATION_CITY)).thenReturn(locations);
-		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-		
-		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByCity(LOCATION_CITY);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findLocationsByCountry_shouldFindLocationsByCountry() {
-		Collection<Location> locations = new ArrayList<>();
-		locations.add(location);
-		when(locationDao.findLocationsByCountry(LOCATION_COUNTRY)).thenReturn(locations);
-		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-		
-		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByCountry(LOCATION_COUNTRY);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findLocationsByPostalCode_shouldFindLocationsByPostalCode() {
-		Collection<Location> locations = new ArrayList<>();
-		locations.add(location);
-		when(locationDao.findLocationsByPostalCode(POSTAL_CODE)).thenReturn(locations);
-		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-		
-		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByPostalCode(POSTAL_CODE);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findLocationsByCityState_shouldFindLocationsByState() {
-		Collection<Location> locations = new ArrayList<>();
-		locations.add(location);
-		when(locationDao.findLocationsByState(LOCATION_STATE)).thenReturn(locations);
-		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-		
-		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByState(LOCATION_STATE);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findLocationsByTag_shouldReturnLocationsContainingGivenTag() {
-		Collection<Location> locations = new ArrayList<>();
-		locations.add(location);
-		TokenParam locationTag = new TokenParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME);
-		
-		when(locationDao.findLocationsByTag(locationTag)).thenReturn(locations);
-		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-		
-		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.findLocationsByTag(locationTag);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), greaterThanOrEqualTo(1));
-	}
-	
 }
