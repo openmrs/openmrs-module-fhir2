@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -26,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -63,10 +65,15 @@ public class ProvenanceTranslatorImplTest {
 	
 	private ProvenanceTranslatorImpl<Person> personProvenanceTranslator;
 	
+	private ProvenanceTranslatorImpl<Patient> patientProvenanceTranslator;
+	
 	@Before
 	public void setup() {
 		personProvenanceTranslator = new ProvenanceTranslatorImpl<>();
 		personProvenanceTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
+		
+		patientProvenanceTranslator = new ProvenanceTranslatorImpl<>();
+		patientProvenanceTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 	}
 	
 	@Before
@@ -213,5 +220,20 @@ public class ProvenanceTranslatorImplTest {
 		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep().getDisplay(), equalTo(AGENT_TYPE_DISPLAY));
 		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep().getSystem(),
 		    equalTo(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE));
+	}
+	
+	@Test
+	public void shouldNotCreateUpdateActivityProvenanceWhenDateChangedAndChangedByIsNull() {
+		Patient patient = new Patient();
+		Provenance result = patientProvenanceTranslator.getUpdateProvenance(patient);
+		
+		assertThat(result, nullValue());
+	}
+
+	@Test
+	public void getUpdateProvenance_shouldReturnNullIfDateChangedAndChangedByAreNull() {
+		person.setChangedBy(null);
+		person.setDateChanged(null);
+		assertThat(personProvenanceTranslator.getUpdateProvenance(person), nullValue());
 	}
 }
