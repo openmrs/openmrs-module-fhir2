@@ -78,7 +78,8 @@ public class FhirTaskDaoImpl extends BaseDaoImpl implements FhirTaskDao {
 		// TODO: Handle optional params
 		// Task.basedOn
 		if (validReferenceParam(basedOnReference)) {
-			criteria.createAlias("basedOnReferences", "bo").add(Restrictions.eq("bo.reference", basedOnReference.getIdPart()))
+			criteria.createAlias("basedOnReferences", "bo")
+			        .add(Restrictions.eq("bo.reference", basedOnReference.getIdPart()))
 			        .add(Restrictions.eq("bo.type", basedOnReference.getResourceType()));
 		}
 		
