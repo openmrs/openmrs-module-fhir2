@@ -17,6 +17,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.Drug;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Obs;
@@ -37,6 +38,11 @@ public abstract class AbstractReferenceHandlingTranslator {
 	protected Reference createEncounterReference(@NotNull Encounter encounter) {
 		return new Reference().setReference(FhirConstants.ENCOUNTER + "/" + encounter.getUuid())
 		        .setType(FhirConstants.ENCOUNTER);
+	}
+	
+	protected Reference createMedicationReference(@NotNull Drug drug) {
+		return new Reference().setReference(FhirConstants.MEDICATION + "/" + drug.getUuid())
+		        .setType(FhirConstants.MEDICATION);
 	}
 	
 	protected Reference createObservationReference(@NotNull Obs obs) {
