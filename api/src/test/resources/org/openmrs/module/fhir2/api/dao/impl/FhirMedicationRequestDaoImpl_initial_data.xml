@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <!--Patient Information -->
+    <person person_id="102" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0"
+            voided="false" uuid="86526ed5-3c11-11de-a0ba-001e3766667a"/>
+    <patient patient_id="102" creator="1" date_created="2008-08-15 15:57:09.0" changed_by="1"
+             date_changed="2008-08-18 12:29:59.0" voided="false" void_reason=""/>
+
+    <encounter_type encounter_type_id="909" name="Consultation" description="Some desc" creator="1"
+                    date_created="2008-08-18 00:00:00.0" retired="false" uuid="759799ab-c9a5-430e-b671-323323ada74e4"/>
+    <encounter encounter_id="890" encounter_type="909" patient_id="102"
+               encounter_datetime="2008-08-19 00:00:00.0" creator="1" date_created="2008-08-19 14:09:05.0" voided="false"
+               uuid="bb0af6222-707a-9029-9859-f15206e63ab1"/>
+
+    <concept concept_id="4020" retired="false" datatype_id="4" class_id="11" is_set="false" creator="501"
+             date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0"
+             uuid="d102c80f-1yz9-4da3-bb88-8122ce889090"/>
+    <concept_name concept_id="4020" concept_name_id="1420" name="Bedaquiline" locale="en" creator="1"
+                  date_created="2004-08-12 00:00:00.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1"
+                  voided="false" uuid="d102c80f-1yz9-4da3-0099-8122ce886891"/>
+
+    <orders order_id="1005" order_type_id="1" encounter_id="890" urgency="ROUTINE" concept_id="4020" orderer="1"
+            care_setting="1" order_action="NEW" order_number="1" date_activated="2016-02-01 00:30:00.0"
+            auto_expire_date="2017-09-30 00:00:00.0" creator="1"
+            date_created="2016-08-19 12:20:22.0" voided="false" patient_id="102"
+            uuid="6d0ae116-707a-4629-9850-f15206e63ab0"/>
+
+    <drug drug_id="2001" concept_id="4020" dosage_form="51" name="Bedaquiline" combination="true" creator="1"
+          date_created="2005-02-24 00:00:00.0" retired="false" uuid="42f00b94-26fe-102b-80cb-0017a47871b2"/>
+
+    <drug_order order_id="1005" drug_inventory_id="2001" duration="6" duration_units="27" dispense_as_written="true"
+                as_needed="false"
+                frequency="2"/>
+</dataset>

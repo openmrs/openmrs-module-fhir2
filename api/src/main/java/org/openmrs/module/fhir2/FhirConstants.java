@@ -107,6 +107,8 @@ public class FhirConstants {
 	
 	public static final String TASK = "Task";
 	
+	public static final String MEDICATION = "Medication";
+	
 	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
 	
 	@Value("${project.parent.artifactId}.personAttributeTypeUuid")
