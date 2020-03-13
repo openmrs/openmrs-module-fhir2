@@ -448,25 +448,25 @@ public class LocationTranslatorImplTest {
 		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
 		    is(true));
 	}
-
+	
 	@Test
 	public void shouldNotAddUpdateProvenanceIfDateChangedAndChangedByAreBothNull() {
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
-
+		
 		org.openmrs.Location location = new org.openmrs.Location();
 		location.setUuid(LOCATION_UUID);
 		location.setDateChanged(null);
 		location.setChangedBy(null);
 		when(customizableMetadataTranslator.getCreateProvenance(location)).thenReturn(provenance);
 		when(customizableMetadataTranslator.getUpdateProvenance(location)).thenReturn(null);
-
+		
 		org.hl7.fhir.r4.model.Location result = locationTranslator.toFhirResource(location);
 		assertThat(result, notNullValue());
 		assertThat(result.getContained(), not(empty()));
 		assertThat(result.getContained().size(), equalTo(1));
 		assertThat(result.getContained().stream()
-						.anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
-				is(true));
+		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
+		    is(true));
 	}
 }

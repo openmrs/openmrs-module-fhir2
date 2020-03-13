@@ -229,7 +229,7 @@ public class ProvenanceTranslatorImplTest {
 		
 		assertThat(result, nullValue());
 	}
-
+	
 	@Test
 	public void getUpdateProvenance_shouldReturnNullIfDateChangedAndChangedByAreNull() {
 		person.setChangedBy(null);

@@ -429,25 +429,25 @@ public class PatientTranslatorImplTest {
 		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
 		    is(true));
 	}
-
+	
 	@Test
 	public void shouldNotAddUpdateProvenanceIfDateChangedAndChangedByAreBothNull() {
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
-
+		
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setUuid(PATIENT_UUID);
 		patient.setDateChanged(null);
 		patient.setChangedBy(null);
 		when(provenanceTranslator.getCreateProvenance(patient)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(patient)).thenReturn(null);
-
+		
 		org.hl7.fhir.r4.model.Patient result = patientTranslator.toFhirResource(patient);
 		assertThat(result, notNullValue());
 		assertThat(result.getContained(), not(empty()));
 		assertThat(result.getContained().size(), equalTo(1));
 		assertThat(result.getContained().stream()
-						.anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
-				is(true));
+		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
+		    is(true));
 	}
 }
