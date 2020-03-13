@@ -26,11 +26,13 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Provenance;
@@ -45,11 +47,14 @@ import org.openmrs.Concept;
 import org.openmrs.ConceptNumeric;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationBasedOnReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationEffectiveDatetimeTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceRangeTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
@@ -69,6 +74,8 @@ public class ObservationTranslatorImplTest {
 	private static final String ENCOUNTER_UUID = "12345-abcde-54321";
 	
 	private static final String PATIENT_UUID = "12345-edcba-12345";
+	
+	private static final String ORDER_UUID = "12344-edcba-12345";
 	
 	private static final Double LOW_NORMAL_VALUE = 1.0;
 	
@@ -101,6 +108,12 @@ public class ObservationTranslatorImplTest {
 	@Mock
 	private ProvenanceTranslator<Obs> provenanceTranslator;
 	
+	@Mock
+	private ObservationBasedOnReferenceTranslator basedOnReferenceTranslator;
+	
+	@Mock
+	private ObservationEffectiveDatetimeTranslator datetimeTranslator;
+	
 	private ObservationTranslatorImpl observationTranslator;
 	
 	@Before
@@ -115,6 +128,8 @@ public class ObservationTranslatorImplTest {
 		observationTranslator.setInterpretationTranslator(interpretationTranslator);
 		observationTranslator.setReferenceRangeTranslator(referenceRangeTranslator);
 		observationTranslator.setProvenanceTranslator(provenanceTranslator);
+		observationTranslator.setBasedOnReferenceTranslator(basedOnReferenceTranslator);
+		observationTranslator.setDatetimeTranslator(datetimeTranslator);
 	}
 	
 	@Test
@@ -288,6 +303,48 @@ public class ObservationTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateOpenMrsDateCreatedToDateIssued() {
+		Obs observation = new Obs();
+		observation.setDateCreated(new Date());
+		Observation result = observationTranslator.toFhirResource(observation);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssued(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateOpenMrsObsDatetimeToEffectiveDatetime() {
+		Obs observation = new Obs();
+		observation.setObsDatetime(new Date());
+		
+		when(datetimeTranslator.toFhirResource(observation)).thenReturn(new DateTimeType(new Date()));
+		
+		Observation result = observationTranslator.toFhirResource(observation);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getEffectiveDateTimeType(), notNullValue());
+		assertThat(result.getEffectiveDateTimeType().getValue(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void toFhirResource_shouldConvertOrderToReference() {
+		Obs observation = new Obs();
+		Order order = new Order();
+		order.setUuid(ORDER_UUID);
+		observation.setOrder(order);
+		Reference orderReference = new Reference();
+		orderReference.setType("Order");
+		orderReference.setId(ORDER_UUID);
+		when(basedOnReferenceTranslator.toFhirResource(observation.getOrder())).thenReturn(orderReference);
+		
+		Observation result = observationTranslator.toFhirResource(observation);
+		
+		assertThat(result.getBasedOn(), notNullValue());
+		assertThat(result.getBasedOn().get(0).getType(), equalTo("Order"));
+		assertThat(result.getBasedOn().get(0).getId(), equalTo(ORDER_UUID));
+	}
+	
+	@Test
 	public void toOpenmrsType_shouldTranslateIdToUuid() {
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
@@ -351,15 +408,47 @@ public class ObservationTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateLastUpdatedDateToDateChanged() {
+	public void toOpenmrsType_shouldTranslateEffectiveDatetimeToObsDatetime() {
 		Observation observation = new Observation();
-		observation.getMeta().setLastUpdated(new Date());
+		DateTimeType dateTime = new DateTimeType();
+		dateTime.setValue(new Date());
+		observation.setEffective(dateTime);
 		
+		Obs obs = new Obs();
 		Obs expected = new Obs();
+		expected.setObsDatetime(new Date());
 		
-		observationTranslator.toOpenmrsType(expected, observation);
+		observationTranslator.toOpenmrsType(obs, observation);
 		assertThat(expected, notNullValue());
-		assertThat(expected.getDateChanged(), DateMatchers.sameDay(new Date()));
+		assertThat(expected.getObsDatetime(), notNullValue());
+		assertThat(expected.getObsDatetime(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldReturnNullObsOrderWhenFhirBasedOnIsNull() {
+		Observation observation = new Observation();
+		Obs obs = new Obs();
+		Obs result = observationTranslator.toOpenmrsType(obs, observation);
+		assertThat(result.getOrder(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateBasedOnToObsOrder() {
+		Observation observation = new Observation();
+		Reference orderReference = new Reference();
+		orderReference.setType("Order");
+		orderReference.setId(ORDER_UUID);
+		observation.setBasedOn(Collections.singletonList(orderReference));
+		
+		Obs obs = new Obs();
+		Order order = new Order();
+		order.setUuid(ORDER_UUID);
+		
+		when(basedOnReferenceTranslator.toOpenmrsType(orderReference)).thenReturn(order);
+		Obs result = observationTranslator.toOpenmrsType(obs, observation);
+		assertThat(result, notNullValue());
+		assertThat(result.getOrder(), notNullValue());
+		assertThat(result.getOrder(), equalTo(order));
 	}
 	
 	@Test

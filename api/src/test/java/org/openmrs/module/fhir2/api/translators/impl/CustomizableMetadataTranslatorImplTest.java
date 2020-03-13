@@ -219,7 +219,7 @@ public class CustomizableMetadataTranslatorImplTest {
 		Provenance result = customizableMetadataTranslator.getUpdateProvenance(location);
 		assertThat(result, nullValue());
 	}
-
+	
 	@Test
 	public void getUpdateProvenance_shouldReturnNullIfDateChangedAndChangedByAreNull() {
 		location.setChangedBy(null);

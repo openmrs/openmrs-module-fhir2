@@ -26,7 +26,7 @@ public class FhirServiceRequestDaoImpl implements FhirServiceRequestDao<TestOrde
 	
 	@Inject
 	@Named("sessionFactory")
-	SessionFactory sessionFactory;
+	private SessionFactory sessionFactory;
 	
 	@Override
 	public TestOrder getServiceRequestByUuid(String uuid) {

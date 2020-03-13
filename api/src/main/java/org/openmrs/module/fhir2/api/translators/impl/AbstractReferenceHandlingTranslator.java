@@ -21,6 +21,7 @@ import org.openmrs.Drug;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Obs;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.Person;
@@ -31,6 +32,10 @@ import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 
 @Setter(AccessLevel.PACKAGE)
 public abstract class AbstractReferenceHandlingTranslator {
+	
+	public static final String DRUG_ORDER_TYPE_UUID = "131168f4-15f5-102d-96e4-000c29c2a5d7";
+	
+	public static final String TEST_ORDER_TYPE_UUID = "52a447d3-a64a-11e3-9aeb-50e549534c5e";
 	
 	@Inject
 	private PatientIdentifierTranslator patientIdentifierTranslator;
@@ -113,6 +118,22 @@ public abstract class AbstractReferenceHandlingTranslator {
 		}
 		
 		return reference;
+	}
+	
+	protected Reference createOrderReference(@NotNull Order order) {
+		if (order.getOrderType() == null) {
+			return null;
+		}
+		
+		if (order.getOrderType().getUuid().equals(TEST_ORDER_TYPE_UUID)) {
+			return new Reference().setReference(FhirConstants.SERVICE_REQUEST + "/" + order.getUuid())
+			        .setType(FhirConstants.SERVICE_REQUEST);
+		} else if (order.getOrderType().getUuid().equals(DRUG_ORDER_TYPE_UUID)) {
+			return new Reference().setReference(FhirConstants.MEDICATION + "/" + order.getUuid())
+			        .setType(FhirConstants.MEDICATION);
+		} else {
+			throw new IllegalArgumentException("Cannot create reference of undetermined order type");
+		}
 	}
 	
 	protected String getReferenceType(Reference reference) {
