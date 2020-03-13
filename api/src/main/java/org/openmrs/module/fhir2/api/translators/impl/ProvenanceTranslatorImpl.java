@@ -34,6 +34,9 @@ public class ProvenanceTranslatorImpl<T extends BaseOpenmrsData> extends Abstrac
 	
 	@Override
 	public Provenance getUpdateProvenance(T openMrsObject) {
+		if (openMrsObject.getDateChanged() == null && openMrsObject.getChangedBy() == null) {
+			return null;
+		}
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
 		provenance.setRecorded(openMrsObject.getDateChanged());

@@ -35,6 +35,9 @@ public class CustomizableMetadataTranslatorImpl<A extends Attribute, T extends B
 	
 	@Override
 	public Provenance getUpdateProvenance(T openMrsObject) {
+		if (openMrsObject.getDateChanged() == null && openMrsObject.getChangedBy() == null) {
+			return null;
+		}
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
 		provenance.setRecorded(openMrsObject.getDateChanged());

@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -208,6 +209,22 @@ public class CustomizableMetadataTranslatorImplTest {
 		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep().getDisplay(), equalTo(AGENT_TYPE_DISPLAY));
 		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep().getSystem(),
 		    equalTo(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE));
+	}
+	
+	@Test
+	public void shouldNotCreateProvenanceWhenDateChangedAndChangeByIsNull() {
+		Location location = new Location();
+		location.setUuid(LOCATION_UUID);
+		
+		Provenance result = customizableMetadataTranslator.getUpdateProvenance(location);
+		assertThat(result, nullValue());
+	}
+
+	@Test
+	public void getUpdateProvenance_shouldReturnNullIfDateChangedAndChangedByAreNull() {
+		location.setChangedBy(null);
+		location.setDateChanged(null);
+		assertThat(customizableMetadataTranslator.getUpdateProvenance(location), nullValue());
 	}
 	
 }
