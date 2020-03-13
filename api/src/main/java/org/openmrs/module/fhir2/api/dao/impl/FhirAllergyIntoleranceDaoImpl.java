@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -52,7 +52,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 	}
 	
 	@Override
-	public Collection<Allergy> searchForAllergies(ReferenceParam patientReference, TokenOrListParam category,
+	public Collection<Allergy> searchForAllergies(ReferenceAndListParam patientReference, TokenOrListParam category,
 	        TokenOrListParam allergen, TokenOrListParam severity, TokenOrListParam manifestationCode,
 	        TokenOrListParam clinicalStatus) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Allergy.class);

@@ -17,7 +17,7 @@ import javax.inject.Named;
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
@@ -41,12 +41,13 @@ public class FhirEncounterDaoImpl extends BaseDaoImpl implements FhirEncounterDa
 	}
 	
 	@Override
-	public Collection<Encounter> searchForEncounters(DateRangeParam date, ReferenceParam location,
-	        ReferenceParam participant, ReferenceParam subject) {
+	public Collection<Encounter> searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
+	        ReferenceAndListParam participant, ReferenceAndListParam subject) {
 		
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Encounter.class);
+		
 		handleDateRange("encounterDatetime", date).ifPresent(criteria::add);
-		handleLocationReference(criteria, location);
+		handleLocationReference("l", location).ifPresent(l -> criteria.createAlias("location", "l").add(l));
 		handleParticipantReference(criteria, participant);
 		handlePatientReference(criteria, subject);
 		

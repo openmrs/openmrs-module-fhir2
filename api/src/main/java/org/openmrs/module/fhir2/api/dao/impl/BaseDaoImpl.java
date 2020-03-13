@@ -52,7 +52,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -425,12 +425,14 @@ public abstract class BaseDaoImpl {
 	}
 	
 	protected Optional<Criterion> handleEncounterReference(@NotNull String encounterAlias,
-	        ReferenceParam encounterReference) {
-		if (encounterReference == null || encounterReference.getIdPart() == null) {
+	        ReferenceAndListParam encounterReference) {
+		if (encounterReference == null) {
 			return Optional.empty();
 		}
-		
-		return Optional.of(eq(String.format("%s.uuid", encounterAlias), encounterReference.getIdPart()));
+		return handleAndListParam(encounterReference, token -> {
+			Optional.of(eq(String.format("%s.uuid", encounterAlias), token.getIdPart()));
+			return Optional.empty();
+		});
 	}
 	
 	protected Optional<Criterion> handleGender(@NotNull String propertyName, TokenOrListParam gender) {
@@ -461,58 +463,64 @@ public abstract class BaseDaoImpl {
 		});
 	}
 	
-	protected void handleLocationReference(Criteria criteria, ReferenceParam locationReference) {
-		if (locationReference != null) {
-			criteria.createAlias("location", "l");
-			
-			if (locationReference.getChain() != null) {
-				switch (locationReference.getChain()) {
-					case Location.SP_ADDRESS_CITY:
-						propertyLike("l.cityVillage", locationReference.getValue()).ifPresent(criteria::add);
-						break;
-					case Location.SP_ADDRESS_STATE:
-						propertyLike("l.stateProvince", locationReference.getValue()).ifPresent(criteria::add);
-						break;
-					case Location.SP_ADDRESS_POSTALCODE:
-						propertyLike("l.postalCode", locationReference.getValue()).ifPresent(criteria::add);
-						break;
-					case Location.SP_ADDRESS_COUNTRY:
-						propertyLike("l.country", locationReference.getValue()).ifPresent(criteria::add);
-						break;
-					case "":
-						criteria.add(eq("l.uuid", locationReference.getValue()));
-						break;
-				}
-			}
+	protected Optional<Criterion> handleLocationReference(@NotNull String locationAlias,
+	        ReferenceAndListParam locationReference) {
+		if (locationReference == null) {
+			return Optional.empty();
 		}
+		
+		return handleAndListParam(locationReference, token -> {
+			switch (token.getChain()) {
+				case Location.SP_ADDRESS_CITY:
+					return Optional.of(ilike(String.format("%s.cityVillage", locationAlias), token.getValue()));
+				case Location.SP_ADDRESS_STATE:
+					return Optional.of(ilike(String.format("%s.stateProvince", locationAlias), token.getValue()));
+				case Location.SP_ADDRESS_POSTALCODE:
+					return Optional.of(ilike(String.format("%s.postalCode", locationAlias), token.getValue()));
+				case Location.SP_ADDRESS_COUNTRY:
+					return Optional.of(ilike(String.format("%s.country", locationAlias), token.getValue()));
+				case "":
+					return Optional.of(eq("l.uuid", token.getValue()));
+			}
+			
+			return Optional.empty();
+		});
+		
 	}
 	
-	protected void handleParticipantReference(Criteria criteria, ReferenceParam participantReference) {
-		if (participantReference != null) {
+	protected void handleParticipantReference(Criteria criteria, ReferenceAndListParam participantReference) {
+		if (participantReference != null && !containsAlias(criteria, "ep")) {
 			criteria.createAlias("encounterProviders", "ep");
 			
-			if (participantReference.getChain() != null) {
-				switch (participantReference.getChain()) {
+			handleAndListParam(participantReference, participantToken -> {
+				switch (participantToken.getChain()) {
 					case Practitioner.SP_IDENTIFIER:
-						criteria.createAlias("ep.provider", "p").add(ilike("p.identifier", participantReference.getValue()));
+						if (!containsAlias(criteria, "p"))
+							criteria.createAlias("ep.provider", "p").add(ilike("p.identifier", participantToken.getValue()));
 						break;
 					case Practitioner.SP_GIVEN:
-						criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
-						        .createAlias("ps.names", "pn")
-						        .add(ilike("pn.givenName", participantReference.getValue(), MatchMode.START));
+						if ((!containsAlias(criteria, "pro")
+						        && (!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))))
+							criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
+							        .createAlias("ps.names", "pn")
+							        .add(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
 						break;
 					case Practitioner.SP_FAMILY:
-						criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
-						        .createAlias("ps.names", "pn")
-						        .add(ilike("pn.familyName", participantReference.getValue(), MatchMode.START));
+						if ((!containsAlias(criteria, "pro")
+						        && (!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))))
+							criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
+							        .createAlias("ps.names", "pn")
+							        .add(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
 						break;
 					case Practitioner.SP_NAME:
-						criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps").createAlias("ps.names",
-						    "pn");
+						if ((!containsAlias(criteria, "pro")
+						        && (!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))))
+							criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
+							        .createAlias("ps.names", "pn");
 						
 						List<Optional<Criterion>> criterionList = new ArrayList<>();
 						
-						for (String token : StringUtils.split(participantReference.getValue(), " \t,")) {
+						for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
 							criterionList.add(propertyLike("pn.givenName", token));
 							criterionList.add(propertyLike("pn.middleName", token));
 							criterionList.add(propertyLike("pn.familyName", token));
@@ -521,10 +529,13 @@ public abstract class BaseDaoImpl {
 						criteria.add(or(toCriteriaArray(criterionList)));
 						break;
 					case "":
-						criteria.add(eq("ep.uuid", participantReference.getValue()));
+						criteria.add(eq("ep.uuid", participantToken.getValue()));
 						break;
 				}
-			}
+				
+				return Optional.empty();
+			});
+			
 		}
 	}
 	
@@ -575,33 +586,41 @@ public abstract class BaseDaoImpl {
 		}
 	}
 	
-	protected void handlePatientReference(Criteria criteria, ReferenceParam patientReference) {
+	protected void handlePatientReference(Criteria criteria, ReferenceAndListParam patientReference) {
 		handlePatientReference(criteria, patientReference, "patient");
 	}
 	
-	protected void handlePatientReference(Criteria criteria, ReferenceParam patientReference, String associationPath) {
+	protected void handlePatientReference(Criteria criteria, ReferenceAndListParam patientReference,
+	        String associationPath) {
 		if (patientReference != null) {
 			criteria.createAlias(associationPath, "p");
 			
-			if (patientReference.getChain() != null) {
-				switch (patientReference.getChain()) {
+			handleAndListParam(patientReference, patientToken -> {
+				switch (patientToken.getChain()) {
 					case Patient.SP_IDENTIFIER:
-						criteria.createAlias("p.identifiers", "pi").add(ilike("pi.identifier", patientReference.getValue()));
+						if (!containsAlias(criteria, "pi")) {
+							criteria.createAlias("p.identifiers", "pi").add(ilike("pi.identifier", patientToken.getValue()));
+						}
 						break;
 					case Patient.SP_GIVEN:
-						criteria.createAlias("p.names", "pn")
-						        .add(ilike("pn.givenName", patientReference.getValue(), MatchMode.START));
+						if (!containsAlias(criteria, "pn")) {
+							criteria.createAlias("p.names", "pn")
+							        .add(ilike("pn.givenName", patientToken.getValue(), MatchMode.START));
+						}
 						break;
 					case Patient.SP_FAMILY:
-						criteria.createAlias("p.names", "pn")
-						        .add(ilike("pn.familyName", patientReference.getValue(), MatchMode.START));
+						if (!containsAlias(criteria, "pn")) {
+							criteria.createAlias("p.names", "pn")
+							        .add(ilike("pn.familyName", patientToken.getValue(), MatchMode.START));
+						}
 						break;
 					case Patient.SP_NAME:
-						criteria.createAlias("p.names", "pn");
-						
+						if (!containsAlias(criteria, "pn")) {
+							criteria.createAlias("p.names", "pn");
+						}
 						List<Optional<Criterion>> criterionList = new ArrayList<>();
 						
-						for (String token : StringUtils.split(patientReference.getValue(), " \t,")) {
+						for (String token : StringUtils.split(patientToken.getValue(), " \t,")) {
 							criterionList.add(propertyLike("pn.givenName", token));
 							criterionList.add(propertyLike("pn.middleName", token));
 							criterionList.add(propertyLike("pn.familyName", token));
@@ -610,10 +629,12 @@ public abstract class BaseDaoImpl {
 						criteria.add(or(toCriteriaArray(criterionList)));
 						break;
 					case "":
-						criteria.add(eq("p.uuid", patientReference.getValue()));
+						criteria.add(eq("p.uuid", patientToken.getValue()));
 						break;
 				}
-			}
+				
+				return Optional.empty();
+			});
 		}
 	}
 	

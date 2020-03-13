@@ -30,6 +30,8 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -66,6 +68,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String PATIENT_IDENTIFIER = "6TS-4";
 	
 	private static final String ENCOUNTER_UUID = "6519d653-393b-4118-9c83-a3715b82d4ac";
+	
+	private static final String ENCOUNTER_UUID_TWO = "6519d653-393b-4118-9c83-a3715b82d4ac";
 	
 	private static final String SNOMED_SYSTEM_URI = "http://snomed.info/sct";
 	
@@ -219,9 +223,13 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForObs_shouldReturnObsByPatientUuid() {
-		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain("");
-		patientReference.setValue(PATIENT_UUID);
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		patient.setChain("");
+		
+		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -232,9 +240,13 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForObs_shouldReturnObsByPatientGivenName() {
-		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain(Patient.SP_GIVEN);
-		patientReference.setValue(PATIENT_GIVEN_NAME);
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -245,9 +257,13 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForObs_shouldReturnObsByPatientFamilyName() {
-		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain(Patient.SP_FAMILY);
-		patientReference.setValue(PATIENT_FAMILY_NAME);
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -258,9 +274,13 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForObs_shouldReturnObsByPatientName() {
-		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain(Patient.SP_NAME);
-		patientReference.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -271,9 +291,13 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForObs_shouldReturnObsByPatientIdentifier() {
-		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setChain(Patient.SP_IDENTIFIER);
-		patientReference.setValue(PATIENT_IDENTIFIER);
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
@@ -284,8 +308,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForObs_shouldReturnObsByEncounter() {
-		ReferenceParam encounterReference = new ReferenceParam();
-		encounterReference.setValue(ENCOUNTER_UUID);
+		ReferenceAndListParam encounterReference = new ReferenceAndListParam();
+		encounterReference.addValue(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID)));
 		
 		Collection<Obs> results = dao.searchForObservations(encounterReference, null, null, null);
 		
@@ -351,6 +375,40 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void searchForObs_shouldReturnObsByPatientUuidAndPatientGivenName() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		ReferenceParam patientOne = new ReferenceParam();
+		ReferenceParam patientTwo = new ReferenceParam();
+		
+		patientOne.setValue(PATIENT_FAMILY_NAME);
+		patientOne.setChain(Patient.SP_FAMILY);
+		
+		patientTwo.setValue(PATIENT_GIVEN_NAME);
+		patientTwo.setChain(Patient.SP_GIVEN);
+		
+		patientReference.addValue(new ReferenceOrListParam().add(patientOne).add(patientTwo));
+		
+		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.iterator().next().getUuid(), equalTo(OBS_UUID));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnObsByEncounters() {
+		ReferenceAndListParam encounterReference = new ReferenceAndListParam();
+		encounterReference.addValue(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID))
+		        .add(new ReferenceParam().setValue(ENCOUNTER_UUID_TWO)));
+		
+		Collection<Obs> results = dao.searchForObservations(encounterReference, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results, hasItem(hasProperty("uuid", equalTo(OBS_UUID))));
+	}
+	
+	@Test
 	public void searchForObs_shouldHandleComplexQuery() {
 		TokenAndListParam code = new TokenAndListParam();
 		TokenOrListParam orListParam = new TokenOrListParam();
@@ -363,9 +421,13 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 			orListParam.addOr(codingToken);
 		}
 		
-		ReferenceParam patientReference = new ReferenceParam();
-		patientReference.setValue(PATIENT_UUID);
-		patientReference.setChain("");
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		patient.setChain("");
+		
+		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		SortSpec sort = new SortSpec();
 		sort.setParamName("date");

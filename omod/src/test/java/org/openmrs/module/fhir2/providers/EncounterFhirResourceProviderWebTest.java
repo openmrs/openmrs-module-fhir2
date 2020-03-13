@@ -30,8 +30,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -91,13 +94,13 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	private EncounterFhirResourceProvider resourceProvider;
 	
 	@Captor
-	private ArgumentCaptor<ReferenceParam> locationCaptor;
+	private ArgumentCaptor<ReferenceAndListParam> locationCaptor;
 	
 	@Captor
-	private ArgumentCaptor<ReferenceParam> participantCaptor;
+	private ArgumentCaptor<ReferenceAndListParam> participantCaptor;
 	
 	@Captor
-	private ArgumentCaptor<ReferenceParam> subjectCaptor;
+	private ArgumentCaptor<ReferenceAndListParam> subjectCaptor;
 	
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;
@@ -138,7 +141,9 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
 		assertThat(subjectCaptor.getValue(), notNullValue());
-		assertThat(subjectCaptor.getValue().getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(subjectCaptor.getAllValues().iterator().next().getValuesAsQueryTokens().iterator().next()
+		        .getValuesAsQueryTokens().iterator().next().getIdPart(),
+		    equalTo(PATIENT_UUID));
 	}
 	
 	@Test
@@ -161,9 +166,13 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		verifyUri(String.format("/Encounter/?location.address-city=%s", ENCOUNTER_ADDRESS_CITY));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(locationCaptor.getValue(), notNullValue());
-		assertThat(locationCaptor.getValue().getChain(), equalTo("address-city"));
-		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_ADDRESS_CITY));
+		assertThat(referenceParam.getChain(), equalTo("address-city"));
+		assertThat(referenceParam.getValue(), equalTo(ENCOUNTER_ADDRESS_CITY));
 	}
 	
 	@Test
@@ -171,9 +180,13 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		verifyUri(String.format("/Encounter/?location.address-state=%s", ENCOUNTER_ADDRESS_STATE));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(locationCaptor.getValue(), notNullValue());
-		assertThat(locationCaptor.getValue().getChain(), equalTo("address-state"));
-		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_ADDRESS_STATE));
+		assertThat(referenceParam.getChain(), equalTo("address-state"));
+		assertThat(referenceParam.getValue(), equalTo(ENCOUNTER_ADDRESS_STATE));
 	}
 	
 	@Test
@@ -181,9 +194,13 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		verifyUri(String.format("/Encounter/?location.address-postalcode=%s", ENCOUNTER_POSTALCODE));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(locationCaptor.getValue(), notNullValue());
-		assertThat(locationCaptor.getValue().getChain(), equalTo("address-postalcode"));
-		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_POSTALCODE));
+		assertThat(referenceParam.getChain(), equalTo("address-postalcode"));
+		assertThat(referenceParam.getValue(), equalTo(ENCOUNTER_POSTALCODE));
 	}
 	
 	@Test
@@ -191,9 +208,43 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		verifyUri(String.format("/Encounter/?location.address-country=%s", ENCOUNTER_ADDRESS_COUNTRY));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(locationCaptor.getValue(), notNullValue());
-		assertThat(locationCaptor.getValue().getChain(), equalTo("address-country"));
-		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_ADDRESS_COUNTRY));
+		assertThat(referenceParam.getChain(), equalTo("address-country"));
+		assertThat(referenceParam.getValue(), equalTo(ENCOUNTER_ADDRESS_COUNTRY));
+	}
+	
+	@Test
+	public void shouldGetEncountersByLocationCountryWithOr() throws Exception {
+		verifyUri(String.format("/Encounter/?location.address-country=%s,%s", ENCOUNTER_ADDRESS_COUNTRY, "USA"));
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo("address-country"));
+		assertThat(referenceParam.getValue(), equalTo(ENCOUNTER_ADDRESS_COUNTRY));
+		assertThat(orListParams.get(0).getValuesAsQueryTokens().size(), equalTo(2));
+	}
+	
+	@Test
+	public void shouldGetEncountersByLocationCountryWithAnd() throws Exception {
+		verifyUri("/Encounter/?location.address-country=INDIA&location.address-country=USA");
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo("address-country"));
+		assertThat(referenceParam.getValue(), equalTo(ENCOUNTER_ADDRESS_COUNTRY));
+		assertThat(locationCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(2));
 	}
 	
 	@Test
@@ -201,9 +252,13 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		verifyUri(String.format("/Encounter/?participant:Practitioner.given=%s", PARTICIPANT_GIVEN_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(participantCaptor.getValue(), notNullValue());
-		assertThat(participantCaptor.getValue().getChain(), equalTo("given"));
-		assertThat(participantCaptor.getValue().getValue(), equalTo(PARTICIPANT_GIVEN_NAME));
+		assertThat(referenceParam.getChain(), equalTo("given"));
+		assertThat(referenceParam.getValue(), equalTo(PARTICIPANT_GIVEN_NAME));
 	}
 	
 	@Test
@@ -211,19 +266,60 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		verifyUri(String.format("/Encounter/?participant:Practitioner.family=%s", PARTICIPANT_FAMILY_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(participantCaptor.getValue(), notNullValue());
-		assertThat(participantCaptor.getValue().getChain(), equalTo("family"));
-		assertThat(participantCaptor.getValue().getValue(), equalTo(PARTICIPANT_FAMILY_NAME));
+		assertThat(referenceParam.getChain(), equalTo("family"));
+		assertThat(referenceParam.getValue(), equalTo(PARTICIPANT_FAMILY_NAME));
+	}
+	
+	@Test
+	public void shouldGetEncountersByParticipantFamilyNameWithOr() throws Exception {
+		verifyUri(String.format("/Encounter/?participant:Practitioner.family=%s,%s", PARTICIPANT_FAMILY_NAME, "Vox"));
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(participantCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo("family"));
+		assertThat(referenceParam.getValue(), equalTo(PARTICIPANT_FAMILY_NAME));
+		assertThat(orListParams.get(0).getValuesAsQueryTokens().size(), equalTo(2));
+	}
+	
+	@Test
+	public void shouldGetEncountersByParticipantFamilyNameWithAnd() throws Exception {
+		verifyUri(String.format("/Encounter/?participant:Practitioner.family=%s&participant:Practitioner.family=%s",
+		    PARTICIPANT_FAMILY_NAME, "Vox"));
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(participantCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo("family"));
+		assertThat(referenceParam.getValue(), equalTo(PARTICIPANT_FAMILY_NAME));
+		assertThat(participantCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(2));
 	}
 	
 	@Test
 	public void shouldGetEncountersByParticipantIdentifier() throws Exception {
-		verifyUri(String.format("/Encounter/?participant:Practitioner.identifier=%s", PARTICIPANT_IDENTIFIER));
+		verifyUri(String.format("/Encounter/?participant:Practitioner.identifier=%s,%s", PARTICIPANT_IDENTIFIER,
+		    "op87yh-34fd-34egs-56h34-34f7"));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(participantCaptor.getValue(), notNullValue());
-		assertThat(participantCaptor.getValue().getChain(), equalTo("identifier"));
-		assertThat(participantCaptor.getValue().getValue(), equalTo(PARTICIPANT_IDENTIFIER));
+		assertThat(referenceParam.getChain(), equalTo("identifier"));
+		assertThat(referenceParam.getValue(), equalTo(PARTICIPANT_IDENTIFIER));
+		assertThat(orListParams.get(0).getValuesAsQueryTokens().size(), equalTo(2));
 	}
 	
 	@Test
@@ -231,9 +327,13 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		verifyUri(String.format("/Encounter/?subject.given=%s", PATIENT_GIVEN_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
+		
+		List<ReferenceOrListParam> orListParams = subjectCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(subjectCaptor.getValue(), notNullValue());
-		assertThat(subjectCaptor.getValue().getChain(), equalTo("given"));
-		assertThat(subjectCaptor.getValue().getValue(), equalTo(PATIENT_GIVEN_NAME));
+		assertThat(referenceParam.getChain(), equalTo("given"));
+		assertThat(referenceParam.getValue(), equalTo(PATIENT_GIVEN_NAME));
 	}
 	
 	@Test
@@ -241,9 +341,13 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		verifyUri(String.format("/Encounter?subject.family=%s", PATIENT_FAMILY_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
+		
+		List<ReferenceOrListParam> orListParams = subjectCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(subjectCaptor.getValue(), notNullValue());
-		assertThat(subjectCaptor.getValue().getChain(), equalTo("family"));
-		assertThat(subjectCaptor.getValue().getValue(), equalTo(PATIENT_FAMILY_NAME));
+		assertThat(referenceParam.getChain(), equalTo("family"));
+		assertThat(referenceParam.getValue(), equalTo(PATIENT_FAMILY_NAME));
 	}
 	
 	@Test
@@ -251,9 +355,13 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		verifyUri(String.format("/Encounter?subject.identifier=%s", PATIENT_IDENTIFIER));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture());
+		
+		List<ReferenceOrListParam> orListParams = subjectCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(subjectCaptor.getValue(), notNullValue());
-		assertThat(subjectCaptor.getValue().getChain(), equalTo("identifier"));
-		assertThat(subjectCaptor.getValue().getValue(), equalTo(PATIENT_IDENTIFIER));
+		assertThat(referenceParam.getChain(), equalTo("identifier"));
+		assertThat(referenceParam.getValue(), equalTo(PATIENT_IDENTIFIER));
 	}
 	
 	@Test
@@ -262,12 +370,60 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), subjectCaptor.capture());
 		
+		List<ReferenceOrListParam> orListParamsSubject = subjectCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParamSubject = orListParamsSubject.get(0).getValuesAsQueryTokens().get(0);
+		
+		List<ReferenceOrListParam> orListParamsLocation = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParamLocation = orListParamsLocation.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(subjectCaptor.getValue(), notNullValue());
-		assertThat(subjectCaptor.getValue().getChain(), equalTo("given"));
-		assertThat(subjectCaptor.getValue().getValue(), equalTo(PATIENT_GIVEN_NAME));
+		assertThat(referenceParamSubject.getChain(), equalTo("given"));
+		assertThat(referenceParamSubject.getValue(), equalTo(PATIENT_GIVEN_NAME));
 		assertThat(locationCaptor.getValue(), notNullValue());
-		assertThat(locationCaptor.getValue().getChain(), equalTo("address-postalcode"));
-		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_POSTALCODE));
+		assertThat(referenceParamLocation.getChain(), equalTo("address-postalcode"));
+		assertThat(referenceParamLocation.getValue(), equalTo(ENCOUNTER_POSTALCODE));
+	}
+	
+	@Test
+	public void shouldGetEncountersBySubjectGivenNameAndLocationPostalCodeWithOr() throws Exception {
+		verifyUri("/Encounter?subject.given=Hannibal&location.address-postalcode=248001,854796");
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), subjectCaptor.capture());
+		
+		List<ReferenceOrListParam> orListParamsSubject = subjectCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParamSubject = orListParamsSubject.get(0).getValuesAsQueryTokens().get(0);
+		
+		List<ReferenceOrListParam> orListParamsLocation = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParamLocation = orListParamsLocation.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(subjectCaptor.getValue(), notNullValue());
+		assertThat(referenceParamSubject.getChain(), equalTo("given"));
+		assertThat(referenceParamSubject.getValue(), equalTo(PATIENT_GIVEN_NAME));
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(referenceParamLocation.getChain(), equalTo("address-postalcode"));
+		assertThat(referenceParamLocation.getValue(), equalTo(ENCOUNTER_POSTALCODE));
+		assertThat(orListParamsLocation.get(0).getValuesAsQueryTokens().size(), equalTo(2));
+	}
+	
+	@Test
+	public void shouldGetEncountersBySubjectGivenNameAndLocationPostalCodeWithAnd() throws Exception {
+		verifyUri("/Encounter?subject.given=Hannibal&location.address-postalcode=248001&location.address-postalcode=854796");
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), subjectCaptor.capture());
+		
+		List<ReferenceOrListParam> orListParamsSubject = subjectCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParamSubject = orListParamsSubject.get(0).getValuesAsQueryTokens().get(0);
+		
+		List<ReferenceOrListParam> orListParamsLocation = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParamLocation = orListParamsLocation.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(subjectCaptor.getValue(), notNullValue());
+		assertThat(referenceParamSubject.getChain(), equalTo("given"));
+		assertThat(referenceParamSubject.getValue(), equalTo(PATIENT_GIVEN_NAME));
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(referenceParamLocation.getChain(), equalTo("address-postalcode"));
+		assertThat(referenceParamLocation.getValue(), equalTo(ENCOUNTER_POSTALCODE));
+		assertThat(locationCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(2));
 	}
 	
 	@Test
@@ -277,24 +433,34 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), participantCaptor.capture(),
 		    isNull());
 		
+		List<ReferenceOrListParam> orListParamsParticipant = participantCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParamParticipant = orListParamsParticipant.get(0).getValuesAsQueryTokens().get(0);
+		
+		List<ReferenceOrListParam> orListParamsLocation = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParamLocation = orListParamsLocation.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(participantCaptor.getValue(), notNullValue());
-		assertThat(participantCaptor.getValue().getChain(), equalTo("identifier"));
-		assertThat(participantCaptor.getValue().getValue(), equalTo(PARTICIPANT_IDENTIFIER));
+		assertThat(referenceParamParticipant.getChain(), equalTo("identifier"));
+		assertThat(referenceParamParticipant.getValue(), equalTo(PARTICIPANT_IDENTIFIER));
 		assertThat(locationCaptor.getValue(), notNullValue());
-		assertThat(locationCaptor.getValue().getChain(), equalTo("address-postalcode"));
-		assertThat(locationCaptor.getValue().getValue(), equalTo(ENCOUNTER_POSTALCODE));
+		assertThat(referenceParamLocation.getChain(), equalTo("address-postalcode"));
+		assertThat(referenceParamLocation.getValue(), equalTo(ENCOUNTER_POSTALCODE));
 	}
 	
 	@Test
 	public void shouldGetEncountersByParticipantIdentifierAndDate() throws Exception {
-		verifyUri("/Encounter?participant:Practitioner.identifier=1000WF&date=ge1975-02-02");
+		verifyUri("/Encounter?participant:Practitioner.identifier=1000WF,670WD&date=ge1975-02-02");
 		
 		verify(encounterService).searchForEncounters(dateRangeCaptor.capture(), isNull(), participantCaptor.capture(),
 		    isNull());
 		
+		List<ReferenceOrListParam> orListParamsParticipant = participantCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParamParticipant = orListParamsParticipant.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(participantCaptor.getValue(), notNullValue());
-		assertThat(participantCaptor.getValue().getChain(), equalTo("identifier"));
-		assertThat(participantCaptor.getValue().getValue(), equalTo(PARTICIPANT_IDENTIFIER));
+		assertThat(referenceParamParticipant.getChain(), equalTo("identifier"));
+		assertThat(referenceParamParticipant.getValue(), equalTo(PARTICIPANT_IDENTIFIER));
+		assertThat(orListParamsParticipant.get(0).getValuesAsQueryTokens().size(), equalTo(2));
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, 1, 2);

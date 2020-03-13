@@ -24,6 +24,8 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -125,8 +127,9 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByIdentifier() {
-		ReferenceParam patient = new ReferenceParam();
-		patient.setChain(Patient.SP_IDENTIFIER).setValue("M4001-1");
+		ReferenceAndListParam patient = new ReferenceAndListParam();
+		patient.addValue(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue("M4001-1").setChain(Patient.SP_IDENTIFIER)));
 		
 		when(service.searchForAllergies(argThat(is(patient)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
@@ -139,8 +142,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByPatientGivenName() {
-		ReferenceParam patient = new ReferenceParam();
-		patient.setChain(Patient.SP_GIVEN).setValue("John");
+		ReferenceAndListParam patient = new ReferenceAndListParam();
+		patient.addValue(new ReferenceOrListParam().add(new ReferenceParam().setValue("John").setChain(Patient.SP_GIVEN)));
 		
 		when(service.searchForAllergies(argThat(is(patient)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
@@ -153,8 +156,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByPatientFamilyName() {
-		ReferenceParam patient = new ReferenceParam();
-		patient.setChain(Patient.SP_FAMILY).setValue("John");
+		ReferenceAndListParam patient = new ReferenceAndListParam();
+		patient.addValue(new ReferenceOrListParam().add(new ReferenceParam().setValue("John").setChain(Patient.SP_FAMILY)));
 		
 		when(service.searchForAllergies(argThat(is(patient)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
@@ -167,8 +170,9 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByPatientName() {
-		ReferenceParam patient = new ReferenceParam();
-		patient.setChain(Patient.SP_NAME).setValue("John Doe");
+		ReferenceAndListParam patient = new ReferenceAndListParam();
+		patient.addValue(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue("John Doe").setChain(Patient.SP_NAME)));
 		
 		when(service.searchForAllergies(argThat(is(patient)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));

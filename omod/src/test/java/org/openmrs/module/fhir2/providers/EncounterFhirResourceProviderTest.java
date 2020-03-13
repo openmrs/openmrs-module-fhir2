@@ -22,6 +22,8 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
@@ -101,8 +103,8 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		encounters.add(encounter);
 		when(encounterService.searchForEncounters(any(), any(), any(), any())).thenReturn(encounters);
 		
-		ReferenceParam subjectreference = new ReferenceParam();
-		subjectreference.setChain(Patient.SP_NAME);
+		ReferenceAndListParam subjectreference = new ReferenceAndListParam();
+		subjectreference.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
 		Bundle results = resourceProvider.searchEncounter(null, null, null, subjectreference);
 		assertThat(results, notNullValue());

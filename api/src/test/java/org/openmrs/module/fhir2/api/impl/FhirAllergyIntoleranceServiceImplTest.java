@@ -23,6 +23,8 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -96,7 +98,13 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	public void searchForAllergies_shouldSearchForAllergiesByIdentifier() {
 		Collection<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
-		ReferenceParam patientParam = new ReferenceParam().setChain(Patient.SP_IDENTIFIER).setValue("M4001-1");
+		ReferenceAndListParam patientParam = new ReferenceAndListParam();
+		ReferenceParam referenceParam = new ReferenceParam();
+		
+		referenceParam.setValue("M4001-1");
+		referenceParam.setChain(Patient.SP_IDENTIFIER);
+		
+		patientParam.addValue(new ReferenceOrListParam().add(referenceParam));
 		
 		when(allergyIntoleranceDao.searchForAllergies(argThat(equalTo(patientParam)), isNull(), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(allergies);
@@ -111,7 +119,13 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	public void searchForAllergies_shouldSearchForAllergiesByPatientGivenName() {
 		Collection<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
-		ReferenceParam patientParam = new ReferenceParam().setChain(Patient.SP_GIVEN).setValue("John");
+		ReferenceAndListParam patientParam = new ReferenceAndListParam();
+		ReferenceParam referenceParam = new ReferenceParam();
+		
+		referenceParam.setValue("John");
+		referenceParam.setChain(Patient.SP_GIVEN);
+		
+		patientParam.addValue(new ReferenceOrListParam().add(referenceParam));
 		
 		when(allergyIntoleranceDao.searchForAllergies(argThat(equalTo(patientParam)), isNull(), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(allergies);
@@ -126,7 +140,13 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyName() {
 		Collection<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
-		ReferenceParam patientParam = new ReferenceParam().setChain(Patient.SP_FAMILY).setValue("John");
+		ReferenceAndListParam patientParam = new ReferenceAndListParam();
+		ReferenceParam referenceParam = new ReferenceParam();
+		
+		referenceParam.setValue("John");
+		referenceParam.setChain(Patient.SP_FAMILY);
+		
+		patientParam.addValue(new ReferenceOrListParam().add(referenceParam));
 		
 		when(allergyIntoleranceDao.searchForAllergies(argThat(equalTo(patientParam)), isNull(), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(allergies);
@@ -141,7 +161,13 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	public void searchForAllergies_shouldSearchForAllergiesByPatientName() {
 		Collection<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
-		ReferenceParam patientParam = new ReferenceParam().setChain(Patient.SP_NAME).setValue("John Doe");
+		ReferenceAndListParam patientParam = new ReferenceAndListParam();
+		ReferenceParam referenceParam = new ReferenceParam();
+		
+		referenceParam.setValue("John Doe");
+		referenceParam.setChain(Patient.SP_NAME);
+		
+		patientParam.addValue(new ReferenceOrListParam().add(referenceParam));
 		
 		when(allergyIntoleranceDao.searchForAllergies(argThat(equalTo(patientParam)), isNull(), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(allergies);

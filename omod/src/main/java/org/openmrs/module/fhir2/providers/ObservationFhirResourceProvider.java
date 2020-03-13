@@ -21,7 +21,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -62,9 +62,11 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	public Bundle searchObservations(@OptionalParam(name = Observation.SP_ENCOUNTER) ReferenceParam encounterReference,
+	public Bundle searchObservations(
+	        @OptionalParam(name = Observation.SP_ENCOUNTER) ReferenceAndListParam encounterReference,
 	        @OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
-	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceParam patientReference,
+	                Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
 	        @OptionalParam(name = Observation.SP_CODE) TokenAndListParam code, @Sort SortSpec sort) {
 		return FhirServerUtils.convertSearchResultsToBundle(
 		    observationService.searchForObservations(encounterReference, patientReference, code, sort));
