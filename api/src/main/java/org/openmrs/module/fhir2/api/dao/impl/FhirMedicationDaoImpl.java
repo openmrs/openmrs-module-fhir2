@@ -14,8 +14,12 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Collection;
+
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.openmrs.Drug;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
@@ -23,7 +27,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirMedicationDaoImpl implements FhirMedicationDao {
+public class FhirMedicationDaoImpl extends BaseDaoImpl implements FhirMedicationDao {
 	
 	@Inject
 	@Named("sessionFactory")
@@ -32,5 +36,30 @@ public class FhirMedicationDaoImpl implements FhirMedicationDao {
 	@Override
 	public Drug getMedicationByUuid(String uuid) {
 		return (Drug) sessionFactory.getCurrentSession().createCriteria(Drug.class).add(eq("uuid", uuid)).uniqueResult();
+	}
+	
+	@Override
+	public Collection<Drug> searchForMedications(TokenOrListParam code, TokenOrListParam dosageForm,
+	        TokenOrListParam ingredientCode, TokenOrListParam status) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Drug.class);
+		handleMedicationCode(criteria, code);
+		handleMedicationDosageForm(criteria, dosageForm);
+		handleBoolean("retired", convertStringStatusToBoolean(status)).ifPresent(criteria::add);
+		
+		return criteria.list();
+	}
+	
+	private void handleMedicationCode(Criteria criteria, TokenOrListParam code) {
+		if (code != null) {
+			criteria.createAlias("concept", "cc");
+			handleResourceCode(criteria, code, "cc", "ccm", "ccrt");
+		}
+	}
+	
+	private void handleMedicationDosageForm(Criteria criteria, TokenOrListParam dosageForm) {
+		if (dosageForm != null) {
+			criteria.createAlias("dosageForm", "dc");
+			handleResourceCode(criteria, dosageForm, "dc", "dcm", "dcrt");
+		}
 	}
 }

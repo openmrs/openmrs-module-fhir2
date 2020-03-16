@@ -56,6 +56,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
@@ -685,6 +686,44 @@ public abstract class BaseDaoImpl {
 		} else {
 			return and(propertyEq("crt.conceptSource", conceptSourceCriteria), eq("crt.code", codes.get(0)));
 		}
+	}
+	
+	protected void handleResourceCode(Criteria criteria, TokenOrListParam code, @NotNull String conceptAlias,
+	        @NotNull String conceptMapAlias, @NotNull String conceptReferenceTermAlias) {
+		
+		handleOrListParamBySystem(code, (system, tokens) -> {
+			if (system.isEmpty()) {
+				return Optional.of(or(
+				    in(String.format("%s.conceptId", conceptAlias),
+				        tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
+				    in(String.format("%s.uuid", conceptAlias), tokensToList(tokens))));
+			} else {
+				if (!containsAlias(criteria, conceptMapAlias)) {
+					criteria.createAlias(String.format("%s.conceptMappings", conceptAlias), conceptMapAlias).createAlias(
+					    String.format("%s.conceptReferenceTerm", conceptMapAlias), conceptReferenceTermAlias);
+				}
+				
+				return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
+			}
+		}).ifPresent(criteria::add);
+	}
+	
+	protected TokenOrListParam convertStringStatusToBoolean(TokenOrListParam statusParam) {
+		if (statusParam != null) {
+			return handleOrListParam(statusParam).map(s -> {
+				switch (s.getValue()) {
+					case "active":
+						return Optional.of("false");
+					case "inactive":
+						return Optional.of("true");
+					default:
+						return Optional.empty();
+				}
+			}).filter(Optional::isPresent).map(Optional::get).collect(TokenOrListParam::new,
+			    (tp, v) -> tp.add(String.valueOf(v)), (tp1, tp2) -> tp2.getListAsCodings().forEach(tp1::add));
+		}
+		
+		return null;
 	}
 	
 	/**

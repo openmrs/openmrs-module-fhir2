@@ -13,8 +13,16 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Medication;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +39,8 @@ public class FhirMedicationServiceImplTest {
 	private static final String MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
 	
 	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	
+	private static final String CODE = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	@Mock
 	private MedicationTranslator medicationTranslator;
@@ -72,5 +82,65 @@ public class FhirMedicationServiceImplTest {
 	public void getMedicationByUuid_shouldReturnNullWhenCalledWithUnknownUuid() {
 		Medication medication = fhirMedicationService.getMedicationByUuid(WRONG_MEDICATION_UUID);
 		assertThat(medication, nullValue());
+	}
+	
+	@Test
+	public void searchForMedications_shouldSearchMedicationsByCode() {
+		Collection<Drug> medications = new ArrayList<>();
+		medications.add(drug);
+		
+		TokenOrListParam code = new TokenOrListParam();
+		code.addOr(new TokenParam().setValue(CODE));
+		
+		when(medicationDao.searchForMedications(argThat(equalTo(code)), isNull(), isNull(), isNull()))
+		        .thenReturn(medications);
+		Collection<Medication> result = fhirMedicationService.searchForMedications(code, null, null, null);
+		assertThat(result.isEmpty(), equalTo(false));
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForMedications_shouldSearchMedicationsByDosageForm() {
+		Collection<Drug> medications = new ArrayList<>();
+		medications.add(drug);
+		
+		TokenOrListParam dosageForm = new TokenOrListParam();
+		dosageForm.addOr(new TokenParam().setValue(CODE));
+		
+		when(medicationDao.searchForMedications(isNull(), argThat(equalTo(dosageForm)), isNull(), isNull()))
+		        .thenReturn(medications);
+		Collection<Medication> result = fhirMedicationService.searchForMedications(null, dosageForm, null, null);
+		assertThat(result.isEmpty(), equalTo(false));
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForMedications_shouldSearchMedicationsByIngredientCode() {
+		Collection<Drug> medications = new ArrayList<>();
+		medications.add(drug);
+		
+		TokenOrListParam ingredientCode = new TokenOrListParam();
+		ingredientCode.addOr(new TokenParam().setValue(CODE));
+		
+		when(medicationDao.searchForMedications(isNull(), isNull(), argThat(equalTo(ingredientCode)), isNull()))
+		        .thenReturn(medications);
+		Collection<Medication> result = fhirMedicationService.searchForMedications(null, null, ingredientCode, null);
+		assertThat(result.isEmpty(), equalTo(false));
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForMedications_shouldSearchMedicationsByStatus() {
+		Collection<Drug> medications = new ArrayList<>();
+		medications.add(drug);
+		
+		TokenOrListParam status = new TokenOrListParam();
+		status.addOr(new TokenParam().setValue("inactive"));
+		
+		when(medicationDao.searchForMedications(isNull(), isNull(), isNull(), argThat(equalTo(status))))
+		        .thenReturn(medications);
+		Collection<Medication> result = fhirMedicationService.searchForMedications(null, null, null, status);
+		assertThat(result.isEmpty(), equalTo(false));
+		assertThat(result.size(), greaterThanOrEqualTo(1));
 	}
 }

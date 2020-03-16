@@ -18,7 +18,6 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.StringType;
@@ -47,14 +46,9 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		medication.setCode(conceptTranslator.toFhirResource(drug.getConcept()));
 		medication.setForm(conceptTranslator.toFhirResource(drug.getDosageForm()));
 		
-		Medication.MedicationIngredientComponent ingredient = new Medication.MedicationIngredientComponent();
-		CodeableConcept codeableConcept;
 		for (DrugIngredient val : drug.getIngredients()) {
-			codeableConcept = conceptTranslator.toFhirResource(val.getIngredient());
-			if (val.getStrength() != null) {
-				codeableConcept.setText(val.getStrength().toString());
-			}
-			medication.addIngredient(ingredient.setItem(codeableConcept));
+			Medication.MedicationIngredientComponent ingredient = new Medication.MedicationIngredientComponent();
+			medication.addIngredient(ingredient.setItem(conceptTranslator.toFhirResource(val.getIngredient())));
 		}
 		
 		medication.getMeta().setLastUpdated(drug.getDateChanged());

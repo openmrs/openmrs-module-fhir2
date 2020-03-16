@@ -13,15 +13,20 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
+import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -46,5 +51,14 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find medication with Id " + id.getIdPart());
 		}
 		return medication;
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle searchForMedication(@OptionalParam(name = Medication.SP_CODE) TokenOrListParam code,
+	        @OptionalParam(name = Medication.SP_FORM) TokenOrListParam dosageForm,
+	        @OptionalParam(name = Medication.SP_STATUS) TokenOrListParam status) {
+		return FhirServerUtils
+		        .convertSearchResultsToBundle(fhirMedicationService.searchForMedications(code, dosageForm, null, status));
 	}
 }

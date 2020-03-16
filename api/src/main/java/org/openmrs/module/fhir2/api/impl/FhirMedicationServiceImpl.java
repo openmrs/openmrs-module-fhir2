@@ -11,6 +11,10 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Medication;
@@ -35,5 +39,14 @@ public class FhirMedicationServiceImpl implements FhirMedicationService {
 	@Transactional(readOnly = true)
 	public Medication getMedicationByUuid(String uuid) {
 		return medicationTranslator.toFhirResource(medicationDao.getMedicationByUuid(uuid));
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public Collection<Medication> searchForMedications(TokenOrListParam code, TokenOrListParam dosageForm,
+	        TokenOrListParam ingredientCode, TokenOrListParam status) {
+		
+		return medicationDao.searchForMedications(code, dosageForm, ingredientCode, status).stream()
+		        .map(medicationTranslator::toFhirResource).collect(Collectors.toList());
 	}
 }
