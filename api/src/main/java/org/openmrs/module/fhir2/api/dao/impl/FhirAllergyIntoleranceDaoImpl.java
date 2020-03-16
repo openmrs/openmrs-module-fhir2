@@ -10,8 +10,6 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
-import static org.hibernate.criterion.Restrictions.or;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -19,13 +17,11 @@ import javax.inject.Named;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
@@ -67,7 +63,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 		handleAllergen(criteria, allergen);
 		handleSeverity(criteria, severity).ifPresent(criteria::add);
 		handleManifestation(criteria, manifestationCode);
-		handleBoolean("voided", setClinicalStatusTokenValue(clinicalStatus));
+		handleBoolean("voided", convertStringStatusToBoolean(clinicalStatus)).ifPresent(criteria::add);
 		
 		return criteria.list();
 	}
@@ -75,41 +71,17 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 	private void handleManifestation(Criteria criteria, TokenOrListParam code) {
 		if (code != null) {
 			criteria.createAlias("reactions", "r");
-			criteria.createAlias("r.reaction", "c");
+			criteria.createAlias("r.reaction", "rc");
 			
-			handleOrListParamBySystem(code, (system, tokens) -> {
-				if (system.isEmpty()) {
-					return Optional.of(
-					    or(in("c.conceptId", tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
-					        in("c.uuid", tokensToList(tokens))));
-				} else {
-					if (!containsAlias(criteria, "cm")) {
-						criteria.createAlias("c.conceptMappings", "cm").createAlias("cm.conceptReferenceTerm", "crt");
-					}
-					
-					return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
-				}
-			}).ifPresent(criteria::add);
+			handleResourceCode(criteria, code, "rc", "rcm", "rcrt");
 		}
 	}
 	
 	private void handleAllergen(Criteria criteria, TokenOrListParam code) {
 		if (code != null) {
-			criteria.createAlias("allergen.codedAllergen", "c");
+			criteria.createAlias("allergen.codedAllergen", "ac");
 			
-			handleOrListParamBySystem(code, (system, tokens) -> {
-				if (system.isEmpty()) {
-					return Optional.of(
-					    or(in("c.conceptId", tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
-					        in("c.uuid", tokensToList(tokens))));
-				} else {
-					if (!containsAlias(criteria, "cm")) {
-						criteria.createAlias("c.conceptMappings", "cm").createAlias("cm.conceptReferenceTerm", "crt");
-					}
-					
-					return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
-				}
-			}).ifPresent(criteria::add);
+			handleResourceCode(criteria, code, "ac", "acm", "acrt");
 		}
 	}
 	
@@ -121,7 +93,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER);
 		
-		criteria.createAlias("severity", "c");
+		criteria.createAlias("severity", "sc");
 		
 		return handleOrListParam(severityParam, token -> {
 			try {
@@ -129,13 +101,13 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 				        .fromCode(token.getValue());
 				switch (severity) {
 					case MILD:
-						return Optional.of(eq("c.uuid", severityConceptUuids.get(0)));
+						return Optional.of(eq("sc.uuid", severityConceptUuids.get(0)));
 					case MODERATE:
-						return Optional.of(eq("c.uuid", severityConceptUuids.get(1)));
+						return Optional.of(eq("sc.uuid", severityConceptUuids.get(1)));
 					case SEVERE:
-						return Optional.of(eq("c.uuid", severityConceptUuids.get(2)));
+						return Optional.of(eq("sc.uuid", severityConceptUuids.get(2)));
 					case NULL:
-						return Optional.of(eq("c.uuid", severityConceptUuids.get(3)));
+						return Optional.of(eq("sc.uuid", severityConceptUuids.get(3)));
 				}
 			}
 			catch (FHIRException ignored) {}
@@ -167,18 +139,6 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 			return Optional.empty();
 		});
 		
-	}
-	
-	public TokenOrListParam setClinicalStatusTokenValue(TokenOrListParam statusParam) {
-		if (statusParam != null && !statusParam.getValuesAsQueryTokens().isEmpty()) {
-			switch (statusParam.getValuesAsQueryTokens().get(0).getValue()) {
-				case "active":
-					return statusParam.add("false");
-				case "inactive":
-					return statusParam.add("true");
-			}
-		}
-		return null;
 	}
 	
 }

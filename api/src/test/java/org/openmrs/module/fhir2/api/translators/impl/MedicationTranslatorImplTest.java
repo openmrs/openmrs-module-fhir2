@@ -153,26 +153,6 @@ public class MedicationTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldSetIngredientTextIfStrengthIsNotNull() {
-		DrugIngredient ingredient = new DrugIngredient();
-		Concept concept = new Concept();
-		concept.setUuid(INGREDIENT_CONCEPT_UUID);
-		ingredient.setIngredient(concept);
-		ingredient.setStrength(500.0);
-		drug.setIngredients(Collections.singleton((ingredient)));
-		
-		CodeableConcept codeableConcept = new CodeableConcept().addCoding(new Coding("", INGREDIENT_CONCEPT_UUID, ""));
-		codeableConcept.setText(DOSE_STRENGTH);
-		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
-		
-		Medication medication = medicationTranslator.toFhirResource(drug);
-		assertThat(medication, notNullValue());
-		assertThat(medication.getIngredient().size(), greaterThanOrEqualTo(1));
-		assertThat(medication.getIngredient().get(0).getItemCodeableConcept().getCoding().size(), greaterThanOrEqualTo(1));
-		assertThat(medication.getIngredient().get(0).getItemCodeableConcept().getText(), equalTo("500.0"));
-	}
-	
-	@Test
 	public void toOpenmrsType_shouldReturnDrugAsItIsIfCalledWithNull() {
 		medicationTranslator.toOpenmrsType(drug, null);
 		assertThat(drug, equalTo(drug));

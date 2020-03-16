@@ -12,7 +12,10 @@
     <concept concept_id="5085" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
     <concept concept_id="5086" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
     <concept concept_id="5087" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept concept_id="5088" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
 
     <drug drug_id="1010" name="ALBENDAZOLE"  combination="0" strength="200mg" concept_id="5085" dosage_form="5086" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+    <drug_ingredient drug_id="1010" ingredient_id="5088" uuid="5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  strength="200" units="5087"/>
 
 </dataset>

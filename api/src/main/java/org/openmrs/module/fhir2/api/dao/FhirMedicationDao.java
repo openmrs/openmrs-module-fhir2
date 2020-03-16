@@ -11,9 +11,15 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Collection;
+
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.openmrs.Drug;
 
 public interface FhirMedicationDao {
 	
 	Drug getMedicationByUuid(@NotNull String uuid);
+	
+	Collection<Drug> searchForMedications(TokenOrListParam code, TokenOrListParam dosageForm,
+	        TokenOrListParam ingredientCode, TokenOrListParam status);
 }
