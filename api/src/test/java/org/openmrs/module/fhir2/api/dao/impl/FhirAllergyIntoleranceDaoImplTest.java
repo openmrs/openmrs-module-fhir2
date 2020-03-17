@@ -14,12 +14,18 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -28,8 +34,10 @@ import org.hibernate.SessionFactory;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
@@ -46,7 +54,15 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	private static final String CODED_ALLERGEN_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String SEVERITY_CONCEPT_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String SEVERITY_MILD_CONCEPT_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String SEVERITY_MODERATE_CONCEPT_UUID = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String SEVERITY_SEVERE_CONCEPT_UUID = "7088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String SEVERITY_NULL_CONCEPT_UUID = "8088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String MODERATE_CONCEPT_UUID = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String CODED_REACTION_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -54,10 +70,12 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	@Named("sessionFactory")
 	private Provider<SessionFactory> sessionFactoryProvider;
 	
-	@Inject
+	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	private FhirAllergyIntoleranceDaoImpl allergyDao;
+	
+	private Map<String, String> severityConceptUuids = new HashMap<>();
 	
 	@Before
 	public void setup() throws Exception {
@@ -65,6 +83,13 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 		allergyDao.setSessionFactory(sessionFactoryProvider.get());
 		allergyDao.setGlobalPropertyService(globalPropertyService);
 		executeDataSet(ALLERGY_INTOLERANCE_INITIAL_DATA_XML);
+	}
+	
+	public void initSeverityData() {
+		severityConceptUuids.put(FhirConstants.GLOBAL_PROPERTY_MILD, SEVERITY_MILD_CONCEPT_UUID);
+		severityConceptUuids.put(FhirConstants.GLOBAL_PROPERTY_MODERATE, SEVERITY_MODERATE_CONCEPT_UUID);
+		severityConceptUuids.put(FhirConstants.GLOBAL_PROPERTY_SEVERE, SEVERITY_SEVERE_CONCEPT_UUID);
+		severityConceptUuids.put(FhirConstants.GLOBAL_PROPERTY_OTHER, SEVERITY_NULL_CONCEPT_UUID);
 	}
 	
 	@Test
@@ -130,7 +155,7 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	}
 	
 	@Test
-	public void searchForAllergies_shouldSearchForAllergiesByCategory() {
+	public void searchForAllergies_shouldSearchForAllergiesByCategoryFood() {
 		TokenOrListParam category = new TokenOrListParam();
 		category.addOr(new TokenParam().setValue("food"));
 		
@@ -138,6 +163,49 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 		assertThat(result, notNullValue());
 		assertThat(result.size(), greaterThanOrEqualTo(1));
 		assertThat(result.iterator().next().getAllergenType(), equalTo(AllergenType.FOOD));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByCategoryMedicine() {
+		TokenOrListParam category = new TokenOrListParam();
+		category.addOr(new TokenParam().setValue("medication"));
+		
+		Collection<Allergy> result = allergyDao.searchForAllergies(null, category, null, null, null, null);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+		assertThat(result.iterator().next().getAllergenType(), equalTo(AllergenType.DRUG));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByCategoryEnvironment() {
+		TokenOrListParam category = new TokenOrListParam();
+		category.addOr(new TokenParam().setValue("environment"));
+		
+		Collection<Allergy> result = allergyDao.searchForAllergies(null, category, null, null, null, null);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+		assertThat(result.iterator().next().getAllergenType(), equalTo(AllergenType.ENVIRONMENT));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByCategoryOther() {
+		TokenOrListParam category = new TokenOrListParam();
+		category.addOr(new TokenParam().setValue("null"));
+		
+		Collection<Allergy> result = allergyDao.searchForAllergies(null, null, null, null, null, null);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForMultipleAllergiesByCategory() {
+		TokenOrListParam category = new TokenOrListParam();
+		category.addOr(new TokenParam(null, "food")).addOr(new TokenParam(null, "medication"));
+		Collection<Allergy> result = allergyDao.searchForAllergies(null, category, null, null, null, null);
+		assertThat(result, notNullValue());
+		assertThat(result, hasSize(2));
+		assertThat(result, hasItem(hasProperty("allergenType", equalTo(AllergenType.FOOD))));
+		assertThat(result, hasItem(hasProperty("allergenType", equalTo(AllergenType.DRUG))));
 	}
 	
 	@Test
@@ -152,14 +220,70 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	}
 	
 	@Test
-	public void searchForAllergies_shouldSearchForAllergiesBySeverity() {
+	public void searchForAllergies_shouldSearchForAllergiesBySeverityMild() {
+		initSeverityData();
+		
 		TokenOrListParam severity = new TokenOrListParam();
-		severity.addOr(new TokenParam().setValue(SEVERITY_CONCEPT_UUID));
+		severity.addOr(new TokenParam().setValue("mild"));
+		
+		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
+		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
+		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(null, null, null, severity, null, null);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), greaterThanOrEqualTo(1));
-		assertThat(result.iterator().next().getSeverity().getUuid(), equalTo(SEVERITY_CONCEPT_UUID));
+		assertThat(result.iterator().next().getSeverity().getUuid(), equalTo(SEVERITY_MILD_CONCEPT_UUID));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesBySeverityModerate() {
+		initSeverityData();
+		
+		TokenOrListParam severity = new TokenOrListParam();
+		severity.addOr(new TokenParam().setValue("moderate"));
+		
+		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
+		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
+		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
+		
+		Collection<Allergy> result = allergyDao.searchForAllergies(null, null, null, severity, null, null);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+		assertThat(result.iterator().next().getSeverity().getUuid(), equalTo(SEVERITY_MODERATE_CONCEPT_UUID));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesBySeveritySevere() {
+		initSeverityData();
+		
+		TokenOrListParam severity = new TokenOrListParam();
+		severity.addOr(new TokenParam().setValue("severe"));
+		
+		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
+		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
+		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
+		
+		Collection<Allergy> result = allergyDao.searchForAllergies(null, null, null, severity, null, null);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+		assertThat(result.iterator().next().getSeverity().getUuid(), equalTo(SEVERITY_SEVERE_CONCEPT_UUID));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesBySeverityOther() {
+		initSeverityData();
+		
+		TokenOrListParam severity = new TokenOrListParam();
+		severity.addOr(new TokenParam().setValue("null"));
+		
+		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
+		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
+		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
+		
+		Collection<Allergy> result = allergyDao.searchForAllergies(null, null, null, severity, null, null);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test

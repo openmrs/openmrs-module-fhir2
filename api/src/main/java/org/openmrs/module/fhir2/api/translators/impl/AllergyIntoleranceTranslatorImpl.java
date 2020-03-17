@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -57,6 +58,8 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 	
 	@Inject
 	private ConceptTranslator conceptTranslator;
+	
+	private Map<String, String> severityConceptUuids;
 	
 	@Override
 	public AllergyIntolerance toFhirResource(Allergy omrsAllergy) {
@@ -217,14 +220,17 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 			return null;
 		}
 		
-		if (globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MILD, "")
-		        .equals(severityConcept.getUuid())) {
+		Map<String, String> severityConceptUuids = getSeverityConceptUuids();
+		
+		if (severityConceptUuids.isEmpty()) {
+			return null;
+		}
+		
+		if (severityConcept.getUuid().equals(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD))) {
 			return AllergyIntolerance.AllergyIntoleranceSeverity.MILD;
-		} else if (globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MODERATE, "")
-		        .equals(severityConcept.getUuid())) {
+		} else if (severityConcept.getUuid().equals(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE))) {
 			return AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE;
-		} else if (globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_SEVERE, "")
-		        .equals(severityConcept.getUuid())) {
+		} else if (severityConcept.getUuid().equals(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE))) {
 			return AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE;
 		} else {
 			return AllergyIntolerance.AllergyIntoleranceSeverity.NULL;
@@ -232,30 +238,36 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 	}
 	
 	private Concept getOpenmrsSeverity(AllergyIntolerance.AllergyIntoleranceSeverity severity) {
-		Concept concept;
+		if (severity == null) {
+			return null;
+		}
+		
+		Map<String, String> severityConceptUuids = getSeverityConceptUuids();
+		
+		if (severityConceptUuids.isEmpty()) {
+			return null;
+		}
+		
 		switch (severity) {
 			case MILD:
-				concept = conceptService
-				        .getConceptByUuid(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MILD))
+				return conceptService.getConceptByUuid(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD))
 				        .orElse(null);
-				break;
 			case MODERATE:
-				concept = conceptService
-				        .getConceptByUuid(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_MODERATE))
+				return conceptService.getConceptByUuid(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE))
 				        .orElse(null);
-				break;
 			case SEVERE:
-				concept = conceptService
-				        .getConceptByUuid(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_SEVERE))
+				return conceptService.getConceptByUuid(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE))
 				        .orElse(null);
-				break;
 			case NULL:
 			default:
-				concept = conceptService
-				        .getConceptByUuid(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_OTHER))
+				return conceptService.getConceptByUuid(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER))
 				        .orElse(null);
 		}
-		return concept;
 	}
 	
+	private Map<String, String> getSeverityConceptUuids() {
+		return globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
+		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
+		    FhirConstants.GLOBAL_PROPERTY_OTHER);
+	}
 }

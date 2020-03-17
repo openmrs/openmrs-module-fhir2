@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
-import java.util.List;
+import java.util.Map;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -37,7 +37,7 @@ public class FhirGlobalPropertyServiceImpl implements FhirGlobalPropertyService 
 	
 	@Override
 	@Transactional(readOnly = true)
-	public List<String> getGlobalProperties(String... properties) {
+	public Map<String, String> getGlobalProperties(String... properties) {
 		return dao.getGlobalProperties(properties);
 	}
 }
