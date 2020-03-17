@@ -11,6 +11,15 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.inject.Inject;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Condition;
@@ -39,6 +48,14 @@ public class FhirConditionServiceImpl_2_0 implements FhirConditionService {
 	@Transactional(readOnly = true)
 	public Condition getConditionByUuid(String uuid) {
 		return conditionTranslator.toFhirResource(dao.getConditionByUuid(uuid));
+	}
+	
+	@Override
+	public Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
+	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateParam onsetDate, QuantityParam onsetAge,
+	        DateParam recordedDate, @Sort SortSpec sort) {
+		return dao.searchForConditions(patientParam, subjectParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate,
+		    sort).stream().map(conditionTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Override

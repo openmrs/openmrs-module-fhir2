@@ -14,8 +14,14 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Collection;
 import java.util.Date;
 
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Session;
@@ -76,5 +82,12 @@ public class FhirConditionDaoImpl_2_0 implements FhirConditionDao<Condition> {
 		session.saveOrUpdate(condition);
 		
 		return condition;
+	}
+	
+	@Override
+	public Collection<Condition> searchForConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
+	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateParam onsetDate, QuantityParam onsetAge,
+	        DateParam recordedDate, SortSpec sort) {
+		return null; // TODO
 	}
 }
