@@ -24,12 +24,21 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hl7.fhir.r4.model.Patient.SP_ADDRESS_CITY;
+import static org.hl7.fhir.r4.model.Patient.SP_ADDRESS_COUNTRY;
+import static org.hl7.fhir.r4.model.Patient.SP_ADDRESS_POSTALCODE;
+import static org.hl7.fhir.r4.model.Patient.SP_ADDRESS_STATE;
+import static org.hl7.fhir.r4.model.Patient.SP_BIRTHDATE;
+import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
+import static org.hl7.fhir.r4.model.Patient.SP_FAMILY;
+import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
+import static org.hl7.fhir.r4.model.Patient.SP_NAME;
+import static org.openmrs.util.OpenmrsUtil.compareWithNullAsGreatest;
 
 import javax.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -40,11 +49,13 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hamcrest.comparator.ComparatorMatcherBuilder;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Patient;
 import org.openmrs.PersonAddress;
+import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -56,7 +67,7 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String BAD_PATIENT_UUID = "282390a6-3608-496d-9025-aecbc1235670";
 	
-	private static final String PATIENT_SEARCH_DATA_FILES[] = {
+	private static final String[] PATIENT_SEARCH_DATA_FILES = {
 	        "org/openmrs/api/include/PatientServiceTest-findPatients.xml",
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_address_data.xml" };
 	
@@ -103,6 +114,38 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String PATIENT_ADDRESS_POSTAL_CODE = "46202";
 	
 	private static final String PATIENT_ADDRESS_PATIENT_UUID = "61b38324-e2fd-4feb-95b7-9e9a2a4400df";
+	
+	private static final ComparatorMatcherBuilder<PersonName> NAME_MATCHER = ComparatorMatcherBuilder
+	        .comparedBy((o1, o2) -> {
+		        int ret;
+		        ret = compareWithNullAsGreatest(o1.getFamilyName(), o2.getFamilyName());
+		        
+		        if (ret == 0) {
+			        ret = compareWithNullAsGreatest(o1.getFamilyName2(), o2.getFamilyName2());
+		        }
+		        
+		        if (ret == 0) {
+			        ret = compareWithNullAsGreatest(o1.getGivenName(), o2.getGivenName());
+		        }
+		        
+		        if (ret == 0) {
+			        ret = compareWithNullAsGreatest(o1.getMiddleName(), o2.getMiddleName());
+		        }
+		        
+		        if (ret == 0) {
+			        ret = compareWithNullAsGreatest(o1.getFamilyNamePrefix(), o2.getFamilyNamePrefix());
+		        }
+		        
+		        if (ret == 0) {
+			        ret = compareWithNullAsGreatest(o1.getFamilyNameSuffix(), o2.getFamilyNameSuffix());
+		        }
+		        
+		        if (ret == 0) {
+			        ret = o1.equalsContent(o2) ? 0 : -1;
+		        }
+		        
+		        return ret;
+	        });
 	
 	private FhirPatientDaoImpl dao;
 	
@@ -400,31 +443,60 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 		sort.setParamName("name");
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		List<Patient> patients = getPatientListForSorting(sort);
+		List<Patient> people = getPatientListForSorting(sort);
 		
-		// Smallest given name of patient i should be less than the largest given name of next patient.
-		for (int i = 1; i < patients.size(); i++) {
-			assertThat(patients.get(i - 1).getNames(), not(empty())); // Not sure why this test is failing
-			String currentSmallestGivenName = patients.get(i - 1).getNames().stream()
-			        .min(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
-			String nextLargestGivenName = patients.get(i).getNames().stream()
-			        .max(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
-			
-			assertThat(currentSmallestGivenName, lessThanOrEqualTo(nextLargestGivenName));
+		for (int i = 1; i < people.size(); i++) {
+			assertThat(people.get(i - 1).getPersonName(), NAME_MATCHER.lessThanOrEqualTo(people.get(i).getPersonName()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		patients = getPatientListForSorting(sort);
+		people = getPatientListForSorting(sort);
 		
-		// Largest given name of patient i + 1 i should be greater than the smallest given name of previous patient.
-		for (int i = 1; i < patients.size(); i++) {
-			String largestGivenName = patients.get(i - 1).getNames().stream()
-			        .max(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
-			String nextSmallestGivenName = patients.get(i).getNames().stream()
-			        .min(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
-			
-			assertThat(largestGivenName, greaterThanOrEqualTo(nextSmallestGivenName));
+		for (int i = 1; i < people.size(); i++) {
+			assertThat(people.get(i - 1).getPersonName(), NAME_MATCHER.greaterThanOrEqualTo(people.get(i).getPersonName()));
+		}
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPatientsSortedByGivenName() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName(SP_GIVEN);
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		List<Patient> people = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < people.size(); i++) {
+			assertThat(people.get(i - 1).getGivenName(), lessThanOrEqualTo(people.get(i).getGivenName()));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		people = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < people.size(); i++) {
+			assertThat(people.get(i - 1).getGivenName(), greaterThanOrEqualTo(people.get(i).getGivenName()));
+		}
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPatientsSortedByFamilyName() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName(SP_FAMILY);
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		List<Patient> people = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < people.size(); i++) {
+			assertThat(people.get(i - 1).getFamilyName(), lessThanOrEqualTo(people.get(i).getFamilyName()));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		people = getPatientListForSorting(sort);
+		
+		for (int i = 1; i < people.size(); i++) {
+			assertThat(people.get(i - 1).getFamilyName(), greaterThanOrEqualTo(people.get(i).getFamilyName()));
 		}
 	}
 	
@@ -450,7 +522,7 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void shouldReturnCollectionOfPatientsSortedByDeathDate() {
 		SortSpec sort = new SortSpec();
-		sort.setParamName("deathdate");
+		sort.setParamName(SP_DEATH_DATE);
 		sort.setOrder(SortOrderEnum.ASC);
 		List<Patient> patients = getPatientListForSorting(sort);
 		
@@ -515,7 +587,7 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void shouldReturnCollectionOfPatientsSortedByPostalCode() {
 		SortSpec sort = new SortSpec();
-		sort.setParamName("address-postalCode");
+		sort.setParamName("address-postalcode");
 		sort.setOrder(SortOrderEnum.ASC);
 		
 		List<Patient> patients = getPatientListForSorting(sort);
@@ -569,26 +641,31 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 		List<Patient> patientList = new ArrayList<>(patients);
 		// remove patients with sort parameter value null, to allow comparison while asserting. 
 		switch (sort.getParamName()) {
-			case "name":
+			case SP_NAME:
+				patientList.removeIf(p -> p.getPersonName() == null);
+			case SP_GIVEN:
 				patientList.removeIf(p -> p.getGivenName() == null);
 				break;
-			case "birthdate":
+			case SP_FAMILY:
+				patientList.removeIf(p -> p.getFamilyName() == null);
+				break;
+			case SP_BIRTHDATE:
 				patientList.removeIf(p -> p.getBirthdate() == null);
 				break;
-			case "deathdate":
+			case SP_DEATH_DATE:
 				patientList.removeIf(p -> p.getDeathDate() == null);
 				break;
-			case "address-city":
-				patientList.removeIf(p -> addressComponentNullorEmtpy(p.getPersonAddress(), "city"));
+			case SP_ADDRESS_CITY:
+				patientList.removeIf(p -> addressComponentNullOrEmpty(p.getPersonAddress(), "city"));
 				break;
-			case "address-state":
-				patientList.removeIf(p -> addressComponentNullorEmtpy(p.getPersonAddress(), "state"));
+			case SP_ADDRESS_STATE:
+				patientList.removeIf(p -> addressComponentNullOrEmpty(p.getPersonAddress(), "state"));
 				break;
-			case "address-postalcode":
-				patientList.removeIf(p -> addressComponentNullorEmtpy(p.getPersonAddress(), "postalCode"));
+			case SP_ADDRESS_POSTALCODE:
+				patientList.removeIf(p -> addressComponentNullOrEmpty(p.getPersonAddress(), "postalCode"));
 				break;
-			case "address-country":
-				patientList.removeIf(p -> addressComponentNullorEmtpy(p.getPersonAddress(), "country"));
+			case SP_ADDRESS_COUNTRY:
+				patientList.removeIf(p -> addressComponentNullOrEmpty(p.getPersonAddress(), "country"));
 				break;
 		}
 		
@@ -597,7 +674,7 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 		return patientList;
 	}
 	
-	private boolean addressComponentNullorEmtpy(PersonAddress address, String component) {
+	private boolean addressComponentNullOrEmpty(PersonAddress address, String component) {
 		if (address == null) {
 			return true;
 		}

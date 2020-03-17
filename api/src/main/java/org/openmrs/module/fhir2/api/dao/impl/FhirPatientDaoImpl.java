@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.or;
+import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,11 +36,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirPatientDaoImpl extends BaseDaoImpl implements FhirPatientDao {
+public class FhirPatientDaoImpl extends AbstractPersonDaoImpl implements FhirPatientDao {
 	
 	@Inject
 	@Named("sessionFactory")
-	SessionFactory sessionFactory;
+	private SessionFactory sessionFactory;
 	
 	@Override
 	public Patient getPatientByUuid(String uuid) {
@@ -80,50 +81,28 @@ public class FhirPatientDaoImpl extends BaseDaoImpl implements FhirPatientDao {
 		handleIdentifier(criteria, identifier);
 		handleGender("gender", gender).ifPresent(criteria::add);
 		handleDateRange("birthdate", birthDate).ifPresent(criteria::add);
-		handleDateRange("deathdate", deathDate).ifPresent(criteria::add);
+		handleDateRange("deathDate", deathDate).ifPresent(criteria::add);
 		handleBoolean("dead", deceased).ifPresent(criteria::add);
 		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
 			criteria.createAlias("addresses", "pad");
 			criteria.add(c);
 		});
-		if (sort != null) {
-			String paramName = sort.getParamName();
-			if ((paramName.equals("name") || paramName.equals("given") || paramName.equals("family"))
-			        && !containsAlias(criteria, "pn")) {
-				criteria.createAlias("names", "pn");
-			}
-			if (paramName.startsWith("address") && !containsAlias(criteria, "pad")) {
-				criteria.createAlias("addresses", "pad");
-			}
-		}
 		handleSort(criteria, sort);
 		
 		return criteria.list();
 	}
 	
 	@Override
-	protected String paramToProp(String param) {
-		switch (param) {
-			case "name":
-			case "given":
-				return "pn.givenName";
-			case "family":
-				return "pn.familyName";
-			case "birthdate":
-				return "birthdate";
-			case "deathdate":
-				return "deathDate";
-			case "address-city":
-				return "pad.cityVillage";
-			case "address-state":
-				return "pad.stateProvince";
-			case "address-postalCode":
-				return "pad.postalCode";
-			case "address-country":
-				return "pad.country";
-			default:
-				return null;
-		}
+	protected String getSqlAlias() {
+		return "this_1_";
 	}
 	
+	@Override
+	protected String paramToProp(String param) {
+		if (param.equalsIgnoreCase(SP_DEATH_DATE)) {
+			return "deathDate";
+		}
+		
+		return super.paramToProp(param);
+	}
 }

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -55,6 +57,9 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -647,24 +652,29 @@ public abstract class BaseDaoImpl {
 		return Optional.of(or(toCriteriaArray(criterionList.stream())));
 	}
 	
+	/**
+	 * Use this method to properly implement sorting for your query. Note that for this method to work,
+	 * you must override one or more of: {@link #paramToProps(SortState)},
+	 * {@link #paramToProps(String)}, or {@link #paramToProp(String)}.
+	 *
+	 * @param criteria the current criteria
+	 * @param sort the {@link SortSpec} which defines the sorting to be translated
+	 */
 	protected void handleSort(Criteria criteria, SortSpec sort) {
-		handleSort(sort, this::paramToProp).ifPresent(l -> l.forEach(criteria::addOrder));
+		handleSort(criteria, sort, this::paramToProps).ifPresent(l -> l.forEach(criteria::addOrder));
 	}
 	
-	protected Optional<List<Order>> handleSort(SortSpec sort, Function<String, String> paramToProp) {
+	protected Optional<List<Order>> handleSort(Criteria criteria, SortSpec sort,
+	        Function<SortState, Collection<Order>> paramToProp) {
 		List<Order> orderings = new ArrayList<>();
 		SortSpec sortSpec = sort;
 		while (sortSpec != null) {
-			String prop = paramToProp.apply(sortSpec.getParamName());
-			if (prop != null) {
-				switch (sortSpec.getOrder()) {
-					case DESC:
-						orderings.add(desc(prop));
-						break;
-					case ASC:
-						orderings.add(asc(prop));
-						break;
-				}
+			SortState state = SortState.builder().criteria(criteria).sortOrder(sortSpec.getOrder())
+			        .parameter(sortSpec.getParamName().toLowerCase()).build();
+			
+			Collection<Order> orders = paramToProp.apply(state);
+			if (orders != null) {
+				orderings.addAll(orders);
 			}
 			
 			sortSpec = sortSpec.getChain();
@@ -727,11 +737,50 @@ public abstract class BaseDaoImpl {
 	}
 	
 	/**
-	 * This function should be overridden by implementations. It exists to map a FHIR parameter value to
-	 * the corresponding property name. This is used to correctly sort the returned results.
+	 * This function should be overridden by implementations. It is used to map FHIR parameter names to
+	 * their corresponding values in the query.
 	 *
-	 * @param param the name of the FHIR parameter
-	 * @return the corresponding property in the query
+	 * @param sortState a {@link SortState} object describing the current sort state
+	 * @return the corresponding ordering(s) needed for this property
+	 */
+	protected Collection<Order> paramToProps(@NotNull SortState sortState) {
+		Collection<String> prop = paramToProps(sortState.getParameter());
+		
+		if (prop != null) {
+			switch (sortState.getSortOrder()) {
+				case ASC:
+					return prop.stream().map(Order::asc).collect(Collectors.toList());
+				case DESC:
+					return prop.stream().map(Order::desc).collect(Collectors.toList());
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * This function should be overridden by implementations. It is used to map FHIR parameter names to
+	 * properties where there is only a single property.
+	 *
+	 * @param param the FHIR parameter to map
+	 * @return the name of the corresponding property from the current query
+	 */
+	protected Collection<String> paramToProps(@NotNull String param) {
+		String prop = paramToProp(param);
+		
+		if (prop != null) {
+			return Collections.singleton(prop);
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * This function should be overridden by implementations. It is used to map FHIR parameter names to
+	 * properties where there is only a single property.
+	 *
+	 * @param param the FHIR parameter to map
+	 * @return the name of the corresponding property from the current query
 	 */
 	protected String paramToProp(@NotNull String param) {
 		return null;
@@ -797,4 +846,20 @@ public abstract class BaseDaoImpl {
 	protected Criterion[] toCriteriaArray(Stream<Optional<Criterion>> criteriaStream) {
 		return criteriaStream.filter(Optional::isPresent).map(Optional::get).toArray(Criterion[]::new);
 	}
+	
+	/**
+	 * This object is used to pass around the state of the sorting where that's needed.
+	 */
+	@Data
+	@Builder
+	@EqualsAndHashCode
+	public static final class SortState {
+		
+		private Criteria criteria;
+		
+		private SortOrderEnum sortOrder;
+		
+		private String parameter;
+	}
+	
 }

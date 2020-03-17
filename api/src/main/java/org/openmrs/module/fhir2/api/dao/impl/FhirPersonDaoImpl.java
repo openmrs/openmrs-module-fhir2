@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirPersonDaoImpl extends BaseDaoImpl implements FhirPersonDao {
+public class FhirPersonDaoImpl extends AbstractPersonDaoImpl implements FhirPersonDao {
 	
 	@Inject
 	@Named("sessionFactory")
@@ -66,37 +66,14 @@ public class FhirPersonDaoImpl extends BaseDaoImpl implements FhirPersonDao {
 			criteria.createAlias("addresses", "pad");
 			criteria.add(c);
 		});
-		if (sort != null) {
-			if (sort.getParamName().equals("name") && !containsAlias(criteria, "pn")) {
-				criteria.createAlias("names", "pn");
-			}
-			if (sort.getParamName().startsWith("address") && !containsAlias(criteria, "pad")) {
-				criteria.createAlias("addresses", "pad");
-			}
-		}
+		
 		handleSort(criteria, sort);
 		
 		return criteria.list();
 	}
 	
 	@Override
-	protected String paramToProp(String param) {
-		switch (param) {
-			case "name":
-				return "pn.givenName";
-			case "birthdate":
-				return "birthdate";
-			case "address-city":
-				return "pad.cityVillage";
-			case "address-state":
-				return "pad.stateProvince";
-			case "address-postalCode":
-				return "pad.postalCode";
-			case "address-country":
-				return "pad.country";
-			default:
-				return null;
-		}
+	protected String getSqlAlias() {
+		return "this_";
 	}
-	
 }
