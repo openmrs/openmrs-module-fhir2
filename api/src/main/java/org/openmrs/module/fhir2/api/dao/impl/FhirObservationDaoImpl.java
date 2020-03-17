@@ -15,7 +15,6 @@ import static org.hibernate.criterion.Restrictions.or;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -57,13 +56,12 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 	}
 	
 	@Override
-	protected String paramToProp(@NotNull String paramName) {
-		switch (paramName) {
-			case "date":
-				return "obsDatetime";
-			default:
-				return null;
+	protected String paramToProp(String paramName) {
+		if ("date".equals(paramName)) {
+			return "obsDatetime";
 		}
+		
+		return null;
 	}
 	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {

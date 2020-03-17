@@ -23,9 +23,16 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_CITY;
+import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_COUNTRY;
+import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_POSTALCODE;
+import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_STATE;
+import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
+import static org.hl7.fhir.r4.model.Person.SP_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.openmrs.util.OpenmrsUtil.compareWithNullAsGreatest;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,7 +42,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -45,11 +51,13 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.exparity.hamcrest.date.DateMatchers;
+import org.hamcrest.comparator.ComparatorMatcherBuilder;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
+import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -100,6 +108,38 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String COUNTRY = "USA";
 	
 	private static final String PERSON_ADDRESS_PERSON_UUID = "61b38324-e2fd-4feb-95b7-9e9a2a4400df";
+	
+	private static final ComparatorMatcherBuilder<PersonName> NAME_MATCHER = ComparatorMatcherBuilder
+	        .comparedBy((o1, o2) -> {
+		        int ret;
+		        ret = compareWithNullAsGreatest(o1.getFamilyName(), o2.getFamilyName());
+		        
+		        if (ret == 0) {
+			        ret = compareWithNullAsGreatest(o1.getFamilyName2(), o2.getFamilyName2());
+		        }
+		        
+		        if (ret == 0) {
+			        ret = compareWithNullAsGreatest(o1.getGivenName(), o2.getGivenName());
+		        }
+		        
+		        if (ret == 0) {
+			        ret = compareWithNullAsGreatest(o1.getMiddleName(), o2.getMiddleName());
+		        }
+		        
+		        if (ret == 0) {
+			        ret = compareWithNullAsGreatest(o1.getFamilyNamePrefix(), o2.getFamilyNamePrefix());
+		        }
+		        
+		        if (ret == 0) {
+			        ret = compareWithNullAsGreatest(o1.getFamilyNameSuffix(), o2.getFamilyNameSuffix());
+		        }
+		        
+		        if (ret == 0) {
+			        ret = o1.equalsContent(o2) ? 0 : -1;
+		        }
+		        
+		        return ret;
+	        });
 	
 	private FhirPersonDaoImpl fhirPersonDao;
 	
@@ -282,29 +322,16 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		List<Person> people = getPersonListForSorting(sort);
 		
-		// Smallest given name of person i should be less than the largest given name of person i + 1.
 		for (int i = 1; i < people.size(); i++) {
-			assertThat(people.get(i - 1).getNames(), not(empty())); // Not sure why this test is failing
-			String currentSmallestGivenName = people.get(i - 1).getNames().stream()
-			        .min(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
-			String nextLargestGivenName = people.get(i).getNames().stream()
-			        .max(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
-			
-			assertThat(currentSmallestGivenName, lessThanOrEqualTo(nextLargestGivenName));
+			assertThat(people.get(i - 1).getPersonName(), NAME_MATCHER.lessThanOrEqualTo(people.get(i).getPersonName()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
 		people = getPersonListForSorting(sort);
 		
-		// Largest given name of person i should be greater than the smallest given name of person i + 1.
 		for (int i = 1; i < people.size(); i++) {
-			String largestGivenName = people.get(i - 1).getNames().stream()
-			        .max(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
-			String nextSmallestGivenName = people.get(i).getNames().stream()
-			        .min(Comparator.comparing(pn -> pn.getGivenName())).get().getGivenName();
-			
-			assertThat(largestGivenName, greaterThanOrEqualTo(nextSmallestGivenName));
+			assertThat(people.get(i - 1).getPersonName(), NAME_MATCHER.greaterThanOrEqualTo(people.get(i).getPersonName()));
 		}
 	}
 	
@@ -376,7 +403,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void shouldReturnCollectionOfPeopleSortedByPostalCode() {
 		SortSpec sort = new SortSpec();
-		sort.setParamName("address-postalCode");
+		sort.setParamName("address-postalcode");
 		sort.setOrder(SortOrderEnum.ASC);
 		
 		List<Person> people = getPersonListForSorting(sort);
@@ -462,22 +489,22 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		List<Person> peopleList = new ArrayList<>(people);
 		// Remove people with sort parameter value null, to allow comparison while asserting. 
 		switch (sort.getParamName()) {
-			case "name":
-				peopleList.removeIf(p -> p.getGivenName() == null);
+			case SP_NAME:
+				peopleList.removeIf(p -> p.getPersonName() == null);
 				break;
-			case "birthdate":
+			case SP_BIRTHDATE:
 				peopleList.removeIf(p -> p.getBirthdate() == null);
 				break;
-			case "address-city":
+			case SP_ADDRESS_CITY:
 				peopleList.removeIf(p -> p.getPersonAddress() == null || p.getPersonAddress().getCityVillage() == null);
 				break;
-			case "address-state":
+			case SP_ADDRESS_STATE:
 				peopleList.removeIf(p -> p.getPersonAddress() == null || p.getPersonAddress().getStateProvince() == null);
 				break;
-			case "address-postalCode":
+			case SP_ADDRESS_POSTALCODE:
 				peopleList.removeIf(p -> p.getPersonAddress() == null || p.getPersonAddress().getPostalCode() == null);
 				break;
-			case "address-country":
+			case SP_ADDRESS_COUNTRY:
 				peopleList.removeIf(p -> p.getPersonAddress() == null || p.getPersonAddress().getCountry() == null);
 				break;
 		}
