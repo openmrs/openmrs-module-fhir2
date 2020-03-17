@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.AUT;
 import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
@@ -20,11 +21,13 @@ import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
 import javax.servlet.ServletException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -48,6 +51,8 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	private static final String CONDITION_UUID = "8a849d5e-6011-4279-a124-40ada5a687de";
 	
 	private static final String WRONG_CONDITION_UUID = "9bf0d1ac-62a8-4440-a5a1-eb1015a7cc65";
+	
+	private static final String JSON_CREATE_CONDITION_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_create.json";
 	
 	@Mock
 	private FhirConditionService conditionService;
@@ -151,5 +156,23 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	private MockHttpServletResponse getConditionHistoryRequest() throws IOException, ServletException {
 		return get("/Condition/" + CONDITION_UUID + "/_history").accept(BaseFhirResourceProviderTest.FhirMediaTypes.JSON)
 		        .go();
+	}
+	
+	@Test
+	public void shouldCreateNewConditionGivenValidConditionResource() throws Exception {
+		Condition condition = new Condition();
+		condition.setId(CONDITION_UUID);
+		String conditionJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_CONDITION_PATH)) {
+			assert is != null;
+			conditionJson = IOUtils.toString(is);
+		}
+		
+		when(conditionService.saveCondition(any(Condition.class))).thenReturn(condition);
+		
+		MockHttpServletResponse response = post("/Condition").jsonContent(conditionJson).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getStatus(), is(201));
 	}
 }

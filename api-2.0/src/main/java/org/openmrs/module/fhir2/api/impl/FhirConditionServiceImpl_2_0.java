@@ -40,4 +40,9 @@ public class FhirConditionServiceImpl_2_0 implements FhirConditionService {
 	public Condition getConditionByUuid(String uuid) {
 		return conditionTranslator.toFhirResource(dao.getConditionByUuid(uuid));
 	}
+	
+	@Override
+	public Condition saveCondition(Condition condition) {
+		return conditionTranslator.toFhirResource(dao.saveCondition(conditionTranslator.toOpenmrsType(condition)));
+	}
 }

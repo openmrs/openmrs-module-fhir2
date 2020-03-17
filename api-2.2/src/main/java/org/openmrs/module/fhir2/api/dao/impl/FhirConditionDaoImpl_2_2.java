@@ -14,8 +14,11 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Date;
+
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.Condition;
 import org.openmrs.annotation.OpenmrsProfile;
@@ -37,5 +40,40 @@ public class FhirConditionDaoImpl_2_2 implements FhirConditionDao<Condition> {
 	public Condition getConditionByUuid(String uuid) {
 		return (Condition) sessionFactory.getCurrentSession().createCriteria(Condition.class).add(eq("uuid", uuid))
 		        .uniqueResult();
+	}
+	
+	@Override
+	public Condition saveCondition(Condition condition) {
+		Session session = sessionFactory.getCurrentSession();
+		Date endDate = condition.getEndDate() != null ? condition.getEndDate() : new Date();
+		if (condition.getEndReason() != null) {
+			condition.setEndDate(endDate);
+		}
+		
+		Condition existingCondition = getConditionByUuid(condition.getUuid());
+		if (condition.equals(existingCondition)) {
+			return existingCondition;
+		}
+		if (existingCondition == null) {
+			session.saveOrUpdate(condition);
+			return condition;
+		}
+		
+		condition = Condition.newInstance(condition);
+		condition.setPreviousVersion(existingCondition);
+		
+		if (existingCondition.getClinicalStatus().equals(condition.getClinicalStatus())) {
+			existingCondition.setVoided(true);
+			session.saveOrUpdate(existingCondition);
+			session.saveOrUpdate(condition);
+			return condition;
+		}
+		Date onSetDate = condition.getOnsetDate() != null ? condition.getOnsetDate() : new Date();
+		existingCondition.setEndDate(onSetDate);
+		session.saveOrUpdate(existingCondition);
+		condition.setOnsetDate(onSetDate);
+		session.saveOrUpdate(condition);
+		
+		return condition;
 	}
 }

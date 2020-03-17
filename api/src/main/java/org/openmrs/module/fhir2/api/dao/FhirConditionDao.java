@@ -14,4 +14,6 @@ import javax.validation.constraints.NotNull;
 public interface FhirConditionDao<T> {
 	
 	T getConditionByUuid(@NotNull String uuid);
+	
+	T saveCondition(@NotNull T condition);
 }

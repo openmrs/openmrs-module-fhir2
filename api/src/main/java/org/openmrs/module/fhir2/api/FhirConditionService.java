@@ -16,4 +16,6 @@ import org.hl7.fhir.r4.model.Condition;
 public interface FhirConditionService {
 	
 	Condition getConditionByUuid(@NotNull String uuid);
+	
+	Condition saveCondition(@NotNull Condition condition);
 }
