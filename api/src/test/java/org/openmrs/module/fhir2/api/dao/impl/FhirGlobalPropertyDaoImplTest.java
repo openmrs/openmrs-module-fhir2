@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import java.util.List;
+import java.util.Map;
 
 import org.hibernate.SessionFactory;
 import org.junit.Before;
@@ -93,10 +93,10 @@ public class FhirGlobalPropertyDaoImplTest extends BaseModuleContextSensitiveTes
 	
 	@Test
 	public void shouldReturnListOfGlobalPropertyValues() {
-		List<String> values = dao.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MODERATE,
+		Map<String, String> values = dao.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MODERATE,
 		    FhirConstants.GLOBAL_PROPERTY_SEVERE);
 		assertThat(values, notNullValue());
 		assertThat(values.size(), greaterThanOrEqualTo(1));
-		assertThat(values.get(0), equalTo(GLOBAL_PROPERTY_MODERATE));
+		assertThat(values.get(FhirConstants.GLOBAL_PROPERTY_MODERATE), equalTo(GLOBAL_PROPERTY_MODERATE));
 	}
 }

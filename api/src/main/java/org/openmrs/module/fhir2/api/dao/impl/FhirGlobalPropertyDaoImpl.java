@@ -13,8 +13,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -47,10 +47,16 @@ public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
 	}
 	
 	@Override
-	public List<String> getGlobalProperties(String... properties) {
+	public Map<String, String> getGlobalProperties(String... properties) {
+		Map<String, String> globalPropertiesMap = new HashMap<>();
+		
 		Collection<GlobalProperty> globalProperties = (sessionFactory.getCurrentSession()
 		        .createCriteria(GlobalProperty.class).add(Restrictions.in("property", properties)).list());
-		return globalProperties.stream().filter(p -> p != null).map(GlobalProperty::getPropertyValue)
-		        .collect(Collectors.toList());
+		
+		for (GlobalProperty property : globalProperties) {
+			globalPropertiesMap.put(property.getProperty(), property.getPropertyValue());
+		}
+		
+		return globalPropertiesMap;
 	}
 }

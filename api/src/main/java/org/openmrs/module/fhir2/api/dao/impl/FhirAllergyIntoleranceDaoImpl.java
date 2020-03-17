@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -45,8 +45,6 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 	@Inject
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	private List<String> severityConceptUuids;
-	
 	@Override
 	public Allergy getAllergyIntoleranceByUuid(String uuid) {
 		return (Allergy) sessionFactory.getCurrentSession().createCriteria(Allergy.class).add(eq("uuid", uuid))
@@ -59,7 +57,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 	        TokenOrListParam clinicalStatus) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Allergy.class);
 		handlePatientReference(criteria, patientReference, "patient");
-		handleAllergenCategory("allergen.allergenType", category);
+		handleAllergenCategory("allergen.allergenType", category).ifPresent(criteria::add);
 		handleAllergen(criteria, allergen);
 		handleSeverity(criteria, severity).ifPresent(criteria::add);
 		handleManifestation(criteria, manifestationCode);
@@ -89,8 +87,8 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 		if (severityParam == null) {
 			return Optional.empty();
 		}
-		severityConceptUuids = globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
+		Map<String, String> severityConceptUuids = globalPropertyService.getGlobalProperties(
+		    FhirConstants.GLOBAL_PROPERTY_MILD, FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER);
 		
 		criteria.createAlias("severity", "sc");
@@ -101,13 +99,13 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 				        .fromCode(token.getValue());
 				switch (severity) {
 					case MILD:
-						return Optional.of(eq("sc.uuid", severityConceptUuids.get(0)));
+						return Optional.of(eq("sc.uuid", severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD)));
 					case MODERATE:
-						return Optional.of(eq("sc.uuid", severityConceptUuids.get(1)));
+						return Optional.of(eq("sc.uuid", severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE)));
 					case SEVERE:
-						return Optional.of(eq("sc.uuid", severityConceptUuids.get(2)));
+						return Optional.of(eq("sc.uuid", severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE)));
 					case NULL:
-						return Optional.of(eq("sc.uuid", severityConceptUuids.get(3)));
+						return Optional.of(eq("sc.uuid", severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER)));
 				}
 			}
 			catch (FHIRException ignored) {}

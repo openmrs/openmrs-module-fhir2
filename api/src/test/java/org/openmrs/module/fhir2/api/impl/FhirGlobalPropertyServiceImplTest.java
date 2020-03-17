@@ -16,8 +16,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
@@ -69,17 +69,17 @@ public class FhirGlobalPropertyServiceImplTest {
 	
 	@Test
 	public void shouldReturnListOfGlobalPropertyValues() {
-		List<String> uuids = new ArrayList<>();
-		uuids.add(GLOBAL_PROPERTY_MODERATE);
+		Map<String, String> uuids = new HashMap<>();
+		uuids.put(FhirConstants.GLOBAL_PROPERTY_MODERATE, GLOBAL_PROPERTY_MODERATE);
 		
 		when(fhirGlobalPropertyDao.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MODERATE,
 		    FhirConstants.GLOBAL_PROPERTY_SEVERE)).thenReturn(uuids);
 		
-		List<String> values = globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MODERATE,
+		Map<String, String> values = globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MODERATE,
 		    FhirConstants.GLOBAL_PROPERTY_SEVERE);
 		
 		assertThat(values, CoreMatchers.notNullValue());
 		assertThat(values.size(), greaterThanOrEqualTo(1));
-		assertThat(values.get(0), CoreMatchers.equalTo(GLOBAL_PROPERTY_MODERATE));
+		assertThat(values.get(FhirConstants.GLOBAL_PROPERTY_MODERATE), CoreMatchers.equalTo(GLOBAL_PROPERTY_MODERATE));
 	}
 }

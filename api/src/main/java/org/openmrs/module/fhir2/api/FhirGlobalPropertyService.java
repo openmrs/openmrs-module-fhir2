@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.List;
+import java.util.Map;
 
 import org.openmrs.api.APIException;
 
@@ -21,6 +21,6 @@ public interface FhirGlobalPropertyService {
 		return this.getGlobalProperty(property) == null ? defaultValue : this.getGlobalProperty(property);
 	}
 	
-	List<String> getGlobalProperties(String... properties);
+	Map<String, String> getGlobalProperties(String... properties);
 	
 }
