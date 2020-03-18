@@ -100,14 +100,14 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	public void searchObservations_shouldReturnMatchingObservations() {
 		List<Observation> obs = new ArrayList<>();
 		obs.add(observation);
-		when(observationService.searchForObservations(any(), any(), any(), any())).thenReturn(obs);
+		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+		        .thenReturn(obs);
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
 		codingToken.setValue("1000");
 		code.addAnd(codingToken);
 		
-		Bundle results = resourceProvider.searchObservations(null, null, code, null);
-		
+		Bundle results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, code, null);
 		assertThat(results, notNullValue());
 		assertThat(results.getTotal(), equalTo(1));
 		assertThat(results.getEntry(), notNullValue());

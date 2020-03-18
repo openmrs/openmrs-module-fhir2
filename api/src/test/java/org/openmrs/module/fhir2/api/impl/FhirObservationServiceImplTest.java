@@ -75,10 +75,12 @@ public class FhirObservationServiceImplTest {
 		obs.add(ob);
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
-		when(dao.searchForObservations(any(), any(), any(), any())).thenReturn(obs);
+		when(dao.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+		        .thenReturn(obs);
 		when(observationTranslator.toFhirResource(ob)).thenReturn(observation);
 		
-		Collection<Observation> results = fhirObservationService.searchForObservations(null, null, null, null);
+		Collection<Observation> results = fhirObservationService.searchForObservations(null, null, null, null, null, null,
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
