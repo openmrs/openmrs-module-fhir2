@@ -13,9 +13,12 @@ import javax.inject.Inject;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 import org.openmrs.Provider;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
@@ -39,6 +42,12 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 	@Inject
 	private MedicationReferenceTranslator medicationReferenceTranslator;
 	
+	@Inject
+	private ConceptTranslator conceptTranslator;
+	
+	@Inject
+	private DosageTranslator dosageTranslator;
+	
 	@Override
 	public MedicationRequest toFhirResource(DrugOrder drugOrder) {
 		MedicationRequest medicationRequest = new MedicationRequest();
@@ -51,6 +60,10 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 		medicationRequest.setMedication(medicationReferenceTranslator.toFhirResource(drugOrder.getDrug()));
 		medicationRequest.setPriority(medicationRequestPriorityTranslator.toFhirResource(drugOrder.getUrgency()));
 		medicationRequest.setRequester(practitionerReferenceTranslator.toFhirResource(drugOrder.getOrderer()));
+		
+		medicationRequest.addNote(new Annotation().setText(drugOrder.getCommentToFulfiller()));
+		medicationRequest.addReasonCode(conceptTranslator.toFhirResource(drugOrder.getOrderReason()));
+		medicationRequest.addDosageInstruction(dosageTranslator.toFhirResource(drugOrder));
 		
 		return medicationRequest;
 	}
@@ -65,6 +78,9 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 		existingDrugOrder.setDrug(medicationReferenceTranslator.toOpenmrsType(medicationRequest.getMedicationReference()));
 		existingDrugOrder.setUrgency(medicationRequestPriorityTranslator.toOpenmrsType(medicationRequest.getPriority()));
 		existingDrugOrder.setOrderer(practitionerReferenceTranslator.toOpenmrsType(medicationRequest.getRequester()));
+		
+		existingDrugOrder.setCommentToFulfiller(medicationRequest.getNoteFirstRep().getText());
+		existingDrugOrder.setOrderReason(conceptTranslator.toOpenmrsType(medicationRequest.getReasonCodeFirstRep()));
 		
 		return existingDrugOrder;
 		
