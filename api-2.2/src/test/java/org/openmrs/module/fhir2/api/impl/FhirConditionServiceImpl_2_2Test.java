@@ -71,4 +71,22 @@ public class FhirConditionServiceImpl_2_2Test {
 		assertThat(conditionService.getConditionByUuid(WRONG_CONDITION_UUID), nullValue());
 	}
 	
+	@Test
+	public void saveCondition_shouldSaveNewCondition() {
+		Condition openMrsCondition = new Condition();
+		openMrsCondition.setUuid(CONDITION_UUID);
+		
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		condition.setId(CONDITION_UUID);
+		
+		when(conditionTranslator.toFhirResource(openMrsCondition)).thenReturn(condition);
+		when(dao.saveCondition(openMrsCondition)).thenReturn(openMrsCondition);
+		when(conditionTranslator.toOpenmrsType(condition)).thenReturn(openMrsCondition);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.saveCondition(condition);
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(CONDITION_UUID));
+	}
+	
 }

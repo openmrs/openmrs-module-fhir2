@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Condition;
@@ -105,6 +106,16 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		idType.setValue(WRONG_CONDITION_UUID);
 		assertThat(resourceProvider.getConditionHistoryById(idType).isEmpty(), is(true));
 		assertThat(resourceProvider.getConditionHistoryById(idType).size(), Matchers.equalTo(0));
+	}
+	
+	@Test
+	public void shouldCreateNewCondition() {
+		when(conditionService.saveCondition(condition)).thenReturn(condition);
+		
+		MethodOutcome result = resourceProvider.createCondition(condition);
+		assertThat(result, notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), equalTo(condition));
 	}
 	
 }
