@@ -21,8 +21,8 @@ import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.stereotype.Component;
@@ -35,7 +35,7 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 	private PersonNameTranslator nameTranslator;
 	
 	@Inject
-	private AddressTranslator addressTranslator;
+	private PersonAddressTranslator addressTranslator;
 	
 	@Inject
 	private GenderTranslator genderTranslator;
