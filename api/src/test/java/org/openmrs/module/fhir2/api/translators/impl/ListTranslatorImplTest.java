@@ -22,8 +22,10 @@ import org.hl7.fhir.r4.model.ListResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Cohort;
+import org.openmrs.module.fhir2.api.translators.ListEntryTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ListTranslatorImplTest {
@@ -34,6 +36,9 @@ public class ListTranslatorImplTest {
 	
 	private static final String DESCRIPTION = "Covid19 patients";
 	
+	@Mock
+	private ListEntryTranslator<Cohort> listEntryTranslator;
+	
 	private ListTranslatorImpl listTranslator;
 	
 	private Cohort cohort;
@@ -41,6 +46,7 @@ public class ListTranslatorImplTest {
 	@Before
 	public void setup() {
 		listTranslator = new ListTranslatorImpl();
+		listTranslator.setListEntryTranslator(listEntryTranslator);
 		cohort = new Cohort();
 	}
 	

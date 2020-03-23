@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.inject.Inject;
+
 import java.util.Collections;
 
 import lombok.AccessLevel;
@@ -16,12 +18,16 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.ListResource;
 import org.openmrs.Cohort;
+import org.openmrs.module.fhir2.api.translators.ListEntryTranslator;
 import org.openmrs.module.fhir2.api.translators.ListTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class ListTranslatorImpl implements ListTranslator<Cohort> {
+	
+	@Inject
+	private ListEntryTranslator<Cohort> listEntryTranslator;
 	
 	@Override
 	public ListResource toFhirResource(Cohort cohort) {
@@ -48,6 +54,8 @@ public class ListTranslatorImpl implements ListTranslator<Cohort> {
 			list.setStatus(ListResource.ListStatus.RETIRED);
 		}
 		
+		list.setEntry(listEntryTranslator.toFhirResource(cohort));
+		
 		return list;
 	}
 	
@@ -72,6 +80,8 @@ public class ListTranslatorImpl implements ListTranslator<Cohort> {
 			case RETIRED:
 				cohort.setVoided(true);
 		}
+		
+		listEntryTranslator.toOpenmrsType(cohort, cohortList.getEntry());
 		
 		return cohort;
 	}
