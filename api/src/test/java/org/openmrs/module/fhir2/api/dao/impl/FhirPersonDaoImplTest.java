@@ -29,9 +29,6 @@ import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_POSTALCODE;
 import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_STATE;
 import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.openmrs.util.OpenmrsUtil.compareWithNullAsGreatest;
 
 import javax.inject.Inject;
@@ -157,16 +154,16 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void getPersonByUuid_shouldReturnMatchingPerson() {
 		Person person = fhirPersonDao.getPersonByUuid(PERSON_UUID);
-		assertNotNull(person);
-		assertEquals(person.getUuid(), PERSON_UUID);
-		assertEquals(person.getGender(), "M");
-		assertEquals(person.getGivenName(), GIVEN_NAME);
+		assertThat(person, notNullValue());
+		assertThat(person.getUuid(), equalTo(PERSON_UUID));
+		assertThat(person.getGender(), equalTo("M"));
+		assertThat(person.getGivenName(), equalTo(GIVEN_NAME));
 	}
 	
 	@Test
 	public void getPersonByWithWrongUuid_shouldReturnNullPerson() {
 		Person person = fhirPersonDao.getPersonByUuid(WRONG_PERSON_UUID);
-		assertNull(person);
+		assertThat(person, nullValue());
 	}
 	
 	@Test
@@ -174,7 +171,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PERSON_NAME));
 		Collection<Person> people = fhirPersonDao.searchForPeople(stringOrListParam, null, null, null, null, null, null,
 		    null);
-		assertNotNull(people);
+		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people.size(), greaterThanOrEqualTo(1));
 	}
@@ -184,7 +181,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PERSON_PARTIAL_NAME));
 		Collection<Person> people = fhirPersonDao.searchForPeople(stringOrListParam, null, null, null, null, null, null,
 		    null);
-		assertNotNull(people);
+		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people.size(), greaterThanOrEqualTo(1));
 	}
@@ -271,7 +268,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(CITY));
 		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, stringOrListParam, null, null, null,
 		    null);
-		assertNotNull(people);
+		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people.size(), greaterThanOrEqualTo(1));
 		assertThat(people.stream().findAny().isPresent(), is(true));
@@ -283,7 +280,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(STATE));
 		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, null, stringOrListParam, null, null,
 		    null);
-		assertNotNull(people);
+		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people.size(), greaterThanOrEqualTo(1));
 		assertThat(people.stream().findAny().isPresent(), is(true));
@@ -295,7 +292,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
 		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, null, null, stringOrListParam, null,
 		    null);
-		assertNotNull(people);
+		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people.size(), greaterThanOrEqualTo(1));
 		assertThat(people.stream().findAny().isPresent(), is(true));
@@ -307,7 +304,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(COUNTRY));
 		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, null, null, null, stringOrListParam,
 		    null);
-		assertNotNull(people);
+		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people.size(), greaterThanOrEqualTo(1));
 		assertThat(people.stream().findAny().isPresent(), is(true));
@@ -459,7 +456,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		Collection<Person> people = fhirPersonDao.searchForPeople(nameParam, genderParam, birthDateParam, cityParam,
 		    stateParam, postalCodeParam, countryParam, null);
 		
-		assertNotNull(people);
+		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people.size(), greaterThanOrEqualTo(1));
 		assertThat(people.iterator().next().getGivenName(), equalTo(PERSON_NAME));
