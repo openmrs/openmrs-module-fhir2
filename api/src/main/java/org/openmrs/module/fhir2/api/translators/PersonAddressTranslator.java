@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.Address;
 import org.openmrs.PersonAddress;
 
-public interface AddressTranslator extends OpenmrsFhirUpdatableTranslator<PersonAddress, Address> {
+public interface PersonAddressTranslator extends OpenmrsFhirUpdatableTranslator<PersonAddress, Address> {
 	
 	/**
 	 * Maps an {@link PersonAddress} to an {@link Address}

@@ -44,8 +44,8 @@ import org.openmrs.PersonName;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
-import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
@@ -87,7 +87,7 @@ public class PersonTranslatorImplTest {
 	private PersonNameTranslator nameTranslator;
 	
 	@Mock
-	private AddressTranslator addressTranslator;
+	private PersonAddressTranslator addressTranslator;
 	
 	@Mock
 	private TelecomTranslator<Object> telecomTranslator;
