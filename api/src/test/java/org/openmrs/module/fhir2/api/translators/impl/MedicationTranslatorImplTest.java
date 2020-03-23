@@ -15,7 +15,6 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -141,7 +140,7 @@ public class MedicationTranslatorImplTest {
 		drug.setRetired(false);
 		org.hl7.fhir.r4.model.Medication medication = medicationTranslator.toFhirResource(drug);
 		assertThat(medication, notNullValue());
-		assertEquals(medication.getStatus(), Medication.MedicationStatus.ACTIVE);
+		assertThat(medication.getStatus(), equalTo(Medication.MedicationStatus.ACTIVE));
 	}
 	
 	@Test
@@ -149,7 +148,7 @@ public class MedicationTranslatorImplTest {
 		drug.setRetired(true);
 		org.hl7.fhir.r4.model.Medication medication = medicationTranslator.toFhirResource(drug);
 		assertThat(medication, notNullValue());
-		assertEquals(medication.getStatus(), Medication.MedicationStatus.INACTIVE);
+		assertThat(medication.getStatus(), equalTo(Medication.MedicationStatus.INACTIVE));
 	}
 	
 	@Test

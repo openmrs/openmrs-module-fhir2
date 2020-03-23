@@ -32,8 +32,8 @@ import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
-import org.openmrs.module.fhir2.api.translators.AddressTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
@@ -48,7 +48,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	private PersonNameTranslator nameTranslator;
 	
 	@Inject
-	private AddressTranslator addressTranslator;
+	private PersonAddressTranslator addressTranslator;
 	
 	@Inject
 	private GenderTranslator genderTranslator;

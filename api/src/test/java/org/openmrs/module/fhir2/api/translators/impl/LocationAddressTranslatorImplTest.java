@@ -13,9 +13,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Extension;
@@ -81,18 +80,18 @@ public class LocationAddressTranslatorImplTest {
 	public void shouldTranslateLocationCityVillageToAddressCity() {
 		omrsLocation.setCityVillage(CITY);
 		org.hl7.fhir.r4.model.Address address = translator.toFhirResource(omrsLocation);
-		assertNotNull(address);
-		assertNotNull(address.getCity());
-		assertEquals(address.getCity(), CITY);
+		assertThat(address, notNullValue());
+		assertThat(address.getCity(), notNullValue());
+		assertThat(address.getCity(), equalTo(CITY));
 	}
 	
 	@Test
 	public void shouldTranslateLocationProvinceToAddressProvince() {
 		omrsLocation.setStateProvince(STATE_PROVINCE);
 		org.hl7.fhir.r4.model.Address address = translator.toFhirResource(omrsLocation);
-		assertNotNull(address);
-		assertNotNull(address.getState());
-		assertEquals(address.getState(), STATE_PROVINCE);
+		assertThat(address, notNullValue());
+		assertThat(address.getState(), notNullValue());
+		assertThat(address.getState(), equalTo(STATE_PROVINCE));
 		
 	}
 	
@@ -100,9 +99,9 @@ public class LocationAddressTranslatorImplTest {
 	public void shouldTranslateLocationCountryToAddressCountry() {
 		omrsLocation.setCountry(COUNTRY);
 		org.hl7.fhir.r4.model.Address address = translator.toFhirResource(omrsLocation);
-		assertNotNull(address);
-		assertNotNull(address.getCountry());
-		assertEquals(address.getCountry(), COUNTRY);
+		assertThat(address, notNullValue());
+		assertThat(address.getCountry(), notNullValue());
+		assertThat(address.getCountry(), equalTo(COUNTRY));
 		
 	}
 	
@@ -110,19 +109,19 @@ public class LocationAddressTranslatorImplTest {
 	public void shouldTranslateLocationPostalCodeToAddressCode() {
 		omrsLocation.setPostalCode(POSTAL_CODE);
 		org.hl7.fhir.r4.model.Address address = translator.toFhirResource(omrsLocation);
-		assertNotNull(address);
-		assertNotNull(address.getPostalCode());
-		assertEquals(address.getPostalCode(), POSTAL_CODE);
+		assertThat(address, notNullValue());
+		assertThat(address.getPostalCode(), notNullValue());
+		assertThat(address.getPostalCode(), equalTo(POSTAL_CODE));
 		
 	}
 	
 	@Test
 	public void toFhirResource_shouldReturnNullIfCalledWithoutLocation() {
 		Address address = translator.toFhirResource(null);
-		assertNull(address.getCity());
-		assertNull(address.getState());
-		assertNull(address.getPostalCode());
-		assertNull(address.getCountry());
+		assertThat(address.getCity(), nullValue());
+		assertThat(address.getState(), nullValue());
+		assertThat(address.getPostalCode(), nullValue());
+		assertThat(address.getCountry(), nullValue());
 	}
 	
 	@Test
@@ -130,9 +129,9 @@ public class LocationAddressTranslatorImplTest {
 		org.hl7.fhir.r4.model.Address address = new Address();
 		address.setCity(CITY);
 		omrsLocation = translator.toOpenmrsType(address);
-		assertNotNull(omrsLocation);
-		assertNotNull(omrsLocation.getCityVillage());
-		assertEquals(omrsLocation.getCityVillage(), CITY);
+		assertThat(omrsLocation, notNullValue());
+		assertThat(omrsLocation.getCityVillage(), notNullValue());
+		assertThat(omrsLocation.getCityVillage(), equalTo(CITY));
 	}
 	
 	@Test
@@ -140,9 +139,9 @@ public class LocationAddressTranslatorImplTest {
 		org.hl7.fhir.r4.model.Address address = new Address();
 		address.setState(STATE_PROVINCE);
 		omrsLocation = translator.toOpenmrsType(address);
-		assertNotNull(omrsLocation);
-		assertNotNull(omrsLocation.getStateProvince());
-		assertEquals(omrsLocation.getStateProvince(), STATE_PROVINCE);
+		assertThat(omrsLocation, notNullValue());
+		assertThat(omrsLocation.getStateProvince(), notNullValue());
+		assertThat(omrsLocation.getStateProvince(), equalTo(STATE_PROVINCE));
 	}
 	
 	@Test
@@ -150,9 +149,9 @@ public class LocationAddressTranslatorImplTest {
 		org.hl7.fhir.r4.model.Address address = new Address();
 		address.setCountry(COUNTRY);
 		omrsLocation = translator.toOpenmrsType(address);
-		assertNotNull(omrsLocation);
-		assertNotNull(omrsLocation.getCountry());
-		assertEquals(omrsLocation.getCountry(), COUNTRY);
+		assertThat(omrsLocation, notNullValue());
+		assertThat(omrsLocation.getCountry(), notNullValue());
+		assertThat(omrsLocation.getCountry(), equalTo(COUNTRY));
 	}
 	
 	@Test
@@ -160,9 +159,9 @@ public class LocationAddressTranslatorImplTest {
 		org.hl7.fhir.r4.model.Address address = new Address();
 		address.setPostalCode(POSTAL_CODE);
 		omrsLocation = translator.toOpenmrsType(address);
-		assertNotNull(omrsLocation);
-		assertNotNull(omrsLocation.getPostalCode());
-		assertEquals(omrsLocation.getPostalCode(), POSTAL_CODE);
+		assertThat(omrsLocation, notNullValue());
+		assertThat(omrsLocation.getPostalCode(), notNullValue());
+		assertThat(omrsLocation.getPostalCode(), equalTo(POSTAL_CODE));
 	}
 	
 	@Test
@@ -345,64 +344,64 @@ public class LocationAddressTranslatorImplTest {
 	@Test
 	public void addAddressComponent_shouldSetAddressesCorrectly() {
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address1", ADDRESS_1);
-		assertNotNull(omrsLocation.getAddress1());
-		assertEquals(omrsLocation.getAddress1(), ADDRESS_1);
+		assertThat(omrsLocation.getAddress1(), notNullValue());
+		assertThat(omrsLocation.getAddress1(), equalTo(ADDRESS_1));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address2", ADDRESS_2);
-		assertNotNull(omrsLocation.getAddress2());
-		assertEquals(omrsLocation.getAddress2(), ADDRESS_2);
+		assertThat(omrsLocation.getAddress2(), notNullValue());
+		assertThat(omrsLocation.getAddress2(), equalTo(ADDRESS_2));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address3", ADDRESS_3);
-		assertNotNull(omrsLocation.getAddress3());
-		assertEquals(omrsLocation.getAddress3(), ADDRESS_3);
+		assertThat(omrsLocation.getAddress3(), notNullValue());
+		assertThat(omrsLocation.getAddress3(), equalTo(ADDRESS_3));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address4", ADDRESS_4);
-		assertNotNull(omrsLocation.getAddress4());
-		assertEquals(omrsLocation.getAddress4(), ADDRESS_4);
+		assertThat(omrsLocation.getAddress4(), notNullValue());
+		assertThat(omrsLocation.getAddress4(), equalTo(ADDRESS_4));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address5", ADDRESS_5);
-		assertNotNull(omrsLocation.getAddress5());
-		assertEquals(omrsLocation.getAddress5(), ADDRESS_5);
+		assertThat(omrsLocation.getAddress5(), notNullValue());
+		assertThat(omrsLocation.getAddress5(), equalTo(ADDRESS_5));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address6", ADDRESS_6);
-		assertNotNull(omrsLocation.getAddress6());
-		assertEquals(omrsLocation.getAddress6(), ADDRESS_6);
+		assertThat(omrsLocation.getAddress6(), notNullValue());
+		assertThat(omrsLocation.getAddress6(), equalTo(ADDRESS_6));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address7", ADDRESS_7);
-		assertNotNull(omrsLocation.getAddress7());
-		assertEquals(omrsLocation.getAddress7(), ADDRESS_7);
+		assertThat(omrsLocation.getAddress7(), notNullValue());
+		assertThat(omrsLocation.getAddress7(), equalTo(ADDRESS_7));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address8", ADDRESS_8);
-		assertNotNull(omrsLocation.getAddress8());
-		assertEquals(omrsLocation.getAddress8(), ADDRESS_8);
+		assertThat(omrsLocation.getAddress8(), notNullValue());
+		assertThat(omrsLocation.getAddress8(), equalTo(ADDRESS_8));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address9", ADDRESS_9);
-		assertNotNull(omrsLocation.getAddress9());
-		assertEquals(omrsLocation.getAddress9(), ADDRESS_9);
+		assertThat(omrsLocation.getAddress9(), notNullValue());
+		assertThat(omrsLocation.getAddress9(), equalTo(ADDRESS_9));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address10", ADDRESS_10);
-		assertNotNull(omrsLocation.getAddress10());
-		assertEquals(omrsLocation.getAddress10(), ADDRESS_10);
+		assertThat(omrsLocation.getAddress10(), notNullValue());
+		assertThat(omrsLocation.getAddress10(), equalTo(ADDRESS_10));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address11", ADDRESS_11);
-		assertNotNull(omrsLocation.getAddress11());
-		assertEquals(omrsLocation.getAddress11(), ADDRESS_11);
+		assertThat(omrsLocation.getAddress11(), notNullValue());
+		assertThat(omrsLocation.getAddress11(), equalTo(ADDRESS_11));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address12", ADDRESS_12);
-		assertNotNull(omrsLocation.getAddress12());
-		assertEquals(omrsLocation.getAddress12(), ADDRESS_12);
+		assertThat(omrsLocation.getAddress12(), notNullValue());
+		assertThat(omrsLocation.getAddress12(), equalTo(ADDRESS_12));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address13", ADDRESS_13);
-		assertNotNull(omrsLocation.getAddress13());
-		assertEquals(omrsLocation.getAddress13(), ADDRESS_13);
+		assertThat(omrsLocation.getAddress13(), notNullValue());
+		assertThat(omrsLocation.getAddress13(), equalTo(ADDRESS_13));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address14", ADDRESS_14);
-		assertNotNull(omrsLocation.getAddress14());
-		assertEquals(omrsLocation.getAddress14(), ADDRESS_14);
+		assertThat(omrsLocation.getAddress14(), notNullValue());
+		assertThat(omrsLocation.getAddress14(), equalTo(ADDRESS_14));
 		
 		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address15", ADDRESS_15);
-		assertNotNull(omrsLocation.getAddress15());
-		assertEquals(omrsLocation.getAddress15(), ADDRESS_15);
+		assertThat(omrsLocation.getAddress15(), notNullValue());
+		assertThat(omrsLocation.getAddress15(), equalTo(ADDRESS_15));
 		
 	}
 }

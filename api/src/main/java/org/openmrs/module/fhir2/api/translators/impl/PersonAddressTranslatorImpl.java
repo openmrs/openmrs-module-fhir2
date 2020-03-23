@@ -12,12 +12,13 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.PersonAddress;
-import org.openmrs.module.fhir2.api.translators.AddressTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AddressTranslatorImpl implements AddressTranslator {
+public class PersonAddressTranslatorImpl extends BaseAddressTranslatorImpl implements PersonAddressTranslator {
 	
 	@Override
 	public Address toFhirResource(PersonAddress address) {
@@ -34,6 +35,8 @@ public class AddressTranslatorImpl implements AddressTranslator {
 		} else {
 			fhirAddress.setUse(Address.AddressUse.OLD);
 		}
+		
+		addAddressExtensions(fhirAddress, address);
 		
 		return fhirAddress;
 	}
@@ -60,6 +63,9 @@ public class AddressTranslatorImpl implements AddressTranslator {
 		if (Address.AddressUse.HOME.equals(address.getUse())) {
 			personAddress.setPreferred(true);
 		}
+		
+		getOpenmrsAddressExtension(address).ifPresent(ext -> ext.getExtension()
+		        .forEach(e -> addAddressComponent(personAddress, e.getUrl(), ((StringType) e.getValue()).getValue())));
 		
 		return personAddress;
 	}

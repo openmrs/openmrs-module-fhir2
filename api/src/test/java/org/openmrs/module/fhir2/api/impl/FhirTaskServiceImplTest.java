@@ -16,7 +16,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -88,7 +87,7 @@ public class FhirTaskServiceImplTest {
 		
 		org.hl7.fhir.r4.model.Task result = fhirTaskService.getTaskByUuid(TASK_UUID);
 		
-		assertNotNull(result);
+		assertThat(result, notNullValue());
 		assertThat(result, equalTo(translatedTask));
 	}
 	
@@ -110,7 +109,7 @@ public class FhirTaskServiceImplTest {
 		
 		org.hl7.fhir.r4.model.Task result = fhirTaskService.saveTask(fhirTask);
 		
-		assertNotNull(result);
+		assertThat(result, notNullValue());
 		assertThat(result, equalTo(fhirTask));
 	}
 	
@@ -139,7 +138,7 @@ public class FhirTaskServiceImplTest {
 		
 		org.hl7.fhir.r4.model.Task result = fhirTaskService.updateTask(TASK_UUID, fhirTask);
 		
-		assertNotNull(result);
+		assertThat(result, notNullValue());
 		assertThat(result, equalTo(fhirTask));
 	}
 	
@@ -189,7 +188,7 @@ public class FhirTaskServiceImplTest {
 		Collection<org.hl7.fhir.r4.model.Task> result = fhirTaskService.getTasksByBasedOn(ServiceRequest.class,
 		    SERVICE_REQUEST_UUID);
 		
-		assertNotNull(result);
+		assertThat(result, notNullValue());
 		assertThat(result, equalTo(basedOnFhirTasks));
 	}
 	
@@ -198,7 +197,7 @@ public class FhirTaskServiceImplTest {
 		Collection<org.hl7.fhir.r4.model.Task> result = fhirTaskService.getTasksByBasedOn(Patient.class,
 		    SERVICE_REQUEST_UUID);
 		
-		assertNotNull(result);
+		assertThat(result, notNullValue());
 		assertThat(result, empty());
 	}
 	
@@ -209,7 +208,7 @@ public class FhirTaskServiceImplTest {
 		Collection<org.hl7.fhir.r4.model.Task> result = fhirTaskService.getTasksByBasedOn(ServiceRequest.class,
 		    SERVICE_REQUEST_UUID);
 		
-		assertNotNull(result);
+		assertThat(result, notNullValue());
 		assertThat(result, empty());
 	}
 	
