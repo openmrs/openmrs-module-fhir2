@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -69,7 +69,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		
 		DiagnosticReport result = service.getDiagnosticReportByUuid(UUID);
 		
-		assertNotNull(result);
+		assertThat(result, notNullValue());
 		assertThat(result, equalTo(diagnosticReport));
 		
 	}
@@ -92,7 +92,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		
 		DiagnosticReport result = service.saveDiagnosticReport(diagnosticReport);
 		
-		assertNotNull(result);
+		assertThat(result, notNullValue());
 		assertThat(result, equalTo(diagnosticReport));
 	}
 	
@@ -121,7 +121,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		
 		DiagnosticReport result = service.updateDiagnosticReport(UUID, diagnosticReport);
 		
-		assertNotNull(result);
+		assertThat(result, notNullValue());
 		assertThat(result, equalTo(diagnosticReport));
 	}
 	
