@@ -11,36 +11,29 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Dosage;
+import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.DrugOrder;
-import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.module.fhir2.api.translators.DosageTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class DosageTranslatorImpl implements DosageTranslator {
+public class MedicationRequestTimingTranslatorImpl implements MedicationRequestTimingTranslator {
 	
 	@Autowired
-	private ConceptTranslator conceptTranslator;
-	
-	@Autowired
-	private MedicationRequestTimingTranslator timingTranslator;
+	private MedicationRequestTimingComponentTranslator timingComponentTranslator;
 	
 	@Override
-	public Dosage toFhirResource(DrugOrder drugOrder) {
+	public Timing toFhirResource(DrugOrder drugOrder) {
 		if (drugOrder == null) {
 			return null;
 		}
-		Dosage dosage = new Dosage();
-		dosage.setText(drugOrder.getDosingInstructions());
-		dosage.setAsNeeded(new BooleanType(drugOrder.getAsNeeded()));
-		dosage.setRoute(conceptTranslator.toFhirResource(drugOrder.getRoute()));
-		dosage.setTiming(timingTranslator.toFhirResource(drugOrder));
+		Timing timing = new Timing();
+		timing.addEvent(drugOrder.getScheduledDate());
+		timing.setRepeat(timingComponentTranslator.toFhirResource(drugOrder));
 		
-		return dosage;
+		return timing;
 	}
 }
