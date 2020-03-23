@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
 
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.openmrs.Allergy;
 
@@ -21,7 +21,7 @@ public interface FhirAllergyIntoleranceDao {
 	
 	Allergy getAllergyIntoleranceByUuid(@NotNull String uuid);
 	
-	Collection<Allergy> searchForAllergies(ReferenceParam patientReference, TokenOrListParam category,
+	Collection<Allergy> searchForAllergies(ReferenceAndListParam patientReference, TokenOrListParam category,
 	        TokenOrListParam allergen, TokenOrListParam severity, TokenOrListParam manifestationCode,
 	        TokenOrListParam clinicalStatus);
 }

@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Obs;
 
@@ -22,6 +22,6 @@ public interface FhirObservationDao {
 	
 	Obs getObsByUuid(@NotNull String uuid);
 	
-	Collection<Obs> searchForObservations(ReferenceParam encounterReference, ReferenceParam patientReference,
+	Collection<Obs> searchForObservations(ReferenceAndListParam encounterReference, ReferenceAndListParam patientReference,
 	        TokenAndListParam code, SortSpec sort);
 }

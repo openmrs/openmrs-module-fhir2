@@ -20,7 +20,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -64,12 +64,13 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	public Bundle searchEncounter(@OptionalParam(name = Encounter.SP_DATE) DateRangeParam date,
 	        @OptionalParam(name = Encounter.SP_LOCATION, chainWhitelist = { "", Location.SP_ADDRESS_CITY,
 	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
-	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceParam location,
+	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam location,
 	        @OptionalParam(name = Encounter.SP_PARTICIPANT, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
 	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
-	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceParam participantReference,
+	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
 	        @OptionalParam(name = Encounter.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
-	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceParam subjectReference) {
+	                Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference) {
 		return FhirServerUtils.convertSearchResultsToBundle(
 		    encounterService.searchForEncounters(date, location, participantReference, subjectReference));
 		

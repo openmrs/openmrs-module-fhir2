@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -108,9 +110,13 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByIdentifier() {
-		ReferenceParam referenceParam = new ReferenceParam();
-		referenceParam.setChain(Patient.SP_IDENTIFIER);
-		referenceParam.setValue("M4001-1");
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam allergyParam = new ReferenceParam();
+		
+		allergyParam.setValue("M4001-1");
+		allergyParam.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(allergyParam));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(referenceParam, null, null, null, null, null);
 		assertThat(result, notNullValue());
@@ -121,9 +127,13 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByPatientGivenName() {
-		ReferenceParam referenceParam = new ReferenceParam();
-		referenceParam.setChain(Patient.SP_GIVEN);
-		referenceParam.setValue("John");
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam allergyParam = new ReferenceParam();
+		
+		allergyParam.setValue("John");
+		allergyParam.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(allergyParam));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(referenceParam, null, null, null, null, null);
 		assertThat(result, notNullValue());
@@ -133,9 +143,13 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyName() {
-		ReferenceParam referenceParam = new ReferenceParam();
-		referenceParam.setChain(Patient.SP_FAMILY);
-		referenceParam.setValue("Doe");
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam allergyParam = new ReferenceParam();
+		
+		allergyParam.setValue("Doe");
+		allergyParam.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(allergyParam));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(referenceParam, null, null, null, null, null);
 		assertThat(result, notNullValue());
@@ -145,13 +159,38 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByPatientName() {
-		ReferenceParam referenceParam = new ReferenceParam();
-		referenceParam.setChain(Patient.SP_NAME);
-		referenceParam.setValue("John Doe");
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam allergyParam = new ReferenceParam();
+		
+		allergyParam.setValue("John Doe");
+		allergyParam.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(allergyParam));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(referenceParam, null, null, null, null, null);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyNameAndGivenName() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam allergyParamName = new ReferenceParam();
+		ReferenceParam allergyParamGiven = new ReferenceParam();
+		
+		allergyParamName.setValue("Doe");
+		allergyParamName.setChain(Patient.SP_FAMILY);
+		
+		allergyParamGiven.setValue("John");
+		allergyParamGiven.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(allergyParamName).add(allergyParamGiven));
+		
+		Collection<Allergy> result = allergyDao.searchForAllergies(referenceParam, null, null, null, null, null);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+		assertThat(result.iterator().next().getUuid(), equalTo(ALLERGY_UUID));
+		assertThat(result.iterator().next().getPatient().getFamilyName(), equalTo("Doe"));
 	}
 	
 	@Test

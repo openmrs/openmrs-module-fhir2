@@ -28,7 +28,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -67,7 +70,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	private AllergyIntoleranceFhirResourceProvider allergyProvider;
 	
 	@Captor
-	private ArgumentCaptor<ReferenceParam> patientCaptor;
+	private ArgumentCaptor<ReferenceAndListParam> patientCaptor;
 	
 	@Captor
 	private ArgumentCaptor<StringOrListParam> stringOrListParamArgumentCaptor;
@@ -110,9 +113,43 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		verifyUri("/AllergyIntolerance?patient.identifier=M4001-1");
 		
 		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(patientCaptor.getValue(), notNullValue());
-		assertThat(patientCaptor.getValue().getChain(), equalTo("identifier"));
-		assertThat(patientCaptor.getValue().getValue(), equalTo("M4001-1"));
+		assertThat(referenceParam.getChain(), equalTo("identifier"));
+		assertThat(referenceParam.getValue(), equalTo("M4001-1"));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByPatientIdentifierWithOr() throws Exception {
+		verifyUri("/AllergyIntolerance?patient.identifier=M4001-1,MK89I");
+		
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo("identifier"));
+		assertThat(referenceParam.getValue(), equalTo("M4001-1"));
+		assertThat(orListParams.get(0).getValuesAsQueryTokens().size(), equalTo(2));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByPatientIdentifierWithAnd() throws Exception {
+		verifyUri("/AllergyIntolerance?patient.identifier=M4001-1&patient.identifier=MK89I");
+		
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo("identifier"));
+		assertThat(referenceParam.getValue(), equalTo("M4001-1"));
+		assertThat(patientCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(2));
 	}
 	
 	@Test
@@ -120,9 +157,13 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		verifyUri("/AllergyIntolerance?patient.given=John");
 		
 		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(patientCaptor.getValue(), notNullValue());
-		assertThat(patientCaptor.getValue().getChain(), equalTo("given"));
-		assertThat(patientCaptor.getValue().getValue(), equalTo("John"));
+		assertThat(referenceParam.getChain(), equalTo("given"));
+		assertThat(referenceParam.getValue(), equalTo("John"));
 	}
 	
 	@Test
@@ -130,9 +171,43 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		verifyUri("/AllergyIntolerance?patient.family=John");
 		
 		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(patientCaptor.getValue(), notNullValue());
-		assertThat(patientCaptor.getValue().getChain(), equalTo("family"));
-		assertThat(patientCaptor.getValue().getValue(), equalTo("John"));
+		assertThat(referenceParam.getChain(), equalTo("family"));
+		assertThat(referenceParam.getValue(), equalTo("John"));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyNameWithOr() throws Exception {
+		verifyUri("/AllergyIntolerance?patient.family=John,Tim,Him");
+		
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo("family"));
+		assertThat(referenceParam.getValue(), equalTo("John"));
+		assertThat(orListParams.get(0).getValuesAsQueryTokens().size(), equalTo(3));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyNameWithAnd() throws Exception {
+		verifyUri("/AllergyIntolerance?patient.family=John&patient.family=Tim&patient.family=Him");
+		
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo("family"));
+		assertThat(referenceParam.getValue(), equalTo("John"));
+		assertThat(patientCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(3));
 	}
 	
 	@Test
@@ -140,9 +215,13 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		verifyUri("/AllergyIntolerance?patient.name=John");
 		
 		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
 		assertThat(patientCaptor.getValue(), notNullValue());
-		assertThat(patientCaptor.getValue().getChain(), equalTo("name"));
-		assertThat(patientCaptor.getValue().getValue(), equalTo("John"));
+		assertThat(referenceParam.getChain(), equalTo("name"));
+		assertThat(referenceParam.getValue(), equalTo("John"));
 	}
 	
 	@Test

@@ -25,6 +25,8 @@ import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Location;
@@ -108,9 +110,10 @@ public class FhirEncounterServiceImplTest {
 	
 	@Test
 	public void searchForEncounter_shouldReturnCollectionOfEncounterByLocation() {
-		ReferenceParam location = new ReferenceParam();
-		location.setValue(ENCOUNTER_ADDRESS_STATE);
-		location.setChain(Location.SP_ADDRESS_CITY);
+		ReferenceAndListParam location = new ReferenceAndListParam();
+		
+		location.addValue(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(ENCOUNTER_ADDRESS_STATE).setChain(Location.SP_ADDRESS_CITY)));
 		
 		Collection<Encounter> encounters = new ArrayList<>();
 		encounters.add(openMrsEncounter);
@@ -129,9 +132,10 @@ public class FhirEncounterServiceImplTest {
 	
 	@Test
 	public void searchForEncounter_shouldReturnCollectionOfEncounterByParticipant() {
-		ReferenceParam participant = new ReferenceParam();
-		participant.setValue(PARTICIPANT_IDENTIFIER);
-		participant.setChain(Practitioner.SP_IDENTIFIER);
+		ReferenceAndListParam participant = new ReferenceAndListParam();
+		
+		participant.addValue(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(PARTICIPANT_IDENTIFIER).setChain(Practitioner.SP_IDENTIFIER)));
 		
 		Collection<Encounter> encounters = new ArrayList<>();
 		encounters.add(openMrsEncounter);
@@ -151,9 +155,10 @@ public class FhirEncounterServiceImplTest {
 	
 	@Test
 	public void searchForEncounter_shouldReturnCollectionOfEncounterBySubject() {
-		ReferenceParam subject = new ReferenceParam();
-		subject.setValue(PATIENT_FAMILY_NAME);
-		subject.setChain(Patient.SP_FAMILY);
+		ReferenceAndListParam subject = new ReferenceAndListParam();
+		
+		subject.addValue(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_FAMILY_NAME).setChain(Patient.SP_FAMILY)));
 		
 		Collection<Encounter> encounters = new ArrayList<>();
 		encounters.add(openMrsEncounter);

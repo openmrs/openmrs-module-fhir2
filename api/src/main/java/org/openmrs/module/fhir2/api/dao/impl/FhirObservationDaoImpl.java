@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hibernate.Criteria;
@@ -43,8 +43,8 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 	}
 	
 	@Override
-	public Collection<Obs> searchForObservations(ReferenceParam encounterReference, ReferenceParam patientReference,
-	        TokenAndListParam code, SortSpec sort) {
+	public Collection<Obs> searchForObservations(ReferenceAndListParam encounterReference,
+	        ReferenceAndListParam patientReference, TokenAndListParam code, SortSpec sort) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Obs.class);
 		
 		handleEncounterReference("e", encounterReference).ifPresent(c -> criteria.createAlias("encounter", "e").add(c));

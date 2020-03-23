@@ -19,7 +19,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -74,7 +74,7 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	public Bundle searchForAllergies(
 	        @OptionalParam(name = AllergyIntolerance.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
 	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceParam patientReference,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
 	        @OptionalParam(name = AllergyIntolerance.SP_CATEGORY) TokenOrListParam category,
 	        @OptionalParam(name = AllergyIntolerance.SP_CODE) TokenOrListParam allergen,
 	        @OptionalParam(name = AllergyIntolerance.SP_SEVERITY) TokenOrListParam severity,

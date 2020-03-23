@@ -26,6 +26,8 @@ import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hamcrest.Matchers;
 import org.hibernate.SessionFactory;
@@ -43,6 +45,8 @@ import org.springframework.test.context.ContextConfiguration;
 public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String ENCOUNTER_UUID = "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9";
+	
+	private static final String ENC_UUID = "e403fafb-e5e4-42d0-9d11-4f52e89d148c";
 	
 	private static final String UNKNOWN_ENCOUNTER_UUID = "xx923xx-3423kk-2323-232jk23";
 	
@@ -65,6 +69,8 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String PATIENT_FAMILY_NAME = "Doe";
 	
 	private static final String ENCOUNTER_ADDRESS_CITY = "Boston";
+	
+	private static final String ENCOUNTER_ADDRESS_COUNTRY = "USA";
 	
 	private static final String ENCOUNTER_ADDRESS_STATE = "MA";
 	
@@ -113,10 +119,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersBySubjectName() {
-		ReferenceParam subjectReference = new ReferenceParam();
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		ReferenceParam subject = new ReferenceParam();
 		
-		subjectReference.setValue(PATIENT_FULL_NAME);
-		subjectReference.setChain(Patient.SP_NAME);
+		subject.setValue(PATIENT_FULL_NAME);
+		subject.setChain(Patient.SP_NAME);
+		
+		subjectReference.addValue(new ReferenceOrListParam().add(subject));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, null, null, subjectReference);
 		
@@ -128,10 +137,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersBySubjectFamilyName() {
-		ReferenceParam subjectReference = new ReferenceParam();
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		ReferenceParam subject = new ReferenceParam();
 		
-		subjectReference.setValue(PATIENT_FAMILY_NAME);
-		subjectReference.setChain(Patient.SP_FAMILY);
+		subject.setValue(PATIENT_FAMILY_NAME);
+		subject.setChain(Patient.SP_FAMILY);
+		
+		subjectReference.addValue(new ReferenceOrListParam().add(subject));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, null, null, subjectReference);
 		
@@ -143,10 +155,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersBySubjectGivenName() {
-		ReferenceParam subjectReference = new ReferenceParam();
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		ReferenceParam subject = new ReferenceParam();
 		
-		subjectReference.setValue(PATIENT_GIVEN_NAME);
-		subjectReference.setChain(Patient.SP_GIVEN);
+		subject.setValue(PATIENT_GIVEN_NAME);
+		subject.setChain(Patient.SP_GIVEN);
+		
+		subjectReference.addValue(new ReferenceOrListParam().add(subject));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, null, null, subjectReference);
 		
@@ -158,10 +173,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersBySubjectIdentifier() {
-		ReferenceParam subjectReference = new ReferenceParam();
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		ReferenceParam subject = new ReferenceParam();
 		
-		subjectReference.setValue(PATIENT_IDENTIFIER);
-		subjectReference.setChain(Patient.SP_IDENTIFIER);
+		subject.setValue(PATIENT_IDENTIFIER);
+		subject.setChain(Patient.SP_IDENTIFIER);
+		
+		subjectReference.addValue(new ReferenceOrListParam().add(subject));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, null, null, subjectReference);
 		
@@ -173,10 +191,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldReturnEmptyCollectionOfEncountersByWrongSubjectIdentifier() {
-		ReferenceParam subjectReference = new ReferenceParam();
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		ReferenceParam subject = new ReferenceParam();
 		
-		subjectReference.setValue(WRONG_PATIENT_IDENTIFIER);
-		subjectReference.setChain(Patient.SP_IDENTIFIER);
+		subject.setValue(WRONG_PATIENT_IDENTIFIER);
+		subject.setChain(Patient.SP_IDENTIFIER);
+		
+		subjectReference.addValue(new ReferenceOrListParam().add(subject));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, null, null, subjectReference);
 		
@@ -186,10 +207,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersByParticipantIdentifier() {
-		ReferenceParam participantReference = new ReferenceParam();
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
 		
-		participantReference.setValue(PARTICIPANT_IDENTIFIER);
-		participantReference.setChain(Practitioner.SP_IDENTIFIER);
+		participant.setValue(PARTICIPANT_IDENTIFIER);
+		participant.setChain(Practitioner.SP_IDENTIFIER);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, null, participantReference, null);
 		
@@ -203,10 +227,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersByParticipantGivenName() {
-		ReferenceParam participantReference = new ReferenceParam();
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
 		
-		participantReference.setValue(PARTICIPANT_GIVEN_NAME);
-		participantReference.setChain(Practitioner.SP_GIVEN);
+		participant.setValue(PARTICIPANT_GIVEN_NAME);
+		participant.setChain(Practitioner.SP_GIVEN);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, null, participantReference, null);
 		
@@ -222,10 +249,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersByParticipantFamilyName() {
-		ReferenceParam participantReference = new ReferenceParam();
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
 		
-		participantReference.setValue(PARTICIPANT_FAMILY_NAME);
-		participantReference.setChain(Practitioner.SP_FAMILY);
+		participant.setValue(PARTICIPANT_FAMILY_NAME);
+		participant.setChain(Practitioner.SP_FAMILY);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, null, participantReference, null);
 		
@@ -241,10 +271,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersByParticipantName() {
-		ReferenceParam participantReference = new ReferenceParam();
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
 		
-		participantReference.setValue(PARTICIPANT_FULL_NAME);
-		participantReference.setChain(Practitioner.SP_NAME);
+		participant.setValue(PARTICIPANT_FULL_NAME);
+		participant.setChain(Practitioner.SP_NAME);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, null, participantReference, null);
 		
@@ -259,10 +292,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersByEncounterLocationCity() {
-		ReferenceParam locationReference = new ReferenceParam();
+		ReferenceAndListParam locationReference = new ReferenceAndListParam();
+		ReferenceParam location = new ReferenceParam();
 		
-		locationReference.setValue(ENCOUNTER_ADDRESS_CITY);
-		locationReference.setChain(Location.SP_ADDRESS_CITY);
+		location.setValue(ENCOUNTER_ADDRESS_CITY);
+		location.setChain(Location.SP_ADDRESS_CITY);
+		
+		locationReference.addValue(new ReferenceOrListParam().add(location));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, locationReference, null, null);
 		
@@ -273,15 +309,99 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersByEncounterLocationState() {
-		ReferenceParam locationReference = new ReferenceParam();
+		ReferenceAndListParam locationReference = new ReferenceAndListParam();
+		ReferenceParam location = new ReferenceParam();
 		
-		locationReference.setValue(ENCOUNTER_ADDRESS_STATE);
-		locationReference.setChain(Location.SP_ADDRESS_STATE);
+		location.setValue(ENCOUNTER_ADDRESS_STATE);
+		location.setChain(Location.SP_ADDRESS_STATE);
+		
+		locationReference.addValue(new ReferenceOrListParam().add(location));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, locationReference, null, null);
 		
 		assertThat(results, Matchers.notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.iterator().next().getLocation().getStateProvince(), equalTo(ENCOUNTER_ADDRESS_STATE));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersBySubjectIdentifierAndGivenName() {
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		ReferenceParam subjectIdentifier = new ReferenceParam();
+		ReferenceParam subjectGiven = new ReferenceParam();
+		
+		subjectIdentifier.setValue(PATIENT_IDENTIFIER);
+		subjectIdentifier.setChain(Patient.SP_IDENTIFIER);
+		
+		subjectGiven.setValue(PATIENT_GIVEN_NAME);
+		subjectGiven.setChain(Patient.SP_GIVEN);
+		
+		subjectReference.addValue(new ReferenceOrListParam().add(subjectIdentifier).add(subjectGiven));
+		
+		Collection<Encounter> results = dao.searchForEncounters(null, null, null, subjectReference);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.iterator().next().getUuid(), equalTo(ENCOUNTER_UUID));
+		assertThat(results.iterator().next().getPatient().getPatientIdentifier().getIdentifier(),
+		    equalTo(PATIENT_IDENTIFIER));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByParticipantNameGivenAndFamily() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participantName = new ReferenceParam();
+		ReferenceParam participantGiven = new ReferenceParam();
+		ReferenceParam participantFamily = new ReferenceParam();
+		
+		participantName.setValue(PARTICIPANT_FULL_NAME);
+		participantName.setChain(Practitioner.SP_NAME);
+		
+		participantGiven.setValue(PARTICIPANT_GIVEN_NAME);
+		participantGiven.setChain(Practitioner.SP_GIVEN);
+		
+		participantFamily.setValue(PARTICIPANT_FAMILY_NAME);
+		participantFamily.setChain(Practitioner.SP_FAMILY);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participantName));
+		
+		Collection<Encounter> results = dao.searchForEncounters(null, null, participantReference, null);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.iterator().next().getUuid(), equalTo(ENCOUNTER_UUID));
+		assertThat(results.iterator().next().getEncounterProviders().size(), greaterThanOrEqualTo(1));
+		assertThat(results.iterator().next().getEncounterProviders().iterator().next().getProvider(), notNullValue());
+		assertThat(results.iterator().next().getEncounterProviders().iterator().next().getProvider().getPerson()
+		        .getPersonName().getFullName(),
+		    equalTo(PARTICIPANT_FULL_NAME));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByEncounterLocationStateCityAndCountry() {
+		ReferenceAndListParam locationReference = new ReferenceAndListParam();
+		ReferenceParam locationState = new ReferenceParam();
+		ReferenceParam locationCity = new ReferenceParam();
+		ReferenceParam locationCountry = new ReferenceParam();
+		
+		locationState.setValue(ENCOUNTER_ADDRESS_STATE);
+		locationState.setChain(Location.SP_ADDRESS_STATE);
+		
+		locationCity.setValue(ENCOUNTER_ADDRESS_CITY);
+		locationCity.setChain(Location.SP_ADDRESS_CITY);
+		
+		locationCountry.setValue(ENCOUNTER_ADDRESS_COUNTRY);
+		locationCountry.setChain(Location.SP_ADDRESS_COUNTRY);
+		
+		locationReference.addValue(new ReferenceOrListParam().add(locationCity).add(locationCountry).add(locationState));
+		
+		Collection<Encounter> results = dao.searchForEncounters(null, locationReference, null, null);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.iterator().next().getUuid(), equalTo(ENC_UUID));
+		assertThat(results.iterator().next().getLocation().getStateProvince(), equalTo(ENCOUNTER_ADDRESS_STATE));
+		assertThat(results.iterator().next().getLocation().getCityVillage(), equalTo(ENCOUNTER_ADDRESS_CITY));
+		assertThat(results.iterator().next().getLocation().getCountry(), equalTo(ENCOUNTER_ADDRESS_COUNTRY));
 	}
 }
