@@ -283,7 +283,7 @@ public class MedicationTranslatorImplTest {
 	}
 	
 	@Test
-	public void addAddressComponent_shouldSetMaximumDailyDoseCorrectly() {
+	public void addMedicineComponent_shouldSetMaximumDailyDoseCorrectly() {
 		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#maximumDailyDose",
 		    "3.5");
 		assertThat(drug.getMaximumDailyDose(), notNullValue());
@@ -291,7 +291,7 @@ public class MedicationTranslatorImplTest {
 	}
 	
 	@Test
-	public void addAddressComponent_shouldSetMinimumDailyDoseCorrectly() {
+	public void addMedicineComponent_shouldSetMinimumDailyDoseCorrectly() {
 		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#minimumDailyDose",
 		    "2.0");
 		assertThat(drug.getMinimumDailyDose(), notNullValue());
@@ -299,7 +299,7 @@ public class MedicationTranslatorImplTest {
 	}
 	
 	@Test
-	public void addAddressComponent_shouldSetStrengthCorrectly() {
+	public void addMedicineComponent_shouldSetStrengthCorrectly() {
 		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#strength",
 		    DOSE_STRENGTH);
 		assertThat(drug.getStrength(), notNullValue());
@@ -307,7 +307,7 @@ public class MedicationTranslatorImplTest {
 	}
 	
 	@Test
-	public void addAddressComponent_shouldReturnNullIfUrlIsNull() {
+	public void addMedicineComponent_shouldReturnNullIfUrlIsNull() {
 		drug.setStrength(null);
 		drug.setMinimumDailyDose(null);
 		drug.setMaximumDailyDose(null);
@@ -319,7 +319,7 @@ public class MedicationTranslatorImplTest {
 	}
 	
 	@Test
-	public void addAddressComponent_shouldReturnNullIfValueIsNull() {
+	public void addMedicineComponent_shouldReturnNullIfValueIsNull() {
 		drug.setStrength(null);
 		drug.setMinimumDailyDose(null);
 		drug.setMaximumDailyDose(null);
@@ -331,7 +331,7 @@ public class MedicationTranslatorImplTest {
 	}
 	
 	@Test
-	public void addAddressComponent_shouldReturnNullIUrlDontStartWithNumberSign() {
+	public void addMedicineComponent_shouldReturnNullIUrlDontStartWithNumberSign() {
 		drug.setStrength(null);
 		drug.setMinimumDailyDose(null);
 		drug.setMaximumDailyDose(null);
