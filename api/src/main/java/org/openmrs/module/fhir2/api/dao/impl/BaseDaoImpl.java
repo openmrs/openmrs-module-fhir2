@@ -56,6 +56,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -474,6 +475,13 @@ public abstract class BaseDaoImpl {
 		return Optional.empty();
 	}
 	
+	protected Optional<Criterion> handleQuantity(@NotNull String propertyName, QuantityAndListParam quantityAndListParam) {
+		if (quantityAndListParam == null) {
+			return Optional.empty();
+		}
+		return handleAndListParam(quantityAndListParam, quantityParam -> handleQuantity(propertyName, quantityParam));
+	}
+	
 	protected Optional<Criterion> handleEncounterReference(@NotNull String encounterAlias,
 	        ReferenceAndListParam encounterReference) {
 		if (encounterReference == null) {
@@ -589,12 +597,7 @@ public abstract class BaseDaoImpl {
 		}
 	}
 	
-	protected Optional<Criterion> findMatchingConcepts(@NotNull String conceptAlias, TokenAndListParam concepts,
-	        Criteria criteria) {
-		if (concepts == null) {
-			return Optional.empty();
-		}
-		
+	protected Optional<Criterion> handleCode(Criteria criteria, TokenAndListParam concepts, @NotNull String conceptAlias) {
 		return handleAndListParamBySystem(concepts, (system, tokens) -> {
 			if (system.isEmpty()) {
 				return Optional.of(or(
@@ -610,6 +613,15 @@ public abstract class BaseDaoImpl {
 				return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
 			}
 		});
+	}
+	
+	protected Optional<Criterion> handleCodeableConcept(Criteria criteria, TokenAndListParam concepts,
+	        @NotNull String conceptAlias) {
+		if (concepts == null) {
+			return Optional.empty();
+		}
+		
+		return handleCode(criteria, concepts, conceptAlias);
 	}
 	
 	protected void handleIdentifier(Criteria criteria, TokenOrListParam identifier) {
@@ -792,9 +804,8 @@ public abstract class BaseDaoImpl {
 		}
 	}
 	
-	protected void handleResourceCode(Criteria criteria, TokenOrListParam code, @NotNull String conceptAlias,
+	protected void handleCode(Criteria criteria, TokenOrListParam code, @NotNull String conceptAlias,
 	        @NotNull String conceptMapAlias, @NotNull String conceptReferenceTermAlias) {
-		
 		handleOrListParamBySystem(code, (system, tokens) -> {
 			if (system.isEmpty()) {
 				return Optional.of(or(
@@ -810,6 +821,12 @@ public abstract class BaseDaoImpl {
 				return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
 			}
 		}).ifPresent(criteria::add);
+	}
+	
+	protected void handleResourceCode(Criteria criteria, TokenOrListParam code, @NotNull String conceptAlias,
+	        @NotNull String conceptMapAlias, @NotNull String conceptReferenceTermAlias) {
+		
+		handleCode(criteria, code, conceptAlias, conceptMapAlias, conceptReferenceTermAlias);
 	}
 	
 	protected TokenOrListParam convertStringStatusToBoolean(TokenOrListParam statusParam) {

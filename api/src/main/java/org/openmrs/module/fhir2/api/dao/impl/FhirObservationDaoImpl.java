@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.ilike;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -30,7 +29,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.MatchMode;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
@@ -63,7 +61,7 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 		handleDateRange("valueDatetime", valueDateParam);
 		
 		handleValueStringParam("valueText", valueStringParam).ifPresent(criteria::add);
-		handleValueQuantityParam("valueNumeric", valueQuantityParam).ifPresent(criteria::add);
+		handleQuantity("valueNumeric", valueQuantityParam).ifPresent(criteria::add);
 		handleDateRange("obsDatetime", date);
 		handleCodedConcept(criteria, code);
 		handleSort(criteria, sort);
@@ -75,35 +73,25 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 		if (hasMemberReference != null) {
 			criteria.createAlias("groupMembers", "gm");
 			
-			if (hasMemberReference.getChain() != null) {
-				switch (hasMemberReference.getChain()) {
-					case Observation.SP_CODE:
-						TokenAndListParam code = new TokenAndListParam()
-						        .addAnd(new TokenParam().setValue(hasMemberReference.getValue()));
-						criteria.createAlias("gm.concept", "c");
-						findMatchingConcepts("c", code, criteria).ifPresent(criteria::add);
-						break;
-					case "":
-						criteria.add(eq("gm.uuid", hasMemberReference.getIdPart()));
-						break;
-				}
+			switch (hasMemberReference.getChain()) {
+				case Observation.SP_CODE:
+					TokenAndListParam code = new TokenAndListParam()
+					        .addAnd(new TokenParam().setValue(hasMemberReference.getValue()));
+					criteria.createAlias("gm.concept", "c");
+					handleCodeableConcept(criteria, code, "c").ifPresent(criteria::add);
+					break;
+				case "":
+					criteria.add(eq("gm.uuid", hasMemberReference.getIdPart()));
+					break;
 			}
 		}
-	}
-	
-	protected Optional<Criterion> handleValueQuantityParam(@NotNull String propertyName,
-	        QuantityAndListParam valueQuantityParam) {
-		if (valueQuantityParam == null) {
-			return Optional.empty();
-		}
-		return handleAndListParam(valueQuantityParam, quantityParam -> handleQuantity(propertyName, quantityParam));
 	}
 	
 	protected Optional<Criterion> handleValueStringParam(@NotNull String propertyName, StringAndListParam valueStringParam) {
 		if (valueStringParam == null) {
 			return Optional.empty();
 		}
-		return handleAndListParam(valueStringParam, v -> Optional.of(ilike(propertyName, v.getValue(), MatchMode.EXACT)));
+		return handleAndListParam(valueStringParam, v -> propertyLike(propertyName, v.getValue()));
 	}
 	
 	@Override
@@ -118,14 +106,14 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("concept", "c");
-			findMatchingConcepts("c", code, criteria).ifPresent(criteria::add);
+			handleCodeableConcept(criteria, code, "c").ifPresent(criteria::add);
 		}
 	}
 	
 	private void handleValueCodedConcept(Criteria criteria, TokenAndListParam valueConcept) {
 		if (valueConcept != null) {
 			criteria.createAlias("valueCoded", "c");
-			findMatchingConcepts("c", valueConcept, criteria).ifPresent(criteria::add);
+			handleCodeableConcept(criteria, valueConcept, "c").ifPresent(criteria::add);
 		}
 	}
 	
