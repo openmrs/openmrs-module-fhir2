@@ -34,4 +34,3 @@ public interface ListEntryTranslator<T> extends ToFhirTranslator<T, List<ListRes
 	@Override
 	T toOpenmrsType(T existingObject, List<ListResource.ListEntryComponent> resource);
 }
-

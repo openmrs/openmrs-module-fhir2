@@ -71,4 +71,3 @@ public class CohortListEntryTranslatorImpl_2_1 extends CohortListEntryTranslator
 		return existingCohort;
 	}
 }
-

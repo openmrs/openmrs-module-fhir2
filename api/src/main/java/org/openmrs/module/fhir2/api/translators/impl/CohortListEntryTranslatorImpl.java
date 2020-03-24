@@ -29,5 +29,3 @@ public class CohortListEntryTranslatorImpl implements ListEntryTranslator<Cohort
 		return existingCohort;
 	}
 }
-
-

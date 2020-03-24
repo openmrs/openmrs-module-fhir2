@@ -51,4 +51,3 @@ public class CohortListEntryTranslatorImplTest {
 		assertThat(result.getId(), equalTo(cohort.getId()));
 	}
 }
-
