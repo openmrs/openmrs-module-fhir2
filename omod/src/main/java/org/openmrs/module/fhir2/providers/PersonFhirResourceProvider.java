@@ -76,7 +76,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	
 	@History
 	@SuppressWarnings("unused")
-	public List<Resource> getPatientHistoryById(@IdParam @NotNull IdType id) {
+	public List<Resource> getPersonHistoryById(@IdParam @NotNull IdType id) {
 		Person person = fhirPersonService.getPersonByUuid(id.getIdPart());
 		if (person == null) {
 			throw new ResourceNotFoundException("Could not find person with Id " + id.getIdPart());

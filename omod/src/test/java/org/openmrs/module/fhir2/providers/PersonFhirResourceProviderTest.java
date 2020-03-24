@@ -217,7 +217,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 		id.setValue(PERSON_UUID);
 		when(fhirPersonService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
 		
-		List<Resource> resources = resourceProvider.getPatientHistoryById(id);
+		List<Resource> resources = resourceProvider.getPersonHistoryById(id);
 		assertThat(resources, notNullValue());
 		assertThat(resources, not(empty()));
 		assertThat(resources.size(), equalTo(2));
@@ -229,7 +229,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 		id.setValue(PERSON_UUID);
 		when(fhirPersonService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
 		
-		List<Resource> resources = resourceProvider.getPatientHistoryById(id);
+		List<Resource> resources = resourceProvider.getPersonHistoryById(id);
 		assertThat(resources, not(empty()));
 		assertThat(resources.stream().findAny().isPresent(), is(true));
 		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
@@ -239,8 +239,8 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_PERSON_UUID);
-		assertThat(resourceProvider.getPatientHistoryById(idType).isEmpty(), is(true));
-		assertThat(resourceProvider.getPatientHistoryById(idType).size(), equalTo(0));
+		assertThat(resourceProvider.getPersonHistoryById(idType).isEmpty(), is(true));
+		assertThat(resourceProvider.getPersonHistoryById(idType).size(), equalTo(0));
 	}
 	
 }
