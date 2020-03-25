@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -52,8 +52,8 @@ public class FhirConditionServiceImpl_2_0 implements FhirConditionService {
 	
 	@Override
 	public Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateParam onsetDate, QuantityParam onsetAge,
-	        DateParam recordedDate, @Sort SortSpec sort) {
+	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
+	        DateRangeParam recordedDate, @Sort SortSpec sort) {
 		return dao.searchForConditions(patientParam, subjectParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate,
 		    sort).stream().map(conditionTranslator::toFhirResource).collect(Collectors.toList());
 	}

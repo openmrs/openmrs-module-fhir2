@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -59,33 +59,30 @@ public class FhirConditionDaoImpl_2_2 extends BaseDaoImpl implements FhirConditi
 		if ("inactive".equalsIgnoreCase(status)) {
 			return ConditionClinicalStatus.INACTIVE;
 		}
-		// TODO during review: What value of the spec. should be mapped to HISTORY_OF?
+		// Note `history_of` is not a valid value in the FHIR spec:
 		// http://www.hl7.org/fhir/valueset-condition-clinical.html
+		// We are simply following the logic implemented in `ConditionClinicalStatusTranslatorImpl_2_2`.
 		return ConditionClinicalStatus.HISTORY_OF;
 	}
 	
 	@Override
 	public Collection<Condition> searchForConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateParam onsetDate, QuantityParam onsetAge,
-	        DateParam recordedData, SortSpec sort) {
+	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
+	        DateRangeParam recordedData, SortSpec sort) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Condition.class);
 		
 		handlePatientReference(criteria, patientParam);
-		// TODO during review: Do we require a ":Patient" modifier or a "Patient/" type for the "subject" search param?
-		// And do we want to support anything other than "Patient" under "subject" based searches (e.g., "Group")?
-		handlePatientReference(criteria, subjectParam);
-		handleDate("onsetDate", onsetDate).ifPresent(criteria::add);
+		if (patientParam == null) {
+			handlePatientReference(criteria, subjectParam);
+		}
+		handleDateRange("onsetDate", onsetDate).ifPresent(criteria::add);
 		// TODO: Handle onsetAge as well.
-		handleDate("dateCreated", recordedData).ifPresent(criteria::add);
+		handleDateRange("dateCreated", recordedData).ifPresent(criteria::add);
 		handleOrListParam(clinicalStatus,
 		    tokenParam -> Optional.of(eq("clinicalStatus", convertStatus(tokenParam.getValue())))).ifPresent(criteria::add);
 		if (code != null) {
-			// TODO add support for code system as well (not just the code value), possibly using ConceptTranslator.
 			criteria.createAlias("condition.coded", "cd");
-			criteria.createAlias("cd.conceptMappings", "map");
-			criteria.createAlias("map.conceptReferenceTerm", "term");
-			handleOrListParam(code, tokenParam -> Optional.of(eq("term.code", tokenParam.getValue())))
-			        .ifPresent(criteria::add);
+			handleResourceCode(criteria, code, "cd", "map", "term");
 		}
 		
 		handleSort(criteria, sort);

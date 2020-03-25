@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -69,9 +70,10 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	private static final String PATIENT_FAMILY_NAME = "Hornblower";
 	
-	private static final String PATIENT_NOT_FOUND_NAME = "Igor";
+	// This is the given name for person_id=8.
+	private static final String ANOTHER_GIVEN_NAME = "Anet";
 	
-	private static final String ONSET_DATE_NOT_FOUND = "eq2017-01-13";
+	private static final String PATIENT_NOT_FOUND_NAME = "Igor";
 	
 	private static final String END_REASON = "End reason";
 	
@@ -143,6 +145,29 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void searchForPatients_shouldReturnConditionByPatientNotFoundName() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_GIVEN, PATIENT_NOT_FOUND_NAME);
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		Collection<Condition> results = dao.searchForConditions(patientList, null, null, null, null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, empty());
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnNoConditionByMultiplePatientGivenName() {
+		ReferenceParam patientReference1 = new ReferenceParam(Patient.SP_GIVEN, PATIENT_GIVEN_NAME);
+		ReferenceParam patientReference2 = new ReferenceParam(Patient.SP_GIVEN, ANOTHER_GIVEN_NAME);
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference1).add(patientReference2));
+		Collection<Condition> results = dao.searchForConditions(patientList, null, null, null, null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, empty());
+	}
+	
+	@Test
 	public void searchForPatients_shouldReturnConditionByPatientFamilyName() {
 		ReferenceParam patientReference = new ReferenceParam(Patient.SP_FAMILY, PATIENT_FAMILY_NAME);
 		ReferenceAndListParam patientList = new ReferenceAndListParam();
@@ -184,10 +209,27 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void searchForPatients_shouldReturnConditionByPatientNameAndIgnoreSubject() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_GIVEN, ANOTHER_GIVEN_NAME);
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		ReferenceParam subjectReference = new ReferenceParam(Patient.SP_GIVEN, PATIENT_GIVEN_NAME);
+		ReferenceAndListParam subjectList = new ReferenceAndListParam();
+		subjectList.addValue(new ReferenceOrListParam().add(subjectReference));
+		Collection<Condition> results = dao.searchForConditions(patientList, subjectList, null, null, null, null, null,
+		    null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), equalTo(1));
+		assertThat(results.iterator().next().getPatient().getGivenName(), equalTo(ANOTHER_GIVEN_NAME));
+	}
+	
+	@Test
 	public void searchForPatients_shouldReturnConditionByOnsetDate() {
 		String testDate = "2017-01-12";
 		
-		DateParam onsetDate = new DateParam("eq" + testDate);
+		DateRangeParam onsetDate = new DateRangeParam(new DateParam("eq" + testDate));
 		Collection<Condition> results = dao.searchForConditions(null, null, null, null, onsetDate, null, null, null);
 		
 		assertThat(results, notNullValue());
@@ -200,7 +242,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	public void searchForPatients_shouldReturnConditionByRecordedDate() {
 		String testDate = "2016-01-12";
 		
-		DateParam recordedDate = new DateParam("eq" + testDate);
+		DateRangeParam recordedDate = new DateRangeParam(new DateParam("eq" + testDate));
 		Collection<Condition> results = dao.searchForConditions(null, null, null, null, null, null, recordedDate, null);
 		
 		assertThat(results, notNullValue());
@@ -248,7 +290,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	@Test
 	public void searchForPatients_shouldReturnConditionByCode() {
 		TokenOrListParam listParam = new TokenOrListParam();
-		listParam.add(new TokenParam("CD41003")); // for concept_id=5497
+		listParam.add(new TokenParam("http://made_up_concepts.info/sct", "CD41003")); // for concept_id=5497
 		Collection<Condition> results = dao.searchForConditions(null, null, listParam, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
@@ -260,8 +302,32 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	@Test
 	public void searchForPatients_shouldReturnMultipleConditionsByCodeList() {
 		TokenOrListParam listParam = new TokenOrListParam();
-		listParam.add(new TokenParam("CD41003")); // for concept_id=5497
-		listParam.add(new TokenParam("WGT234")); // for concept_id=5089
+		listParam.add(new TokenParam("http://made_up_concepts.info/sct", "CD41003")); // for concept_id=5497
+		listParam.add(new TokenParam("http://made_up_concepts.info/sct", "WGT234")); // for concept_id=5089
+		Collection<Condition> results = dao.searchForConditions(null, null, listParam, null, null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), equalTo(2));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnConditionByCodeAndNoSystem() {
+		TokenOrListParam listParam = new TokenOrListParam();
+		listParam.add(new TokenParam("5497"));
+		Collection<Condition> results = dao.searchForConditions(null, null, listParam, null, null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), equalTo(1));
+		assertThat(results.iterator().next().getCondition().getCoded().getConceptId(), equalTo(5497));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnMultipleConditionsByCodeListAndNoSystem() {
+		TokenOrListParam listParam = new TokenOrListParam();
+		listParam.add(new TokenParam("5497")); // for concept_id=5497
+		listParam.add(new TokenParam("5089")); // for concept_id=5089
 		Collection<Condition> results = dao.searchForConditions(null, null, listParam, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());

@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -86,8 +86,8 @@ public class FhirConditionDaoImpl_2_0 implements FhirConditionDao<Condition> {
 	
 	@Override
 	public Collection<Condition> searchForConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateParam onsetDate, QuantityParam onsetAge,
-	        DateParam recordedDate, SortSpec sort) {
+	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
+	        DateRangeParam recordedDate, SortSpec sort) {
 		return null; // TODO
 	}
 }

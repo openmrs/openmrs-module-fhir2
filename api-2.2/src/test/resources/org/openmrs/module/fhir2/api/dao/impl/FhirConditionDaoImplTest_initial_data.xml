@@ -35,4 +35,5 @@
 	<conditions condition_id="9" patient_id="6" clinical_status="ACTIVE" creator="1" date_created="2020-03-14 19:32:34"
 			voided="false" onset_date="2020-03-13 19:00:00" verification_status="CONFIRMED" condition_coded="5089"
 			uuid="604953c5-b5c6-4e1e-be95-e37d8f392046"/>
+	<fhir_concept_source fhir_concept_source_id="1" name="Some Made-up Terminology" url="http://made_up_concepts.info/sct" concept_source_id="1" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="0d30bea3-4ba2-4ab4-ac7b-5525840bde20" />
 </dataset>

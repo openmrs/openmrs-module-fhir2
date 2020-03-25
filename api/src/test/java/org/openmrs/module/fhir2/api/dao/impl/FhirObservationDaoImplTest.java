@@ -247,7 +247,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		patient.setChain(Patient.SP_GIVEN);
 		
 		patientReference.addValue(new ReferenceOrListParam().add(patient));
-
+		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null);
 		
 		assertThat(results, notNullValue());

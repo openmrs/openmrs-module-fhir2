@@ -78,7 +78,7 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 						criteria.createAlias("c.conceptMappings", "cm").createAlias("cm.conceptReferenceTerm", "crt");
 					}
 					
-					return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
+					return Optional.of(generateSystemQuery(system, tokensToList(tokens), "crt"));
 				}
 			}).ifPresent(criteria::add);
 		}

@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -105,9 +105,10 @@ public class FhirConditionServiceImpl_2_0Test {
 		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "subject name")));
 		TokenOrListParam codeList = new TokenOrListParam().add(new TokenParam("test code"));
 		TokenOrListParam clinicalList = new TokenOrListParam().add(new TokenParam("test clinical"));
-		DateParam onsetDate = new DateParam("test date");
+		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("lower date").setUpperBound("upper date");
 		QuantityParam onsetAge = new QuantityParam(12);
-		DateParam recordDate = new DateParam("test date");
+		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
+		        .setUpperBound("upper record date");
 		SortSpec sort = new SortSpec("sort param");
 		when(dao.searchForConditions(patientReference, subjectReference, codeList, clinicalList, onsetDate, onsetAge,
 		    recordDate, sort)).thenReturn(Arrays.asList(openmrsCondition));
