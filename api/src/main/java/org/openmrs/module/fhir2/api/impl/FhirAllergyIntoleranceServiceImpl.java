@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -45,8 +46,8 @@ public class FhirAllergyIntoleranceServiceImpl implements FhirAllergyIntolerance
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<AllergyIntolerance> searchForAllergies(ReferenceAndListParam patientReference,
-	        TokenOrListParam category, TokenOrListParam allergen, TokenOrListParam severity,
-	        TokenOrListParam manifestationCode, TokenOrListParam clinicalStatus) {
+	        TokenOrListParam category, TokenAndListParam allergen, TokenOrListParam severity,
+	        TokenAndListParam manifestationCode, TokenOrListParam clinicalStatus) {
 		return allergyIntoleranceDao
 		        .searchForAllergies(patientReference, category, allergen, severity, manifestationCode, clinicalStatus)
 		        .stream().map(allergyIntoleranceTranslator::toFhirResource).collect(Collectors.toList());

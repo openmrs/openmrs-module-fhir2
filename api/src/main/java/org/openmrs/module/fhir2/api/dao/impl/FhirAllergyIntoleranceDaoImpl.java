@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -53,7 +54,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 	
 	@Override
 	public Collection<Allergy> searchForAllergies(ReferenceAndListParam patientReference, TokenOrListParam category,
-	        TokenOrListParam allergen, TokenOrListParam severity, TokenOrListParam manifestationCode,
+	        TokenAndListParam allergen, TokenOrListParam severity, TokenAndListParam manifestationCode,
 	        TokenOrListParam clinicalStatus) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Allergy.class);
 		handlePatientReference(criteria, patientReference, "patient");
@@ -66,20 +67,20 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 		return criteria.list();
 	}
 	
-	private void handleManifestation(Criteria criteria, TokenOrListParam code) {
+	private void handleManifestation(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("reactions", "r");
 			criteria.createAlias("r.reaction", "rc");
 			
-			handleResourceCode(criteria, code, "rc", "rcm", "rcrt");
+			handleCodeableConcept(criteria, code, "rc", "rcm", "rcrt").ifPresent(criteria::add);
 		}
 	}
 	
-	private void handleAllergen(Criteria criteria, TokenOrListParam code) {
+	private void handleAllergen(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("allergen.codedAllergen", "ac");
 			
-			handleResourceCode(criteria, code, "ac", "acm", "acrt");
+			handleCodeableConcept(criteria, code, "ac", "acm", "acrt").ifPresent(criteria::add);
 		}
 	}
 	

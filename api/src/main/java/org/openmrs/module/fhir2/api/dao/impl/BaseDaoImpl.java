@@ -13,6 +13,7 @@ import static org.hibernate.criterion.Order.asc;
 import static org.hibernate.criterion.Order.desc;
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.between;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.ge;
 import static org.hibernate.criterion.Restrictions.gt;
@@ -21,12 +22,14 @@ import static org.hibernate.criterion.Restrictions.in;
 import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.le;
 import static org.hibernate.criterion.Restrictions.lt;
+import static org.hibernate.criterion.Restrictions.ne;
 import static org.hibernate.criterion.Restrictions.not;
 import static org.hibernate.criterion.Restrictions.or;
 import static org.hibernate.criterion.Subqueries.propertyEq;
 
 import javax.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -52,9 +55,13 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.Builder;
@@ -151,6 +158,8 @@ import org.openmrs.module.fhir2.FhirConceptSource;
  * </p>
  */
 public abstract class BaseDaoImpl {
+	
+	private static final BigDecimal APPROX_RANGE = new BigDecimal(0.1);
 	
 	/**
 	 * Converts an {@link Iterable} to a {@link Stream}
@@ -424,6 +433,55 @@ public abstract class BaseDaoImpl {
 		return Optional.empty();
 	}
 	
+	protected Optional<Criterion> handleQuantity(String propertyName, QuantityParam quantityParam) {
+		if (quantityParam == null) {
+			return Optional.empty();
+		}
+		
+		BigDecimal value = quantityParam.getValue();
+		if (quantityParam.getPrefix() == null || quantityParam.getPrefix() == ParamPrefixEnum.APPROXIMATE) {
+			String plainString = quantityParam.getValue().toPlainString();
+			int dotIdx = plainString.indexOf('.');
+			
+			BigDecimal approxRange = APPROX_RANGE.multiply(value);
+			if (dotIdx == -1) {
+				return Optional.of(
+				    between(propertyName, value.subtract(approxRange).doubleValue(), value.add(approxRange).doubleValue()));
+			} else {
+				int precision = plainString.length() - (dotIdx);
+				double mul = Math.pow(10, -precision);
+				double val = mul * 5.0d;
+				return Optional.of(between(propertyName, value.subtract(new BigDecimal(val)).doubleValue(),
+				    value.add(new BigDecimal(val)).doubleValue()));
+			}
+		} else {
+			double val = value.doubleValue();
+			switch (quantityParam.getPrefix()) {
+				case EQUAL:
+					return Optional.of(eq(propertyName, val));
+				case NOT_EQUAL:
+					return Optional.of(ne(propertyName, val));
+				case LESSTHAN_OR_EQUALS:
+					return Optional.of(le(propertyName, val));
+				case LESSTHAN:
+					return Optional.of(lt(propertyName, val));
+				case GREATERTHAN_OR_EQUALS:
+					return Optional.of(ge(propertyName, val));
+				case GREATERTHAN:
+					return Optional.of(gt(propertyName, val));
+			}
+		}
+		
+		return Optional.empty();
+	}
+	
+	protected Optional<Criterion> handleQuantity(@NotNull String propertyName, QuantityAndListParam quantityAndListParam) {
+		if (quantityAndListParam == null) {
+			return Optional.empty();
+		}
+		return handleAndListParam(quantityAndListParam, quantityParam -> handleQuantity(propertyName, quantityParam));
+	}
+	
 	protected Optional<Criterion> handleEncounterReference(@NotNull String encounterAlias,
 	        ReferenceAndListParam encounterReference) {
 		if (encounterReference == null) {
@@ -537,6 +595,29 @@ public abstract class BaseDaoImpl {
 			});
 			
 		}
+	}
+	
+	protected Optional<Criterion> handleCodeableConcept(Criteria criteria, TokenAndListParam concepts,
+	        @NotNull String conceptAlias, @NotNull String conceptMapAlias, @NotNull String conceptReferenceTermAlias) {
+		if (concepts == null) {
+			return Optional.empty();
+		}
+		
+		return handleAndListParamBySystem(concepts, (system, tokens) -> {
+			if (system.isEmpty()) {
+				return Optional.of(or(
+				    in(String.format("%s.conceptId", conceptAlias),
+				        tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
+				    in(String.format("%s.uuid", conceptAlias), tokensToList(tokens))));
+			} else {
+				if (!containsAlias(criteria, conceptMapAlias)) {
+					criteria.createAlias(String.format("%s.conceptMappings", conceptAlias), conceptMapAlias).createAlias(
+					    String.format("%s.conceptReferenceTerm", conceptMapAlias), conceptReferenceTermAlias);
+				}
+				
+				return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
+			}
+		});
 	}
 	
 	protected void handleIdentifier(Criteria criteria, TokenOrListParam identifier) {
@@ -717,26 +798,6 @@ public abstract class BaseDaoImpl {
 		} else {
 			return and(propertyEq("crt.conceptSource", conceptSourceCriteria), eq("crt.code", codes.get(0)));
 		}
-	}
-	
-	protected void handleResourceCode(Criteria criteria, TokenOrListParam code, @NotNull String conceptAlias,
-	        @NotNull String conceptMapAlias, @NotNull String conceptReferenceTermAlias) {
-		
-		handleOrListParamBySystem(code, (system, tokens) -> {
-			if (system.isEmpty()) {
-				return Optional.of(or(
-				    in(String.format("%s.conceptId", conceptAlias),
-				        tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
-				    in(String.format("%s.uuid", conceptAlias), tokensToList(tokens))));
-			} else {
-				if (!containsAlias(criteria, conceptMapAlias)) {
-					criteria.createAlias(String.format("%s.conceptMappings", conceptAlias), conceptMapAlias).createAlias(
-					    String.format("%s.conceptReferenceTerm", conceptMapAlias), conceptReferenceTermAlias);
-				}
-				
-				return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
-			}
-		}).ifPresent(criteria::add);
 	}
 	
 	protected TokenOrListParam convertStringStatusToBoolean(TokenOrListParam statusParam) {
