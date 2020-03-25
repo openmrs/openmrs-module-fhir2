@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 
@@ -126,7 +127,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(3));
+		assertThat(results, hasSize(3));
 		assertThat(results.iterator().next().getPatient().getUuid(), equalTo(PATIENT_UUID));
 	}
 	
@@ -139,8 +140,10 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		// TODO during review: Is returning duplicated Conditions the desired outcome?
-		assertThat(results.size(), equalTo(6));
+		// Note the 6 returned conditions are in fact 3 conditions each repeated twice. The reason is
+		// that there are two `person_name` with `person_id=2` and three conditions for `person_id=2`;
+		// because of the join between `person` and `person_name` tables we end up with 6 rows.
+		assertThat(results, hasSize(6));
 		assertThat(results.iterator().next().getPatient().getGivenName(), equalTo(PATIENT_GIVEN_NAME));
 	}
 	
@@ -176,7 +179,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(9));
+		assertThat(results, hasSize(9));
 		assertThat(results.iterator().next().getPatient().getFamilyName(), equalTo(PATIENT_FAMILY_NAME));
 	}
 	
@@ -189,7 +192,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(9));
+		assertThat(results, hasSize(9));
 		assertThat(results.iterator().next().getPatient().getGivenName(), equalTo(PATIENT_GIVEN_NAME));
 		assertThat(results.iterator().next().getPatient().getFamilyName(), equalTo(PATIENT_FAMILY_NAME));
 	}
@@ -203,7 +206,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(9));
+		assertThat(results, hasSize(9));
 		assertThat(results.iterator().next().getPatient().getGivenName(), equalTo(PATIENT_GIVEN_NAME));
 		assertThat(results.iterator().next().getPatient().getFamilyName(), equalTo(PATIENT_FAMILY_NAME));
 	}
@@ -221,7 +224,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(1));
+		assertThat(results, hasSize(1));
 		assertThat(results.iterator().next().getPatient().getGivenName(), equalTo(ANOTHER_GIVEN_NAME));
 	}
 	
@@ -234,8 +237,37 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(3));
+		assertThat(results, hasSize(3));
 		assertThat(results.iterator().next().getOnsetDate().toString(), startsWith(testDate));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnConditionByOnsetDateRange() {
+		String startDate = "2020-03-01";
+		String endDate = "2020-03-10";
+		String actualDate = "2020-03-05";
+		
+		DateRangeParam onsetDate = new DateRangeParam(new DateParam(startDate), new DateParam(endDate));
+		Collection<Condition> results = dao.searchForConditions(null, null, null, null, onsetDate, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results, hasSize(1));
+		assertThat(results.iterator().next().getOnsetDate().toString(), startsWith(actualDate));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnConditionByUnboundedOnsetDateRange() {
+		String testDate = "2017-01-15";
+		String actualDate = "2017-01-12";
+		
+		DateRangeParam onsetDate = new DateRangeParam(new DateParam("lt" + testDate));
+		Collection<Condition> results = dao.searchForConditions(null, null, null, null, onsetDate, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results, hasSize(3));
+		assertThat(results.iterator().next().getOnsetDate().toString(), startsWith(actualDate));
 	}
 	
 	@Test
@@ -247,7 +279,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(1));
+		assertThat(results, hasSize(1));
 		assertThat(results.iterator().next().getDateCreated().toString(), startsWith(testDate));
 	}
 	
@@ -259,7 +291,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(5));
+		assertThat(results, hasSize(5));
 		assertThat(results.iterator().next().getClinicalStatus(), equalTo(ConditionClinicalStatus.ACTIVE));
 	}
 	
@@ -271,7 +303,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(1));
+		assertThat(results, hasSize(1));
 		assertThat(results.iterator().next().getClinicalStatus(), equalTo(ConditionClinicalStatus.INACTIVE));
 	}
 	
@@ -284,7 +316,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(6));
+		assertThat(results, hasSize(6));
 	}
 	
 	@Test
@@ -295,7 +327,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(1));
+		assertThat(results, hasSize(1));
 		assertThat(results.iterator().next().getCondition().getCoded().getConceptId(), equalTo(5497));
 	}
 	
@@ -308,7 +340,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(2));
+		assertThat(results, hasSize(2));
 	}
 	
 	@Test
@@ -319,7 +351,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(1));
+		assertThat(results, hasSize(1));
 		assertThat(results.iterator().next().getCondition().getCoded().getConceptId(), equalTo(5497));
 	}
 	
@@ -332,7 +364,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(2));
+		assertThat(results, hasSize(2));
 	}
 	
 	public void shouldSaveNewCondition() {
