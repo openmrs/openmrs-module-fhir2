@@ -21,6 +21,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Collections;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -87,8 +88,8 @@ public class MedicationFhirResourceProviderTest {
 	
 	@Test
 	public void searchForMedication_shouldReturnMatchingBundleOfMedicationByCode() {
-		TokenOrListParam code = new TokenOrListParam();
-		code.addOr(new TokenParam().setValue(CODE));
+		TokenAndListParam code = new TokenAndListParam();
+		code.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
 		
 		when(fhirMedicationService.searchForMedications(argThat(is(code)), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(medication));
@@ -101,8 +102,8 @@ public class MedicationFhirResourceProviderTest {
 	
 	@Test
 	public void searchForMedication_shouldReturnMatchingBundleOfMedicationByDosageForm() {
-		TokenOrListParam dosageFormCode = new TokenOrListParam();
-		dosageFormCode.addOr(new TokenParam().setValue(CODE));
+		TokenAndListParam dosageFormCode = new TokenAndListParam();
+		dosageFormCode.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
 		
 		when(fhirMedicationService.searchForMedications(isNull(), argThat(is(dosageFormCode)), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(medication));

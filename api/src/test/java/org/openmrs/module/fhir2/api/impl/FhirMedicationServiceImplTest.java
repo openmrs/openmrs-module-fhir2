@@ -21,6 +21,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Medication;
@@ -89,8 +90,8 @@ public class FhirMedicationServiceImplTest {
 		Collection<Drug> medications = new ArrayList<>();
 		medications.add(drug);
 		
-		TokenOrListParam code = new TokenOrListParam();
-		code.addOr(new TokenParam().setValue(CODE));
+		TokenAndListParam code = new TokenAndListParam();
+		code.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
 		
 		when(medicationDao.searchForMedications(argThat(equalTo(code)), isNull(), isNull(), isNull()))
 		        .thenReturn(medications);
@@ -104,8 +105,8 @@ public class FhirMedicationServiceImplTest {
 		Collection<Drug> medications = new ArrayList<>();
 		medications.add(drug);
 		
-		TokenOrListParam dosageForm = new TokenOrListParam();
-		dosageForm.addOr(new TokenParam().setValue(CODE));
+		TokenAndListParam dosageForm = new TokenAndListParam();
+		dosageForm.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
 		
 		when(medicationDao.searchForMedications(isNull(), argThat(equalTo(dosageForm)), isNull(), isNull()))
 		        .thenReturn(medications);

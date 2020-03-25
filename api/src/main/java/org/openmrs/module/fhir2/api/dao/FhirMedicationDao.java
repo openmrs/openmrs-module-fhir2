@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.openmrs.Drug;
 
@@ -20,6 +21,6 @@ public interface FhirMedicationDao {
 	
 	Drug getMedicationByUuid(@NotNull String uuid);
 	
-	Collection<Drug> searchForMedications(TokenOrListParam code, TokenOrListParam dosageForm,
+	Collection<Drug> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
 	        TokenOrListParam ingredientCode, TokenOrListParam status);
 }

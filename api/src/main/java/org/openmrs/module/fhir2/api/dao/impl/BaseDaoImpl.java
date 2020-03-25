@@ -804,31 +804,6 @@ public abstract class BaseDaoImpl {
 		}
 	}
 	
-	protected void handleCode(Criteria criteria, TokenOrListParam code, @NotNull String conceptAlias,
-	        @NotNull String conceptMapAlias, @NotNull String conceptReferenceTermAlias) {
-		handleOrListParamBySystem(code, (system, tokens) -> {
-			if (system.isEmpty()) {
-				return Optional.of(or(
-				    in(String.format("%s.conceptId", conceptAlias),
-				        tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
-				    in(String.format("%s.uuid", conceptAlias), tokensToList(tokens))));
-			} else {
-				if (!containsAlias(criteria, conceptMapAlias)) {
-					criteria.createAlias(String.format("%s.conceptMappings", conceptAlias), conceptMapAlias).createAlias(
-					    String.format("%s.conceptReferenceTerm", conceptMapAlias), conceptReferenceTermAlias);
-				}
-				
-				return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
-			}
-		}).ifPresent(criteria::add);
-	}
-	
-	protected void handleResourceCode(Criteria criteria, TokenOrListParam code, @NotNull String conceptAlias,
-	        @NotNull String conceptMapAlias, @NotNull String conceptReferenceTermAlias) {
-		
-		handleCode(criteria, code, conceptAlias, conceptMapAlias, conceptReferenceTermAlias);
-	}
-	
 	protected TokenOrListParam convertStringStatusToBoolean(TokenOrListParam statusParam) {
 		if (statusParam != null) {
 			return handleOrListParam(statusParam).map(s -> {

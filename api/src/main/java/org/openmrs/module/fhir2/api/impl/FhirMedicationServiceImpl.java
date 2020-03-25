@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -43,7 +44,7 @@ public class FhirMedicationServiceImpl implements FhirMedicationService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Collection<Medication> searchForMedications(TokenOrListParam code, TokenOrListParam dosageForm,
+	public Collection<Medication> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
 	        TokenOrListParam ingredientCode, TokenOrListParam status) {
 		
 		return medicationDao.searchForMedications(code, dosageForm, ingredientCode, status).stream()

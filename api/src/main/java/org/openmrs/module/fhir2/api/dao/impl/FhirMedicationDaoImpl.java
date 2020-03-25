@@ -16,6 +16,7 @@ import javax.inject.Named;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -39,7 +40,7 @@ public class FhirMedicationDaoImpl extends BaseDaoImpl implements FhirMedication
 	}
 	
 	@Override
-	public Collection<Drug> searchForMedications(TokenOrListParam code, TokenOrListParam dosageForm,
+	public Collection<Drug> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
 	        TokenOrListParam ingredientCode, TokenOrListParam status) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Drug.class);
 		handleMedicationCode(criteria, code);
@@ -49,17 +50,17 @@ public class FhirMedicationDaoImpl extends BaseDaoImpl implements FhirMedication
 		return criteria.list();
 	}
 	
-	private void handleMedicationCode(Criteria criteria, TokenOrListParam code) {
+	private void handleMedicationCode(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("concept", "cc");
-			handleResourceCode(criteria, code, "cc", "ccm", "ccrt");
+			handleCodeableConcept(criteria, code, "cc").ifPresent(criteria::add);
 		}
 	}
 	
-	private void handleMedicationDosageForm(Criteria criteria, TokenOrListParam dosageForm) {
+	private void handleMedicationDosageForm(Criteria criteria, TokenAndListParam dosageForm) {
 		if (dosageForm != null) {
 			criteria.createAlias("dosageForm", "dc");
-			handleResourceCode(criteria, dosageForm, "dc", "dcm", "dcrt");
+			handleCodeableConcept(criteria, dosageForm, "dc").ifPresent(criteria::add);
 		}
 	}
 }
