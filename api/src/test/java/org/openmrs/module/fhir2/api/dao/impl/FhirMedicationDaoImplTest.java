@@ -21,6 +21,7 @@ import javax.inject.Provider;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.SessionFactory;
@@ -75,8 +76,8 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForMedications_shouldSearchMedicationsByCode() {
-		TokenOrListParam code = new TokenOrListParam();
-		code.addOr(new TokenParam().setValue(CONCEPT_UUID));
+		TokenAndListParam code = new TokenAndListParam();
+		code.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CONCEPT_UUID)));
 		
 		Collection<Drug> result = medicationDao.searchForMedications(code, null, null, null);
 		assertThat(result, notNullValue());
@@ -86,8 +87,8 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForMedications_shouldSearchMedicationsByDosageForm() {
-		TokenOrListParam dosageForm = new TokenOrListParam();
-		dosageForm.addOr(new TokenParam().setValue(DOSAGE_FORM_UUID));
+		TokenAndListParam dosageForm = new TokenAndListParam();
+		dosageForm.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(DOSAGE_FORM_UUID)));
 		
 		Collection<Drug> result = medicationDao.searchForMedications(null, dosageForm, null, null);
 		assertThat(result, notNullValue());

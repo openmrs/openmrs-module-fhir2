@@ -21,13 +21,13 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
- * FHIR Task.input - https://www.hl7.org/fhir/task-definitions.html#Task.input
+ * FHIR Task.output - https://www.hl7.org/fhir/task-definitions.html#Task.output
  */
 @Data(staticConstructor = "of")
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "fhir_task_input")
+@Table(name = "fhir_task_output")
 public class FhirTaskOutput extends FhirTaskParam {
 	
 	private static final long serialVersionUID = 1L;

@@ -10,22 +10,26 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
-import static org.hibernate.criterion.Restrictions.or;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.apache.commons.lang3.math.NumberUtils;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Criterion;
+import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.springframework.stereotype.Component;
@@ -44,15 +48,50 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 	
 	@Override
 	public Collection<Obs> searchForObservations(ReferenceAndListParam encounterReference,
-	        ReferenceAndListParam patientReference, TokenAndListParam code, SortSpec sort) {
+	        ReferenceAndListParam patientReference, ReferenceParam hasMemberReference, TokenAndListParam valueConcept,
+	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
+	        DateRangeParam date, TokenAndListParam code, SortSpec sort) {
+		
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Obs.class);
 		
 		handleEncounterReference("e", encounterReference).ifPresent(c -> criteria.createAlias("encounter", "e").add(c));
 		handlePatientReference(criteria, patientReference, "person");
+		handleHasMemberReference(criteria, hasMemberReference);
+		handleValueCodedConcept(criteria, valueConcept);
+		handleDateRange("valueDatetime", valueDateParam);
+		
+		handleValueStringParam("valueText", valueStringParam).ifPresent(criteria::add);
+		handleQuantity("valueNumeric", valueQuantityParam).ifPresent(criteria::add);
+		handleDateRange("obsDatetime", date);
 		handleCodedConcept(criteria, code);
 		handleSort(criteria, sort);
 		
 		return criteria.list();
+	}
+	
+	protected void handleHasMemberReference(Criteria criteria, ReferenceParam hasMemberReference) {
+		if (hasMemberReference != null) {
+			criteria.createAlias("groupMembers", "gm");
+			
+			switch (hasMemberReference.getChain()) {
+				case Observation.SP_CODE:
+					TokenAndListParam code = new TokenAndListParam()
+					        .addAnd(new TokenParam().setValue(hasMemberReference.getValue()));
+					criteria.createAlias("gm.concept", "c");
+					handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
+					break;
+				case "":
+					criteria.add(eq("gm.uuid", hasMemberReference.getIdPart()));
+					break;
+			}
+		}
+	}
+	
+	protected Optional<Criterion> handleValueStringParam(@NotNull String propertyName, StringAndListParam valueStringParam) {
+		if (valueStringParam == null) {
+			return Optional.empty();
+		}
+		return handleAndListParam(valueStringParam, v -> propertyLike(propertyName, v.getValue()));
 	}
 	
 	@Override
@@ -67,20 +106,14 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("concept", "c");
-			
-			handleAndListParamBySystem(code, (system, tokens) -> {
-				if (system.isEmpty()) {
-					return Optional.of(
-					    or(in("c.conceptId", tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
-					        in("c.uuid", tokensToList(tokens))));
-				} else {
-					if (!containsAlias(criteria, "cm")) {
-						criteria.createAlias("c.conceptMappings", "cm").createAlias("cm.conceptReferenceTerm", "crt");
-					}
-					
-					return Optional.of(generateSystemQuery(system, tokensToList(tokens), "crt"));
-				}
-			}).ifPresent(criteria::add);
+			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
+		}
+	}
+	
+	private void handleValueCodedConcept(Criteria criteria, TokenAndListParam valueConcept) {
+		if (valueConcept != null) {
+			criteria.createAlias("valueCoded", "c");
+			handleCodeableConcept(criteria, valueConcept, "c", "cm", "crt").ifPresent(criteria::add);
 		}
 	}
 	

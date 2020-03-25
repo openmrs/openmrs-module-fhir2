@@ -43,6 +43,12 @@ public class FhirPatientDaoImpl extends AbstractPersonDaoImpl implements FhirPat
 	private SessionFactory sessionFactory;
 	
 	@Override
+	public Patient getPatientById(Integer id) {
+		return (Patient) sessionFactory.getCurrentSession().createCriteria(Patient.class).add(eq("patientId", id))
+		        .uniqueResult();
+	}
+	
+	@Override
 	public Patient getPatientByUuid(String uuid) {
 		return (Patient) sessionFactory.getCurrentSession().createCriteria(Patient.class).add(eq("uuid", uuid))
 		        .uniqueResult();

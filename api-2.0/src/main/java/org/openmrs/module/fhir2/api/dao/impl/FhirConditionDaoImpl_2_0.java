@@ -21,7 +21,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Session;
@@ -86,7 +86,7 @@ public class FhirConditionDaoImpl_2_0 implements FhirConditionDao<Condition> {
 	
 	@Override
 	public Collection<Condition> searchForConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
+	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
 	        DateRangeParam recordedDate, SortSpec sort) {
 		return null; // TODO
 	}

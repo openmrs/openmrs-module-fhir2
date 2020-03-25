@@ -44,9 +44,8 @@ public class FhirTaskDaoImpl extends BaseDaoImpl implements FhirTaskDao {
 	
 	@Override
 	public FhirTask saveTask(FhirTask task) throws DAOException {
-		
 		// TODO: Refactor - and figure out why CascadeType.ALL does not take care of this.
-		if (task.getOwnerReference() != null) {
+		if (task.getOwnerReference() != null && task.getOwnerReference().getReference() != null) {
 			sessionFactory.getCurrentSession().saveOrUpdate(task.getOwnerReference());
 		}
 		

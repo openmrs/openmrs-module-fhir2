@@ -20,8 +20,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
@@ -54,6 +57,9 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 	
 	@Captor
 	private ArgumentCaptor<TokenOrListParam> tokenOrListParamArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
 	private Medication medication;
 	
@@ -89,20 +95,28 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 	public void searchForMedications_shouldSearchForMedicationsByCode() throws Exception {
 		verifyUri("/Medication?code=5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		
-		verify(fhirMedicationService).searchForMedications(tokenOrListParamArgumentCaptor.capture(), isNull(), isNull(),
+		verify(fhirMedicationService).searchForMedications(tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
 		    isNull());
-		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo(CODE));
+		
+		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
+		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenParam.getValue(), equalTo(CODE));
 	}
 	
 	@Test
 	public void searchForMedications_shouldSearchForMedicationsByDosageForm() throws Exception {
 		verifyUri("/Medication?form=5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		
-		verify(fhirMedicationService).searchForMedications(isNull(), tokenOrListParamArgumentCaptor.capture(), isNull(),
+		verify(fhirMedicationService).searchForMedications(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
 		    isNull());
-		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo(CODE));
+		
+		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
+		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenParam.getValue(), equalTo(CODE));
 	}
 	
 	@Test

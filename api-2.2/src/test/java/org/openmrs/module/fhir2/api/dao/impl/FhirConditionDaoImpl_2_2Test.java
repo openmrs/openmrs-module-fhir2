@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.exparity.hamcrest.date.DateMatchers;
@@ -285,8 +286,8 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void searchForPatients_shouldReturnConditionByClinicalStatusActive() {
-		TokenOrListParam listParam = new TokenOrListParam();
-		listParam.add(new TokenParam("active"));
+		TokenAndListParam listParam = new TokenAndListParam();
+		listParam.addValue(new TokenOrListParam().add(new TokenParam("active")));
 		Collection<Condition> results = dao.searchForConditions(null, null, null, listParam, null, null, null, null);
 		
 		assertThat(results, notNullValue());
@@ -297,8 +298,8 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void searchForPatients_shouldReturnConditionByClinicalStatusInactive() {
-		TokenOrListParam listParam = new TokenOrListParam();
-		listParam.add(new TokenParam("inactive"));
+		TokenAndListParam listParam = new TokenAndListParam();
+		listParam.addValue(new TokenOrListParam().add(new TokenParam("inactive")));
 		Collection<Condition> results = dao.searchForConditions(null, null, null, listParam, null, null, null, null);
 		
 		assertThat(results, notNullValue());
@@ -309,9 +310,8 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void searchForPatients_shouldReturnConditionByClinicalStatusAll() {
-		TokenOrListParam listParam = new TokenOrListParam();
-		listParam.add(new TokenParam("active"));
-		listParam.add(new TokenParam("inactive"));
+		TokenAndListParam listParam = new TokenAndListParam();
+		listParam.addValue(new TokenOrListParam().add(new TokenParam("active")).add(new TokenParam("inactive")));
 		Collection<Condition> results = dao.searchForConditions(null, null, null, listParam, null, null, null, null);
 		
 		assertThat(results, notNullValue());
@@ -321,8 +321,8 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void searchForPatients_shouldReturnConditionByCode() {
-		TokenOrListParam listParam = new TokenOrListParam();
-		listParam.add(new TokenParam("http://made_up_concepts.info/sct", "CD41003")); // for concept_id=5497
+		TokenAndListParam listParam = new TokenAndListParam();
+		listParam.addValue(new TokenOrListParam().add(new TokenParam("http://made_up_concepts.info/sct", "CD41003"))); // for concept_id=5497
 		Collection<Condition> results = dao.searchForConditions(null, null, listParam, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
@@ -333,9 +333,10 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void searchForPatients_shouldReturnMultipleConditionsByCodeList() {
-		TokenOrListParam listParam = new TokenOrListParam();
-		listParam.add(new TokenParam("http://made_up_concepts.info/sct", "CD41003")); // for concept_id=5497
-		listParam.add(new TokenParam("http://made_up_concepts.info/sct", "WGT234")); // for concept_id=5089
+		TokenAndListParam listParam = new TokenAndListParam();
+		// Adding codes concept_id=5497 and concept_id=5089.
+		listParam.addValue(new TokenOrListParam().add(new TokenParam("http://made_up_concepts.info/sct", "CD41003"))
+		        .add(new TokenParam("http://made_up_concepts.info/sct", "WGT234")));
 		Collection<Condition> results = dao.searchForConditions(null, null, listParam, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
@@ -345,8 +346,8 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void searchForPatients_shouldReturnConditionByCodeAndNoSystem() {
-		TokenOrListParam listParam = new TokenOrListParam();
-		listParam.add(new TokenParam("5497"));
+		TokenAndListParam listParam = new TokenAndListParam();
+		listParam.addValue(new TokenOrListParam().add(new TokenParam("5497")));
 		Collection<Condition> results = dao.searchForConditions(null, null, listParam, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
@@ -357,9 +358,8 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void searchForPatients_shouldReturnMultipleConditionsByCodeListAndNoSystem() {
-		TokenOrListParam listParam = new TokenOrListParam();
-		listParam.add(new TokenParam("5497")); // for concept_id=5497
-		listParam.add(new TokenParam("5089")); // for concept_id=5089
+		TokenAndListParam listParam = new TokenAndListParam();
+		listParam.addValue(new TokenOrListParam().add(new TokenParam("5497")).add(new TokenParam("5089")));
 		Collection<Condition> results = dao.searchForConditions(null, null, listParam, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());

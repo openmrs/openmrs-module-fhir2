@@ -18,7 +18,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Condition;
 
 public interface FhirConditionService {
@@ -26,7 +26,7 @@ public interface FhirConditionService {
 	Condition getConditionByUuid(@NotNull String uuid);
 	
 	Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
+	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
 	        DateRangeParam recordedDate, @Sort SortSpec sort);
 	
 	Condition saveCondition(@NotNull Condition condition);

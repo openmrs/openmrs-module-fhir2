@@ -27,6 +27,7 @@ import java.util.List;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -199,8 +200,9 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByAllergen() {
-		TokenOrListParam allergen = new TokenOrListParam();
-		allergen.addOr(new TokenParam().setValue(CODED_ALLERGEN_UUID));
+		TokenAndListParam allergen = new TokenAndListParam();
+		allergen.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODED_ALLERGEN_UUID)));
+		
 		when(service.searchForAllergies(isNull(), isNull(), argThat(is(allergen)), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
@@ -227,8 +229,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	
 	@Test
 	public void searchForAllergies_shouldReturnMatchingBundleOfAllergiesByManifestation() {
-		TokenOrListParam manifestation = new TokenOrListParam();
-		manifestation.addOr(new TokenParam().setValue(CODED_REACTION_UUID));
+		TokenAndListParam manifestation = new TokenAndListParam();
+		manifestation.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODED_REACTION_UUID)));
 		
 		when(service.searchForAllergies(isNull(), isNull(), isNull(), isNull(), argThat(is(manifestation)), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));

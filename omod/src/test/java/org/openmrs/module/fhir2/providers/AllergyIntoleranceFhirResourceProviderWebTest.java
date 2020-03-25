@@ -34,7 +34,9 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -77,6 +79,9 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	
 	@Captor
 	private ArgumentCaptor<TokenOrListParam> tokenOrListParamArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
 	AllergyIntolerance allergyIntolerance;
 	
@@ -238,17 +243,20 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	public void searchForAllergies_shouldSearchForAllergiesByAllergenCode() throws Exception {
 		verifyUri("/AllergyIntolerance?code=d1b98543-10ff-4911-83a2-b7f5fafe2751");
 		
-		verify(allergyService).searchForAllergies(isNull(), isNull(), tokenOrListParamArgumentCaptor.capture(), isNull(),
+		verify(allergyService).searchForAllergies(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
 		    isNull(), isNull());
-		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo("d1b98543-10ff-4911-83a2-b7f5fafe2751"));
+		
+		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
+		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenParam.getValue(), equalTo("d1b98543-10ff-4911-83a2-b7f5fafe2751"));
 	}
 	
 	public void searchForAllergies_shouldSearchForAllergiesByAllergenCodeAndSystem() throws Exception {
 		verifyUri("/AllergyIntolerance?code=d1b98543-10ff-4911-83a2-b7f5fafe2751");
 		
-		verify(allergyService).searchForAllergies(isNull(), isNull(), tokenOrListParamArgumentCaptor.capture(), isNull(),
+		verify(allergyService).searchForAllergies(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
 		    isNull(), isNull());
 		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(),
@@ -270,10 +278,13 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		verifyUri("/AllergyIntolerance?manifestation=c0b1f314-1691-11df-97a5-7038c432aabd");
 		
 		verify(allergyService).searchForAllergies(isNull(), isNull(), isNull(), isNull(),
-		    tokenOrListParamArgumentCaptor.capture(), isNull());
-		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo("c0b1f314-1691-11df-97a5-7038c432aabd"));
+		    tokenAndListParamArgumentCaptor.capture(), isNull());
+		
+		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
+		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenParam.getValue(), equalTo("c0b1f314-1691-11df-97a5-7038c432aabd"));
 	}
 	
 	@Test

@@ -31,10 +31,13 @@ import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProvenanceTranslatorImplTest {
+	
+	private static final String TASK_UUID = "67a0a7c1-4bb0-4802-8905-d7c94f549bd4";
 	
 	private static final String PERSON_UUID = "ghc25312-9798-4e6c-b8f8-269f2dd07cfe";
 	
@@ -59,6 +62,8 @@ public class ProvenanceTranslatorImplTest {
 	@Mock
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
+	private FhirTask task;
+	
 	private Person person;
 	
 	private User user;
@@ -67,6 +72,8 @@ public class ProvenanceTranslatorImplTest {
 	
 	private ProvenanceTranslatorImpl<Patient> patientProvenanceTranslator;
 	
+	private ProvenanceTranslatorImpl<FhirTask> taskProvenanceTranslator;
+	
 	@Before
 	public void setup() {
 		personProvenanceTranslator = new ProvenanceTranslatorImpl<>();
@@ -74,10 +81,13 @@ public class ProvenanceTranslatorImplTest {
 		
 		patientProvenanceTranslator = new ProvenanceTranslatorImpl<>();
 		patientProvenanceTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
+		
+		taskProvenanceTranslator = new ProvenanceTranslatorImpl<>();
+		taskProvenanceTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 	}
 	
 	@Before
-	public void initPersonMock() {
+	public void initDummyObjects() {
 		user = new User();
 		user.setUuid(USER_UUID);
 		
@@ -88,17 +98,57 @@ public class ProvenanceTranslatorImplTest {
 		person.setDateCreated(new Date());
 		person.setChangedBy(user);
 		person.setDateChanged(new Date());
+		
+		task = new FhirTask();
+		task.setUuid(TASK_UUID);
+		task.setCreator(user);
+		task.setDateCreated(new Date());
+		task.setChangedBy(user);
+		task.setDateChanged(new Date());
 	}
 	
 	@Test
-	public void shouldGetCreateProvenance() {
+	public void shouldGetCreateProvenanceForOpenmrsData() {
 		Provenance provenance = personProvenanceTranslator.getCreateProvenance(person);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getId(), notNullValue());
 	}
 	
 	@Test
-	public void shouldGetCreateProvenanceWithCorrectUpdateActivity() {
+	public void shouldGetCreateProvenanceForOpenmrsMetadata() {
+		Provenance provenance = taskProvenanceTranslator.getCreateProvenance(task);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getId(), notNullValue());
+	}
+	
+	@Test
+	public void shouldGetCreateProvenanceForOpenmrsDataWithoutChange() {
+		Person person = new Person();
+		person.setUuid(PERSON_UUID);
+		person.setCreator(user);
+		person.setDateCreated(new Date());
+		
+		Provenance provenance = personProvenanceTranslator.getCreateProvenance(person);
+		
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getId(), notNullValue());
+	}
+	
+	@Test
+	public void shouldGetCreateProvenanceForOpenmrsMetaWithoutChange() {
+		FhirTask task = new FhirTask();
+		task.setUuid(TASK_UUID);
+		task.setCreator(user);
+		task.setDateCreated(new Date());
+		
+		Provenance provenance = taskProvenanceTranslator.getCreateProvenance(task);
+		
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getId(), notNullValue());
+	}
+	
+	@Test
+	public void shouldGetCreateProvenanceWithCorrectUpdateActivityForOpenmrsData() {
 		Provenance provenance = personProvenanceTranslator.getCreateProvenance(person);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getActivity().getCoding(), not(empty()));
@@ -109,7 +159,18 @@ public class ProvenanceTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldGetCreateProvenanceWithCorrectDateChanged() {
+	public void shouldGetCreateProvenanceWithCorrectUpdateActivityForOpenmrsMetadata() {
+		Provenance provenance = taskProvenanceTranslator.getCreateProvenance(task);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getActivity().getCoding(), not(empty()));
+		assertThat(provenance.getActivity().getCodingFirstRep().getCode(), equalTo(CREATE));
+		assertThat(provenance.getActivity().getCodingFirstRep().getDisplay(), equalTo("create"));
+		assertThat(provenance.getActivity().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION));
+	}
+	
+	@Test
+	public void shouldGetCreateProvenanceWithCorrectDateChangedForOpenmrsData() {
 		Provenance provenance = personProvenanceTranslator.getCreateProvenance(person);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getRecorded(), notNullValue());
@@ -117,7 +178,15 @@ public class ProvenanceTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldGetCreateProvenanceWithCorrectPractitionerReference() {
+	public void shouldGetCreateProvenanceWithCorrectDateChangedForOpenmrsMetadata() {
+		Provenance provenance = taskProvenanceTranslator.getCreateProvenance(task);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getRecorded(), notNullValue());
+		assertThat(provenance.getRecorded(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldGetCreateProvenanceWithCorrectPractitionerReferenceForOpenmrsData() {
 		Reference practitionerRef = new Reference();
 		practitionerRef.setReference(FhirConstants.PRACTITIONER + "/" + USER_UUID);
 		
@@ -130,7 +199,20 @@ public class ProvenanceTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldGetCreateProvenanceWithCorrectAgentRole() {
+	public void shouldGetCreateProvenanceWithCorrectPractitionerReferenceForOpenmrsMetadata() {
+		Reference practitionerRef = new Reference();
+		practitionerRef.setReference(FhirConstants.PRACTITIONER + "/" + USER_UUID);
+		
+		when(practitionerReferenceTranslator.toFhirResource(user)).thenReturn(practitionerRef);
+		Provenance provenance = taskProvenanceTranslator.getCreateProvenance(task);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getAgent(), not(empty()));
+		assertThat(provenance.getAgentFirstRep().getWho(), notNullValue());
+		assertThat(provenance.getAgentFirstRep().getWho(), equalTo(practitionerRef));
+	}
+	
+	@Test
+	public void shouldGetCreateProvenanceWithCorrectAgentRoleForOpenmrsData() {
 		Provenance provenance = personProvenanceTranslator.getCreateProvenance(person);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getAgent(), not(empty()));
@@ -144,7 +226,21 @@ public class ProvenanceTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldGetCreateProvenanceWithCorrectAgentType() {
+	public void shouldGetCreateProvenanceWithCorrectAgentRoleForOpenmrsMetadata() {
+		Provenance provenance = taskProvenanceTranslator.getCreateProvenance(task);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getAgent(), not(empty()));
+		assertThat(provenance.getAgentFirstRep().getRoleFirstRep(), notNullValue());
+		assertThat(provenance.getAgentFirstRep().getRoleFirstRep().getCodingFirstRep(), notNullValue());
+		assertThat(provenance.getAgentFirstRep().getRoleFirstRep().getCodingFirstRep().getCode(), equalTo(AGENT_ROLE_CODE));
+		assertThat(provenance.getAgentFirstRep().getRoleFirstRep().getCodingFirstRep().getDisplay(),
+		    equalTo(AGENT_ROLE_DISPLAY));
+		assertThat(provenance.getAgentFirstRep().getRoleFirstRep().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE));
+	}
+	
+	@Test
+	public void shouldGetCreateProvenanceWithCorrectAgentTypeForOpenmrsData() {
 		Provenance provenance = personProvenanceTranslator.getCreateProvenance(person);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getAgent(), not(empty()));
@@ -157,14 +253,34 @@ public class ProvenanceTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldGetUpdateProvenance() {
+	public void shouldGetCreateProvenanceWithCorrectAgentTypeForOpenmrsMetadata() {
+		Provenance provenance = taskProvenanceTranslator.getCreateProvenance(task);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getAgent(), not(empty()));
+		assertThat(provenance.getAgentFirstRep().getType(), notNullValue());
+		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep(), notNullValue());
+		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep().getCode(), equalTo(AGENT_TYPE_CODE));
+		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep().getDisplay(), equalTo(AGENT_TYPE_DISPLAY));
+		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE));
+	}
+	
+	@Test
+	public void shouldGetUpdateProvenanceForOpenmrsData() {
 		Provenance provenance = personProvenanceTranslator.getUpdateProvenance(person);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getId(), notNullValue());
 	}
 	
 	@Test
-	public void shouldGetUpdateProvenanceWithCorrectUpdateActivity() {
+	public void shouldGetUpdateProvenanceForOpenmrsMetadata() {
+		Provenance provenance = taskProvenanceTranslator.getUpdateProvenance(task);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getId(), notNullValue());
+	}
+	
+	@Test
+	public void shouldGetUpdateProvenanceWithCorrectUpdateActivityForOpenmrsData() {
 		Provenance provenance = personProvenanceTranslator.getUpdateProvenance(person);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getActivity().getCoding(), not(empty()));
@@ -175,7 +291,18 @@ public class ProvenanceTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldGetUpdateProvenanceWithCorrectDateChanged() {
+	public void shouldGetUpdateProvenanceWithCorrectUpdateActivityForOpenmrsMetadata() {
+		Provenance provenance = taskProvenanceTranslator.getUpdateProvenance(task);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getActivity().getCoding(), not(empty()));
+		assertThat(provenance.getActivity().getCodingFirstRep().getCode(), equalTo(UPDATE));
+		assertThat(provenance.getActivity().getCodingFirstRep().getDisplay(), equalTo(REVISE));
+		assertThat(provenance.getActivity().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION));
+	}
+	
+	@Test
+	public void shouldGetUpdateProvenanceWithCorrectDateChangedForOpenmrsData() {
 		Provenance provenance = personProvenanceTranslator.getUpdateProvenance(person);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getRecorded(), notNullValue());
@@ -183,7 +310,15 @@ public class ProvenanceTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldGetUpdateProvenanceWithCorrectPractitionerReference() {
+	public void shouldGetUpdateProvenanceWithCorrectDateChangedForOpenmrsMetadata() {
+		Provenance provenance = personProvenanceTranslator.getUpdateProvenance(person);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getRecorded(), notNullValue());
+		assertThat(provenance.getRecorded(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldGetUpdateProvenanceWithCorrectPractitionerReferenceForOpenmrsData() {
 		Reference practitionerRef = new Reference();
 		practitionerRef.setReference(FhirConstants.PRACTITIONER + "/" + USER_UUID);
 		
@@ -196,7 +331,20 @@ public class ProvenanceTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldGetUpdateProvenanceWithCorrectAgentRole() {
+	public void shouldGetUpdateProvenanceWithCorrectPractitionerReferenceForOpenmrsMetadata() {
+		Reference practitionerRef = new Reference();
+		practitionerRef.setReference(FhirConstants.PRACTITIONER + "/" + USER_UUID);
+		
+		when(practitionerReferenceTranslator.toFhirResource(user)).thenReturn(practitionerRef);
+		Provenance provenance = personProvenanceTranslator.getCreateProvenance(person);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getAgent(), not(empty()));
+		assertThat(provenance.getAgentFirstRep().getWho(), notNullValue());
+		assertThat(provenance.getAgentFirstRep().getWho(), equalTo(practitionerRef));
+	}
+	
+	@Test
+	public void shouldGetUpdateProvenanceWithCorrectAgentRoleForOpenmrsData() {
 		Provenance provenance = personProvenanceTranslator.getUpdateProvenance(person);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getAgent(), not(empty()));
@@ -210,7 +358,34 @@ public class ProvenanceTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldGetUpdateProvenanceWithCorrectAgentType() {
+	public void shouldGetUpdateProvenanceWithCorrectAgentRoleForOpenmrsMetadata() {
+		Provenance provenance = personProvenanceTranslator.getUpdateProvenance(person);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getAgent(), not(empty()));
+		assertThat(provenance.getAgentFirstRep().getRoleFirstRep(), notNullValue());
+		assertThat(provenance.getAgentFirstRep().getRoleFirstRep().getCodingFirstRep(), notNullValue());
+		assertThat(provenance.getAgentFirstRep().getRoleFirstRep().getCodingFirstRep().getCode(), equalTo(AGENT_ROLE_CODE));
+		assertThat(provenance.getAgentFirstRep().getRoleFirstRep().getCodingFirstRep().getDisplay(),
+		    equalTo(AGENT_ROLE_DISPLAY));
+		assertThat(provenance.getAgentFirstRep().getRoleFirstRep().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE));
+	}
+	
+	@Test
+	public void shouldGetUpdateProvenanceWithCorrectAgentTypeForOpenmrsData() {
+		Provenance provenance = personProvenanceTranslator.getUpdateProvenance(person);
+		assertThat(provenance, notNullValue());
+		assertThat(provenance.getAgent(), not(empty()));
+		assertThat(provenance.getAgentFirstRep().getType(), notNullValue());
+		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep(), notNullValue());
+		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep().getCode(), equalTo(AGENT_TYPE_CODE));
+		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep().getDisplay(), equalTo(AGENT_TYPE_DISPLAY));
+		assertThat(provenance.getAgentFirstRep().getType().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE));
+	}
+	
+	@Test
+	public void shouldGetUpdateProvenanceWithCorrectAgentTypeForOpenmrsMetadata() {
 		Provenance provenance = personProvenanceTranslator.getUpdateProvenance(person);
 		assertThat(provenance, notNullValue());
 		assertThat(provenance.getAgent(), not(empty()));
@@ -234,6 +409,7 @@ public class ProvenanceTranslatorImplTest {
 	public void getUpdateProvenance_shouldReturnNullIfDateChangedAndChangedByAreNull() {
 		person.setChangedBy(null);
 		person.setDateChanged(null);
+		
 		assertThat(personProvenanceTranslator.getUpdateProvenance(person), nullValue());
 	}
 }

@@ -22,7 +22,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
@@ -67,7 +67,7 @@ public class FhirConditionDaoImpl_2_2 extends BaseDaoImpl implements FhirConditi
 	
 	@Override
 	public Collection<Condition> searchForConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenOrListParam code, TokenOrListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
+	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
 	        DateRangeParam recordedData, SortSpec sort) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Condition.class);
 		
@@ -78,11 +78,11 @@ public class FhirConditionDaoImpl_2_2 extends BaseDaoImpl implements FhirConditi
 		handleDateRange("onsetDate", onsetDate).ifPresent(criteria::add);
 		// TODO: Handle onsetAge as well.
 		handleDateRange("dateCreated", recordedData).ifPresent(criteria::add);
-		handleOrListParam(clinicalStatus,
+		handleAndListParam(clinicalStatus,
 		    tokenParam -> Optional.of(eq("clinicalStatus", convertStatus(tokenParam.getValue())))).ifPresent(criteria::add);
 		if (code != null) {
 			criteria.createAlias("condition.coded", "cd");
-			handleResourceCode(criteria, code, "cd", "map", "term");
+			handleCodeableConcept(criteria, code, "cd", "map", "term").ifPresent(criteria::add);
 		}
 		
 		handleSort(criteria, sort);

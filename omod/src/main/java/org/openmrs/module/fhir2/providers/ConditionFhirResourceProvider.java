@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -88,8 +88,8 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	                Patient.SP_GIVEN, Patient.SP_FAMILY }) ReferenceAndListParam patientParam,
 	        @OptionalParam(name = Condition.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_NAME,
 	                Patient.SP_GIVEN, Patient.SP_FAMILY }) ReferenceAndListParam subjectParam,
-	        @OptionalParam(name = Condition.SP_CODE) TokenOrListParam code,
-	        @OptionalParam(name = Condition.SP_CLINICAL_STATUS) TokenOrListParam clinicalStatus,
+	        @OptionalParam(name = Condition.SP_CODE) TokenAndListParam code,
+	        @OptionalParam(name = Condition.SP_CLINICAL_STATUS) TokenAndListParam clinicalStatus,
 	        @OptionalParam(name = Condition.SP_ONSET_DATE) DateRangeParam onsetDate,
 	        @OptionalParam(name = Condition.SP_ONSET_AGE) QuantityParam onsetAge,
 	        @OptionalParam(name = Condition.SP_RECORDED_DATE) DateRangeParam recordedDate, @Sort SortSpec sort) {

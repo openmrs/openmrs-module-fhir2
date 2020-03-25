@@ -26,6 +26,7 @@ import java.util.Collection;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -199,8 +200,8 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		Collection<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		
-		TokenOrListParam allergen = new TokenOrListParam();
-		allergen.addOr(new TokenParam().setValue(CODED_ALLERGEN_UUID));
+		TokenAndListParam allergen = new TokenAndListParam();
+		allergen.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODED_ALLERGEN_UUID)));
 		
 		when(allergyIntoleranceDao.searchForAllergies(isNull(), isNull(), argThat(equalTo(allergen)), isNull(), isNull(),
 		    isNull())).thenReturn(allergies);
@@ -231,8 +232,8 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		Collection<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		
-		TokenOrListParam manifestation = new TokenOrListParam();
-		manifestation.addOr(new TokenParam().setValue(CODED_REACTION_UUID));
+		TokenAndListParam manifestation = new TokenAndListParam();
+		manifestation.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODED_REACTION_UUID)));
 		
 		when(allergyIntoleranceDao.searchForAllergies(isNull(), isNull(), isNull(), isNull(),
 		    argThat(equalTo(manifestation)), isNull())).thenReturn(allergies);

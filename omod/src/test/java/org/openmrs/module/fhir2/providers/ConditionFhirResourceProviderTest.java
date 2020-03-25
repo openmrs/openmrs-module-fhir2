@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -135,8 +136,10 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		patientReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "patient name")));
 		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
 		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "subject name")));
-		TokenOrListParam codeList = new TokenOrListParam().add(new TokenParam("test code"));
-		TokenOrListParam clinicalList = new TokenOrListParam().add(new TokenParam("test clinical"));
+		TokenAndListParam codeList = new TokenAndListParam();
+		codeList.addValue(new TokenOrListParam().add(new TokenParam("test code")));
+		TokenAndListParam clinicalList = new TokenAndListParam();
+		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
 		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("lower date").setUpperBound("upper date");
 		QuantityParam onsetAge = new QuantityParam(12);
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")

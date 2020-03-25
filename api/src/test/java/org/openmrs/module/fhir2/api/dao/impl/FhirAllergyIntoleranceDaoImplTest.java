@@ -30,6 +30,7 @@ import java.util.Map;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.SessionFactory;
@@ -249,8 +250,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByAllergen() {
-		TokenOrListParam allergen = new TokenOrListParam();
-		allergen.addOr(new TokenParam().setValue(CODED_ALLERGEN_UUID));
+		TokenAndListParam allergen = new TokenAndListParam();
+		allergen.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODED_ALLERGEN_UUID)));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(null, null, allergen, null, null, null);
 		assertThat(result, notNullValue());
@@ -327,8 +328,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByManifestation() {
-		TokenOrListParam manifestation = new TokenOrListParam();
-		manifestation.addOr(new TokenParam().setValue(CODED_REACTION_UUID));
+		TokenAndListParam manifestation = new TokenAndListParam();
+		manifestation.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODED_REACTION_UUID)));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(null, null, null, null, manifestation, null);
 		assertThat(result, notNullValue());

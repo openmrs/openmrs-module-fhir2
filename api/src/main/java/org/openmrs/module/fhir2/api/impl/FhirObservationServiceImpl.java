@@ -15,7 +15,11 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -46,8 +50,12 @@ public class FhirObservationServiceImpl implements FhirObservationService {
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Observation> searchForObservations(ReferenceAndListParam encounterReference,
-	        ReferenceAndListParam patientReference, TokenAndListParam code, SortSpec sort) {
-		return dao.searchForObservations(encounterReference, patientReference, code, sort).stream()
-		        .map(observationTranslator::toFhirResource).collect(Collectors.toList());
+	        ReferenceAndListParam patientReference, ReferenceParam hasMemberReference, TokenAndListParam valueConcept,
+	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
+	        DateRangeParam date, TokenAndListParam code, SortSpec sort) {
+		return dao
+		        .searchForObservations(encounterReference, patientReference, hasMemberReference, valueConcept,
+		            valueDateParam, valueQuantityParam, valueStringParam, date, code, sort)
+		        .stream().map(observationTranslator::toFhirResource).collect(Collectors.toList());
 	}
 }

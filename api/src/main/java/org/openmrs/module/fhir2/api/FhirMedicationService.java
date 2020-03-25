@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.r4.model.Medication;
 
@@ -20,6 +21,6 @@ public interface FhirMedicationService {
 	
 	Medication getMedicationByUuid(@NotNull String uuid);
 	
-	Collection<Medication> searchForMedications(TokenOrListParam code, TokenOrListParam dosageForm,
+	Collection<Medication> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
 	        TokenOrListParam ingredientCode, TokenOrListParam status);
 }

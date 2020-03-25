@@ -22,6 +22,8 @@ import org.openmrs.PatientIdentifierType;
 
 public interface FhirPatientDao {
 	
+	Patient getPatientById(@NotNull Integer id);
+	
 	Patient getPatientByUuid(@NotNull String uuid);
 	
 	PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid);

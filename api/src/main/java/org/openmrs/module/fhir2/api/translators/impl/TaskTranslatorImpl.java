@@ -137,28 +137,28 @@ public class TaskTranslatorImpl implements TaskTranslator {
 			openmrsTask.setIntent(FhirTask.TaskIntent.valueOf(fhirTask.getIntent().name()));
 		}
 		
-		if (fhirTask.getBasedOn() != null) {
+		if (!fhirTask.getBasedOn().isEmpty()) {
 			openmrsTask.setBasedOnReferences(
 			    fhirTask.getBasedOn().stream().map(referenceTranslator::toOpenmrsType).collect(Collectors.toSet()));
 		}
 		
-		if (fhirTask.getEncounter() != null) {
+		if (!fhirTask.getEncounter().isEmpty()) {
 			openmrsTask.setEncounterReference(referenceTranslator.toOpenmrsType(fhirTask.getEncounter()));
 		}
 		
-		if (fhirTask.getFor() != null) {
+		if (!fhirTask.getFor().isEmpty()) {
 			openmrsTask.setForReference(referenceTranslator.toOpenmrsType(fhirTask.getFor()));
 		}
 		
-		if (fhirTask.getOwner() != null) {
+		if (!fhirTask.getOwner().isEmpty()) {
 			openmrsTask.setOwnerReference(referenceTranslator.toOpenmrsType(fhirTask.getOwner()));
 		}
 		
-		if (fhirTask.getInput() != null) {
+		if (!fhirTask.getInput().isEmpty()) {
 			openmrsTask.setInput(fhirTask.getInput().stream().map(this::translateToInputText).collect(Collectors.toSet()));
 		}
 		
-		if (fhirTask.getOutput() != null) {
+		if (!fhirTask.getOutput().isEmpty()) {
 			openmrsTask.setOutput(
 			    fhirTask.getOutput().stream().map(this::translateToOutputReference).collect(Collectors.toSet()));
 		}

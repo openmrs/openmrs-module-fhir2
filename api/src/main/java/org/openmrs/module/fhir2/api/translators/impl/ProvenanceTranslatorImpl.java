@@ -13,14 +13,15 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Provenance;
-import org.openmrs.BaseOpenmrsData;
+import org.openmrs.Auditable;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ProvenanceTranslatorImpl<T extends BaseOpenmrsData> extends AbstractProvenanceHandlingTranslator implements ProvenanceTranslator<T> {
+public class ProvenanceTranslatorImpl<T extends OpenmrsObject & Auditable> extends AbstractProvenanceHandlingTranslator implements ProvenanceTranslator<T> {
 	
 	@Override
 	public Provenance getCreateProvenance(T openMrsObject) {
