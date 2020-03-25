@@ -597,7 +597,12 @@ public abstract class BaseDaoImpl {
 		}
 	}
 	
-	protected Optional<Criterion> handleCode(Criteria criteria, TokenAndListParam concepts, @NotNull String conceptAlias) {
+	protected Optional<Criterion> handleCodeableConcept(Criteria criteria, TokenAndListParam concepts,
+	        @NotNull String conceptAlias, @NotNull String conceptMapAlias, @NotNull String conceptReferenceTermAlias) {
+		if (concepts == null) {
+			return Optional.empty();
+		}
+		
 		return handleAndListParamBySystem(concepts, (system, tokens) -> {
 			if (system.isEmpty()) {
 				return Optional.of(or(
@@ -605,23 +610,14 @@ public abstract class BaseDaoImpl {
 				        tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
 				    in(String.format("%s.uuid", conceptAlias), tokensToList(tokens))));
 			} else {
-				if (!containsAlias(criteria, "cm")) {
-					criteria.createAlias(String.format("%s.conceptMappings", conceptAlias), "cm")
-					        .createAlias("cm.conceptReferenceTerm", "crt");
+				if (!containsAlias(criteria, conceptMapAlias)) {
+					criteria.createAlias(String.format("%s.conceptMappings", conceptAlias), conceptMapAlias).createAlias(
+					    String.format("%s.conceptReferenceTerm", conceptMapAlias), conceptReferenceTermAlias);
 				}
 				
 				return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
 			}
 		});
-	}
-	
-	protected Optional<Criterion> handleCodeableConcept(Criteria criteria, TokenAndListParam concepts,
-	        @NotNull String conceptAlias) {
-		if (concepts == null) {
-			return Optional.empty();
-		}
-		
-		return handleCode(criteria, concepts, conceptAlias);
 	}
 	
 	protected void handleIdentifier(Criteria criteria, TokenOrListParam identifier) {

@@ -53,14 +53,14 @@ public class FhirMedicationDaoImpl extends BaseDaoImpl implements FhirMedication
 	private void handleMedicationCode(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("concept", "cc");
-			handleCodeableConcept(criteria, code, "cc").ifPresent(criteria::add);
+			handleCodeableConcept(criteria, code, "cc", "ccm", "ccrt").ifPresent(criteria::add);
 		}
 	}
 	
 	private void handleMedicationDosageForm(Criteria criteria, TokenAndListParam dosageForm) {
 		if (dosageForm != null) {
 			criteria.createAlias("dosageForm", "dc");
-			handleCodeableConcept(criteria, dosageForm, "dc").ifPresent(criteria::add);
+			handleCodeableConcept(criteria, dosageForm, "dc", "dcm", "dcrt").ifPresent(criteria::add);
 		}
 	}
 }

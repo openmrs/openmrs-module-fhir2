@@ -72,7 +72,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 			criteria.createAlias("reactions", "r");
 			criteria.createAlias("r.reaction", "rc");
 			
-			handleCodeableConcept(criteria, code, "rc").ifPresent(criteria::add);
+			handleCodeableConcept(criteria, code, "rc", "rcm", "rcrt").ifPresent(criteria::add);
 		}
 	}
 	
@@ -80,7 +80,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAl
 		if (code != null) {
 			criteria.createAlias("allergen.codedAllergen", "ac");
 			
-			handleCodeableConcept(criteria, code, "ac").ifPresent(criteria::add);
+			handleCodeableConcept(criteria, code, "ac", "acm", "acrt").ifPresent(criteria::add);
 		}
 	}
 	

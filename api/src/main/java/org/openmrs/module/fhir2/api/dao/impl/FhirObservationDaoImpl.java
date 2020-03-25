@@ -78,7 +78,7 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 					TokenAndListParam code = new TokenAndListParam()
 					        .addAnd(new TokenParam().setValue(hasMemberReference.getValue()));
 					criteria.createAlias("gm.concept", "c");
-					handleCodeableConcept(criteria, code, "c").ifPresent(criteria::add);
+					handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
 					break;
 				case "":
 					criteria.add(eq("gm.uuid", hasMemberReference.getIdPart()));
@@ -106,14 +106,14 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("concept", "c");
-			handleCodeableConcept(criteria, code, "c").ifPresent(criteria::add);
+			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
 		}
 	}
 	
 	private void handleValueCodedConcept(Criteria criteria, TokenAndListParam valueConcept) {
 		if (valueConcept != null) {
 			criteria.createAlias("valueCoded", "c");
-			handleCodeableConcept(criteria, valueConcept, "c").ifPresent(criteria::add);
+			handleCodeableConcept(criteria, valueConcept, "c", "cm", "crt").ifPresent(criteria::add);
 		}
 	}
 	
