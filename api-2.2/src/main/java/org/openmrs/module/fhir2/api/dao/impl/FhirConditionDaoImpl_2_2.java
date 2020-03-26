@@ -14,13 +14,22 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.Condition;
+import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.springframework.context.annotation.Primary;
@@ -30,7 +39,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 @OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
-public class FhirConditionDaoImpl_2_2 implements FhirConditionDao<Condition> {
+public class FhirConditionDaoImpl_2_2 extends BaseDaoImpl implements FhirConditionDao<Condition> {
+	// TODO: Change the BaseDaoImpl inheritance pattern to one of composition; here and everywhere else.
 	
 	@Inject
 	@Named("sessionFactory")
@@ -40,6 +50,44 @@ public class FhirConditionDaoImpl_2_2 implements FhirConditionDao<Condition> {
 	public Condition getConditionByUuid(String uuid) {
 		return (Condition) sessionFactory.getCurrentSession().createCriteria(Condition.class).add(eq("uuid", uuid))
 		        .uniqueResult();
+	}
+	
+	private ConditionClinicalStatus convertStatus(String status) {
+		if ("active".equalsIgnoreCase(status)) {
+			return ConditionClinicalStatus.ACTIVE;
+		}
+		if ("inactive".equalsIgnoreCase(status)) {
+			return ConditionClinicalStatus.INACTIVE;
+		}
+		// Note `history_of` is not a valid value in the FHIR spec:
+		// http://www.hl7.org/fhir/valueset-condition-clinical.html
+		// We are simply following the logic implemented in `ConditionClinicalStatusTranslatorImpl_2_2`.
+		return ConditionClinicalStatus.HISTORY_OF;
+	}
+	
+	@Override
+	public Collection<Condition> searchForConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
+	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
+	        DateRangeParam recordedData, SortSpec sort) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Condition.class);
+		
+		handlePatientReference(criteria, patientParam);
+		if (patientParam == null) {
+			handlePatientReference(criteria, subjectParam);
+		}
+		handleDateRange("onsetDate", onsetDate).ifPresent(criteria::add);
+		// TODO: Handle onsetAge as well.
+		handleDateRange("dateCreated", recordedData).ifPresent(criteria::add);
+		handleAndListParam(clinicalStatus,
+		    tokenParam -> Optional.of(eq("clinicalStatus", convertStatus(tokenParam.getValue())))).ifPresent(criteria::add);
+		if (code != null) {
+			criteria.createAlias("condition.coded", "cd");
+			handleCodeableConcept(criteria, code, "cd", "map", "term").ifPresent(criteria::add);
+		}
+		
+		handleSort(criteria, sort);
+		
+		return criteria.list();
 	}
 	
 	@Override

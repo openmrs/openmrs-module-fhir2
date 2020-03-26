@@ -15,6 +15,19 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.Collection;
+
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -89,4 +102,29 @@ public class FhirConditionServiceImpl_2_2Test {
 		assertThat(result.getId(), equalTo(CONDITION_UUID));
 	}
 	
+	@Test
+	public void searchConditions_shouldReturnTranslatedConditionReturnedByDao() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		patientReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "patient name")));
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "subject name")));
+		TokenAndListParam codeList = new TokenAndListParam();
+		codeList.addValue(new TokenOrListParam().add(new TokenParam("test code")));
+		TokenAndListParam clinicalList = new TokenAndListParam();
+		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
+		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("lower date").setUpperBound("upper date");
+		QuantityParam onsetAge = new QuantityParam(12);
+		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
+		        .setUpperBound("upper record date");
+		SortSpec sort = new SortSpec("sort param");
+		when(dao.searchForConditions(patientReference, subjectReference, codeList, clinicalList, onsetDate, onsetAge,
+		    recordDate, sort)).thenReturn(Arrays.asList(openmrsCondition));
+		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
+		
+		Collection<org.hl7.fhir.r4.model.Condition> result = conditionService.searchConditions(patientReference,
+		    subjectReference, codeList, clinicalList, onsetDate, onsetAge, recordDate, sort);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), equalTo(1));
+		assertThat(result, equalTo(Arrays.asList(fhirCondition)));
+	}
 }

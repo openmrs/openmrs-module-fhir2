@@ -18,13 +18,25 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
@@ -118,4 +130,28 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(result.getResource(), equalTo(condition));
 	}
 	
+	@Test
+	public void searchConditions_shouldReturnConditionReturnedByService() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		patientReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "patient name")));
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "subject name")));
+		TokenAndListParam codeList = new TokenAndListParam();
+		codeList.addValue(new TokenOrListParam().add(new TokenParam("test code")));
+		TokenAndListParam clinicalList = new TokenAndListParam();
+		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
+		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("lower date").setUpperBound("upper date");
+		QuantityParam onsetAge = new QuantityParam(12);
+		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
+		        .setUpperBound("upper record date");
+		SortSpec sort = new SortSpec("sort param");
+		when(conditionService.searchConditions(patientReference, subjectReference, codeList, clinicalList, onsetDate,
+		    onsetAge, recordDate, sort)).thenReturn(Arrays.asList(condition));
+		
+		Bundle result = resourceProvider.searchConditions(patientReference, subjectReference, codeList, clinicalList,
+		    onsetDate, onsetAge, recordDate, sort);
+		assertThat(result, notNullValue());
+		assertThat(result.getTotal(), is(1));
+		assertThat(result.getEntry().get(0).getResource(), equalTo(condition));
+	}
 }

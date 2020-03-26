@@ -615,7 +615,7 @@ public abstract class BaseDaoImpl {
 					    String.format("%s.conceptReferenceTerm", conceptMapAlias), conceptReferenceTermAlias);
 				}
 				
-				return Optional.of(generateSystemQuery(system, tokensToList(tokens)));
+				return Optional.of(generateSystemQuery(system, tokensToList(tokens), conceptReferenceTermAlias));
 			}
 		});
 	}
@@ -680,20 +680,21 @@ public abstract class BaseDaoImpl {
 				switch (patientToken.getChain()) {
 					case Patient.SP_IDENTIFIER:
 						if (!containsAlias(criteria, "pi")) {
-							criteria.createAlias("p.identifiers", "pi").add(ilike("pi.identifier", patientToken.getValue()));
+							criteria.createAlias("p.identifiers", "pi");
 						}
+						criteria.add(ilike("pi.identifier", patientToken.getValue()));
 						break;
 					case Patient.SP_GIVEN:
 						if (!containsAlias(criteria, "pn")) {
-							criteria.createAlias("p.names", "pn")
-							        .add(ilike("pn.givenName", patientToken.getValue(), MatchMode.START));
+							criteria.createAlias("p.names", "pn");
 						}
+						criteria.add(ilike("pn.givenName", patientToken.getValue(), MatchMode.START));
 						break;
 					case Patient.SP_FAMILY:
 						if (!containsAlias(criteria, "pn")) {
-							criteria.createAlias("p.names", "pn")
-							        .add(ilike("pn.familyName", patientToken.getValue(), MatchMode.START));
+							criteria.createAlias("p.names", "pn");
 						}
+						criteria.add(ilike("pn.familyName", patientToken.getValue(), MatchMode.START));
 						break;
 					case Patient.SP_NAME:
 						if (!containsAlias(criteria, "pn")) {
@@ -789,14 +790,16 @@ public abstract class BaseDaoImpl {
 		return Optional.of(orderings);
 	}
 	
-	protected Criterion generateSystemQuery(String system, List<String> codes) {
+	protected Criterion generateSystemQuery(String system, List<String> codes, String conceptReferenceTermAlias) {
 		DetachedCriteria conceptSourceCriteria = DetachedCriteria.forClass(FhirConceptSource.class).add(eq("url", system))
 		        .setProjection(property("conceptSource"));
 		
 		if (codes.size() > 1) {
-			return and(propertyEq("crt.conceptSource", conceptSourceCriteria), in("crt.code", codes));
+			return and(propertyEq(String.format("%s.conceptSource", conceptReferenceTermAlias), conceptSourceCriteria),
+			    in(String.format("%s.code", conceptReferenceTermAlias), codes));
 		} else {
-			return and(propertyEq("crt.conceptSource", conceptSourceCriteria), eq("crt.code", codes.get(0)));
+			return and(propertyEq(String.format("%s.conceptSource", conceptReferenceTermAlias), conceptSourceCriteria),
+			    eq(String.format("%s.code", conceptReferenceTermAlias), codes.get(0)));
 		}
 	}
 	
