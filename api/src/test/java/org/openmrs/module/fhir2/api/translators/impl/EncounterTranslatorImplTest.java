@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -158,6 +159,11 @@ public class EncounterTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), notNullValue());
 		assertThat(result.getUuid(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldReturnNullWhenOpenMrsEncounterIsNull() {
+		assertThat(encounterTranslator.toFhirResource(null), nullValue());
 	}
 	
 	@Test

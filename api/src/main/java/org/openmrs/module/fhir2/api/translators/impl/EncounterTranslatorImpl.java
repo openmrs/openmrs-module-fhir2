@@ -45,6 +45,9 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 	
 	@Override
 	public Encounter toFhirResource(org.openmrs.Encounter openMrsEncounter) {
+		if (openMrsEncounter == null) {
+			return null;
+		}
 		Encounter encounter = new Encounter();
 		encounter.setId(openMrsEncounter.getUuid());
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
