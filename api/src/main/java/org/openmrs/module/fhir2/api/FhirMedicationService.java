@@ -21,6 +21,10 @@ public interface FhirMedicationService {
 	
 	Medication getMedicationByUuid(@NotNull String uuid);
 	
+	Medication saveMedication(@NotNull Medication medication);
+	
+	Medication updateMedication(@NotNull Medication medication, String uuid);
+	
 	Collection<Medication> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
 	        TokenOrListParam ingredientCode, TokenOrListParam status);
 }

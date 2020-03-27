@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
@@ -24,6 +25,8 @@ import java.util.Collection;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.hl7.fhir.r4.model.Medication;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +42,7 @@ public class FhirMedicationServiceImplTest {
 	
 	private static final String MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
 	
-	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97aa-7038c432aaba";
 	
 	private static final String CODE = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -143,5 +146,65 @@ public class FhirMedicationServiceImplTest {
 		Collection<Medication> result = fhirMedicationService.searchForMedications(null, null, null, status);
 		assertThat(result.isEmpty(), equalTo(false));
 		assertThat(result.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void saveMedication_shouldSaveNewMedication() {
+		Drug drug = new Drug();
+		drug.setUuid(MEDICATION_UUID);
+		
+		Medication medication = new Medication();
+		medication.setId(MEDICATION_UUID);
+		
+		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toOpenmrsType(any(Drug.class), any(Medication.class))).thenReturn(drug);
+		when(medicationDao.saveMedication(drug)).thenReturn(drug);
+		
+		Medication result = fhirMedicationService.saveMedication(medication);
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), equalTo(MEDICATION_UUID));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateMedication_shouldThrowInvalidRequestExceptionIfIdIsNull() {
+		Medication medication = new Medication();
+		medication.setId(MEDICATION_UUID);
+		
+		Medication result = fhirMedicationService.updateMedication(medication, null);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateMedication_shouldThrowInvalidRequestException() {
+		Medication medication = new Medication();
+		medication.setId(MEDICATION_UUID);
+		
+		Medication result = fhirMedicationService.updateMedication(medication, WRONG_MEDICATION_UUID);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateMedication_shouldThrowMethodNotAllowedException() {
+		Medication medication = new Medication();
+		medication.setId(MEDICATION_UUID);
+		
+		Medication result = fhirMedicationService.updateMedication(medication, MEDICATION_UUID);
+	}
+	
+	@Test
+	public void updateMedication_shouldUpdateMedication() {
+		Drug drug = new Drug();
+		drug.setUuid(MEDICATION_UUID);
+		
+		Medication medication = new Medication();
+		medication.setId(MEDICATION_UUID);
+		medication.setStatus(Medication.MedicationStatus.INACTIVE);
+		
+		when(medicationDao.getMedicationByUuid(MEDICATION_UUID)).thenReturn(drug);
+		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toOpenmrsType(drug, medication)).thenReturn(drug);
+		when(medicationDao.saveMedication(drug)).thenReturn(drug);
+		
+		Medication result = fhirMedicationService.updateMedication(medication, MEDICATION_UUID);
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(Medication.MedicationStatus.INACTIVE));
 	}
 }
