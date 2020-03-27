@@ -36,7 +36,6 @@
 
 	<modules>
 		<module>api</module>
-        <module>api-2.0</module>
 		<module>api-2.1</module>
         <module>api-2.2</module>
 		<module>omod</module>
@@ -180,12 +179,6 @@
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-structures-r4</artifactId>
 				<version>${hapifhirVersion}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>emrapi-condition-list</artifactId>
-				<version>${emrApiConditionModuleApiVersion}</version>
-				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
@@ -604,6 +597,5 @@
         <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
 		<openmrsPlatformToolsVersion>2.0.5</openmrsPlatformToolsVersion>
 		<hapifhirVersion>4.2.0</hapifhirVersion>
-		<emrApiConditionModuleApiVersion>1.27.0</emrApiConditionModuleApiVersion>
     </properties>
 </project>

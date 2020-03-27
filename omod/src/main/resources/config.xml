@@ -38,21 +38,11 @@
             <path>/lib/fhir2-api-2.2-${project.parent.version}.jar</path>
             <openmrsVersion>2.2.* - 2.*</openmrsVersion>
         </conditionalResource>
-        <conditionalResource>
-            <path>/lib/fhir2-api-2.0-${project.parent.version}.jar</path>
-            <openmrsVersion>2.0.5 - 2.1.*</openmrsVersion>
-        </conditionalResource>
     </conditionalResources>
-	
-	<!-- Extensions -->
 
-	<require_modules>
-		<require_module>org.openmrs.module.emrapi</require_module>
-	</require_modules>
 
 	<aware_of_modules>
 		<aware_of_module>org.openmrs.module.legacyui</aware_of_module>
-		<aware_of_module>org.openmrs.module.emrapi-condition-list</aware_of_module>
 	</aware_of_modules>
 
 	<servlet>
