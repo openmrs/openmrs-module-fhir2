@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.providers;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,6 +20,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,6 +29,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Medication;
 import org.junit.Before;
@@ -48,6 +51,10 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
 	
 	private static final String CODE = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String JSON_CREATE_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_create.json";
+	
+	private static final String JSON_UPDATE_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_update.json";
 	
 	@Mock
 	private FhirMedicationService fhirMedicationService;
@@ -152,5 +159,42 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 		assertThat(results.getEntry(), not(empty()));
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
+	}
+	
+	@Test
+	public void shouldCreateNewMedication() throws Exception {
+		Medication medication = new Medication();
+		medication.setId(MEDICATION_UUID);
+		String medicationJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_MEDICATION_PATH)) {
+			assert is != null;
+			medicationJson = IOUtils.toString(is);
+		}
+		
+		when(fhirMedicationService.saveMedication(any(Medication.class))).thenReturn(medication);
+		
+		MockHttpServletResponse response = post("/Medication").jsonContent(medicationJson).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getStatus(), is(201));
+	}
+	
+	@Test
+	public void shouldUpdateMedication() throws Exception {
+		Medication medication = new Medication();
+		medication.setId(MEDICATION_UUID);
+		medication.setStatus(Medication.MedicationStatus.INACTIVE);
+		String medicationJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
+			assert is != null;
+			medicationJson = IOUtils.toString(is);
+		}
+		
+		when(fhirMedicationService.updateMedication(any(Medication.class), any(String.class))).thenReturn(medication);
+		
+		MockHttpServletResponse response = put("/Medication/a2749656-1bc0-4d22-9c11-1d60026b672b")
+		        .jsonContent(medicationJson).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
 	}
 }

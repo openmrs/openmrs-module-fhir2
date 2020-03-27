@@ -21,10 +21,12 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Collections;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
@@ -126,5 +128,27 @@ public class MedicationFhirResourceProviderTest {
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldCreateNewMedication() {
+		when(fhirMedicationService.saveMedication(medication)).thenReturn(medication);
+		
+		MethodOutcome result = resourceProvider.createMedication(medication);
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), CoreMatchers.equalTo(medication));
+	}
+	
+	@Test
+	public void shouldUpdateMedication() {
+		Medication med = medication;
+		med.setStatus(Medication.MedicationStatus.INACTIVE);
+		
+		when(fhirMedicationService.updateMedication(medication, MEDICATION_UUID)).thenReturn(med);
+		
+		MethodOutcome result = resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID), medication);
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(med));
 	}
 }

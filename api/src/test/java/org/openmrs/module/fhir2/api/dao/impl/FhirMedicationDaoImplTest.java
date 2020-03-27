@@ -20,6 +20,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -27,8 +28,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.Concept;
 import org.openmrs.Drug;
+import org.openmrs.DrugIngredient;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -45,11 +49,18 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String INGREDIENT_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
+	private static final String NEW_MEDICATION_UUID = "1088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String NEW_CONCEPT_UUID = "5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
 	private static final String MEDICATION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationDaoImplTest_initial_data.xml";
 	
 	@Inject
 	@Named("sessionFactory")
 	private Provider<SessionFactory> sessionFactoryProvider;
+	
+	@Inject
+	private FhirConceptDao fhirConceptDao;
 	
 	private FhirMedicationDaoImpl medicationDao;
 	
@@ -116,6 +127,36 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(result, notNullValue());
 		assertThat(result.size(), greaterThanOrEqualTo(1));
 		assertThat(result.iterator().next().getRetired(), equalTo(true));
+	}
+	
+	@Test
+	public void saveMedication_shouldSaveNewMedication() {
+		Drug drug = new Drug();
+		drug.setUuid(NEW_MEDICATION_UUID);
+		
+		Concept concept = fhirConceptDao.getConceptByUuid(NEW_CONCEPT_UUID).orElse(null);
+		drug.setConcept(concept);
+		
+		DrugIngredient ingredient = new DrugIngredient();
+		ingredient.setUuid(INGREDIENT_UUID);
+		ingredient.setIngredient(concept);
+		drug.setIngredients(Collections.singleton(ingredient));
+		
+		Drug result = medicationDao.saveMedication(drug);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(NEW_MEDICATION_UUID));
+		assertThat(result.getIngredients().size(), greaterThanOrEqualTo(1));
+		assertThat(result.getIngredients().iterator().next().getUuid(), equalTo(INGREDIENT_UUID));
+	}
+	
+	@Test
+	public void saveMedication_shouldUpdateMedicationCorrectly() {
+		Drug drug = medicationDao.getMedicationByUuid(MEDICATION_UUID);
+		drug.setStrength("1000mg");
+		
+		Drug result = medicationDao.saveMedication(drug);
+		assertThat(result, notNullValue());
+		assertThat(result.getStrength(), equalTo("1000mg"));
 	}
 	
 }
