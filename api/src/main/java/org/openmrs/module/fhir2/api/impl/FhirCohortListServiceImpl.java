@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ListResource;
@@ -18,6 +16,7 @@ import org.openmrs.Cohort;
 import org.openmrs.module.fhir2.api.FhirListService;
 import org.openmrs.module.fhir2.api.dao.FhirListDao;
 import org.openmrs.module.fhir2.api.translators.ListTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,10 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter(AccessLevel.PACKAGE)
 public class FhirCohortListServiceImpl implements FhirListService<Cohort> {
 	
-	@Inject
+	@Autowired
 	private FhirListDao<Cohort> dao;
 	
-	@Inject
+	@Autowired
 	private ListTranslator<Cohort> cohortListTranslator;
 	
 	@Override

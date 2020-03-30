@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
@@ -26,13 +25,14 @@ import org.openmrs.DrugIngredient;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class MedicationTranslatorImpl implements MedicationTranslator {
 	
-	@Inject
+	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
 	@Override

@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
@@ -18,16 +16,17 @@ import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class ObservationComponentTranslatorImpl implements ObservationComponentTranslator {
 	
-	@Inject
+	@Autowired
 	private ObservationValueTranslator observationValueTranslator;
 	
-	@Inject
+	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
 	@Override

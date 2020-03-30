@@ -19,7 +19,6 @@ import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hl7.fhir.r4.model.Task;
 
 /**
  * FHIR Task.input - https://www.hl7.org/fhir/task-definitions.html#Task.input

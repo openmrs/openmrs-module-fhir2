@@ -21,9 +21,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,6 +44,7 @@ import org.openmrs.module.fhir2.FhirTaskInput;
 import org.openmrs.module.fhir2.FhirTaskOutput;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -88,13 +86,13 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private FhirTaskDaoImpl dao;
 	
-	@Inject
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	private SessionFactory sessionFactory;
 	
 	@Before
 	public void setup() throws Exception {
 		dao = new FhirTaskDaoImpl();
-		dao.setSessionFactory(sessionFactoryProvider.get());
+		dao.setSessionFactory(sessionFactory);
 		executeDataSet(TASK_DATA_XML);
 	}
 	
@@ -220,7 +218,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		executeDataSet(CONCEPT_DATA_XML);
 		
 		HibernateConceptDAO cd = new HibernateConceptDAO();
-		cd.setSessionFactory(sessionFactoryProvider.get());
+		cd.setSessionFactory(sessionFactory);
 		
 		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
 		Double someNumericVal = 123123.11;
@@ -254,7 +252,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		executeDataSet(CONCEPT_DATA_XML);
 		
 		HibernateConceptDAO cd = new HibernateConceptDAO();
-		cd.setSessionFactory(sessionFactoryProvider.get());
+		cd.setSessionFactory(sessionFactory);
 		
 		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
 		

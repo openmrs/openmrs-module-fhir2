@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,28 +33,29 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingTranslator implements AllergyIntoleranceTranslator {
 	
-	@Inject
+	@Autowired
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	@Inject
+	@Autowired
 	private FhirConceptService conceptService;
 	
-	@Inject
+	@Autowired
 	private ProvenanceTranslator<Allergy> provenanceTranslator;
 	
-	@Inject
+	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
 	private Map<String, String> severityConceptUuids;

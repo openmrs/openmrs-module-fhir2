@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import javax.inject.Inject;
-
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -18,13 +16,14 @@ import lombok.Setter;
 import org.openmrs.Concept;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirConceptDaoImpl implements FhirConceptDao {
 	
-	@Inject
+	@Autowired
 	private ConceptService conceptService;
 	
 	@Override

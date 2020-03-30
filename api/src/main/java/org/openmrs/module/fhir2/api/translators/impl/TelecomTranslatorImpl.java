@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -23,22 +21,23 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class TelecomTranslatorImpl implements TelecomTranslator<Object> {
 	
-	@Inject
+	@Autowired
 	private PersonService personService;
 	
-	@Inject
+	@Autowired
 	private LocationService locationService;
 	
-	@Inject
+	@Autowired
 	private ProviderService providerService;
 	
-	@Inject
+	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override

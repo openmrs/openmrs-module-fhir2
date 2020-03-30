@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -19,6 +17,7 @@ import org.hl7.fhir.r4.model.Provenance;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PACKAGE)
 public abstract class AbstractProvenanceHandlingTranslator {
@@ -31,7 +30,7 @@ public abstract class AbstractProvenanceHandlingTranslator {
 	
 	private static final String AGENT_ROLE_DISPLAY = "author";
 	
-	@Inject
+	@Autowired
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
 	protected CodeableConcept createActivity() {

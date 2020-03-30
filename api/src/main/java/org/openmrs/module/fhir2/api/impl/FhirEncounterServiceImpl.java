@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -22,6 +20,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter(AccessLevel.PACKAGE)
 public class FhirEncounterServiceImpl implements FhirEncounterService {
 	
-	@Inject
+	@Autowired
 	FhirEncounterDao dao;
 	
-	@Inject
+	@Autowired
 	EncounterTranslator translator;
 	
 	@Override

@@ -11,8 +11,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Identifier;
@@ -21,6 +19,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,7 +28,7 @@ import org.springframework.stereotype.Component;
 // TODO Create proper "System" value
 public class PatientIdentifierTranslatorImpl implements PatientIdentifierTranslator {
 	
-	@Inject
+	@Autowired
 	private FhirPatientService patientService;
 	
 	@Override

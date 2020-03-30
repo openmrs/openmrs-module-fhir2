@@ -11,9 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -33,17 +30,19 @@ import org.openmrs.Allergy;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAllergyIntoleranceDao {
 	
-	@Inject
-	@Named("sessionFactory")
+	@Autowired
+	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	@Inject
+	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override

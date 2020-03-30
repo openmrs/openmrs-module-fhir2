@@ -11,8 +11,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang.Validate.notNull;
 
-import javax.inject.Inject;
-
 import java.util.Collections;
 import java.util.stream.Collectors;
 
@@ -25,22 +23,23 @@ import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class EncounterTranslatorImpl implements EncounterTranslator {
 	
-	@Inject
+	@Autowired
 	private EncounterParticipantTranslator participantTranslator;
 	
-	@Inject
+	@Autowired
 	private EncounterLocationTranslator encounterLocationTranslator;
 	
-	@Inject
+	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private ProvenanceTranslator<org.openmrs.Encounter> provenanceTranslator;
 	
 	@Override

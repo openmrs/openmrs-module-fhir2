@@ -15,10 +15,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import java.util.Collection;
 import java.util.Collections;
 
@@ -34,6 +30,8 @@ import org.openmrs.DrugIngredient;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -55,11 +53,11 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String MEDICATION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationDaoImplTest_initial_data.xml";
 	
-	@Inject
-	@Named("sessionFactory")
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
-	@Inject
+	@Autowired
 	private FhirConceptDao fhirConceptDao;
 	
 	private FhirMedicationDaoImpl medicationDao;
@@ -67,7 +65,7 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Before
 	public void setup() throws Exception {
 		medicationDao = new FhirMedicationDaoImpl();
-		medicationDao.setSessionFactory(sessionFactoryProvider.get());
+		medicationDao.setSessionFactory(sessionFactory);
 		executeDataSet(MEDICATION_INITIAL_DATA_XML);
 	}
 	

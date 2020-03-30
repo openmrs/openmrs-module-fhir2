@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import java.util.Map;
 
 import lombok.AccessLevel;
@@ -18,6 +16,7 @@ import lombok.Setter;
 import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirGlobalPropertyDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter(AccessLevel.PACKAGE)
 public class FhirGlobalPropertyServiceImpl implements FhirGlobalPropertyService {
 	
-	@Inject
+	@Autowired
 	private FhirGlobalPropertyDao dao;
 	
 	@Override

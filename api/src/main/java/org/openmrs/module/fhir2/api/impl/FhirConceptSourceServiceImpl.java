@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import java.util.Collection;
 import java.util.Optional;
 
@@ -19,6 +17,7 @@ import lombok.Setter;
 import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter(AccessLevel.PACKAGE)
 public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	
-	@Inject
+	@Autowired
 	private FhirConceptSourceDao dao;
 	
 	@Override

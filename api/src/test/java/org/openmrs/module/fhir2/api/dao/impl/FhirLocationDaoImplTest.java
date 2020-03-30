@@ -19,10 +19,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +38,8 @@ import org.openmrs.LocationAttribute;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -91,14 +89,14 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private FhirLocationDaoImpl fhirLocationDao;
 	
-	@Inject
-	@Named("sessionFactory")
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
 	@Before
 	public void setup() throws Exception {
 		fhirLocationDao = new FhirLocationDaoImpl();
-		fhirLocationDao.setSessionFactory(sessionFactoryProvider.get());
+		fhirLocationDao.setSessionFactory(sessionFactory);
 		executeDataSet(LOCATION_INITIAL_DATA_XML);
 	}
 	

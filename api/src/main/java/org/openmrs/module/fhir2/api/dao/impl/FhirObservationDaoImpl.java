@@ -11,8 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
@@ -32,13 +30,15 @@ import org.hibernate.criterion.Criterion;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservationDao {
 	
-	@Inject
-	@Named("sessionFactory")
+	@Autowired
+	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
 	@Override

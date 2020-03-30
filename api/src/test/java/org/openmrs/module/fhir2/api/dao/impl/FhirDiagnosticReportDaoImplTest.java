@@ -13,10 +13,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import java.util.Date;
 
 import org.hibernate.SessionFactory;
@@ -28,6 +24,8 @@ import org.openmrs.api.ObsService;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -43,25 +41,25 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 	
 	private FhirDiagnosticReportDaoImpl dao;
 	
-	@Inject
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	private SessionFactory sessionFactory;
 	
-	@Inject
-	@Named("patientService")
-	private Provider<PatientService> patientServiceProvider;
+	@Autowired
+	@Qualifier("patientService")
+	private PatientService patientService;
 	
-	@Inject
-	@Named("conceptService")
-	private Provider<ConceptService> conceptServiceProvider;
+	@Autowired
+	@Qualifier("conceptService")
+	private ConceptService conceptService;
 	
-	@Inject
-	@Named("obsService")
-	private Provider<ObsService> obsServiceProvider;
+	@Autowired
+	@Qualifier("obsService")
+	private ObsService obsService;
 	
 	@Before
 	public void setup() throws Exception {
 		dao = new FhirDiagnosticReportDaoImpl();
-		dao.setSessionFactory(sessionFactoryProvider.get());
+		dao.setSessionFactory(sessionFactory);
 		executeDataSet(DATA_XML);
 	}
 	
@@ -79,9 +77,9 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 		
 		newObs.setUuid(NEW_UUID);
 		newObs.setObsDatetime(new Date());
-		newObs.setPerson(patientServiceProvider.get().getPatient(7));
-		newObs.setConcept(conceptServiceProvider.get().getConcept(5085));
-		newObs.addGroupMember(obsServiceProvider.get().getObsByUuid(CHILD_UUID));
+		newObs.setPerson(patientService.getPatient(7));
+		newObs.setConcept(conceptService.getConcept(5085));
+		newObs.addGroupMember(obsService.getObsByUuid(CHILD_UUID));
 		
 		Obs result = dao.saveObsGroup(newObs);
 		

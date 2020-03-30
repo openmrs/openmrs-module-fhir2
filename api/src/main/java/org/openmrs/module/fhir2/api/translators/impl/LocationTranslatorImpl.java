@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
@@ -31,25 +30,26 @@ import org.openmrs.module.fhir2.api.translators.CustomizableMetadataTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator implements LocationTranslator {
 	
-	@Inject
+	@Autowired
 	private LocationAddressTranslator locationAddressTranslator;
 	
-	@Inject
+	@Autowired
 	private TelecomTranslator<Object> telecomTranslator;
 	
-	@Inject
+	@Autowired
 	private FhirGlobalPropertyService propertyService;
 	
-	@Inject
+	@Autowired
 	private FhirLocationDao fhirLocationDao;
 	
-	@Inject
+	@Autowired
 	private CustomizableMetadataTranslator<LocationAttribute, org.openmrs.Location> customizableMetadataTranslator;
 	
 	/**

@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
@@ -20,6 +18,7 @@ import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter(AccessLevel.PACKAGE)
 public class FhirDiagnosticReportServiceImpl implements FhirDiagnosticReportService {
 	
-	@Inject
+	@Autowired
 	FhirDiagnosticReportDao dao;
 	
-	@Inject
+	@Autowired
 	DiagnosticReportTranslator translator;
 	
 	@Override

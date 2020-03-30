@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -29,19 +27,20 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.ReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class TaskTranslatorImpl implements TaskTranslator {
 	
-	@Inject
+	@Autowired
 	private ProvenanceTranslator<FhirTask> provenanceTranslator;
 	
-	@Inject
+	@Autowired
 	private ReferenceTranslator referenceTranslator;
 	
-	@Inject
+	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
 	@Override

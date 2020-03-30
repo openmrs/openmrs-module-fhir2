@@ -18,8 +18,6 @@ modules that should be borne in mind while developing this module.
 
 1. The OpenMRS service layer, e.g. `PatientService`, `EncounterService` etc.
 should only be used inside DAO objects.
-1. Favour JSR-330 style `@Inject` over `@Autowired` whenever possible. This
-will allow us to de-couple from Spring if necessary.
 1. Avoid using `org.openmrs.Context` except as a last resort. We should favour
 injecting the appropriate service rather than relying on `Context` to load it
 for us.

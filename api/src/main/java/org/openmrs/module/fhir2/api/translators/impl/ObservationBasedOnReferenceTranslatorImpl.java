@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -20,16 +18,17 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.openmrs.module.fhir2.api.translators.ObservationBasedOnReferenceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class ObservationBasedOnReferenceTranslatorImpl extends AbstractReferenceHandlingTranslator implements ObservationBasedOnReferenceTranslator {
 	
-	@Inject
+	@Autowired
 	private FhirServiceRequestDao<TestOrder> serviceRequestDao;
 	
-	@Inject
+	@Autowired
 	private FhirMedicationRequestDao medicationRequestDao;
 	
 	@Override

@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -25,19 +23,20 @@ import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class PractitionerTranslatorUserImpl implements PractitionerTranslator<User> {
 	
-	@Inject
+	@Autowired
 	private PersonNameTranslator nameTranslator;
 	
-	@Inject
+	@Autowired
 	private PersonAddressTranslator addressTranslator;
 	
-	@Inject
+	@Autowired
 	private GenderTranslator genderTranslator;
 	
 	@Override

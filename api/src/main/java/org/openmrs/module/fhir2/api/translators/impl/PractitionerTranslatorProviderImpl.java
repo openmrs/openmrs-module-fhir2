@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import java.util.Date;
@@ -36,31 +35,32 @@ import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class PractitionerTranslatorProviderImpl implements PractitionerTranslator<Provider> {
 	
-	@Inject
+	@Autowired
 	private PersonNameTranslator nameTranslator;
 	
-	@Inject
+	@Autowired
 	private PersonAddressTranslator addressTranslator;
 	
-	@Inject
+	@Autowired
 	private GenderTranslator genderTranslator;
 	
-	@Inject
+	@Autowired
 	private TelecomTranslator<Object> telecomTranslator;
 	
-	@Inject
+	@Autowired
 	private FhirPractitionerDao fhirPractitionerDao;
 	
-	@Inject
+	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	@Inject
+	@Autowired
 	private CustomizableMetadataTranslator<ProviderAttribute, Provider> customizableMetadataTranslator;
 	
 	@Override

@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -24,6 +22,7 @@ import org.hl7.fhir.r4.model.Location;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter(AccessLevel.PACKAGE)
 public class FhirLocationServiceImpl implements FhirLocationService {
 	
-	@Inject
+	@Autowired
 	FhirLocationDao locationDao;
 	
-	@Inject
+	@Autowired
 	LocationTranslator locationTranslator;
 	
 	@Override

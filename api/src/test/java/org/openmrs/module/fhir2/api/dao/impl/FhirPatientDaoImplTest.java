@@ -35,8 +35,6 @@ import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
 import static org.hl7.fhir.r4.model.Patient.SP_NAME;
 import static org.openmrs.util.OpenmrsUtil.compareWithNullAsGreatest;
 
-import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -58,6 +56,7 @@ import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -149,7 +148,7 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private FhirPatientDaoImpl dao;
 	
-	@Inject
+	@Autowired
 	private SessionFactory sessionFactory;
 	
 	@Before

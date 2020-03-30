@@ -22,8 +22,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -53,6 +51,7 @@ import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -107,7 +106,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String LOINC_SYSTOLIC_BP = "8480-6";
 	
-	@Inject
+	@Autowired
 	FhirObservationDaoImpl dao;
 	
 	@Before

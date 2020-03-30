@@ -14,9 +14,6 @@ import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.or;
 import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -32,14 +29,16 @@ import org.hibernate.SessionFactory;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirPatientDaoImpl extends AbstractPersonDaoImpl implements FhirPatientDao {
 	
-	@Inject
-	@Named("sessionFactory")
+	@Autowired
+	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
 	@Override

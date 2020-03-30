@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import org.hl7.fhir.r4.model.Reference;
-import org.openmrs.User;
 
 public interface PractitionerReferenceTranslator<T> extends OpenmrsFhirTranslator<T, Reference> {
 	

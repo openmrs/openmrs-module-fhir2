@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
@@ -18,16 +16,17 @@ import org.openmrs.Location;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class EncounterLocationTranslatorImpl extends AbstractReferenceHandlingTranslator implements EncounterLocationTranslator {
 	
-	@Inject
+	@Autowired
 	FhirLocationService locationService;
 	
-	@Inject
+	@Autowired
 	LocationTranslator locationTranslator;
 	
 	@Override

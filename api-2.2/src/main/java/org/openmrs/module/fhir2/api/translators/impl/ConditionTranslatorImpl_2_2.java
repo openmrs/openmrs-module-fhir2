@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -31,6 +29,7 @@ import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTrans
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Setter(AccessLevel.PACKAGE)
@@ -38,22 +37,22 @@ import org.springframework.stereotype.Component;
 @OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
 public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Condition> {
 	
-	@Inject
+	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private ConditionClinicalStatusTranslator<ConditionClinicalStatus> clinicalStatusTranslator;
 	
-	@Inject
+	@Autowired
 	private ConditionVerificationStatusTranslator<ConditionVerificationStatus> verificationStatusTranslator;
 	
-	@Inject
+	@Autowired
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
-	@Inject
+	@Autowired
 	private ProvenanceTranslator<Condition> provenanceTranslator;
 	
 	@Override

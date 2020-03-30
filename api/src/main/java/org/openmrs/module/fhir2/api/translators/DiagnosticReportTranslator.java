@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.openmrs.Encounter;
 import org.openmrs.Obs;
 
 public interface DiagnosticReportTranslator extends OpenmrsFhirUpdatableTranslator<Obs, DiagnosticReport> {

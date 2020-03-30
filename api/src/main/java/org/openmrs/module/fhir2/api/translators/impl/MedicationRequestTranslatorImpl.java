@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Annotation;
@@ -24,28 +22,29 @@ import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTransla
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class MedicationRequestTranslatorImpl implements MedicationRequestTranslator {
 	
-	@Inject
+	@Autowired
 	private MedicationRequestStatusTranslator statusTranslator;
 	
-	@Inject
+	@Autowired
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private MedicationRequestPriorityTranslator medicationRequestPriorityTranslator;
 	
-	@Inject
+	@Autowired
 	private MedicationReferenceTranslator medicationReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
-	@Inject
+	@Autowired
 	private DosageTranslator dosageTranslator;
 	
 	@Override

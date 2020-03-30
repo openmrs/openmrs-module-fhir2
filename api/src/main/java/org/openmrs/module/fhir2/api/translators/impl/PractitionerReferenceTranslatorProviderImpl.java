@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -18,16 +16,17 @@ import org.openmrs.Provider;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class PractitionerReferenceTranslatorProviderImpl extends AbstractReferenceHandlingTranslator implements PractitionerReferenceTranslator<Provider> {
 	
-	@Inject
+	@Autowired
 	private FhirPractitionerService practitionerService;
 	
-	@Inject
+	@Autowired
 	private PractitionerTranslator<Provider> practitionerTranslator;
 	
 	@Override

@@ -15,10 +15,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +22,8 @@ import org.openmrs.OrderType;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -41,16 +39,16 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	
 	private FhirServiceRequestDaoImpl dao;
 	
-	@Inject
-	@Named("sessionFactory")
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(TEST_ORDER_INITIAL_DATA);
 		
 		dao = new FhirServiceRequestDaoImpl();
-		dao.setSessionFactory(sessionFactoryProvider.get());
+		dao.setSessionFactory(sessionFactory);
 	}
 	
 	@Test

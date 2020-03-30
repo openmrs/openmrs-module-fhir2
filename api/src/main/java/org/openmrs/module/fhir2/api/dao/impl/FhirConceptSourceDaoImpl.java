@@ -11,9 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import java.util.Collection;
 import java.util.Optional;
 
@@ -22,6 +19,8 @@ import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter(AccessLevel.PACKAGE)
 public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	
-	@Inject
-	@Named("sessionFactory")
+	@Autowired
+	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
 	@Override

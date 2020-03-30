@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.providers;
 
-import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -22,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	
-	@Inject
+	@Autowired
 	private FhirServiceRequestService serviceRequestService;
 	
 	@Override

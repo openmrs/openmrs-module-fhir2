@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -25,6 +23,7 @@ import org.openmrs.Drug;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,10 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter(AccessLevel.PACKAGE)
 public class FhirMedicationServiceImpl implements FhirMedicationService {
 	
-	@Inject
+	@Autowired
 	private MedicationTranslator medicationTranslator;
 	
-	@Inject
+	@Autowired
 	private FhirMedicationDao medicationDao;
 	
 	@Override
