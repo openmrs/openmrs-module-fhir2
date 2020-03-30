@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import lombok.AccessLevel;
@@ -29,6 +28,7 @@ import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PACKAGE)
 public abstract class AbstractReferenceHandlingTranslator {
@@ -37,7 +37,7 @@ public abstract class AbstractReferenceHandlingTranslator {
 	
 	public static final String TEST_ORDER_TYPE_UUID = "52a447d3-a64a-11e3-9aeb-50e549534c5e";
 	
-	@Inject
+	@Autowired
 	private PatientIdentifierTranslator patientIdentifierTranslator;
 	
 	protected Reference createEncounterReference(@NotNull Encounter encounter) {

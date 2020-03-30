@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -23,6 +21,7 @@ import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,10 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter(AccessLevel.PACKAGE)
 public class FhirAllergyIntoleranceServiceImpl implements FhirAllergyIntoleranceService {
 	
-	@Inject
+	@Autowired
 	private AllergyIntoleranceTranslator allergyIntoleranceTranslator;
 	
-	@Inject
+	@Autowired
 	private FhirAllergyIntoleranceDao allergyIntoleranceDao;
 	
 	@Override

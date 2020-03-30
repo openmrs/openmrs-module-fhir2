@@ -15,9 +15,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-
 import java.util.Map;
 
 import org.hibernate.SessionFactory;
@@ -27,6 +24,7 @@ import org.openmrs.GlobalProperty;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -44,15 +42,15 @@ public class FhirGlobalPropertyDaoImplTest extends BaseModuleContextSensitiveTes
 	
 	private static final String GLOBAL_PROPERTY_MODERATE = "1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	@Inject
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	private SessionFactory sessionFactory;
 	
 	private FhirGlobalPropertyDaoImpl dao;
 	
 	@Before
 	public void setUp() throws Exception {
 		dao = new FhirGlobalPropertyDaoImpl();
-		dao.setSessionFactory(sessionFactoryProvider.get());
+		dao.setSessionFactory(sessionFactory);
 		executeDataSet(PERSON_ATTRIBUTE_TYPE_INITIAL_DATA_XML);
 	}
 	

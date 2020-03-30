@@ -11,23 +11,22 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
 import org.openmrs.Obs;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirDiagnosticReportDaoImpl implements FhirDiagnosticReportDao {
 	
-	@Inject
-	@Named("sessionFactory")
+	@Autowired
+	@Qualifier("sessionFactory")
 	SessionFactory sessionFactory;
 	
 	@Override

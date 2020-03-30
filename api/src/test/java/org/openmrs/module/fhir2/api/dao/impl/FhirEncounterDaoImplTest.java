@@ -18,10 +18,6 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.DateParam;
@@ -39,6 +35,8 @@ import org.junit.Test;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -80,16 +78,16 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PARTICIPANT_GIVEN_NAME = "John";
 	
-	@Inject
-	@Named("sessionFactory")
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
 	private FhirEncounterDaoImpl dao;
 	
 	@Before
 	public void setUp() throws Exception {
 		dao = new FhirEncounterDaoImpl();
-		dao.setSessionFactory(sessionFactoryProvider.get());
+		dao.setSessionFactory(sessionFactory);
 		executeDataSet(ENCOUNTER_INITIAL_DATA_XML);
 	}
 	

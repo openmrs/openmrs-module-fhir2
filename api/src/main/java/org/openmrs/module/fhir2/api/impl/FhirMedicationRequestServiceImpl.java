@@ -9,24 +9,23 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirMedicationRequestServiceImpl implements FhirMedicationRequestService {
 	
-	@Inject
+	@Autowired
 	private MedicationRequestTranslator medicationRequestTranslator;
 	
-	@Inject
+	@Autowired
 	private FhirMedicationRequestDao dao;
 	
 	@Override

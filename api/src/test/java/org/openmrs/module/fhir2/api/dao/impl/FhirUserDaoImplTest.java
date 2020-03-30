@@ -14,16 +14,14 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -35,16 +33,16 @@ public class FhirUserDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String USER_INITIAL_DATA_XML = "org/openmrs/api/include/UserServiceTest.xml";
 	
-	@Inject
-	@Named("sessionFactory")
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
 	private FhirUserDaoImpl fhirUserDao;
 	
 	@Before
 	public void setup() throws Exception {
 		fhirUserDao = new FhirUserDaoImpl();
-		fhirUserDao.setSessionFactory(sessionFactoryProvider.get());
+		fhirUserDao.setSessionFactory(sessionFactory);
 		executeDataSet(USER_INITIAL_DATA_XML);
 	}
 	

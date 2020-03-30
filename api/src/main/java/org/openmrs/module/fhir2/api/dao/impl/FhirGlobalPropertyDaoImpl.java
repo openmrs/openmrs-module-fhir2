@@ -9,9 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,14 +20,16 @@ import org.hibernate.criterion.Restrictions;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.api.dao.FhirGlobalPropertyDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
 	
-	@Inject
-	@Named("sessionFactory")
+	@Autowired
+	@Qualifier("sessionFactory")
 	SessionFactory sessionFactory;
 	
 	@Override

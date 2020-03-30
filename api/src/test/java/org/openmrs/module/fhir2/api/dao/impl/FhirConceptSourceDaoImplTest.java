@@ -18,8 +18,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
-import javax.inject.Inject;
-
 import java.util.Collection;
 import java.util.Optional;
 
@@ -30,6 +28,7 @@ import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -37,7 +36,7 @@ public class FhirConceptSourceDaoImplTest extends BaseModuleContextSensitiveTest
 	
 	private static final String CONCEPT_SOURCE_FHIR_DATA = "org/openmrs/module/fhir2/api/dao/impl/FhirConceptSourceDaoImplTest_initial_data.xml";
 	
-	@Inject
+	@Autowired
 	private SessionFactory sessionFactory;
 	
 	private FhirConceptSourceDaoImpl fhirConceptSourceDao;

@@ -11,9 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -24,14 +21,16 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirEncounterDaoImpl extends BaseDaoImpl implements FhirEncounterDao {
 	
-	@Inject
-	@Named("sessionFactory")
+	@Autowired
+	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
 	@Override

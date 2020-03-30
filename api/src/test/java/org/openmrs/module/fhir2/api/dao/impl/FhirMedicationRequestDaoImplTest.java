@@ -14,16 +14,14 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -35,16 +33,16 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	
 	private static final String MEDICATION_REQUEST_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationRequestDaoImpl_initial_data.xml";
 	
-	@Inject
-	@Named("sessionFactory")
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
 	private FhirMedicationRequestDaoImpl medicationRequestDao;
 	
 	@Before
 	public void setup() throws Exception {
 		medicationRequestDao = new FhirMedicationRequestDaoImpl();
-		medicationRequestDao.setSessionFactory(sessionFactoryProvider.get());
+		medicationRequestDao.setSessionFactory(sessionFactory);
 		executeDataSet(MEDICATION_REQUEST_INITIAL_DATA_XML);
 	}
 	

@@ -10,10 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
@@ -32,14 +29,16 @@ import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirTaskDaoImpl extends BaseDaoImpl implements FhirTaskDao {
 	
-	@Inject
-	@Named("sessionFactory")
+	@Autowired
+	@Qualifier("sessionFactory")
 	SessionFactory sessionFactory;
 	
 	@Override

@@ -17,10 +17,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import java.util.List;
 
 import org.hibernate.SessionFactory;
@@ -29,6 +25,8 @@ import org.junit.Test;
 import org.openmrs.ProviderAttribute;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -48,16 +46,16 @@ public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest 
 	
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "FF89DD99-OOX78-KKG89D-XX89CC8";
 	
-	@Inject
-	@Named("sessionFactory")
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
 	private FhirPractitionerDaoImpl dao;
 	
 	@Before
 	public void setUp() throws Exception {
 		dao = new FhirPractitionerDaoImpl();
-		dao.setSessionFactory(sessionFactoryProvider.get());
+		dao.setSessionFactory(sessionFactory);
 		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
 	}
 	

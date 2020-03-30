@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -18,13 +16,14 @@ import org.hl7.fhir.r4.model.Dosage;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class DosageTranslatorImpl implements DosageTranslator {
 	
-	@Inject
+	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
 	@Override

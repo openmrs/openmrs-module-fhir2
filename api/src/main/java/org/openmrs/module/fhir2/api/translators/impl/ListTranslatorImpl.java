@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import java.util.Collections;
 
 import lombok.AccessLevel;
@@ -20,13 +18,14 @@ import org.hl7.fhir.r4.model.ListResource;
 import org.openmrs.Cohort;
 import org.openmrs.module.fhir2.api.translators.ListEntryTranslator;
 import org.openmrs.module.fhir2.api.translators.ListTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class ListTranslatorImpl implements ListTranslator<Cohort> {
 	
-	@Inject
+	@Autowired
 	private ListEntryTranslator<Cohort> listEntryTranslator;
 	
 	@Override

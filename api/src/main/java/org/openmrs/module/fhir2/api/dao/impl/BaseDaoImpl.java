@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Order.asc;
-import static org.hibernate.criterion.Order.desc;
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.between;

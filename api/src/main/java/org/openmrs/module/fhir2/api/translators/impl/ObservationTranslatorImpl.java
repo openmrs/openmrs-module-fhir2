@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import java.util.function.Supplier;
 
 import lombok.AccessLevel;
@@ -34,43 +32,44 @@ import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class ObservationTranslatorImpl implements ObservationTranslator {
 	
-	@Inject
+	@Autowired
 	private ObservationStatusTranslator observationStatusTranslator;
 	
-	@Inject
+	@Autowired
 	private ObservationReferenceTranslator observationReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private ObservationValueTranslator observationValueTranslator;
 	
-	@Inject
+	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
-	@Inject
+	@Autowired
 	private EncounterReferenceTranslator encounterReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private ObservationInterpretationTranslator interpretationTranslator;
 	
-	@Inject
+	@Autowired
 	private ObservationReferenceRangeTranslator referenceRangeTranslator;
 	
-	@Inject
+	@Autowired
 	private ProvenanceTranslator<Obs> provenanceTranslator;
 	
-	@Inject
+	@Autowired
 	private ObservationBasedOnReferenceTranslator basedOnReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private ObservationEffectiveDatetimeTranslator datetimeTranslator;
 	
 	@Override

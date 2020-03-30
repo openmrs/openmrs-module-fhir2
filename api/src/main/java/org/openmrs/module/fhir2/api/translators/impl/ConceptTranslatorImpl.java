@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.AccessLevel;
@@ -23,16 +21,17 @@ import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class ConceptTranslatorImpl implements ConceptTranslator {
 	
-	@Inject
+	@Autowired
 	private FhirConceptService conceptService;
 	
-	@Inject
+	@Autowired
 	private FhirConceptSourceService conceptSourceService;
 	
 	@Override

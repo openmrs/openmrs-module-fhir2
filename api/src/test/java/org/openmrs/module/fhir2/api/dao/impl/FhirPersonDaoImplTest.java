@@ -31,10 +31,6 @@ import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 import static org.openmrs.util.OpenmrsUtil.compareWithNullAsGreatest;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,6 +53,8 @@ import org.openmrs.PersonAttribute;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -140,14 +138,14 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private FhirPersonDaoImpl fhirPersonDao;
 	
-	@Inject
-	@Named("sessionFactory")
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
 	@Before
 	public void setup() throws Exception {
 		fhirPersonDao = new FhirPersonDaoImpl();
-		fhirPersonDao.setSessionFactory(sessionFactoryProvider.get());
+		fhirPersonDao.setSessionFactory(sessionFactory);
 		executeDataSet(PERSON_INITIAL_DATA_XML);
 	}
 	

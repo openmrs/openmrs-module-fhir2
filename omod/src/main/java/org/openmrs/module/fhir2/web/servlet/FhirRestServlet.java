@@ -9,9 +9,6 @@
  */
 package org.openmrs.module.fhir2.web.servlet;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import java.util.Collection;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -36,11 +33,11 @@ public class FhirRestServlet extends RestfulServer {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@Inject
+	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	@Inject
-	@Named("hapiLoggingInterceptor")
+	@Autowired
+	@Qualifier("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
 	
 	@Override
@@ -76,8 +73,8 @@ public class FhirRestServlet extends RestfulServer {
 	}
 	
 	@Override
-	@Inject
-	@Named("fhirR4")
+	@Autowired
+	@Qualifier("fhirR4")
 	public void setFhirContext(FhirContext theFhirContext) {
 		super.setFhirContext(theFhirContext);
 	}

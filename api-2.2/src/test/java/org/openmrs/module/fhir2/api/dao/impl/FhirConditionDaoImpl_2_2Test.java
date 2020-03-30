@@ -19,10 +19,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -48,6 +44,8 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -86,23 +84,23 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	// This corresponds to the EXISTING_CONDITION_UUID above.
 	private static final String CONDITION_CONCEPT_UUID = "c607c80f-1ea9-4da3-bb88-6276ce8868dd";
 	
-	@Inject
-	@Named("sessionFactory")
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
-	@Inject
+	@Autowired
 	private PatientService patientService;
 	
-	@Inject
+	@Autowired
 	private ConceptService conceptService;
 	
-	@Inject
+	@Autowired
 	private FhirConditionDaoImpl_2_2 dao;
 	
 	@Before
 	public void setUp() {
 		dao = new FhirConditionDaoImpl_2_2();
-		dao.setSessionFactory(sessionFactoryProvider.get());
+		dao.setSessionFactory(sessionFactory);
 		executeDataSet(CONDITION_INITIAL_DATA_XML);
 	}
 	

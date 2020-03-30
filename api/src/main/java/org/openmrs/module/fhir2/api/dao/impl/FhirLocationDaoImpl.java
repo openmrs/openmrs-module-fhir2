@@ -11,8 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
@@ -36,14 +34,16 @@ import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirLocationDaoImpl extends BaseDaoImpl implements FhirLocationDao {
 	
-	@Inject
-	@Named("sessionFactory")
+	@Autowired
+	@Qualifier("sessionFactory")
 	SessionFactory sessionFactory;
 	
 	@Override

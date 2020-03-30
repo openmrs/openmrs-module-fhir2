@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -27,6 +25,7 @@ import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.dao.impl.FhirConditionDaoImpl_2_2;
 import org.openmrs.module.fhir2.api.translators.impl.ConditionTranslatorImpl_2_2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,10 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
 @OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
 public class FhirConditionServiceImpl_2_2 implements FhirConditionService {
 	
-	@Inject
+	@Autowired
 	private FhirConditionDaoImpl_2_2 dao;
 	
-	@Inject
+	@Autowired
 	private ConditionTranslatorImpl_2_2 conditionTranslator;
 	
 	@Override

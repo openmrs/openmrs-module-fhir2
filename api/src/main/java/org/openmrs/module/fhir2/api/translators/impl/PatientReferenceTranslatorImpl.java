@@ -9,21 +9,20 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Patient;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class PatientReferenceTranslatorImpl extends AbstractReferenceHandlingTranslator implements PatientReferenceTranslator {
 	
-	@Inject
+	@Autowired
 	private FhirPatientDao patientDao;
 	
 	@Override

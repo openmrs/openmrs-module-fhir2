@@ -9,13 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter(AccessLevel.PACKAGE)
 public class FhirUserServiceImpl implements FhirUserService {
 	
-	@Inject
+	@Autowired
 	private FhirUserDao userDao;
 	
 	@Override

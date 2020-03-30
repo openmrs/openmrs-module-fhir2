@@ -14,15 +14,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -40,13 +38,13 @@ public class FhirPatientDaoImplPatientIdentifierTest extends BaseModuleContextSe
 	
 	private FhirPatientDaoImpl dao;
 	
-	@Inject
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	private SessionFactory sessionFactory;
 	
 	@Before
 	public void setup() throws Exception {
 		dao = new FhirPatientDaoImpl();
-		dao.setSessionFactory(sessionFactoryProvider.get());
+		dao.setSessionFactory(sessionFactory);
 		executeDataSet(PATIENT_IDENTIFIER_DATA_XML);
 	}
 	

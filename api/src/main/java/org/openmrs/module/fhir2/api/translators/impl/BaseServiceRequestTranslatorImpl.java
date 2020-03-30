@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import java.util.Collection;
 
 import lombok.AccessLevel;
@@ -19,11 +17,12 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PROTECTED)
 public class BaseServiceRequestTranslatorImpl {
 	
-	@Inject
+	@Autowired
 	private FhirTaskService taskService;
 	
 	protected ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(String orderUuid) {

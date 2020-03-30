@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -26,22 +24,23 @@ import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslator {
 	
-	@Inject
+	@Autowired
 	private EncounterReferenceTranslator encounterReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
-	@Inject
+	@Autowired
 	private ObservationReferenceTranslator observationReferenceTranslator;
 	
 	@Override

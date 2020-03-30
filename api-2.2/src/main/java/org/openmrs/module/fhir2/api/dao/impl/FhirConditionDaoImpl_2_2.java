@@ -11,9 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
@@ -32,6 +29,8 @@ import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -42,8 +41,8 @@ import org.springframework.stereotype.Component;
 public class FhirConditionDaoImpl_2_2 extends BaseDaoImpl implements FhirConditionDao<Condition> {
 	// TODO: Change the BaseDaoImpl inheritance pattern to one of composition; here and everywhere else.
 	
-	@Inject
-	@Named("sessionFactory")
+	@Autowired
+	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
 	@Override

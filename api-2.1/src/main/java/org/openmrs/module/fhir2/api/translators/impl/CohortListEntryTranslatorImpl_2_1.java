@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +21,7 @@ import org.openmrs.CohortMembership;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -32,10 +31,10 @@ import org.springframework.stereotype.Component;
 @OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.*")
 public class CohortListEntryTranslatorImpl_2_1 extends CohortListEntryTranslatorImpl {
 	
-	@Inject
+	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Inject
+	@Autowired
 	private FhirPatientDao patientDao;
 	
 	@Override

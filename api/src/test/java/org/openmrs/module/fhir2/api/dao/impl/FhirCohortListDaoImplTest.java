@@ -14,16 +14,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Cohort;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -35,16 +33,16 @@ public class FhirCohortListDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String LIST_COHORT_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirCohortListDaoImplTest_initial_data.xml";
 	
-	@Inject
-	@Named("sessionFactory")
-	private Provider<SessionFactory> sessionFactoryProvider;
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
 	private FhirCohortListDaoImpl fhirCohortListDao;
 	
 	@Before
 	public void setup() throws Exception {
 		fhirCohortListDao = new FhirCohortListDaoImpl();
-		fhirCohortListDao.setSessionFactory(sessionFactoryProvider.get());
+		fhirCohortListDao.setSessionFactory(sessionFactory);
 		executeDataSet(LIST_COHORT_INITIAL_DATA_XML);
 	}
 	

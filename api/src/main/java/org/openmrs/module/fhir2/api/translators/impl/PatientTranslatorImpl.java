@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
-import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
@@ -42,34 +41,35 @@ import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class PatientTranslatorImpl implements PatientTranslator {
 	
-	@Inject
+	@Autowired
 	private PatientIdentifierTranslator identifierTranslator;
 	
-	@Inject
+	@Autowired
 	private PersonNameTranslator nameTranslator;
 	
-	@Inject
+	@Autowired
 	private GenderTranslator genderTranslator;
 	
-	@Inject
+	@Autowired
 	private PersonAddressTranslator addressTranslator;
 	
-	@Inject
+	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	@Inject
+	@Autowired
 	private FhirPersonDao fhirPersonDao;
 	
-	@Inject
+	@Autowired
 	private TelecomTranslator<Object> telecomTranslator;
 	
-	@Inject
+	@Autowired
 	private ProvenanceTranslator<org.openmrs.Patient> provenanceTranslator;
 	
 	@Override
