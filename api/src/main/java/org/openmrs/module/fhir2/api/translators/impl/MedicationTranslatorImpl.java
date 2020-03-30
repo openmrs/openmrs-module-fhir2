@@ -12,8 +12,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -71,7 +71,9 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		if (med == null) {
 			return existingDrug;
 		}
-		existingDrug.setUuid(med.getId());
+		if (med.getId() != null) {
+			existingDrug.setUuid(med.getId());
+		}
 		
 		if (med.hasCode()) {
 			existingDrug.setConcept(conceptTranslator.toOpenmrsType(med.getCode()));
@@ -80,7 +82,7 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		if (med.hasForm()) {
 			existingDrug.setConcept(conceptTranslator.toOpenmrsType(med.getForm()));
 		}
-		Collection<DrugIngredient> ingredients = new ArrayList<>();
+		Collection<DrugIngredient> ingredients = new LinkedHashSet();
 		if (med.hasIngredient()) {
 			for (Medication.MedicationIngredientComponent ingredient : med.getIngredient()) {
 				DrugIngredient omrsIngredient = new DrugIngredient();

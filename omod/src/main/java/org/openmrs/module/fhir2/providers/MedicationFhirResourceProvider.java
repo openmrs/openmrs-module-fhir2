@@ -12,10 +12,14 @@ package org.openmrs.module.fhir2.providers;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -62,4 +66,21 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 		return FhirServerUtils
 		        .convertSearchResultsToBundle(fhirMedicationService.searchForMedications(code, dosageForm, null, status));
 	}
+	
+	@Create
+	@SuppressWarnings("unused")
+	public MethodOutcome createMedication(@ResourceParam Medication medication) {
+		return FhirServerUtils.buildCreate(fhirMedicationService.saveMedication(medication));
+	}
+	
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updateMedication(@IdParam IdType id, @ResourceParam Medication medication) {
+		if (id != null) {
+			medication.setId(id.getIdPart());
+		}
+		
+		return FhirServerUtils.buildUpdate(fhirMedicationService.updateMedication(medication, id.getIdPart()));
+	}
+	
 }

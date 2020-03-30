@@ -21,6 +21,8 @@ public interface FhirMedicationDao {
 	
 	Drug getMedicationByUuid(@NotNull String uuid);
 	
+	Drug saveMedication(@NotNull Drug drug);
+	
 	Collection<Drug> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
 	        TokenOrListParam ingredientCode, TokenOrListParam status);
 }

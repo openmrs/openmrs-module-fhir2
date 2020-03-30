@@ -16,9 +16,12 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Medication;
+import org.openmrs.Drug;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
@@ -40,6 +43,32 @@ public class FhirMedicationServiceImpl implements FhirMedicationService {
 	@Transactional(readOnly = true)
 	public Medication getMedicationByUuid(String uuid) {
 		return medicationTranslator.toFhirResource(medicationDao.getMedicationByUuid(uuid));
+	}
+	
+	@Override
+	public Medication saveMedication(Medication medication) {
+		return medicationTranslator
+		        .toFhirResource(medicationDao.saveMedication(medicationTranslator.toOpenmrsType(new Drug(), medication)));
+	}
+	
+	@Override
+	public Medication updateMedication(Medication medication, String uuid) {
+		if (uuid == null) {
+			throw new InvalidRequestException("Uuid cannot be null.");
+		}
+		
+		if (!medication.getId().equals(uuid)) {
+			throw new InvalidRequestException("Medication id and provided id do not match.");
+		}
+		
+		Drug drug = medicationDao.getMedicationByUuid(uuid);
+		
+		if (drug == null) {
+			throw new MethodNotAllowedException("No Medication found to update.");
+		}
+		
+		return medicationTranslator
+		        .toFhirResource(medicationDao.saveMedication(medicationTranslator.toOpenmrsType(drug, medication)));
 	}
 	
 	@Override
