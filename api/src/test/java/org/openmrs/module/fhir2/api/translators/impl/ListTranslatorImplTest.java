@@ -170,29 +170,4 @@ public class ListTranslatorImplTest {
 		assertThat(cohort.getVoided(), equalTo(true));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldTranslateListDateToDateCreated() {
-		ListResource list = new ListResource();
-		list.setDate(new Date());
-		list.setStatus(ListResource.ListStatus.CURRENT);
-		
-		listTranslator.toOpenmrsType(cohort, list);
-		
-		assertThat(cohort.getDateCreated(), notNullValue());
-		assertThat(cohort.getDateCreated(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldTranslateListDateToDateUpdated() {
-		ListResource list = new ListResource();
-		list.setDate(new Date());
-		list.setStatus(ListResource.ListStatus.CURRENT);
-		
-		cohort.setDateCreated(DateUtils.addDays(new Date(), -60));
-		listTranslator.toOpenmrsType(cohort, list);
-		
-		assertThat(cohort.getDateCreated(), notNullValue());
-		assertThat(cohort.getDateChanged(), notNullValue());
-		assertThat(cohort.getDateChanged(), DateMatchers.sameDay(new Date()));
-	}
 }

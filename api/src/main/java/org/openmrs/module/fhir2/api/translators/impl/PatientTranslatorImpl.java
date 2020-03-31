@@ -178,7 +178,6 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .collect(Collectors.toSet());
 		currentPatient.setAttributes(attributes);
-		currentPatient.setDateChanged(patient.getMeta().getLastUpdated());
 		
 		return currentPatient;
 	}

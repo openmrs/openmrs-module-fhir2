@@ -332,15 +332,6 @@ public class EncounterTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateLastUpdatedDateToDateChanged() {
-		fhirEncounter.getMeta().setLastUpdated(new Date());
-		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
-		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
-		assertThat(result, notNullValue());
-		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
 	public void shouldAddProvenances() {
 		org.openmrs.Encounter encounter = new org.openmrs.Encounter();
 		encounter.setUuid(ENCOUNTER_UUID);

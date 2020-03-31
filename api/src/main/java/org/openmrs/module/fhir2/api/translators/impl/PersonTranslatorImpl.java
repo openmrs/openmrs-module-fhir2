@@ -152,7 +152,6 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
 		        .collect(Collectors.toSet());
 		openmrsPerson.setAttributes(attributes);
-		openmrsPerson.setDateChanged(person.getMeta().getLastUpdated());
 		
 		return openmrsPerson;
 	}

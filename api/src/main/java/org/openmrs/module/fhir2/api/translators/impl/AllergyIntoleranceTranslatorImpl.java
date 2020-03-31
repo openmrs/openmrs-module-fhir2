@@ -140,8 +140,6 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 		allergy.setVoided(isAllergyInactive(fhirAllergy.getClinicalStatus()));
 		allergy.setPatient(patientReferenceTranslator.toOpenmrsType(fhirAllergy.getPatient()));
 		allergy.setCreator(practitionerReferenceTranslator.toOpenmrsType(fhirAllergy.getRecorder()));
-		allergy.setDateCreated(fhirAllergy.getRecordedDate());
-		allergy.setDateChanged(fhirAllergy.getMeta().getLastUpdated());
 		
 		List<AllergyReaction> reactions = new ArrayList<>();
 		
