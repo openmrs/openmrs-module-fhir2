@@ -10,12 +10,14 @@
 package org.openmrs.module.fhir2.providers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +29,7 @@ import java.util.List;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
@@ -46,7 +49,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProviderTest<MedicationFhirResourceProvider, Medication> {
 	
-	private static final String MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String MEDICATION_UUID = "a2749656-1bc0-4d22-9c11-1d60026b672b";
 	
 	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
 	
@@ -55,6 +58,10 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 	private static final String JSON_CREATE_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_create.json";
 	
 	private static final String JSON_UPDATE_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_update.json";
+	
+	private static final String JSON_UPDATE_WITHOUTID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UdateWithoutId.json";
+	
+	private static final String JSON_UPDATE_WITHWRONGID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UdateWithWrongId.json";
 	
 	@Mock
 	private FhirMedicationService fhirMedicationService;
@@ -192,9 +199,55 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 		
 		when(fhirMedicationService.updateMedication(any(Medication.class), any(String.class))).thenReturn(medication);
 		
-		MockHttpServletResponse response = put("/Medication/a2749656-1bc0-4d22-9c11-1d60026b672b")
-		        .jsonContent(medicationJson).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = put("/Medication/" + MEDICATION_UUID).jsonContent(medicationJson)
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
+	}
+	
+	@Test
+	public void updateMedicationShouldErrorForIdMismatch() throws Exception {
+		String medicationJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
+			medicationJson = IOUtils.toString(is);
+		}
+		
+		MockHttpServletResponse response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(medicationJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+	}
+	
+	@Test
+	public void updateMedicationShouldErrorForNoId() throws Exception {
+		String medicationJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITHOUTID_MEDICATION_PATH)) {
+			medicationJson = IOUtils.toString(is);
+		}
+		
+		MockHttpServletResponse response = put("/Medication/" + MEDICATION_UUID).jsonContent(medicationJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
+	}
+	
+	@Test
+	public void updateMedicationShouldErrorForNonexistentMedication() throws Exception {
+		String medicationJson;
+		try (InputStream is = this.getClass().getClassLoader()
+		        .getResourceAsStream(JSON_UPDATE_WITHWRONGID_MEDICATION_PATH)) {
+			medicationJson = IOUtils.toString(is);
+		}
+		
+		when(fhirMedicationService.updateMedication(any(Medication.class), eq(WRONG_MEDICATION_UUID)))
+		        .thenThrow(new MethodNotAllowedException("Medication " + WRONG_MEDICATION_UUID + " does not exist"));
+		
+		MockHttpServletResponse response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(medicationJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isMethodNotAllowed());
 	}
 }

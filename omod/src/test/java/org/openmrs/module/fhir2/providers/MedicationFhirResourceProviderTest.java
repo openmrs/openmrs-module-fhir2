@@ -25,6 +25,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.r4.model.Bundle;
@@ -150,5 +152,25 @@ public class MedicationFhirResourceProviderTest {
 		MethodOutcome result = resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID), medication);
 		assertThat(result, CoreMatchers.notNullValue());
 		assertThat(result.getResource(), CoreMatchers.equalTo(med));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateMedicationShouldThrowInvalidRequestForUuidMismatch() {
+		when(fhirMedicationService.updateMedication(medication, WRONG_MEDICATION_UUID))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID), medication);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateMedicationShouldThrowMethodNotAllowedIfDoesNotExist() {
+		Medication wrongMedication = new Medication();
+		
+		wrongMedication.setId(WRONG_MEDICATION_UUID);
+		
+		when(fhirMedicationService.updateMedication(wrongMedication, WRONG_MEDICATION_UUID))
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID), wrongMedication);
 	}
 }
