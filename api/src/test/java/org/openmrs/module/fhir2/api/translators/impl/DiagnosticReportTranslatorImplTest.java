@@ -309,17 +309,6 @@ public class DiagnosticReportTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldConvertIssued() {
-		Date issuedDate = new Date();
-		diagnosticReport.setIssued(issuedDate);
-		
-		Obs result = translator.toOpenmrsType(diagnosticReport);
-		
-		assertThat(result.getDateCreated(), notNullValue());
-		assertThat(result.getDateCreated(), equalTo(issuedDate));
-	}
-	
-	@Test
 	public void toOpenmrsType_shouldConvertResult() {
 		Obs result = translator.toOpenmrsType(diagnosticReport);
 		
@@ -362,12 +351,4 @@ public class DiagnosticReportTranslatorImplTest {
 		assertThat(result.getConcept(), equalTo(translatedCode));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldTranslateLastUpdatedDateToDateChanged() {
-		diagnosticReport.getMeta().setLastUpdated(new Date());
-		
-		Obs obs = translator.toOpenmrsType(diagnosticReport);
-		assertThat(obs, notNullValue());
-		assertThat(obs.getDateChanged(), DateMatchers.sameDay(new Date()));
-	}
 }

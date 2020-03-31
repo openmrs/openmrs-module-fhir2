@@ -404,16 +404,6 @@ public class PatientTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateLastUpdatedDateToDateChanged() {
-		Patient patient = new Patient();
-		patient.getMeta().setLastUpdated(new Date());
-		
-		org.openmrs.Patient result = patientTranslator.toOpenmrsType(patient);
-		assertThat(result, notNullValue());
-		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
 	public void shouldAddProvenanceResources() {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setUuid(PATIENT_UUID);

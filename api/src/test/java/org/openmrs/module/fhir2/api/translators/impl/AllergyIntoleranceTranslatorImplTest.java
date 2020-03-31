@@ -495,15 +495,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateRecordedDateToOpenmrsDateCreated() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		allergy.setRecordedDate(new Date());
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getDateCreated(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
 	public void toOpenmrsType_shouldTranslatePatientReferenceToPatient() {
 		Reference patientReference = new Reference().setReference(FhirTestConstants.PATIENT + "/" + PATIENT_UUID)
 		        .setType(FhirTestConstants.PATIENT).setIdentifier(new Identifier().setValue(PATIENT_UUID));
@@ -536,16 +527,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 		assertThat(omrsAllergy, notNullValue());
 		assertThat(omrsAllergy.getCreator(), is(user));
 		assertThat(omrsAllergy.getCreator().getUuid(), is(CREATOR_UUID));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldTranslateLastUpdatedDateToDateChanged() {
-		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
-		allergyIntolerance.getMeta().setLastUpdated(new Date());
-		
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergyIntolerance);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getDateChanged(), DateMatchers.sameDay(new Date()));
 	}
 	
 	@Test

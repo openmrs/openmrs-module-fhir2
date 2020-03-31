@@ -67,12 +67,6 @@ public class ListTranslatorImpl implements ListTranslator<Cohort> {
 		cohort.setUuid(cohortList.getId());
 		cohort.setName(cohortList.getTitle());
 		
-		if (cohort.getDateCreated() == null) {
-			cohort.setDateCreated(cohortList.getDate());
-		} else {
-			cohort.setDateChanged(cohortList.getDate());
-		}
-		
 		switch (cohortList.getStatus()) {
 			case CURRENT:
 				cohort.setVoided(false);

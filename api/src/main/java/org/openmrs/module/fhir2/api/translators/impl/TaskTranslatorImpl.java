@@ -164,9 +164,6 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		
 		openmrsTask.setName(FhirConstants.TASK + "/" + fhirTask.getId());
 		
-		openmrsTask.setDateCreated(fhirTask.getAuthoredOn());
-		
-		openmrsTask.setDateChanged(fhirTask.getLastModified());
 	}
 	
 	private FhirTaskOutput translateToOutputReference(Task.TaskOutputComponent taskOutputComponent) {

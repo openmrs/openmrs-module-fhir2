@@ -420,16 +420,6 @@ public class LocationTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateLastUpdatedDateToDateChanged() {
-		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
-		location.getMeta().setLastUpdated(new Date());
-		
-		Location omrsLocation = locationTranslator.toOpenmrsType(location);
-		assertThat(omrsLocation, notNullValue());
-		assertThat(omrsLocation.getDateChanged(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
 	public void toFhirResource_shouldAddProvenanceResources() {
 		Location location = new Location();
 		location.setUuid(LOCATION_UUID);

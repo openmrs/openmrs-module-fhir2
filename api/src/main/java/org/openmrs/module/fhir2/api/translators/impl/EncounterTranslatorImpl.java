@@ -84,7 +84,6 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		                        .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
 		                .collect(Collectors.toSet()));
 		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
-		existingEncounter.setDateChanged(encounter.getMeta().getLastUpdated());
 		
 		return existingEncounter;
 	}
