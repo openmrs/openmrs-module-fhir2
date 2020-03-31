@@ -38,7 +38,7 @@ public class FhirMedicationDaoImpl extends BaseDaoImpl implements FhirMedication
 	public Drug getMedicationByUuid(String uuid) {
 		return (Drug) sessionFactory.getCurrentSession().createCriteria(Drug.class).add(eq("uuid", uuid)).uniqueResult();
 	}
-
+	
 	@Override
 	public Drug saveMedication(Drug drug) {
 		sessionFactory.getCurrentSession().saveOrUpdate(drug);
