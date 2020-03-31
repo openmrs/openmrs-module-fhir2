@@ -323,15 +323,6 @@ public class ConditionTranslatorImpl_2_2Test {
 	}
 	
 	@Test
-	public void shouldTranslateConditionRecordedDateToDateCreatedOpenMrsType() {
-		fhirCondition.setRecordedDate(new Date());
-		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
-		assertThat(condition, notNullValue());
-		assertThat(condition.getDateCreated(), notNullValue());
-		assertThat(condition.getDateCreated(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
 	public void shouldTranslateConditionRecorderToOpenmrsUser() {
 		Reference userRef = new Reference();
 		userRef.setReference(FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID);

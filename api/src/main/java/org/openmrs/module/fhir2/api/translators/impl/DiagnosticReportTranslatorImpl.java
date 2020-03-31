@@ -164,9 +164,6 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		
 		// DiagnosticReport.category (Constant)
 		
-		// DiagnosticReport.issued
-		translatedObs.setDateCreated(diagnosticReport.getIssued());
-		
 		// DiagnosticReport.result
 		for (Reference observationReference : diagnosticReport.getResult()) {
 			translatedObs.addGroupMember(observationReferenceTranslator.toOpenmrsType(observationReference));
@@ -175,8 +172,6 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		// Tag as diagnostic report
 		// TODO: distinguish between DianosticReport and Observation mapping for a given Obs
 		translatedObs.setComment("mapped DiagnosticReport");
-		
-		translatedObs.setDateChanged(diagnosticReport.getMeta().getLastUpdated());
 		
 	}
 }

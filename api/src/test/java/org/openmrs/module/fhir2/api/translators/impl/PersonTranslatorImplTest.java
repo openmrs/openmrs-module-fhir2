@@ -393,16 +393,6 @@ public class PersonTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateLastUpdatedDateToDateChanged() {
-		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
-		person.getMeta().setLastUpdated(new Date());
-		
-		Person result = personTranslator.toOpenmrsType(person);
-		assertThat(result, notNullValue());
-		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
 	public void shouldAddProvenanceResources() {
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.uniqueUuid()));

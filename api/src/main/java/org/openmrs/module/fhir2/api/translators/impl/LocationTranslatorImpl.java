@@ -148,8 +148,8 @@ public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator 
 			}
 			
 			openmrsLocation.setParentLocation(getOpenmrsParentLocation(fhirLocation.getPartOf()));
-			openmrsLocation.setDateChanged(fhirLocation.getMeta().getLastUpdated());
 		}
+		
 		return openmrsLocation;
 	}
 	
