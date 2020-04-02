@@ -54,7 +54,11 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PATIENT_FULL_NAME = "Mr. John Doe";
 	
+	private static final String PATIENT_UUID = "a194be38-271a-44cb-ba3f-f2dbf4831fe9";
+	
 	private static final String PARTICIPANT_FULL_NAME = "John Doe";
+	
+	private static final String PARTICIPANT_UUID = "c2879800-cca9-11e0-9572-0800200c9a66";
 	
 	private static final String ENCOUNTER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml";
 	
@@ -66,11 +70,15 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PATIENT_FAMILY_NAME = "Doe";
 	
-	private static final String ENCOUNTER_ADDRESS_CITY = "Boston";
+	private static final String ENCOUNTER_LOCATION_CITY = "Boston";
 	
-	private static final String ENCOUNTER_ADDRESS_COUNTRY = "USA";
+	private static final String ENCOUNTER_LOCATION_COUNTRY = "USA";
 	
-	private static final String ENCOUNTER_ADDRESS_STATE = "MA";
+	private static final String ENCOUNTER_LOCATION_STATE = "MA";
+	
+	private static final String ENCOUNTER_LOCATION_POSTAL_CODE = "02115";
+	
+	private static final String ENCOUNTER_LOCATION_UUID = "be69741b-29e9-49a1-adc9-2a726e6610e4";
 	
 	private static final String PARTICIPANT_IDENTIFIER = "1000WF";
 	
@@ -170,6 +178,22 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void searchForEncounters_shouldSearchForEncountersBySubjectUuid() {
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		ReferenceParam subject = new ReferenceParam();
+		
+		subject.setValue(PATIENT_UUID);
+		
+		subjectReference.addValue(new ReferenceOrListParam().add(subject));
+		
+		Collection<Encounter> results = dao.searchForEncounters(null, null, null, subjectReference);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.iterator().next().getPatient().getUuid(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
 	public void searchForEncounters_shouldSearchForEncountersBySubjectIdentifier() {
 		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
 		ReferenceParam subject = new ReferenceParam();
@@ -242,7 +266,6 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(results.iterator().next().getEncounterProviders().iterator().next().getProvider().getPerson()
 		        .getPersonName().getGivenName(),
 		    equalTo(PARTICIPANT_GIVEN_NAME));
-		
 	}
 	
 	@Test
@@ -264,7 +287,6 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(results.iterator().next().getEncounterProviders().iterator().next().getProvider().getPerson()
 		        .getPersonName().getFamilyName(),
 		    equalTo(PARTICIPANT_FAMILY_NAME));
-		
 	}
 	
 	@Test
@@ -289,20 +311,39 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void searchForEncounters_shouldSearchForEncountersByParticipantUuid() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_UUID);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant));
+		
+		Collection<Encounter> results = dao.searchForEncounters(null, null, participantReference, null);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.iterator().next().getEncounterProviders().size(), greaterThanOrEqualTo(1));
+		assertThat(results.iterator().next().getEncounterProviders().iterator().next().getProvider(), notNullValue());
+		assertThat(results.iterator().next().getEncounterProviders().iterator().next().getProvider().getUuid(),
+		    equalTo(PARTICIPANT_UUID));
+	}
+	
+	@Test
 	public void searchForEncounters_shouldSearchForEncountersByEncounterLocationCity() {
 		ReferenceAndListParam locationReference = new ReferenceAndListParam();
 		ReferenceParam location = new ReferenceParam();
 		
-		location.setValue(ENCOUNTER_ADDRESS_CITY);
+		location.setValue(ENCOUNTER_LOCATION_CITY);
 		location.setChain(Location.SP_ADDRESS_CITY);
 		
 		locationReference.addValue(new ReferenceOrListParam().add(location));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, locationReference, null, null);
 		
-		assertThat(results, Matchers.notNullValue());
+		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.iterator().next().getLocation().getCityVillage(), equalTo(ENCOUNTER_ADDRESS_CITY));
+		assertThat(results.iterator().next().getLocation().getCityVillage(), equalTo(ENCOUNTER_LOCATION_CITY));
 	}
 	
 	@Test
@@ -310,16 +351,66 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		ReferenceAndListParam locationReference = new ReferenceAndListParam();
 		ReferenceParam location = new ReferenceParam();
 		
-		location.setValue(ENCOUNTER_ADDRESS_STATE);
+		location.setValue(ENCOUNTER_LOCATION_STATE);
 		location.setChain(Location.SP_ADDRESS_STATE);
 		
 		locationReference.addValue(new ReferenceOrListParam().add(location));
 		
 		Collection<Encounter> results = dao.searchForEncounters(null, locationReference, null, null);
 		
-		assertThat(results, Matchers.notNullValue());
+		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.iterator().next().getLocation().getStateProvince(), equalTo(ENCOUNTER_ADDRESS_STATE));
+		assertThat(results.iterator().next().getLocation().getStateProvince(), equalTo(ENCOUNTER_LOCATION_STATE));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByEncounterLocationCountry() {
+		ReferenceAndListParam locationReference = new ReferenceAndListParam();
+		ReferenceParam location = new ReferenceParam();
+		
+		location.setValue(ENCOUNTER_LOCATION_COUNTRY);
+		location.setChain(Location.SP_ADDRESS_COUNTRY);
+		
+		locationReference.addValue(new ReferenceOrListParam().add(location));
+		
+		Collection<Encounter> results = dao.searchForEncounters(null, locationReference, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.iterator().next().getLocation().getCountry(), equalTo(ENCOUNTER_LOCATION_COUNTRY));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByEncounterLocationPostalCode() {
+		ReferenceAndListParam locationReference = new ReferenceAndListParam();
+		ReferenceParam location = new ReferenceParam();
+		
+		location.setValue(ENCOUNTER_LOCATION_POSTAL_CODE);
+		location.setChain(Location.SP_ADDRESS_POSTALCODE);
+		
+		locationReference.addValue(new ReferenceOrListParam().add(location));
+		
+		Collection<Encounter> results = dao.searchForEncounters(null, locationReference, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.iterator().next().getLocation().getPostalCode(), equalTo(ENCOUNTER_LOCATION_POSTAL_CODE));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByEncounterLocationUuid() {
+		ReferenceAndListParam locationReference = new ReferenceAndListParam();
+		ReferenceParam location = new ReferenceParam();
+		
+		location.setValue(ENCOUNTER_LOCATION_UUID);
+		
+		locationReference.addValue(new ReferenceOrListParam().add(location));
+		
+		Collection<Encounter> results = dao.searchForEncounters(null, locationReference, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.iterator().next().getLocation().getUuid(), equalTo(ENCOUNTER_LOCATION_UUID));
 	}
 	
 	@Test
@@ -382,13 +473,13 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		ReferenceParam locationCity = new ReferenceParam();
 		ReferenceParam locationCountry = new ReferenceParam();
 		
-		locationState.setValue(ENCOUNTER_ADDRESS_STATE);
+		locationState.setValue(ENCOUNTER_LOCATION_STATE);
 		locationState.setChain(Location.SP_ADDRESS_STATE);
 		
-		locationCity.setValue(ENCOUNTER_ADDRESS_CITY);
+		locationCity.setValue(ENCOUNTER_LOCATION_CITY);
 		locationCity.setChain(Location.SP_ADDRESS_CITY);
 		
-		locationCountry.setValue(ENCOUNTER_ADDRESS_COUNTRY);
+		locationCountry.setValue(ENCOUNTER_LOCATION_COUNTRY);
 		locationCountry.setChain(Location.SP_ADDRESS_COUNTRY);
 		
 		locationReference.addValue(new ReferenceOrListParam().add(locationCity).add(locationCountry).add(locationState));
@@ -398,8 +489,8 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, Matchers.notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results.iterator().next().getUuid(), equalTo(ENC_UUID));
-		assertThat(results.iterator().next().getLocation().getStateProvince(), equalTo(ENCOUNTER_ADDRESS_STATE));
-		assertThat(results.iterator().next().getLocation().getCityVillage(), equalTo(ENCOUNTER_ADDRESS_CITY));
-		assertThat(results.iterator().next().getLocation().getCountry(), equalTo(ENCOUNTER_ADDRESS_COUNTRY));
+		assertThat(results.iterator().next().getLocation().getStateProvince(), equalTo(ENCOUNTER_LOCATION_STATE));
+		assertThat(results.iterator().next().getLocation().getCityVillage(), equalTo(ENCOUNTER_LOCATION_CITY));
+		assertThat(results.iterator().next().getLocation().getCountry(), equalTo(ENCOUNTER_LOCATION_COUNTRY));
 	}
 }
