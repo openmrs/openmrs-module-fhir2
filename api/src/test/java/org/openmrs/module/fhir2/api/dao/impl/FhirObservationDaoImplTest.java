@@ -251,8 +251,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		ReferenceParam patient = new ReferenceParam();
 		
 		patient.setValue(PATIENT_UUID);
-		patient.setChain("");
-		
+
 		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		Collection<Obs> results = dao.searchForObservations(null, patientReference, null, null, null, null, null, null, null,
@@ -457,8 +456,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		ReferenceParam patient = new ReferenceParam();
 		
 		patient.setValue(PATIENT_UUID);
-		patient.setChain("");
-		
+
 		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		SortSpec sort = new SortSpec();
