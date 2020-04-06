@@ -75,6 +75,10 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_MEDICINE = OPENMRS_FHIR_EXT_PREFIX + "/medicine";
 	
+	public static final String RELATED_PERSON = "RelatedPerson";
+	
+	public static final String PERSON = "Person";
+	
 	public static final String OPENMRS_FHIR_EXT_USER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/user/identifier";
 	
 	public static final String OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/provider/identifier";
