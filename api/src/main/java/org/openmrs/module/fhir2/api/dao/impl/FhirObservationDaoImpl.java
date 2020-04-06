@@ -13,10 +13,6 @@ import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Collection;
-import java.util.Optional;
-
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -25,51 +21,56 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservationDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+public class FhirObservationDaoImpl extends BaseFhirDaoImpl<Obs> implements FhirObservationDao {
 	
 	@Override
-	public Obs getObsByUuid(String uuid) {
-		return (Obs) sessionFactory.getCurrentSession().createCriteria(Obs.class).add(eq("uuid", uuid)).uniqueResult();
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(p -> handleEncounterReference("e", (ReferenceAndListParam) p.getParam())
+					        .ifPresent(c -> criteria.createAlias("encounter", "e").add(c)));
+					break;
+				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(patientReference -> handlePatientReference(criteria,
+					    (ReferenceAndListParam) patientReference.getParam(), "person"));
+					break;
+				case FhirConstants.CODED_SEARCH_HANDLER:
+					entry.getValue().forEach(code -> handleCodedConcept(criteria, (TokenAndListParam) code.getParam()));
+					break;
+				case FhirConstants.VALUE_CODED_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    valueCoded -> handleValueCodedConcept(criteria, (TokenAndListParam) valueCoded.getParam()));
+					break;
+				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
+					entry.getValue().forEach(dateRangeParam -> handleDateRange(dateRangeParam.getPropertyName(),
+					    (DateRangeParam) dateRangeParam.getParam()));
+					break;
+				case FhirConstants.HAS_MEMBER_SEARCH_HANDLER:
+					entry.getValue().forEach(hasMemberReference -> handleHasMemberReference(criteria,
+					    (ReferenceParam) hasMemberReference.getParam()));
+					break;
+				case FhirConstants.QUANTITY_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    quantity -> handleQuantity(quantity.getPropertyName(), (QuantityAndListParam) quantity.getParam()));
+					break;
+				case FhirConstants.VALUE_STRING_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    string -> handleValueStringParam(string.getPropertyName(), (StringAndListParam) string.getParam()));
+					break;
+			}
+		});
 	}
 	
-	@Override
-	public Collection<Obs> searchForObservations(ReferenceAndListParam encounterReference,
-	        ReferenceAndListParam patientReference, ReferenceParam hasMemberReference, TokenAndListParam valueConcept,
-	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
-	        DateRangeParam date, TokenAndListParam code, SortSpec sort) {
-		
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Obs.class);
-		
-		handleEncounterReference("e", encounterReference).ifPresent(c -> criteria.createAlias("encounter", "e").add(c));
-		handlePatientReference(criteria, patientReference, "person");
-		handleHasMemberReference(criteria, hasMemberReference);
-		handleValueCodedConcept(criteria, valueConcept);
-		handleDateRange("valueDatetime", valueDateParam).ifPresent(criteria::add);
-		
-		handleValueStringParam("valueText", valueStringParam).ifPresent(criteria::add);
-		handleQuantity("valueNumeric", valueQuantityParam).ifPresent(criteria::add);
-		handleDateRange("obsDatetime", date).ifPresent(criteria::add);
-		handleCodedConcept(criteria, code);
-		handleSort(criteria, sort);
-		
-		return criteria.list();
-	}
-	
-	protected void handleHasMemberReference(Criteria criteria, ReferenceParam hasMemberReference) {
+	private void handleHasMemberReference(Criteria criteria, ReferenceParam hasMemberReference) {
 		if (hasMemberReference != null) {
 			criteria.createAlias("groupMembers", "gm");
 			
@@ -87,11 +88,28 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 		}
 	}
 	
-	protected Optional<Criterion> handleValueStringParam(@NotNull String propertyName, StringAndListParam valueStringParam) {
-		if (valueStringParam == null) {
-			return Optional.empty();
+	private void handleValueStringParam(@NotNull String propertyName, StringAndListParam valueStringParam) {
+		if (valueStringParam != null) {
+			handleAndListParam(valueStringParam, v -> propertyLike(propertyName, v.getValue()));
 		}
-		return handleAndListParam(valueStringParam, v -> propertyLike(propertyName, v.getValue()));
+	}
+	
+	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
+		if (code != null) {
+			if (!containsAlias(criteria, "c")) {
+				criteria.createAlias("concept", "c");
+			}
+			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
+		}
+	}
+	
+	private void handleValueCodedConcept(Criteria criteria, TokenAndListParam valueConcept) {
+		if (valueConcept != null) {
+			if (!containsAlias(criteria, "vc")) {
+				criteria.createAlias("valueCoded", "vc");
+			}
+			handleCodeableConcept(criteria, valueConcept, "vc", "vcm", "vcrt").ifPresent(criteria::add);
+		}
 	}
 	
 	@Override
@@ -102,19 +120,4 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 		
 		return null;
 	}
-	
-	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
-		if (code != null) {
-			criteria.createAlias("concept", "c");
-			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
-		}
-	}
-	
-	private void handleValueCodedConcept(Criteria criteria, TokenAndListParam valueConcept) {
-		if (valueConcept != null) {
-			criteria.createAlias("valueCoded", "c");
-			handleCodeableConcept(criteria, valueConcept, "c", "cm", "crt").ifPresent(criteria::add);
-		}
-	}
-	
 }

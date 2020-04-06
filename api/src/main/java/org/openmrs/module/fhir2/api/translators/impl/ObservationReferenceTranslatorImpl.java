@@ -50,6 +50,6 @@ public class ObservationReferenceTranslatorImpl extends AbstractReferenceHandlin
 			return null;
 		}
 		
-		return observationDao.getObsByUuid(uuid);
+		return observationDao.get(uuid);
 	}
 }

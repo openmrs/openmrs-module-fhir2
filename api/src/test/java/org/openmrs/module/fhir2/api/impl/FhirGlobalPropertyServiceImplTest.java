@@ -12,8 +12,10 @@ package org.openmrs.module.fhir2.api.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirGlobalPropertyDao;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,6 +41,12 @@ public class FhirGlobalPropertyServiceImplTest {
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "12323h324-32423n30-32n23-23j23";
 	
 	private static final String GLOBAL_PROPERTY_MODERATE = "1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String DEFAULT_PAGE_SIZE = "default.page.size";
+	
+	private static final String DEFAULT_PAGE_SIZE_STRING_VALUE = "10";
+	
+	private static final Integer DEFAULT_PAGE_SIZE_INTEGER_VALUE = 10;
 	
 	@Mock
 	private FhirGlobalPropertyDao fhirGlobalPropertyDao;
@@ -81,5 +90,48 @@ public class FhirGlobalPropertyServiceImplTest {
 		assertThat(values, CoreMatchers.notNullValue());
 		assertThat(values.size(), greaterThanOrEqualTo(1));
 		assertThat(values.get(FhirConstants.GLOBAL_PROPERTY_MODERATE), CoreMatchers.equalTo(GLOBAL_PROPERTY_MODERATE));
+	}
+	
+	@Test
+	public void shouldReturnIntegerGlobalPropertyValueWhenPropertyMatched() {
+		FhirGlobalPropertyService globalPropertyService = mock(FhirGlobalPropertyService.class);
+		when(globalPropertyService.getGlobalProperty(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_INTEGER_VALUE)).thenReturn(100);
+		
+		int result = globalPropertyService.getGlobalProperty(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_INTEGER_VALUE);
+		assertThat(result, notNullValue());
+		assertThat(result, is(100));
+	}
+	
+	@Test
+	public void shouldReturnDefaultIntegerGlobalPropertyValueWhenPropertyNotMatched() {
+		int result = globalPropertyService.getGlobalProperty(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_INTEGER_VALUE);
+		assertThat(result, notNullValue());
+		assertThat(result, is(DEFAULT_PAGE_SIZE_INTEGER_VALUE));
+	}
+	
+	@Test
+	public void shouldReturnStringGlobalPropertyValueWhenPropertyMatched() {
+		FhirGlobalPropertyService globalPropertyService = mock(FhirGlobalPropertyService.class);
+		when(globalPropertyService.getGlobalProperty(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_STRING_VALUE)).thenReturn("100");
+		
+		String result = globalPropertyService.getGlobalProperty(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_STRING_VALUE);
+		assertThat(result, notNullValue());
+		assertThat(result, is("100"));
+	}
+	
+	@Test
+	public void shouldReturnDefaultStringGlobalPropertyValueWhenPropertyNotMatched() {
+		String result = globalPropertyService.getGlobalProperty(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_STRING_VALUE);
+		assertThat(result, notNullValue());
+		assertThat(result, is(DEFAULT_PAGE_SIZE_STRING_VALUE));
+	}
+	
+	@Test
+	public void shouldThrowNumberFormatException() {
+		when(globalPropertyService.getGlobalProperty(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_STRING_VALUE))
+		        .thenReturn("Invalid");
+		Integer result = globalPropertyService.getGlobalProperty(DEFAULT_PAGE_SIZE, 0);
+		assertThat(result, notNullValue());
+		assertThat(result, is(0));
 	}
 }

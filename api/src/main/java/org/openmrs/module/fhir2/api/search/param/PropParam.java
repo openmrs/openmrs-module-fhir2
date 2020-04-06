@@ -7,20 +7,20 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api;
+package org.openmrs.module.fhir2.api.search.param;
 
-import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import org.openmrs.api.APIException;
-
-public interface FhirGlobalPropertyService {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PropParam<T> {
 	
-	String getGlobalProperty(String property) throws APIException;
+	private String propertyName;
 	
-	Integer getGlobalProperty(String property, Integer defaultValue);
-	
-	String getGlobalProperty(String property, String defaultValue);
-	
-	Map<String, String> getGlobalProperties(String... properties);
-	
+	private T param;
 }

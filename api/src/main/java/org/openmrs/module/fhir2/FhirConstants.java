@@ -133,4 +133,24 @@ public class FhirConstants {
 	
 	public static final String AUT = "AUT";
 	
+	public static final String AND_LIST_PARAMS_SEARCH_HANDLER = "and.list.params.search.handler";
+	
+	public static final String OR_LIST_PARAMS_SEARCH_HANDLER = "or.list.params.search.handler";
+	
+	public static final String ENCOUNTER_REFERENCE_SEARCH_HANDLER = "encounter.reference.search.handler";
+	
+	public static final String PATIENT_REFERENCE_SEARCH_HANDLER = "patient.reference.search.handler";
+	
+	public static final String CODED_SEARCH_HANDLER = "coded.search.handler";
+	
+	public static final String VALUE_CODED_SEARCH_HANDLER = "value.coded.search.handler";
+	
+	public static final String DATE_RANGE_SEARCH_HANDLER = "date.range.search.handler";
+	
+	public static final String HAS_MEMBER_SEARCH_HANDLER = "obs.has.member.search.handler";
+	
+	public static final String QUANTITY_SEARCH_HANDLER = "quantity.search.handler";
+	
+	public static final String VALUE_STRING_SEARCH_HANDLER = "value.string.search.handler";
+	
 }

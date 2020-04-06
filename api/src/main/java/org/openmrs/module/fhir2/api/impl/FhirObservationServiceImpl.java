@@ -9,10 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -22,8 +20,12 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
+import org.openmrs.Obs;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,26 +37,38 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirObservationServiceImpl implements FhirObservationService {
 	
 	@Autowired
-	FhirObservationDao dao;
+	private FhirObservationDao dao;
 	
 	@Autowired
-	ObservationTranslator observationTranslator;
+	private ObservationTranslator observationTranslator;
+	
+	@Autowired
+	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Observation getObservationByUuid(String uuid) {
-		return observationTranslator.toFhirResource(dao.getObsByUuid(uuid));
+		return observationTranslator.toFhirResource(dao.get(uuid));
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Collection<Observation> searchForObservations(ReferenceAndListParam encounterReference,
+	public IBundleProvider searchForObservations(ReferenceAndListParam encounterReference,
 	        ReferenceAndListParam patientReference, ReferenceParam hasMemberReference, TokenAndListParam valueConcept,
 	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
 	        DateRangeParam date, TokenAndListParam code, SortSpec sort) {
-		return dao
-		        .searchForObservations(encounterReference, patientReference, hasMemberReference, valueConcept,
-		            valueDateParam, valueQuantityParam, valueStringParam, date, code, sort)
-		        .stream().map(observationTranslator::toFhirResource).collect(Collectors.toList());
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.VALUE_CODED_SEARCH_HANDLER, valueConcept)
+		        .addParameter(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, hasMemberReference)
+		        .addParameter(FhirConstants.AND_LIST_PARAMS_SEARCH_HANDLER, "valueText", valueStringParam)
+		        .addParameter(FhirConstants.AND_LIST_PARAMS_SEARCH_HANDLER, "valueNumeric", valueQuantityParam)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime", date)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "valueDatetime", valueDateParam).setSortSpec(sort);
+		
+		return searchQuery.getQueryResults(theParams, dao, observationTranslator);
 	}
 }

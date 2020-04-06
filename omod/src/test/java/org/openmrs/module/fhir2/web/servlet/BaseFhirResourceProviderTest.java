@@ -20,12 +20,14 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import lombok.SneakyThrows;
@@ -51,6 +53,10 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, U extends IBaseResource> {
 	
 	private static final String SERVLET_NAME = "fhir2Servlet";
+	
+	private static final int FROM_INDEX = 0;
+	
+	private static final int TO_INDEX = 10;
 	
 	private static ServletConfig servletConfig;
 	
@@ -144,6 +150,10 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 	
 	public Bundle readBundleResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (Bundle) parser.parseResource(response.getContentAsString());
+	}
+	
+	public List<IBaseResource> getResources(IBundleProvider results) {
+		return results.getResources(FROM_INDEX, TO_INDEX);
 	}
 	
 	public abstract T getResourceProvider();

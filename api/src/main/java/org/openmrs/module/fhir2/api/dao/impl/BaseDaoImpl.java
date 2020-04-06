@@ -473,6 +473,7 @@ public abstract class BaseDaoImpl {
 		if (quantityAndListParam == null) {
 			return Optional.empty();
 		}
+		
 		return handleAndListParam(quantityAndListParam, quantityParam -> handleQuantity(propertyName, quantityParam));
 	}
 	
@@ -481,10 +482,9 @@ public abstract class BaseDaoImpl {
 		if (encounterReference == null) {
 			return Optional.empty();
 		}
-		return handleAndListParam(encounterReference, token -> {
-			Optional.of(eq(String.format("%s.uuid", encounterAlias), token.getIdPart()));
-			return Optional.empty();
-		});
+		
+		return handleAndListParam(encounterReference,
+		    token -> Optional.of(eq(String.format("%s.uuid", encounterAlias), token.getIdPart())));
 	}
 	
 	protected Optional<Criterion> handleGender(@NotNull String propertyName, TokenOrListParam gender) {
@@ -941,7 +941,7 @@ public abstract class BaseDaoImpl {
 	}
 	
 	/**
-	 * This object is used to pass around the state of the sorting where that's needed.
+	 * This object is used to store the state of the sorting
 	 */
 	@Data
 	@Builder

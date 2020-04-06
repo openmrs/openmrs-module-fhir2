@@ -69,7 +69,7 @@ public class ObservationReferenceTranslatorImplTest {
 		Obs obs = new Obs();
 		obs.setUuid(UUID);
 		
-		when(dao.getObsByUuid(UUID)).thenReturn(obs);
+		when(dao.get(UUID)).thenReturn(obs);
 		
 		Obs result = observationReferenceTranslator.toOpenmrsType(observationReference);
 		
