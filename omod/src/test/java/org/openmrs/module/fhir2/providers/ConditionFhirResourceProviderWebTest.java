@@ -69,7 +69,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldReturnPersonByUuid() throws Exception {
+	public void shouldReturnConditionByUuid() throws Exception {
 		Condition condition = new Condition();
 		condition.setId(CONDITION_UUID);
 		when(conditionService.getConditionByUuid(CONDITION_UUID)).thenReturn(condition);
@@ -84,7 +84,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void shouldReturn404IfPersonNotFound() throws Exception {
+	public void shouldReturn404IfConditionNotFound() throws Exception {
 		when(conditionService.getConditionByUuid(WRONG_CONDITION_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/Condition/" + WRONG_CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
