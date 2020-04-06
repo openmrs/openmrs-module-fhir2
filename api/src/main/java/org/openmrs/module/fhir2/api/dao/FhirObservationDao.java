@@ -9,26 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
-
-import java.util.Collection;
-
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QuantityAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Obs;
 
-public interface FhirObservationDao {
+public interface FhirObservationDao extends FhirDao<Obs> {
 	
-	Obs getObsByUuid(@NotNull String uuid);
-	
-	Collection<Obs> searchForObservations(ReferenceAndListParam encounterReference, ReferenceAndListParam patientReference,
-	        ReferenceParam hasMemberReference, TokenAndListParam valueConcept, DateRangeParam valueDateParam,
-	        QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam, DateRangeParam date,
-	        
-	        TokenAndListParam code, SortSpec sort);
 }

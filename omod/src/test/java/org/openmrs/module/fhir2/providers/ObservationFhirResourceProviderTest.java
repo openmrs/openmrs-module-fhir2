@@ -13,21 +13,22 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Provenance;
@@ -98,21 +99,24 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	
 	@Test
 	public void searchObservations_shouldReturnMatchingObservations() {
-		List<Observation> obs = new ArrayList<>();
-		obs.add(observation);
+		observation = new Observation();
+		observation.setId(OBSERVATION_UUID);
+		
 		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(obs);
+		        .thenReturn(new BaseFhirIBundleResourceProviderTest<>(Collections.singletonList(observation), 10, 1));
+		
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
 		codingToken.setValue("1000");
 		code.addAnd(codingToken);
 		
-		Bundle results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, code, null);
+		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, code,
+		    null);
 		assertThat(results, notNullValue());
-		assertThat(results.getTotal(), equalTo(1));
-		assertThat(results.getEntry(), notNullValue());
-		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("Observation"));
-		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(OBSERVATION_UUID));
+		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
+		assertThat(results.getResources(1, 5).get(0), notNullValue());
+		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo("Observation"));
+		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
 	
 	@Test

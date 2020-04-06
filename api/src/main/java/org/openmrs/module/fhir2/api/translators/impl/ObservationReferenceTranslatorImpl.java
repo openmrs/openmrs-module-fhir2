@@ -50,6 +50,6 @@ public class ObservationReferenceTranslatorImpl extends BaseReferenceHandlingTra
 			return null;
 		}
 		
-		return observationDao.getObsByUuid(uuid);
+		return observationDao.get(uuid);
 	}
 }

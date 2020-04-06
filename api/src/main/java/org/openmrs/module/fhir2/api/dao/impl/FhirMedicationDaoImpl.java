@@ -60,9 +60,4 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 			handleCodeableConcept(criteria, dosageForm, "dc", "dcm", "dcrt").ifPresent(criteria::add);
 		}
 	}
-	
-	@Override
-	public Drug delete(String uuid) {
-		return super.delete(uuid);
-	}
 }

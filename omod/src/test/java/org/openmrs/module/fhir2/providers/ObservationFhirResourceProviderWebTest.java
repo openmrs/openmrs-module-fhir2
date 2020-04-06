@@ -582,7 +582,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirResourceProv
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
 		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(Collections.singletonList(observation));
+		        .thenReturn(new BaseFhirIBundleResourceProviderTest<>(Collections.singletonList(observation), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
