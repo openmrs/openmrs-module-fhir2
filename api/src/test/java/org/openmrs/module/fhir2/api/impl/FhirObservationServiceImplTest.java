@@ -12,36 +12,45 @@ package org.openmrs.module.fhir2.api.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Obs;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
+import org.openmrs.module.fhir2.api.search.ISearchQuery;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FhirObservationServiceImplTest {
+public class FhirObservationServiceImplTest extends BaseIBundleProviderTest<Observation> {
 	
 	private static final String OBS_UUID = "12345-abcde-12345";
 	
-	@Mock
-	FhirObservationDao dao;
+	private static final String PATIENT_GIVEN_NAME = "Clement";
 	
 	@Mock
-	ObservationTranslator observationTranslator;
+	private FhirObservationDao dao;
+	
+	@Mock
+	private ISearchQuery<FhirObservationDao, ObservationTranslator> searchQuery;
+	
+	@Mock
+	private ObservationTranslator observationTranslator;
 	
 	private FhirObservationServiceImpl fhirObservationService;
 	
@@ -49,6 +58,7 @@ public class FhirObservationServiceImplTest {
 	public void setup() {
 		fhirObservationService = new FhirObservationServiceImpl();
 		fhirObservationService.setDao(dao);
+		fhirObservationService.setSearchQuery(searchQuery);
 		fhirObservationService.setObservationTranslator(observationTranslator);
 	}
 	
@@ -69,21 +79,25 @@ public class FhirObservationServiceImplTest {
 	
 	@Test
 	public void searchForObservations_shouldReturnObservationsByParameters() {
-		Collection<Obs> obs = new ArrayList<>();
-		Obs ob = new Obs();
-		ob.setUuid(OBS_UUID);
-		obs.add(ob);
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
-		when(dao.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(obs);
-		when(observationTranslator.toFhirResource(ob)).thenReturn(observation);
 		
-		Collection<Observation> results = fhirObservationService.searchForObservations(null, null, null, null, null, null,
-		    null, null, null, null);
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
 		
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("id", equalTo(OBS_UUID))));
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		patientReference.addValue(new ReferenceOrListParam().add(patient));
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addAndParam(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(getQueryResults(observation));
+		
+		IBundleProvider results = fhirObservationService.searchForObservations(null, patientReference, null, null, null,
+		    null, null, null, null, null);
+		
+		assertThat(get(results), not(empty()));
+		assertThat(get(results), hasSize(equalTo(1)));
 	}
 }

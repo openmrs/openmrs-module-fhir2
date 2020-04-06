@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -31,13 +32,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirObservationService;
-import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -66,7 +65,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	public Bundle searchObservations(
+	public IBundleProvider searchObservations(
 	        @OptionalParam(name = Observation.SP_ENCOUNTER) ReferenceAndListParam encounterReference,
 	        @OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY,
@@ -79,9 +78,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Observation.SP_VALUE_STRING) StringAndListParam valueStringParam,
 	        @OptionalParam(name = Observation.SP_DATE) DateRangeParam date,
 	        @OptionalParam(name = Observation.SP_CODE) TokenAndListParam code, @Sort SortSpec sort) {
-		return FhirServerUtils.convertSearchResultsToBundle(
-		    observationService.searchForObservations(encounterReference, patientReference, hasMemberReference, valueConcept,
-		        valueDateParam, valueQuantityParam, valueStringParam, date, code, sort));
+		return observationService.searchForObservations(encounterReference, patientReference, hasMemberReference,
+		    valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date, code, sort);
 	}
 	
 	@History

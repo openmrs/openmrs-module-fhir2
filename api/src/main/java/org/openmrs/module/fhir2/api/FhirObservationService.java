@@ -11,9 +11,8 @@ package org.openmrs.module.fhir2.api;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -26,8 +25,8 @@ public interface FhirObservationService {
 	
 	Observation getObservationByUuid(@NotNull String uuid);
 	
-	Collection<Observation> searchForObservations(ReferenceAndListParam encounterReference,
-	        ReferenceAndListParam patientReference, ReferenceParam hasMemberReference, TokenAndListParam valueConcept,
-	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
-	        DateRangeParam date, TokenAndListParam code, SortSpec sort);
+	IBundleProvider searchForObservations(ReferenceAndListParam encounterReference, ReferenceAndListParam patientReference,
+	        ReferenceParam hasMemberReference, TokenAndListParam valueConcept, DateRangeParam valueDateParam,
+	        QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam, DateRangeParam date,
+	        TokenAndListParam code, SortSpec sort);
 }

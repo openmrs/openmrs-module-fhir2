@@ -18,17 +18,24 @@ import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
@@ -98,21 +105,24 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	
 	@Test
 	public void searchObservations_shouldReturnMatchingObservations() {
-		List<Observation> obs = new ArrayList<>();
-		obs.add(observation);
+		observation = new Observation();
+		observation.setId(OBSERVATION_UUID);
+		
 		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(obs);
+		        .thenReturn(getResults(Collections.singletonList(observation)));
+		
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
 		codingToken.setValue("1000");
 		code.addAnd(codingToken);
 		
-		Bundle results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, code, null);
+		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, code,
+		    null);
 		assertThat(results, notNullValue());
-		assertThat(results.getTotal(), equalTo(1));
-		assertThat(results.getEntry(), notNullValue());
-		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("Observation"));
-		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(OBSERVATION_UUID));
+		assertThat(results.getResources(1, 5).size(), equalTo(1));
+		assertThat(results.getResources(1, 5).get(0), notNullValue());
+		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo("Observation"));
+		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
 	
 	@Test
@@ -146,5 +156,38 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		idType.setValue(WRONG_OBSERVATION_UUID);
 		assertThat(resourceProvider.getObservationHistoryById(idType).isEmpty(), is(true));
 		assertThat(resourceProvider.getObservationHistoryById(idType).size(), Matchers.equalTo(0));
+	}
+	
+	private IBundleProvider getResults(List<IBaseResource> resources) {
+		return new IBundleProvider() {
+			
+			@Override
+			public IPrimitiveType<Date> getPublished() {
+				return InstantType.withCurrentTime();
+			}
+			
+			@Nonnull
+			@Override
+			public List<IBaseResource> getResources(int i, int i1) {
+				return resources;
+			}
+			
+			@Nullable
+			@Override
+			public String getUuid() {
+				return null;
+			}
+			
+			@Override
+			public Integer preferredPageSize() {
+				return null;
+			}
+			
+			@Nullable
+			@Override
+			public Integer size() {
+				return null;
+			}
+		};
 	}
 }

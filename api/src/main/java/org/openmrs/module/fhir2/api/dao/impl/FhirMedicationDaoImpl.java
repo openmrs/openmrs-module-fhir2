@@ -70,4 +70,9 @@ public class FhirMedicationDaoImpl extends BaseFhirDaoImpl<Drug> implements Fhir
 	public Drug delete(String uuid) {
 		return super.delete(uuid);
 	}
+	
+	@Override
+	public Drug getModelClazz() {
+		return new Drug();
+	}
 }

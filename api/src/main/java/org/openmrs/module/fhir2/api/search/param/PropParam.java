@@ -7,14 +7,21 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api.dao;
+package org.openmrs.module.fhir2.api.search.param;
 
-import javax.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import org.openmrs.Obs;
-
-public interface FhirObservationDao extends FhirDao<Obs> {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PropParam<T> {
 	
-	Obs getObsByUuid(@NotNull String uuid);
+	private String propertyName;
+	
+	private T param;
 	
 }

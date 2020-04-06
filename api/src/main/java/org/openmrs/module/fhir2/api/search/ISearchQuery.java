@@ -7,27 +7,29 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api.dao;
+package org.openmrs.module.fhir2.api.search;
 
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.Criteria;
-import org.openmrs.Auditable;
-import org.openmrs.OpenmrsObject;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
 /**
- * Base interface for all FHIR DAO objects
+ * Generic search Interface
+ *
+ * @param <O> openMrs generic DAO Class Implementation
+ * @param <T> FHIR generic translator Class
  */
-public interface FhirDao<T extends OpenmrsObject & Auditable> {
+public interface ISearchQuery<O, T> {
 	
-	T get(@NotNull String uuid);
+	/**
+	 * Gets query results
+	 * 
+	 * @param theParams search params.
+	 * @param dao generic dao
+	 * @param translator generic translator
+	 * @return IBundleProvider
+	 */
+	IBundleProvider getQueryResults(@NotNull SearchParameterMap theParams, O dao, T translator);
 	
-	T createOrUpdate(T newEntry);
-	
-	T delete(@NotNull String uuid);
-	
-	T getModelClazz();
-	
-	Criteria search(SearchParameterMap theParams);
 }

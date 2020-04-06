@@ -12,6 +12,8 @@ package org.openmrs.module.fhir2.web.servlet;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.validation.constraints.NotNull;
@@ -20,12 +22,15 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import lombok.SneakyThrows;
@@ -33,7 +38,9 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -51,6 +58,10 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, U extends IBaseResource> {
 	
 	private static final String SERVLET_NAME = "fhir2Servlet";
+	
+	private static final int FROM_INDEX = 0;
+	
+	private static final int TO_INDEX = 10;
 	
 	private static ServletConfig servletConfig;
 	
@@ -144,6 +155,43 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 	
 	public Bundle readBundleResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (Bundle) parser.parseResource(response.getContentAsString());
+	}
+	
+	public List<IBaseResource> getResources(IBundleProvider results) {
+		return results.getResources(FROM_INDEX, TO_INDEX);
+	}
+	
+	public IBundleProvider getResults(List<U> resources) {
+		return new IBundleProvider() {
+			
+			@Override
+			public IPrimitiveType<Date> getPublished() {
+				return InstantType.withCurrentTime();
+			}
+			
+			@Nonnull
+			@Override
+			public List<IBaseResource> getResources(int i, int i1) {
+				return (List<IBaseResource>) resources;
+			}
+			
+			@Nullable
+			@Override
+			public String getUuid() {
+				return null;
+			}
+			
+			@Override
+			public Integer preferredPageSize() {
+				return null;
+			}
+			
+			@Nullable
+			@Override
+			public Integer size() {
+				return null;
+			}
+		};
 	}
 	
 	public abstract T getResourceProvider();
