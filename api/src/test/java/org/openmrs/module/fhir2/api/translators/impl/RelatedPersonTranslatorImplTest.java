@@ -23,22 +23,28 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Date;
 
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.Relationship;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 
@@ -46,6 +52,8 @@ import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 public class RelatedPersonTranslatorImplTest {
 	
 	private static final String RELATIONSHIP_UUID = "2d298ef7-4eb5-4753-a998-5b5e4b1cf48a";
+	
+	private static final String PATIENT_UUID = "4x398ef7-4eb5-4753-a998-5b5e4b1cf90u";
 	
 	private static final String PERSON_FAMILY_NAME = "John";
 	
@@ -72,6 +80,12 @@ public class RelatedPersonTranslatorImplTest {
 	@Mock
 	private PersonAddressTranslator addressTranslator;
 	
+	@Mock
+	private PatientReferenceTranslator patientReferenceTranslator;
+	
+	@Mock
+	private FhirPatientDao patientDao;
+	
 	private RelatedPersonTranslatorImpl relatedPersonTranslator;
 	
 	private Relationship relationship;
@@ -88,6 +102,8 @@ public class RelatedPersonTranslatorImplTest {
 		relatedPersonTranslator.setGenderTranslator(genderTranslator);
 		relatedPersonTranslator.setNameTranslator(nameTranslator);
 		relatedPersonTranslator.setAddressTranslator(addressTranslator);
+		relatedPersonTranslator.setPatientDao(patientDao);
+		relatedPersonTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		
 		user = new User();
 		user.setUuid(USER_UUID);
@@ -102,6 +118,7 @@ public class RelatedPersonTranslatorImplTest {
 		
 		personB = new Person();
 		personB.setUuid(PERSON_A_UUID);
+		personB.setPersonId(2);
 		personB.setGender("F");
 		personB.setCreator(user);
 		personB.setDateCreated(new Date());
@@ -222,5 +239,56 @@ public class RelatedPersonTranslatorImplTest {
 		assertThat(result.getAddress(), notNullValue());
 		assertThat(result.getAddress(), not(empty()));
 		assertThat(result.getAddress().get(0), equalTo(address));
+	}
+	
+	@Test
+	public void shouldTranslateStartDateEndDateToRelatedPersonPeriod() {
+		relationship.setStartDate(new Date());
+		relationship.setEndDate(new Date());
+		RelatedPerson result = relatedPersonTranslator.toFhirResource(relationship);
+		assertThat(result, notNullValue());
+		assertThat(result.getPeriod(), notNullValue());
+		assertThat(result.getPeriod().getStart(), DateMatchers.sameDay(new Date()));
+		assertThat(result.getPeriod().getEnd(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateToPeriodWithNullStartAndEnd() {
+		RelatedPerson result = relatedPersonTranslator.toFhirResource(relationship);
+		assertThat(result, notNullValue());
+		assertThat(result.getPeriod().getStart(), nullValue());
+		assertThat(result.getPeriod().getEnd(), nullValue());
+	}
+	
+	@Test
+	public void shouldTranslatePersonBIfPatientToPatientReference() {
+		Person personMock = Mockito.mock(Person.class);
+		personMock.setUuid(PERSON_B_UUID);
+		relationship.setPersonB(personMock);
+		
+		Patient patient = new Patient();
+		patient.setUuid(PATIENT_UUID);
+		
+		Reference patientReference = new Reference();
+		patientReference.setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID);
+		
+		when(personMock.getIsPatient()).thenReturn(true);
+		when(personMock.getUuid()).thenReturn(PERSON_B_UUID);
+		when(patientDao.getPatientByUuid(PERSON_B_UUID)).thenReturn(patient);
+		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientReference);
+		
+		RelatedPerson result = relatedPersonTranslator.toFhirResource(relationship);
+		assertThat(result, notNullValue());
+		assertThat(result.getPatient(), notNullValue());
+		assertThat(result.getPatient(), notNullValue());
+		assertThat(result.getPatient(), equalTo(patientReference));
+		assertThat(result.getPatient().getReference(), equalTo(patientReference.getReference()));
+	}
+	
+	@Test
+	public void shouldTranslatePersonBToNullPatientReferenceIfNotPatient() {
+		RelatedPerson result = relatedPersonTranslator.toFhirResource(relationship);
+		assertThat(result, notNullValue());
+		assertThat(result.getPatient().getReference(), nullValue());
 	}
 }

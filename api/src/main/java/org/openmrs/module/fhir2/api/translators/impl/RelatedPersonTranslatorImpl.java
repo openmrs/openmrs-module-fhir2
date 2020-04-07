@@ -14,13 +14,16 @@ import java.util.Date;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.Relationship;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator;
@@ -40,6 +43,12 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 	@Autowired
 	private GenderTranslator genderTranslator;
 	
+	@Autowired
+	private PatientReferenceTranslator patientReferenceTranslator;
+	
+	@Autowired
+	private FhirPatientDao patientDao;
+	
 	/**
 	 * @see org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator#toFhirResource(org.openmrs.Relationship)
 	 */
@@ -53,6 +62,11 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		
 		relatedPerson.setId(relationship.getUuid());
 		relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
+		
+		if (relationship.getPersonB().getIsPatient()) {
+			relatedPerson.setPatient(
+			    patientReferenceTranslator.toFhirResource(patientDao.getPatientByUuid(relationship.getPersonB().getUuid())));
+		}
 		
 		if (omrsRelatedPerson.getGender() != null) {
 			relatedPerson.setGender(genderTranslator.toFhirResource(omrsRelatedPerson.getGender()));
@@ -80,6 +94,11 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		} else {
 			relatedPerson.setActive(false);
 		}
+		
+		Period period = new Period();
+		period.setStart(relationship.getStartDate());
+		period.setEnd(relationship.getEndDate());
+		relatedPerson.setPeriod(period);
 		
 		return relatedPerson;
 	}
