@@ -115,14 +115,11 @@ public class FhirConstants {
 	
 	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
 	
-	@Value("${project.parent.artifactId}.personAttributeTypeUuid")
-	public static String PERSON_ATTRIBUTE_TYPE_PROPERTY;
+	public static String PERSON_ATTRIBUTE_TYPE_PROPERTY = "fhir2.personAttributeTypeUuid";
 	
-	@Value("${project.parent.artifactId}.locationAttributeTypeUuid")
-	public static String LOCATION_ATTRIBUTE_TYPE_PROPERTY;
+	public static String LOCATION_ATTRIBUTE_TYPE_PROPERTY = "fhir2.locationAttributeTypeUuid";
 	
-	@Value("${project.parent.artifactId}.providerAttributeTypeUuid")
-	public static String PROVIDER_ATTRIBUTE_TYPE_PROPERTY;
+	public static String PROVIDER_ATTRIBUTE_TYPE_PROPERTY = "fhir2.providerAttributeTypeUuid";
 	
 	public static final String GLOBAL_PROPERTY_MILD = "allergy.concept.severity.mild";
 	
