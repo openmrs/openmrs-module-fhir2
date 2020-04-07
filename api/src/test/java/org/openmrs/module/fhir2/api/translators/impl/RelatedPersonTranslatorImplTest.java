@@ -25,6 +25,8 @@ import java.util.Date;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Reference;
@@ -40,6 +42,7 @@ import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.Relationship;
+import org.openmrs.RelationshipType;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
@@ -47,6 +50,7 @@ import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.RelationshipTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RelatedPersonTranslatorImplTest {
@@ -71,6 +75,10 @@ public class RelatedPersonTranslatorImplTest {
 	
 	private static final String USER_UUID = "68b1e787-e68d-424e-8aac-c3387a0ab7b5";
 	
+	private static final String RELATIONSHIP_TYPE_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
+	
+	private static final String B_IS_TO_A = "Child";
+	
 	@Mock
 	private GenderTranslator genderTranslator;
 	
@@ -85,6 +93,9 @@ public class RelatedPersonTranslatorImplTest {
 	
 	@Mock
 	private FhirPatientDao patientDao;
+	
+	@Mock
+	private RelationshipTranslator relationshipTranslator;
 	
 	private RelatedPersonTranslatorImpl relatedPersonTranslator;
 	
@@ -104,6 +115,7 @@ public class RelatedPersonTranslatorImplTest {
 		relatedPersonTranslator.setAddressTranslator(addressTranslator);
 		relatedPersonTranslator.setPatientDao(patientDao);
 		relatedPersonTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
+		relatedPersonTranslator.setRelationshipTranslator(relationshipTranslator);
 		
 		user = new User();
 		user.setUuid(USER_UUID);
@@ -195,6 +207,27 @@ public class RelatedPersonTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getActive(), is(false));
+	}
+	
+	@Test
+	public void shouldTranslateRelationshipTypeToFhirCoding() {
+		RelationshipType relationshipType = new RelationshipType();
+		relationshipType.setUuid(RELATIONSHIP_TYPE_UUID);
+		relationshipType.setbIsToA(B_IS_TO_A);
+		relationship.setRelationshipType(relationshipType);
+		
+		Coding coding = new Coding();
+		coding.setCode(B_IS_TO_A);
+		coding.setSystem(FhirConstants.OPENMRS_FHIR_EXT_RELATIONSHIP_TYPE);
+		
+		when(relationshipTranslator.toFhirResource(relationshipType)).thenReturn(new CodeableConcept().addCoding(coding));
+		RelatedPerson result = relatedPersonTranslator.toFhirResource(relationship);
+		assertThat(result, notNullValue());
+		assertThat(result.getRelationship(), not(empty()));
+		assertThat(result.getRelationship().size(), equalTo(1));
+		assertThat(result.getRelationship().get(0).getCodingFirstRep().getCode(), equalTo(B_IS_TO_A));
+		assertThat(result.getRelationship().get(0).getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.OPENMRS_FHIR_EXT_RELATIONSHIP_TYPE));
 	}
 	
 	@Test
