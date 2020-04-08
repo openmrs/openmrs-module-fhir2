@@ -13,19 +13,16 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
-import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTelecomTranslator;
@@ -53,6 +50,12 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	@Autowired
 	private ProvenanceTranslator<Person> provenanceTranslator;
 	
+	@Autowired
+	private PatientReferenceTranslator patientReferenceTranslator;
+	
+	@Autowired
+	private FhirPatientDao patientDao;
+	
 	@Override
 	public org.hl7.fhir.r4.model.Person toFhirResource(@NotNull Person openmrsPerson) {
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
@@ -74,31 +77,15 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			}
 			person.setTelecom(telecomTranslator.toFhirResource(openmrsPerson));
 			
-			buildPersonLinks(openmrsPerson, person);
+			if (openmrsPerson.getIsPatient()) {
+				person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent().setTarget(
+				    patientReferenceTranslator.toFhirResource(patientDao.getPatientByUuid(openmrsPerson.getUuid()))));
+			}
 			person.getMeta().setLastUpdated(openmrsPerson.getDateChanged());
 			person.addContained(provenanceTranslator.getCreateProvenance(openmrsPerson));
 			person.addContained(provenanceTranslator.getUpdateProvenance(openmrsPerson));
 		}
 		return person;
-	}
-	
-	/**
-	 * TODO Find a better way to implement this generically and maybe move to different package
-	 */
-	private void buildPersonLinks(@NotNull Person openmrsPerson, org.hl7.fhir.r4.model.Person person) {
-		if (openmrsPerson.getIsPatient()) {
-			List<org.hl7.fhir.r4.model.Person.PersonLinkComponent> links = new ArrayList<>();
-			org.hl7.fhir.r4.model.Person.PersonLinkComponent linkComponent = new org.hl7.fhir.r4.model.Person.PersonLinkComponent();
-			String uri = FhirConstants.PATIENT + "/" + openmrsPerson.getUuid();
-			Reference patientReference = new Reference();
-			PersonName name = openmrsPerson.getPersonName();
-			patientReference.setDisplay(name.getFullName());
-			patientReference.setId(uri);
-			linkComponent.setTarget(patientReference);
-			links.add(linkComponent);
-			
-			person.setLink(links);
-		}
 	}
 	
 	@Override

@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
@@ -30,18 +31,23 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
 import org.openmrs.User;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTelecomTranslator;
@@ -92,6 +98,12 @@ public class PersonTranslatorImplTest {
 	@Mock
 	private ProvenanceTranslator<Person> provenanceTranslator;
 	
+	@Mock
+	private FhirPatientDao patientDao;
+	
+	@Mock
+	private PatientReferenceTranslator patientReferenceTranslator;
+	
 	private PersonTranslatorImpl personTranslator;
 	
 	private Person personMock;
@@ -106,6 +118,8 @@ public class PersonTranslatorImplTest {
 		personTranslator.setAddressTranslator(addressTranslator);
 		personTranslator.setTelecomTranslator(telecomTranslator);
 		personTranslator.setProvenanceTranslator(provenanceTranslator);
+		personTranslator.setPatientDao(patientDao);
+		personTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 	}
 	
 	@Before
@@ -356,6 +370,36 @@ public class PersonTranslatorImplTest {
 		assertThat(people.getAttributes(), notNullValue());
 		assertThat(people.getAttributes().isEmpty(), is(false));
 		assertThat(people.getAttributes().size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldAddPersonLinkIfIsAPatient() {
+		Person personMock = mock(Person.class);
+		personMock.setUuid(PERSON_UUID);
+		personMock.setGender("M");
+		
+		Patient patient = new Patient();
+		patient.setUuid(PERSON_UUID);
+		
+		Reference patientReference = new Reference();
+		patientReference.setReference(FhirConstants.PATIENT + "/" + PERSON_UUID);
+		
+		when(personMock.getIsPatient()).thenReturn(true);
+		when(patientDao.getPatientByUuid(personMock.getUuid())).thenReturn(patient);
+		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientReference);
+		
+		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(personMock);
+		assertThat(result, notNullValue());
+		assertThat(result.getLink(), not(empty()));
+		assertThat(result.getLinkFirstRep().getTarget(), equalTo(patientReference));
+		assertThat(result.getLinkFirstRep().getTarget().getReference(), equalTo(patientReference.getReference()));
+	}
+	
+	@Test
+	public void shouldNotAddPersonLinkIfNotAPatient() {
+		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(personMock);
+		assertThat(result, notNullValue());
+		assertThat(result.getLink(), is(empty()));
 	}
 	
 	@Test
