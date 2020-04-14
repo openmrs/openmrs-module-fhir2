@@ -15,28 +15,22 @@ import javax.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
-import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
-import org.openmrs.PersonAttribute;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonTelecomTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
-import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -54,13 +48,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	private GenderTranslator genderTranslator;
 	
 	@Autowired
-	private TelecomTranslator<Object> telecomTranslator;
-	
-	@Autowired
-	private FhirPersonDao fhirPersonDao;
-	
-	@Autowired
-	private FhirGlobalPropertyService globalPropertyService;
+	private PersonTelecomTranslator telecomTranslator;
 	
 	@Autowired
 	private ProvenanceTranslator<Person> provenanceTranslator;
@@ -84,7 +72,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			for (PersonAddress address : openmrsPerson.getAddresses()) {
 				person.addAddress(addressTranslator.toFhirResource(address));
 			}
-			person.setTelecom(getPersonContactDetails(openmrsPerson));
+			person.setTelecom(telecomTranslator.toFhirResource(openmrsPerson));
 			
 			buildPersonLinks(openmrsPerson, person);
 			person.getMeta().setLastUpdated(openmrsPerson.getDateChanged());
@@ -92,13 +80,6 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			person.addContained(provenanceTranslator.getUpdateProvenance(openmrsPerson));
 		}
 		return person;
-	}
-	
-	public List<ContactPoint> getPersonContactDetails(@NotNull Person person) {
-		return fhirPersonDao
-		        .getActiveAttributesByPersonAndAttributeTypeUuid(person,
-		            globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY))
-		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	/**
@@ -148,10 +129,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		for (Address address : person.getAddress()) {
 			openmrsPerson.addAddress(addressTranslator.toOpenmrsType(address));
 		}
-		Set<PersonAttribute> attributes = person.getTelecom().stream()
-		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
-		        .collect(Collectors.toSet());
-		openmrsPerson.setAttributes(attributes);
+		openmrsPerson.setAttributes(telecomTranslator.toOpenmrsType(person.getTelecom()));
 		
 		return openmrsPerson;
 	}
