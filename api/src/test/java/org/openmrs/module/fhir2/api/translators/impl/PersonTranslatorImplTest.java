@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Date;
-import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Address;
@@ -42,13 +41,11 @@ import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
 import org.openmrs.User;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.PersonTelecomTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
-import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -90,13 +87,7 @@ public class PersonTranslatorImplTest {
 	private PersonAddressTranslator addressTranslator;
 	
 	@Mock
-	private TelecomTranslator<Object> telecomTranslator;
-	
-	@Mock
-	private FhirGlobalPropertyService globalPropertyService;
-	
-	@Mock
-	private FhirPersonDao fhirPersonDao;
+	private PersonTelecomTranslator telecomTranslator;
 	
 	@Mock
 	private ProvenanceTranslator<Person> provenanceTranslator;
@@ -114,8 +105,6 @@ public class PersonTranslatorImplTest {
 		personTranslator.setNameTranslator(nameTranslator);
 		personTranslator.setAddressTranslator(addressTranslator);
 		personTranslator.setTelecomTranslator(telecomTranslator);
-		personTranslator.setFhirPersonDao(fhirPersonDao);
-		personTranslator.setGlobalPropertyService(globalPropertyService);
 		personTranslator.setProvenanceTranslator(provenanceTranslator);
 	}
 	
@@ -351,6 +340,8 @@ public class PersonTranslatorImplTest {
 		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
 		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
 		personAttribute.setAttributeType(attributeType);
+		Person omrsPerson = new Person();
+		omrsPerson.addAttribute(personAttribute);
 		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
 		ContactPoint contactPoint = new ContactPoint();
@@ -358,28 +349,13 @@ public class PersonTranslatorImplTest {
 		contactPoint.setValue(PERSON_ATTRIBUTE_VALUE);
 		person.addTelecom(contactPoint);
 		
+		when(telecomTranslator.toOpenmrsType(person.getTelecom())).thenReturn(omrsPerson.getAttributes());
 		Person people = personTranslator.toOpenmrsType(person);
 		
 		assertThat(people, notNullValue());
 		assertThat(people.getAttributes(), notNullValue());
 		assertThat(people.getAttributes().isEmpty(), is(false));
 		assertThat(people.getAttributes().size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void shouldReturnPersonContactPointGivenOpenMrsPerson() {
-		PersonAttributeType attributeType = new PersonAttributeType();
-		attributeType.setName(PERSON_ATTRIBUTE_TYPE_NAME);
-		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
-		PersonAttribute personAttribute = new PersonAttribute();
-		personAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
-		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
-		personAttribute.setAttributeType(attributeType);
-		Person person = new Person();
-		person.addAttribute(personAttribute);
-		
-		List<ContactPoint> contactPoints = personTranslator.getPersonContactDetails(person);
-		assertThat(contactPoints, notNullValue());
 	}
 	
 	@Test
