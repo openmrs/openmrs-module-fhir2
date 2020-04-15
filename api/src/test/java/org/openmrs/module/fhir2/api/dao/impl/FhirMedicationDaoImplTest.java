@@ -11,9 +11,9 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.nullValue;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -62,6 +62,8 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private FhirMedicationDaoImpl medicationDao;
 	
+	private BaseFhirDaoImpl<Drug> baseFhirDao;
+	
 	@Before
 	public void setup() throws Exception {
 		medicationDao = new FhirMedicationDaoImpl();
@@ -71,7 +73,7 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getMedicationByUuid_shouldGetByUuid() {
-		Drug medication = medicationDao.getMedicationByUuid(MEDICATION_UUID);
+		Drug medication = medicationDao.get(MEDICATION_UUID);
 		assertThat(medication, notNullValue());
 		assertThat(medication.getUuid(), notNullValue());
 		assertThat(medication.getUuid(), equalTo(MEDICATION_UUID));
@@ -79,7 +81,7 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getMedicationByUuid_shouldReturnNullWhenCalledWithUnknownUuid() {
-		Drug medication = medicationDao.getMedicationByUuid(WRONG_MEDICATION_UUID);
+		Drug medication = medicationDao.get(WRONG_MEDICATION_UUID);
 		assertThat(medication, nullValue());
 	}
 	
@@ -140,7 +142,7 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 		ingredient.setIngredient(concept);
 		drug.setIngredients(Collections.singleton(ingredient));
 		
-		Drug result = medicationDao.saveMedication(drug);
+		Drug result = medicationDao.createOrUpdate(drug);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(NEW_MEDICATION_UUID));
 		assertThat(result.getIngredients().size(), greaterThanOrEqualTo(1));
@@ -149,12 +151,28 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void saveMedication_shouldUpdateMedicationCorrectly() {
-		Drug drug = medicationDao.getMedicationByUuid(MEDICATION_UUID);
+		Drug drug = medicationDao.get(MEDICATION_UUID);
 		drug.setStrength("1000mg");
 		
-		Drug result = medicationDao.saveMedication(drug);
+		Drug result = medicationDao.createOrUpdate(drug);
 		assertThat(result, notNullValue());
 		assertThat(result.getStrength(), equalTo("1000mg"));
+	}
+	
+	@Test
+	public void deleteMedication_shouldDeleteMedication() {
+		Drug result = medicationDao.delete(MEDICATION_UUID);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getRetired(), equalTo(true));
+		assertThat(result.getRetireReason(), equalTo("Retired via FHIR API"));
+	}
+	
+	@Test
+	public void deleteMedication_shouldReturnNullIfDrugToDeleteDoesNotExist() {
+		Drug result = medicationDao.delete(WRONG_MEDICATION_UUID);
+		
+		assertThat(result, nullValue());
 	}
 	
 }

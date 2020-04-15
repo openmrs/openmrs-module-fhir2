@@ -41,13 +41,13 @@ public class FhirMedicationServiceImpl implements FhirMedicationService {
 	@Override
 	@Transactional(readOnly = true)
 	public Medication getMedicationByUuid(String uuid) {
-		return medicationTranslator.toFhirResource(medicationDao.getMedicationByUuid(uuid));
+		return medicationTranslator.toFhirResource(medicationDao.get(uuid));
 	}
 	
 	@Override
 	public Medication saveMedication(Medication medication) {
 		return medicationTranslator
-		        .toFhirResource(medicationDao.saveMedication(medicationTranslator.toOpenmrsType(new Drug(), medication)));
+		        .toFhirResource(medicationDao.createOrUpdate(medicationTranslator.toOpenmrsType(new Drug(), medication)));
 	}
 	
 	@Override
@@ -60,14 +60,14 @@ public class FhirMedicationServiceImpl implements FhirMedicationService {
 			throw new InvalidRequestException("Medication id and provided id do not match.");
 		}
 		
-		Drug drug = medicationDao.getMedicationByUuid(uuid);
+		Drug drug = medicationDao.get(uuid);
 		
 		if (drug == null) {
 			throw new MethodNotAllowedException("No Medication found to update.");
 		}
 		
 		return medicationTranslator
-		        .toFhirResource(medicationDao.saveMedication(medicationTranslator.toOpenmrsType(drug, medication)));
+		        .toFhirResource(medicationDao.createOrUpdate(medicationTranslator.toOpenmrsType(drug, medication)));
 	}
 	
 	@Override
@@ -77,5 +77,10 @@ public class FhirMedicationServiceImpl implements FhirMedicationService {
 		
 		return medicationDao.searchForMedications(code, dosageForm, ingredientCode, status).stream()
 		        .map(medicationTranslator::toFhirResource).collect(Collectors.toList());
+	}
+	
+	@Override
+	public Medication deleteMedication(String uuid) {
+		return medicationTranslator.toFhirResource(medicationDao.delete(uuid));
 	}
 }

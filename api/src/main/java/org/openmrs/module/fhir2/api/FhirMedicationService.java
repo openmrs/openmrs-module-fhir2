@@ -27,4 +27,6 @@ public interface FhirMedicationService {
 	
 	Collection<Medication> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
 	        TokenOrListParam ingredientCode, TokenOrListParam status);
+	
+	Medication deleteMedication(@NotNull String uuid);
 }

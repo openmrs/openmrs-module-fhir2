@@ -49,6 +49,6 @@ public class MedicationReferenceTranslatorImpl extends AbstractReferenceHandling
 			return null;
 		}
 		
-		return medicationDao.getMedicationByUuid(uuid);
+		return medicationDao.get(uuid);
 	}
 }

@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -18,33 +16,26 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
 import org.openmrs.Drug;
 import org.openmrs.DrugIngredient;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirMedicationDaoImpl extends BaseDaoImpl implements FhirMedicationDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+public class FhirMedicationDaoImpl extends BaseFhirDaoImpl<Drug> implements FhirMedicationDao {
 	
 	@Override
-	public Drug getMedicationByUuid(String uuid) {
-		return (Drug) sessionFactory.getCurrentSession().createCriteria(Drug.class).add(eq("uuid", uuid)).uniqueResult();
+	public Drug get(String uuid) {
+		return super.get(uuid);
 	}
 	
 	@Override
-	public Drug saveMedication(Drug drug) {
-		sessionFactory.getCurrentSession().saveOrUpdate(drug);
+	public Drug createOrUpdate(Drug drug) {
+		super.createOrUpdate(drug);
 		
 		for (DrugIngredient ingredient : drug.getIngredients()) {
-			sessionFactory.getCurrentSession().saveOrUpdate(ingredient);
+			getSessionFactory().getCurrentSession().saveOrUpdate(ingredient);
 		}
 		
 		return drug;
@@ -53,7 +44,7 @@ public class FhirMedicationDaoImpl extends BaseDaoImpl implements FhirMedication
 	@Override
 	public Collection<Drug> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
 	        TokenOrListParam ingredientCode, TokenOrListParam status) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Drug.class);
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Drug.class);
 		handleMedicationCode(criteria, code);
 		handleMedicationDosageForm(criteria, dosageForm);
 		handleBoolean("retired", convertStringStatusToBoolean(status)).ifPresent(criteria::add);
@@ -73,5 +64,10 @@ public class FhirMedicationDaoImpl extends BaseDaoImpl implements FhirMedication
 			criteria.createAlias("dosageForm", "dc");
 			handleCodeableConcept(criteria, dosageForm, "dc", "dcm", "dcrt").ifPresent(criteria::add);
 		}
+	}
+	
+	@Override
+	public Drug delete(String uuid) {
+		return super.delete(uuid);
 	}
 }
