@@ -27,6 +27,7 @@ import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator;
+import org.openmrs.module.fhir2.api.translators.RelationshipTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +49,9 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 	
 	@Autowired
 	private FhirPatientDao patientDao;
+	
+	@Autowired
+	private RelationshipTranslator relationshipTranslator;
 	
 	/**
 	 * @see org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator#toFhirResource(org.openmrs.Relationship)
@@ -79,6 +83,7 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		for (PersonAddress address : omrsRelatedPerson.getAddresses()) {
 			relatedPerson.addAddress(addressTranslator.toFhirResource(address));
 		}
+		relatedPerson.addRelationship(relationshipTranslator.toFhirResource(relationship.getRelationshipType()));
 		
 		//identifier
 		Identifier relationshipIdentifier = new Identifier();
