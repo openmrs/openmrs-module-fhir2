@@ -53,7 +53,7 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	@Read
 	@SuppressWarnings("unused")
 	public Medication getMedicationByUuid(@IdParam @NotNull IdType id) {
-		Medication medication = fhirMedicationService.getMedicationByUuid(id.getIdPart());
+		Medication medication = fhirMedicationService.get(id.getIdPart());
 		if (medication == null) {
 			throw new ResourceNotFoundException("Could not find medication with Id " + id.getIdPart());
 		}
@@ -72,7 +72,7 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createMedication(@ResourceParam Medication medication) {
-		return FhirServerUtils.buildCreate(fhirMedicationService.saveMedication(medication));
+		return FhirServerUtils.buildCreate(fhirMedicationService.create(medication));
 	}
 	
 	@Update
@@ -82,13 +82,13 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 			medication.setId(id.getIdPart());
 		}
 		
-		return FhirServerUtils.buildUpdate(fhirMedicationService.updateMedication(medication, id.getIdPart()));
+		return FhirServerUtils.buildUpdate(fhirMedicationService.update(id.getIdPart(), medication));
 	}
 	
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteMedication(@IdParam @NotNull IdType id) {
-		Medication medication = fhirMedicationService.deleteMedication(id.getIdPart());
+		Medication medication = fhirMedicationService.delete(id.getIdPart());
 		if (medication == null) {
 			throw new ResourceNotFoundException("Could not find medication to update with id " + id.getIdPart());
 		}

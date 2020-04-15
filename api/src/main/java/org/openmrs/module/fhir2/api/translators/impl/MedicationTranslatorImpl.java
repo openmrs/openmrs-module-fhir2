@@ -67,6 +67,11 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 	}
 	
 	@Override
+	public Drug toOpenmrsType(Medication medication) {
+		return toOpenmrsType(new Drug(), medication);
+	}
+	
+	@Override
 	public Drug toOpenmrsType(Drug existingDrug, Medication med) {
 		if (med == null) {
 			return existingDrug;
@@ -140,4 +145,5 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		return Optional.ofNullable(medication.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE));
 		
 	}
+	
 }
