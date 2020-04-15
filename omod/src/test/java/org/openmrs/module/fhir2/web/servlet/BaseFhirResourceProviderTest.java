@@ -134,6 +134,10 @@ public abstract class BaseFhirResourceProviderTest<T extends IResourceProvider, 
 		return new FhirRequestBuilder(RequestTypeEnum.PUT, "http://localhost:8080/" + SERVLET_NAME + uri);
 	}
 	
+	public FhirRequestBuilder delete(@NotNull String uri) throws MalformedURLException {
+		return new FhirRequestBuilder(RequestTypeEnum.DELETE, "http://localhost:8080/" + SERVLET_NAME + uri);
+	}
+	
 	public U readResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (U) parser.parseResource(response.getContentAsString());
 	}

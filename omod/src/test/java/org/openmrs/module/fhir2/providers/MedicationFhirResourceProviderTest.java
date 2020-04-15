@@ -32,6 +32,7 @@ import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -172,5 +173,25 @@ public class MedicationFhirResourceProviderTest {
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID), wrongMedication);
+	}
+	
+	@Test
+	public void shouldDeleteMedication() {
+		Medication med = medication;
+		med.setStatus(Medication.MedicationStatus.INACTIVE);
+		
+		when(fhirMedicationService.deleteMedication(MEDICATION_UUID)).thenReturn(med);
+		
+		OperationOutcome result = resourceProvider.deleteMedication(new IdType().setValue(MEDICATION_UUID));
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getId(), equalTo(MEDICATION_UUID));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteMedicationShouldThrowResourceNotFoundException() {
+		IdType id = new IdType();
+		id.setValue(WRONG_MEDICATION_UUID);
+		OperationOutcome medication = resourceProvider.deleteMedication(id);
+		assertThat(medication, nullValue());
 	}
 }

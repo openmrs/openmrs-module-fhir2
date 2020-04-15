@@ -35,6 +35,7 @@ import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -250,4 +251,23 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 		
 		assertThat(response, isMethodNotAllowed());
 	}
+	
+	@Test
+	public void shouldDeleteMedication() throws Exception {
+		OperationOutcome retVal = new OperationOutcome();
+		retVal.setId(MEDICATION_UUID);
+		retVal.getText().setDivAsString("Deleted successfully");
+		
+		Medication medication = new Medication();
+		medication.setId(MEDICATION_UUID);
+		medication.setStatus(Medication.MedicationStatus.INACTIVE);
+		
+		when(fhirMedicationService.deleteMedication(any(String.class))).thenReturn(medication);
+		
+		MockHttpServletResponse response = delete("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
 }
