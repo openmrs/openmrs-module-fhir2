@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.providers;
 import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -29,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,4 +85,16 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 		return FhirServerUtils.buildUpdate(fhirMedicationService.updateMedication(medication, id.getIdPart()));
 	}
 	
+	@Delete
+	@SuppressWarnings("unused")
+	public OperationOutcome deleteMedication(@IdParam @NotNull IdType id) {
+		Medication medication = fhirMedicationService.deleteMedication(id.getIdPart());
+		if (medication == null) {
+			throw new ResourceNotFoundException("Could not find medication to update with id " + id.getIdPart());
+		}
+		OperationOutcome retVal = new OperationOutcome();
+		retVal.setId(id.getIdPart());
+		retVal.getText().setDivAsString("Deleted successfully");
+		return retVal;
+	}
 }

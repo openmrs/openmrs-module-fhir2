@@ -9,14 +9,19 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import java.util.Collection;
+import javax.validation.constraints.NotNull;
 
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import org.openmrs.Drug;
+import org.openmrs.Auditable;
+import org.openmrs.OpenmrsObject;
 
-public interface FhirMedicationDao extends FhirDao<Drug> {
+/**
+ * Base interface for all FHIR DAO objects
+ */
+public interface FhirDao<T extends OpenmrsObject & Auditable> {
 	
-	Collection<Drug> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
-	        TokenOrListParam ingredientCode, TokenOrListParam status);
+	T get(@NotNull String uuid);
+	
+	T createOrUpdate(T newEntry);
+	
+	T delete(@NotNull String uuid);
 }

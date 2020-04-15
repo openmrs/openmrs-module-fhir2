@@ -71,7 +71,7 @@ public class MedicationReferenceTranslatorImplTest {
 		        .setType(FhirConstants.MEDICATION);
 		Drug drug = new Drug();
 		drug.setUuid(MEDICATION_UUID);
-		when(dao.getMedicationByUuid(MEDICATION_UUID)).thenReturn(drug);
+		when(dao.get(MEDICATION_UUID)).thenReturn(drug);
 		
 		Drug result = medicationReferenceTranslator.toOpenmrsType(medicationReference);
 		
