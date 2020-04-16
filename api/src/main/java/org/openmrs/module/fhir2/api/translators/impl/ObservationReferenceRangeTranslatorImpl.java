@@ -27,12 +27,15 @@ public class ObservationReferenceRangeTranslatorImpl implements ObservationRefer
 	public List<Observation.ObservationReferenceRangeComponent> toFhirResource(ConceptNumeric conceptNumeric) {
 		if (conceptNumeric != null) {
 			List<Observation.ObservationReferenceRangeComponent> observationReferenceRangeComponentList = new ArrayList<>();
-			observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiNormal(),
-			    conceptNumeric.getLowNormal(), FhirConstants.OBSERVATION_REFERENCE_NORMAL));
-			if (conceptNumeric.getHiCritical() != null || conceptNumeric.getLowCritical() != null) {
+			if (conceptNumeric.getHiNormal() != null && conceptNumeric.getLowNormal() != null) {
+				observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiNormal(),
+				    conceptNumeric.getLowNormal(), FhirConstants.OBSERVATION_REFERENCE_NORMAL));
+			}
+			if (conceptNumeric.getHiCritical() != null && conceptNumeric.getLowCritical() != null) {
 				observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiCritical(),
 				    conceptNumeric.getLowCritical(), FhirConstants.OBSERVATION_REFERENCE_TREATMENT));
-			} else if (conceptNumeric.getHiAbsolute() != null || conceptNumeric.getLowAbsolute() != null) {
+			}
+			if (conceptNumeric.getHiAbsolute() != null && conceptNumeric.getLowAbsolute() != null) {
 				observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiAbsolute(),
 				    conceptNumeric.getLowAbsolute(), FhirConstants.OBSERVATION_REFERENCE_TREATMENT));
 			}
