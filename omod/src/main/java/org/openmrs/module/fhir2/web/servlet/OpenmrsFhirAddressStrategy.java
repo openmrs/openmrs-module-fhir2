@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.web.servlet;
 
+import static org.openmrs.module.fhir2.web.servlet.FhirVersionUtils.FhirVersion.R3;
+import static org.openmrs.module.fhir2.web.servlet.FhirVersionUtils.FhirVersion.R4;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,6 +36,12 @@ public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 		String gpPrefix = globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX);
 		
 		if (StringUtils.isNotBlank(gpPrefix)) {
+			Enum<FhirVersionUtils.FhirVersion> fhirVersion = FhirVersionUtils.getFhirResourceVersion(request);
+			if (R3.equals(fhirVersion)) {
+				gpPrefix += "/R3/";
+			} else if (R4.equals(fhirVersion)) {
+				gpPrefix += "/R4/";
+			}
 			return gpPrefix;
 		}
 		
@@ -55,6 +64,7 @@ public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 			}
 		}
 		
-		return request.getScheme() + "://" + request.getServerName() + port + "/" + contextPath + "/ws/fhir2/";
+		return request.getScheme() + "://" + request.getServerName() + port + "/" + contextPath + "/ws/fhir2/"
+		        + FhirVersionUtils.getFhirResourceVersion(request);
 	}
 }
