@@ -98,8 +98,6 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PATIENT_BIRTHDATE = "1976-08-25";
 	
-	private static final String PATIENT_BIRTHDATE_WITH_TIME = "1976-08-25T13:44:57.0";
-	
 	private static final String PATIENT_BIRTHDATE_LOWER_BOUND = "1975-04-08";
 	
 	private static final String PATIENT_BIRTHDATE_PATIENT_UUID = "ca17fcc5-ec96-487f-b9ea-42973c8973e3";
@@ -360,16 +358,6 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForPatients_shouldSearchForPatientsByBirthDate() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null, null, null,
 		    new DateRangeParam(new DateParam(PATIENT_BIRTHDATE)), null, null, null, null, null, null, null);
-		
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("uuid", equalTo(PATIENT_BIRTHDATE_PATIENT_UUID))));
-	}
-	
-	@Test
-	public void searchForPatients_shouldTruncateBirthDateToDay() {
-		Collection<Patient> results = dao.searchForPatients(null, null, null, null, null,
-		    new DateRangeParam(new DateParam(PATIENT_BIRTHDATE_WITH_TIME)), null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));

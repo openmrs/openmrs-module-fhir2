@@ -48,7 +48,6 @@ import java.util.stream.StreamSupport;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -398,34 +397,31 @@ public abstract class BaseDaoImpl {
 			return Optional.empty();
 		}
 		
-		Date dayStart, dayEnd;
-		if (dateParam.getPrecision().ordinal() > TemporalPrecisionEnum.DAY.ordinal()) {
-			// TODO We may want to not use the default Calendar
-			dayStart = DateUtils.truncate(dateParam.getValue(), Calendar.DATE);
-		} else {
-			dayStart = dateParam.getValue();
+		int calendarPrecision = dateParam.getPrecision().getCalendarConstant();
+		if (calendarPrecision > Calendar.SECOND) {
+			calendarPrecision = Calendar.SECOND;
 		}
-		
 		// TODO We may want to not use the default Calendar
-		dayEnd = DateUtils.ceiling(dayStart, Calendar.DATE);
+		Date dateStart = DateUtils.truncate(dateParam.getValue(), calendarPrecision);
+		Date dateEnd = DateUtils.ceiling(dateParam.getValue(), calendarPrecision);
 		
 		// TODO This does not properly handle FHIR Periods and Timings, though its unclear if we are using those
 		// see https://www.hl7.org/fhir/search.html#date
 		switch (dateParam.getPrefix()) {
 			case EQUAL:
-				return Optional.of(and(ge(propertyName, dayStart), lt(propertyName, dayEnd)));
+				return Optional.of(and(ge(propertyName, dateStart), lt(propertyName, dateEnd)));
 			case NOT_EQUAL:
-				return Optional.of(not(and(ge(propertyName, dayStart), lt(propertyName, dayEnd))));
+				return Optional.of(not(and(ge(propertyName, dateStart), lt(propertyName, dateEnd))));
 			case LESSTHAN_OR_EQUALS:
 			case LESSTHAN:
-				return Optional.of(le(propertyName, dayEnd));
+				return Optional.of(le(propertyName, dateEnd));
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
-				return Optional.of(ge(propertyName, dayStart));
+				return Optional.of(ge(propertyName, dateStart));
 			case STARTS_AFTER:
-				return Optional.of(gt(propertyName, dayEnd));
+				return Optional.of(gt(propertyName, dateEnd));
 			case ENDS_BEFORE:
-				return Optional.of(lt(propertyName, dayStart));
+				return Optional.of(lt(propertyName, dateStart));
 		}
 		
 		return Optional.empty();

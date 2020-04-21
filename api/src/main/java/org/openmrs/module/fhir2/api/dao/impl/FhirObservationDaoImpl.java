@@ -58,11 +58,11 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 		handlePatientReference(criteria, patientReference, "person");
 		handleHasMemberReference(criteria, hasMemberReference);
 		handleValueCodedConcept(criteria, valueConcept);
-		handleDateRange("valueDatetime", valueDateParam);
+		handleDateRange("valueDatetime", valueDateParam).ifPresent(criteria::add);
 		
 		handleValueStringParam("valueText", valueStringParam).ifPresent(criteria::add);
 		handleQuantity("valueNumeric", valueQuantityParam).ifPresent(criteria::add);
-		handleDateRange("obsDatetime", date);
+		handleDateRange("obsDatetime", date).ifPresent(criteria::add);
 		handleCodedConcept(criteria, code);
 		handleSort(criteria, sort);
 		
