@@ -16,28 +16,28 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.r4.model.Condition;
+import org.openmrs.module.fhir2.FhirException;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FhirConditionServiceImpl implements FhirConditionService {
-	
+
 	@Override
 	public Condition getConditionByUuid(String uuid) {
-		throw new NotImplementedException("Please install fhir2conditions module");
+		throw new FhirException("Please install org.openmrs.module.fhir2conditions");
 	}
-	
+
 	@Override
 	public Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
-	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, SortSpec sort) {
-		throw new NotImplementedException("");
+			TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
+			QuantityAndListParam onsetAge, DateRangeParam recordedDate, SortSpec sort) {
+		throw new FhirException("Please install org.openmrs.module.fhir2conditions");
 	}
-	
+
 	@Override
 	public Condition saveCondition(Condition condition) {
-		throw new NotImplementedException("");
+		throw new FhirException("Please install org.openmrs.module.fhir2conditions");
 	}
 }
