@@ -9,31 +9,25 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
-import javax.validation.constraints.NotNull;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ToFhirTranslator;
+import org.springframework.stereotype.Component;
 
-/**
- * Generic search Interface
- *
- * @param <O> openMrs generic DAO Class Implementation
- * @param <T> FHIR generic translator Class
- */
-public interface SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends ToFhirTranslator<T, U>> {
+@Component
+@NoArgsConstructor
+@Setter(AccessLevel.PACKAGE)
+public class SearchQueryImpl<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends ToFhirTranslator<T, U>> implements SearchQuery<T, U, O, V> {
 	
-	/**
-	 * Gets query results
-	 *
-	 * @param theParams search params.
-	 * @param dao generic dao
-	 * @param translator generic translator
-	 * @return IBundleProvider
-	 */
-	IBundleProvider getQueryResults(@NotNull SearchParameterMap theParams, O dao, V translator);
+	@Override
+	public IBundleProvider getQueryResults(SearchParameterMap theParams, O dao, V translator) {
+		return new SearchQueryBundleProvider<>(theParams, dao, translator);
+	}
 }

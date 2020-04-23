@@ -147,7 +147,7 @@ public class FhirConstants {
 	
 	public static final String DATE_RANGE_SEARCH_HANDLER = "date.range.search.handler";
 	
-	public static final String HAS_MEMBER_SEARCH_HANDLER = "has.member.search.handler";
+	public static final String HAS_MEMBER_SEARCH_HANDLER = "obs.has.member.search.handler";
 	
 	public static final String QUANTITY_SEARCH_HANDLER = "quantity.search.handler";
 	

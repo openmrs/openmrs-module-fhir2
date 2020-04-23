@@ -17,7 +17,16 @@ public interface FhirGlobalPropertyService {
 	
 	String getGlobalProperty(String property) throws APIException;
 	
-	default String getGlobalProperty(String property, String defaultValue) throws APIException {
+	default Integer getGlobalProperty(String property, Integer defaultValue) {
+		try {
+			return Integer.valueOf(getGlobalProperty(property, String.valueOf(defaultValue)));
+		}
+		catch (NumberFormatException e) {
+			return defaultValue;
+		}
+	}
+	
+	default String getGlobalProperty(String property, String defaultValue) {
 		return this.getGlobalProperty(property) == null ? defaultValue : this.getGlobalProperty(property);
 	}
 	

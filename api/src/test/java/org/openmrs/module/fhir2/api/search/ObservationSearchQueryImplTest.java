@@ -43,6 +43,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
@@ -54,11 +55,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
+public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String OBS_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirObservationDaoImplTest_initial_data_suppl.xml";
 	
 	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
+	
+	private static final String OBS_GROUP_UUID = "4efa62d2-6b8b-4803-a8fa-3f32ee54db4f";
 	
 	private static final String OBS_CONCEPT_ID = "5089";
 	
@@ -114,7 +117,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private FhirObservationDao dao;
 	
 	@Autowired
-	private ISearchQuery<FhirObservationDao, ObservationTranslator> searchQuery;
+	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
 	
 	@Before
 	public void setup() throws Exception {
@@ -137,7 +140,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		code.addAnd(codingToken);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.CODED_SEARCH_HANDLER, code);
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -152,7 +155,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		codingToken.setValue(OBS_CONCEPT_UUID);
 		code.addAnd(codingToken);
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.CODED_SEARCH_HANDLER, code);
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
 		IBundleProvider results = search(theParams);
 		
@@ -171,7 +174,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		code.addAnd(codingToken);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.CODED_SEARCH_HANDLER, code);
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -194,7 +197,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		}
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.CODED_SEARCH_HANDLER, code);
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -219,7 +222,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		orListParam.addOr(codingToken2);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.CODED_SEARCH_HANDLER, code);
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -243,7 +246,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		orListParam.addOr(codingToken2);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.CODED_SEARCH_HANDLER, code);
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -261,7 +264,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -280,7 +283,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -299,7 +302,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -318,7 +321,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -337,7 +340,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -351,7 +354,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		encounterReference.addValue(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
+		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -421,7 +424,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		patientReference.addValue(new ReferenceOrListParam().add(patientOne).add(patientTwo));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -436,7 +439,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		        .add(new ReferenceParam().setValue(ENCOUNTER_UUID_TWO)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
+		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -469,8 +472,8 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		sort.setOrder(SortOrderEnum.DESC);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
-		theParams.addAndParam(FhirConstants.CODED_SEARCH_HANDLER, code);
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		theParams.setSortSpec(sort);
 		IBundleProvider results = this.search(theParams);
 		
@@ -487,12 +490,12 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		memberReference.setChain("");
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addReferenceParam(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, memberReference);
+		theParams.addParameter(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, memberReference);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), not(empty()));
-		assertThat(get(results).iterator().next().getIdElement().getIdPart(), equalTo(OBS_UUID));
+		assertThat(get(results).iterator().next().getIdElement().getIdPart(), equalTo(OBS_GROUP_UUID));
 	}
 	
 	@Test
@@ -503,12 +506,12 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		memberReference.setChain(Observation.SP_CODE);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addReferenceParam(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, memberReference);
+		theParams.addParameter(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, memberReference);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), not(empty()));
-		assertThat(get(results).iterator().next().getIdElement().getIdPart(), equalTo(OBS_UUID));
+		assertThat(get(results).iterator().next().getIdElement().getIdPart(), equalTo(OBS_GROUP_UUID));
 	}
 	
 	@Test
@@ -519,7 +522,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		code.addAnd(codingToken);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.CODED_SEARCH_HANDLER, code);
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -530,7 +533,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldSearchForObsByValueDate() {
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		theParams.addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
 		    new DateRangeParam(new DateParam(VALUE_DATE_AND_TIME)));
 		IBundleProvider results = search(theParams);
 		
@@ -550,7 +553,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -569,7 +572,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -588,7 +591,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -607,7 +610,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -627,7 +630,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -648,7 +651,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -668,7 +671,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -688,7 +691,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -708,7 +711,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -728,7 +731,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -748,7 +751,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
@@ -764,7 +767,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		stringAndListParam.addAnd(stringParam);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.VALUE_STRING_SEARCH_HANDLER, stringAndListParam);
+		theParams.addParameter(FhirConstants.VALUE_STRING_SEARCH_HANDLER, stringAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());

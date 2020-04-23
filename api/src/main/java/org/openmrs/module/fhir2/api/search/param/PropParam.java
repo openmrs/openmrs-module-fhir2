@@ -23,5 +23,4 @@ public class PropParam<T> {
 	private String propertyName;
 	
 	private T param;
-	
 }

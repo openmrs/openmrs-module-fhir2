@@ -14,9 +14,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
+import java.util.Collection;
+
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hibernate.Criteria;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
@@ -50,16 +51,16 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void getObsByUuid_shouldGetObsByUuid() {
-		Obs result = dao.getObsByUuid(OBS_UUID);
+	public void get_shouldGetObsByUuid() {
+		Obs result = dao.get(OBS_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(OBS_UUID));
 	}
 	
 	@Test
-	public void getObsByUuid_shouldReturnNullIfObsNotFoundByUuid() {
-		Obs result = dao.getObsByUuid(BAD_OBS_UUID);
+	public void get_shouldReturnNullIfObsNotFoundByUuid() {
+		Obs result = dao.get(BAD_OBS_UUID);
 		
 		assertThat(result, nullValue());
 	}
@@ -72,10 +73,10 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		code.addAnd(codingToken);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.CODED_SEARCH_HANDLER, code);
-		Criteria query = dao.search(theParams);
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
+		Collection<Obs> obs = dao.search(theParams);
 		
-		assertThat(query, notNullValue());
+		assertThat(obs, notNullValue());
 	}
 	
 }

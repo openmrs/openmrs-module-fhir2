@@ -11,7 +11,9 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.Criteria;
+import java.io.Serializable;
+import java.util.Collection;
+
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -19,7 +21,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 /**
  * Base interface for all FHIR DAO objects
  */
-public interface FhirDao<T extends OpenmrsObject & Auditable> {
+public interface FhirDao<T extends OpenmrsObject & Auditable> extends Serializable {
 	
 	T get(@NotNull String uuid);
 	
@@ -27,7 +29,11 @@ public interface FhirDao<T extends OpenmrsObject & Auditable> {
 	
 	T delete(@NotNull String uuid);
 	
-	T getModelClazz();
+	Integer getResultCounts(SearchParameterMap theParams);
 	
-	Criteria search(SearchParameterMap theParams);
+	default Collection<T> search(SearchParameterMap theParams) {
+		return search(theParams, 0, -1);
+	}
+	
+	Collection<T> search(SearchParameterMap theParams, int firstResult, int maxResults);
 }

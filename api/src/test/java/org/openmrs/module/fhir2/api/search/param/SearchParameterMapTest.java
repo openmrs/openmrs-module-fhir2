@@ -45,11 +45,11 @@ public class SearchParameterMapTest {
 	public void shouldAddStringAndListParamIntoTheMap() {
 		StringAndListParam andListParam = new StringAndListParam();
 		andListParam.addAnd(new StringParam("John"));
-		searchParam.addAndParam(NAME, andListParam);
+		searchParam.addParameter(NAME, andListParam);
 		
 		assertThat(searchParam, notNullValue());
-		assertThat(searchParam.getAndParams(NAME), not(empty()));
-		assertThat(searchParam.getAndParams(NAME), hasSize(is(1)));
+		assertThat(searchParam.getParameters(NAME), not(empty()));
+		assertThat(searchParam.getParameters(NAME), hasSize(is(1)));
 	}
 	
 	@Test
@@ -60,23 +60,23 @@ public class SearchParameterMapTest {
 		StringAndListParam andListParam2 = new StringAndListParam();
 		andListParam2.addAnd(new StringParam("Joe"));
 		
-		searchParam.addAndParam(NAME, andListParam1);
-		searchParam.addAndParam(NAME, andListParam2);
+		searchParam.addParameter(NAME, andListParam1);
+		searchParam.addParameter(NAME, andListParam2);
 		
 		assertThat(searchParam, notNullValue());
-		assertThat(searchParam.getAndParams(NAME), not(empty()));
-		assertThat(searchParam.getAndParams(NAME), hasSize(is(2)));
+		assertThat(searchParam.getParameters(NAME), not(empty()));
+		assertThat(searchParam.getParameters(NAME), hasSize(is(2)));
 	}
 	
 	@Test
 	public void shouldAddStringOrListParamIntoTheMap() {
 		StringOrListParam orListParam = new StringOrListParam();
 		orListParam.addOr(new StringParam("Clement"));
-		searchParam.addOrParam(NAME, orListParam);
+		searchParam.addParameter(NAME, orListParam);
 		
 		assertThat(searchParam, notNullValue());
-		assertThat(searchParam.getOrParams(NAME), not(empty()));
-		assertThat(searchParam.getOrParams(NAME), hasSize(is(1)));
+		assertThat(searchParam.getParameters(NAME), not(empty()));
+		assertThat(searchParam.getParameters(NAME), hasSize(is(1)));
 	}
 	
 	@Test
@@ -87,23 +87,23 @@ public class SearchParameterMapTest {
 		StringOrListParam orListParam2 = new StringOrListParam();
 		orListParam2.addOr(new StringParam("Jane"));
 		
-		searchParam.addOrParam(NAME, orListParam1);
-		searchParam.addOrParam(NAME, orListParam2);
+		searchParam.addParameter(NAME, orListParam1);
+		searchParam.addParameter(NAME, orListParam2);
 		
 		assertThat(searchParam, notNullValue());
-		assertThat(searchParam.getOrParams(NAME), not(empty()));
-		assertThat(searchParam.getOrParams(NAME), hasSize(is(2)));
+		assertThat(searchParam.getParameters(NAME), not(empty()));
+		assertThat(searchParam.getParameters(NAME), hasSize(is(2)));
 	}
 	
 	@Test
 	public void shouldAddReferenceParamIntoLinkedHashMap() {
 		ReferenceParam referenceParam = new ReferenceParam();
 		referenceParam.setValue("referenceParamValue");
-		searchParam.addReferenceParam(REF_PARAM, referenceParam);
+		searchParam.addParameter(REF_PARAM, referenceParam);
 		
 		assertThat(searchParam, notNullValue());
-		assertThat(searchParam.getReferenceParams(REF_PARAM), not(empty()));
-		assertThat(searchParam.getReferenceParams(REF_PARAM), hasSize(equalTo(1)));
+		assertThat(searchParam.getParameters(REF_PARAM), not(empty()));
+		assertThat(searchParam.getParameters(REF_PARAM), hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -113,12 +113,12 @@ public class SearchParameterMapTest {
 		ReferenceParam referenceParam2 = new ReferenceParam();
 		referenceParam2.setValue("referenceParamValue");
 		
-		searchParam.addReferenceParam(REF_PARAM, referenceParam1);
-		searchParam.addReferenceParam(REF_PARAM, referenceParam2);
+		searchParam.addParameter(REF_PARAM, referenceParam1);
+		searchParam.addParameter(REF_PARAM, referenceParam2);
 		
 		assertThat(searchParam, notNullValue());
-		assertThat(searchParam.getReferenceParams(REF_PARAM), not(empty()));
-		assertThat(searchParam.getReferenceParams(REF_PARAM), hasSize(equalTo(2)));
+		assertThat(searchParam.getParameters(REF_PARAM), not(empty()));
+		assertThat(searchParam.getParameters(REF_PARAM), hasSize(equalTo(2)));
 	}
 	
 	@Test
@@ -132,12 +132,5 @@ public class SearchParameterMapTest {
 		assertThat(searchParam.getSortSpec(), notNullValue());
 		assertThat(searchParam.getSortSpec().getOrder(), equalTo(SortOrderEnum.ASC));
 		assertThat(searchParam.getSortSpec().getParamName(), equalTo(ENCOUNTER_DATETIME));
-	}
-	
-	@Test
-	public void shouldSetCount() {
-		searchParam.setCount(10);
-		assertThat(searchParam.getCount(), notNullValue());
-		assertThat(searchParam.getCount(), equalTo(10));
 	}
 }

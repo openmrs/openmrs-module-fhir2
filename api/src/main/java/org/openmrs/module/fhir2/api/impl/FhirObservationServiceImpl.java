@@ -20,10 +20,11 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
+import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
-import org.openmrs.module.fhir2.api.search.ISearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +43,12 @@ public class FhirObservationServiceImpl implements FhirObservationService {
 	private ObservationTranslator observationTranslator;
 	
 	@Autowired
-	private ISearchQuery<FhirObservationDao, ObservationTranslator> searchQuery;
+	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Observation getObservationByUuid(String uuid) {
-		return observationTranslator.toFhirResource(dao.getObsByUuid(uuid));
+		return observationTranslator.toFhirResource(dao.get(uuid));
 	}
 	
 	@Override
@@ -57,17 +58,16 @@ public class FhirObservationServiceImpl implements FhirObservationService {
 	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
 	        DateRangeParam date, TokenAndListParam code, SortSpec sort) {
 		
-		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
-		theParams.addAndParam(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
-		theParams.addAndParam(FhirConstants.CODED_SEARCH_HANDLER, code);
-		theParams.addAndParam(FhirConstants.VALUE_CODED_SEARCH_HANDLER, valueConcept);
-		theParams.addReferenceParam(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, hasMemberReference);
-		theParams.addAndParam(FhirConstants.AND_LIST_PARAMS_SEARCH_HANDLER, "valueText", valueStringParam);
-		theParams.addAndParam(FhirConstants.AND_LIST_PARAMS_SEARCH_HANDLER, "valueNumeric", valueQuantityParam);
-		theParams.addAndParam(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime", date);
-		theParams.addAndParam(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "valueDatetime", valueDateParam);
-		theParams.setSortSpec(sort);
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.VALUE_CODED_SEARCH_HANDLER, valueConcept)
+		        .addParameter(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, hasMemberReference)
+		        .addParameter(FhirConstants.AND_LIST_PARAMS_SEARCH_HANDLER, "valueText", valueStringParam)
+		        .addParameter(FhirConstants.AND_LIST_PARAMS_SEARCH_HANDLER, "valueNumeric", valueQuantityParam)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime", date)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "valueDatetime", valueDateParam).setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, observationTranslator);
 	}

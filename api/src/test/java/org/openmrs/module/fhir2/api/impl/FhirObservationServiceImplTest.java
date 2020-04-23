@@ -32,7 +32,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
-import org.openmrs.module.fhir2.api.search.ISearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 
@@ -47,7 +47,7 @@ public class FhirObservationServiceImplTest extends BaseIBundleProviderTest<Obse
 	private FhirObservationDao dao;
 	
 	@Mock
-	private ISearchQuery<FhirObservationDao, ObservationTranslator> searchQuery;
+	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
 	
 	@Mock
 	private ObservationTranslator observationTranslator;
@@ -68,7 +68,7 @@ public class FhirObservationServiceImplTest extends BaseIBundleProviderTest<Obse
 		obs.setUuid(OBS_UUID);
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
-		when(dao.getObsByUuid(OBS_UUID)).thenReturn(obs);
+		when(dao.get(OBS_UUID)).thenReturn(obs);
 		when(observationTranslator.toFhirResource(obs)).thenReturn(observation);
 		
 		Observation result = fhirObservationService.getObservationByUuid(OBS_UUID);
@@ -90,7 +90,7 @@ public class FhirObservationServiceImplTest extends BaseIBundleProviderTest<Obse
 		
 		patientReference.addValue(new ReferenceOrListParam().add(patient));
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addAndParam(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		
 		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(getQueryResults(observation));
 		
