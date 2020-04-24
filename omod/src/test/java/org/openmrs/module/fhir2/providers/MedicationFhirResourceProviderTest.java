@@ -73,7 +73,7 @@ public class MedicationFhirResourceProviderTest {
 	
 	@Test
 	public void getMedicationByUuid_shouldReturnMatchingMedication() {
-		when(fhirMedicationService.getMedicationByUuid(MEDICATION_UUID)).thenReturn(medication);
+		when(fhirMedicationService.get(MEDICATION_UUID)).thenReturn(medication);
 		
 		IdType id = new IdType();
 		id.setValue(MEDICATION_UUID);
@@ -135,7 +135,7 @@ public class MedicationFhirResourceProviderTest {
 	
 	@Test
 	public void shouldCreateNewMedication() {
-		when(fhirMedicationService.saveMedication(medication)).thenReturn(medication);
+		when(fhirMedicationService.create(medication)).thenReturn(medication);
 		
 		MethodOutcome result = resourceProvider.createMedication(medication);
 		assertThat(result, CoreMatchers.notNullValue());
@@ -148,7 +148,7 @@ public class MedicationFhirResourceProviderTest {
 		Medication med = medication;
 		med.setStatus(Medication.MedicationStatus.INACTIVE);
 		
-		when(fhirMedicationService.updateMedication(medication, MEDICATION_UUID)).thenReturn(med);
+		when(fhirMedicationService.update(MEDICATION_UUID, medication)).thenReturn(med);
 		
 		MethodOutcome result = resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID), medication);
 		assertThat(result, CoreMatchers.notNullValue());
@@ -157,8 +157,7 @@ public class MedicationFhirResourceProviderTest {
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateMedicationShouldThrowInvalidRequestForUuidMismatch() {
-		when(fhirMedicationService.updateMedication(medication, WRONG_MEDICATION_UUID))
-		        .thenThrow(InvalidRequestException.class);
+		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, medication)).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID), medication);
 	}
@@ -169,7 +168,7 @@ public class MedicationFhirResourceProviderTest {
 		
 		wrongMedication.setId(WRONG_MEDICATION_UUID);
 		
-		when(fhirMedicationService.updateMedication(wrongMedication, WRONG_MEDICATION_UUID))
+		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, wrongMedication))
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID), wrongMedication);
@@ -180,7 +179,7 @@ public class MedicationFhirResourceProviderTest {
 		Medication med = medication;
 		med.setStatus(Medication.MedicationStatus.INACTIVE);
 		
-		when(fhirMedicationService.deleteMedication(MEDICATION_UUID)).thenReturn(med);
+		when(fhirMedicationService.delete(MEDICATION_UUID)).thenReturn(med);
 		
 		OperationOutcome result = resourceProvider.deleteMedication(new IdType().setValue(MEDICATION_UUID));
 		assertThat(result, CoreMatchers.notNullValue());

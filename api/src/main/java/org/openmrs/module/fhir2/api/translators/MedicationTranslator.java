@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.Medication;
 import org.openmrs.Drug;
 
-public interface MedicationTranslator extends ToFhirTranslator<Drug, Medication>, UpdatableOpenmrsTranslator<Drug, Medication> {
+public interface MedicationTranslator extends ToFhirTranslator<Drug, Medication>, OpenmrsFhirUpdatableTranslator<Drug, Medication> {
 	
 	/**
 	 * Maps {@link org.openmrs.Drug} to {@link org.hl7.fhir.r4.model.Medication}
@@ -22,6 +22,15 @@ public interface MedicationTranslator extends ToFhirTranslator<Drug, Medication>
 	 */
 	@Override
 	Medication toFhirResource(Drug drug);
+	
+	/**
+	 * Maps {@link org.hl7.fhir.r4.model.Medication} to {@link org.openmrs.Drug}
+	 *
+	 * @param medication the resource to map
+	 * @return the corresponding OpenMrs Drug object
+	 */
+	@Override
+	Drug toOpenmrsType(Medication medication);
 	
 	/**
 	 * Maps {@link org.hl7.fhir.r4.model.Medication} to {@link org.openmrs.Drug}
