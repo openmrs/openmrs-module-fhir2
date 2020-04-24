@@ -61,7 +61,13 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
 	
+	private static final String OBS_WITH_DATE_UUID = "be48cdcb-6a76-47e3-9f2e-2635032f3a9a";
+	
+	private static final String OBS_WITH_VALUE_DATE_UUID = "99b92980-db62-40cd-8bca-733357c48126";
+	
 	private static final String BAD_OBS_UUID = "121b73a6-e1a4-4424-8610-d5765bf2fdf7";
+	
+	private static final String OBS_MINUTE_UUID = "942ec003-a55d-43c4-ac7a-bd6d1ba63381";
 	
 	private static final String OBS_CONCEPT_ID = "5089";
 	
@@ -69,13 +75,17 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String OBS_VALUE_CONCEPT_UUID = "785li1f8-bdbc-4950-833b-002244e9fa2b";
 	
-	private static final String VALUE_DATE = "1976-08-25";
+	private static final String OBS_DATE = "2008-08-01";
+	
+	private static final String OBS_MONTH = "2008-08";
+	
+	private static final String OBS_MINUTE = "2008-07-01T10:00";
 	
 	private static final String VALUE_QUANTITY = "134.0";
 	
 	private static final String VALUE_STRING = "AFH56";
 	
-	private static final String VALUE_DATE_AND_TIME = "1976-08-25T13:44:57.0";
+	private static final String VALUE_DATE = "2008-08-14";
 	
 	private static final String OBS_CONCEPT_UUID = "c607c80f-1ea9-4da3-bb88-6276ce8868dd";
 	
@@ -531,11 +541,41 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForObs_shouldSearchForObsByValueDate() {
 		Collection<Obs> results = dao.searchForObservations(null, null, null, null,
-		    new DateRangeParam(new DateParam(VALUE_DATE_AND_TIME)), null, null, null, null, null);
+		    new DateRangeParam(new DateParam(VALUE_DATE)), null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("uuid", equalTo(OBS_UUID))));
+		assertThat(results, hasSize(1));
+		assertThat(results, hasItem(hasProperty("uuid", equalTo(OBS_WITH_VALUE_DATE_UUID))));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchForObsByDate() {
+		Collection<Obs> results = dao.searchForObservations(null, null, null, null, null, null, null,
+		    new DateRangeParam(new DateParam(OBS_DATE)), null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, hasSize(1));
+		assertThat(results, hasItem(hasProperty("uuid", equalTo(OBS_WITH_DATE_UUID))));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchForObsByMonth() {
+		Collection<Obs> results = dao.searchForObservations(null, null, null, null, null, null, null,
+		    new DateRangeParam(new DateParam(OBS_MONTH)), null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, hasSize(8));
+		assertThat(results, hasItem(hasProperty("uuid", equalTo(OBS_WITH_DATE_UUID))));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchForObsByMinute() {
+		Collection<Obs> results = dao.searchForObservations(null, null, null, null, null, null, null,
+		    new DateRangeParam(new DateParam(OBS_MINUTE)), null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, hasSize(1));
+		assertThat(results, hasItem(hasProperty("uuid", equalTo(OBS_MINUTE_UUID))));
 	}
 	
 	@Test
@@ -646,7 +686,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(15));
+		assertThat(results.size(), equalTo(16));
 	}
 	
 	@Test
@@ -665,7 +705,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(10));
+		assertThat(results.size(), equalTo(11));
 	}
 	
 	@Test
@@ -684,7 +724,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(9));
+		assertThat(results.size(), equalTo(10));
 	}
 	
 	@Test
