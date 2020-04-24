@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import com.google.gson.reflect.TypeToken;
+import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,7 +45,7 @@ public abstract class BaseFhirDaoImpl<T extends OpenmrsObject & Auditable> exten
 	private SessionFactory sessionFactory;
 	
 	protected BaseFhirDaoImpl() {
-		typeToken = new TypeToken<T>() {
+		typeToken = new TypeToken<T>(getClass()) {
 			
 		};
 	}
