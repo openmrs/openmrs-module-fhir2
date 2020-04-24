@@ -20,6 +20,8 @@ import java.util.Collection;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.QuantityOrListParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -113,7 +115,8 @@ public class FhirConditionServiceImpl_2_2Test {
 		TokenAndListParam clinicalList = new TokenAndListParam();
 		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
 		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("lower date").setUpperBound("upper date");
-		QuantityParam onsetAge = new QuantityParam(12);
+		QuantityAndListParam onsetAge = new QuantityAndListParam();
+		onsetAge.addValue(new QuantityOrListParam().add(new QuantityParam(12)));
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
 		        .setUpperBound("upper record date");
 		SortSpec sort = new SortSpec("sort param");
