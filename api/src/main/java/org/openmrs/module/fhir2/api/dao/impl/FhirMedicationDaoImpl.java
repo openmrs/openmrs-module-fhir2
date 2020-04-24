@@ -26,11 +26,6 @@ import org.springframework.stereotype.Component;
 public class FhirMedicationDaoImpl extends BaseFhirDaoImpl<Drug> implements FhirMedicationDao {
 	
 	@Override
-	public Drug get(String uuid) {
-		return super.get(uuid);
-	}
-	
-	@Override
 	public Drug createOrUpdate(Drug drug) {
 		super.createOrUpdate(drug);
 		
