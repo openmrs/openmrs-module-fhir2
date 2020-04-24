@@ -14,15 +14,15 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Medication;
 import org.openmrs.Drug;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
+import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirUpdatableTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirMedicationServiceImpl implements FhirMedicationService {
+public class FhirMedicationServiceImpl extends BaseFhirService<Medication, Drug> implements FhirMedicationService {
 	
 	@Autowired
 	private MedicationTranslator medicationTranslator;
@@ -39,35 +39,29 @@ public class FhirMedicationServiceImpl implements FhirMedicationService {
 	private FhirMedicationDao medicationDao;
 	
 	@Override
+	protected FhirDao<Drug> getDao() {
+		return medicationDao;
+	}
+	
+	@Override
+	protected OpenmrsFhirUpdatableTranslator<Drug, Medication> getTranslator() {
+		return medicationTranslator;
+	}
+	
+	@Override
 	@Transactional(readOnly = true)
-	public Medication getMedicationByUuid(String uuid) {
+	public Medication get(String uuid) {
 		return medicationTranslator.toFhirResource(medicationDao.get(uuid));
 	}
 	
 	@Override
-	public Medication saveMedication(Medication medication) {
-		return medicationTranslator
-		        .toFhirResource(medicationDao.createOrUpdate(medicationTranslator.toOpenmrsType(new Drug(), medication)));
+	public Medication create(Medication newResource) {
+		return super.create(newResource);
 	}
 	
 	@Override
-	public Medication updateMedication(Medication medication, String uuid) {
-		if (uuid == null) {
-			throw new InvalidRequestException("Uuid cannot be null.");
-		}
-		
-		if (!medication.getId().equals(uuid)) {
-			throw new InvalidRequestException("Medication id and provided id do not match.");
-		}
-		
-		Drug drug = medicationDao.get(uuid);
-		
-		if (drug == null) {
-			throw new MethodNotAllowedException("No Medication found to update.");
-		}
-		
-		return medicationTranslator
-		        .toFhirResource(medicationDao.createOrUpdate(medicationTranslator.toOpenmrsType(drug, medication)));
+	public Medication update(String uuid, Medication updatedResource) {
+		return super.update(uuid, updatedResource);
 	}
 	
 	@Override
@@ -80,7 +74,7 @@ public class FhirMedicationServiceImpl implements FhirMedicationService {
 	}
 	
 	@Override
-	public Medication deleteMedication(String uuid) {
-		return medicationTranslator.toFhirResource(medicationDao.delete(uuid));
+	public Medication delete(String uuid) {
+		return super.delete(uuid);
 	}
 }

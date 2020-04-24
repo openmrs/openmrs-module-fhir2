@@ -15,7 +15,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
@@ -76,7 +75,7 @@ public class FhirMedicationServiceImplTest {
 		when(medicationDao.get(MEDICATION_UUID)).thenReturn(drug);
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		Medication medication = fhirMedicationService.getMedicationByUuid(MEDICATION_UUID);
+		Medication medication = fhirMedicationService.get(MEDICATION_UUID);
 		assertThat(medication, notNullValue());
 		assertThat(medication.getId(), notNullValue());
 		assertThat(medication.getId(), equalTo(MEDICATION_UUID));
@@ -84,7 +83,7 @@ public class FhirMedicationServiceImplTest {
 	
 	@Test
 	public void getMedicationByUuid_shouldReturnNullWhenCalledWithUnknownUuid() {
-		Medication medication = fhirMedicationService.getMedicationByUuid(WRONG_MEDICATION_UUID);
+		Medication medication = fhirMedicationService.get(WRONG_MEDICATION_UUID);
 		assertThat(medication, nullValue());
 	}
 	
@@ -157,10 +156,10 @@ public class FhirMedicationServiceImplTest {
 		medication.setId(MEDICATION_UUID);
 		
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
-		when(medicationTranslator.toOpenmrsType(any(Drug.class), any(Medication.class))).thenReturn(drug);
+		when(medicationTranslator.toOpenmrsType(medication)).thenReturn(drug);
 		when(medicationDao.createOrUpdate(drug)).thenReturn(drug);
 		
-		Medication result = fhirMedicationService.saveMedication(medication);
+		Medication result = fhirMedicationService.create(medication);
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(MEDICATION_UUID));
 	}
@@ -170,7 +169,7 @@ public class FhirMedicationServiceImplTest {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		
-		Medication result = fhirMedicationService.updateMedication(medication, null);
+		Medication result = fhirMedicationService.update(null, medication);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -178,7 +177,7 @@ public class FhirMedicationServiceImplTest {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		
-		Medication result = fhirMedicationService.updateMedication(medication, WRONG_MEDICATION_UUID);
+		Medication result = fhirMedicationService.update(WRONG_MEDICATION_UUID, medication);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -186,7 +185,7 @@ public class FhirMedicationServiceImplTest {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		
-		Medication result = fhirMedicationService.updateMedication(medication, MEDICATION_UUID);
+		Medication result = fhirMedicationService.update(MEDICATION_UUID, medication);
 	}
 	
 	@Test
@@ -203,7 +202,7 @@ public class FhirMedicationServiceImplTest {
 		when(medicationTranslator.toOpenmrsType(drug, medication)).thenReturn(drug);
 		when(medicationDao.createOrUpdate(drug)).thenReturn(drug);
 		
-		Medication result = fhirMedicationService.updateMedication(medication, MEDICATION_UUID);
+		Medication result = fhirMedicationService.update(MEDICATION_UUID, medication);
 		assertThat(result, notNullValue());
 		assertThat(result.getStatus(), equalTo(Medication.MedicationStatus.INACTIVE));
 	}
@@ -214,7 +213,7 @@ public class FhirMedicationServiceImplTest {
 		when(medicationDao.delete(MEDICATION_UUID)).thenReturn(drug);
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		Medication medication = fhirMedicationService.deleteMedication(MEDICATION_UUID);
+		Medication medication = fhirMedicationService.delete(MEDICATION_UUID);
 		assertThat(medication, notNullValue());
 		assertThat(medication.getId(), equalTo(MEDICATION_UUID));
 		assertThat(medication.getStatus(), equalTo(Medication.MedicationStatus.INACTIVE));

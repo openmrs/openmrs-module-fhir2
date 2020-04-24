@@ -97,7 +97,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 	public void getMedicationByUuid_shouldReturnMedication() throws Exception {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
-		when(fhirMedicationService.getMedicationByUuid(MEDICATION_UUID)).thenReturn(medication);
+		when(fhirMedicationService.get(MEDICATION_UUID)).thenReturn(medication);
 		
 		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -146,7 +146,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 	
 	@Test
 	public void getMedicationByUuid_shouldReturn404() throws Exception {
-		when(fhirMedicationService.getMedicationByUuid(WRONG_MEDICATION_UUID)).thenReturn(null);
+		when(fhirMedicationService.get(WRONG_MEDICATION_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/Medication/" + WRONG_MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -179,7 +179,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 			medicationJson = IOUtils.toString(is);
 		}
 		
-		when(fhirMedicationService.saveMedication(any(Medication.class))).thenReturn(medication);
+		when(fhirMedicationService.create(any(Medication.class))).thenReturn(medication);
 		
 		MockHttpServletResponse response = post("/Medication").jsonContent(medicationJson).accept(FhirMediaTypes.JSON).go();
 		
@@ -198,7 +198,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 			medicationJson = IOUtils.toString(is);
 		}
 		
-		when(fhirMedicationService.updateMedication(any(Medication.class), any(String.class))).thenReturn(medication);
+		when(fhirMedicationService.update(any(String.class), any(Medication.class))).thenReturn(medication);
 		
 		MockHttpServletResponse response = put("/Medication/" + MEDICATION_UUID).jsonContent(medicationJson)
 		        .accept(FhirMediaTypes.JSON).go();
@@ -243,7 +243,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 			medicationJson = IOUtils.toString(is);
 		}
 		
-		when(fhirMedicationService.updateMedication(any(Medication.class), eq(WRONG_MEDICATION_UUID)))
+		when(fhirMedicationService.update(eq(WRONG_MEDICATION_UUID), any(Medication.class)))
 		        .thenThrow(new MethodNotAllowedException("Medication " + WRONG_MEDICATION_UUID + " does not exist"));
 		
 		MockHttpServletResponse response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(medicationJson)
@@ -262,7 +262,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 		medication.setId(MEDICATION_UUID);
 		medication.setStatus(Medication.MedicationStatus.INACTIVE);
 		
-		when(fhirMedicationService.deleteMedication(any(String.class))).thenReturn(medication);
+		when(fhirMedicationService.delete(any(String.class))).thenReturn(medication);
 		
 		MockHttpServletResponse response = delete("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		

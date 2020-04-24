@@ -9,15 +9,17 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.Collection;
+import javax.validation.constraints.NotNull;
 
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
-public interface FhirMedicationService extends FhirService<Medication> {
+public interface FhirService<T extends IAnyResource> {
 	
-	Collection<Medication> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
-	        TokenOrListParam ingredientCode, TokenOrListParam status);
+	T get(@NotNull String uuid);
 	
+	T create(T newResource);
+	
+	T update(String uuid, T updatedResource);
+	
+	T delete(@NotNull String uuid);
 }
