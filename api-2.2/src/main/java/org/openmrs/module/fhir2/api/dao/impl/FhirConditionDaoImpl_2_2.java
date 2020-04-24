@@ -9,14 +9,24 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.ge;
+import static org.hibernate.criterion.Restrictions.le;
+import static org.hibernate.criterion.Restrictions.not;
 
+import javax.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -25,10 +35,12 @@ import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Criterion;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
+import org.openmrs.module.fhir2.api.util.CalendarFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -44,6 +56,9 @@ public class FhirConditionDaoImpl_2_2 extends BaseDaoImpl implements FhirConditi
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
+	
+	@Autowired
+	private CalendarFactory calendarFactory;
 	
 	@Override
 	public Condition getConditionByUuid(String uuid) {
@@ -64,10 +79,83 @@ public class FhirConditionDaoImpl_2_2 extends BaseDaoImpl implements FhirConditi
 		return ConditionClinicalStatus.HISTORY_OF;
 	}
 	
+	private Optional<Criterion> handleAgeByDateProperty(@NotNull String datePropertyName, @NotNull QuantityParam age) {
+		BigDecimal value = age.getValue();
+		if (value == null) {
+			throw new IllegalArgumentException("Age value should be provided in " + age);
+		}
+		String unit = age.getUnits();
+		if (unit == null) {
+			throw new IllegalArgumentException("Age unit should be provided in " + age);
+		}
+		int unitSeconds = -1;
+		// TODO check if HAPI FHIR already defines these constant strings. These are mostly from
+		// http://www.hl7.org/fhir/valueset-age-units.html with the exception of "s" which is not
+		// listed but was seen in FHIR examples: http://www.hl7.org/fhir/datatypes-examples.html#Quantity
+		switch (unit) {
+			case "s":
+				unitSeconds = 1;
+				break;
+			case "min":
+				unitSeconds = 60;
+				break;
+			case "h":
+				unitSeconds = 3600;
+				break;
+			case "d":
+				unitSeconds = 24 * 3600;
+				break;
+			case "wk":
+				unitSeconds = 7 * 24 * 3600;
+				break;
+			case "mo":
+				unitSeconds = 30 * 24 * 3600;
+				break;
+			case "a":
+				unitSeconds = 365 * 24 * 3600;
+				break;
+		}
+		if (unitSeconds < 0) {
+			throw new IllegalArgumentException(
+			        "Invalid unit " + unit + " in age " + age + " should be one of 'min', 'h', 'd', 'wk', 'mo', 'a'");
+		}
+		Calendar cal = calendarFactory.getCalendar();
+		int offsetSeconds = value.multiply(new BigDecimal(-1 * unitSeconds)).intValue();
+		cal.add(Calendar.SECOND, offsetSeconds);
+		ParamPrefixEnum prefix = age.getPrefix();
+		if (prefix == null) {
+			prefix = ParamPrefixEnum.EQUAL;
+		}
+		if (prefix == ParamPrefixEnum.EQUAL || prefix == ParamPrefixEnum.NOT_EQUAL) {
+			// Create a range for the targeted unit; the interval length is determined by the unit and
+			// its center is `offsetSeconds` in the past.
+			cal.add(Calendar.SECOND, -1 * unitSeconds / 2);
+			Date lowerBound = cal.getTime();
+			cal.add(Calendar.SECOND, unitSeconds);
+			Date upperBound = cal.getTime();
+			if (prefix == ParamPrefixEnum.EQUAL) {
+				return Optional.of(and(ge(datePropertyName, lowerBound), le(datePropertyName, upperBound)));
+			} else {
+				return Optional.of(not(and(ge(datePropertyName, lowerBound), le(datePropertyName, upperBound))));
+			}
+		}
+		switch (prefix) {
+			case LESSTHAN_OR_EQUALS:
+			case LESSTHAN:
+			case STARTS_AFTER:
+				return Optional.of(ge(datePropertyName, cal.getTime()));
+			case GREATERTHAN_OR_EQUALS:
+			case GREATERTHAN:
+				return Optional.of(le(datePropertyName, cal.getTime()));
+			// Ignoring ENDS_BEFORE as it is not meaningful for age.
+		}
+		return Optional.empty();
+	}
+	
 	@Override
 	public Collection<Condition> searchForConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
-	        DateRangeParam recordedData, SortSpec sort) {
+	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
+	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, SortSpec sort) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Condition.class);
 		
 		handlePatientReference(criteria, patientParam);
@@ -75,8 +163,9 @@ public class FhirConditionDaoImpl_2_2 extends BaseDaoImpl implements FhirConditi
 			handlePatientReference(criteria, subjectParam);
 		}
 		handleDateRange("onsetDate", onsetDate).ifPresent(criteria::add);
-		// TODO: Handle onsetAge as well.
-		handleDateRange("dateCreated", recordedData).ifPresent(criteria::add);
+		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("onsetDate", onsetAgeParam))
+		        .ifPresent(criteria::add);
+		handleDateRange("dateCreated", recordedDate).ifPresent(criteria::add);
 		handleAndListParam(clinicalStatus,
 		    tokenParam -> Optional.of(eq("clinicalStatus", convertStatus(tokenParam.getValue())))).ifPresent(criteria::add);
 		if (code != null) {

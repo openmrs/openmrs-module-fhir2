@@ -10,21 +10,29 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
+import static org.mockito.Mockito.when;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.QuantityOrListParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -36,6 +44,7 @@ import org.hibernate.SessionFactory;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.openmrs.CodedOrFreeText;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
@@ -43,6 +52,7 @@ import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.util.CalendarFactory;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,6 +64,10 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	private static final String CONDITION_UUID = "2cc6880e-2c46-15e4-9038-a6c5e4d22fb7";
 	
 	private static final String NEW_CONDITION_UUID = "3dd6880e-2c46-15e4-9038-a6c5e4d22gh8";
+	
+	private static final String UUID_13MAR2020_1900 = "604953c5-b5c6-4e1e-be95-e37d8f392046";
+	
+	private static final String UUID_5MAR2020_1900 = "db6f11a3-c52d-4e3c-bd0c-0a1d7df7d33c";
 	
 	private static final String EXISTING_CONDITION_UUID = "604953c5-b5c6-4e1e-be95-e37d8f392046";
 	
@@ -94,6 +108,9 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	@Autowired
 	private ConceptService conceptService;
 	
+	@Mock
+	private CalendarFactory calendarFactory;
+	
 	@Autowired
 	private FhirConditionDaoImpl_2_2 dao;
 	
@@ -101,6 +118,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	public void setUp() {
 		dao = new FhirConditionDaoImpl_2_2();
 		dao.setSessionFactory(sessionFactory);
+		dao.setCalendarFactory(calendarFactory);
 		executeDataSet(CONDITION_INITIAL_DATA_XML);
 	}
 	
@@ -267,6 +285,88 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		assertThat(results, not(empty()));
 		assertThat(results, hasSize(3));
 		assertThat(results.iterator().next().getOnsetDate().toString(), startsWith(actualDate));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnConditionByOnsetAgeLessThanHour() {
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 1.5, "", "h"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.MARCH, 13, 19, 10, 0);
+		when(calendarFactory.getCalendar()).thenReturn(calendar);
+		Collection<Condition> results = dao.searchForConditions(null, null, null, null, null, onsetAgeParam, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, hasSize(1));
+		assertThat(results.iterator().next().getUuid(), equalTo(UUID_13MAR2020_1900));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnConditionByOnsetAgeEqualHour() {
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 3, "", "h"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.MARCH, 5, 22, 0, 0);
+		when(calendarFactory.getCalendar()).thenReturn(calendar);
+		Collection<Condition> results = dao.searchForConditions(null, null, null, null, null, onsetAgeParam, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, hasSize(1));
+		assertThat(results.iterator().next().getUuid(), equalTo(UUID_5MAR2020_1900));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnConditionByOnsetAgeIntervalDay() {
+		QuantityOrListParam orListLower = new QuantityOrListParam();
+		QuantityOrListParam orListUpper = new QuantityOrListParam();
+		orListLower.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 11, "", "d"));
+		orListUpper.addOr(new QuantityParam(ParamPrefixEnum.GREATERTHAN, 8, "", "d"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orListLower).addAnd(orListUpper);
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.MARCH, 14, 22, 0, 0);
+		when(calendarFactory.getCalendar()).thenReturn((Calendar) calendar.clone()).thenReturn((Calendar) calendar.clone());
+		Collection<Condition> results = dao.searchForConditions(null, null, null, null, null, onsetAgeParam, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, hasSize(1));
+		assertThat(results.iterator().next().getUuid(), equalTo(UUID_5MAR2020_1900));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnConditionByOnsetAgeOrWeekMonthYear() {
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 1, "", "wk"));
+		orList.addOr(new QuantityParam(ParamPrefixEnum.GREATERTHAN, 3, "", "mo"));
+		orList.addOr(new QuantityParam(ParamPrefixEnum.GREATERTHAN, 2, "", "a"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.MARCH, 14, 22, 0, 0);
+		when(calendarFactory.getCalendar()).thenReturn((Calendar) calendar.clone()).thenReturn((Calendar) calendar.clone());
+		Collection<Condition> results = dao.searchForConditions(null, null, null, null, null, onsetAgeParam, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, hasSize(5));
+		assertThat(results, hasItem(hasProperty("uuid", equalTo(UUID_13MAR2020_1900))));
+		assertThat(results, not(hasItem(hasProperty("uuid", equalTo(UUID_5MAR2020_1900)))));
+		assertThat(results, hasItem(not(hasProperty("uuid", equalTo(UUID_13MAR2020_1900)))));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void searchForPatients_shouldReturnConditionByOnsetAgeExceptionForWrongUnit() {
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 1.5, "", "WRONG_UNIT"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.MARCH, 13, 19, 10, 0);
+		when(calendarFactory.getCalendar()).thenReturn(calendar);
+		dao.searchForConditions(null, null, null, null, null, onsetAgeParam, null, null);
 	}
 	
 	@Test

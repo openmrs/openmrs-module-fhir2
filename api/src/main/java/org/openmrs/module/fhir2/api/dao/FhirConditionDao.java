@@ -15,7 +15,7 @@ import java.util.Collection;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 
@@ -26,6 +26,6 @@ public interface FhirConditionDao<T> {
 	T saveCondition(@NotNull T condition);
 	
 	Collection<T> searchForConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityParam onsetAge,
-	        DateRangeParam recordedDate, SortSpec sort);
+	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
+	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, SortSpec sort);
 }
