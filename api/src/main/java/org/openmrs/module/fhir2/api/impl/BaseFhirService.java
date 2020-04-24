@@ -16,25 +16,23 @@ import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
-import org.openmrs.module.fhir2.api.translators.OpenmrsFhirUpdatableTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
+import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 
 public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsObject & Auditable> implements FhirService<T> {
 	
 	@Override
 	public T get(String uuid) {
-		OpenmrsFhirUpdatableTranslator<U, T> translator = getTranslator();
-		return translator.toFhirResource(getDao().get(uuid));
+		return getTranslator().toFhirResource(getDao().get(uuid));
 	}
 	
 	@Override
 	public T create(T newResource) {
-		OpenmrsFhirUpdatableTranslator<U, T> translator = getTranslator();
-		return translator.toFhirResource(getDao().createOrUpdate(translator.toOpenmrsType(newResource)));
+		return getTranslator().toFhirResource(getDao().createOrUpdate(getTranslator().toOpenmrsType(newResource)));
 	}
 	
 	@Override
 	public T update(String uuid, T updatedResource) {
-		
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
@@ -50,19 +48,23 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 			throw new MethodNotAllowedException("No object found to update");
 		}
 		
-		OpenmrsFhirUpdatableTranslator<U, T> updatableTranslator = getTranslator();
+		OpenmrsFhirTranslator<U, T> translator = getTranslator();
 		
-		return updatableTranslator
-		        .toFhirResource(getDao().createOrUpdate(updatableTranslator.toOpenmrsType(existingObject, updatedResource)));
+		if (translator instanceof UpdatableOpenmrsTranslator) {
+			UpdatableOpenmrsTranslator<U, T> updatableOpenmrsTranslator = (UpdatableOpenmrsTranslator<U, T>) translator;
+			return translator.toFhirResource(
+			    getDao().createOrUpdate(updatableOpenmrsTranslator.toOpenmrsType(existingObject, updatedResource)));
+		} else {
+			return translator.toFhirResource(getDao().createOrUpdate(translator.toOpenmrsType(updatedResource)));
+		}
 	}
 	
 	@Override
 	public T delete(String uuid) {
-		OpenmrsFhirUpdatableTranslator<U, T> translator = getTranslator();
-		return translator.toFhirResource(getDao().delete(uuid));
+		return getTranslator().toFhirResource(getDao().delete(uuid));
 	}
 	
 	protected abstract FhirDao<U> getDao();
 	
-	protected abstract OpenmrsFhirUpdatableTranslator<U, T> getTranslator();
+	protected abstract OpenmrsFhirTranslator<U, T> getTranslator();
 }
