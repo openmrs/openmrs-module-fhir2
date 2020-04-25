@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.Allergy;
 
-public interface AllergyIntoleranceTranslator extends ToFhirTranslator<Allergy, AllergyIntolerance>, UpdatableOpenmrsTranslator<Allergy, AllergyIntolerance> {
+public interface AllergyIntoleranceTranslator extends ToFhirTranslator<Allergy, AllergyIntolerance>, OpenmrsFhirUpdatableTranslator<Allergy, AllergyIntolerance> {
 	
 	/**
 	 * Maps {@link org.openmrs.Allergy} to {@link org.hl7.fhir.r4.model.AllergyIntolerance}

@@ -106,12 +106,20 @@ public class AllergyIntoleranceTranslatorImpl extends AbstractReferenceHandlingT
 	}
 	
 	@Override
+	public Allergy toOpenmrsType(AllergyIntolerance fhirAllergy) {
+		return toOpenmrsType(new Allergy(), fhirAllergy);
+	}
+	
+	@Override
 	public Allergy toOpenmrsType(Allergy allergy, AllergyIntolerance fhirAllergy) {
 		if (fhirAllergy == null) {
 			return allergy;
 		}
 		
-		allergy.setUuid(fhirAllergy.getId());
+		if (fhirAllergy.getId() != null) {
+			allergy.setUuid(fhirAllergy.getId());
+		}
+		
 		if (allergy.getAllergen() == null) {
 			Allergen allergen = new Allergen();
 			if (fhirAllergy.hasCode()) {

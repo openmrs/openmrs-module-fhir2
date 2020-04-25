@@ -80,10 +80,10 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	
 	@Test
 	public void getAllergyIntoleranceByUuid_shouldGetAllergyIntoleranceByUuid() {
-		when(allergyIntoleranceDao.getAllergyIntoleranceByUuid(ALLERGY_UUID)).thenReturn(omrsAllergy);
+		when(allergyIntoleranceDao.get(ALLERGY_UUID)).thenReturn(omrsAllergy);
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		AllergyIntolerance result = service.getAllergyIntoleranceByUuid(ALLERGY_UUID);
+		AllergyIntolerance result = service.get(ALLERGY_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(ALLERGY_UUID));
@@ -91,7 +91,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	
 	@Test
 	public void getAllergyIntoleranceByUuid_shouldReturnNullWhenCalledWithWrongUuid() {
-		AllergyIntolerance result = service.getAllergyIntoleranceByUuid(WRONG_ALLERGY_UUID);
+		AllergyIntolerance result = service.get(WRONG_ALLERGY_UUID);
 		assertThat(result, nullValue());
 	}
 	
@@ -258,4 +258,5 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 	}
+	
 }
