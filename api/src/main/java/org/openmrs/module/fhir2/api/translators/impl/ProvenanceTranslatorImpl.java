@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class ProvenanceTranslatorImpl<T extends OpenmrsObject & Auditable> extends BaseProvenanceHandlingTranslator implements ProvenanceTranslator<T> {
-	
+
 	@Override
 	public Provenance getCreateProvenance(T openMrsObject) {
 		Provenance provenance = new Provenance();
@@ -32,7 +32,7 @@ public class ProvenanceTranslatorImpl<T extends OpenmrsObject & Auditable> exten
 		provenance.addAgent(createAgentComponent(openMrsObject.getCreator()));
 		return provenance;
 	}
-	
+
 	@Override
 	public Provenance getUpdateProvenance(T openMrsObject) {
 		if (openMrsObject.getDateChanged() == null && openMrsObject.getChangedBy() == null) {
