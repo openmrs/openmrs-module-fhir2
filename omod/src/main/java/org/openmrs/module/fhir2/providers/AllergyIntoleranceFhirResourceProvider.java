@@ -53,7 +53,7 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	@Read
 	@SuppressWarnings("unused")
 	public AllergyIntolerance getAllergyIntoleranceByUuid(@IdParam @NotNull IdType id) {
-		AllergyIntolerance allergy = fhirAllergyIntoleranceService.getAllergyIntoleranceByUuid(id.getIdPart());
+		AllergyIntolerance allergy = fhirAllergyIntoleranceService.get(id.getIdPart());
 		if (allergy == null) {
 			throw new ResourceNotFoundException("Could not find allergy with Id " + id.getIdPart());
 		}
@@ -63,7 +63,7 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getAllergyIntoleranceHistoryById(@IdParam @NotNull IdType id) {
-		AllergyIntolerance allergy = fhirAllergyIntoleranceService.getAllergyIntoleranceByUuid(id.getIdPart());
+		AllergyIntolerance allergy = fhirAllergyIntoleranceService.get(id.getIdPart());
 		if (allergy == null) {
 			throw new ResourceNotFoundException("Could not find allergy with Id " + id.getIdPart());
 		}
@@ -84,4 +84,5 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		return FhirServerUtils.convertSearchResultsToBundle(fhirAllergyIntoleranceService
 		        .searchForAllergies(patientReference, category, allergen, severity, manifestationCode, clinicalStatus));
 	}
+	
 }
