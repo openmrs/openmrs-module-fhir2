@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class MedicationReferenceTranslatorImpl extends AbstractReferenceHandlingTranslator implements MedicationReferenceTranslator {
+public class MedicationReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements MedicationReferenceTranslator {
 	
 	@Autowired
 	private FhirMedicationDao medicationDao;

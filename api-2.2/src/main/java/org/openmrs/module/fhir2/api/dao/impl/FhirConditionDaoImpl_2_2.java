@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 @OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
-public class FhirConditionDaoImpl_2_2 extends BaseDaoImpl implements FhirConditionDao<Condition> {
+public class FhirConditionDaoImpl_2_2 extends BaseDao implements FhirConditionDao<Condition> {
 	// TODO: Change the BaseDaoImpl inheritance pattern to one of composition; here and everywhere else.
 	
 	@Autowired

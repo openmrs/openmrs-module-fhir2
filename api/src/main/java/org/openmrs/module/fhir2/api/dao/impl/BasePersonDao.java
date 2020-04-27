@@ -35,7 +35,7 @@ import org.hibernate.criterion.Subqueries;
 import org.hibernate.sql.JoinType;
 import org.openmrs.PersonName;
 
-public abstract class AbstractPersonDaoImpl extends BaseDaoImpl {
+public abstract class BasePersonDao extends BaseDao {
 	
 	/**
 	 * Returns the sqlAlias of the Person class for queries from this class

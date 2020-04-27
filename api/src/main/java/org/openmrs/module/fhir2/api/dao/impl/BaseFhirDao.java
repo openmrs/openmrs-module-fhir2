@@ -27,14 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This is a base class for FHIR2 Dao objects providing default implementations for the
- * {@link FhirDao} interface. It extends {@link BaseDaoImpl} so that the criteria helpers used there
+ * {@link FhirDao} interface. It extends {@link BaseDao} so that the criteria helpers used there
  * will be available to all subclasses. In general, Dao objects implementing this class will simply
  * need to provide implementation(s) for search functionality
  *
  * @param <T> the {@link OpenmrsObject} managed by this Dao
  */
 @Transactional
-public abstract class BaseFhirDaoImpl<T extends OpenmrsObject & Auditable> extends BaseDaoImpl implements FhirDao<T> {
+public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao implements FhirDao<T> {
 	
 	private final TypeToken<T> typeToken;
 	
@@ -44,7 +44,7 @@ public abstract class BaseFhirDaoImpl<T extends OpenmrsObject & Auditable> exten
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	protected BaseFhirDaoImpl() {
+	protected BaseFhirDao() {
 		typeToken = new TypeToken<T>(getClass()) {
 			
 		};

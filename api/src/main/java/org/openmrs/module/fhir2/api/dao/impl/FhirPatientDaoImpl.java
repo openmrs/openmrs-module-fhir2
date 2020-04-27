@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirPatientDaoImpl extends AbstractPersonDaoImpl implements FhirPatientDao {
+public class FhirPatientDaoImpl extends BasePersonDao implements FhirPatientDao {
 	
 	@Autowired
 	@Qualifier("sessionFactory")

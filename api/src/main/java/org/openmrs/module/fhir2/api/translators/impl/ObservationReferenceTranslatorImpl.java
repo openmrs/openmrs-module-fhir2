@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ObservationReferenceTranslatorImpl extends AbstractReferenceHandlingTranslator implements ObservationReferenceTranslator {
+public class ObservationReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements ObservationReferenceTranslator {
 	
 	@Autowired
 	private FhirObservationDao observationDao;

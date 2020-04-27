@@ -102,6 +102,19 @@ Concept result = getConcept("expectedConcept");
 assertThat(result, equalTo(expected));
 ```
 
+Class Naming Conventions
+------------------------
+
+* Prefer to create an interface rather than directly creating a concrete type. This allows modules and implementers to swap
+out these classes with minimal effort.
+* All interfaces should be the name of a class without additional text.  For example, favour `GreatClass` as an interface
+name over `IGreatClass` or `GreatClassInterface`.
+* All implementation classes should be the name of the class with `Impl` to distinguish them from the interface. For example,
+`GreatClassImpl`.
+* All abstract classes should start with `Base` and not end with `Impl`. For example, `BaseGreatClass`.
+* These conventions can be waved for `ResourceProvider`s, as they all implement HAPI's `IResourceProvider` interface and are
+not expected to be overwritten by implementations. Instead, they should be named `GreatClassFhirResourceProvider`.
+
 License
 -------
 

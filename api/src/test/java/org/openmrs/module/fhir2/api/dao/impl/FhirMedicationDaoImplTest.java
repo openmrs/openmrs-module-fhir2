@@ -62,7 +62,7 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private FhirMedicationDaoImpl medicationDao;
 	
-	private BaseFhirDaoImpl<Drug> baseFhirDao;
+	private BaseFhirDao<Drug> baseFhirDao;
 	
 	@Before
 	public void setup() throws Exception {

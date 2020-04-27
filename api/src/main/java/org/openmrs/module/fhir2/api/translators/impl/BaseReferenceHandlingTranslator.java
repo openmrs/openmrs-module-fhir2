@@ -31,7 +31,7 @@ import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PACKAGE)
-public abstract class AbstractReferenceHandlingTranslator {
+public abstract class BaseReferenceHandlingTranslator {
 	
 	public static final String DRUG_ORDER_TYPE_UUID = "131168f4-15f5-102d-96e4-000c29c2a5d7";
 	

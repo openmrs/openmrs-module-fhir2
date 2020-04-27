@@ -20,7 +20,7 @@ import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PACKAGE)
-public abstract class AbstractProvenanceHandlingTranslator {
+public abstract class BaseProvenanceHandlingTranslator {
 	
 	private static final String AGENT_TYPE_CODE = "author";
 	
