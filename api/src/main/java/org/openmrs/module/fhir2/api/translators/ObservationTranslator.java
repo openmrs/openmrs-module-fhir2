@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 
-public interface ObservationTranslator extends ToFhirTranslator<Obs, Observation>, UpdatableOpenmrsTranslator<Obs, Observation> {
+public interface ObservationTranslator extends ToFhirTranslator<Obs, Observation>, OpenmrsFhirUpdatableTranslator<Obs, Observation> {
 	
 	/**
 	 * Maps an {@link org.openmrs.Obs} to an {@link org.hl7.fhir.r4.model.Observation}
@@ -53,4 +53,6 @@ public interface ObservationTranslator extends ToFhirTranslator<Obs, Observation
 	 * @return an updated version of the current obs
 	 */
 	Obs toOpenmrsType(Obs existingObs, Observation observation, Supplier<Obs> groupedObsFactory);
+
+	Obs toOpenmrsType(Obs fhirObs);
 }

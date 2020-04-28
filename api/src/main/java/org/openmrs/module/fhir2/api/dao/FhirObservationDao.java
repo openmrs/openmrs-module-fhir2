@@ -22,9 +22,9 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Obs;
 
-public interface FhirObservationDao {
+public interface FhirObservationDao extends FhirDao<Obs> {
 	
-	Obs getObsByUuid(@NotNull String uuid);
+	Obs get(@NotNull String uuid);
 	
 	Collection<Obs> searchForObservations(ReferenceAndListParam encounterReference, ReferenceAndListParam patientReference,
 	        ReferenceParam hasMemberReference, TokenAndListParam valueConcept, DateRangeParam valueDateParam,

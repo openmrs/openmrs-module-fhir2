@@ -37,14 +37,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservationDao {
 	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Override
-	public Obs getObsByUuid(String uuid) {
-		return (Obs) sessionFactory.getCurrentSession().createCriteria(Obs.class).add(eq("uuid", uuid)).uniqueResult();
-	}
 	
 	@Override
 	public Collection<Obs> searchForObservations(ReferenceAndListParam encounterReference,
@@ -52,7 +44,7 @@ public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservati
 	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
 	        DateRangeParam date, TokenAndListParam code, SortSpec sort) {
 		
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Obs.class);
+		Criteria criteria = getsessionFactory.getCurrentSession().createCriteria(Obs.class);
 		
 		handleEncounterReference("e", encounterReference).ifPresent(c -> criteria.createAlias("encounter", "e").add(c));
 		handlePatientReference(criteria, patientReference, "person");

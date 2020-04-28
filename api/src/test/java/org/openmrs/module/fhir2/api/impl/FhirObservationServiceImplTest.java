@@ -58,10 +58,10 @@ public class FhirObservationServiceImplTest {
 		obs.setUuid(OBS_UUID);
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
-		when(dao.getObsByUuid(OBS_UUID)).thenReturn(obs);
+		when(dao.get(OBS_UUID)).thenReturn(obs);
 		when(observationTranslator.toFhirResource(obs)).thenReturn(observation);
 		
-		Observation result = fhirObservationService.getObservationByUuid(OBS_UUID);
+		Observation result = fhirObservationService.get(OBS_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(OBS_UUID));

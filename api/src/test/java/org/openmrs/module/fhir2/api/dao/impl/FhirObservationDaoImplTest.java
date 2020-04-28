@@ -126,7 +126,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getObsByUuid_shouldGetObsByUuid() {
-		Obs result = dao.getObsByUuid(OBS_UUID);
+		Obs result = dao.get(OBS_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(OBS_UUID));
@@ -134,7 +134,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getObsByUuid_shouldReturnNullIfObsNotFoundByUuid() {
-		Obs result = dao.getObsByUuid(BAD_OBS_UUID);
+		Obs result = dao.get(BAD_OBS_UUID);
 		
 		assertThat(result, nullValue());
 	}

@@ -22,9 +22,10 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Observation;
 
-public interface FhirObservationService {
+public interface FhirObservationService extends FhirService<Observation>{
 	
-	Observation getObservationByUuid(@NotNull String uuid);
+	@Override
+	Observation get(@NotNull String uuid);
 	
 	Collection<Observation> searchForObservations(ReferenceAndListParam encounterReference,
 	        ReferenceAndListParam patientReference, ReferenceParam hasMemberReference, TokenAndListParam valueConcept,

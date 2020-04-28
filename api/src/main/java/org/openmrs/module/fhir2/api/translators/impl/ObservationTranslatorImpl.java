@@ -120,6 +120,10 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		return obs;
 	}
+	@Override
+	public Obs toOpenmrsType(Obs fhirObs) {
+		return toOpenmrsType(new Obs());
+	}
 	
 	@Override
 	public Obs toOpenmrsType(Obs existingObs, Observation observation, Supplier<Obs> groupedObsFactory) {

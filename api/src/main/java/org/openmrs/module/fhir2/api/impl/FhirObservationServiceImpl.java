@@ -22,9 +22,12 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
+import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.FhirObservationService;
+import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirObservationServiceImpl implements FhirObservationService {
+public class FhirObservationServiceImpl BaseFhirService<Observation, org.openmrs.obs>implements FhirObservationService {
 	
 	@Autowired
 	FhirObservationDao dao;
@@ -40,11 +43,14 @@ public class FhirObservationServiceImpl implements FhirObservationService {
 	@Autowired
 	ObservationTranslator observationTranslator;
 	
-	@Override
 	@Transactional(readOnly = true)
-	public Observation getObservationByUuid(String uuid) {
-		return observationTranslator.toFhirResource(dao.getObsByUuid(uuid));
+	public Observation get(String uuid) {
+		return observationTranslator.toFhirResource(((FhirDao<Obs>) dao).get(uuid));
 	}
+	protected FhirDao<Obs> getDao() {
+		return (FhirDao<Obs>) dao;
+	}
+
 	
 	@Override
 	@Transactional(readOnly = true)
