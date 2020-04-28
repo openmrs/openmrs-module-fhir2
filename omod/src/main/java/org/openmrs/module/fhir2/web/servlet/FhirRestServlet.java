@@ -15,6 +15,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import lombok.AccessLevel;
@@ -84,5 +85,11 @@ public class FhirRestServlet extends RestfulServer {
 	@Qualifier("fhirResources")
 	public void setResourceProviders(Collection<IResourceProvider> theProviders) {
 		super.setResourceProviders(theProviders);
+	}
+	
+	@Override
+	@Autowired
+	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
+		super.setServerAddressStrategy(theServerAddressStrategy);
 	}
 }
