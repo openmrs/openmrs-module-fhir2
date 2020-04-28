@@ -22,10 +22,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -40,6 +36,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.web.servlet.BaseFhirProvenanceResourceTest;
+
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Encounter> {
@@ -81,7 +82,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	public void getEncounterByUuid_shouldReturnMatchingEncounter() {
 		IdType id = new IdType();
 		id.setValue(ENCOUNTER_UUID);
-		when(encounterService.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(encounter);
+		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
 		Encounter result = resourceProvider.getEncounterByUuid(id);
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
@@ -118,7 +119,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	public void getEncounterHistory_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(ENCOUNTER_UUID);
-		when(encounterService.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(encounter);
+		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
 		
 		List<Resource> resources = resourceProvider.getEncounterHistoryById(id);
 		assertThat(resources, not(empty()));

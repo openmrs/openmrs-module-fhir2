@@ -53,7 +53,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	public Encounter getEncounterByUuid(@IdParam @NotNull IdType id) {
-		Encounter encounter = encounterService.getEncounterByUuid(id.getIdPart());
+		Encounter encounter = encounterService.get(id.getIdPart());
 		if (encounter == null) {
 			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());
 		}
@@ -79,7 +79,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getEncounterHistoryById(@IdParam @NotNull IdType id) {
-		Encounter encounter = encounterService.getEncounterByUuid(id.getIdPart());
+		Encounter encounter = encounterService.get(id.getIdPart());
 		if (encounter == null) {
 			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());
 		}

@@ -114,10 +114,10 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	}
 	
 	@Test
-	public void getEncounterByUuid_shouldReturnEncounter() throws Exception {
+	public void get_shouldReturnEncounter() throws Exception {
 		Encounter encounter = new Encounter();
 		encounter.setId(ENCOUNTER_UUID);
-		when(encounterService.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(encounter);
+		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
 		
 		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -128,7 +128,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	
 	@Test
 	public void getEncounterByWrongUuid_shouldReturn404() throws Exception {
-		when(encounterService.getEncounterByUuid(WRONG_ENCOUNTER_UUID)).thenReturn(null);
+		when(encounterService.get(WRONG_ENCOUNTER_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/Encounter/" + WRONG_ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -492,7 +492,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	public void shouldVerifyEncounterHistoryByIdUri() throws Exception {
 		Encounter encounter = new Encounter();
 		encounter.setId(ENCOUNTER_UUID);
-		when(encounterService.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(encounter);
+		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
 		
 		MockHttpServletResponse response = getEncounterHistoryRequest();
 		
@@ -516,7 +516,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		encounter.setId(ENCOUNTER_UUID);
 		encounter.addContained(provenance);
 		
-		when(encounterService.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(encounter);
+		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
 		
 		MockHttpServletResponse response = getEncounterHistoryRequest();
 		
@@ -534,7 +534,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		Encounter encounter = new Encounter();
 		encounter.setId(ENCOUNTER_UUID);
 		encounter.setContained(new ArrayList<>());
-		when(encounterService.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(encounter);
+		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
 		
 		MockHttpServletResponse response = getEncounterHistoryRequest();
 		Bundle results = readBundleResponse(response);

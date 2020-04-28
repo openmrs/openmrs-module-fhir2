@@ -18,8 +18,10 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
+import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirEncounterServiceImpl implements FhirEncounterService {
+public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.openmrs.Encounter> implements FhirEncounterService {
 	
 	@Autowired
 	FhirEncounterDao dao;
@@ -37,8 +39,8 @@ public class FhirEncounterServiceImpl implements FhirEncounterService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Encounter getEncounterByUuid(String uuid) {
-		return translator.toFhirResource(dao.getEncounterByUuid(uuid));
+	public Encounter get(String uuid) {
+		return translator.toFhirResource(dao.get(uuid));
 	}
 	
 	@Override
@@ -47,5 +49,15 @@ public class FhirEncounterServiceImpl implements FhirEncounterService {
 	        ReferenceAndListParam participant, ReferenceAndListParam subject) {
 		return dao.searchForEncounters(date, location, participant, subject).stream().map(translator::toFhirResource)
 		        .collect(Collectors.toList());
+	}
+	
+	@Override
+	protected FhirDao<org.openmrs.Encounter> getDao() {
+		return dao;
+	}
+	
+	@Override
+	protected OpenmrsFhirTranslator<org.openmrs.Encounter, Encounter> getTranslator() {
+		return translator;
 	}
 }

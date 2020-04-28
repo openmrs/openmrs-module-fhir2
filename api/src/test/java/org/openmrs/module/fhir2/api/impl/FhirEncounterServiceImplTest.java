@@ -81,9 +81,9 @@ public class FhirEncounterServiceImplTest {
 	
 	@Test
 	public void shouldGetEncounterByUuid() {
-		when(dao.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
+		when(dao.get(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
-		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.getEncounterByUuid(ENCOUNTER_UUID);
+		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.get(ENCOUNTER_UUID);
 		assertThat(fhirEncounter, notNullValue());
 		assertThat(fhirEncounter.getId(), notNullValue());
 		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));
