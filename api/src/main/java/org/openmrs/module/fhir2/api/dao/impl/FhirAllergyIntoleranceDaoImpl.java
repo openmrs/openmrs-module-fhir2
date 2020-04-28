@@ -21,7 +21,6 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -31,31 +30,20 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirAllergyIntoleranceDaoImpl extends BaseDaoImpl implements FhirAllergyIntoleranceDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDaoImpl<Allergy> implements FhirAllergyIntoleranceDao {
 	
 	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
-	public Allergy getAllergyIntoleranceByUuid(String uuid) {
-		return (Allergy) sessionFactory.getCurrentSession().createCriteria(Allergy.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
-	
-	@Override
 	public Collection<Allergy> searchForAllergies(ReferenceAndListParam patientReference, TokenOrListParam category,
 	        TokenAndListParam allergen, TokenOrListParam severity, TokenAndListParam manifestationCode,
 	        TokenOrListParam clinicalStatus) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Allergy.class);
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Allergy.class);
 		handlePatientReference(criteria, patientReference, "patient");
 		handleAllergenCategory("allergen.allergenType", category).ifPresent(criteria::add);
 		handleAllergen(criteria, allergen);

@@ -18,9 +18,12 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.openmrs.Allergy;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
+import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirAllergyIntoleranceServiceImpl implements FhirAllergyIntoleranceService {
+public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIntolerance, Allergy> implements FhirAllergyIntoleranceService {
 	
 	@Autowired
 	private AllergyIntoleranceTranslator allergyIntoleranceTranslator;
@@ -37,9 +40,13 @@ public class FhirAllergyIntoleranceServiceImpl implements FhirAllergyIntolerance
 	private FhirAllergyIntoleranceDao allergyIntoleranceDao;
 	
 	@Override
-	@Transactional
-	public AllergyIntolerance getAllergyIntoleranceByUuid(String uuid) {
-		return allergyIntoleranceTranslator.toFhirResource(allergyIntoleranceDao.getAllergyIntoleranceByUuid(uuid));
+	protected FhirDao<Allergy> getDao() {
+		return allergyIntoleranceDao;
+	}
+	
+	@Override
+	protected OpenmrsFhirTranslator<Allergy, AllergyIntolerance> getTranslator() {
+		return allergyIntoleranceTranslator;
 	}
 	
 	@Override
