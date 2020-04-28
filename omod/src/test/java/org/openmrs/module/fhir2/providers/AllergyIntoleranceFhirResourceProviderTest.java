@@ -87,7 +87,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	
 	@Test
 	public void getAllergyIntoleranceByUuid_shouldReturnMatchingAllergy() {
-		when(service.getAllergyIntoleranceByUuid(ALLERGY_UUID)).thenReturn(allergyIntolerance);
+		when(service.get(ALLERGY_UUID)).thenReturn(allergyIntolerance);
 		
 		IdType id = new IdType();
 		id.setValue(ALLERGY_UUID);
@@ -109,7 +109,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	public void getAllergyIntoleranceHistory_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(ALLERGY_UUID);
-		when(service.getAllergyIntoleranceByUuid(ALLERGY_UUID)).thenReturn(allergyIntolerance);
+		when(service.get(ALLERGY_UUID)).thenReturn(allergyIntolerance);
 		
 		List<Resource> resources = resourceProvider.getAllergyIntoleranceHistoryById(id);
 		assertThat(resources, not(empty()));
@@ -254,4 +254,5 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
 	}
+	
 }

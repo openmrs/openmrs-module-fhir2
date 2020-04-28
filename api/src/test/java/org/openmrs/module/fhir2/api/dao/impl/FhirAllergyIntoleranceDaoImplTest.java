@@ -95,7 +95,7 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void getAllergyIntoleranceByUuid_shouldGetByUuid() {
-		Allergy allergy = allergyDao.getAllergyIntoleranceByUuid(ALLERGY_UUID);
+		Allergy allergy = allergyDao.get(ALLERGY_UUID);
 		assertThat(allergy, notNullValue());
 		assertThat(allergy.getUuid(), notNullValue());
 		assertThat(allergy.getUuid(), equalTo(ALLERGY_UUID));
@@ -103,7 +103,7 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void getAllergyIntoleranceByUuid_shouldReturnNullWhenCalledWithUnknownUuid() {
-		Allergy allergy = allergyDao.getAllergyIntoleranceByUuid(UNKNOWN_ALLERGY_UUID);
+		Allergy allergy = allergyDao.get(UNKNOWN_ALLERGY_UUID);
 		assertThat(allergy, nullValue());
 	}
 	

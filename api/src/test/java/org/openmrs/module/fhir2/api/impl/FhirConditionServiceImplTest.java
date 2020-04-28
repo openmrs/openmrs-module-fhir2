@@ -12,12 +12,12 @@ package org.openmrs.module.fhir2.api.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.r4.model.Condition;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
@@ -36,18 +36,18 @@ public class FhirConditionServiceImplTest {
 		condition.setId(BAD_CONDITION_UUID);
 	}
 	
-	@Test(expected = NotImplementedException.class)
-	public void getConditionByUuid_shouldNotImplementedException() {
+	@Test(expected = FhirException.class)
+	public void getConditionByUuid_shouldThrowFhirException() {
 		assertThat(conditionService.getConditionByUuid(BAD_CONDITION_UUID), nullValue());
 	}
 	
-	@Test(expected = NotImplementedException.class)
-	public void searchConditions_shouldNotImplementedException() {
+	@Test(expected = FhirException.class)
+	public void searchConditions_shouldThrowFhirException() {
 		assertThat(conditionService.searchConditions(null, null, null, null, null, null, null, null), nullValue());
 	}
 	
-	@Test(expected = NotImplementedException.class)
-	public void saveCondition_shouldNotImplementedException() {
+	@Test(expected = FhirException.class)
+	public void saveCondition_shouldThrowFhirException() {
 		assertThat(conditionService.saveCondition(condition), nullValue());
 	}
 	

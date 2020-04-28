@@ -104,7 +104,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	public void getAllergyIntoleranceByUuid_shouldReturnAllergy() throws Exception {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.setId(ALLERGY_UUID);
-		when(allergyService.getAllergyIntoleranceByUuid(ALLERGY_UUID)).thenReturn(allergy);
+		when(allergyService.get(ALLERGY_UUID)).thenReturn(allergy);
 		
 		MockHttpServletResponse response = get("/AllergyIntolerance/" + ALLERGY_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -299,7 +299,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	
 	@Test
 	public void getAllergyIntoleranceByUuid_shouldReturn404() throws Exception {
-		when(allergyService.getAllergyIntoleranceByUuid(WRONG_ALLERGY_UUID)).thenReturn(null);
+		when(allergyService.get(WRONG_ALLERGY_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/AllergyIntolerance/" + WRONG_ALLERGY_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -310,7 +310,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	public void shouldVerifyAllergyIntoleranceHistoryByIdUri() throws Exception {
 		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
 		allergyIntolerance.setId(ALLERGY_UUID);
-		when(allergyService.getAllergyIntoleranceByUuid(ALLERGY_UUID)).thenReturn(allergyIntolerance);
+		when(allergyService.get(ALLERGY_UUID)).thenReturn(allergyIntolerance);
 		
 		MockHttpServletResponse response = getAllergyIntoleranceHistoryRequest();
 		
@@ -334,7 +334,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		allergyIntolerance.setId(ALLERGY_UUID);
 		allergyIntolerance.addContained(provenance);
 		
-		when(allergyService.getAllergyIntoleranceByUuid(ALLERGY_UUID)).thenReturn(allergyIntolerance);
+		when(allergyService.get(ALLERGY_UUID)).thenReturn(allergyIntolerance);
 		
 		MockHttpServletResponse response = getAllergyIntoleranceHistoryRequest();
 		
@@ -353,7 +353,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
 		allergyIntolerance.setId(ALLERGY_UUID);
 		allergyIntolerance.setContained(new ArrayList<>());
-		when(allergyService.getAllergyIntoleranceByUuid(ALLERGY_UUID)).thenReturn(allergyIntolerance);
+		when(allergyService.get(ALLERGY_UUID)).thenReturn(allergyIntolerance);
 		
 		MockHttpServletResponse response = getAllergyIntoleranceHistoryRequest();
 		Bundle results = readBundleResponse(response);
@@ -391,4 +391,5 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
 	}
+	
 }
