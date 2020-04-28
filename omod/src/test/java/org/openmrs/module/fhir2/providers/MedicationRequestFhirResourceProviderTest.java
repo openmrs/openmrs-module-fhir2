@@ -15,7 +15,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.Before;
@@ -24,6 +23,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
+
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestFhirResourceProviderTest {
@@ -56,7 +57,7 @@ public class MedicationRequestFhirResourceProviderTest {
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldReturnMatchingMedicationRequest() {
-		when(fhirMedicationRequestService.getMedicationRequestByUuid(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
+		when(fhirMedicationRequestService.get(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
 		
 		IdType id = new IdType();
 		id.setValue(MEDICATION_REQUEST_UUID);

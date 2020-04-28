@@ -135,7 +135,7 @@ public class ObservationBasedOnReferenceTranslatorImplTest {
 		DrugOrder order = new DrugOrder();
 		order.setUuid(ORDER_UUID);
 		
-		when(medicationRequestDao.getMedicationRequestByUuid(ORDER_UUID)).thenReturn(order);
+		when(medicationRequestDao.get(ORDER_UUID)).thenReturn(order);
 		
 		Order result = translator.toOpenmrsType(orderReference);
 		
