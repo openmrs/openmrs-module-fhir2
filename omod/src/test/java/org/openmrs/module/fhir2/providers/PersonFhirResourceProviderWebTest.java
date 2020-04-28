@@ -100,7 +100,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderT
 	public void shouldReturnPersonByUuid() throws Exception {
 		Person person = new Person();
 		person.setId(PERSON_UUID);
-		when(personService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
+		when(personService.get(PERSON_UUID)).thenReturn(person);
 		
 		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -113,7 +113,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderT
 	
 	@Test
 	public void shouldReturn404IfPersonNotFound() throws Exception {
-		when(personService.getPersonByUuid(WRONG_PERSON_UUID)).thenReturn(null);
+		when(personService.get(WRONG_PERSON_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -339,7 +339,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderT
 	public void shouldVerifyGetPersonHistoryByIdUri() throws Exception {
 		Person person = new Person();
 		person.setId(PERSON_UUID);
-		when(personService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
+		when(personService.get(PERSON_UUID)).thenReturn(person);
 		
 		MockHttpServletResponse response = getPersonHistoryByIdRequest();
 		
@@ -363,7 +363,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderT
 		person.setId(PERSON_UUID);
 		person.addContained(provenance);
 		
-		when(personService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
+		when(personService.get(PERSON_UUID)).thenReturn(person);
 		
 		MockHttpServletResponse response = getPersonHistoryByIdRequest();
 		
@@ -381,7 +381,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderT
 		Person person = new Person();
 		person.setId(PERSON_UUID);
 		person.setContained(new ArrayList<>());
-		when(personService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
+		when(personService.get(PERSON_UUID)).thenReturn(person);
 		
 		MockHttpServletResponse response = getPersonHistoryByIdRequest();
 		Bundle results = readBundleResponse(response);

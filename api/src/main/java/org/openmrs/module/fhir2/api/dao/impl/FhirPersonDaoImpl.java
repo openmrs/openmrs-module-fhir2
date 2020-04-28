@@ -29,12 +29,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
+@SuppressWarnings("unchecked")
 public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
 	
 	@Override
-	public Person getPersonByUuid(String uuid) {
-		return (Person) getSessionFactory().getCurrentSession().createCriteria(Person.class).add(eq("uuid", uuid))
-		        .uniqueResult();
+	public Person get(String uuid) {
+		return super.get(uuid);
 	}
 	
 	@Override
@@ -44,6 +44,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 		        .createAlias("person", "p", JoinType.INNER_JOIN, eq("p.id", person.getId()))
 		        .createAlias("attributeType", "pat").add(eq("pat.uuid", personAttributeTypeUuid)).add(eq("voided", false))
 		        .list();
+		
 	}
 	
 	@Override
@@ -65,8 +66,8 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 		return criteria.list();
 	}
 	
-	@Override
 	protected String getSqlAlias() {
 		return "this_";
 	}
+	
 }
