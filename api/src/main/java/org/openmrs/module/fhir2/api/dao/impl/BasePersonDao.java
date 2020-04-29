@@ -33,9 +33,11 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Subqueries;
 import org.hibernate.sql.JoinType;
+import org.openmrs.Auditable;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.PersonName;
 
-public abstract class BasePersonDao extends BaseDao {
+public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	/**
 	 * Returns the sqlAlias of the Person class for queries from this class

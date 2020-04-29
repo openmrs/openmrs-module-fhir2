@@ -25,38 +25,31 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirPatientDaoImpl extends BasePersonDao implements FhirPatientDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPatientDao {
 	
 	@Override
 	public Patient getPatientById(Integer id) {
-		return (Patient) sessionFactory.getCurrentSession().createCriteria(Patient.class).add(eq("patientId", id))
+		return (Patient) getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(eq("patientId", id))
 		        .uniqueResult();
 	}
 	
 	@Override
 	public Patient getPatientByUuid(String uuid) {
-		return (Patient) sessionFactory.getCurrentSession().createCriteria(Patient.class).add(eq("uuid", uuid))
+		return (Patient) getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(eq("uuid", uuid))
 		        .uniqueResult();
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
 	public PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid) {
-		List<PatientIdentifierType> identifierTypes = (List<PatientIdentifierType>) sessionFactory.getCurrentSession()
+		List<PatientIdentifierType> identifierTypes = (List<PatientIdentifierType>) getSessionFactory().getCurrentSession()
 		        .createCriteria(PatientIdentifierType.class)
 		        .add(or(and(eq("name", name), eq("retired", false)), eq("uuid", uuid))).list();
 		
@@ -80,7 +73,7 @@ public class FhirPatientDaoImpl extends BasePersonDao implements FhirPatientDao 
 	        TokenOrListParam identifier, TokenOrListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
 	        TokenOrListParam deceased, StringOrListParam city, StringOrListParam state, StringOrListParam postalCode,
 	        StringOrListParam country, SortSpec sort) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Patient.class);
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Patient.class);
 		
 		handleNames(criteria, name, given, family);
 		handleIdentifier(criteria, identifier);

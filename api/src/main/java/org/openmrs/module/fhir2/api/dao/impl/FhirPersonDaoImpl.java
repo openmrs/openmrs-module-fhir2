@@ -21,32 +21,26 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirPersonDaoImpl extends BasePersonDao implements FhirPersonDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
 	
 	@Override
 	public Person getPersonByUuid(String uuid) {
-		return (Person) sessionFactory.getCurrentSession().createCriteria(Person.class).add(eq("uuid", uuid)).uniqueResult();
+		return (Person) getSessionFactory().getCurrentSession().createCriteria(Person.class).add(eq("uuid", uuid))
+		        .uniqueResult();
 	}
 	
 	@Override
 	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(Person person,
 	        String personAttributeTypeUuid) {
-		return (List<PersonAttribute>) sessionFactory.getCurrentSession().createCriteria(PersonAttribute.class)
+		return (List<PersonAttribute>) getSessionFactory().getCurrentSession().createCriteria(PersonAttribute.class)
 		        .createAlias("person", "p", JoinType.INNER_JOIN, eq("p.id", person.getId()))
 		        .createAlias("attributeType", "pat").add(eq("pat.uuid", personAttributeTypeUuid)).add(eq("voided", false))
 		        .list();
@@ -56,7 +50,7 @@ public class FhirPersonDaoImpl extends BasePersonDao implements FhirPersonDao {
 	public Collection<Person> searchForPeople(StringOrListParam name, TokenOrListParam gender, DateRangeParam birthDate,
 	        StringOrListParam city, StringOrListParam state, StringOrListParam postalCode, StringOrListParam country,
 	        SortSpec sort) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Person.class);
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Person.class);
 		
 		handleNames(criteria, name, null, null);
 		handleGender("gender", gender).ifPresent(criteria::add);
