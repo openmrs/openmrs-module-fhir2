@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class CustomizableMetadataTranslatorImpl<A extends Attribute, T extends BaseCustomizableMetadata<A>> extends BaseProvenanceHandlingTranslator implements CustomizableMetadataTranslator<A, T> {
-
+	
 	@Override
 	public Provenance getCreateProvenance(T openMrsObject) {
 		Provenance provenance = new Provenance();
@@ -32,7 +32,7 @@ public class CustomizableMetadataTranslatorImpl<A extends Attribute, T extends B
 		provenance.addAgent(createAgentComponent(openMrsObject.getCreator()));
 		return provenance;
 	}
-
+	
 	@Override
 	public Provenance getUpdateProvenance(T openMrsObject) {
 		if (openMrsObject.getDateChanged() == null && openMrsObject.getChangedBy() == null) {

@@ -35,10 +35,10 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implements FhirAllergyIntoleranceDao {
-
+	
 	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
-
+	
 	@Override
 	public Collection<Allergy> searchForAllergies(ReferenceAndListParam patientReference, TokenOrListParam category,
 	        TokenAndListParam allergen, TokenOrListParam severity, TokenAndListParam manifestationCode,
@@ -50,27 +50,27 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		handleSeverity(criteria, severity).ifPresent(criteria::add);
 		handleManifestation(criteria, manifestationCode);
 		handleBoolean("voided", convertStringStatusToBoolean(clinicalStatus)).ifPresent(criteria::add);
-
+		
 		return criteria.list();
 	}
-
+	
 	private void handleManifestation(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("reactions", "r");
 			criteria.createAlias("r.reaction", "rc");
-
+			
 			handleCodeableConcept(criteria, code, "rc", "rcm", "rcrt").ifPresent(criteria::add);
 		}
 	}
-
+	
 	private void handleAllergen(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("allergen.codedAllergen", "ac");
-
+			
 			handleCodeableConcept(criteria, code, "ac", "acm", "acrt").ifPresent(criteria::add);
 		}
 	}
-
+	
 	private Optional<Criterion> handleSeverity(Criteria criteria, TokenOrListParam severityParam) {
 		if (severityParam == null) {
 			return Optional.empty();
@@ -78,9 +78,9 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		Map<String, String> severityConceptUuids = globalPropertyService.getGlobalProperties(
 		    FhirConstants.GLOBAL_PROPERTY_MILD, FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER);
-
+		
 		criteria.createAlias("severity", "sc");
-
+		
 		return handleOrListParam(severityParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceSeverity severity = AllergyIntolerance.AllergyIntoleranceSeverity
@@ -100,12 +100,12 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 			return Optional.empty();
 		});
 	}
-
+	
 	private Optional<Criterion> handleAllergenCategory(String propertyName, TokenOrListParam categoryParam) {
 		if (categoryParam == null) {
 			return Optional.empty();
 		}
-
+		
 		return handleOrListParam(categoryParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceCategory category = AllergyIntolerance.AllergyIntoleranceCategory
@@ -124,6 +124,6 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 			catch (FHIRException ignored) {}
 			return Optional.empty();
 		});
-
+		
 	}
 }
