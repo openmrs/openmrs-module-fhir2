@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterReferenceTranslatorImpl extends AbstractReferenceHandlingTranslator implements EncounterReferenceTranslator {
+public class EncounterReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterReferenceTranslator {
 	
 	@Autowired
 	private FhirEncounterDao encounterDao;

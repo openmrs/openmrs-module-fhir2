@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class PractitionerReferenceTranslatorProviderImpl extends AbstractReferenceHandlingTranslator implements PractitionerReferenceTranslator<Provider> {
+public class PractitionerReferenceTranslatorProviderImpl extends BaseReferenceHandlingTranslator implements PractitionerReferenceTranslator<Provider> {
 	
 	@Autowired
 	private FhirPractitionerService practitionerService;

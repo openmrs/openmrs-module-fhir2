@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirEncounterDaoImpl extends BaseDaoImpl implements FhirEncounterDao {
+public class FhirEncounterDaoImpl extends BaseDao implements FhirEncounterDao {
 	
 	@Autowired
 	@Qualifier("sessionFactory")

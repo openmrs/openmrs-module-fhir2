@@ -154,7 +154,7 @@ import org.openmrs.module.fhir2.FhirConceptSource;
  * }</pre>
  * </p>
  */
-public abstract class BaseDaoImpl {
+public abstract class BaseDao {
 	
 	private static final BigDecimal APPROX_RANGE = new BigDecimal(0.1);
 	

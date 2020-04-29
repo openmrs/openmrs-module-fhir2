@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class PractitionerReferenceTranslatorUserImpl extends AbstractReferenceHandlingTranslator implements PractitionerReferenceTranslator<User> {
+public class PractitionerReferenceTranslatorUserImpl extends BaseReferenceHandlingTranslator implements PractitionerReferenceTranslator<User> {
 	
 	@Autowired
 	private FhirUserService userService;

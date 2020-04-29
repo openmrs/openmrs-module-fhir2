@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterLocationTranslatorImpl extends AbstractReferenceHandlingTranslator implements EncounterLocationTranslator {
+public class EncounterLocationTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterLocationTranslator {
 	
 	@Autowired
 	FhirLocationService locationService;

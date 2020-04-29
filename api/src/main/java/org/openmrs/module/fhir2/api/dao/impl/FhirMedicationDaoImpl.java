@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirMedicationDaoImpl extends BaseFhirDaoImpl<Drug> implements FhirMedicationDao {
+public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedicationDao {
 	
 	@Override
 	public Drug createOrUpdate(Drug drug) {

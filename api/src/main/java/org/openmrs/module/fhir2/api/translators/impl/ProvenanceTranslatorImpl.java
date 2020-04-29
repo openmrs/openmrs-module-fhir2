@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ProvenanceTranslatorImpl<T extends OpenmrsObject & Auditable> extends AbstractProvenanceHandlingTranslator implements ProvenanceTranslator<T> {
+public class ProvenanceTranslatorImpl<T extends OpenmrsObject & Auditable> extends BaseProvenanceHandlingTranslator implements ProvenanceTranslator<T> {
 	
 	@Override
 	public Provenance getCreateProvenance(T openMrsObject) {

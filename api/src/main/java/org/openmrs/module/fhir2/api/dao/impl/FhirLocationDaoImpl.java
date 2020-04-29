@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirLocationDaoImpl extends BaseDaoImpl implements FhirLocationDao {
+public class FhirLocationDaoImpl extends BaseDao implements FhirLocationDao {
 	
 	@Autowired
 	@Qualifier("sessionFactory")

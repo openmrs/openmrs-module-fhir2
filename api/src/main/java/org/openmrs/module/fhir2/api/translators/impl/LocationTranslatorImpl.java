@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class LocationTranslatorImpl extends AbstractReferenceHandlingTranslator implements LocationTranslator {
+public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator implements LocationTranslator {
 	
 	@Autowired
 	private LocationAddressTranslator locationAddressTranslator;

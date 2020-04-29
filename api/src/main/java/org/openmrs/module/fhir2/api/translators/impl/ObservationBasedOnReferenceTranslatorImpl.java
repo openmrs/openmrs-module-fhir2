@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ObservationBasedOnReferenceTranslatorImpl extends AbstractReferenceHandlingTranslator implements ObservationBasedOnReferenceTranslator {
+public class ObservationBasedOnReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements ObservationBasedOnReferenceTranslator {
 	
 	@Autowired
 	private FhirServiceRequestDao<TestOrder> serviceRequestDao;

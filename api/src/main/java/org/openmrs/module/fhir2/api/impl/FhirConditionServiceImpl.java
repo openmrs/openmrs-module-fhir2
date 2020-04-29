@@ -23,19 +23,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FhirConditionServiceImpl implements FhirConditionService {
-
+	
 	@Override
 	public Condition getConditionByUuid(String uuid) {
 		throw new FhirException("Please install org.openmrs.module.fhir2conditions");
 	}
-
+	
 	@Override
 	public Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-			TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
-			QuantityAndListParam onsetAge, DateRangeParam recordedDate, SortSpec sort) {
+	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
+	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, SortSpec sort) {
 		throw new FhirException("Please install org.openmrs.module.fhir2conditions");
 	}
-
+	
 	@Override
 	public Condition saveCondition(Condition condition) {
 		throw new FhirException("Please install org.openmrs.module.fhir2conditions");

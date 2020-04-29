@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirPersonDaoImpl extends AbstractPersonDaoImpl implements FhirPersonDao {
+public class FhirPersonDaoImpl extends BasePersonDao implements FhirPersonDao {
 	
 	@Autowired
 	@Qualifier("sessionFactory")

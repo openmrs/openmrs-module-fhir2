@@ -33,7 +33,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AbstractReferenceHandlingTranslatorTest {
+public class BaseReferenceHandlingTranslatorTest {
 	
 	private static final String GIVEN_NAME = "Ricky";
 	
@@ -89,11 +89,11 @@ public class AbstractReferenceHandlingTranslatorTest {
 	@Mock
 	private PatientIdentifierTranslator patientIdentifierTranslator;
 	
-	private AbstractReferenceHandlingTranslator referenceHandlingTranslator;
+	private BaseReferenceHandlingTranslator referenceHandlingTranslator;
 	
 	@Before
 	public void setUp() {
-		referenceHandlingTranslator = new AbstractReferenceHandlingTranslator() {};
+		referenceHandlingTranslator = new BaseReferenceHandlingTranslator() {};
 		referenceHandlingTranslator.setPatientIdentifierTranslator(patientIdentifierTranslator);
 		
 		patient = new Patient();

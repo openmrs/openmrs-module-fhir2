@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class CustomizableMetadataTranslatorImpl<A extends Attribute, T extends BaseCustomizableMetadata<A>> extends AbstractProvenanceHandlingTranslator implements CustomizableMetadataTranslator<A, T> {
+public class CustomizableMetadataTranslatorImpl<A extends Attribute, T extends BaseCustomizableMetadata<A>> extends BaseProvenanceHandlingTranslator implements CustomizableMetadataTranslator<A, T> {
 	
 	@Override
 	public Provenance getCreateProvenance(T openMrsObject) {

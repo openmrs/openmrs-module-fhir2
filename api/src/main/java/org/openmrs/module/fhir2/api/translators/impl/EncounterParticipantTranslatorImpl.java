@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterParticipantTranslatorImpl extends AbstractReferenceHandlingTranslator implements EncounterParticipantTranslator {
+public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterParticipantTranslator {
 	
 	@Autowired
 	private FhirPractitionerService practitionerService;

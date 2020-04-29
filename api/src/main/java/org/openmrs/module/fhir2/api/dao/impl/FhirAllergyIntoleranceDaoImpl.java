@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDaoImpl<Allergy> implements FhirAllergyIntoleranceDao {
+public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implements FhirAllergyIntoleranceDao {
 	
 	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
@@ -126,5 +126,4 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDaoImpl<Allergy> impl
 		});
 		
 	}
-	
 }
