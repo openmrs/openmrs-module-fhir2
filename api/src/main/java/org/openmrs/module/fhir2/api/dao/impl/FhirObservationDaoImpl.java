@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirObservationDaoImpl extends BaseDaoImpl implements FhirObservationDao {
+public class FhirObservationDaoImpl extends BaseFhirDaoImpl implements FhirObservationDao {
 	
 	
 	@Override

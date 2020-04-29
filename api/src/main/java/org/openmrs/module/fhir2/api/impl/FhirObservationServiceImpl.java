@@ -35,13 +35,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirObservationServiceImpl BaseFhirService<Observation, org.openmrs.obs>implements FhirObservationService {
+public class FhirObservationServiceImpl  extends BaseFhirService<Observation, org.openmrs.Obs>implements FhirObservationService {
 	
 	@Autowired
-	FhirObservationDao dao;
+	private FhirObservationDao dao;
 	
 	@Autowired
-	ObservationTranslator observationTranslator;
+	private ObservationTranslator observationTranslator;
 	
 	@Transactional(readOnly = true)
 	public Observation get(String uuid) {
