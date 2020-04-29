@@ -83,6 +83,11 @@
 		<file>messages_es.properties</file>
 	</messages>
 	<!-- /Internationalization -->
+	
+	<globalProperty>
+		<property>${project.parent.artifactId}.uriPrefix</property>
+		<description>Prefix for the FHIR server in case this cannot be automatically detected</description>
+	</globalProperty>
 
 	<globalProperty>
 		<property>${project.parent.artifactId}.personAttributeTypeUuid</property>

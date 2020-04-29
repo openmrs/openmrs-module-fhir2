@@ -36,6 +36,23 @@ public class FhirGlobalPropertyServiceImpl implements FhirGlobalPropertyService 
 	
 	@Override
 	@Transactional(readOnly = true)
+	public Integer getGlobalProperty(String property, Integer defaultValue) {
+		try {
+			return Integer.valueOf(getGlobalProperty(property, String.valueOf(defaultValue)));
+		}
+		catch (NumberFormatException e) {
+			return defaultValue;
+		}
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public String getGlobalProperty(String property, String defaultValue) {
+		return this.getGlobalProperty(property) == null ? defaultValue : this.getGlobalProperty(property);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
 	public Map<String, String> getGlobalProperties(String... properties) {
 		return dao.getGlobalProperties(properties);
 	}
