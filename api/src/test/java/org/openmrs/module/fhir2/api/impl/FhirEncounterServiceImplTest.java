@@ -23,11 +23,6 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
@@ -40,6 +35,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
+
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirEncounterServiceImplTest {
@@ -81,9 +82,9 @@ public class FhirEncounterServiceImplTest {
 	
 	@Test
 	public void shouldGetEncounterByUuid() {
-		when(dao.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
+		when(dao.get(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
-		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.getEncounterByUuid(ENCOUNTER_UUID);
+		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.get(ENCOUNTER_UUID);
 		assertThat(fhirEncounter, notNullValue());
 		assertThat(fhirEncounter.getId(), notNullValue());
 		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));

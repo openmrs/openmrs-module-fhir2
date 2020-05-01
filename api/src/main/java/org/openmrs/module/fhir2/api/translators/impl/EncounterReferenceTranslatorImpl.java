@@ -9,14 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import lombok.AccessLevel;
+import lombok.Setter;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -49,6 +50,6 @@ public class EncounterReferenceTranslatorImpl extends BaseReferenceHandlingTrans
 			return null;
 		}
 		
-		return encounterDao.getEncounterByUuid(uuid);
+		return encounterDao.get(uuid);
 	}
 }

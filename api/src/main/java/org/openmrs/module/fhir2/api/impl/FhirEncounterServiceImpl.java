@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
@@ -27,19 +28,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirEncounterServiceImpl implements FhirEncounterService {
+@Getter(AccessLevel.PROTECTED)
+public class FhirEncounterServiceImpl extends  BaseFhirService<Encounter, org.openmrs.Encounter> implements FhirEncounterService {
 	
 	@Autowired
 	FhirEncounterDao dao;
 	
 	@Autowired
 	EncounterTranslator translator;
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Encounter getEncounterByUuid(String uuid) {
-		return translator.toFhirResource(dao.getEncounterByUuid(uuid));
-	}
 	
 	@Override
 	@Transactional(readOnly = true)
