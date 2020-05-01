@@ -54,7 +54,7 @@ public class FhirObservationServiceImplTest {
 	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
 	
 	@Mock
-	private ObservationTranslator observationTranslator;
+	private ObservationTranslator translator;
 	
 	private FhirObservationServiceImpl fhirObservationService;
 	
@@ -63,7 +63,7 @@ public class FhirObservationServiceImplTest {
 		fhirObservationService = new FhirObservationServiceImpl();
 		fhirObservationService.setDao(dao);
 		fhirObservationService.setSearchQuery(searchQuery);
-		fhirObservationService.setObservationTranslator(observationTranslator);
+		fhirObservationService.setTranslator(translator);
 	}
 	
 	@Test
@@ -73,9 +73,9 @@ public class FhirObservationServiceImplTest {
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
 		when(dao.get(OBS_UUID)).thenReturn(obs);
-		when(observationTranslator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		Observation result = fhirObservationService.getObservationByUuid(OBS_UUID);
+		Observation result = fhirObservationService.get(OBS_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(OBS_UUID));
@@ -100,7 +100,7 @@ public class FhirObservationServiceImplTest {
 		when(dao.getResultCounts(any())).thenReturn(1L);
 		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, observationTranslator));
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
 		
 		IBundleProvider results = fhirObservationService.searchForObservations(null, patientReference, null, null, null,
 		    null, null, null, null, null);

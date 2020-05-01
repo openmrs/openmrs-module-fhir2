@@ -1,5 +1,5 @@
 /*
- * This Source Code Form is subject to the terms of the Mozilla Public License,
+* This Source Code Form is subject to the terms of the Mozilla Public License,
  * v. 2.0. If a copy of the MPL was not distributed with this file, You can
  * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
  * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
@@ -78,7 +78,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	
 	@Test
 	public void getObservationByUuid_shouldReturnMatchingObservation() {
-		when(observationService.getObservationByUuid(OBSERVATION_UUID)).thenReturn(observation);
+		when(observationService.get(OBSERVATION_UUID)).thenReturn(observation);
 		IdType id = new IdType();
 		id.setValue(OBSERVATION_UUID);
 		
@@ -123,7 +123,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	public void getPatientResourceHistory_shouldReturnListOfResource() {
 		IdType id = new IdType();
 		id.setValue(OBSERVATION_UUID);
-		when(observationService.getObservationByUuid(OBSERVATION_UUID)).thenReturn(observation);
+		when(observationService.get(OBSERVATION_UUID)).thenReturn(observation);
 		
 		List<Resource> resources = resourceProvider.getObservationHistoryById(id);
 		assertThat(resources, Matchers.notNullValue());
@@ -135,7 +135,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(OBSERVATION_UUID);
-		when(observationService.getObservationByUuid(OBSERVATION_UUID)).thenReturn(observation);
+		when(observationService.get(OBSERVATION_UUID)).thenReturn(observation);
 		
 		List<Resource> resources = resourceProvider.getObservationHistoryById(id);
 		assertThat(resources, not(empty()));
