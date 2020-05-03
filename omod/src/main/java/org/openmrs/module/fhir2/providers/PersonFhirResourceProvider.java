@@ -54,7 +54,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	@Read
 	@SuppressWarnings("unused")
 	public Person getPersonById(@IdParam IdType id) {
-		Person person = fhirPersonService.getPersonByUuid(id.getIdPart());
+		Person person = fhirPersonService.get(id.getIdPart());
 		if (person == null) {
 			throw new ResourceNotFoundException("Could not find Person with Id " + id.getIdPart());
 		}
@@ -77,7 +77,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getPersonHistoryById(@IdParam @NotNull IdType id) {
-		Person person = fhirPersonService.getPersonByUuid(id.getIdPart());
+		Person person = fhirPersonService.get(id.getIdPart());
 		if (person == null) {
 			throw new ResourceNotFoundException("Could not find person with Id " + id.getIdPart());
 		}

@@ -29,13 +29,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
-	
-	@Override
-	public Person getPersonByUuid(String uuid) {
-		return (Person) getSessionFactory().getCurrentSession().createCriteria(Person.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
+public class FhirPersonDaoImpl extends BaseFhirDao<Person> implements FhirPersonDao {
 	
 	@Override
 	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(Person person,

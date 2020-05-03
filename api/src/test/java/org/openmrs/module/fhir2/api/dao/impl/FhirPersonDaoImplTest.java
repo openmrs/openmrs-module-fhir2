@@ -151,7 +151,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getPersonByUuid_shouldReturnMatchingPerson() {
-		Person person = fhirPersonDao.getPersonByUuid(PERSON_UUID);
+		Person person = fhirPersonDao.get(PERSON_UUID);
 		assertThat(person, notNullValue());
 		assertThat(person.getUuid(), equalTo(PERSON_UUID));
 		assertThat(person.getGender(), equalTo("M"));
@@ -160,7 +160,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getPersonByWithWrongUuid_shouldReturnNullPerson() {
-		Person person = fhirPersonDao.getPersonByUuid(WRONG_PERSON_UUID);
+		Person person = fhirPersonDao.get(WRONG_PERSON_UUID);
 		assertThat(person, nullValue());
 	}
 	

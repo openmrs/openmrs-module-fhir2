@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Person;
 import org.openmrs.module.fhir2.api.FhirPersonService;
@@ -26,10 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Getter(AccessLevel.PROTECTED)
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirPersonServiceImpl implements FhirPersonService {
+public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.Person> implements FhirPersonService {
 	
 	@Autowired
 	private FhirPersonDao fhirPersonDao;
@@ -37,10 +39,9 @@ public class FhirPersonServiceImpl implements FhirPersonService {
 	@Autowired
 	private PersonTranslator personTranslator;
 	
-	@Override
 	@Transactional(readOnly = true)
-	public Person getPersonByUuid(String uuid) {
-		return personTranslator.toFhirResource(fhirPersonDao.getPersonByUuid(uuid));
+	public Person get(String uuid) {
+		return personTranslator.toFhirResource(fhirPersonDao.get(uuid));
 	}
 	
 	@Override
