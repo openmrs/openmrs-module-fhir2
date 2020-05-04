@@ -104,11 +104,10 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 			CodedOrFreeText conditionCodedOrText = new CodedOrFreeText();
 			if (concept == null) {
 				conditionCodedOrText.setNonCoded(condition.getCode().getCoding().get(0).getCode());
-				existingCondition.setCondition(conditionCodedOrText);
 			} else {
 				conditionCodedOrText.setCoded(concept);
-				existingCondition.setCondition(conditionCodedOrText);
 			}
+			existingCondition.setCondition(conditionCodedOrText);
 		}
 		existingCondition.setOnsetDate(condition.getOnsetDateTimeType().getValue());
 		existingCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));

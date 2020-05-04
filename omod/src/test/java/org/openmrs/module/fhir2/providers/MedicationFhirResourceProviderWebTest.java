@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
@@ -67,7 +66,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 	@Mock
 	private FhirMedicationService fhirMedicationService;
 	
-	@Getter(AccessLevel.PUBLIC)
+	@Getter
 	private MedicationFhirResourceProvider resourceProvider;
 	
 	@Captor
@@ -86,11 +85,6 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 		medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		super.setup();
-	}
-	
-	@Override
-	public MedicationFhirResourceProvider getResourceProvider() {
-		return resourceProvider;
 	}
 	
 	@Test

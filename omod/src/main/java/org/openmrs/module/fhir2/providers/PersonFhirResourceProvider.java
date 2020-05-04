@@ -61,6 +61,16 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		return person;
 	}
 	
+	@History
+	@SuppressWarnings("unused")
+	public List<Resource> getPersonHistoryById(@IdParam @NotNull IdType id) {
+		Person person = fhirPersonService.getPersonByUuid(id.getIdPart());
+		if (person == null) {
+			throw new ResourceNotFoundException("Could not find person with Id " + id.getIdPart());
+		}
+		return person.getContained();
+	}
+	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle searchPeople(@OptionalParam(name = Person.SP_NAME) StringOrListParam name,
@@ -72,16 +82,6 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringOrListParam country, @Sort SortSpec sort) {
 		return FhirServerUtils.convertSearchResultsToBundle(
 		    fhirPersonService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort));
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getPersonHistoryById(@IdParam @NotNull IdType id) {
-		Person person = fhirPersonService.getPersonByUuid(id.getIdPart());
-		if (person == null) {
-			throw new ResourceNotFoundException("Could not find person with Id " + id.getIdPart());
-		}
-		return person.getContained();
 	}
 	
 }

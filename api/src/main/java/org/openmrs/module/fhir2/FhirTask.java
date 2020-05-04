@@ -44,7 +44,7 @@ public class FhirTask extends BaseOpenmrsMetadata {
 		ACCEPTED,
 		COMPLETED,
 		UNKNOWN
-	};
+	}
 	
 	public enum TaskIntent {
 		ORDER

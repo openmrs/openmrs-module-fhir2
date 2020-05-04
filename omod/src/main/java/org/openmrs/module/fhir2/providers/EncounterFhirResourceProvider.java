@@ -60,6 +60,16 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		return encounter;
 	}
 	
+	@History
+	@SuppressWarnings("unused")
+	public List<Resource> getEncounterHistoryById(@IdParam @NotNull IdType id) {
+		Encounter encounter = encounterService.get(id.getIdPart());
+		if (encounter == null) {
+			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());
+		}
+		return encounter.getContained();
+	}
+	
 	@Search
 	public Bundle searchEncounter(@OptionalParam(name = Encounter.SP_DATE) DateRangeParam date,
 	        @OptionalParam(name = Encounter.SP_LOCATION, chainWhitelist = { "", Location.SP_ADDRESS_CITY,
@@ -74,16 +84,6 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		return FhirServerUtils.convertSearchResultsToBundle(
 		    encounterService.searchForEncounters(date, location, participantReference, subjectReference));
 		
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getEncounterHistoryById(@IdParam @NotNull IdType id) {
-		Encounter encounter = encounterService.get(id.getIdPart());
-		if (encounter == null) {
-			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());
-		}
-		return encounter.getContained();
 	}
 	
 }

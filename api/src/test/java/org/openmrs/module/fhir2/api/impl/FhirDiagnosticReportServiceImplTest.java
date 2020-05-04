@@ -50,7 +50,7 @@ public class FhirDiagnosticReportServiceImplTest {
 	private FhirDiagnosticReportServiceImpl service;
 	
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		service = new FhirDiagnosticReportServiceImpl();
 		service.setTranslator(translator);
 		service.setDao(dao);

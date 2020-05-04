@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -30,7 +31,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -303,7 +303,7 @@ public class FhirTaskTranslatorImplTest {
 		FhirTask task = new FhirTask();
 		
 		shouldTranslateReferenceListToFhir(task, FhirConstants.SERVICE_REQUEST, SERVICE_REQUEST_UUID,
-		    task::setBasedOnReferences, t -> t.getBasedOn().stream().collect(Collectors.toList()));
+		    task::setBasedOnReferences, t -> new ArrayList<>(t.getBasedOn()));
 	}
 	
 	@Test
@@ -311,7 +311,7 @@ public class FhirTaskTranslatorImplTest {
 		Task task = new Task();
 		
 		shouldTranslateReferenceListToOpenmrs(task, FhirConstants.SERVICE_REQUEST, SERVICE_REQUEST_UUID, task::setBasedOn,
-		    t -> t.getBasedOnReferences());
+		    FhirTask::getBasedOnReferences);
 	}
 	
 	@Test
@@ -319,7 +319,7 @@ public class FhirTaskTranslatorImplTest {
 		Task task = new Task();
 		
 		shouldUpdateReferenceListInOpenmrs(task, FhirConstants.SERVICE_REQUEST, SERVICE_REQUEST_UUID, task::setBasedOn,
-		    t -> t.getBasedOnReferences());
+		    FhirTask::getBasedOnReferences);
 	}
 	
 	// Task.encounter
@@ -328,7 +328,7 @@ public class FhirTaskTranslatorImplTest {
 		FhirTask task = new FhirTask();
 		
 		shouldTranslateReferenceToFhir(task, FhirConstants.ENCOUNTER, ENCOUNTER_UUID, task::setEncounterReference,
-		    t -> t.getEncounter());
+		    Task::getEncounter);
 	}
 	
 	@Test
@@ -336,7 +336,7 @@ public class FhirTaskTranslatorImplTest {
 		Task task = new Task();
 		
 		shouldTranslateReferenceToOpenmrs(task, FhirConstants.ENCOUNTER, ENCOUNTER_UUID, task::setEncounter,
-		    t -> t.getEncounterReference());
+		    FhirTask::getEncounterReference);
 	}
 	
 	@Test
@@ -344,7 +344,7 @@ public class FhirTaskTranslatorImplTest {
 		Task task = new Task();
 		
 		shouldUpdateReferenceInOpenmrs(task, FhirConstants.ENCOUNTER, ENCOUNTER_UUID, task::setEncounter,
-		    t -> t.getEncounterReference());
+		    FhirTask::getEncounterReference);
 	}
 	
 	// Task.owner
@@ -353,7 +353,7 @@ public class FhirTaskTranslatorImplTest {
 		FhirTask task = new FhirTask();
 		
 		shouldTranslateReferenceToFhir(task, FhirConstants.ORGANIZATION, OPENELIS_ID, task::setOwnerReference,
-		    t -> t.getOwner());
+		    Task::getOwner);
 	}
 	
 	@Test
@@ -361,7 +361,7 @@ public class FhirTaskTranslatorImplTest {
 		Task task = new Task();
 		
 		shouldTranslateReferenceToOpenmrs(task, FhirConstants.ORGANIZATION, OPENELIS_ID, task::setOwner,
-		    t -> t.getOwnerReference());
+		    FhirTask::getOwnerReference);
 	}
 	
 	@Test
@@ -369,7 +369,7 @@ public class FhirTaskTranslatorImplTest {
 		Task task = new Task();
 		
 		shouldUpdateReferenceInOpenmrs(task, FhirConstants.ORGANIZATION, OPENELIS_ID, task::setOwner,
-		    t -> t.getOwnerReference());
+		    FhirTask::getOwnerReference);
 	}
 	
 	// Task.for
@@ -377,21 +377,22 @@ public class FhirTaskTranslatorImplTest {
 	public void toFhirResource_shouldTranslateFor() {
 		FhirTask task = new FhirTask();
 		
-		shouldTranslateReferenceToFhir(task, FhirConstants.PATIENT, PATIENT_UUID, task::setForReference, t -> t.getFor());
+		shouldTranslateReferenceToFhir(task, FhirConstants.PATIENT, PATIENT_UUID, task::setForReference, Task::getFor);
 	}
 	
 	@Test
 	public void toOpenmrsType_shouldTranslateFor() {
 		Task task = new Task();
 		
-		shouldTranslateReferenceToOpenmrs(task, FhirConstants.PATIENT, PATIENT_UUID, task::setFor, t -> t.getForReference());
+		shouldTranslateReferenceToOpenmrs(task, FhirConstants.PATIENT, PATIENT_UUID, task::setFor,
+		    FhirTask::getForReference);
 	}
 	
 	@Test
 	public void toOpenmrsType_shouldUpdateFor() {
 		Task task = new Task();
 		
-		shouldUpdateReferenceInOpenmrs(task, FhirConstants.PATIENT, PATIENT_UUID, task::setFor, t -> t.getForReference());
+		shouldUpdateReferenceInOpenmrs(task, FhirConstants.PATIENT, PATIENT_UUID, task::setFor, FhirTask::getForReference);
 	}
 	
 	// Task.output
@@ -644,7 +645,7 @@ public class FhirTaskTranslatorImplTest {
 		return result;
 	}
 	
-	private Task shouldTranslateReferenceListToFhir(FhirTask task, String refType, String refUuid,
+	private void shouldTranslateReferenceListToFhir(FhirTask task, String refType, String refUuid,
 	        Consumer<Set<FhirReference>> setOpenmrsReference, Function<Task, List<Reference>> getFhirReference) {
 		FhirReference openmrsReference = new FhirReference();
 		openmrsReference.setType(refType);
@@ -664,10 +665,9 @@ public class FhirTaskTranslatorImplTest {
 		assertThat(resultReference.iterator().next().getType(), equalTo(refType));
 		assertThat(resultReference.iterator().next().getReference(), equalTo(refUuid));
 		
-		return result;
 	}
 	
-	private FhirTask shouldTranslateReferenceListToOpenmrs(Task task, String refType, String refUuid,
+	private void shouldTranslateReferenceListToOpenmrs(Task task, String refType, String refUuid,
 	        Consumer<List<Reference>> setFhirReference, Function<FhirTask, Set<FhirReference>> getOpenmrsReference) {
 		
 		Reference fhirReference = new Reference().setReference(refUuid).setType(refType);
@@ -687,10 +687,9 @@ public class FhirTaskTranslatorImplTest {
 		assertThat(resultReference.iterator().next().getReference(), equalTo(refUuid));
 		assertThat(resultReference.iterator().next().getType(), equalTo(refType));
 		
-		return result;
 	}
 	
-	private FhirTask shouldUpdateReferenceListInOpenmrs(Task task, String refType, String refUuid,
+	private void shouldUpdateReferenceListInOpenmrs(Task task, String refType, String refUuid,
 	        Consumer<List<Reference>> setFhirReference, Function<FhirTask, Set<FhirReference>> getOpenmrsReference) {
 		
 		Reference fhirReference = new Reference().setReference(refUuid).setType(refType);
@@ -714,7 +713,6 @@ public class FhirTaskTranslatorImplTest {
 		assertThat(resultReference.iterator().next().getReference(), equalTo(refUuid));
 		assertThat(resultReference.iterator().next().getType(), equalTo(refType));
 		
-		return result;
 	}
 	
 	@Test

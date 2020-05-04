@@ -29,11 +29,11 @@ import org.openmrs.ProviderAttribute;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
-import org.openmrs.module.fhir2.api.translators.CustomizableMetadataTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -61,7 +61,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Autowired
-	private CustomizableMetadataTranslator<ProviderAttribute, Provider> customizableMetadataTranslator;
+	private ProvenanceTranslator<Provider> provenanceTranslator;
 	
 	@Override
 	public Provider toOpenmrsType(Provider existingProvider, Practitioner practitioner) {
@@ -106,16 +106,18 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 		if (provider.getPerson() != null) {
 			practitioner.setBirthDate(provider.getPerson().getBirthdate());
 			practitioner.setGender(genderTranslator.toFhirResource(provider.getPerson().getGender()));
+			
 			for (PersonName name : provider.getPerson().getNames()) {
 				practitioner.addName(nameTranslator.toFhirResource(name));
 			}
+			
 			for (PersonAddress address : provider.getPerson().getAddresses()) {
 				practitioner.addAddress(addressTranslator.toFhirResource(address));
 			}
 		}
 		practitioner.getMeta().setLastUpdated(provider.getDateChanged());
-		practitioner.addContained(customizableMetadataTranslator.getCreateProvenance(provider));
-		practitioner.addContained(customizableMetadataTranslator.getUpdateProvenance(provider));
+		practitioner.addContained(provenanceTranslator.getCreateProvenance(provider));
+		practitioner.addContained(provenanceTranslator.getUpdateProvenance(provider));
 		
 		return practitioner;
 	}

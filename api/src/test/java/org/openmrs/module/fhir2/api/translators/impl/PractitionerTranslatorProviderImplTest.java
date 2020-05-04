@@ -44,10 +44,10 @@ import org.openmrs.ProviderAttribute;
 import org.openmrs.ProviderAttributeType;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
-import org.openmrs.module.fhir2.api.translators.CustomizableMetadataTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 
@@ -101,7 +101,7 @@ public class PractitionerTranslatorProviderImplTest {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private CustomizableMetadataTranslator<ProviderAttribute, Provider> customizableMetadataTranslator;
+	private ProvenanceTranslator<Provider> provenanceTranslator;
 	
 	private PractitionerTranslatorProviderImpl practitionerTranslator;
 	
@@ -118,7 +118,7 @@ public class PractitionerTranslatorProviderImplTest {
 		practitionerTranslator.setTelecomTranslator(telecomTranslator);
 		practitionerTranslator.setFhirPractitionerDao(fhirPractitionerDao);
 		practitionerTranslator.setGlobalPropertyService(globalPropertyService);
-		practitionerTranslator.setCustomizableMetadataTranslator(customizableMetadataTranslator);
+		practitionerTranslator.setProvenanceTranslator(provenanceTranslator);
 		
 		Person person = new Person();
 		person.setGender(GENDER);
@@ -280,8 +280,8 @@ public class PractitionerTranslatorProviderImplTest {
 		provider.setUuid(PRACTITIONER_UUID);
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
-		when(customizableMetadataTranslator.getCreateProvenance(provider)).thenReturn(provenance);
-		when(customizableMetadataTranslator.getUpdateProvenance(provider)).thenReturn(provenance);
+		when(provenanceTranslator.getCreateProvenance(provider)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(provider)).thenReturn(provenance);
 		org.hl7.fhir.r4.model.Practitioner result = practitionerTranslator.toFhirResource(provider);
 		assertThat(result, notNullValue());
 		assertThat(result.getContained(), not(empty()));

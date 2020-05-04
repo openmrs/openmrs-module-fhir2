@@ -21,12 +21,12 @@ import org.openmrs.module.fhir2.FhirTask;
 
 public interface FhirTaskDao {
 	
-	public FhirTask saveTask(FhirTask task);
+	FhirTask saveTask(FhirTask task);
 	
-	public FhirTask getTaskByUuid(@NotNull String taskUUID);
+	FhirTask getTaskByUuid(@NotNull String taskUUID);
 	
-	public Collection<FhirTask> getTasksByBasedOnUuid(Class<? extends DomainResource> resourceType, String uuid);
+	Collection<FhirTask> getTasksByBasedOnUuid(Class<? extends DomainResource> resourceType, String uuid);
 	
-	public Collection<FhirTask> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
+	Collection<FhirTask> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
 	        TokenOrListParam status, SortSpec sort);
 }
