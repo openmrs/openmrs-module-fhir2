@@ -67,7 +67,7 @@ public class EncounterReferenceTranslatorImplTest {
 		        .setType(FhirConstants.ENCOUNTER).setIdentifier(new Identifier().setValue(ENCOUNTER_UUID));
 		Encounter encounter = new Encounter();
 		encounter.setUuid(ENCOUNTER_UUID);
-		when(dao.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(encounter);
+		when(dao.get(ENCOUNTER_UUID)).thenReturn(encounter);
 		
 		Encounter result = encounterReferenceTranslator.toOpenmrsType(encounterReference);
 		

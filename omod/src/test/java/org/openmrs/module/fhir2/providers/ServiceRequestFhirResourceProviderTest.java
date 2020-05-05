@@ -41,7 +41,7 @@ public class ServiceRequestFhirResourceProviderTest {
 	private ServiceRequest serviceRequest;
 	
 	@Before
-	public void setup() throws Exception {
+	public void setup() {
 		resourceProvider = new ServiceRequestFhirResourceProvider();
 		resourceProvider.setServiceRequestService(serviceRequestService);
 	}

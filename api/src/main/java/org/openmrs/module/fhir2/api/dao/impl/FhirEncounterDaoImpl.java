@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -18,32 +16,19 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirEncounterDaoImpl extends BaseDao implements FhirEncounterDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Override
-	public Encounter getEncounterByUuid(String uuid) {
-		return (Encounter) sessionFactory.getCurrentSession().createCriteria(Encounter.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
+public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements FhirEncounterDao {
 	
 	@Override
 	public Collection<Encounter> searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
 	        ReferenceAndListParam participant, ReferenceAndListParam subject) {
 		
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Encounter.class);
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
 		
 		handleDateRange("encounterDatetime", date).ifPresent(criteria::add);
 		handleLocationReference("l", location).ifPresent(l -> criteria.createAlias("location", "l").add(l));

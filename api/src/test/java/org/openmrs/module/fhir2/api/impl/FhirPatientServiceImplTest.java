@@ -265,9 +265,8 @@ public class FhirPatientServiceImplTest {
 	
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientGenderNotMatched() {
-		Collection<Patient> patients = new ArrayList<>();
-		patients.add(patient);
 		TokenOrListParam tokenOrListParam = new TokenOrListParam().add(WRONG_GENDER);
+		
 		when(dao.searchForPatients(isNull(), isNull(), isNull(), isNull(), argThat(equalTo(tokenOrListParam)), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.emptyList());
 		
@@ -300,18 +299,14 @@ public class FhirPatientServiceImplTest {
 	
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientBirthDateNotMatched() throws ParseException {
-		Date birthDate = dateFormatter.parse(DATE);
-		patient.setBirthdate(birthDate);
-		
-		Collection<Patient> patients = new ArrayList<>();
-		patients.add(patient);
-		
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(UNKNOWN_DATE).setUpperBound(UNKNOWN_DATE);
+		
 		when(dao.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(equalTo(dateRangeParam)),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.emptyList());
 		
 		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.searchForPatients(null, null, null, null, null,
 		    dateRangeParam, null, null, null, null, null, null, null);
+		
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
 	}
@@ -339,12 +334,6 @@ public class FhirPatientServiceImplTest {
 	
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientDeathDateNotMatched() throws ParseException {
-		Date deathDate = dateFormatter.parse(DATE);
-		patient.setDeathDate(deathDate);
-		
-		Collection<Patient> patients = new ArrayList<>();
-		patients.add(patient);
-		
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(UNKNOWN_DATE).setUpperBound(UNKNOWN_DATE);
 		when(dao.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(equalTo(dateRangeParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
@@ -440,7 +429,6 @@ public class FhirPatientServiceImplTest {
 		
 		Collection<org.hl7.fhir.r4.model.Patient> results = patientService.searchForPatients(null, null, null, null, null,
 		    null, null, null, null, null, stringOrListParam, null, null);
-		;
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
 	}

@@ -53,11 +53,7 @@ public class FhirDiagnosticReportServiceImpl implements FhirDiagnosticReportServ
 			throw new InvalidRequestException("Diagnostic Report id and provided id do not match.");
 		}
 		
-		Obs obsGroup = new Obs();
-		
-		if (uuid != null) {
-			obsGroup = dao.getObsGroupByUuid(uuid);
-		}
+		Obs obsGroup = dao.getObsGroupByUuid(uuid);
 		
 		if (obsGroup == null) {
 			throw new MethodNotAllowedException("No Diagnostic Report found to update.");

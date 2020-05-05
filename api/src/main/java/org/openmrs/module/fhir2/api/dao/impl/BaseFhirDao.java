@@ -41,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <T> the {@link OpenmrsObject} managed by this Dao
  */
 @Transactional
+@SuppressWarnings("UnstableApiUsage")
 public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao implements FhirDao<T> {
 	
 	private final TypeToken<T> typeToken;
@@ -69,7 +70,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public T createOrUpdate(T newEntry) {
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
 		return newEntry;

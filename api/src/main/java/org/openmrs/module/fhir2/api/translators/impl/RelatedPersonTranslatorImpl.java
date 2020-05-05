@@ -57,6 +57,7 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		if (relationship == null) {
 			return null;
 		}
+		
 		Person omrsRelatedPerson = relationship.getPersonA();
 		RelatedPerson relatedPerson = new RelatedPerson();
 		
@@ -87,13 +88,9 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		relatedPerson.addIdentifier(relationshipIdentifier);
 		
 		// Active
-		if (relationship.getStartDate() == null
+		relatedPerson.setActive(relationship.getStartDate() == null
 		        || relationship.getStartDate().before(new Date()) && relationship.getEndDate() == null
-		        || relationship.getEndDate().after(new Date())) {
-			relatedPerson.setActive(true);
-		} else {
-			relatedPerson.setActive(false);
-		}
+		        || relationship.getEndDate().after(new Date()));
 		
 		Period period = new Period();
 		period.setStart(relationship.getStartDate());

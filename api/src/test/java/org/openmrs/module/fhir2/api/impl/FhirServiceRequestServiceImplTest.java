@@ -39,10 +39,10 @@ public class FhirServiceRequestServiceImplTest {
 	private static final String LOINC_CODE = "1000-1";
 	
 	@Mock
-	private ServiceRequestTranslator translator;
+	private ServiceRequestTranslator<TestOrder> translator;
 	
 	@Mock
-	private FhirServiceRequestDao dao;
+	private FhirServiceRequestDao<TestOrder> dao;
 	
 	private FhirServiceRequestServiceImpl serviceRequestService;
 	

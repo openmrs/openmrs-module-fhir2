@@ -70,11 +70,7 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 		patientIdentifier.setUuid(identifier.getId());
 		patientIdentifier.setIdentifier(identifier.getValue());
 		
-		if (Identifier.IdentifierUse.OFFICIAL.equals(identifier.getUse())) {
-			patientIdentifier.setPreferred(true);
-		} else {
-			patientIdentifier.setPreferred(false);
-		}
+		patientIdentifier.setPreferred(Identifier.IdentifierUse.OFFICIAL.equals(identifier.getUse()));
 		
 		PatientIdentifierType type = patientService.getPatientIdentifierTypeByIdentifier(identifier);
 		if (type == null && patientIdentifier.getIdentifierType() == null) {

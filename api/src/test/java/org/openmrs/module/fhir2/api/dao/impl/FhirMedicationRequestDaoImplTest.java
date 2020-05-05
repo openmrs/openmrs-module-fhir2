@@ -48,7 +48,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldGetByUuid() {
-		DrugOrder drugOrder = medicationRequestDao.getMedicationRequestByUuid(DRUG_ORDER_UUID);
+		DrugOrder drugOrder = medicationRequestDao.get(DRUG_ORDER_UUID);
 		assertThat(drugOrder, notNullValue());
 		assertThat(drugOrder.getUuid(), notNullValue());
 		assertThat(drugOrder.getUuid(), equalTo(DRUG_ORDER_UUID));
@@ -56,7 +56,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldReturnNullWhenCalledWithBadUuid() {
-		DrugOrder drugOrder = medicationRequestDao.getMedicationRequestByUuid(BAD_DRUG_ORDER_UUID);
+		DrugOrder drugOrder = medicationRequestDao.get(BAD_DRUG_ORDER_UUID);
 		assertThat(drugOrder, nullValue());
 	}
 	

@@ -101,7 +101,7 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnMatchingEncounter() {
-		Encounter encounter = dao.getEncounterByUuid(ENCOUNTER_UUID);
+		Encounter encounter = dao.get(ENCOUNTER_UUID);
 		assertThat(encounter, notNullValue());
 		assertThat(encounter.getUuid(), notNullValue());
 		assertThat(encounter.getUuid(), equalTo(ENCOUNTER_UUID));
@@ -109,7 +109,7 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnNullWithUnknownEncounterUuid() {
-		Encounter encounter = dao.getEncounterByUuid(UNKNOWN_ENCOUNTER_UUID);
+		Encounter encounter = dao.get(UNKNOWN_ENCOUNTER_UUID);
 		assertThat(encounter, nullValue());
 	}
 	

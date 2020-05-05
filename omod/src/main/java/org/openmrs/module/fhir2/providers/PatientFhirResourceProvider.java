@@ -61,6 +61,16 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		return patient;
 	}
 	
+	@History
+	@SuppressWarnings("unused")
+	public List<Resource> getPatientResourceHistory(@IdParam @NotNull IdType id) {
+		Patient patient = patientService.getPatientByUuid(id.getIdPart());
+		if (patient == null) {
+			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
+		}
+		return patient.getContained();
+	}
+	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle searchPatients(@OptionalParam(name = Patient.SP_NAME) StringOrListParam name,
@@ -77,15 +87,5 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Patient.SP_ADDRESS_COUNTRY) StringOrListParam country, @Sort SortSpec sort) {
 		return FhirServerUtils.convertSearchResultsToBundle(patientService.searchForPatients(name, given, family, identifier,
 		    gender, birthDate, deathDate, deceased, city, state, postalCode, country, sort));
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getPatientResourceHistory(@IdParam @NotNull IdType id) {
-		Patient patient = patientService.getPatientByUuid(id.getIdPart());
-		if (patient == null) {
-			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
-		}
-		return patient.getContained();
 	}
 }

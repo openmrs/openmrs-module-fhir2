@@ -190,7 +190,7 @@ public class FhirPersonServiceImplTest {
 	}
 	
 	@Test
-	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonBirthDateNotMatched() throws ParseException {
+	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonBirthDateNotMatched() {
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(NOT_FOUND_PERSON_BIRTH_DATE)
 		        .setUpperBound(NOT_FOUND_PERSON_BIRTH_DATE);
 		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(), isNull(),

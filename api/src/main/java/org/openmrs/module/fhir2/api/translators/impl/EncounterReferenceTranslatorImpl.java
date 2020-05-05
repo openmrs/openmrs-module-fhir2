@@ -49,6 +49,6 @@ public class EncounterReferenceTranslatorImpl extends BaseReferenceHandlingTrans
 			return null;
 		}
 		
-		return encounterDao.getEncounterByUuid(uuid);
+		return encounterDao.get(uuid);
 	}
 }

@@ -62,6 +62,16 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 		return task;
 	}
 	
+	@History
+	@SuppressWarnings("unused")
+	public List<Resource> getTaskHistoryById(@IdParam IdType id) {
+		Task task = service.getTaskByUuid(id.getIdPart());
+		if (task == null) {
+			throw new ResourceNotFoundException("Could not find Task with Id " + id.getIdPart());
+		}
+		return task.getContained();
+	}
+	
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createTask(@ResourceParam Task newTask) {
@@ -72,16 +82,6 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@SuppressWarnings("unused")
 	public MethodOutcome updateTask(@IdParam IdType id, @ResourceParam Task task) {
 		return FhirServerUtils.buildUpdate(service.updateTask(id.getIdPart(), task));
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getTaskHistoryById(@IdParam IdType id) {
-		Task task = service.getTaskByUuid(id.getIdPart());
-		if (task == null) {
-			throw new ResourceNotFoundException("Could not find Task with Id " + id.getIdPart());
-		}
-		return task.getContained();
 	}
 	
 	@Search

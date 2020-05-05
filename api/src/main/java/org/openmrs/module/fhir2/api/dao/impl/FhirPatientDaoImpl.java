@@ -59,7 +59,8 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 			// favour uuid if one was supplied
 			if (uuid != null) {
 				try {
-					return identifierTypes.stream().filter((idType) -> uuid.equals(idType.getUuid())).findFirst().get();
+					return identifierTypes.stream().filter((idType) -> uuid.equals(idType.getUuid())).findFirst()
+					        .orElse(identifierTypes.get(0));
 				}
 				catch (NoSuchElementException ignored) {}
 			}

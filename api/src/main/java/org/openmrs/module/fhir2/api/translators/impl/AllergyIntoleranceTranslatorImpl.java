@@ -172,7 +172,7 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 	
 	private CodeableConcept setClinicalStatus(boolean voided) {
 		CodeableConcept status = new CodeableConcept();
-		if (voided == true) {
+		if (voided) {
 			status.setText("Inactive");
 			status.addCoding(
 			    new Coding(FhirConstants.ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET, "inactive", "Inactive"));
