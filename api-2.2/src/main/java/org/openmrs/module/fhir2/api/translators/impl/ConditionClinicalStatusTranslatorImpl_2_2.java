@@ -31,7 +31,7 @@ public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClini
 	@Override
 	public ConditionClinicalStatus toOpenmrsType(CodeableConcept codeableConcept) {
 		return codeableConcept.getCoding().stream().filter(coding -> coding.getSystem().equals(FhirConstants.OPENMRS_URI))
-		        .map(this::getClinicalStatus).findFirst().get();
+		        .map(this::getClinicalStatus).findFirst().orElse(null);
 	}
 	
 	private ConditionClinicalStatus getClinicalStatus(Coding coding) {

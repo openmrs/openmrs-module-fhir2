@@ -78,7 +78,7 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 			throw new InvalidRequestException("Task resource is missing id.");
 		}
 		
-		if (task.getId() != uuid) {
+		if (!task.getId().equals(uuid)) {
 			throw new InvalidRequestException("Task id and provided uuid do not match");
 		}
 		

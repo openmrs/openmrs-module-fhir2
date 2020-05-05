@@ -81,7 +81,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	public void getEncounterByUuid_shouldReturnMatchingEncounter() {
 		IdType id = new IdType();
 		id.setValue(ENCOUNTER_UUID);
-		when(encounterService.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(encounter);
+		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
 		Encounter result = resourceProvider.getEncounterByUuid(id);
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
@@ -118,7 +118,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	public void getEncounterHistory_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(ENCOUNTER_UUID);
-		when(encounterService.getEncounterByUuid(ENCOUNTER_UUID)).thenReturn(encounter);
+		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
 		
 		List<Resource> resources = resourceProvider.getEncounterHistoryById(id);
 		assertThat(resources, not(empty()));

@@ -74,7 +74,7 @@ public class ServiceRequestTranslatorImplTest {
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Mock
-	private PractitionerReferenceTranslator practitionerReferenceTranslator;
+	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
 	@Before
 	public void setup() {
@@ -174,8 +174,7 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
-		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID))
-		        .thenReturn(Collections.<Task> emptyList());
+		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(Collections.emptyList());
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		

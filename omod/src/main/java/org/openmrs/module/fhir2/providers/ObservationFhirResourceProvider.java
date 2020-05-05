@@ -57,11 +57,20 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	public Observation getObservationById(@IdParam @NotNull IdType id) {
-		Observation observation = observationService.getObservationByUuid(id.getIdPart());
+		Observation observation = observationService.get(id.getIdPart());
 		if (observation == null) {
 			throw new ResourceNotFoundException("Could not find Observation with Id " + id.getIdPart());
 		}
 		return observation;
+	}
+	
+	@History
+	public List<Resource> getObservationHistoryById(@IdParam @NotNull IdType id) {
+		Observation observation = observationService.get(id.getIdPart());
+		if (observation == null) {
+			throw new ResourceNotFoundException("Could not find Observation with Id " + id.getIdPart());
+		}
+		return observation.getContained();
 	}
 	
 	@Search
@@ -80,14 +89,5 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Observation.SP_CODE) TokenAndListParam code, @Sort SortSpec sort) {
 		return observationService.searchForObservations(encounterReference, patientReference, hasMemberReference,
 		    valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date, code, sort);
-	}
-	
-	@History
-	public List<Resource> getObservationHistoryById(@IdParam @NotNull IdType id) {
-		Observation observation = observationService.getObservationByUuid(id.getIdPart());
-		if (observation == null) {
-			throw new ResourceNotFoundException("Could not find Observation with Id " + id.getIdPart());
-		}
-		return observation.getContained();
 	}
 }

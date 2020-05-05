@@ -48,7 +48,7 @@ public class FhirMedicationRequestServiceImplTest {
 	public void setup() {
 		medicationRequestService = new FhirMedicationRequestServiceImpl();
 		medicationRequestService.setDao(dao);
-		medicationRequestService.setMedicationRequestTranslator(medicationRequestTranslator);
+		medicationRequestService.setTranslator(medicationRequestTranslator);
 		
 		medicationRequest = new MedicationRequest();
 		medicationRequest.setId(MEDICATION_REQUEST_UUID);
@@ -59,10 +59,10 @@ public class FhirMedicationRequestServiceImplTest {
 	
 	@Test
 	public void shouldGetMedicationRequestByUuid() {
-		when(dao.getMedicationRequestByUuid(MEDICATION_REQUEST_UUID)).thenReturn(drugOrder);
+		when(dao.get(MEDICATION_REQUEST_UUID)).thenReturn(drugOrder);
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		
-		MedicationRequest result = medicationRequestService.getMedicationRequestByUuid(MEDICATION_REQUEST_UUID);
+		MedicationRequest result = medicationRequestService.get(MEDICATION_REQUEST_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(MEDICATION_REQUEST_UUID));
@@ -70,7 +70,7 @@ public class FhirMedicationRequestServiceImplTest {
 	
 	@Test
 	public void shouldReturnNullForBadMedicationRequestUuid() {
-		MedicationRequest result = medicationRequestService.getMedicationRequestByUuid(BAD_MEDICATION_REQUEST_UUID);
+		MedicationRequest result = medicationRequestService.get(BAD_MEDICATION_REQUEST_UUID);
 		assertThat(result, nullValue());
 	}
 	

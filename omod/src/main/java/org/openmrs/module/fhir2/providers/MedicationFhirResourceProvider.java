@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -78,9 +79,11 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	@Update
 	@SuppressWarnings("unused")
 	public MethodOutcome updateMedication(@IdParam IdType id, @ResourceParam Medication medication) {
-		if (id != null) {
-			medication.setId(id.getIdPart());
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
 		}
+		
+		medication.setId(id.getIdPart());
 		
 		return FhirServerUtils.buildUpdate(fhirMedicationService.update(id.getIdPart(), medication));
 	}

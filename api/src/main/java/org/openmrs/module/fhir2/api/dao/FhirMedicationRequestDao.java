@@ -13,8 +13,9 @@ import javax.validation.constraints.NotNull;
 
 import org.openmrs.DrugOrder;
 
-public interface FhirMedicationRequestDao {
+public interface FhirMedicationRequestDao extends FhirDao<DrugOrder> {
 	
-	DrugOrder getMedicationRequestByUuid(@NotNull String uuid);
+	@Override
+	DrugOrder get(@NotNull String uuid);
 	
 }

@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
@@ -31,24 +32,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Component
 @Transactional
+@Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.PACKAGE)
-public class FhirObservationServiceImpl implements FhirObservationService {
+public class FhirObservationServiceImpl extends BaseFhirService<Observation, org.openmrs.Obs> implements FhirObservationService {
 	
 	@Autowired
 	private FhirObservationDao dao;
 	
 	@Autowired
-	private ObservationTranslator observationTranslator;
+	private ObservationTranslator translator;
 	
 	@Autowired
 	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Observation getObservationByUuid(String uuid) {
-		return observationTranslator.toFhirResource(dao.get(uuid));
+	public Observation get(String uuid) {
+		return translator.toFhirResource(dao.get(uuid));
 	}
 	
 	@Override
@@ -69,6 +72,6 @@ public class FhirObservationServiceImpl implements FhirObservationService {
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime", date)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "valueDatetime", valueDateParam).setSortSpec(sort);
 		
-		return searchQuery.getQueryResults(theParams, dao, observationTranslator);
+		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 }

@@ -61,6 +61,16 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		return person;
 	}
 	
+	@History
+	@SuppressWarnings("unused")
+	public List<Resource> getPersonHistoryById(@IdParam @NotNull IdType id) {
+		Person person = fhirPersonService.get(id.getIdPart());
+		if (person == null) {
+			throw new ResourceNotFoundException("Could not find person with Id " + id.getIdPart());
+		}
+		return person.getContained();
+	}
+	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle searchPeople(@OptionalParam(name = Person.SP_NAME) StringOrListParam name,
@@ -83,5 +93,5 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		}
 		return person.getContained();
 	}
-	
+
 }

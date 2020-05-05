@@ -13,14 +13,18 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Provenance;
+import org.openmrs.Auditable;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PACKAGE)
-public abstract class BaseProvenanceHandlingTranslator {
+public abstract class BaseProvenanceHandlingTranslator<T extends OpenmrsObject & Auditable> {
 	
 	private static final String AGENT_TYPE_CODE = "author";
 	
@@ -32,6 +36,27 @@ public abstract class BaseProvenanceHandlingTranslator {
 	
 	@Autowired
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
+	
+	public Provenance getCreateProvenance(T openMrsObject) {
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setRecorded(openMrsObject.getDateCreated());
+		provenance.setActivity(createActivity());
+		provenance.addAgent(createAgentComponent(openMrsObject.getCreator()));
+		return provenance;
+	}
+	
+	public Provenance getUpdateProvenance(T openMrsObject) {
+		if (openMrsObject.getDateChanged() == null && openMrsObject.getChangedBy() == null) {
+			return null;
+		}
+		Provenance provenance = new Provenance();
+		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setRecorded(openMrsObject.getDateChanged());
+		provenance.setActivity(updateActivity());
+		provenance.addAgent(createAgentComponent(openMrsObject.getChangedBy()));
+		return provenance;
+	}
 	
 	protected CodeableConcept createActivity() {
 		Coding coding = new Coding();

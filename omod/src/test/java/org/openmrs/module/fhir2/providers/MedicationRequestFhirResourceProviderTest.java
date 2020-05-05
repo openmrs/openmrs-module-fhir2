@@ -56,7 +56,7 @@ public class MedicationRequestFhirResourceProviderTest {
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldReturnMatchingMedicationRequest() {
-		when(fhirMedicationRequestService.getMedicationRequestByUuid(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
+		when(fhirMedicationRequestService.get(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
 		
 		IdType id = new IdType();
 		id.setValue(MEDICATION_REQUEST_UUID);

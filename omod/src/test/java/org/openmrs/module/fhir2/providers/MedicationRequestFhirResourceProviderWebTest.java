@@ -50,7 +50,7 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirResour
 	public void getMedicationRequestByUuid_shouldReturnMedication() throws Exception {
 		MedicationRequest medicationRequest = new MedicationRequest();
 		medicationRequest.setId(MEDICATION_REQUEST_UUID);
-		when(fhirMedicationRequestService.getMedicationRequestByUuid(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
+		when(fhirMedicationRequestService.get(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
 		
 		MockHttpServletResponse response = get("/MedicationRequest/" + MEDICATION_REQUEST_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
@@ -62,7 +62,7 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirResour
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldReturn404() throws Exception {
-		when(fhirMedicationRequestService.getMedicationRequestByUuid(WRONG_MEDICATION_REQUEST_UUID)).thenReturn(null);
+		when(fhirMedicationRequestService.get(WRONG_MEDICATION_REQUEST_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/MedicationRequest/" + WRONG_MEDICATION_REQUEST_UUID)
 		        .accept(FhirMediaTypes.JSON).go();

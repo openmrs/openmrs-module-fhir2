@@ -253,7 +253,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void shouldReturnEmptyCollectionForNoMatchOnBirthDate() throws ParseException {
+	public void shouldReturnEmptyCollectionForNoMatchOnBirthDate() {
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(NOT_FOUND_BIRTH_DATE)
 		        .setUpperBound(NOT_FOUND_BIRTH_DATE);
 		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);

@@ -156,7 +156,7 @@ import org.openmrs.module.fhir2.FhirConceptSource;
  */
 public abstract class BaseDao {
 	
-	private static final BigDecimal APPROX_RANGE = new BigDecimal(0.1);
+	private static final BigDecimal APPROX_RANGE = new BigDecimal("0.1");
 	
 	/**
 	 * Converts an {@link Iterable} to a {@link Stream}
@@ -293,7 +293,7 @@ public abstract class BaseDao {
 			return Optional.empty();
 		}
 		
-		return Optional.of(or(toCriteriaArray(handleOrListParam(orListParam).map(handler).flatMap(s -> s))));
+		return Optional.of(or(toCriteriaArray(handleOrListParam(orListParam).flatMap(handler))));
 	}
 	
 	/**

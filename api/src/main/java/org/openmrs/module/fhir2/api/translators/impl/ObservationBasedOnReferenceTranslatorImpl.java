@@ -60,6 +60,6 @@ public class ObservationBasedOnReferenceTranslatorImpl extends BaseReferenceHand
 			return serviceRequestDao.getServiceRequestByUuid(uuid);
 		}
 		
-		return medicationRequestDao.getMedicationRequestByUuid(uuid);
+		return medicationRequestDao.get(uuid);
 	}
 }

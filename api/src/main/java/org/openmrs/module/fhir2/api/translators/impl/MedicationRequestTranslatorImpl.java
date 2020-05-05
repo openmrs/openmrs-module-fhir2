@@ -68,6 +68,11 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 	}
 	
 	@Override
+	public DrugOrder toOpenmrsType(MedicationRequest medicationRequest) {
+		return toOpenmrsType(new DrugOrder(), medicationRequest);
+	}
+	
+	@Override
 	public DrugOrder toOpenmrsType(DrugOrder existingDrugOrder, MedicationRequest medicationRequest) {
 		if (medicationRequest == null) {
 			return existingDrugOrder;

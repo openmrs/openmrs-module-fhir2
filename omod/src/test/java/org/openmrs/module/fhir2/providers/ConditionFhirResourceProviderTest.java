@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -149,7 +149,7 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		        .setUpperBound("upper record date");
 		SortSpec sort = new SortSpec("sort param");
 		when(conditionService.searchConditions(patientReference, subjectReference, codeList, clinicalList, onsetDate,
-		    onsetAge, recordDate, sort)).thenReturn(Arrays.asList(condition));
+		    onsetAge, recordDate, sort)).thenReturn(Collections.singletonList(condition));
 		
 		Bundle result = resourceProvider.searchConditions(patientReference, subjectReference, codeList, clinicalList,
 		    onsetDate, onsetAge, recordDate, sort);

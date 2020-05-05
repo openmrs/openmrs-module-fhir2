@@ -87,7 +87,9 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		if (med.hasForm()) {
 			existingDrug.setConcept(conceptTranslator.toOpenmrsType(med.getForm()));
 		}
-		Collection<DrugIngredient> ingredients = new LinkedHashSet();
+		
+		Collection<DrugIngredient> ingredients = new LinkedHashSet<>();
+		
 		if (med.hasIngredient()) {
 			for (Medication.MedicationIngredientComponent ingredient : med.getIngredient()) {
 				DrugIngredient omrsIngredient = new DrugIngredient();

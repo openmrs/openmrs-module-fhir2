@@ -56,6 +56,16 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 		return practitioner;
 	}
 	
+	@History
+	@SuppressWarnings("unused")
+	public List<Resource> getPractitionerHistoryById(@IdParam @NotNull IdType id) {
+		Practitioner practitioner = practitionerService.getPractitionerByUuid(id.getIdPart());
+		if (practitioner == null) {
+			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
+		}
+		return practitioner.getContained();
+	}
+	
 	@Search
 	@SuppressWarnings("unused")
 	public Bundle findPractitionersByName(@RequiredParam(name = Practitioner.SP_NAME) @NotNull String name) {
@@ -69,13 +79,4 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 		return FhirServerUtils.convertSearchResultsToBundle(practitionerService.findPractitionerByIdentifier(identifier));
 	}
 	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getPractitionerHistoryById(@IdParam @NotNull IdType id) {
-		Practitioner practitioner = practitionerService.getPractitionerByUuid(id.getIdPart());
-		if (practitioner == null) {
-			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
-		}
-		return practitioner.getContained();
-	}
 }

@@ -41,7 +41,7 @@ public class EncounterParticipantTranslatorImplTest {
 	FhirPractitionerService practitionerService;
 	
 	@Mock
-	PractitionerTranslator practitionerTranslator;
+	PractitionerTranslator<Provider> practitionerTranslator;
 	
 	private EncounterParticipantTranslatorImpl participantTranslator;
 	
