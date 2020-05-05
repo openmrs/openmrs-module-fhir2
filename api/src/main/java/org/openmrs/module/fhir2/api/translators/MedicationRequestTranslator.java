@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 
-public interface MedicationRequestTranslator extends ToFhirTranslator<DrugOrder, MedicationRequest>, UpdatableOpenmrsTranslator<DrugOrder, MedicationRequest> {
+public interface MedicationRequestTranslator extends ToFhirTranslator<DrugOrder, MedicationRequest>, OpenmrsFhirUpdatableTranslator<DrugOrder, MedicationRequest> {
 	
 	/**
 	 * Maps a {@link org.openmrs.DrugOrder} to a {@link org.hl7.fhir.r4.model.MedicationRequest}
@@ -34,4 +34,15 @@ public interface MedicationRequestTranslator extends ToFhirTranslator<DrugOrder,
 	 */
 	@Override
 	DrugOrder toOpenmrsType(DrugOrder existingDrugOrder, MedicationRequest medicationRequest);
+	
+	/**
+	 * Maps a {@link org.hl7.fhir.r4.model.MedicationRequest} medicationRequest to an existing
+	 * {@link org.openmrs.DrugOrder}
+	 *
+	 * @param medicationRequest the medicationRequest to map
+	 * @return an updated version of the existingDrugOrder
+	 */
+	@Override
+	DrugOrder toOpenmrsType(MedicationRequest medicationRequest);
+	
 }

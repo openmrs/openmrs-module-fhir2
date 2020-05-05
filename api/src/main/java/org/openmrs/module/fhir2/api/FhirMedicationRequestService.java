@@ -13,8 +13,9 @@ import javax.validation.constraints.NotNull;
 
 import org.hl7.fhir.r4.model.MedicationRequest;
 
-public interface FhirMedicationRequestService {
-	
-	MedicationRequest getMedicationRequestByUuid(@NotNull String uuid);
+public interface FhirMedicationRequestService extends FhirService<MedicationRequest>{
+
+	@Override
+	MedicationRequest get(@NotNull String uuid);
 	
 }

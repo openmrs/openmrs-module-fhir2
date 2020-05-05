@@ -13,8 +13,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +22,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.web.servlet.BaseFhirResourceProviderTest;
 import org.springframework.mock.web.MockHttpServletResponse;
+
+import lombok.AccessLevel;
+import lombok.Getter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirResourceProviderTest<MedicationRequestFhirResourceProvider, MedicationRequest> {
@@ -50,7 +51,7 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirResour
 	public void getMedicationRequestByUuid_shouldReturnMedication() throws Exception {
 		MedicationRequest medicationRequest = new MedicationRequest();
 		medicationRequest.setId(MEDICATION_REQUEST_UUID);
-		when(fhirMedicationRequestService.getMedicationRequestByUuid(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
+		when(fhirMedicationRequestService.get(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
 		
 		MockHttpServletResponse response = get("/MedicationRequest/" + MEDICATION_REQUEST_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
@@ -62,7 +63,7 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirResour
 	
 	@Test
 	public void getMedicationRequestByUuid_shouldReturn404() throws Exception {
-		when(fhirMedicationRequestService.getMedicationRequestByUuid(WRONG_MEDICATION_REQUEST_UUID)).thenReturn(null);
+		when(fhirMedicationRequestService.get(WRONG_MEDICATION_REQUEST_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/MedicationRequest/" + WRONG_MEDICATION_REQUEST_UUID)
 		        .accept(FhirMediaTypes.JSON).go();

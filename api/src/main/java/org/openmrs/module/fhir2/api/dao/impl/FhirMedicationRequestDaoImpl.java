@@ -9,28 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
+import org.openmrs.DrugOrder;
+import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
+import org.springframework.stereotype.Component;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.SessionFactory;
-import org.openmrs.DrugOrder;
-import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirMedicationRequestDaoImpl implements FhirMedicationRequestDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Override
-	public DrugOrder getMedicationRequestByUuid(String uuid) {
-		return (DrugOrder) sessionFactory.getCurrentSession().createCriteria(DrugOrder.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
+public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> implements FhirMedicationRequestDao {
+
 }

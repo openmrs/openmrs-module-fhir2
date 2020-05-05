@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
@@ -18,18 +16,19 @@ import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirMedicationRequestServiceImpl implements FhirMedicationRequestService {
+@Getter(AccessLevel.PROTECTED)
+public class FhirMedicationRequestServiceImpl extends BaseFhirService<MedicationRequest, org.openmrs.DrugOrder> implements FhirMedicationRequestService {
 	
 	@Autowired
-	private MedicationRequestTranslator medicationRequestTranslator;
+	private MedicationRequestTranslator translator;
 	
 	@Autowired
 	private FhirMedicationRequestDao dao;
-	
-	@Override
-	public MedicationRequest getMedicationRequestByUuid(String uuid) {
-		return medicationRequestTranslator.toFhirResource(dao.getMedicationRequestByUuid(uuid));
-	}
+
 }
