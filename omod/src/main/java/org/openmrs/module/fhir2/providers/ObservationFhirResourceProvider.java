@@ -57,7 +57,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	public Observation getObservationById(@IdParam @NotNull IdType id) {
-		Observation observation = observationService.getObservationByUuid(id.getIdPart());
+		Observation observation = observationService.get(id.getIdPart());
 		if (observation == null) {
 			throw new ResourceNotFoundException("Could not find Observation with Id " + id.getIdPart());
 		}
@@ -66,7 +66,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@History
 	public List<Resource> getObservationHistoryById(@IdParam @NotNull IdType id) {
-		Observation observation = observationService.getObservationByUuid(id.getIdPart());
+		Observation observation = observationService.get(id.getIdPart());
 		if (observation == null) {
 			throw new ResourceNotFoundException("Could not find Observation with Id " + id.getIdPart());
 		}

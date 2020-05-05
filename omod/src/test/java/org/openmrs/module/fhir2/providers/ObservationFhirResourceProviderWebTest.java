@@ -120,7 +120,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirResourceProv
 	public void shouldGetObservationByUuid() throws Exception {
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
-		when(observationService.getObservationByUuid(OBS_UUID)).thenReturn(observation);
+		when(observationService.get(OBS_UUID)).thenReturn(observation);
 		
 		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
 		
