@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
-public class FhirEncounterServiceImpl extends  BaseFhirService<Encounter, org.openmrs.Encounter> implements FhirEncounterService {
+public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.openmrs.Encounter> implements FhirEncounterService {
 	
 	@Autowired
 	FhirEncounterDao dao;

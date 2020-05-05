@@ -23,6 +23,11 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
@@ -35,12 +40,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
-
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirEncounterServiceImplTest {

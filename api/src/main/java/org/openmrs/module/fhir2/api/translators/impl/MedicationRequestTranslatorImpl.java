@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
@@ -22,9 +24,6 @@ import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import lombok.AccessLevel;
-import lombok.Setter;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -72,7 +71,7 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 	public DrugOrder toOpenmrsType(MedicationRequest medicationRequest) {
 		return toOpenmrsType(new DrugOrder(), medicationRequest);
 	}
-
+	
 	@Override
 	public DrugOrder toOpenmrsType(DrugOrder existingDrugOrder, MedicationRequest medicationRequest) {
 		if (medicationRequest == null) {

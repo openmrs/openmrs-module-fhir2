@@ -17,7 +17,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import org.hl7.fhir.r4.model.Encounter;
 
-public interface FhirEncounterService extends FhirService<Encounter>{
+public interface FhirEncounterService extends FhirService<Encounter> {
 	
 	Encounter get(@NotNull String uuid);
 	

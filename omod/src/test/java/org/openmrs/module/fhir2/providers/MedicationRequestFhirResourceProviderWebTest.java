@@ -13,6 +13,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,9 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.web.servlet.BaseFhirResourceProviderTest;
 import org.springframework.mock.web.MockHttpServletResponse;
-
-import lombok.AccessLevel;
-import lombok.Getter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirResourceProviderTest<MedicationRequestFhirResourceProvider, MedicationRequest> {

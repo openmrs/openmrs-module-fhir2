@@ -17,7 +17,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import org.openmrs.Encounter;
 
-public interface FhirEncounterDao extends FhirDao<Encounter>{
+public interface FhirEncounterDao extends FhirDao<Encounter> {
 	
 	Encounter get(@NotNull String uuid);
 	

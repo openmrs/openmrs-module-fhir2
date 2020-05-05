@@ -11,20 +11,18 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.hibernate.Criteria;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.springframework.stereotype.Component;
 
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import lombok.AccessLevel;
-import lombok.Setter;
-
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements FhirEncounterDao {
-	
 	
 	@Override
 	public Collection<Encounter> searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
