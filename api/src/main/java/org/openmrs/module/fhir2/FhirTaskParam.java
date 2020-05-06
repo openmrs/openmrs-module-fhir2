@@ -18,15 +18,15 @@ import javax.persistence.OneToOne;
 
 import java.util.Date;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.openmrs.BaseOpenmrsMetadata;
 import org.openmrs.Concept;
 
-@Data(staticConstructor = "of")
+@Getter
+@Setter
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @MappedSuperclass
 public abstract class FhirTaskParam extends BaseOpenmrsMetadata {
 	

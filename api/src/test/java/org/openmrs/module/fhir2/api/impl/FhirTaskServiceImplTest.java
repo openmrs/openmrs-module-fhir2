@@ -173,7 +173,9 @@ public class FhirTaskServiceImplTest {
 		Collection<org.hl7.fhir.r4.model.Task> basedOnFhirTasks;
 		
 		FhirTask t1 = new FhirTask();
+		t1.setId(1);
 		FhirTask t2 = new FhirTask();
+		t2.setId(2);
 		
 		org.hl7.fhir.r4.model.Task f1 = new org.hl7.fhir.r4.model.Task();
 		org.hl7.fhir.r4.model.Task f2 = new org.hl7.fhir.r4.model.Task();

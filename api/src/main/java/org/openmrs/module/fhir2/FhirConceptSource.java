@@ -26,13 +26,14 @@ import org.openmrs.ConceptSource;
 
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
 @Table(name = "fhir_concept_source")
 public class FhirConceptSource extends BaseOpenmrsMetadata {
 	
 	private static final long serialVersionUID = 1742113L;
 	
+	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "fhir_concept_source_id")

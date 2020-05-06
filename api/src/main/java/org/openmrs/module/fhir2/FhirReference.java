@@ -26,13 +26,14 @@ import org.openmrs.BaseOpenmrsMetadata;
  */
 @Data(staticConstructor = "of")
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
 @Table(name = "fhir_reference")
 public class FhirReference extends BaseOpenmrsMetadata {
 	
 	private static final long serialVersionUID = 1L;
 	
+	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "reference_id")

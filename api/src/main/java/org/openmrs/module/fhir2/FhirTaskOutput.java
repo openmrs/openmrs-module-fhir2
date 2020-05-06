@@ -25,13 +25,14 @@ import lombok.NoArgsConstructor;
  */
 @Data(staticConstructor = "of")
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
 @Table(name = "fhir_task_output")
 public class FhirTaskOutput extends FhirTaskParam {
 	
 	private static final long serialVersionUID = 1L;
 	
+	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "task_output_id")

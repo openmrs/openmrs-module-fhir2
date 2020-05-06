@@ -32,7 +32,7 @@ import org.openmrs.BaseOpenmrsMetadata;
 
 @Data(staticConstructor = "of")
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
 @Table(name = "fhir_task")
 public class FhirTask extends BaseOpenmrsMetadata {
@@ -52,6 +52,7 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	
 	private static final long serialVersionUID = 1L;
 	
+	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "task_id")
