@@ -17,9 +17,10 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.r4.model.Person;
 
-public interface FhirPersonService {
+public interface FhirPersonService extends FhirService<Person> {
 	
-	Person getPersonByUuid(String uuid);
+	@Override
+	Person get(String uuid);
 	
 	Collection<Person> searchForPeople(StringOrListParam name, TokenOrListParam gender, DateRangeParam birthDate,
 	        StringOrListParam city, StringOrListParam state, StringOrListParam postalCode, StringOrListParam country,
