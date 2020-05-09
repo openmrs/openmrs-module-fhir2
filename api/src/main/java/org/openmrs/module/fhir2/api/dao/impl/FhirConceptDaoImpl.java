@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.validation.constraints.NotNull;
+
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -21,14 +23,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirConceptDaoImpl implements FhirConceptDao {
+public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConceptDao {
 	
 	@Autowired
 	private ConceptService conceptService;
 	
 	@Override
-	public Optional<Concept> getConceptByUuid(String uuid) {
-		return Optional.ofNullable(conceptService.getConceptByUuid(uuid));
+	public Concept get(@NotNull String uuid) {
+		if (conceptService.getConceptByUuid(uuid) != null) {
+			return conceptService.getConceptByUuid(uuid);
+		}
+		return null;
 	}
 	
 	@Override

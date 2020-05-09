@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
+import javax.annotation.Nullable;
+
 import java.util.Optional;
 
 import org.junit.Before;
@@ -47,19 +49,20 @@ public class FhirConceptServiceImplTest {
 	public void getConceptByUuid_shouldGetConceptByUuid() {
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
-		when(conceptDao.getConceptByUuid(CONCEPT_UUID)).thenReturn(Optional.of(concept));
+		when(conceptDao.get(CONCEPT_UUID)).thenReturn(concept);
 		
-		Optional<Concept> result = fhirConceptService.getConceptByUuid(CONCEPT_UUID);
-		assertThat(result.isPresent(), is(true));
-		assertThat(result.get().getUuid(), equalTo(CONCEPT_UUID));
+		Concept result = fhirConceptService.getConceptByUuid(CONCEPT_UUID);
+		assertThat(result, is(true));
+		assertThat(result.getUuid(), equalTo(CONCEPT_UUID));
 	}
 	
 	@Test
+	@Nullable
 	public void getConceptByUuid_shouldReturnNullWhenConceptUuidNotFound() {
-		when(conceptDao.getConceptByUuid(BAD_CONCEPT_UUID)).thenReturn(Optional.empty());
+		when(conceptDao.get(BAD_CONCEPT_UUID)).thenReturn(null);
 		
-		Optional<Concept> result = fhirConceptService.getConceptByUuid(BAD_CONCEPT_UUID);
-		assertThat(result.isPresent(), is(false));
+		Concept result = fhirConceptService.getConceptByUuid(BAD_CONCEPT_UUID);
+		assertThat(result, is(false));
 	}
 	
 	@Test

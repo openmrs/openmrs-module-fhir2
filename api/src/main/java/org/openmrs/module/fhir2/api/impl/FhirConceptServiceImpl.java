@@ -30,8 +30,8 @@ public class FhirConceptServiceImpl implements FhirConceptService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<Concept> getConceptByUuid(String uuid) {
-		return dao.getConceptByUuid(uuid);
+	public Concept getConceptByUuid(String uuid) {
+		return dao.get(uuid);
 	}
 	
 	@Override

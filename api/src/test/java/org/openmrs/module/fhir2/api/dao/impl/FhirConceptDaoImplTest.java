@@ -55,15 +55,15 @@ public class FhirConceptDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getConceptByUuid_shouldGetConceptByUuid() {
-		Optional<Concept> result = dao.getConceptByUuid(CONCEPT_UUID);
-		assertThat(result.isPresent(), is(true));
-		assertThat(result.get().getUuid(), equalTo(CONCEPT_UUID));
+		Concept result = dao.get(CONCEPT_UUID);
+		assertThat(result, is(true));
+		assertThat(result.getUuid(), equalTo(CONCEPT_UUID));
 	}
 	
 	@Test
 	public void getConceptByUuid_shouldReturnNullIfConceptUuidDoesNotExist() {
-		Optional<Concept> result = dao.getConceptByUuid(BAD_CONCEPT_UUID);
-		assertThat(result.isPresent(), is(false));
+		Concept result = dao.get(BAD_CONCEPT_UUID);
+		assertThat(result, is(false));
 	}
 	
 	@Test

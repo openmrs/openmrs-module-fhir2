@@ -11,11 +11,13 @@ package org.openmrs.module.fhir2.api.dao;
 
 import java.util.Optional;
 
+import javax.validation.constraints.NotNull;
+
 import org.openmrs.Concept;
 
-public interface FhirConceptDao {
+public interface FhirConceptDao extends FhirDao<Concept> {
 	
-	Optional<Concept> getConceptByUuid(String uuid);
+	Concept get(@NotNull String uuid);
 	
 	Optional<Concept> getConceptBySourceNameAndCode(String sourceName, String code);
 }
