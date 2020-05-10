@@ -16,9 +16,8 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -33,8 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
+@Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.PACKAGE)
-public class FhirTaskServiceImpl implements FhirTaskService {
+public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> implements FhirTaskService {
 	
 	@Autowired
 	private FhirTaskDao dao;
@@ -50,8 +50,8 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public Task getTaskByUuid(String uuid) {
-		return translator.toFhirResource(dao.getTaskByUuid(uuid));
+	public Task get(String uuid) {
+		return translator.toFhirResource(dao.get(uuid));
 	}
 	
 	/**
@@ -66,34 +66,31 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 	}
 	
 	/**
-	 * Save task to the DB, or update task if one exists with given UUID
-	 * 
-	 * @param uuid the uuid of the task to update
-	 * @param task the task to save
-	 * @return the saved task
+	 * // * Save task to the DB, or update task if one exists with given UUID // * // * @param uuid the
+	 * uuid of the task to update // * @param task the task to save // * @return the saved task //
 	 */
-	@Override
-	public Task updateTask(String uuid, Task task) {
-		if (task.getId() == null) {
-			throw new InvalidRequestException("Task resource is missing id.");
-		}
-		
-		if (!task.getId().equals(uuid)) {
-			throw new InvalidRequestException("Task id and provided uuid do not match");
-		}
-		
-		FhirTask openmrsTask = null;
-		
-		if (uuid != null) {
-			openmrsTask = dao.getTaskByUuid(task.getId());
-		}
-		
-		if (openmrsTask == null) {
-			throw new MethodNotAllowedException("No Task found to update. Use Post to create new Tasks.");
-		}
-		
-		return translator.toFhirResource(dao.saveTask(translator.toOpenmrsType(openmrsTask, task)));
-	}
+	//	@Override
+	//	public Task update(String uuid, Task task) {
+	//		if (task.getId() == null) {
+	//			throw new InvalidRequestException("Task resource is missing id.");
+	//		}
+	//		
+	//		if (!task.getId().equals(uuid)) {
+	//			throw new InvalidRequestException("Task id and provided uuid do not match");
+	//		}
+	//		
+	//		FhirTask openmrsTask = null;
+	//		
+	//		if (uuid != null) {
+	//			openmrsTask = dao.get(task.getId());
+	//		}
+	//		
+	//		if (openmrsTask == null) {
+	//			throw new MethodNotAllowedException("No Task found to update. Use Post to create new Tasks.");
+	//		}
+	//		
+	//		return translator.toFhirResource(dao.saveTask(translator.toOpenmrsType(openmrsTask, task)));
+	//	}
 	
 	/**
 	 * Get a list of Tasks associated with the given Resource with the given Uuid through the basedOn
@@ -131,4 +128,5 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 		return dao.searchForTasks(basedOnReference, ownerReference, status, sort).stream().map(translator::toFhirResource)
 		        .collect(Collectors.toList());
 	}
+	
 }

@@ -63,7 +63,6 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 	private static final String JSON_TASK_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/TestTask_CreateUpdate_WrongId.json";
 	
 	private Task task;
-	
 	@Mock
 	private FhirTaskService service;
 	
@@ -79,7 +78,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 		
 		task = new Task();
 		task.setId(TASK_UUID);
-		when(service.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(service.get(TASK_UUID)).thenReturn(task);
 	}
 	
 	@Test
@@ -93,7 +92,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 	
 	@Test
 	public void getTaskByWrongUuid_shouldReturn404() throws Exception {
-		when(service.getTaskByUuid(WRONG_TASK_UUID)).thenReturn(null);
+		when(service.get(WRONG_TASK_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
