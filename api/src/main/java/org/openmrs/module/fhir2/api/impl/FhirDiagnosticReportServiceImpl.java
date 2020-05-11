@@ -16,8 +16,10 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
+import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirDiagnosticReportServiceImpl implements FhirDiagnosticReportService {
+public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticReport, org.openmrs.Obs> implements FhirDiagnosticReportService {
 	
 	@Autowired
 	FhirDiagnosticReportDao dao;
@@ -61,4 +63,35 @@ public class FhirDiagnosticReportServiceImpl implements FhirDiagnosticReportServ
 		
 		return translator.toFhirResource(dao.saveObsGroup(translator.toOpenmrsType(obsGroup, diagnosticReport)));
 	}
+	
+	@Override
+	protected FhirDao<Obs> getDao() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	protected OpenmrsFhirTranslator<Obs, DiagnosticReport> getTranslator() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public DiagnosticReport get(String uuid) {
+		// TODO Auto-generated method stub
+		return super.get(uuid);
+	}
+	
+	@Override
+	public DiagnosticReport create(DiagnosticReport newResource) {
+		// TODO Auto-generated method stub
+		return super.create(newResource);
+	}
+	
+	@Override
+	public DiagnosticReport update(String uuid, DiagnosticReport updatedResource) {
+		// TODO Auto-generated method stub
+		return super.update(uuid, updatedResource);
+	}
+	
 }
