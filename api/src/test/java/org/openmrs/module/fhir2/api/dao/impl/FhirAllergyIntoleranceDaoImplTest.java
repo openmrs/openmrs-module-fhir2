@@ -194,8 +194,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByCategoryFood() {
-		TokenOrListParam category = new TokenOrListParam();
-		category.addOr(new TokenParam().setValue("food"));
+		TokenAndListParam category = new TokenAndListParam();
+		category.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("food")));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(null, category, null, null, null, null);
 		assertThat(result, notNullValue());
@@ -205,8 +205,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByCategoryMedicine() {
-		TokenOrListParam category = new TokenOrListParam();
-		category.addOr(new TokenParam().setValue("medication"));
+		TokenAndListParam category = new TokenAndListParam();
+		category.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("medication")));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(null, category, null, null, null, null);
 		assertThat(result, notNullValue());
@@ -216,8 +216,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByCategoryEnvironment() {
-		TokenOrListParam category = new TokenOrListParam();
-		category.addOr(new TokenParam().setValue("environment"));
+		TokenAndListParam category = new TokenAndListParam();
+		category.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("environment")));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(null, category, null, null, null, null);
 		assertThat(result, notNullValue());
@@ -227,8 +227,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByCategoryOther() {
-		TokenOrListParam category = new TokenOrListParam();
-		category.addOr(new TokenParam().setValue("null"));
+		TokenAndListParam category = new TokenAndListParam();
+		category.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("null")));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(null, null, null, null, null, null);
 		assertThat(result, notNullValue());
@@ -237,8 +237,9 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForMultipleAllergiesByCategory() {
-		TokenOrListParam category = new TokenOrListParam();
-		category.addOr(new TokenParam(null, "food")).addOr(new TokenParam(null, "medication"));
+		TokenAndListParam category = new TokenAndListParam();
+		category.addAnd(
+		    new TokenOrListParam().addOr(new TokenParam(null, "food")).addOr(new TokenParam(null, "medication")));
 		Collection<Allergy> result = allergyDao.searchForAllergies(null, category, null, null, null, null);
 		assertThat(result, notNullValue());
 		assertThat(result, hasSize(2));
@@ -261,8 +262,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	public void searchForAllergies_shouldSearchForAllergiesBySeverityMild() {
 		initSeverityData();
 		
-		TokenOrListParam severity = new TokenOrListParam();
-		severity.addOr(new TokenParam().setValue("mild"));
+		TokenAndListParam severity = new TokenAndListParam();
+		severity.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("mild")));
 		
 		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
 		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
@@ -278,8 +279,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	public void searchForAllergies_shouldSearchForAllergiesBySeverityModerate() {
 		initSeverityData();
 		
-		TokenOrListParam severity = new TokenOrListParam();
-		severity.addOr(new TokenParam().setValue("moderate"));
+		TokenAndListParam severity = new TokenAndListParam();
+		severity.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("moderate")));
 		
 		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
 		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
@@ -295,8 +296,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	public void searchForAllergies_shouldSearchForAllergiesBySeveritySevere() {
 		initSeverityData();
 		
-		TokenOrListParam severity = new TokenOrListParam();
-		severity.addOr(new TokenParam().setValue("severe"));
+		TokenAndListParam severity = new TokenAndListParam();
+		severity.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("severe")));
 		
 		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
 		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
@@ -312,8 +313,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	public void searchForAllergies_shouldSearchForAllergiesBySeverityOther() {
 		initSeverityData();
 		
-		TokenOrListParam severity = new TokenOrListParam();
-		severity.addOr(new TokenParam().setValue("null"));
+		TokenAndListParam severity = new TokenAndListParam();
+		severity.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("null")));
 		
 		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
 		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
@@ -337,8 +338,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByClinicalStatus() {
-		TokenOrListParam status = new TokenOrListParam();
-		status.addOr(new TokenParam().setValue("active"));
+		TokenAndListParam status = new TokenAndListParam();
+		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("active")));
 		
 		Collection<Allergy> result = allergyDao.searchForAllergies(null, null, null, null, null, status);
 		assertThat(result, notNullValue());

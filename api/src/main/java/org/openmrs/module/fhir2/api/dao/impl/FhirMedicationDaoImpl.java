@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
@@ -38,7 +37,7 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 	
 	@Override
 	public Collection<Drug> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
-	        TokenOrListParam ingredientCode, TokenOrListParam status) {
+	        TokenAndListParam ingredientCode, TokenAndListParam status) {
 		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Drug.class);
 		handleMedicationCode(criteria, code);
 		handleMedicationDosageForm(criteria, dosageForm);

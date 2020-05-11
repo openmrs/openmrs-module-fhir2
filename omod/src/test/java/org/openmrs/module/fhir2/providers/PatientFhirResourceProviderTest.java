@@ -26,8 +26,10 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Bundle;
@@ -131,7 +133,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByName() {
-		StringOrListParam nameParam = new StringOrListParam().add(new StringParam(NAME));
+		StringAndListParam nameParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(NAME)));
 		when(patientService.searchForPatients(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(Collections.singletonList(patient));
@@ -146,7 +148,8 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByGivenName() {
-		StringOrListParam givenNameParam = new StringOrListParam().add(new StringParam(NAME));
+		StringAndListParam givenNameParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(NAME)));
 		when(patientService.searchForPatients(isNull(), argThat(is(givenNameParam)), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(Collections.singletonList(patient));
@@ -161,7 +164,8 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByFamilyName() {
-		StringOrListParam familyNameParam = new StringOrListParam().add(new StringParam(FAMILY_NAME));
+		StringAndListParam familyNameParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(FAMILY_NAME)));
 		when(patientService.searchForPatients(isNull(), isNull(), argThat(is(familyNameParam)), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(Collections.singletonList(patient));
@@ -176,7 +180,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByIdentifier() {
-		TokenOrListParam identifierParam = new TokenOrListParam().add(IDENTIFIER);
+		TokenAndListParam identifierParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(IDENTIFIER));
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), argThat(is(identifierParam)), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(Collections.singletonList(patient));
@@ -191,7 +195,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByGender() {
-		TokenOrListParam genderParam = new TokenOrListParam().add(GENDER);
+		TokenAndListParam genderParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(GENDER));
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), argThat(is(genderParam)), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(Collections.singletonList(patient));
@@ -236,7 +240,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByDeceased() {
-		TokenOrListParam deceasedParam = new TokenOrListParam().add("true");
+		TokenAndListParam deceasedParam = new TokenAndListParam().addAnd(new TokenOrListParam().add("true"));
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(is(deceasedParam)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(Collections.singletonList(patient));
@@ -251,7 +255,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByCity() {
-		StringOrListParam cityParam = new StringOrListParam().add(new StringParam(CITY));
+		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(is(cityParam)), isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
 		
@@ -265,7 +269,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByState() {
-		StringOrListParam stateParam = new StringOrListParam().add(new StringParam(STATE));
+		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), argThat(is(stateParam)), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(patient));
 		
@@ -279,7 +283,8 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByPostalCode() {
-		StringOrListParam postalCodeParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
+		StringAndListParam postalCodeParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), argThat(is(postalCodeParam)), isNull(), isNull()))
 		            .thenReturn(Collections.singletonList(patient));
@@ -294,7 +299,8 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByCountry() {
-		StringOrListParam countryParam = new StringOrListParam().add(new StringParam(COUNTRY));
+		StringAndListParam countryParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
 		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), argThat(is(countryParam)), isNull()))
 		            .thenReturn(Collections.singletonList(patient));

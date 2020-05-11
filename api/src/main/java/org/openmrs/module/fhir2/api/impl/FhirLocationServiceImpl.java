@@ -13,9 +13,9 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Location;
@@ -45,9 +45,9 @@ public class FhirLocationServiceImpl implements FhirLocationService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Collection<Location> searchForLocations(StringOrListParam name, StringOrListParam city, StringOrListParam country,
-	        StringOrListParam postalCode, StringOrListParam state, TokenOrListParam tag, ReferenceOrListParam parent,
-	        SortSpec sort) {
+	public Collection<Location> searchForLocations(StringAndListParam name, StringAndListParam city,
+	        StringAndListParam country, StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag,
+	        ReferenceAndListParam parent, SortSpec sort) {
 		return locationDao.searchForLocations(name, city, country, postalCode, state, tag, parent, sort).stream()
 		        .map(locationTranslator::toFhirResource).collect(Collectors.toList());
 	}

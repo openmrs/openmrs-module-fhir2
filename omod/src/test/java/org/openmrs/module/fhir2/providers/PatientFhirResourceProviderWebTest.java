@@ -30,8 +30,8 @@ import java.util.Collections;
 import java.util.Date;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
@@ -72,10 +72,10 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 	private FhirPatientService patientService;
 	
 	@Captor
-	private ArgumentCaptor<StringOrListParam> stringOrListCaptor;
+	private ArgumentCaptor<StringAndListParam> stringAndListCaptor;
 	
 	@Captor
-	private ArgumentCaptor<TokenOrListParam> tokenOrListCaptor;
+	private ArgumentCaptor<TokenAndListParam> tokenAndListCaptor;
 	
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;
@@ -113,55 +113,60 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 	public void shouldGetPatientByName() throws Exception {
 		verifyUri("/Patient/?name=Hannibal Lector");
 		
-		verify(patientService).searchForPatients(stringOrListCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
+		verify(patientService).searchForPatients(stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("Hannibal Lector"));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("Hannibal Lector"));
 	}
 	
 	@Test
 	public void shouldGetPatientByGivenName() throws Exception {
 		verifyUri("/Patient/?given=Hannibal");
 		
-		verify(patientService).searchForPatients(isNull(), stringOrListCaptor.capture(), isNull(), isNull(), isNull(),
+		verify(patientService).searchForPatients(isNull(), stringAndListCaptor.capture(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("Hannibal"));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("Hannibal"));
 	}
 	
 	@Test
 	public void shouldGetPatientByFamilyName() throws Exception {
 		verifyUri("/Patient/?family=Lector");
 		
-		verify(patientService).searchForPatients(isNull(), isNull(), stringOrListCaptor.capture(), isNull(), isNull(),
+		verify(patientService).searchForPatients(isNull(), isNull(), stringAndListCaptor.capture(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("Lector"));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("Lector"));
 	}
 	
 	@Test
 	public void shouldGetPatientByIdentifier() throws Exception {
 		verifyUri("/Patient/?identifier=M10000");
 		
-		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), tokenOrListCaptor.capture(), isNull(),
+		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), tokenAndListCaptor.capture(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(tokenOrListCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("M10000"));
+		assertThat(tokenAndListCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("M10000"));
 	}
 	
 	@Test
 	public void shouldGetPatientByGender() throws Exception {
 		verifyUri("/Patient/?gender=male");
 		
-		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), tokenOrListCaptor.capture(),
+		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), tokenAndListCaptor.capture(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(tokenOrListCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("male"));
+		assertThat(tokenAndListCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("male"));
 	}
 	
 	@Test
@@ -371,11 +376,12 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 		verifyUri("/Patient/?deceased=true");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    tokenOrListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    tokenAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
-		assertThat(tokenOrListCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("true"));
+		assertThat(tokenAndListCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("true"));
 	}
 	
 	@Test
@@ -383,11 +389,12 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 		verifyUri("/Patient/?address-city=Washington");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), stringOrListCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull());
 		
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("Washington"));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("Washington"));
 	}
 	
 	@Test
@@ -395,11 +402,12 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 		verifyUri("/Patient/?address-state=Washington");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), stringOrListCaptor.capture(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), stringAndListCaptor.capture(), isNull(), isNull(), isNull());
 		
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("Washington"));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("Washington"));
 	}
 	
 	@Test
@@ -407,11 +415,12 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 		verifyUri("/Patient/?address-country=Washington");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), stringOrListCaptor.capture(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), stringAndListCaptor.capture(), isNull());
 		
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("Washington"));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("Washington"));
 	}
 	
 	@Test
@@ -419,11 +428,12 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 		verifyUri("/Patient/?address-postalcode=98136");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), stringOrListCaptor.capture(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), stringAndListCaptor.capture(), isNull(), isNull());
 		
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("98136"));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("98136"));
 	}
 	
 	@Test

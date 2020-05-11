@@ -184,8 +184,8 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		Collection<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		
-		TokenOrListParam category = new TokenOrListParam();
-		category.addOr(new TokenParam().setValue("food"));
+		TokenAndListParam category = new TokenAndListParam();
+		category.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("food")));
 		
 		when(allergyIntoleranceDao.searchForAllergies(isNull(), argThat(equalTo(category)), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(allergies);
@@ -216,8 +216,8 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		Collection<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		
-		TokenOrListParam severity = new TokenOrListParam();
-		severity.addOr(new TokenParam().setValue(SEVERITY_CONCEPT_UUID));
+		TokenAndListParam severity = new TokenAndListParam();
+		severity.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(SEVERITY_CONCEPT_UUID)));
 		
 		when(allergyIntoleranceDao.searchForAllergies(isNull(), isNull(), isNull(), argThat(equalTo(severity)), isNull(),
 		    isNull())).thenReturn(allergies);
@@ -248,8 +248,8 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		Collection<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		
-		TokenOrListParam status = new TokenOrListParam();
-		status.addOr(new TokenParam().setValue("active"));
+		TokenAndListParam status = new TokenAndListParam();
+		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("active")));
 		
 		when(allergyIntoleranceDao.searchForAllergies(isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(equalTo(status)))).thenReturn(allergies);

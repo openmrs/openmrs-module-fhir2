@@ -29,6 +29,7 @@ import java.util.List;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hibernate.SessionFactory;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -333,8 +334,8 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForTasks_shouldReturnTasksByStatus() {
-		TokenOrListParam status = new TokenOrListParam(FhirConstants.TASK_STATUS_VALUE_SET_URI,
-		        Task.TaskStatus.ACCEPTED.toString());
+		TokenAndListParam status = new TokenAndListParam().addAnd(
+		    new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, Task.TaskStatus.ACCEPTED.toString()));
 		
 		Collection<FhirTask> results = dao.searchForTasks(null, null, status, null);
 		
@@ -403,10 +404,11 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForTasks_shouldHandleAComplexQuery() throws Exception {
 		executeDataSet(TASK_DATA_OWNER_XML);
 		
-		TokenOrListParam status = new TokenOrListParam();
+		TokenAndListParam status = new TokenAndListParam();
 		
-		status.add(FhirConstants.TASK_STATUS_VALUE_SET_URI, Task.TaskStatus.ACCEPTED.toString());
-		status.add(FhirConstants.TASK_STATUS_VALUE_SET_URI, Task.TaskStatus.REQUESTED.toString());
+		status.addAnd(
+		    new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, Task.TaskStatus.ACCEPTED.toString())
+		            .add(FhirConstants.TASK_STATUS_VALUE_SET_URI, Task.TaskStatus.REQUESTED.toString()));
 		
 		ReferenceParam ownerReference = new ReferenceParam();
 		ownerReference.setValue(FhirConstants.PRACTITIONER + "/" + OWNER_USER_UUID);

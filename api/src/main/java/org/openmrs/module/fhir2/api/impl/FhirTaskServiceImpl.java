@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
@@ -127,7 +127,7 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Task> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
-	        TokenOrListParam status, SortSpec sort) {
+	        TokenAndListParam status, SortSpec sort) {
 		return dao.searchForTasks(basedOnReference, ownerReference, status, sort).stream().map(translator::toFhirResource)
 		        .collect(Collectors.toList());
 	}

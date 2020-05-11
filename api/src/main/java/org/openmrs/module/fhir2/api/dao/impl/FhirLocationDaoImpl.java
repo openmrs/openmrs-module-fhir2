@@ -18,18 +18,13 @@ import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Subqueries;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
@@ -53,9 +48,9 @@ public class FhirLocationDaoImpl extends BaseDao implements FhirLocationDao {
 	}
 	
 	@Override
-	public Collection<Location> searchForLocations(StringOrListParam name, StringOrListParam city, StringOrListParam country,
-	        StringOrListParam postalCode, StringOrListParam state, TokenOrListParam tag, ReferenceOrListParam parent,
-	        SortSpec sort) {
+	public Collection<Location> searchForLocations(StringAndListParam name, StringAndListParam city,
+	        StringAndListParam country, StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag,
+	        ReferenceAndListParam parent, SortSpec sort) {
 		
 		Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(Location.class);
 		
@@ -81,74 +76,48 @@ public class FhirLocationDaoImpl extends BaseDao implements FhirLocationDao {
 		        .list();
 	}
 	
-	private void handleName(Criteria criteria, StringOrListParam namePattern) {
+	private void handleName(Criteria criteria, StringAndListParam namePattern) {
 		if (namePattern != null) {
-			handleOrListParam(namePattern, (name) -> propertyLike("name", name)).ifPresent(criteria::add);
+			handleAndListParam(namePattern, (name) -> propertyLike("name", name)).ifPresent(criteria::add);
 		}
 	}
 	
-	private void handleCity(Criteria criteria, StringOrListParam cityPattern) {
+	private void handleCity(Criteria criteria, StringAndListParam cityPattern) {
 		if (cityPattern != null) {
-			handleOrListParam(cityPattern, (city) -> propertyLike("cityVillage", city)).ifPresent(criteria::add);
+			handleAndListParam(cityPattern, (city) -> propertyLike("cityVillage", city)).ifPresent(criteria::add);
 		}
 	}
 	
-	private void handleCountry(Criteria criteria, StringOrListParam countryPattern) {
+	private void handleCountry(Criteria criteria, StringAndListParam countryPattern) {
 		if (countryPattern != null) {
-			handleOrListParam(countryPattern, (country) -> propertyLike("country", country)).ifPresent(criteria::add);
+			handleAndListParam(countryPattern, (country) -> propertyLike("country", country)).ifPresent(criteria::add);
 		}
 	}
 	
-	private void handlePostalCode(Criteria criteria, StringOrListParam postalCodePattern) {
+	private void handlePostalCode(Criteria criteria, StringAndListParam postalCodePattern) {
 		if (postalCodePattern != null) {
-			handleOrListParam(postalCodePattern, (postalCode) -> propertyLike("postalCode", postalCode))
+			handleAndListParam(postalCodePattern, (postalCode) -> propertyLike("postalCode", postalCode))
 			        .ifPresent(criteria::add);
 		}
 	}
 	
-	private void handleState(Criteria criteria, StringOrListParam statePattern) {
+	private void handleState(Criteria criteria, StringAndListParam statePattern) {
 		if (statePattern != null) {
-			handleOrListParam(statePattern, (state) -> propertyLike("stateProvince", state)).ifPresent(criteria::add);
+			handleAndListParam(statePattern, (state) -> propertyLike("stateProvince", state)).ifPresent(criteria::add);
 		}
 	}
 	
-	private void handleTag(Criteria criteria, TokenOrListParam tags) {
+	private void handleTag(Criteria criteria, TokenAndListParam tags) {
 		if (tags != null) {
 			criteria.createAlias("tags", "t");
-			handleOrListParam(tags, (tag) -> Optional.of(eq("t.name", tag.getValue()))).ifPresent(criteria::add);
+			handleAndListParam(tags, (tag) -> Optional.of(eq("t.name", tag.getValue()))).ifPresent(criteria::add);
 		}
 	}
 	
-	private void handleParentLocation(Criteria criteria, ReferenceOrListParam parent) {
+	private void handleParentLocation(Criteria criteria, ReferenceAndListParam parent) {
 		if (parent != null) {
-			DetachedCriteria criteriaForParent = DetachedCriteria.forClass(Location.class);
-			handleOrListParam(parent, this::handleParentReference).ifPresent(criteriaForParent::add);
-			criteriaForParent.setProjection(Projections.property("locationId"));
-			criteria.add(Subqueries.propertyIn("parentLocation.locationId", criteriaForParent));
+			handleLocationReference("loc", parent).ifPresent(loc -> criteria.createAlias("parentLocation", "loc").add(loc));
 		}
-	}
-	
-	private Optional<Criterion> handleParentReference(ReferenceParam parentReference) {
-		if (parentReference != null) {
-			if (parentReference.getChain() != null) {
-				switch (parentReference.getChain()) {
-					case "name":
-						return propertyLike("name", parentReference.getValue());
-					case "address-city":
-						return propertyLike("cityVillage", parentReference.getValue());
-					case "address-state":
-						return propertyLike("stateProvince", parentReference.getValue());
-					case "address-country":
-						return propertyLike("country", parentReference.getValue());
-					case "address-postalcode":
-						return propertyLike("postalCode", parentReference.getValue());
-					case "":
-						return Optional.of(eq("uuid", parentReference.getValue()));
-				}
-			}
-		}
-		
-		return Optional.empty();
 	}
 	
 	@Override

@@ -14,16 +14,16 @@ import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Location;
 
 public interface FhirLocationService {
 	
 	Location getLocationByUuid(@NotNull String uuid);
 	
-	Collection<Location> searchForLocations(StringOrListParam name, StringOrListParam city, StringOrListParam country,
-	        StringOrListParam postalCode, StringOrListParam state, TokenOrListParam tag, ReferenceOrListParam parent,
+	Collection<Location> searchForLocations(StringAndListParam name, StringAndListParam city, StringAndListParam country,
+	        StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,
 	        SortSpec sort);
 }

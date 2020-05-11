@@ -13,7 +13,7 @@ import java.util.Collection;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Task;
 
@@ -64,6 +64,6 @@ public interface FhirTaskService {
 	 * @param sort
 	 * @return the collection of Tasks that match the search parameters
 	 */
-	Collection<Task> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference, TokenOrListParam status,
+	Collection<Task> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference, TokenAndListParam status,
 	        SortSpec sort);
 }

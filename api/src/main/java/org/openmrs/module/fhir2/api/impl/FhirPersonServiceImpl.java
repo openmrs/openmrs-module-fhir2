@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,8 +48,8 @@ public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.P
 	}
 	
 	@Override
-	public Collection<Person> searchForPeople(StringOrListParam name, TokenOrListParam gender, DateRangeParam birthDate,
-	        StringOrListParam city, StringOrListParam state, StringOrListParam postalCode, StringOrListParam country,
+	public Collection<Person> searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
+	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
 	        SortSpec sort) {
 		return dao.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort).stream()
 		        .map(translator::toFhirResource).collect(Collectors.toList());

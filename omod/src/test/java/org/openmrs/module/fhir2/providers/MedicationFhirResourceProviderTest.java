@@ -121,8 +121,8 @@ public class MedicationFhirResourceProviderTest {
 	
 	@Test
 	public void searchForMedication_shouldReturnMatchingBundleOfMedicationByStatus() {
-		TokenOrListParam status = new TokenOrListParam();
-		status.addOr(new TokenParam().setValue("active"));
+		TokenAndListParam status = new TokenAndListParam();
+		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("active")));
 		
 		when(fhirMedicationService.searchForMedications(isNull(), isNull(), isNull(), argThat(is(status))))
 		        .thenReturn(Collections.singletonList(medication));

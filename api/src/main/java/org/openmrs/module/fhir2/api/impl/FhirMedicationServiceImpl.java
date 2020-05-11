@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,7 +40,7 @@ public class FhirMedicationServiceImpl extends BaseFhirService<Medication, Drug>
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Medication> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
-	        TokenOrListParam ingredientCode, TokenOrListParam status) {
+	        TokenAndListParam ingredientCode, TokenAndListParam status) {
 		
 		return dao.searchForMedications(code, dosageForm, ingredientCode, status).stream().map(translator::toFhirResource)
 		        .collect(Collectors.toList());

@@ -15,8 +15,8 @@ import java.util.Collection;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 
@@ -28,8 +28,8 @@ public interface FhirPatientDao {
 	
 	PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid);
 	
-	Collection<Patient> searchForPatients(StringOrListParam name, StringOrListParam given, StringOrListParam family,
-	        TokenOrListParam identifier, TokenOrListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
-	        TokenOrListParam deceased, StringOrListParam city, StringOrListParam state, StringOrListParam postalCode,
-	        StringOrListParam country, SortSpec sort);
+	Collection<Patient> searchForPatients(StringAndListParam name, StringAndListParam given, StringAndListParam family,
+	        TokenAndListParam identifier, TokenAndListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
+	        TokenAndListParam deceased, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
+	        StringAndListParam country, SortSpec sort);
 }

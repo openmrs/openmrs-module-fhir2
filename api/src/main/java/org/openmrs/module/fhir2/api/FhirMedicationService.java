@@ -12,12 +12,11 @@ package org.openmrs.module.fhir2.api;
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.r4.model.Medication;
 
 public interface FhirMedicationService extends FhirService<Medication> {
 	
 	Collection<Medication> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
-	        TokenOrListParam ingredientCode, TokenOrListParam status);
+	        TokenAndListParam ingredientCode, TokenAndListParam status);
 	
 }

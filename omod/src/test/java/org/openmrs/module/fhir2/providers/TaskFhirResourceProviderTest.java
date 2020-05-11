@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -186,10 +187,10 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		
 		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
 		
-		TokenOrListParam status = new TokenOrListParam();
+		TokenAndListParam status = new TokenAndListParam();
 		TokenParam statusToken = new TokenParam();
 		statusToken.setValue("ACCEPTED");
-		status.add(statusToken);
+		status.addAnd(new TokenOrListParam().add(statusToken));
 		
 		Bundle results = resourceProvider.searchTasks(null, null, status, null);
 		
