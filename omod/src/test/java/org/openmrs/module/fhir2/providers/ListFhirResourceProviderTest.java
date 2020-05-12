@@ -43,7 +43,7 @@ public class ListFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	private static final String DESCRIPTION = "Covid19 patients";
 	
 	@Mock
-	private FhirListService<Cohort> cohortFhirListService;
+	private FhirListService<Cohort, ListResource> cohortFhirListService;
 	
 	private ListFhirResourceProvider listFhirResourceProvider;
 	
@@ -75,7 +75,7 @@ public class ListFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	
 	@Test
 	public void getListById_shouldReturnMatchingList() {
-		when(cohortFhirListService.getListByUuid(LIST_UUID)).thenReturn(list);
+		when(cohortFhirListService.get(LIST_UUID)).thenReturn(list);
 		IdType id = new IdType();
 		id.setValue(LIST_UUID);
 		ListResource result = listFhirResourceProvider.getListById(id);

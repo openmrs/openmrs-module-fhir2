@@ -9,28 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.SessionFactory;
 import org.openmrs.Cohort;
 import org.openmrs.module.fhir2.api.dao.FhirListDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirCohortListDaoImpl implements FhirListDao<Cohort> {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Override
-	public Cohort getListByUuid(String uuid) {
-		return (Cohort) sessionFactory.getCurrentSession().createCriteria(Cohort.class).add(eq("uuid", uuid)).uniqueResult();
-	}
+public class FhirCohortListDaoImpl extends BaseFhirDao<Cohort> implements FhirListDao<Cohort> {
 	
 }
