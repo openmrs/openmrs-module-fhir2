@@ -35,7 +35,7 @@ public class SearchParameterMap implements Serializable {
 	@Getter
 	private SortSpec sortSpec;
 	
-	private LinkedHashMap<String, List<PropParam<?>>> params = new LinkedCaseInsensitiveMap<>();
+	private LinkedHashMap<String, List<PropParam<?>>> params = new LinkedHashMap<>();
 	
 	/**
 	 * Adds parameter into the {@link org.springframework.util.LinkedCaseInsensitiveMap}
