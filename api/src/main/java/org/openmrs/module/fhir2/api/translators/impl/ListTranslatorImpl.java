@@ -59,6 +59,11 @@ public class ListTranslatorImpl implements ListTranslator<Cohort> {
 	}
 	
 	@Override
+	public Cohort toOpenmrsType(ListResource cohortList) {
+		return toOpenmrsType(new Cohort(), cohortList);
+	}
+	
+	@Override
 	public Cohort toOpenmrsType(Cohort cohort, ListResource cohortList) {
 		if (cohortList == null) {
 			return cohort;
