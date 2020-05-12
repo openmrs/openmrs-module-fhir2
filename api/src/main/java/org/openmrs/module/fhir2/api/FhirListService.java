@@ -9,12 +9,8 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.validation.constraints.NotNull;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
-import org.hl7.fhir.r4.model.ListResource;
-
-public interface FhirListService<T> {
-	
-	ListResource getListByUuid(@NotNull String uuid);
+public interface FhirListService<T, U extends IAnyResource> extends FhirService<U> {
 	
 }

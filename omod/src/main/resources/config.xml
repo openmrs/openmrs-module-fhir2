@@ -65,6 +65,10 @@
 	</filter>
 	<filter-mapping>
 		<filter-name>fhir2ForwardingFilter</filter-name>
+		<url-pattern>/ws/fhir2</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>fhir2ForwardingFilter</filter-name>
 		<url-pattern>/ws/fhir2/*</url-pattern>
 	</filter-mapping>
 

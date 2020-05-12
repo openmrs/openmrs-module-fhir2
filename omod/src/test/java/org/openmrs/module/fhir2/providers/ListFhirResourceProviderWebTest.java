@@ -34,7 +34,7 @@ public class ListFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 	private static final String UNKNOWN_UUID = "c0b1f314-1691-11df-97a5-7038c432aab99";
 	
 	@Mock
-	private FhirListService<Cohort> cohortFhirListService;
+	private FhirListService<Cohort, ListResource> cohortFhirListService;
 	
 	@Getter(AccessLevel.PUBLIC)
 	private ListFhirResourceProvider listFhirResourceProvider;
@@ -56,7 +56,7 @@ public class ListFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 	public void getListById_shouldReturnListWithMatchingUuid() throws Exception {
 		ListResource listResource = new ListResource();
 		listResource.setId(LIST_UUID);
-		when(cohortFhirListService.getListByUuid(LIST_UUID)).thenReturn(listResource);
+		when(cohortFhirListService.get(LIST_UUID)).thenReturn(listResource);
 		
 		MockHttpServletResponse response = get("/List/" + LIST_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -69,7 +69,7 @@ public class ListFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 	
 	@Test
 	public void shouldReturn404IfListNotFound() throws Exception {
-		when(cohortFhirListService.getListByUuid(UNKNOWN_UUID)).thenReturn(null);
+		when(cohortFhirListService.get(UNKNOWN_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/List/" + UNKNOWN_UUID).accept(FhirMediaTypes.JSON).go();
 		

@@ -55,7 +55,7 @@ public class FhirCohortListServiceImplTest {
 	@Before
 	public void setup() {
 		fhirCohortListService = new FhirCohortListServiceImpl();
-		fhirCohortListService.setCohortListTranslator(listTranslator);
+		fhirCohortListService.setTranslator(listTranslator);
 		fhirCohortListService.setDao(listDao);
 		
 		cohort = new Cohort();
@@ -77,10 +77,10 @@ public class FhirCohortListServiceImplTest {
 	
 	@Test
 	public void getListByUuid_shouldGetListByUuid() {
-		when(listDao.getListByUuid(LIST_UUID)).thenReturn(cohort);
+		when(listDao.get(LIST_UUID)).thenReturn(cohort);
 		when(listTranslator.toFhirResource(cohort)).thenReturn(list);
 		
-		org.hl7.fhir.r4.model.ListResource result = fhirCohortListService.getListByUuid(LIST_UUID);
+		org.hl7.fhir.r4.model.ListResource result = fhirCohortListService.get(LIST_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(LIST_UUID));
@@ -90,7 +90,7 @@ public class FhirCohortListServiceImplTest {
 	
 	@Test
 	public void getListByUuid_shouldReturnNullForUnknownUuid() {
-		ListResource list = fhirCohortListService.getListByUuid(UNKNOWN_UUID);
+		ListResource list = fhirCohortListService.get(UNKNOWN_UUID);
 		assertThat(list, nullValue());
 	}
 }
