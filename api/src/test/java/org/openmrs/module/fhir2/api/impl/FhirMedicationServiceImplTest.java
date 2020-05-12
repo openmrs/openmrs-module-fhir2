@@ -60,8 +60,8 @@ public class FhirMedicationServiceImplTest {
 	@Before
 	public void setup() {
 		fhirMedicationService = new FhirMedicationServiceImpl();
-		fhirMedicationService.setMedicationTranslator(medicationTranslator);
-		fhirMedicationService.setMedicationDao(medicationDao);
+		fhirMedicationService.setTranslator(medicationTranslator);
+		fhirMedicationService.setDao(medicationDao);
 		
 		medication = new Medication();
 		medication.setId(MEDICATION_UUID);
