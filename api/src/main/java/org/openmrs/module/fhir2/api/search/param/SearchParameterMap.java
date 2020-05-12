@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +34,7 @@ public class SearchParameterMap implements Serializable {
 	@Getter
 	private SortSpec sortSpec;
 	
-	private LinkedHashMap<String, List<PropParam<?>>> params = new LinkedHashMap<>();
+	private Map<String, List<PropParam<?>>> params = new LinkedCaseInsensitiveMap<>();
 	
 	/**
 	 * Adds parameter into the {@link org.springframework.util.LinkedCaseInsensitiveMap}
