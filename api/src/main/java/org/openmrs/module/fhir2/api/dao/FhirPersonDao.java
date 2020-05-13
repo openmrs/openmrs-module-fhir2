@@ -21,9 +21,10 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 
-public interface FhirPersonDao {
+public interface FhirPersonDao extends FhirDao<Person> {
 	
-	Person getPersonByUuid(@NotNull String uuid);
+	@Override
+	Person get(@NotNull String uuid);
 	
 	List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@NotNull Person person,
 	        @NotNull String personAttributeTypeUuid);
