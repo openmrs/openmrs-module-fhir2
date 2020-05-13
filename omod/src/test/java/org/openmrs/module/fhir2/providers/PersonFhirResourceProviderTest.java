@@ -103,7 +103,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	public void getPersonById_shouldReturnPerson() {
 		IdType id = new IdType();
 		id.setValue(PERSON_UUID);
-		when(fhirPersonService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
+		when(fhirPersonService.get(PERSON_UUID)).thenReturn(person);
 		
 		Person result = resourceProvider.getPersonById(id);
 		assertThat(result.isResource(), is(true));
@@ -215,7 +215,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	public void getPatientResourceHistory_shouldReturnListOfResource() {
 		IdType id = new IdType();
 		id.setValue(PERSON_UUID);
-		when(fhirPersonService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
+		when(fhirPersonService.get(PERSON_UUID)).thenReturn(person);
 		
 		List<Resource> resources = resourceProvider.getPersonHistoryById(id);
 		assertThat(resources, notNullValue());
@@ -227,7 +227,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(PERSON_UUID);
-		when(fhirPersonService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
+		when(fhirPersonService.get(PERSON_UUID)).thenReturn(person);
 		
 		List<Resource> resources = resourceProvider.getPersonHistoryById(id);
 		assertThat(resources, not(empty()));

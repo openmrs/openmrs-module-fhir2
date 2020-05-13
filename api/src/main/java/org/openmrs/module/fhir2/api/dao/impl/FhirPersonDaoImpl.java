@@ -32,12 +32,6 @@ import org.springframework.stereotype.Component;
 public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
 	
 	@Override
-	public Person getPersonByUuid(String uuid) {
-		return (Person) getSessionFactory().getCurrentSession().createCriteria(Person.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
-	
-	@Override
 	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(Person person,
 	        String personAttributeTypeUuid) {
 		return (List<PersonAttribute>) getSessionFactory().getCurrentSession().createCriteria(PersonAttribute.class)
