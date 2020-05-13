@@ -25,10 +25,13 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
@@ -117,7 +120,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByName() {
-		StringOrListParam location = new StringOrListParam().add(new StringParam(LOCATION_NAME));
+		StringAndListParam location = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_NAME)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(location, null, null, null, null, null, null,
 		    null);
 		
@@ -128,7 +132,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnEmptyCollectionWhenCalledWithUnknownName() {
-		StringOrListParam location = new StringOrListParam().add(new StringParam(UNKNOWN_LOCATION_NAME));
+		StringAndListParam location = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(UNKNOWN_LOCATION_NAME)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(location, null, null, null, null, null, null,
 		    null);
 		
@@ -138,7 +143,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByCity() {
-		StringOrListParam city = new StringOrListParam().add(new StringParam(LOCATION_CITY));
+		StringAndListParam city = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_CITY)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, city, null, null, null, null, null, null);
 		
 		assertThat(locations, notNullValue());
@@ -148,7 +154,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnEmptyCollectionWhenCalledWithUnknownCity() {
-		StringOrListParam city = new StringOrListParam().add(new StringParam(UNKNOWN_LOCATION_CITY));
+		StringAndListParam city = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(UNKNOWN_LOCATION_CITY)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, city, null, null, null, null, null, null);
 		
 		assertThat(locations, notNullValue());
@@ -157,7 +164,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByCountry() {
-		StringOrListParam country = new StringOrListParam().add(new StringParam(LOCATION_COUNTRY));
+		StringAndListParam country = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_COUNTRY)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, country, null, null, null, null,
 		    null);
 		
@@ -168,7 +176,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnEmptyCollectionWhenCalledWithUnknownCountry() {
-		StringOrListParam country = new StringOrListParam().add(new StringParam(UNKNOWN_LOCATION_COUNTRY));
+		StringAndListParam country = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(UNKNOWN_LOCATION_COUNTRY)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, country, null, null, null, null,
 		    null);
 		
@@ -178,7 +187,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByPostalCode() {
-		StringOrListParam postalCode = new StringOrListParam().add(new StringParam(POSTAL_CODE));
+		StringAndListParam postalCode = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, postalCode, null, null, null,
 		    null);
 		
@@ -189,7 +199,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnEmptyCollectionWhenCalledWithUnknownCode() {
-		StringOrListParam postalCode = new StringOrListParam().add(new StringParam(UNKNOWN_POSTAL_CODE));
+		StringAndListParam postalCode = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(UNKNOWN_POSTAL_CODE)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, postalCode, null, null, null,
 		    null);
 		
@@ -199,7 +210,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByState() {
-		StringOrListParam state = new StringOrListParam().add(new StringParam(LOCATION_STATE));
+		StringAndListParam state = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_STATE)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, null, state, null, null, null);
 		
 		assertThat(locations, notNullValue());
@@ -209,7 +221,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnEmptyCollectionWhenCalledWithUnknownState() {
-		StringOrListParam state = new StringOrListParam().add(new StringParam(UNKNOWN_LOCATION_STATE));
+		StringAndListParam state = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(UNKNOWN_LOCATION_STATE)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, null, state, null, null, null);
 		
 		assertThat(locations, notNullValue());
@@ -218,8 +231,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnLocationsContainingGivenTag() {
-		TokenOrListParam locationTag = new TokenOrListParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG,
-		        LOGIN_LOCATION_TAG_NAME);
+		TokenAndListParam locationTag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, null, null, locationTag, null,
 		    null);
 		
@@ -230,8 +243,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByParentUUID() {
-		ReferenceOrListParam parentLocation = new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(LOCATION_PARENT_ID).setChain(""));
+		ReferenceAndListParam parentLocation = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(LOCATION_PARENT_ID).setChain(null)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, null, null, null,
 		    parentLocation, null);
 		
@@ -242,8 +255,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByParentName() {
-		ReferenceOrListParam parentLocation = new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(LOCATION_PARENT_NAME).setChain("name"));
+		ReferenceAndListParam parentLocation = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(LOCATION_PARENT_NAME).setChain("name")));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, null, null, null,
 		    parentLocation, null);
 		
@@ -254,8 +267,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByParentCity() {
-		ReferenceOrListParam parentLocation = new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(LOCATION_PARENT_CITY).setChain("address-city"));
+		ReferenceAndListParam parentLocation = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(LOCATION_PARENT_CITY).setChain("address-city")));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, null, null, null,
 		    parentLocation, null);
 		
@@ -266,8 +279,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByParentCountry() {
-		ReferenceOrListParam parentLocation = new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(LOCATION_PARENT_COUNTRY).setChain("address-country"));
+		ReferenceAndListParam parentLocation = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(LOCATION_PARENT_COUNTRY).setChain("address-country")));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, null, null, null,
 		    parentLocation, null);
 		
@@ -278,8 +291,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByParentPostalCode() {
-		ReferenceOrListParam parentLocation = new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(LOCATION_PARENT_POSTAL_CODE).setChain("address-postalcode"));
+		ReferenceAndListParam parentLocation = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(LOCATION_PARENT_POSTAL_CODE).setChain("address-postalcode")));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, null, null, null,
 		    parentLocation, null);
 		
@@ -290,8 +303,8 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByParentState() {
-		ReferenceOrListParam parentLocation = new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(LOCATION_PARENT_STATE).setChain("address-state"));
+		ReferenceAndListParam parentLocation = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(LOCATION_PARENT_STATE).setChain("address-state")));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, null, null, null, null,
 		    parentLocation, null);
 		
@@ -302,8 +315,10 @@ public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldHandleComplexQuery() {
-		StringOrListParam postalCode = new StringOrListParam().add(new StringParam(POSTAL_CODE));
-		StringOrListParam country = new StringOrListParam().add(new StringParam(LOCATION_COUNTRY));
+		StringAndListParam postalCode = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
+		StringAndListParam country = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_COUNTRY)));
 		Collection<Location> locations = fhirLocationDao.searchForLocations(null, null, country, postalCode, null, null,
 		    null, null);
 		

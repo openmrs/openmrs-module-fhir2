@@ -17,7 +17,6 @@ import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
@@ -40,9 +39,9 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
-	public Collection<Allergy> searchForAllergies(ReferenceAndListParam patientReference, TokenOrListParam category,
-	        TokenAndListParam allergen, TokenOrListParam severity, TokenAndListParam manifestationCode,
-	        TokenOrListParam clinicalStatus) {
+	public Collection<Allergy> searchForAllergies(ReferenceAndListParam patientReference, TokenAndListParam category,
+	        TokenAndListParam allergen, TokenAndListParam severity, TokenAndListParam manifestationCode,
+	        TokenAndListParam clinicalStatus) {
 		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Allergy.class);
 		handlePatientReference(criteria, patientReference, "patient");
 		handleAllergenCategory("allergen.allergenType", category).ifPresent(criteria::add);
@@ -71,7 +70,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		}
 	}
 	
-	private Optional<Criterion> handleSeverity(Criteria criteria, TokenOrListParam severityParam) {
+	private Optional<Criterion> handleSeverity(Criteria criteria, TokenAndListParam severityParam) {
 		if (severityParam == null) {
 			return Optional.empty();
 		}
@@ -81,7 +80,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		
 		criteria.createAlias("severity", "sc");
 		
-		return handleOrListParam(severityParam, token -> {
+		return handleAndListParam(severityParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceSeverity severity = AllergyIntolerance.AllergyIntoleranceSeverity
 				        .fromCode(token.getValue());
@@ -101,12 +100,12 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 		});
 	}
 	
-	private Optional<Criterion> handleAllergenCategory(String propertyName, TokenOrListParam categoryParam) {
+	private Optional<Criterion> handleAllergenCategory(String propertyName, TokenAndListParam categoryParam) {
 		if (categoryParam == null) {
 			return Optional.empty();
 		}
 		
-		return handleOrListParam(categoryParam, token -> {
+		return handleAndListParam(categoryParam, token -> {
 			try {
 				AllergyIntolerance.AllergyIntoleranceCategory category = AllergyIntolerance.AllergyIntoleranceCategory
 				        .fromCode(token.getValue());

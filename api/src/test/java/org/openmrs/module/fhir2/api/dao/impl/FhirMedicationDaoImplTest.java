@@ -109,8 +109,8 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForMedications_shouldSearchMedicationsByClinicalStatusActive() {
-		TokenOrListParam status = new TokenOrListParam();
-		status.addOr(new TokenParam().setValue("active"));
+		TokenAndListParam status = new TokenAndListParam();
+		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("active")));
 		
 		Collection<Drug> result = medicationDao.searchForMedications(null, null, null, status);
 		assertThat(result, notNullValue());
@@ -120,8 +120,8 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForMedications_shouldSearchMedicationsByClinicalStatusInactive() {
-		TokenOrListParam status = new TokenOrListParam();
-		status.addOr(new TokenParam().setValue("inactive"));
+		TokenAndListParam status = new TokenAndListParam();
+		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("inactive")));
 		
 		Collection<Drug> result = medicationDao.searchForMedications(null, null, null, status);
 		assertThat(result, notNullValue());

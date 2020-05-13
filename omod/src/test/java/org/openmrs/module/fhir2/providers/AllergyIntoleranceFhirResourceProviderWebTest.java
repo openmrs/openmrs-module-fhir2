@@ -33,7 +33,6 @@ import java.util.List;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -73,12 +72,6 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	
 	@Captor
 	private ArgumentCaptor<ReferenceAndListParam> patientCaptor;
-	
-	@Captor
-	private ArgumentCaptor<StringOrListParam> stringOrListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<TokenOrListParam> tokenOrListParamArgumentCaptor;
 	
 	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
@@ -233,10 +226,12 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	public void searchForAllergies_shouldSearchForAllergiesByCategory() throws Exception {
 		verifyUri("/AllergyIntolerance?category=food");
 		
-		verify(allergyService).searchForAllergies(isNull(), tokenOrListParamArgumentCaptor.capture(), isNull(), isNull(),
+		verify(allergyService).searchForAllergies(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
 		    isNull(), isNull());
-		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("food"));
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo("food"));
 	}
 	
 	@Test
@@ -258,8 +253,9 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		
 		verify(allergyService).searchForAllergies(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
 		    isNull(), isNull());
-		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
 		    equalTo("d1b98543-10ff-4911-83a2-b7f5fafe2751"));
 	}
 	
@@ -267,10 +263,12 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	public void searchForAllergies_shouldSearchForAllergiesBySeverity() throws Exception {
 		verifyUri("/AllergyIntolerance?severity=severe");
 		
-		verify(allergyService).searchForAllergies(isNull(), isNull(), isNull(), tokenOrListParamArgumentCaptor.capture(),
+		verify(allergyService).searchForAllergies(isNull(), isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(),
 		    isNull(), isNull());
-		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("severe"));
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo("severe"));
 	}
 	
 	@Test
@@ -292,9 +290,11 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		verifyUri("/AllergyIntolerance?clinical-status=active");
 		
 		verify(allergyService).searchForAllergies(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    tokenOrListParamArgumentCaptor.capture());
-		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("active"));
+		    tokenAndListParamArgumentCaptor.capture());
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo("active"));
 	}
 	
 	@Test

@@ -26,10 +26,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Address;
@@ -126,7 +127,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Test
 	public void findLocationsByName_shouldReturnMatchingBundleOfLocations() {
-		StringOrListParam nameParam = new StringOrListParam().add(new StringParam(LOCATION_NAME));
+		StringAndListParam nameParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_NAME)));
 		when(locationService.searchForLocations(argThat(Matchers.is(nameParam)), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
@@ -139,7 +141,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Test
 	public void findLocationsByCity_shouldReturnMatchingBundleOfLocations() {
-		StringOrListParam cityParam = new StringOrListParam().add(new StringParam(CITY));
+		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
 		when(locationService.searchForLocations(isNull(), argThat(Matchers.is(cityParam)), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
@@ -152,7 +154,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Test
 	public void findLocationsByCountry_shouldReturnMatchingBundleOfLocations() {
-		StringOrListParam countryParam = new StringOrListParam().add(new StringParam(COUNTRY));
+		StringAndListParam countryParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
 		when(locationService.searchForLocations(isNull(), isNull(), argThat(Matchers.is(countryParam)), isNull(), isNull(),
 		    isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
@@ -165,7 +168,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Test
 	public void findLocationsByState_shouldReturnMatchingBundleOfLocations() {
-		StringOrListParam stateParam = new StringOrListParam().add(new StringParam(STATE));
+		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), argThat(Matchers.is(stateParam)),
 		    isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
@@ -178,7 +181,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Test
 	public void findLocationsByPostalCode_shouldReturnMatchingBundleOfLocations() {
-		StringOrListParam postalCodeParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
+		StringAndListParam postalCodeParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), argThat(Matchers.is(postalCodeParam)),
 		    isNull(), isNull(), isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
@@ -191,8 +195,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Test
 	public void findLocationsByTags_shouldReturnLocationsContainingGivenTag() {
-		TokenOrListParam tag = new TokenOrListParam()
-		        .add(new TokenParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME));
+		TokenAndListParam tag = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME));
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(Matchers.is(tag)),
 		    isNull(), isNull())).thenReturn(Collections.singletonList(location));
 		
@@ -210,7 +214,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(locations);
 		
-		StringOrListParam location = new StringOrListParam().add(new StringParam(LOCATION_NAME));
+		StringAndListParam location = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_NAME)));
 		
 		Bundle resultLocations = resourceProvider.searchLocations(location, null, null, null, null, null, null, null);
 		

@@ -13,12 +13,11 @@ import java.util.Collection;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 
 public interface FhirAllergyIntoleranceService extends FhirService<AllergyIntolerance> {
 	
-	Collection<AllergyIntolerance> searchForAllergies(ReferenceAndListParam patientReference, TokenOrListParam category,
-	        TokenAndListParam allergen, TokenOrListParam severity, TokenAndListParam manifestationCode,
-	        TokenOrListParam clinicalStatus);
+	Collection<AllergyIntolerance> searchForAllergies(ReferenceAndListParam patientReference, TokenAndListParam category,
+	        TokenAndListParam allergen, TokenAndListParam severity, TokenAndListParam manifestationCode,
+	        TokenAndListParam clinicalStatus);
 }

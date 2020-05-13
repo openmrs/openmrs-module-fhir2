@@ -70,9 +70,6 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 	private MedicationFhirResourceProvider resourceProvider;
 	
 	@Captor
-	private ArgumentCaptor<TokenOrListParam> tokenOrListParamArgumentCaptor;
-	
-	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
 	private Medication medication;
@@ -133,9 +130,11 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirResourceProvi
 		verifyUri("/Medication?status=active");
 		
 		verify(fhirMedicationService).searchForMedications(isNull(), isNull(), isNull(),
-		    tokenOrListParamArgumentCaptor.capture());
-		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo("active"));
+		    tokenAndListParamArgumentCaptor.capture());
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo("active"));
 	}
 	
 	@Test

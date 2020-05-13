@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Identifier;
@@ -53,10 +53,10 @@ public class FhirPatientServiceImpl implements FhirPatientService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Collection<Patient> searchForPatients(StringOrListParam name, StringOrListParam given, StringOrListParam family,
-	        TokenOrListParam identifier, TokenOrListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
-	        TokenOrListParam deceased, StringOrListParam city, StringOrListParam state, StringOrListParam postalCode,
-	        StringOrListParam country, SortSpec sort) {
+	public Collection<Patient> searchForPatients(StringAndListParam name, StringAndListParam given,
+	        StringAndListParam family, TokenAndListParam identifier, TokenAndListParam gender, DateRangeParam birthDate,
+	        DateRangeParam deathDate, TokenAndListParam deceased, StringAndListParam city, StringAndListParam state,
+	        StringAndListParam postalCode, StringAndListParam country, SortSpec sort) {
 		return dao.searchForPatients(name, given, family, identifier, gender, birthDate, deathDate, deceased, city, state,
 		    postalCode, country, sort).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}

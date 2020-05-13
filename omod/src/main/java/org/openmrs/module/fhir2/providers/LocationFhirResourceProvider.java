@@ -20,9 +20,9 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -72,13 +72,13 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	public Bundle searchLocations(@OptionalParam(name = Location.SP_NAME) StringOrListParam name,
-	        @OptionalParam(name = Location.SP_ADDRESS_CITY) StringOrListParam city,
-	        @OptionalParam(name = Location.SP_ADDRESS_COUNTRY) StringOrListParam country,
-	        @OptionalParam(name = Location.SP_ADDRESS_POSTALCODE) StringOrListParam postalCode,
-	        @OptionalParam(name = Location.SP_ADDRESS_STATE) StringOrListParam state,
-	        @OptionalParam(name = "_tag") TokenOrListParam tag,
-	        @OptionalParam(name = Location.SP_PARTOF) ReferenceOrListParam parent, @Sort SortSpec sort) {
+	public Bundle searchLocations(@OptionalParam(name = Location.SP_NAME) StringAndListParam name,
+	        @OptionalParam(name = Location.SP_ADDRESS_CITY) StringAndListParam city,
+	        @OptionalParam(name = Location.SP_ADDRESS_COUNTRY) StringAndListParam country,
+	        @OptionalParam(name = Location.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
+	        @OptionalParam(name = Location.SP_ADDRESS_STATE) StringAndListParam state,
+	        @OptionalParam(name = "_tag") TokenAndListParam tag,
+	        @OptionalParam(name = Location.SP_PARTOF) ReferenceAndListParam parent, @Sort SortSpec sort) {
 		return FhirServerUtils.convertSearchResultsToBundle(
 		    fhirLocationService.searchForLocations(name, city, country, postalCode, state, tag, parent, sort));
 	}

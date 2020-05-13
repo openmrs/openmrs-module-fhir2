@@ -30,8 +30,8 @@ import java.util.Collections;
 import java.util.Date;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
@@ -80,10 +80,10 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderT
 	private PersonFhirResourceProvider resourceProvider;
 	
 	@Captor
-	private ArgumentCaptor<StringOrListParam> stringOrListCaptor;
+	private ArgumentCaptor<StringAndListParam> stringAndListCaptor;
 	
 	@Captor
-	private ArgumentCaptor<TokenOrListParam> tokenOrListCaptor;
+	private ArgumentCaptor<TokenAndListParam> tokenAndListCaptor;
 	
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;
@@ -124,24 +124,26 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderT
 	public void shouldGetPersonByName() throws Exception {
 		verifyUri(String.format("/Person/?name=%s", PERSON_NAME));
 		
-		verify(personService).searchForPeople(stringOrListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull());
+		verify(personService).searchForPeople(stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull());
 		
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo(PERSON_NAME));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(PERSON_NAME));
 	}
 	
 	@Test
 	public void shouldGetPersonByGender() throws Exception {
 		verifyUri(String.format("/Person/?gender=%s", PERSON_GENDER));
 		
-		verify(personService).searchForPeople(isNull(), tokenOrListCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
+		verify(personService).searchForPeople(isNull(), tokenAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull());
 		
-		assertThat(tokenOrListCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo(PERSON_GENDER));
+		assertThat(tokenAndListCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(PERSON_GENDER));
 	}
 	
 	@Test
@@ -248,36 +250,39 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderT
 	public void shouldGetPersonByCity() throws Exception {
 		verifyUri(String.format("/Person/?address-city=%s", ADDRESS_FIELD));
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), stringOrListCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull());
+		verify(personService).searchForPeople(isNull(), isNull(), isNull(), stringAndListCaptor.capture(), isNull(),
+		    isNull(), isNull(), isNull());
 		
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo(ADDRESS_FIELD));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(ADDRESS_FIELD));
 	}
 	
 	@Test
 	public void shouldGetPersonByState() throws Exception {
 		verifyUri(String.format("/Person/?address-state=%s", ADDRESS_FIELD));
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), stringOrListCaptor.capture(), isNull(),
-		    isNull(), isNull());
+		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), stringAndListCaptor.capture(),
+		    isNull(), isNull(), isNull());
 		
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo(ADDRESS_FIELD));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(ADDRESS_FIELD));
 	}
 	
 	@Test
 	public void shouldGetPersonByPostalCode() throws Exception {
 		verifyUri(String.format("/Person/?address-postalcode=%s", POSTAL_CODE));
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), stringOrListCaptor.capture(),
-		    isNull(), isNull());
+		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(),
+		    stringAndListCaptor.capture(), isNull(), isNull());
 		
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo(POSTAL_CODE));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(POSTAL_CODE));
 	}
 	
 	@Test
@@ -285,27 +290,30 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirResourceProviderT
 		verifyUri(String.format("/Person/?address-country=%s", ADDRESS_FIELD));
 		
 		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    stringOrListCaptor.capture(), isNull());
+		    stringAndListCaptor.capture(), isNull());
 		
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo(ADDRESS_FIELD));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(ADDRESS_FIELD));
 	}
 	
 	@Test
 	public void shouldGetPersonByComplexQuery() throws Exception {
 		verifyUri(String.format("/Person/?name=%s&gender=%s&birthdate=eq1975-02-02", PERSON_NAME, PERSON_GENDER));
 		
-		verify(personService).searchForPeople(stringOrListCaptor.capture(), tokenOrListCaptor.capture(),
+		verify(personService).searchForPeople(stringAndListCaptor.capture(), tokenAndListCaptor.capture(),
 		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
-		assertThat(stringOrListCaptor.getValue(), notNullValue());
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo(PERSON_NAME));
+		assertThat(stringAndListCaptor.getValue(), notNullValue());
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(PERSON_NAME));
 		
-		assertThat(tokenOrListCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenOrListCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(), equalTo(PERSON_GENDER));
+		assertThat(tokenAndListCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(PERSON_GENDER));
 		
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
