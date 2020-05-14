@@ -45,7 +45,7 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	public DiagnosticReport getDiagnosticReportById(@IdParam @NotNull IdType id) {
-		DiagnosticReport diagnosticReport = service.getDiagnosticReportByUuid(id.getIdPart());
+		DiagnosticReport diagnosticReport = service.get(id.getIdPart());
 		
 		if (diagnosticReport == null) {
 			throw new ResourceNotFoundException("Could not find Diagnostic Report with Id " + id.getIdPart());
@@ -56,7 +56,7 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport diagnosticReport) {
-		return FhirServerUtils.buildCreate(service.saveDiagnosticReport(diagnosticReport));
+		return FhirServerUtils.buildCreate(service.create(diagnosticReport));
 	}
 	
 	@Update
@@ -67,6 +67,6 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 			idPart = id.getIdPart();
 		}
 		
-		return FhirServerUtils.buildUpdate(service.updateDiagnosticReport(idPart, diagnosticReport));
+		return FhirServerUtils.buildUpdate(service.update(idPart, diagnosticReport));
 	}
 }

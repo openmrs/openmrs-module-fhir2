@@ -64,10 +64,10 @@ public class FhirDiagnosticReportServiceImplTest {
 		obsGroup.setUuid(UUID);
 		diagnosticReport.setId(UUID);
 		
-		when(dao.getObsGroupByUuid(UUID)).thenReturn(obsGroup);
+		when(dao.get(UUID)).thenReturn(obsGroup);
 		when(translator.toFhirResource(obsGroup)).thenReturn(diagnosticReport);
 		
-		DiagnosticReport result = service.getDiagnosticReportByUuid(UUID);
+		DiagnosticReport result = service.get(UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(diagnosticReport));
@@ -75,7 +75,7 @@ public class FhirDiagnosticReportServiceImplTest {
 	}
 	
 	@Test
-	public void saveDiagnosticReport_shouldSaveNewDiagnosticReport() {
+	public void createDiagnosticReport_shouldCreateNewDiagnosticReport() {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 		
@@ -87,10 +87,10 @@ public class FhirDiagnosticReportServiceImplTest {
 		obsGroup.addGroupMember(childObs);
 		
 		when(translator.toOpenmrsType(diagnosticReport)).thenReturn(obsGroup);
-		when(dao.saveObsGroup(obsGroup)).thenReturn(obsGroup);
+		when(dao.createOrUpdate(obsGroup)).thenReturn(obsGroup);
 		when(translator.toFhirResource(obsGroup)).thenReturn(diagnosticReport);
 		
-		DiagnosticReport result = service.saveDiagnosticReport(diagnosticReport);
+		DiagnosticReport result = service.create(diagnosticReport);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(diagnosticReport));
@@ -115,11 +115,11 @@ public class FhirDiagnosticReportServiceImplTest {
 		updatedObsGroup.addGroupMember(childObs);
 		
 		when(translator.toOpenmrsType(obsGroup, diagnosticReport)).thenReturn(updatedObsGroup);
-		when(dao.saveObsGroup(updatedObsGroup)).thenReturn(updatedObsGroup);
-		when(dao.getObsGroupByUuid(UUID)).thenReturn(obsGroup);
+		when(dao.createOrUpdate(updatedObsGroup)).thenReturn(updatedObsGroup);
+		when(dao.get(UUID)).thenReturn(obsGroup);
 		when(translator.toFhirResource(updatedObsGroup)).thenReturn(diagnosticReport);
 		
-		DiagnosticReport result = service.updateDiagnosticReport(UUID, diagnosticReport);
+		DiagnosticReport result = service.update(UUID, diagnosticReport);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(diagnosticReport));
@@ -130,14 +130,14 @@ public class FhirDiagnosticReportServiceImplTest {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 		
-		service.updateDiagnosticReport(WRONG_UUID, diagnosticReport);
+		service.update(WRONG_UUID, diagnosticReport);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateTask_shouldThrowInvalidRequestForMissingUuid() {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		
-		service.updateDiagnosticReport(UUID, diagnosticReport);
+		service.update(UUID, diagnosticReport);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -145,8 +145,8 @@ public class FhirDiagnosticReportServiceImplTest {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(WRONG_UUID);
 		
-		when(dao.getObsGroupByUuid(WRONG_UUID)).thenReturn(null);
+		when(dao.get(WRONG_UUID)).thenReturn(null);
 		
-		service.updateDiagnosticReport(WRONG_UUID, diagnosticReport);
+		service.update(WRONG_UUID, diagnosticReport);
 	}
 }

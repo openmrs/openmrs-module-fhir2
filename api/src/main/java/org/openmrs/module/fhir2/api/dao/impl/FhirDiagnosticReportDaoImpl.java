@@ -9,40 +9,24 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.eq;
-
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.SessionFactory;
 import org.openmrs.Obs;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirDiagnosticReportDaoImpl implements FhirDiagnosticReportDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	SessionFactory sessionFactory;
+public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<Obs> implements FhirDiagnosticReportDao {
 	
 	@Override
-	public Obs getObsGroupByUuid(String uuid) {
-		return (Obs) sessionFactory.getCurrentSession().createCriteria(Obs.class).createAlias("groupMembers", "group")
-		        .add(eq("uuid", uuid)).uniqueResult();
-	}
-	
-	@Override
-	public Obs saveObsGroup(Obs obs) throws DAOException {
-		if (!obs.isObsGrouping()) {
+	public Obs createOrUpdate(Obs newObs) throws DAOException {
+		if (!newObs.isObsGrouping()) {
 			throw new IllegalArgumentException("Provided Obs must be an Obs grouping.");
 		}
 		
-		sessionFactory.getCurrentSession().saveOrUpdate(obs);
-		
-		return obs;
+		return super.createOrUpdate(newObs);
 	}
+	
 }
