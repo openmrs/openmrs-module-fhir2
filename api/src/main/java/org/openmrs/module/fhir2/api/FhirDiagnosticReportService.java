@@ -11,29 +11,6 @@ package org.openmrs.module.fhir2.api;
 
 import org.hl7.fhir.r4.model.DiagnosticReport;
 
-public interface FhirDiagnosticReportService {
+public interface FhirDiagnosticReportService extends FhirService<DiagnosticReport> {
 	
-	/**
-	 * Get diagnostic report by the UUID
-	 *
-	 * @param uuid Identifier for requested diagnostic report
-	 * @return diagnostic report with given internal identifier
-	 */
-	DiagnosticReport getDiagnosticReportByUuid(String uuid);
-	
-	/**
-	 * Get diagnostic report by the UUID
-	 *
-	 * @return Created diagnostic report
-	 */
-	DiagnosticReport saveDiagnosticReport(DiagnosticReport diagnosticReport);
-	
-	/**
-	 * Get diagnostic report by the UUID
-	 *
-	 * @param uuid Target DiagnosticReport identifier
-	 * @param diagnosticReport DiagnosticReport to update
-	 * @return Updated diagnostic report
-	 */
-	DiagnosticReport updateDiagnosticReport(String uuid, DiagnosticReport diagnosticReport);
 }

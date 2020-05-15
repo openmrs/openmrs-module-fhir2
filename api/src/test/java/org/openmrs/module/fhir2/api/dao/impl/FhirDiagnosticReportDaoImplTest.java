@@ -65,7 +65,7 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 	
 	@Test
 	public void getObsGroupByUuid_shouldGetObsGroupByUuid() {
-		Obs result = dao.getObsGroupByUuid(UUID);
+		Obs result = dao.get(UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(UUID));
@@ -81,7 +81,7 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 		newObs.setConcept(conceptService.getConcept(5085));
 		newObs.addGroupMember(obsService.getObsByUuid(CHILD_UUID));
 		
-		Obs result = dao.saveObsGroup(newObs);
+		Obs result = dao.createOrUpdate(newObs);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(NEW_UUID));
@@ -93,7 +93,7 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 		Obs newObs = new Obs();
 		newObs.setUuid(NEW_UUID);
 		
-		Obs result = dao.saveObsGroup(newObs);
+		dao.createOrUpdate(newObs);
 	}
 	
 	@Test
@@ -101,10 +101,10 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 		Obs newMember = new Obs();
 		newMember.setUuid(NEW_UUID);
 		
-		Obs existingObsGroup = dao.getObsGroupByUuid(UUID);
+		Obs existingObsGroup = dao.get(UUID);
 		existingObsGroup.addGroupMember(newMember);
 		
-		Obs result = dao.saveObsGroup(existingObsGroup);
+		Obs result = dao.createOrUpdate(existingObsGroup);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(UUID));
