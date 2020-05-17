@@ -91,7 +91,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 	public void shouldGetPatientByUuid() throws Exception {
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
 		
 		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -440,7 +440,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 	public void shouldVerifyGetPatientResourceHistoryUri() throws Exception {
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
 		
 		MockHttpServletResponse response = getPatientHistoryRequest();
 		
@@ -464,7 +464,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 		patient.setId(PATIENT_UUID);
 		patient.addContained(provenance);
 		
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
 		
 		MockHttpServletResponse response = getPatientHistoryRequest();
 		
@@ -482,7 +482,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirResourceProvider
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
 		patient.setContained(new ArrayList<>());
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
 		
 		MockHttpServletResponse response = getPatientHistoryRequest();
 		Bundle results = readBundleResponse(response);

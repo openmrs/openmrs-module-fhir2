@@ -54,7 +54,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	@Read
 	@SuppressWarnings("unused")
 	public Patient getPatientById(@IdParam @NotNull IdType id) {
-		Patient patient = patientService.getPatientByUuid(id.getIdPart());
+		Patient patient = patientService.get(id.getIdPart());
 		if (patient == null) {
 			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
 		}
@@ -64,7 +64,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getPatientResourceHistory(@IdParam @NotNull IdType id) {
-		Patient patient = patientService.getPatientByUuid(id.getIdPart());
+		Patient patient = patientService.get(id.getIdPart());
 		if (patient == null) {
 			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
 		}

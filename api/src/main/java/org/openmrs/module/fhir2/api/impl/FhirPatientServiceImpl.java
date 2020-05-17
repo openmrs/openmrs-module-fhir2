@@ -22,7 +22,9 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.FhirPatientService;
+import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirPatientServiceImpl implements FhirPatientService {
+
+public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs.Patient> implements FhirPatientService {
 	
 	@Autowired
 	private PatientTranslator translator;
@@ -41,8 +44,8 @@ public class FhirPatientServiceImpl implements FhirPatientService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Patient getPatientByUuid(String uuid) {
-		return translator.toFhirResource(dao.getPatientByUuid(uuid));
+	public Patient get(String uuid) {
+		return translator.toFhirResource(dao.get(uuid));
 	}
 	
 	@Override
@@ -59,5 +62,17 @@ public class FhirPatientServiceImpl implements FhirPatientService {
 	        StringAndListParam postalCode, StringAndListParam country, SortSpec sort) {
 		return dao.searchForPatients(name, given, family, identifier, gender, birthDate, deathDate, deceased, city, state,
 		    postalCode, country, sort).stream().map(translator::toFhirResource).collect(Collectors.toList());
+	}
+	
+	@Override
+	protected FhirDao<org.openmrs.Patient> getDao() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	protected OpenmrsFhirTranslator<org.openmrs.Patient, Patient> getTranslator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

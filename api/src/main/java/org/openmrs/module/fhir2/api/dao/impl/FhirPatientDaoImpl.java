@@ -41,7 +41,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	public Patient getPatientByUuid(String uuid) {
+	public Patient get(String uuid) {
 		return (Patient) getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(eq("uuid", uuid))
 		        .uniqueResult();
 	}

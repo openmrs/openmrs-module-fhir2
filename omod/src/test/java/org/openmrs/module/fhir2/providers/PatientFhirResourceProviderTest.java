@@ -114,7 +114,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void getPatientById_shouldReturnPatient() {
 		IdType id = new IdType();
 		id.setValue(PATIENT_UUID);
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
 		
 		Patient result = resourceProvider.getPatientById(id);
 		assertThat(result.isResource(), is(true));
@@ -317,7 +317,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void getPatientResourceHistory_shouldReturnListOfResource() {
 		IdType id = new IdType();
 		id.setValue(PATIENT_UUID);
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
 		
 		List<Resource> resources = resourceProvider.getPatientResourceHistory(id);
 		assertThat(resources, notNullValue());
@@ -329,7 +329,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(PATIENT_UUID);
-		when(patientService.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
 		
 		List<Resource> resources = resourceProvider.getPatientResourceHistory(id);
 		assertThat(resources, not(empty()));

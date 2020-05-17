@@ -67,7 +67,7 @@ public class PatientReferenceTranslatorImplTest {
 		        .setType(FhirConstants.PATIENT).setIdentifier(new Identifier().setValue(PATIENT_UUID));
 		Patient patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
-		when(dao.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(dao.get(PATIENT_UUID)).thenReturn(patient);
 		
 		Patient result = patientReferenceTranslator.toOpenmrsType(patientReference);
 		
