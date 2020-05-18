@@ -67,6 +67,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	private static final String CODED_REACTION_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
+	private static final String PATIENT_UUID = "8d703ff2-c3e2-4070-9737-73e713d5a50d";
+	
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
@@ -122,6 +124,22 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 		assertThat(result.size(), greaterThanOrEqualTo(1));
 		assertThat(result.iterator().next().getPatient().getIdentifiers().iterator().next().getIdentifier(),
 		    equalTo("M4001-1"));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByPatientUUID() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam allergyParam = new ReferenceParam();
+		
+		allergyParam.setValue(PATIENT_UUID);
+		allergyParam.setChain(null);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(allergyParam));
+		
+		Collection<Allergy> result = allergyDao.searchForAllergies(referenceParam, null, null, null, null, null);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+		assertThat(result.iterator().next().getPatient().getUuid(), equalTo(PATIENT_UUID));
 	}
 	
 	@Test

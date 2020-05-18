@@ -150,6 +150,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirResourceProv
 		
 		assertThat(patientCaptor.getValue(), notNullValue());
 		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(referenceParam.getChain(), equalTo(null));
 	}
 	
 	@Test
@@ -165,6 +166,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirResourceProv
 		assertThat(patientCaptor.getValue(), notNullValue());
 		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
 		assertThat(referenceParam.getResourceType(), equalTo("Patient"));
+		assertThat(referenceParam.getChain(), equalTo(null));
 	}
 	
 	@Test
@@ -338,6 +340,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirResourceProv
 		
 		assertThat(encounterCaptor.getValue(), notNullValue());
 		assertThat(referenceParam.getIdPart(), equalTo("c4aa5682-90cf-48e8-87c9-a6066ffd3a3f"));
+		assertThat(referenceParam.getChain(), equalTo(null));
 	}
 	
 	@Test

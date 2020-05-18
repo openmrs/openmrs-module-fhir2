@@ -33,7 +33,6 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -141,7 +140,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(LOCATION_NAME));
+		    equalTo(LOCATION_NAME));
 	}
 	
 	@Test
@@ -153,7 +152,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(CITY));
+		    equalTo(CITY));
 	}
 	
 	@Test
@@ -165,7 +164,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(COUNTRY));
+		    equalTo(COUNTRY));
 	}
 	
 	@Test
@@ -177,7 +176,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(POSTAL_CODE));
+		    equalTo(POSTAL_CODE));
 	}
 	
 	@Test
@@ -189,7 +188,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(STATE));
+		    equalTo(STATE));
 	}
 	
 	@Test
@@ -211,7 +210,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		    isNull(), isNull());
 		assertThat(tagCaptor.getValue(), notNullValue());
 		assertThat(tagCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(LOGIN_LOCATION_TAG_NAME));
+		    equalTo(LOGIN_LOCATION_TAG_NAME));
 	}
 	
 	@Test
@@ -224,6 +223,9 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
 		    equalTo(PARENT_LOCATION_ID));
+		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getChain(),
+		    equalTo(null));
 	}
 	
 	@Test
@@ -235,7 +237,10 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    CoreMatchers.equalTo(PARENT_LOCATION_NAME));
+		    equalTo(PARENT_LOCATION_NAME));
+		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getChain(),
+		    equalTo("name"));
 	}
 	
 	@Test
@@ -247,7 +252,10 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    CoreMatchers.equalTo(PARENT_LOCATION_CITY));
+		    equalTo(PARENT_LOCATION_CITY));
+		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getChain(),
+		    equalTo("address-city"));
 	}
 	
 	@Test
@@ -259,7 +267,10 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    CoreMatchers.equalTo(PARENT_LOCATION_COUNTRY));
+		    equalTo(PARENT_LOCATION_COUNTRY));
+		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getChain(),
+		    equalTo("address-country"));
 	}
 	
 	@Test
@@ -271,7 +282,10 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    CoreMatchers.equalTo(PARENT_LOCATION_POSTAL_CODE));
+		    equalTo(PARENT_LOCATION_POSTAL_CODE));
+		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getChain(),
+		    equalTo("address-postalcode"));
 	}
 	
 	@Test
@@ -283,7 +297,10 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    CoreMatchers.equalTo(PARENT_LOCATION_STATE));
+		    equalTo(PARENT_LOCATION_STATE));
+		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getChain(),
+		    equalTo("address-state"));
 	}
 	
 	@Test
@@ -302,6 +319,9 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
 		    equalTo(PARENT_LOCATION_CITY));
+		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getChain(),
+		    equalTo("address-city"));
 	}
 	
 	@Test
