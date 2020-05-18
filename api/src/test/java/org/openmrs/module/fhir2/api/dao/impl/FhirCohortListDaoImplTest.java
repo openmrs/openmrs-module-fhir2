@@ -48,7 +48,7 @@ public class FhirCohortListDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getListByUuid_shouldReturnMatchingCohort() {
-		Cohort result = fhirCohortListDao.getListByUuid(LIST_UUID);
+		Cohort result = fhirCohortListDao.get(LIST_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(LIST_UUID));
@@ -56,7 +56,7 @@ public class FhirCohortListDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getListByUuid_shouldReturnNullWhenCalledWithUnknownUuid() {
-		Cohort result = fhirCohortListDao.getListByUuid(UNKNOWN_UUID);
+		Cohort result = fhirCohortListDao.get(UNKNOWN_UUID);
 		
 		assertThat(result, nullValue());
 	}

@@ -9,13 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
-
 import org.openmrs.Obs;
 
-public interface FhirDiagnosticReportDao {
+public interface FhirDiagnosticReportDao extends FhirDao<Obs> {
 	
-	Obs getObsGroupByUuid(@NotNull String uuid);
-	
-	Obs saveObsGroup(Obs newObs);
 }

@@ -60,8 +60,8 @@ public class FhirMedicationServiceImplTest {
 	@Before
 	public void setup() {
 		fhirMedicationService = new FhirMedicationServiceImpl();
-		fhirMedicationService.setMedicationTranslator(medicationTranslator);
-		fhirMedicationService.setMedicationDao(medicationDao);
+		fhirMedicationService.setTranslator(medicationTranslator);
+		fhirMedicationService.setDao(medicationDao);
 		
 		medication = new Medication();
 		medication.setId(MEDICATION_UUID);
@@ -122,8 +122,8 @@ public class FhirMedicationServiceImplTest {
 		Collection<Drug> medications = new ArrayList<>();
 		medications.add(drug);
 		
-		TokenOrListParam ingredientCode = new TokenOrListParam();
-		ingredientCode.addOr(new TokenParam().setValue(CODE));
+		TokenAndListParam ingredientCode = new TokenAndListParam();
+		ingredientCode.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
 		
 		when(medicationDao.searchForMedications(isNull(), isNull(), argThat(equalTo(ingredientCode)), isNull()))
 		        .thenReturn(medications);
@@ -137,8 +137,8 @@ public class FhirMedicationServiceImplTest {
 		Collection<Drug> medications = new ArrayList<>();
 		medications.add(drug);
 		
-		TokenOrListParam status = new TokenOrListParam();
-		status.addOr(new TokenParam().setValue("inactive"));
+		TokenAndListParam status = new TokenAndListParam();
+		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("inactive")));
 		
 		when(medicationDao.searchForMedications(isNull(), isNull(), isNull(), argThat(equalTo(status))))
 		        .thenReturn(medications);

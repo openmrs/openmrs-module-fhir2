@@ -69,7 +69,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 		IdType id = new IdType();
 		id.setValue(UUID);
 		
-		when(service.getDiagnosticReportByUuid(UUID)).thenReturn(diagnosticReport);
+		when(service.get(UUID)).thenReturn(diagnosticReport);
 		
 		DiagnosticReport result = resourceProvider.getDiagnosticReportById(id);
 		
@@ -90,7 +90,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 	
 	@Test
 	public void createDiagnosticReport_shouldCreateNewDiagnosticReport() {
-		when(service.saveDiagnosticReport(diagnosticReport)).thenReturn(diagnosticReport);
+		when(service.create(diagnosticReport)).thenReturn(diagnosticReport);
 		
 		MethodOutcome result = resourceProvider.createDiagnosticReport(diagnosticReport);
 		
@@ -100,7 +100,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 	
 	@Test
 	public void updateDiagnosticReport_shouldUpdateExistingDiagnosticReport() {
-		when(service.updateDiagnosticReport(UUID, diagnosticReport)).thenReturn(diagnosticReport);
+		when(service.update(UUID, diagnosticReport)).thenReturn(diagnosticReport);
 		
 		MethodOutcome result = resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), diagnosticReport);
 		
@@ -110,7 +110,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateDiagnosticReport_shouldThrowInvalidRequestForUuidMismatch() {
-		when(service.updateDiagnosticReport(WRONG_UUID, diagnosticReport)).thenThrow(InvalidRequestException.class);
+		when(service.update(WRONG_UUID, diagnosticReport)).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), diagnosticReport);
 	}
@@ -119,7 +119,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 	public void updateDiagnosticReport_shouldThrowInvalidRequestForMissingId() {
 		DiagnosticReport noIdDiagnostiReport = new DiagnosticReport();
 		
-		when(service.updateDiagnosticReport(UUID, noIdDiagnostiReport)).thenThrow(InvalidRequestException.class);
+		when(service.update(UUID, noIdDiagnostiReport)).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), noIdDiagnostiReport);
 	}
@@ -130,7 +130,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 		
 		wrongDiagnosticReport.setId(WRONG_UUID);
 		
-		when(service.updateDiagnosticReport(WRONG_UUID, wrongDiagnosticReport)).thenThrow(MethodNotAllowedException.class);
+		when(service.update(WRONG_UUID, wrongDiagnosticReport)).thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport);
 	}

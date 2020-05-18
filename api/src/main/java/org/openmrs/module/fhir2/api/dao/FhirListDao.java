@@ -9,11 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
+import org.openmrs.Auditable;
 
-import org.openmrs.Cohort;
-
-public interface FhirListDao<T> {
+public interface FhirListDao<T extends Auditable> extends FhirDao<T> {
 	
-	Cohort getListByUuid(@NotNull String uuid);
 }

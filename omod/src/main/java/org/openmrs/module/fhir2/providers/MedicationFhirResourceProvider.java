@@ -21,7 +21,6 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -65,7 +64,7 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	@SuppressWarnings("unused")
 	public Bundle searchForMedication(@OptionalParam(name = Medication.SP_CODE) TokenAndListParam code,
 	        @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,
-	        @OptionalParam(name = Medication.SP_STATUS) TokenOrListParam status) {
+	        @OptionalParam(name = Medication.SP_STATUS) TokenAndListParam status) {
 		return FhirServerUtils
 		        .convertSearchResultsToBundle(fhirMedicationService.searchForMedications(code, dosageForm, null, status));
 	}

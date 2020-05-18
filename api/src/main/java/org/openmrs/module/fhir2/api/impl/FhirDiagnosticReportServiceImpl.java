@@ -9,9 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Obs;
@@ -25,7 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirDiagnosticReportServiceImpl implements FhirDiagnosticReportService {
+@Getter(AccessLevel.PROTECTED)
+public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticReport, Obs> implements FhirDiagnosticReportService {
 	
 	@Autowired
 	FhirDiagnosticReportDao dao;
@@ -33,32 +33,4 @@ public class FhirDiagnosticReportServiceImpl implements FhirDiagnosticReportServ
 	@Autowired
 	DiagnosticReportTranslator translator;
 	
-	@Override
-	public DiagnosticReport getDiagnosticReportByUuid(String uuid) {
-		return translator.toFhirResource(dao.getObsGroupByUuid(uuid));
-	}
-	
-	@Override
-	public DiagnosticReport saveDiagnosticReport(DiagnosticReport diagnosticReport) {
-		return translator.toFhirResource(dao.saveObsGroup(translator.toOpenmrsType(diagnosticReport)));
-	}
-	
-	@Override
-	public DiagnosticReport updateDiagnosticReport(String uuid, DiagnosticReport diagnosticReport) {
-		if (diagnosticReport.getId() == null) {
-			throw new InvalidRequestException("Diagnostic Report resource is missing id.");
-		}
-		
-		if (!diagnosticReport.getId().equals(uuid)) {
-			throw new InvalidRequestException("Diagnostic Report id and provided id do not match.");
-		}
-		
-		Obs obsGroup = dao.getObsGroupByUuid(uuid);
-		
-		if (obsGroup == null) {
-			throw new MethodNotAllowedException("No Diagnostic Report found to update.");
-		}
-		
-		return translator.toFhirResource(dao.saveObsGroup(translator.toOpenmrsType(obsGroup, diagnosticReport)));
-	}
 }

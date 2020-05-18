@@ -21,8 +21,8 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -73,18 +73,18 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	@SuppressWarnings("unused")
-	public Bundle searchPatients(@OptionalParam(name = Patient.SP_NAME) StringOrListParam name,
-	        @OptionalParam(name = Patient.SP_GIVEN) StringOrListParam given,
-	        @OptionalParam(name = Patient.SP_FAMILY) StringOrListParam family,
-	        @OptionalParam(name = Patient.SP_IDENTIFIER) TokenOrListParam identifier,
-	        @OptionalParam(name = Patient.SP_GENDER) TokenOrListParam gender,
+	public Bundle searchPatients(@OptionalParam(name = Patient.SP_NAME) StringAndListParam name,
+	        @OptionalParam(name = Patient.SP_GIVEN) StringAndListParam given,
+	        @OptionalParam(name = Patient.SP_FAMILY) StringAndListParam family,
+	        @OptionalParam(name = Patient.SP_IDENTIFIER) TokenAndListParam identifier,
+	        @OptionalParam(name = Patient.SP_GENDER) TokenAndListParam gender,
 	        @OptionalParam(name = Patient.SP_BIRTHDATE) DateRangeParam birthDate,
 	        @OptionalParam(name = Patient.SP_DEATH_DATE) DateRangeParam deathDate,
-	        @OptionalParam(name = Patient.SP_DECEASED) TokenOrListParam deceased,
-	        @OptionalParam(name = Patient.SP_ADDRESS_CITY) StringOrListParam city,
-	        @OptionalParam(name = Patient.SP_ADDRESS_STATE) StringOrListParam state,
-	        @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringOrListParam postalCode,
-	        @OptionalParam(name = Patient.SP_ADDRESS_COUNTRY) StringOrListParam country, @Sort SortSpec sort) {
+	        @OptionalParam(name = Patient.SP_DECEASED) TokenAndListParam deceased,
+	        @OptionalParam(name = Patient.SP_ADDRESS_CITY) StringAndListParam city,
+	        @OptionalParam(name = Patient.SP_ADDRESS_STATE) StringAndListParam state,
+	        @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
+	        @OptionalParam(name = Patient.SP_ADDRESS_COUNTRY) StringAndListParam country, @Sort SortSpec sort) {
 		return FhirServerUtils.convertSearchResultsToBundle(patientService.searchForPatients(name, given, family, identifier,
 		    gender, birthDate, deathDate, deceased, city, state, postalCode, country, sort));
 	}

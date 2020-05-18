@@ -40,8 +40,10 @@ import java.util.List;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.comparator.ComparatorMatcherBuilder;
@@ -151,7 +153,7 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getPersonByUuid_shouldReturnMatchingPerson() {
-		Person person = fhirPersonDao.getPersonByUuid(PERSON_UUID);
+		Person person = fhirPersonDao.get(PERSON_UUID);
 		assertThat(person, notNullValue());
 		assertThat(person.getUuid(), equalTo(PERSON_UUID));
 		assertThat(person.getGender(), equalTo("M"));
@@ -160,13 +162,14 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getPersonByWithWrongUuid_shouldReturnNullPerson() {
-		Person person = fhirPersonDao.getPersonByUuid(WRONG_PERSON_UUID);
+		Person person = fhirPersonDao.get(WRONG_PERSON_UUID);
 		assertThat(person, nullValue());
 	}
 	
 	@Test
 	public void shouldReturnCollectionOfPeopleForMatchOnPersonName() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PERSON_NAME));
+		StringAndListParam stringOrListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(PERSON_NAME)));
 		Collection<Person> people = fhirPersonDao.searchForPeople(stringOrListParam, null, null, null, null, null, null,
 		    null);
 		assertThat(people, notNullValue());
@@ -176,7 +179,8 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnCollectionOfPeopleForPartialMatchOnPersonName() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PERSON_PARTIAL_NAME));
+		StringAndListParam stringOrListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(PERSON_PARTIAL_NAME)));
 		Collection<Person> people = fhirPersonDao.searchForPeople(stringOrListParam, null, null, null, null, null, null,
 		    null);
 		assertThat(people, notNullValue());
@@ -186,7 +190,8 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnEmptyCollectionForNoMatchOnPersonName() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_FOUND_NAME));
+		StringAndListParam stringOrListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(NOT_FOUND_NAME)));
 		Collection<Person> people = fhirPersonDao.searchForPeople(stringOrListParam, null, null, null, null, null, null,
 		    null);
 		assertThat(people, is(empty()));
@@ -195,36 +200,36 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void shouldReturnCollectionOfPeopleForMatchingGender() {
 		final String GENDER_PROPERTY = "gender";
-		Collection<Person> people = fhirPersonDao.searchForPeople(null, new TokenOrListParam().add(MALE_GENDER), null, null,
-		    null, null, null, null);
+		Collection<Person> people = fhirPersonDao.searchForPeople(null,
+		    new TokenAndListParam().addAnd(new TokenOrListParam().add(MALE_GENDER)), null, null, null, null, null, null);
 		
 		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people, everyItem(hasProperty(GENDER_PROPERTY, equalTo("M"))));
 		
-		people = fhirPersonDao.searchForPeople(null, new TokenOrListParam().add(FEMALE_GENDER), null, null, null, null, null,
-		    null);
+		people = fhirPersonDao.searchForPeople(null,
+		    new TokenAndListParam().addAnd(new TokenOrListParam().add(FEMALE_GENDER)), null, null, null, null, null, null);
 		
 		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people, everyItem(hasProperty(GENDER_PROPERTY, equalTo("F"))));
 		
-		people = fhirPersonDao.searchForPeople(null, new TokenOrListParam().add(OTHER_GENDER), null, null, null, null, null,
-		    null);
+		people = fhirPersonDao.searchForPeople(null,
+		    new TokenAndListParam().addAnd(new TokenOrListParam().add(OTHER_GENDER)), null, null, null, null, null, null);
 		
 		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people, everyItem(hasProperty(GENDER_PROPERTY, nullValue())));
 		
-		people = fhirPersonDao.searchForPeople(null, new TokenOrListParam().add(NULL_GENDER), null, null, null, null, null,
-		    null);
+		people = fhirPersonDao.searchForPeople(null, new TokenAndListParam().addAnd(new TokenOrListParam().add(NULL_GENDER)),
+		    null, null, null, null, null, null);
 		
 		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
 		assertThat(people, everyItem(hasProperty(GENDER_PROPERTY, nullValue())));
 		
-		people = fhirPersonDao.searchForPeople(null, new TokenOrListParam().add(UNKNOWN_GENDER), null, null, null, null,
-		    null, null);
+		people = fhirPersonDao.searchForPeople(null,
+		    new TokenAndListParam().addAnd(new TokenOrListParam().add(UNKNOWN_GENDER)), null, null, null, null, null, null);
 		
 		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
@@ -233,8 +238,8 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnEmptyCollectionForNoMatchOnGender() {
-		TokenOrListParam tokenOrListParam = new TokenOrListParam().add(WRONG_GENDER);
-		Collection<Person> people = fhirPersonDao.searchForPeople(null, tokenOrListParam, null, null, null, null, null,
+		TokenAndListParam tokenAndListParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(WRONG_GENDER));
+		Collection<Person> people = fhirPersonDao.searchForPeople(null, tokenAndListParam, null, null, null, null, null,
 		    null);
 		
 		assertThat(people, notNullValue());
@@ -263,8 +268,9 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnCollectionOfPeopleForMatchOnCity() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(CITY));
-		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, stringOrListParam, null, null, null,
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(CITY)));
+		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, stringAndListParam, null, null, null,
 		    null);
 		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
@@ -275,8 +281,9 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnCollectionOfPeopleForMatchOnState() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(STATE));
-		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, null, stringOrListParam, null, null,
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(STATE)));
+		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, null, stringAndListParam, null, null,
 		    null);
 		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
@@ -287,8 +294,9 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnCollectionOfPeopleForMatchOnPostalCode() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
-		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, null, null, stringOrListParam, null,
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
+		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, null, null, stringAndListParam, null,
 		    null);
 		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
@@ -299,8 +307,9 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnCollectionOfPeopleForMatchOnCountry() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(COUNTRY));
-		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, null, null, null, stringOrListParam,
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
+		Collection<Person> people = fhirPersonDao.searchForPeople(null, null, null, null, null, null, stringAndListParam,
 		    null);
 		assertThat(people, notNullValue());
 		assertThat(people, not(empty()));
@@ -443,13 +452,16 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldHandleComplexQuery() throws ParseException {
-		StringOrListParam nameParam = new StringOrListParam().add(new StringParam(PERSON_NAME));
-		TokenOrListParam genderParam = new TokenOrListParam().add(MALE_GENDER);
+		StringAndListParam nameParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(PERSON_NAME)));
+		TokenAndListParam genderParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(MALE_GENDER));
 		DateRangeParam birthDateParam = new DateRangeParam().setLowerBound(BIRTH_DATE).setUpperBound(BIRTH_DATE);
-		StringOrListParam cityParam = new StringOrListParam().add(new StringParam(CITY));
-		StringOrListParam stateParam = new StringOrListParam().add(new StringParam(STATE));
-		StringOrListParam postalCodeParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
-		StringOrListParam countryParam = new StringOrListParam().add(new StringParam(COUNTRY));
+		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
+		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
+		StringAndListParam postalCodeParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
+		StringAndListParam countryParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
 		
 		Collection<Person> people = fhirPersonDao.searchForPeople(nameParam, genderParam, birthDateParam, cityParam,
 		    stateParam, postalCodeParam, countryParam, null);

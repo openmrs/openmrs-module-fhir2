@@ -21,8 +21,8 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -54,7 +54,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	@Read
 	@SuppressWarnings("unused")
 	public Person getPersonById(@IdParam IdType id) {
-		Person person = fhirPersonService.getPersonByUuid(id.getIdPart());
+		Person person = fhirPersonService.get(id.getIdPart());
 		if (person == null) {
 			throw new ResourceNotFoundException("Could not find Person with Id " + id.getIdPart());
 		}
@@ -64,7 +64,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getPersonHistoryById(@IdParam @NotNull IdType id) {
-		Person person = fhirPersonService.getPersonByUuid(id.getIdPart());
+		Person person = fhirPersonService.get(id.getIdPart());
 		if (person == null) {
 			throw new ResourceNotFoundException("Could not find person with Id " + id.getIdPart());
 		}
@@ -73,13 +73,13 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	@SuppressWarnings("unused")
-	public Bundle searchPeople(@OptionalParam(name = Person.SP_NAME) StringOrListParam name,
-	        @OptionalParam(name = Person.SP_GENDER) TokenOrListParam gender,
+	public Bundle searchPeople(@OptionalParam(name = Person.SP_NAME) StringAndListParam name,
+	        @OptionalParam(name = Person.SP_GENDER) TokenAndListParam gender,
 	        @OptionalParam(name = Person.SP_BIRTHDATE) DateRangeParam birthDate,
-	        @OptionalParam(name = Person.SP_ADDRESS_CITY) StringOrListParam city,
-	        @OptionalParam(name = Person.SP_ADDRESS_STATE) StringOrListParam state,
-	        @OptionalParam(name = Person.SP_ADDRESS_POSTALCODE) StringOrListParam postalCode,
-	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringOrListParam country, @Sort SortSpec sort) {
+	        @OptionalParam(name = Person.SP_ADDRESS_CITY) StringAndListParam city,
+	        @OptionalParam(name = Person.SP_ADDRESS_STATE) StringAndListParam state,
+	        @OptionalParam(name = Person.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
+	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringAndListParam country, @Sort SortSpec sort) {
 		return FhirServerUtils.convertSearchResultsToBundle(
 		    fhirPersonService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort));
 	}

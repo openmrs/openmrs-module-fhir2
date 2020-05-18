@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ListResource;
 import org.openmrs.Cohort;
@@ -23,17 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirCohortListServiceImpl implements FhirListService<Cohort> {
+@Getter(AccessLevel.PROTECTED)
+public class FhirCohortListServiceImpl extends BaseFhirService<ListResource, org.openmrs.Cohort> implements FhirListService<Cohort, ListResource> {
 	
 	@Autowired
 	private FhirListDao<Cohort> dao;
 	
 	@Autowired
-	private ListTranslator<Cohort> cohortListTranslator;
+	private ListTranslator<Cohort> translator;
 	
-	@Override
-	@Transactional(readOnly = true)
-	public ListResource getListByUuid(String uuid) {
-		return cohortListTranslator.toFhirResource(dao.getListByUuid(uuid));
-	}
 }

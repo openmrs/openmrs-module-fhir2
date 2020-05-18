@@ -14,12 +14,12 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -63,7 +63,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	
 	@Override
 	public Collection<FhirTask> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
-	        TokenOrListParam status, SortSpec sort) {
+	        TokenAndListParam status, SortSpec sort) {
 		
 		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(FhirTask.class);
 		
@@ -83,10 +83,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		}
 		
 		// Task.status
-		if (status != null && !status.getValuesAsQueryTokens().isEmpty()) {
-			criteria.add(Restrictions.in("status", status.getValuesAsQueryTokens().stream()
-			        .map(token -> FhirTask.TaskStatus.valueOf(token.getValue())).collect(Collectors.toList())));
-		}
+		handleStatus(status).ifPresent(criteria::add);
 		
 		handleSort(criteria, sort);
 		
@@ -105,5 +102,19 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	
 	private Boolean validReferenceParam(ReferenceParam ref) {
 		return (ref != null && ref.getIdPart() != null && ref.getResourceType() != null);
+	}
+	
+	private Optional<Criterion> handleStatus(TokenAndListParam tokenAndListParam) {
+		if (tokenAndListParam == null) {
+			return Optional.empty();
+		}
+		
+		return handleAndListParam(tokenAndListParam, token -> {
+			if (token.getValue() != null) {
+				return Optional.of(eq("status", FhirTask.TaskStatus.valueOf(token.getValue())));
+			}
+			
+			return Optional.empty();
+		});
 	}
 }

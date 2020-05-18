@@ -16,8 +16,8 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
@@ -32,12 +32,6 @@ import org.springframework.stereotype.Component;
 public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
 	
 	@Override
-	public Person getPersonByUuid(String uuid) {
-		return (Person) getSessionFactory().getCurrentSession().createCriteria(Person.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
-	
-	@Override
 	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(Person person,
 	        String personAttributeTypeUuid) {
 		return (List<PersonAttribute>) getSessionFactory().getCurrentSession().createCriteria(PersonAttribute.class)
@@ -47,8 +41,8 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	public Collection<Person> searchForPeople(StringOrListParam name, TokenOrListParam gender, DateRangeParam birthDate,
-	        StringOrListParam city, StringOrListParam state, StringOrListParam postalCode, StringOrListParam country,
+	public Collection<Person> searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
+	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
 	        SortSpec sort) {
 		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Person.class);
 		

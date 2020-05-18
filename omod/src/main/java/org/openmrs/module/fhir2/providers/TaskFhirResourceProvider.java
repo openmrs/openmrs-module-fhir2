@@ -23,7 +23,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -87,7 +87,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@SuppressWarnings("unused")
 	public Bundle searchTasks(@OptionalParam(name = Task.SP_BASED_ON) ReferenceParam basedOnReference,
 	        @OptionalParam(name = Task.SP_OWNER) ReferenceParam ownerReference,
-	        @OptionalParam(name = Task.SP_STATUS) TokenOrListParam status, @Sort SortSpec sort) {
+	        @OptionalParam(name = Task.SP_STATUS) TokenAndListParam status, @Sort SortSpec sort) {
 		return FhirServerUtils
 		        .convertSearchResultsToBundle(service.searchForTasks(basedOnReference, ownerReference, status, sort));
 	}

@@ -43,8 +43,10 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hamcrest.comparator.ComparatorMatcherBuilder;
@@ -189,8 +191,9 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByName() {
-		Collection<Patient> results = dao.searchForPatients(new StringOrListParam().add(new StringParam(PATIENT_GIVEN_NAME)),
-		    null, null, null, null, null, null, null, null, null, null, null, null);
+		Collection<Patient> results = dao.searchForPatients(
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_GIVEN_NAME))), null, null,
+		    null, null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -200,8 +203,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldReturnMultiplePatientsForPartialMatch() {
 		Collection<Patient> results = dao.searchForPatients(
-		    new StringOrListParam().add(new StringParam(PATIENT_PARTIAL_GIVEN_NAME)), null, null, null, null, null, null,
-		    null, null, null, null, null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_PARTIAL_GIVEN_NAME))), null,
+		    null, null, null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -211,8 +214,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientNameNotMatched() {
 		Collection<Patient> results = dao.searchForPatients(
-		    new StringOrListParam().add(new StringParam(PATIENT_NOT_FOUND_NAME)), null, null, null, null, null, null, null,
-		    null, null, null, null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_NOT_FOUND_NAME))), null,
+		    null, null, null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -221,8 +224,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByGivenName() {
 		Collection<Patient> results = dao.searchForPatients(null,
-		    new StringOrListParam().add(new StringParam(PATIENT_GIVEN_NAME)), null, null, null, null, null, null, null, null,
-		    null, null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_GIVEN_NAME))), null, null,
+		    null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -232,8 +235,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldReturnMultiplePatientsForPartialMatchOnGivenName() {
 		Collection<Patient> results = dao.searchForPatients(null,
-		    new StringOrListParam().add(new StringParam(PATIENT_PARTIAL_GIVEN_NAME)), null, null, null, null, null, null,
-		    null, null, null, null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_PARTIAL_GIVEN_NAME))), null,
+		    null, null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -243,8 +246,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientGivenNameNotMatched() {
 		Collection<Patient> results = dao.searchForPatients(null,
-		    new StringOrListParam().add(new StringParam(PATIENT_NOT_FOUND_NAME)), null, null, null, null, null, null, null,
-		    null, null, null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_NOT_FOUND_NAME))), null,
+		    null, null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -253,8 +256,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByFamilyName() {
 		Collection<Patient> results = dao.searchForPatients(null, null,
-		    new StringOrListParam().add(new StringParam(PATIENT_FAMILY_NAME)), null, null, null, null, null, null, null,
-		    null, null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_FAMILY_NAME))), null, null,
+		    null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -264,8 +267,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldReturnMultiplePatientsForPartialMatchOnFamilyName() {
 		Collection<Patient> results = dao.searchForPatients(null, null,
-		    new StringOrListParam().add(new StringParam(PATIENT_PARTIAL_FAMILY_NAME)), null, null, null, null, null, null,
-		    null, null, null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_PARTIAL_FAMILY_NAME))), null,
+		    null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -275,8 +278,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientFamilyNameNotMatched() {
 		Collection<Patient> results = dao.searchForPatients(null, null,
-		    new StringOrListParam().add(new StringParam(PATIENT_NOT_FOUND_NAME)), null, null, null, null, null, null, null,
-		    null, null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_NOT_FOUND_NAME))), null,
+		    null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -285,8 +288,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByIdentifier() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null,
-		    new TokenOrListParam().add(new TokenParam(null, PATIENT_IDENTIFIER)), null, null, null, null, null, null, null,
-		    null, null);
+		    new TokenAndListParam().addAnd(new TokenOrListParam().add(new TokenParam(null, PATIENT_IDENTIFIER))), null, null,
+		    null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -296,8 +299,9 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByIdentifierWithType() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null,
-		    new TokenOrListParam().add(new TokenParam(PATIENT_IDENTIFIER_TYPE, PATIENT_IDENTIFIER)), null, null, null, null,
-		    null, null, null, null, null);
+		    new TokenAndListParam()
+		            .addAnd(new TokenOrListParam().add(new TokenParam(PATIENT_IDENTIFIER_TYPE, PATIENT_IDENTIFIER))),
+		    null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -307,8 +311,9 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenIdentifierNotMatched() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null,
-		    new TokenOrListParam().add(new TokenParam(PATIENT_IDENTIFIER_TYPE, BAD_PATIENT_IDENTIFIER)), null, null, null,
-		    null, null, null, null, null, null);
+		    new TokenAndListParam()
+		            .addAnd(new TokenOrListParam().add(new TokenParam(PATIENT_IDENTIFIER_TYPE, BAD_PATIENT_IDENTIFIER))),
+		    null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -317,8 +322,9 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenIdentifierTypeNotMatched() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null,
-		    new TokenOrListParam().add(new TokenParam(BAD_PATIENT_IDENTIFIER_TYPE, PATIENT_IDENTIFIER)), null, null, null,
-		    null, null, null, null, null, null);
+		    new TokenAndListParam()
+		            .addAnd(new TokenOrListParam().add(new TokenParam(BAD_PATIENT_IDENTIFIER_TYPE, PATIENT_IDENTIFIER))),
+		    null, null, null, null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -329,15 +335,16 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 		final String GENDER_PROPERTY = "gender";
 		
 		Collection<Patient> results = dao.searchForPatients(null, null, null, null,
-		    new TokenOrListParam().add(new TokenParam(PATIENT_MALE_GENDER)), null, null, null, null, null, null, null, null);
+		    new TokenAndListParam().addAnd(new TokenOrListParam().add(new TokenParam(PATIENT_MALE_GENDER))), null, null,
+		    null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
 		assertThat(results, everyItem(hasProperty(GENDER_PROPERTY, equalTo("M"))));
 		
 		results = dao.searchForPatients(null, null, null, null,
-		    new TokenOrListParam().add(new TokenParam(PATIENT_FEMALE_GENDER)), null, null, null, null, null, null, null,
-		    null);
+		    new TokenAndListParam().addAnd(new TokenOrListParam().add(new TokenParam(PATIENT_FEMALE_GENDER))), null, null,
+		    null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -347,8 +354,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenGenderNotMatched() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null, null,
-		    new TokenOrListParam().add(new TokenParam(PATIENT_WRONG_GENDER)), null, null, null, null, null, null, null,
-		    null);
+		    new TokenAndListParam().addAnd(new TokenOrListParam().add(new TokenParam(PATIENT_WRONG_GENDER))), null, null,
+		    null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -401,7 +408,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByCity() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null, null, null, null, null, null,
-		    new StringOrListParam().add(new StringParam(PATIENT_ADDRESS_CITY)), null, null, null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_ADDRESS_CITY))), null, null,
+		    null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -411,7 +419,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByState() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    new StringOrListParam().add(new StringParam(PATIENT_ADDRESS_STATE)), null, null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_ADDRESS_STATE))), null, null,
+		    null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -421,7 +430,7 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldSearchForPatientsCountry() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null, null, null, null, null, null, null, null, null,
-		    new StringOrListParam().add(new StringParam(PATIENT_ADDRESS_COUNTRY)), null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_ADDRESS_COUNTRY))), null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -431,7 +440,8 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByPostalCode() {
 		Collection<Patient> results = dao.searchForPatients(null, null, null, null, null, null, null, null, null, null,
-		    new StringOrListParam().add(new StringParam(PATIENT_ADDRESS_POSTAL_CODE)), null, null);
+		    new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(PATIENT_ADDRESS_POSTAL_CODE))), null,
+		    null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));

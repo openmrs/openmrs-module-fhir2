@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
-
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -124,7 +123,7 @@ public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> impleme
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Task> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
-	        TokenOrListParam status, SortSpec sort) {
+	        TokenAndListParam status, SortSpec sort) {
 		return dao.searchForTasks(basedOnReference, ownerReference, status, sort).stream().map(translator::toFhirResource)
 		        .collect(Collectors.toList());
 	}

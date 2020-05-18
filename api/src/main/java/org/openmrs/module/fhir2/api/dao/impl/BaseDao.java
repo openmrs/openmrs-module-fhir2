@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static ca.uhn.fhir.rest.api.SortOrderEnum.ASC;
+import static ca.uhn.fhir.rest.api.SortOrderEnum.DESC;
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.between;
@@ -56,7 +58,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -347,14 +349,14 @@ public abstract class BaseDao {
 	 * @return a {@link Criterion} to be added to the query indicating that the property matches the
 	 *         given value
 	 */
-	protected Optional<Criterion> handleBoolean(String propertyName, TokenOrListParam booleanToken) {
+	protected Optional<Criterion> handleBoolean(String propertyName, TokenAndListParam booleanToken) {
 		if (booleanToken == null) {
 			return Optional.empty();
 		}
 		
 		// note that we use a custom implementation here as Boolean.valueOf() and Boolean.parse() only determine whether
 		// the string matches "true". We could potentially be passed a non-valid Boolean value here.
-		return handleOrListParam(booleanToken, token -> {
+		return handleAndListParam(booleanToken, token -> {
 			if (token.getValue().equalsIgnoreCase("true")) {
 				return handleBooleanProperty(propertyName, true);
 			} else if (token.getValue().equalsIgnoreCase("false")) {
@@ -487,12 +489,12 @@ public abstract class BaseDao {
 		    token -> Optional.of(eq(String.format("%s.uuid", encounterAlias), token.getIdPart())));
 	}
 	
-	protected Optional<Criterion> handleGender(@NotNull String propertyName, TokenOrListParam gender) {
+	protected Optional<Criterion> handleGender(@NotNull String propertyName, TokenAndListParam gender) {
 		if (gender == null) {
 			return Optional.empty();
 		}
 		
-		return handleOrListParam(gender, token -> {
+		return handleAndListParam(gender, token -> {
 			try {
 				AdministrativeGender administrativeGender = AdministrativeGender.fromCode(token.getValue());
 				
@@ -526,17 +528,19 @@ public abstract class BaseDao {
 		return handleAndListParam(locationReference, token -> {
 			if (token.getChain() != null) {
 				switch (token.getChain()) {
+					case Location.SP_NAME:
+						return propertyLike(String.format("%s.name", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_CITY:
-						return Optional.of(ilike(String.format("%s.cityVillage", locationAlias), token.getValue()));
+						return propertyLike(String.format("%s.cityVillage", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_STATE:
-						return Optional.of(ilike(String.format("%s.stateProvince", locationAlias), token.getValue()));
+						return propertyLike(String.format("%s.stateProvince", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_POSTALCODE:
-						return Optional.of(ilike(String.format("%s.postalCode", locationAlias), token.getValue()));
+						return propertyLike(String.format("%s.postalCode", locationAlias), token.getValue());
 					case Location.SP_ADDRESS_COUNTRY:
-						return Optional.of(ilike(String.format("%s.country", locationAlias), token.getValue()));
+						return propertyLike(String.format("%s.country", locationAlias), token.getValue());
 				}
 			} else {
-				return Optional.of(eq("l.uuid", token.getValue()));
+				return Optional.of(eq(String.format("%s.uuid", locationAlias), token.getValue()));
 			}
 			
 			return Optional.empty();
@@ -627,14 +631,14 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected void handleIdentifier(Criteria criteria, TokenOrListParam identifier) {
+	protected void handleIdentifier(Criteria criteria, TokenAndListParam identifier) {
 		if (identifier == null) {
 			return;
 		}
 		
 		criteria.createAlias("identifiers", "pi", JoinType.INNER_JOIN, eq("pi.voided", false));
 		
-		handleOrListParamBySystem(identifier, (system, tokens) -> {
+		handleAndListParamBySystem(identifier, (system, tokens) -> {
 			if (system.isEmpty()) {
 				return Optional.of(in("pi.identifier", tokensToList(tokens)));
 			} else {
@@ -647,8 +651,8 @@ public abstract class BaseDao {
 		}).ifPresent(criteria::add);
 	}
 	
-	protected void handleNames(Criteria criteria, StringOrListParam name, StringOrListParam given,
-	        StringOrListParam family) {
+	protected void handleNames(Criteria criteria, StringAndListParam name, StringAndListParam given,
+	        StringAndListParam family) {
 		if (name == null && given == null && family == null) {
 			return;
 		}
@@ -656,7 +660,7 @@ public abstract class BaseDao {
 		criteria.createAlias("names", "pn");
 		
 		if (name != null) {
-			handleOrListParamAsStream(name,
+			handleAndListParamAsStream(name,
 			    (nameParam) -> Arrays.stream(StringUtils.split(nameParam.getValue(), " \t,"))
 			            .map(token -> new StringParam().setValue(token).setExact(nameParam.isExact())
 			                    .setContains(nameParam.isContains()))
@@ -666,11 +670,11 @@ public abstract class BaseDao {
 		}
 		
 		if (given != null) {
-			handleOrListParam(given, (givenName) -> propertyLike("pn.givenName", givenName)).ifPresent(criteria::add);
+			handleAndListParam(given, (givenName) -> propertyLike("pn.givenName", givenName)).ifPresent(criteria::add);
 		}
 		
 		if (family != null) {
-			handleOrListParam(family, (familyName) -> propertyLike("pn.familyName", familyName)).ifPresent(criteria::add);
+			handleAndListParam(family, (familyName) -> propertyLike("pn.familyName", familyName)).ifPresent(criteria::add);
 		}
 	}
 	
@@ -728,8 +732,8 @@ public abstract class BaseDao {
 		}
 	}
 	
-	protected Optional<Criterion> handlePersonAddress(String aliasPrefix, StringOrListParam city, StringOrListParam state,
-	        StringOrListParam postalCode, StringOrListParam country) {
+	protected Optional<Criterion> handlePersonAddress(String aliasPrefix, StringAndListParam city, StringAndListParam state,
+	        StringAndListParam postalCode, StringAndListParam country) {
 		if (city == null && state == null && postalCode == null && country == null) {
 			return Optional.empty();
 		}
@@ -738,22 +742,22 @@ public abstract class BaseDao {
 		
 		if (city != null) {
 			criterionList.add(
-			    handleOrListParam(city, c -> Optional.of(eq(String.format("%s.cityVillage", aliasPrefix), c.getValue()))));
+			    handleAndListParam(city, c -> Optional.of(eq(String.format("%s.cityVillage", aliasPrefix), c.getValue()))));
 		}
 		
 		if (state != null) {
-			criterionList.add(handleOrListParam(state,
+			criterionList.add(handleAndListParam(state,
 			    c -> Optional.of(eq(String.format("%s.stateProvince", aliasPrefix), c.getValue()))));
 		}
 		
 		if (postalCode != null) {
-			criterionList.add(handleOrListParam(postalCode,
+			criterionList.add(handleAndListParam(postalCode,
 			    c -> Optional.of(eq(String.format("%s.postalCode", aliasPrefix), c.getValue()))));
 		}
 		
 		if (country != null) {
 			criterionList.add(
-			    handleOrListParam(country, c -> Optional.of(eq(String.format("%s.country", aliasPrefix), c.getValue()))));
+			    handleAndListParam(country, c -> Optional.of(eq(String.format("%s.country", aliasPrefix), c.getValue()))));
 		}
 		
 		if (criterionList.size() == 0) {
@@ -824,6 +828,15 @@ public abstract class BaseDao {
 				}
 			}).filter(Optional::isPresent).map(Optional::get).collect(TokenOrListParam::new,
 			    (tp, v) -> tp.add(String.valueOf(v)), (tp1, tp2) -> tp2.getListAsCodings().forEach(tp1::add));
+		}
+		
+		return null;
+	}
+	
+	protected TokenAndListParam convertStringStatusToBoolean(TokenAndListParam statusParam) {
+		if (statusParam != null) {
+			return handleAndListParam(statusParam).map(this::convertStringStatusToBoolean).collect(TokenAndListParam::new,
+			    TokenAndListParam::addAnd, (tp1, tp2) -> tp2.getValuesAsQueryTokens().forEach(tp1::addAnd));
 		}
 		
 		return null;

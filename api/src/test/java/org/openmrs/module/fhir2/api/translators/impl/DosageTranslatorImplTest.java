@@ -10,15 +10,22 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
+import org.hl7.fhir.r4.model.Timing;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +34,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DosageTranslatorImplTest {
@@ -40,6 +48,9 @@ public class DosageTranslatorImplTest {
 	@Mock
 	private ConceptTranslator conceptTranslator;
 	
+	@Mock
+	private MedicationRequestTimingTranslator timingTranslator;
+	
 	private DosageTranslatorImpl dosageTranslator;
 	
 	private DrugOrder drugOrder;
@@ -48,6 +59,7 @@ public class DosageTranslatorImplTest {
 	public void setup() {
 		dosageTranslator = new DosageTranslatorImpl();
 		dosageTranslator.setConceptTranslator(conceptTranslator);
+		dosageTranslator.setTimingTranslator(timingTranslator);
 		
 		drugOrder = new DrugOrder();
 		drugOrder.setUuid(DRUG_ORDER_UUID);
@@ -89,5 +101,25 @@ public class DosageTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldReturnNullIfDrugOrderIsNull() {
 		assertThat(dosageTranslator.toFhirResource(null), nullValue());
+	}
+	
+	@Test
+	public void toFhirResource_shouldSetDosageTiming() {
+		Timing.TimingRepeatComponent repeatComponent = new Timing.TimingRepeatComponent();
+		repeatComponent.setPeriod(1);
+		repeatComponent.setPeriodUnit(Timing.UnitsOfTime.D);
+		
+		Timing timing = new Timing();
+		timing.addEvent(new Date());
+		timing.setRepeat(repeatComponent);
+		when(timingTranslator.toFhirResource(drugOrder)).thenReturn(timing);
+		
+		Dosage result = dosageTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getTiming(), notNullValue());
+		assertThat(result.getTiming().getEvent(), not(empty()));
+		assertThat(result.getTiming().getEvent().get(0).getValue(), DateMatchers.sameDay(new Date()));
+		assertThat(result.getTiming().getRepeat().getPeriod(), equalTo(new BigDecimal(1)));
+		assertThat(result.getTiming().getRepeat().getPeriodUnit(), equalTo(Timing.UnitsOfTime.D));
 	}
 }

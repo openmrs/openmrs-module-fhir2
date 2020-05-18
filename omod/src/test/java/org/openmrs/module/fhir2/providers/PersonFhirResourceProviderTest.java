@@ -25,8 +25,10 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Bundle;
@@ -103,7 +105,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	public void getPersonById_shouldReturnPerson() {
 		IdType id = new IdType();
 		id.setValue(PERSON_UUID);
-		when(fhirPersonService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
+		when(fhirPersonService.get(PERSON_UUID)).thenReturn(person);
 		
 		Person result = resourceProvider.getPersonById(id);
 		assertThat(result.isResource(), is(true));
@@ -122,7 +124,8 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Test
 	public void searchPeople_shouldReturnMatchingBundleOfPeopleByName() {
-		StringOrListParam nameParam = new StringOrListParam().add(new StringParam(GIVEN_NAME));
+		StringAndListParam nameParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(GIVEN_NAME)));
 		when(fhirPersonService.searchForPeople(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
 		
@@ -135,7 +138,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Test
 	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByGender() {
-		TokenOrListParam genderParam = new TokenOrListParam().add(GENDER);
+		TokenAndListParam genderParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(GENDER));
 		when(fhirPersonService.searchForPeople(isNull(), argThat(is(genderParam)), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
 		
@@ -161,7 +164,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Test
 	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByCity() {
-		StringOrListParam cityParam = new StringOrListParam().add(new StringParam(CITY));
+		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
 		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), argThat(is(cityParam)), isNull(), isNull(),
 		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
 		
@@ -174,7 +177,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Test
 	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByState() {
-		StringOrListParam stateParam = new StringOrListParam().add(new StringParam(STATE));
+		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
 		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stateParam)), isNull(),
 		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
 		
@@ -187,7 +190,8 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Test
 	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByPostalCode() {
-		StringOrListParam postalCodeParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
+		StringAndListParam postalCodeParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
 		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(is(postalCodeParam)), isNull(), isNull())).thenReturn(Collections.singletonList(person));
 		
@@ -200,7 +204,8 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Test
 	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByCountry() {
-		StringOrListParam countryParam = new StringOrListParam().add(new StringParam(COUNTRY));
+		StringAndListParam countryParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
 		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(is(countryParam)), isNull())).thenReturn(Collections.singletonList(person));
 		
@@ -215,7 +220,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	public void getPatientResourceHistory_shouldReturnListOfResource() {
 		IdType id = new IdType();
 		id.setValue(PERSON_UUID);
-		when(fhirPersonService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
+		when(fhirPersonService.get(PERSON_UUID)).thenReturn(person);
 		
 		List<Resource> resources = resourceProvider.getPersonHistoryById(id);
 		assertThat(resources, notNullValue());
@@ -227,7 +232,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(PERSON_UUID);
-		when(fhirPersonService.getPersonByUuid(PERSON_UUID)).thenReturn(person);
+		when(fhirPersonService.get(PERSON_UUID)).thenReturn(person);
 		
 		List<Resource> resources = resourceProvider.getPersonHistoryById(id);
 		assertThat(resources, not(empty()));

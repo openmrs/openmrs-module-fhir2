@@ -27,8 +27,10 @@ import java.util.Collections;
 import java.util.Date;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Before;
@@ -89,8 +91,8 @@ public class FhirPersonServiceImplTest {
 	@Before
 	public void setUp() {
 		personService = new FhirPersonServiceImpl();
-		personService.setFhirPersonDao(dao);
-		personService.setPersonTranslator(personTranslator);
+		personService.setDao(dao);
+		personService.setTranslator(personTranslator);
 		
 		PersonName name = new PersonName();
 		name.setUuid(PERSON_NAME_UUID);
@@ -111,11 +113,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonForGivenNameMatched() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(GIVEN_NAME));
-		when(dao.searchForPeople(argThat(is(stringOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(GIVEN_NAME)));
+		when(dao.searchForPeople(argThat(is(stringAndListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(stringOrListParam, null, null, null, null, null, null,
+		Collection<Person> results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -124,11 +127,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonForPartialMatchOnName() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(PERSON_PARTIAL_NAME));
-		when(dao.searchForPeople(argThat(is(stringOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(PERSON_PARTIAL_NAME)));
+		when(dao.searchForPeople(argThat(is(stringAndListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(stringOrListParam, null, null, null, null, null, null,
+		Collection<Person> results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -137,11 +141,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonNameNotMatched() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_FOUND_NAME));
-		when(dao.searchForPeople(argThat(is(stringOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(NOT_FOUND_NAME)));
+		when(dao.searchForPeople(argThat(is(stringAndListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(stringOrListParam, null, null, null, null, null, null,
+		Collection<Person> results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -150,11 +155,11 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonGenderMatched() {
-		TokenOrListParam tokenOrListParam = new TokenOrListParam().add(GENDER);
-		when(dao.searchForPeople(isNull(), argThat(is(tokenOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
+		TokenAndListParam tokenAndListParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(GENDER));
+		when(dao.searchForPeople(isNull(), argThat(is(tokenAndListParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, tokenOrListParam, null, null, null, null, null,
+		Collection<Person> results = personService.searchForPeople(null, tokenAndListParam, null, null, null, null, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -163,11 +168,11 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonGenderNotMatched() {
-		TokenOrListParam tokenOrListParam = new TokenOrListParam().add(WRONG_GENDER);
-		when(dao.searchForPeople(isNull(), argThat(is(tokenOrListParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
+		TokenAndListParam tokenAndListParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(WRONG_GENDER));
+		when(dao.searchForPeople(isNull(), argThat(is(tokenAndListParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, tokenOrListParam, null, null, null, null, null,
+		Collection<Person> results = personService.searchForPeople(null, tokenAndListParam, null, null, null, null, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -180,8 +185,8 @@ public class FhirPersonServiceImplTest {
 		
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(PERSON_BIRTH_DATE)
 		        .setUpperBound(PERSON_BIRTH_DATE);
-		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.singletonList(person));
+		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(),
+		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
 		
 		Collection<Person> results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
 		assertThat(results, notNullValue());
@@ -193,8 +198,8 @@ public class FhirPersonServiceImplTest {
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonBirthDateNotMatched() {
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(NOT_FOUND_PERSON_BIRTH_DATE)
 		        .setUpperBound(NOT_FOUND_PERSON_BIRTH_DATE);
-		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.emptyList());
+		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(),
+		    isNull(), isNull())).thenReturn(Collections.emptyList());
 		
 		Collection<Person> results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
 		assertThat(results, notNullValue());
@@ -203,11 +208,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonCityMatched() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(CITY));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(), isNull(), isNull(),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(CITY)));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, stringOrListParam, null, null, null,
+		Collection<Person> results = personService.searchForPeople(null, null, null, stringAndListParam, null, null, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -216,11 +222,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonCityNotMatched() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(), isNull(), isNull(),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD)));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(), isNull(), isNull(),
 		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, stringOrListParam, null, null, null,
+		Collection<Person> results = personService.searchForPeople(null, null, null, stringAndListParam, null, null, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -228,11 +235,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonStateMatched() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(STATE));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(), isNull(),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(STATE)));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(), isNull(),
 		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, stringOrListParam, null, null,
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, stringAndListParam, null, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -241,11 +249,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonStateNotMatched() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(), isNull(),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD)));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(), isNull(),
 		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, stringOrListParam, null, null,
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, stringAndListParam, null, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -253,11 +262,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonPostalCodeMatched() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(POSTAL_CODE));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(),
 		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, stringOrListParam, null,
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, stringAndListParam, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -266,11 +276,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonPostalCodeNotMatched() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)), isNull(),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD)));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(),
 		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, stringOrListParam, null,
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, stringAndListParam, null,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -278,11 +289,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonCountryMatched() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(COUNTRY));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)),
 		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, null, stringOrListParam,
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, null, stringAndListParam,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -291,11 +303,12 @@ public class FhirPersonServiceImplTest {
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonCountryNotMatched() {
-		StringOrListParam stringOrListParam = new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringOrListParam)),
+		StringAndListParam stringAndListParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD)));
+		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)),
 		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, null, stringOrListParam,
+		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, null, stringAndListParam,
 		    null);
 		assertThat(results, notNullValue());
 		assertThat(results, empty());

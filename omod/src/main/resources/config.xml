@@ -56,7 +56,9 @@
 	</filter>
 	<filter-mapping>
 		<filter-name>fhir2AuthenticationFilter</filter-name>
+		<url-pattern>/ws/fhir2</url-pattern>
 		<url-pattern>/ws/fhir2/*</url-pattern>
+		<url-pattern>/ms/fhir2Servlet</url-pattern>
 		<url-pattern>/ms/fhir2Servlet/*</url-pattern>
 	</filter-mapping>
 	<filter>
@@ -65,6 +67,7 @@
 	</filter>
 	<filter-mapping>
 		<filter-name>fhir2ForwardingFilter</filter-name>
+		<url-pattern>/ws/fhir2</url-pattern>
 		<url-pattern>/ws/fhir2/*</url-pattern>
 	</filter-mapping>
 

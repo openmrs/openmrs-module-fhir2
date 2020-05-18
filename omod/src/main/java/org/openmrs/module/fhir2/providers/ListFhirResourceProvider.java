@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 public class ListFhirResourceProvider implements IResourceProvider {
 	
 	@Autowired
-	private FhirListService<Cohort> cohortFhirListService;
+	private FhirListService<Cohort, ListResource> cohortFhirListService;
 	
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {
@@ -42,7 +42,7 @@ public class ListFhirResourceProvider implements IResourceProvider {
 	@Read
 	@SuppressWarnings("unused")
 	public ListResource getListById(@IdParam @NotNull IdType id) {
-		ListResource listResource = cohortFhirListService.getListByUuid(id.getIdPart());
+		ListResource listResource = cohortFhirListService.get(id.getIdPart());
 		if (listResource == null) {
 			throw new ResourceNotFoundException("Could not find listResource with Id " + id.getIdPart());
 		}

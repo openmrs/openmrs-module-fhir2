@@ -14,13 +14,16 @@ import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Person;
 import org.openmrs.module.fhir2.api.FhirPersonService;
+import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,27 +31,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
+@Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.PACKAGE)
-public class FhirPersonServiceImpl implements FhirPersonService {
+public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.Person> implements FhirPersonService {
 	
 	@Autowired
-	private FhirPersonDao fhirPersonDao;
+	private FhirPersonDao dao;
 	
 	@Autowired
-	private PersonTranslator personTranslator;
+	private PersonTranslator translator;
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Person getPersonByUuid(String uuid) {
-		return personTranslator.toFhirResource(fhirPersonDao.getPersonByUuid(uuid));
+	public Person get(String uuid) {
+		return translator.toFhirResource(dao.get(uuid));
 	}
 	
 	@Override
-	public Collection<Person> searchForPeople(StringOrListParam name, TokenOrListParam gender, DateRangeParam birthDate,
-	        StringOrListParam city, StringOrListParam state, StringOrListParam postalCode, StringOrListParam country,
+	public Collection<Person> searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
+	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
 	        SortSpec sort) {
-		return fhirPersonDao.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort).stream()
-		        .map(personTranslator::toFhirResource).collect(Collectors.toList());
+		return dao.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort).stream()
+		        .map(translator::toFhirResource).collect(Collectors.toList());
 	}
 	
 }

@@ -64,7 +64,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirResourc
 	public void getDiagnosticReportByUuid_shouldReturnDiagnosticReport() throws Exception {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
-		when(service.getDiagnosticReportByUuid(DIAGNOSTIC_REPORT_UUID)).thenReturn(diagnosticReport);
+		when(service.get(DIAGNOSTIC_REPORT_UUID)).thenReturn(diagnosticReport);
 		
 		MockHttpServletResponse response = get("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
@@ -76,7 +76,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirResourc
 	
 	@Test
 	public void getDiagnosticReportByWrongUuid_shouldReturn404() throws Exception {
-		when(service.getDiagnosticReportByUuid(WRONG_UUID)).thenReturn(null);
+		when(service.get(WRONG_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/DiagnosticReport/" + WRONG_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -93,7 +93,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirResourc
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
 		
-		when(service.saveDiagnosticReport(any(DiagnosticReport.class))).thenReturn(diagnosticReport);
+		when(service.create(any(DiagnosticReport.class))).thenReturn(diagnosticReport);
 		
 		MockHttpServletResponse response = post("/DiagnosticReport").jsonContent(jsonDiagnosticReport)
 		        .accept(FhirMediaTypes.JSON).go();
@@ -111,7 +111,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirResourc
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
 		
-		when(service.updateDiagnosticReport(anyString(), any(DiagnosticReport.class))).thenReturn(diagnosticReport);
+		when(service.update(anyString(), any(DiagnosticReport.class))).thenReturn(diagnosticReport);
 		
 		MockHttpServletResponse response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
 		        .jsonContent(jsonDiagnosticReport).accept(FhirMediaTypes.JSON).go();
@@ -155,7 +155,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirResourc
 			jsonDiagnosticReport = IOUtils.toString(is);
 		}
 		
-		when(service.updateDiagnosticReport(eq(WRONG_UUID), any(DiagnosticReport.class)))
+		when(service.update(eq(WRONG_UUID), any(DiagnosticReport.class)))
 		        .thenThrow(new MethodNotAllowedException("DiagnosticReport " + WRONG_UUID + " does not exist"));
 		
 		MockHttpServletResponse response = put("/DiagnosticReport/" + WRONG_UUID).jsonContent(jsonDiagnosticReport)
