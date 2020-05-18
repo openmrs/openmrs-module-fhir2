@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -75,7 +76,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	public IBundleProvider searchObservations(
-	        @OptionalParam(name = Observation.SP_ENCOUNTER) ReferenceAndListParam encounterReference,
+	        @OptionalParam(name = Observation.SP_ENCOUNTER, chainWhitelist = {
+	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
 	        @OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY,
 	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
