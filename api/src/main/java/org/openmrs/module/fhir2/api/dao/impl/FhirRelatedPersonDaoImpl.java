@@ -14,6 +14,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
+import org.hl7.fhir.r4.model.RelatedPerson;
 import org.openmrs.Relationship;
 import org.openmrs.module.fhir2.api.dao.FhirRelatedPersonDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +23,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirRelatedPersonDaoImpl implements FhirRelatedPersonDao {
+public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implements FhirRelatedPersonDao {
 	
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	@Override
-	public Relationship getRelationshipByUuid(String uuid) {
-		return (Relationship) sessionFactory.getCurrentSession().createCriteria(Relationship.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
+	// @Override
+	// public Relationship getRelationshipByUuid(String uuid) {
+	// 	return (Relationship) sessionFactory.getCurrentSession().createCriteria(Relationship.class).add(eq("uuid", uuid))
+	// 	        .uniqueResult();
+	// }
 }

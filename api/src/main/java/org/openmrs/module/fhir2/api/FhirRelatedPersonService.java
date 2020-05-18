@@ -9,17 +9,10 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.validation.constraints.NotNull;
-
 import org.hl7.fhir.r4.model.RelatedPerson;
 
-public interface FhirRelatedPersonService {
-	
-	/**
-	 * Get {@link org.hl7.fhir.r4.model.RelatedPerson} by Id
-	 * 
-	 * @param Id the Id of related person
-	 * @return corresponding {@link org.hl7.fhir.r4.model.RelatedPerson} resource
-	 */
-	RelatedPerson getRelatedPersonById(@NotNull String Id);
+public interface FhirRelatedPersonService extends FhirService<RelatedPerson>{
+
+	@Override
+	RelatedPerson get(String uuid);
 }

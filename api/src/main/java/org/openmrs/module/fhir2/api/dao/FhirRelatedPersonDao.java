@@ -9,11 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+
 import javax.validation.constraints.NotNull;
 
 import org.openmrs.Relationship;
 
-public interface FhirRelatedPersonDao {
+public interface FhirRelatedPersonDao extends FhirDao<Relationship>{
 	
-	Relationship getRelationshipByUuid(@NotNull String uuid);
+
+	@Override
+	Relationship get(@NotNull String uuid);
 }
