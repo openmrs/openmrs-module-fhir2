@@ -15,9 +15,7 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.openmrs.Relationship;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
-import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.dao.FhirRelatedPersonDao;
-import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,13 +25,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.PACKAGE)
-public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson, org.openmrs.Relationship>
-		implements FhirRelatedPersonService {
-
+public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson, org.openmrs.Relationship> implements FhirRelatedPersonService {
+	
 	@Autowired
 	private FhirRelatedPersonDao fhirRelatedPersonDao;
-
+	
 	@Autowired
 	private RelatedPersonTranslator relatedPersonTranslator;
-
+	
 }

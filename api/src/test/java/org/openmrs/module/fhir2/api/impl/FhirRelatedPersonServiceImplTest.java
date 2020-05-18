@@ -43,8 +43,8 @@ public class FhirRelatedPersonServiceImplTest {
 	@Before
 	public void setup() {
 		relatedPersonService = new FhirRelatedPersonServiceImpl();
-		relatedPersonService.setFhirRelatedPersonDao(relatedPersonDao);
-		relatedPersonService.setRelatedPersonTranslator(relatedPersonTranslator);
+		relatedPersonService.setDao(relatedPersonDao);
+		relatedPersonService.setTranslator(relatedPersonTranslator);
 	}
 	
 	@Test
@@ -66,7 +66,7 @@ public class FhirRelatedPersonServiceImplTest {
 	
 	@Test
 	public void shouldReturnNullWhenGetByWrongUuid() {
-		when(relatedPersonDao.getRelationshipByUuid(WRONG_RELATED_PERSON_UUID)).thenReturn(null);
-		assertThat(relatedPersonService.getRelatedPersonById(WRONG_RELATED_PERSON_UUID), nullValue());
+		when(relatedPersonDao.get(WRONG_RELATED_PERSON_UUID)).thenReturn(null);
+		assertThat(relatedPersonService.get(WRONG_RELATED_PERSON_UUID), nullValue());
 	}
 }
