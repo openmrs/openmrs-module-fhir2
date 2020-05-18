@@ -13,11 +13,14 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -82,6 +85,12 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	        @OptionalParam(name = AllergyIntolerance.SP_CLINICAL_STATUS) TokenAndListParam clinicalStatus) {
 		return FhirServerUtils.convertSearchResultsToBundle(fhirAllergyIntoleranceService
 		        .searchForAllergies(patientReference, category, allergen, severity, manifestationCode, clinicalStatus));
+	}
+	
+	@Create
+	@SuppressWarnings("unused")
+	public MethodOutcome createAllergy(@ResourceParam AllergyIntolerance allergy) {
+		return FhirServerUtils.buildCreate(fhirAllergyIntoleranceService.create(allergy));
 	}
 	
 }
