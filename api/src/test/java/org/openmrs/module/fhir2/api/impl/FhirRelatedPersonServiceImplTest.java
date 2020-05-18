@@ -55,10 +55,10 @@ public class FhirRelatedPersonServiceImplTest {
 		RelatedPerson relatedPerson = new RelatedPerson();
 		relatedPerson.setId(RELATED_PERSON_UUID);
 		
-		when(relatedPersonDao.getRelationshipByUuid(RELATED_PERSON_UUID)).thenReturn(relationship);
+		when(relatedPersonDao.get(RELATED_PERSON_UUID)).thenReturn(relationship);
 		when(relatedPersonTranslator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		
-		RelatedPerson result = relatedPersonService.getRelatedPersonById(RELATED_PERSON_UUID);
+		RelatedPerson result = relatedPersonService.get(RELATED_PERSON_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(RELATED_PERSON_UUID));
