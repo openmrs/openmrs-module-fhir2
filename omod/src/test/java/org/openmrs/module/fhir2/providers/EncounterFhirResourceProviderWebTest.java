@@ -87,6 +87,10 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 	
 	private static final String PARTICIPANT_IDENTIFIER = "1000WF";
 	
+	private static final String LOCATION_UUID = "c36006e5-9fbb-4f20-866b-0ece245615a1";
+	
+	private static final String PARTICIPANT_UUID = "b566821c-1ad9-473b-836b-9e9c67688e02";
+	
 	@Mock
 	private FhirEncounterService encounterService;
 	
@@ -144,6 +148,9 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		assertThat(subjectCaptor.getAllValues().iterator().next().getValuesAsQueryTokens().iterator().next()
 		        .getValuesAsQueryTokens().iterator().next().getIdPart(),
 		    equalTo(PATIENT_UUID));
+		assertThat(subjectCaptor.getAllValues().iterator().next().getValuesAsQueryTokens().iterator().next()
+		        .getValuesAsQueryTokens().iterator().next().getChain(),
+		    equalTo(null));
 	}
 	
 	@Test
@@ -159,6 +166,20 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 		assertThat(dateRangeCaptor.getValue().getUpperBound(), nullValue());
+	}
+	
+	@Test
+	public void shouldGetEncountersByLocationUUID() throws Exception {
+		verifyUri(String.format("/Encounter/?location=%s", LOCATION_UUID));
+		
+		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(locationCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo(null));
+		assertThat(referenceParam.getValue(), equalTo(LOCATION_UUID));
 	}
 	
 	@Test
@@ -245,6 +266,20 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirResourceProvid
 		assertThat(referenceParam.getChain(), equalTo("address-country"));
 		assertThat(referenceParam.getValue(), equalTo(ENCOUNTER_ADDRESS_COUNTRY));
 		assertThat(locationCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(2));
+	}
+	
+	@Test
+	public void shouldGetEncountersByParticipantUUID() throws Exception {
+		verifyUri(String.format("/Encounter/?participant:Practitioner=%s", PARTICIPANT_UUID));
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(participantCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo(null));
+		assertThat(referenceParam.getValue(), equalTo(PARTICIPANT_UUID));
 	}
 	
 	@Test

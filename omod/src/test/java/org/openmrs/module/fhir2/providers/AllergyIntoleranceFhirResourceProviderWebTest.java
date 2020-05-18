@@ -64,6 +64,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	
 	private static final String WRONG_ALLERGY_UUID = "2085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
+	private static final String PATIENT_UUID = "8d703ff2-c3e2-4070-9737-73e713d5a50d";
+	
 	@Mock
 	private FhirAllergyIntoleranceService allergyService;
 	
@@ -104,6 +106,20 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		assertThat(readResponse(response).getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByPatientUUID() throws Exception {
+		verifyUri(String.format("/AllergyIntolerance?patient=%s", PATIENT_UUID));
+		
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getChain(), equalTo(null));
+		assertThat(referenceParam.getValue(), equalTo(PATIENT_UUID));
 	}
 	
 	@Test
