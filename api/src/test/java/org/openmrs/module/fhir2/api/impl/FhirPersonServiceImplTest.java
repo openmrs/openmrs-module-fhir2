@@ -185,8 +185,8 @@ public class FhirPersonServiceImplTest {
 		
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(PERSON_BIRTH_DATE)
 		        .setUpperBound(PERSON_BIRTH_DATE);
-		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(),
-		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.singletonList(person));
 		
 		Collection<Person> results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
 		assertThat(results, notNullValue());
@@ -198,8 +198,8 @@ public class FhirPersonServiceImplTest {
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonBirthDateNotMatched() {
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(NOT_FOUND_PERSON_BIRTH_DATE)
 		        .setUpperBound(NOT_FOUND_PERSON_BIRTH_DATE);
-		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(),
-		    isNull(), isNull())).thenReturn(Collections.emptyList());
+		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(), isNull(),
+		    isNull())).thenReturn(Collections.emptyList());
 		
 		Collection<Person> results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
 		assertThat(results, notNullValue());
