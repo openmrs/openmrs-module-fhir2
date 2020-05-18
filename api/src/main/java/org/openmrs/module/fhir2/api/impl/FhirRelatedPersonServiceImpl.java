@@ -28,9 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson, org.openmrs.Relationship> implements FhirRelatedPersonService {
 	
 	@Autowired
-	private FhirRelatedPersonDao fhirRelatedPersonDao;
+	private FhirRelatedPersonDao dao;
 	
 	@Autowired
-	private RelatedPersonTranslator relatedPersonTranslator;
+	private RelatedPersonTranslator translator;
 	
 }
