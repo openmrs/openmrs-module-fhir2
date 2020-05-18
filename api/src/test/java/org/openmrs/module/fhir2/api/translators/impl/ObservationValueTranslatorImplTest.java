@@ -38,11 +38,13 @@ import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareOnlyThisForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareOnlyThisForTest({ Context.class })
+@PowerMockIgnore({ "com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "javax.management.*" })
 public class ObservationValueTranslatorImplTest {
 	
 	private static final String CONCEPT_VALUE_UUID = "12345-abcde-54321";
