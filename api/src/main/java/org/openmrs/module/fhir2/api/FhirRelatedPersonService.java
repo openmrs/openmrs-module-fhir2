@@ -11,8 +11,8 @@ package org.openmrs.module.fhir2.api;
 
 import org.hl7.fhir.r4.model.RelatedPerson;
 
-public interface FhirRelatedPersonService extends FhirService<RelatedPerson>{
-
+public interface FhirRelatedPersonService extends FhirService<RelatedPerson> {
+	
 	@Override
 	RelatedPerson get(String uuid);
 }
