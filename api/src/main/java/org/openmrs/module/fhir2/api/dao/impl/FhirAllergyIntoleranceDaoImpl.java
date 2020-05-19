@@ -25,6 +25,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
+import org.openmrs.AllergyReaction;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
@@ -37,6 +38,17 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	
 	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
+	
+	@Override
+	public Allergy createOrUpdate(Allergy allergy) {
+		Allergy savedAllergy = super.createOrUpdate(allergy);
+		
+		for (AllergyReaction reaction : allergy.getReactions()) {
+			getSessionFactory().getCurrentSession().saveOrUpdate(reaction);
+		}
+		
+		return savedAllergy;
+	}
 	
 	@Override
 	public Collection<Allergy> searchForAllergies(ReferenceAndListParam patientReference, TokenAndListParam category,
