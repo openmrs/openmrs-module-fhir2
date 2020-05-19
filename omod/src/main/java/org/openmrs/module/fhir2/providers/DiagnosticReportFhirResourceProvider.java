@@ -13,17 +13,27 @@ import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.util.FhirServerUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,5 +78,18 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return FhirServerUtils.buildUpdate(service.update(idPart, diagnosticReport));
+	}
+	
+	@Search
+	public Bundle searchForDiagnosticReports(
+	        @OptionalParam(name = DiagnosticReport.SP_ENCOUNTER, chainWhitelist = {
+	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
+	        @OptionalParam(name = DiagnosticReport.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
+	                Patient.SP_GIVEN, Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
+	        @OptionalParam(name = DiagnosticReport.SP_ISSUED) DateRangeParam issueDate,
+	        @OptionalParam(name = DiagnosticReport.SP_CODE) TokenAndListParam code, @Sort SortSpec sort) {
+		return FhirServerUtils.convertSearchResultsToBundle(
+		    service.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code, sort));
 	}
 }

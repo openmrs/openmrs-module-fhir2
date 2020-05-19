@@ -14,7 +14,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+
+import java.util.Collections;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -22,6 +26,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.Before;
@@ -133,5 +138,19 @@ public class DiagnosticReportFhirResourceProviderTest {
 		when(service.update(WRONG_UUID, wrongDiagnosticReport)).thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport);
+	}
+	
+	@Test
+	public void findDiagnosticReports_shouldReturnMatchingBundleOfDiagnosticReports() {
+		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any()))
+		        .thenReturn(Collections.singletonList(diagnosticReport));
+		
+		Bundle results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.isResource(), is(true));
+		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("DiagnosticReport"));
+		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(UUID));
 	}
 }

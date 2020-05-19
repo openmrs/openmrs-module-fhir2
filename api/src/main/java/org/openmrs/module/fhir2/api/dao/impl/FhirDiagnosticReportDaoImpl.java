@@ -9,8 +9,18 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.validation.constraints.NotNull;
+
+import java.util.Collection;
+
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.Criteria;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Obs;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
@@ -27,6 +37,40 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<Obs> implements Fhi
 		}
 		
 		return super.createOrUpdate(newObs);
+	}
+	
+	@Override
+	public Collection<Obs> searchForDiagnosticReports(ReferenceAndListParam encounterReference,
+	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code, SortSpec sort) {
+		
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Obs.class);
+		
+		handleEncounterReference("e", encounterReference).ifPresent(c -> criteria.createAlias("encounter", "e").add(c));
+		handlePatientReference(criteria, patientReference, "person");
+		handleCodedConcept(criteria, code);
+		handleDateRange("dateCreated", issueDate).ifPresent(criteria::add);
+		handleSort(criteria, sort);
+		
+		return criteria.list();
+	}
+	
+	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
+		if (code != null) {
+			if (!containsAlias(criteria, "c")) {
+				criteria.createAlias("concept", "c");
+			}
+			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
+		}
+	}
+	
+	@Override
+	protected String paramToProp(@NotNull String paramName) {
+		switch (paramName) {
+			case DiagnosticReport.SP_ISSUED:
+				return "dateCreated";
+			default:
+				return null;
+		}
 	}
 	
 }
