@@ -64,7 +64,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 	
 	private static final String ALLERGY_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
 	
-	private static final String ALLERGY_RAECTION_UUID = "c0938432-1691-11df-97a5-7038c432r679";
+	private static final String ALLERGY_REACTION_UUID = "c0938432-1691-11df-97a5-7038c432r679";
 	
 	private static final String ALLERGY_INTOLERANCE_CLINICAL_STATUC_ACTIVE = "active";
 	
@@ -305,7 +305,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		concept.setUuid(CONCEPT_UUID);
 		
 		AllergyReaction reaction = new AllergyReaction();
-		reaction.setUuid(ALLERGY_RAECTION_UUID);
+		reaction.setUuid(ALLERGY_REACTION_UUID);
 		reaction.setReaction(concept);
 		reaction.setAllergy(omrsAllergy);
 		reaction.setReactionNonCoded(NON_CODED_REACTION);
