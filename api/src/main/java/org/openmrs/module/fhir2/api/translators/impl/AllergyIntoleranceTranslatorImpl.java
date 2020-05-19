@@ -95,8 +95,7 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		
 		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
 		reactionComponent.setSubstance(getAllergySubstance(omrsAllergy.getAllergen()));
-		reactionComponent.addManifestation(getManifestation(omrsAllergy.getReactions()));
-		reactionComponent.setDescription(omrsAllergy.getReactionNonCoded());
+		reactionComponent.setManifestation(getManifestation(omrsAllergy.getReactions()));
 		reactionComponent.setSeverity(getFhirSeverity(omrsAllergy.getSeverity()));
 		allergy.addReaction(reactionComponent);
 		allergy.addContained(provenanceTranslator.getCreateProvenance(omrsAllergy));
@@ -120,13 +119,15 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 			allergy.setUuid(fhirAllergy.getId());
 		}
 		
-		if (allergy.getAllergen() == null) {
-			Allergen allergen = new Allergen();
-			if (fhirAllergy.hasCode()) {
+		if (fhirAllergy.hasCode()) {
+			if (allergy.getAllergen() == null) {
+				Allergen allergen = new Allergen();
+				
 				allergen.setCodedAllergen(conceptTranslator.toOpenmrsType(fhirAllergy.getCode()));
 				allergen.setNonCodedAllergen(fhirAllergy.getCode().getText());
+				
+				allergy.setAllergen(allergen);
 			}
-			allergy.setAllergen(allergen);
 		}
 		if (fhirAllergy.hasCategory()) {
 			switch (fhirAllergy.getCategory().get(0).getValue()) {
@@ -154,12 +155,8 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		if (fhirAllergy.hasReaction()) {
 			allergy.setSeverity(getOpenmrsSeverity(fhirAllergy.getReaction().get(0).getSeverity()));
 			
-			for (AllergyIntolerance.AllergyIntoleranceReactionComponent reaction : fhirAllergy.getReaction()) {
-				if (reaction.hasManifestation()) {
-					reactions.add(
-					    new AllergyReaction(allergy, conceptTranslator.toOpenmrsType(reaction.getManifestation().get(0)),
-					            reaction.getManifestation().get(0).getText()));
-				}
+			for (CodeableConcept code : fhirAllergy.getReaction().get(0).getManifestation()) {
+				reactions.add(new AllergyReaction(allergy, conceptTranslator.toOpenmrsType(code), code.getText()));
 			}
 		}
 		if (!fhirAllergy.getNote().isEmpty()) {
@@ -199,22 +196,18 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		
 		if (allergen.getCodedAllergen() != null) {
 			allergySubstance = conceptTranslator.toFhirResource(allergen.getCodedAllergen());
-		}
-		
-		if (allergen.getNonCodedAllergen() != null) {
 			allergySubstance.setText(allergen.getNonCodedAllergen());
 		}
 		
 		return allergySubstance;
 	}
 	
-	private CodeableConcept getManifestation(List<AllergyReaction> reactions) {
-		CodeableConcept manifestations = new CodeableConcept();
+	private List<CodeableConcept> getManifestation(List<AllergyReaction> reactions) {
+		List<CodeableConcept> manifestations = new ArrayList<>();
 		for (AllergyReaction reaction : reactions) {
-			Coding code = new Coding(FhirConstants.CLINICAL_FINDINGS_VALUE_SET_URI, reaction.getUuid(),
-			        reaction.getReactionNonCoded());
-			manifestations.addCoding(code);
-			manifestations.setText(reaction.getReactionNonCoded());
+			CodeableConcept codeableConcept = conceptTranslator.toFhirResource(reaction.getReaction());
+			codeableConcept.setText(reaction.getReactionNonCoded());
+			manifestations.add(codeableConcept);
 		}
 		
 		return manifestations;
