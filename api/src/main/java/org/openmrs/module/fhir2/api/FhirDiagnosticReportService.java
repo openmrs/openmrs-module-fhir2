@@ -9,8 +9,16 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import java.util.Collection;
+
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 
 public interface FhirDiagnosticReportService extends FhirService<DiagnosticReport> {
 	
+	Collection<DiagnosticReport> searchForDiagnosticReports(ReferenceAndListParam encounterReference,
+	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code, SortSpec sort);
 }
