@@ -40,7 +40,7 @@ public class RelatedPersonFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	public RelatedPerson getRelatedPersonById(@IdParam @NotNull IdType id) {
-		RelatedPerson relatedPerson = relatedPersonService.getRelatedPersonById(id.getIdPart());
+		RelatedPerson relatedPerson = relatedPersonService.get(id.getIdPart());
 		if (relatedPerson == null) {
 			throw new ResourceNotFoundException("Could not find related person with Id " + id.getIdPart());
 		}

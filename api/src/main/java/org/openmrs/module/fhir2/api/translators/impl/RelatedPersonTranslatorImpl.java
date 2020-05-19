@@ -102,4 +102,18 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		
 		return relatedPerson;
 	}
+	
+	@Override
+	public Relationship toOpenmrsType(RelatedPerson resource) {
+		return toOpenmrsType(new Relationship(), resource);
+	}
+	
+	@Override
+	public Relationship toOpenmrsType(Relationship existingRelationship, RelatedPerson resource) {
+		if (resource == null) {
+			return existingRelationship;
+		}
+		existingRelationship.setUuid(resource.getId());
+		return existingRelationship;
+	}
 }

@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.openmrs.Relationship;
 
-public interface RelatedPersonTranslator extends ToFhirTranslator<Relationship, RelatedPerson> {
+public interface RelatedPersonTranslator extends OpenmrsFhirUpdatableTranslator<Relationship, RelatedPerson> {
 	
 	/**
 	 * Maps an {@link org.openmrs.Relationship} to a {@link org.hl7.fhir.r4.model.RelatedPerson}
