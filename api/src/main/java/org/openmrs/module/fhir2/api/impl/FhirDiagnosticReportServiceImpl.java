@@ -9,6 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,4 +40,10 @@ public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticR
 	@Autowired
 	DiagnosticReportTranslator translator;
 	
+	@Override
+	public Collection<DiagnosticReport> searchForDiagnosticReports(ReferenceAndListParam encounterReference,
+	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code, SortSpec sort) {
+		return dao.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code, sort).stream()
+		        .map(translator::toFhirResource).collect(Collectors.toList());
+	}
 }
