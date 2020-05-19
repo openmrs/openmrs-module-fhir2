@@ -25,6 +25,7 @@ import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
 import javax.servlet.ServletException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -65,6 +67,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	private static final String WRONG_ALLERGY_UUID = "2085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String PATIENT_UUID = "8d703ff2-c3e2-4070-9737-73e713d5a50d";
+	
+	private static final String JSON_CREAT_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_create.json";
 	
 	@Mock
 	private FhirAllergyIntoleranceService allergyService;
@@ -408,4 +412,22 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
 	}
 	
+	@Test
+	public void createAllergy_shouldCreateAllergyIntolerance() throws Exception {
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.setId(ALLERGY_UUID);
+		String createAllergyJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREAT_ALLERGY_PATH)) {
+			assert is != null;
+			createAllergyJson = IOUtils.toString(is);
+		}
+		
+		when(allergyService.create(any(AllergyIntolerance.class))).thenReturn(allergy);
+		
+		MockHttpServletResponse response = post("/AllergyIntolerance").jsonContent(createAllergyJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getStatus(), is(201));
+	}
 }

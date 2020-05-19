@@ -68,8 +68,8 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	@Before
 	public void setup() {
 		service = new FhirAllergyIntoleranceServiceImpl();
-		service.setAllergyIntoleranceTranslator(translator);
-		service.setAllergyIntoleranceDao(allergyIntoleranceDao);
+		service.setTranslator(translator);
+		service.setDao(allergyIntoleranceDao);
 		
 		omrsAllergy = new Allergy();
 		omrsAllergy.setUuid(ALLERGY_UUID);
@@ -257,6 +257,23 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		    null, status);
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void saveAllergy_shouldSaveNewAllergy() {
+		Allergy allergy = new Allergy();
+		allergy.setUuid(ALLERGY_UUID);
+		
+		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
+		allergyIntolerance.setId(ALLERGY_UUID);
+		
+		when(translator.toFhirResource(allergy)).thenReturn(allergyIntolerance);
+		when(translator.toOpenmrsType(allergyIntolerance)).thenReturn(allergy);
+		when(allergyIntoleranceDao.createOrUpdate(allergy)).thenReturn(allergy);
+		
+		AllergyIntolerance result = service.create(allergyIntolerance);
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), equalTo(ALLERGY_UUID));
 	}
 	
 }

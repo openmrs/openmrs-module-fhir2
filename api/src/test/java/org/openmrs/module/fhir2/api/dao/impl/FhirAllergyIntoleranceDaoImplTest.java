@@ -36,9 +36,12 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
+import org.openmrs.AllergyReaction;
+import org.openmrs.Concept;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,6 +53,8 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	private static final String ALLERGY_INTOLERANCE_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirAllergyIntoleranceDaoImplTest_initial_data.xml";
 	
 	private static final String ALLERGY_UUID = "1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String NEW_ALLERGY_UUID = "9999AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String UNKNOWN_ALLERGY_UUID = "9999AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -77,6 +82,9 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	private FhirAllergyIntoleranceDaoImpl allergyDao;
+	
+	@Autowired
+	private FhirConceptDao fhirConceptDao;
 	
 	private Map<String, String> severityConceptUuids = new HashMap<>();
 	
@@ -363,6 +371,38 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 		assertThat(result, notNullValue());
 		assertThat(result.size(), greaterThanOrEqualTo(1));
 		assertThat(result.iterator().next().getVoided(), equalTo(false));
+	}
+	
+	@Test
+	public void saveAllergy_shouldSaveAllergyCorrectly() {
+		Allergy existing = allergyDao.get(ALLERGY_UUID);
+		Allergy newAllergy = new Allergy();
+		newAllergy.setPatient(existing.getPatient());
+		newAllergy.setAllergen(existing.getAllergen());
+		newAllergy.setUuid(NEW_ALLERGY_UUID);
+		
+		Allergy result = allergyDao.createOrUpdate(newAllergy);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(UNKNOWN_ALLERGY_UUID));
+	}
+	
+	@Test
+	public void saveAllergy_shouldSaveAllergyReactionsCorrectly() {
+		Allergy existing = allergyDao.get(ALLERGY_UUID);
+		Allergy newAllergy = new Allergy();
+		newAllergy.setPatient(existing.getPatient());
+		newAllergy.setAllergen(existing.getAllergen());
+		newAllergy.setUuid(NEW_ALLERGY_UUID);
+		
+		Concept codedReaction = fhirConceptDao.getConceptByUuid(CODED_REACTION_UUID).orElse(null);
+		
+		AllergyReaction reaction = new AllergyReaction(newAllergy, codedReaction, "Test Reaction");
+		newAllergy.addReaction(reaction);
+		
+		Allergy result = allergyDao.createOrUpdate(newAllergy);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(NEW_ALLERGY_UUID));
+		assertThat(result.getReactions().get(0).getReaction().getUuid(), equalTo(CODED_REACTION_UUID));
 	}
 	
 }

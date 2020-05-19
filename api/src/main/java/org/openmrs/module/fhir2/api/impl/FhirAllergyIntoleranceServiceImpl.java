@@ -15,14 +15,13 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.Allergy;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
-import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
-import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,31 +29,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
+@Getter(AccessLevel.PROTECTED)
 public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIntolerance, Allergy> implements FhirAllergyIntoleranceService {
 	
 	@Autowired
-	private AllergyIntoleranceTranslator allergyIntoleranceTranslator;
+	private AllergyIntoleranceTranslator translator;
 	
 	@Autowired
-	private FhirAllergyIntoleranceDao allergyIntoleranceDao;
-	
-	@Override
-	protected FhirDao<Allergy> getDao() {
-		return allergyIntoleranceDao;
-	}
-	
-	@Override
-	protected OpenmrsFhirTranslator<Allergy, AllergyIntolerance> getTranslator() {
-		return allergyIntoleranceTranslator;
-	}
+	private FhirAllergyIntoleranceDao dao;
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<AllergyIntolerance> searchForAllergies(ReferenceAndListParam patientReference,
 	        TokenAndListParam category, TokenAndListParam allergen, TokenAndListParam severity,
 	        TokenAndListParam manifestationCode, TokenAndListParam clinicalStatus) {
-		return allergyIntoleranceDao
-		        .searchForAllergies(patientReference, category, allergen, severity, manifestationCode, clinicalStatus)
-		        .stream().map(allergyIntoleranceTranslator::toFhirResource).collect(Collectors.toList());
+		return dao.searchForAllergies(patientReference, category, allergen, severity, manifestationCode, clinicalStatus)
+		        .stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
 }
