@@ -155,4 +155,28 @@ public class FhirConstants {
 	
 	public static final String VALUE_STRING_SEARCH_HANDLER = "value.string.search.handler";
 	
+	public static final String GENDER_SEARCH_HANDLER = "gender.search.handler";
+	
+	public static final String IDENTIFIER_SEARCH_HANDLER = "identifier.search.handler";
+	
+	public static final String BOOLEAN_SEARCH_HANDLER = "boolean.search.handler";
+	
+	public static final String ADDRESS_SEARCH_HANDLER = "address.search.handler";
+	
+	public static final String NAME_SEARCH_HANDLER = "name.search.handler";
+	
+	public static final String NAME_PROPERTY = "name.property";
+	
+	public static final String GIVEN_PROPERTY = "given.property";
+	
+	public static final String FAMILY_PROPERTY = "family.property";
+	
+	public static final String CITY_PROPERTY = "city.property";
+	
+	public static final String COUNTRY_PROPERTY = "country.property";
+	
+	public static final String STATE_PROPERTY = "state.property";
+	
+	public static final String POSTAL_CODE_PROPERTY = "postalCode.property";
+	
 }
