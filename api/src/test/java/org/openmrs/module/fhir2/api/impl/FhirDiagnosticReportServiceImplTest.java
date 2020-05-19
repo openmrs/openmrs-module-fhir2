@@ -10,11 +10,19 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -148,5 +156,26 @@ public class FhirDiagnosticReportServiceImplTest {
 		when(dao.get(WRONG_UUID)).thenReturn(null);
 		
 		service.update(WRONG_UUID, diagnosticReport);
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnCollectionOfDiagnosticReportsByParameters() {
+		Obs obs = new Obs();
+		obs.setUuid(UUID);
+		
+		DiagnosticReport diagnosticReport = new DiagnosticReport();
+		diagnosticReport.setId(UUID);
+		
+		List<Obs> obsList = new ArrayList<>();
+		obsList.add(obs);
+		
+		when(dao.searchForDiagnosticReports(any(), any(), any(), any(), any())).thenReturn(obsList);
+		when(translator.toFhirResource(obs)).thenReturn(diagnosticReport);
+		
+		Collection<DiagnosticReport> results = service.searchForDiagnosticReports(null, null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results, hasItem(hasProperty("id", equalTo(UUID))));
 	}
 }
