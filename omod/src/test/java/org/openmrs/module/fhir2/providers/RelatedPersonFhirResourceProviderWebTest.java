@@ -50,7 +50,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirResourcePr
 	public void shouldReturnRelatedPersonById() throws Exception {
 		RelatedPerson relatedPerson = new RelatedPerson();
 		relatedPerson.setId(RELATED_PERSON_UUID);
-		when(relatedPersonService.getRelatedPersonById(RELATED_PERSON_UUID)).thenReturn(relatedPerson);
+		when(relatedPersonService.get(RELATED_PERSON_UUID)).thenReturn(relatedPerson);
 		
 		MockHttpServletResponse response = get("/RelatedPerson/" + RELATED_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -63,7 +63,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirResourcePr
 	
 	@Test
 	public void shouldReturn404IfRelatedPersonNotFound() throws Exception {
-		when(relatedPersonService.getRelatedPersonById(WRONG_RELATED_PERSON_UUID)).thenReturn(null);
+		when(relatedPersonService.get(WRONG_RELATED_PERSON_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/RelatedPerson/" + WRONG_RELATED_PERSON_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
