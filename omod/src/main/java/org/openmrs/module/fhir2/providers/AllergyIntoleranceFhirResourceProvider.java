@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -93,4 +94,13 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		return FhirServerUtils.buildCreate(fhirAllergyIntoleranceService.create(allergy));
 	}
 	
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updateAllergy(@ResourceParam AllergyIntolerance allergy, @IdParam IdType id) {
+		if (id != null) {
+			allergy.setId(id.getIdPart());
+		}
+		
+		return FhirServerUtils.buildUpdate(fhirAllergyIntoleranceService.update(id.getIdPart(), allergy));
+	}
 }

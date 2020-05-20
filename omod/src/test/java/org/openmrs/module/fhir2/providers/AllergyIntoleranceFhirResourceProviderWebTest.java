@@ -10,12 +10,14 @@
 package org.openmrs.module.fhir2.providers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,10 +39,12 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -68,7 +72,11 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 	
 	private static final String PATIENT_UUID = "8d703ff2-c3e2-4070-9737-73e713d5a50d";
 	
-	private static final String JSON_CREAT_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_create.json";
+	private static final String JSON_CREATE_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_create.json";
+	
+	private static final String JSON_UPDATE_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_update.json";
+	
+	private static final String JSON_UPDATE_WITHOUTID_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_UpdateWithoutId.json";
 	
 	@Mock
 	private FhirAllergyIntoleranceService allergyService;
@@ -417,7 +425,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.setId(ALLERGY_UUID);
 		String createAllergyJson;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREAT_ALLERGY_PATH)) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_ALLERGY_PATH)) {
 			assert is != null;
 			createAllergyJson = IOUtils.toString(is);
 		}
@@ -429,5 +437,69 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirResou
 		
 		assertThat(response, isCreated());
 		assertThat(response.getStatus(), is(201));
+	}
+	
+	@Test
+	public void updateAllergy_shouldUpdateAllergyIntolerance() throws Exception {
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.setId(ALLERGY_UUID);
+		allergy.addNote(new Annotation().setText("Updating note"));
+		String updateAllergyJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ALLERGY_PATH)) {
+			assert is != null;
+			updateAllergyJson = IOUtils.toString(is);
+		}
+		
+		when(allergyService.update(any(String.class), any(AllergyIntolerance.class))).thenReturn(allergy);
+		
+		MockHttpServletResponse response = put("/AllergyIntolerance/" + ALLERGY_UUID).jsonContent(updateAllergyJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+	}
+	
+	@Test
+	public void updateAllergy_shouldErrorForIdMismatch() throws Exception {
+		String updateAllergyJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ALLERGY_PATH)) {
+			updateAllergyJson = IOUtils.toString(is);
+		}
+		
+		MockHttpServletResponse response = put("/AllergyIntolerance/" + WRONG_ALLERGY_UUID).jsonContent(updateAllergyJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+	}
+	
+	@Test
+	public void updateAllergy_shouldErrorForNoId() throws Exception {
+		String updateAllergyJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITHOUTID_ALLERGY_PATH)) {
+			updateAllergyJson = IOUtils.toString(is);
+		}
+		
+		MockHttpServletResponse response = put("/AllergyIntolerance/" + ALLERGY_UUID).jsonContent(updateAllergyJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
+	}
+	
+	@Test
+	public void updateAllergy_shouldErrorForNonexistentAllergy() throws Exception {
+		String updateAllergyJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ALLERGY_PATH)) {
+			updateAllergyJson = IOUtils.toString(is);
+		}
+		
+		when(allergyService.update(eq(ALLERGY_UUID), any(AllergyIntolerance.class)))
+		        .thenThrow(new MethodNotAllowedException("AllergyIntolerance " + ALLERGY_UUID + " does not exist"));
+		
+		MockHttpServletResponse response = put("/AllergyIntolerance/" + ALLERGY_UUID).jsonContent(updateAllergyJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isMethodNotAllowed());
 	}
 }

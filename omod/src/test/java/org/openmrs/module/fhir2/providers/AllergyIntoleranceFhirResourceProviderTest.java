@@ -31,9 +31,12 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -265,6 +268,36 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		assertThat(result, CoreMatchers.notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), CoreMatchers.equalTo(allergyIntolerance));
+	}
+	
+	@Test
+	public void updateAllergy_shouldUpdateAllergyIntolerance() {
+		AllergyIntolerance allergy = allergyIntolerance;
+		allergy.addNote(new Annotation().setText("Updating note"));
+		
+		when(service.update(ALLERGY_UUID, allergy)).thenReturn(allergy);
+		
+		MethodOutcome result = resourceProvider.updateAllergy(allergyIntolerance, new IdType().setValue(ALLERGY_UUID));
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(allergy));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateAllergy_shouldThrowInvalidRequestForUuidMismatch() {
+		when(service.update(WRONG_ALLERGY_UUID, allergyIntolerance)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateAllergy(allergyIntolerance, new IdType().setValue(WRONG_ALLERGY_UUID));
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateAllergy_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
+		
+		allergyIntolerance.setId(WRONG_ALLERGY_UUID);
+		
+		when(service.update(WRONG_ALLERGY_UUID, allergyIntolerance)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateAllergy(allergyIntolerance, new IdType().setValue(WRONG_ALLERGY_UUID));
 	}
 	
 }

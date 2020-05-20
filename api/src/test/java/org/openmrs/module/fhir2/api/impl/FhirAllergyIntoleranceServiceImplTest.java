@@ -29,7 +29,10 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
@@ -274,6 +277,49 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		AllergyIntolerance result = service.create(allergyIntolerance);
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(ALLERGY_UUID));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateAllergy_shouldThrowInvalidRequestExceptionIfIdIsNull() {
+		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
+		allergyIntolerance.setId(ALLERGY_UUID);
+		
+		AllergyIntolerance result = service.update(null, allergyIntolerance);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateAllergy_shouldThrowInvalidRequestException() {
+		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
+		allergyIntolerance.setId(ALLERGY_UUID);
+		
+		AllergyIntolerance result = service.update(WRONG_ALLERGY_UUID, allergyIntolerance);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateAllergy_shouldThrowMethodNotAllowedException() {
+		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
+		allergyIntolerance.setId(ALLERGY_UUID);
+		
+		AllergyIntolerance result = service.update(ALLERGY_UUID, allergyIntolerance);
+	}
+	
+	@Test
+	public void updateAllergy_shouldUpdateAllergyIntolerance() {
+		Allergy allergy = new Allergy();
+		allergy.setUuid(ALLERGY_UUID);
+		
+		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
+		allergyIntolerance.setId(ALLERGY_UUID);
+		allergyIntolerance.addNote(new Annotation().setText("Updating note"));
+		
+		when(allergyIntoleranceDao.get(ALLERGY_UUID)).thenReturn(allergy);
+		when(translator.toFhirResource(allergy)).thenReturn(allergyIntolerance);
+		when(translator.toOpenmrsType(allergy, allergyIntolerance)).thenReturn(allergy);
+		when(allergyIntoleranceDao.createOrUpdate(allergy)).thenReturn(allergy);
+		
+		AllergyIntolerance result = service.update(ALLERGY_UUID, allergyIntolerance);
+		assertThat(result, notNullValue());
+		assertThat(result.getNote().get(0).getText(), equalTo("Updating note"));
 	}
 	
 }

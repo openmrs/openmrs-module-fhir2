@@ -405,4 +405,14 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 		assertThat(result.getReactions().get(0).getReaction().getUuid(), equalTo(CODED_REACTION_UUID));
 	}
 	
+	@Test
+	public void saveAllergy_shouldUpdateAllergyCorrectly() {
+		Allergy allergy = allergyDao.get(ALLERGY_UUID);
+		allergy.setVoided(true);
+		
+		Allergy result = allergyDao.createOrUpdate(allergy);
+		assertThat(result, notNullValue());
+		assertThat(result.getVoided(), equalTo(true));
+	}
+	
 }
