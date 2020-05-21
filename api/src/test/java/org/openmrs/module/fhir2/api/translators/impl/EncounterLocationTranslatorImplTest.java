@@ -85,14 +85,14 @@ public class EncounterLocationTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateEncounterLocationToOpenMrsType() {
-		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(fhirLocation);
+		when(locationService.get(LOCATION_UUID)).thenReturn(fhirLocation);
 		when(locationTranslator.toOpenmrsType(fhirLocation)).thenReturn(location);
 		assertThat(encounterLocationTranslator.toOpenmrsType(encounterLocationComponent), notNullValue());
 	}
 	
 	@Test
 	public void shouldTranslateEncounterLocationToFhirTypeWithCorrectLocationDetails() {
-		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(fhirLocation);
+		when(locationService.get(LOCATION_UUID)).thenReturn(fhirLocation);
 		when(locationTranslator.toOpenmrsType(fhirLocation)).thenReturn(location);
 		Location location = encounterLocationTranslator.toOpenmrsType(encounterLocationComponent);
 		assertThat(location, notNullValue());

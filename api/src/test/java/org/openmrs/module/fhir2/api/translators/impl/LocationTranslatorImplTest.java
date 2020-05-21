@@ -372,7 +372,7 @@ public class LocationTranslatorImplTest {
 		
 		Location parentLocation = new Location();
 		parentLocation.setUuid(PARENT_LOCATION_UUID);
-		when(fhirLocationDao.getLocationByUuid(PARENT_LOCATION_UUID)).thenReturn(parentLocation);
+		when(fhirLocationDao.get(PARENT_LOCATION_UUID)).thenReturn(parentLocation);
 		Location result = locationTranslator.getOpenmrsParentLocation(locationReference);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), is(PARENT_LOCATION_UUID));

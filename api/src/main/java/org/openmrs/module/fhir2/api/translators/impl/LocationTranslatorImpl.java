@@ -167,6 +167,6 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 			return null;
 		}
 		
-		return fhirLocationDao.getLocationByUuid(uuid);
+		return fhirLocationDao.get(uuid);
 	}
 }

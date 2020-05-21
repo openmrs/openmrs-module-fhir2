@@ -108,7 +108,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Test
 	public void getLocationByUuid_shouldReturnMatchingLocation() {
-		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		when(locationService.get(LOCATION_UUID)).thenReturn(location);
 		IdType id = new IdType();
 		id.setValue(LOCATION_UUID);
 		Location result = resourceProvider.getLocationById(id);
@@ -231,7 +231,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	public void getLocationHistoryById_shouldReturnListOfResource() {
 		IdType id = new IdType();
 		id.setValue(LOCATION_UUID);
-		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		when(locationService.get(LOCATION_UUID)).thenReturn(location);
 		
 		List<Resource> resources = resourceProvider.getLocationHistoryById(id);
 		assertThat(resources, Matchers.notNullValue());
@@ -243,7 +243,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	public void getLocationHistoryById_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(LOCATION_UUID);
-		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		when(locationService.get(LOCATION_UUID)).thenReturn(location);
 		
 		List<Resource> resources = resourceProvider.getLocationHistoryById(id);
 		assertThat(resources, not(empty()));
