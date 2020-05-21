@@ -58,8 +58,6 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
-	private Map<String, String> severityConceptUuids;
-	
 	@Override
 	public AllergyIntolerance toFhirResource(Allergy omrsAllergy) {
 		if (omrsAllergy == null) {
@@ -155,8 +153,13 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		if (fhirAllergy.hasReaction()) {
 			allergy.setSeverity(getOpenmrsSeverity(fhirAllergy.getReaction().get(0).getSeverity()));
 			
-			for (CodeableConcept code : fhirAllergy.getReaction().get(0).getManifestation()) {
-				reactions.add(new AllergyReaction(allergy, conceptTranslator.toOpenmrsType(code), code.getText()));
+			for (AllergyIntolerance.AllergyIntoleranceReactionComponent reaction : fhirAllergy.getReaction()) {
+				if (reaction.hasManifestation()) {
+					reaction.getManifestation().forEach(manifestation -> {
+						reactions.add(new AllergyReaction(allergy, conceptTranslator.toOpenmrsType(manifestation),
+						        manifestation.getText()));
+					});
+				}
 			}
 		}
 		if (!fhirAllergy.getNote().isEmpty()) {
@@ -205,9 +208,8 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 	private List<CodeableConcept> getManifestation(List<AllergyReaction> reactions) {
 		List<CodeableConcept> manifestations = new ArrayList<>();
 		for (AllergyReaction reaction : reactions) {
-			CodeableConcept codeableConcept = conceptTranslator.toFhirResource(reaction.getReaction());
-			codeableConcept.setText(reaction.getReactionNonCoded());
-			manifestations.add(codeableConcept);
+			manifestations
+			        .add(conceptTranslator.toFhirResource(reaction.getReaction()).setText(reaction.getReactionNonCoded()));
 		}
 		
 		return manifestations;
