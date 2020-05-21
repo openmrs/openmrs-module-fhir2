@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Location;
 import org.openmrs.module.fhir2.api.FhirLocationService;
@@ -29,26 +30,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirLocationServiceImpl implements FhirLocationService {
+@Getter(AccessLevel.PROTECTED)
+public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openmrs.Location> implements FhirLocationService {
 	
 	@Autowired
-	FhirLocationDao locationDao;
+	private FhirLocationDao dao;
 	
 	@Autowired
-	LocationTranslator locationTranslator;
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Location getLocationByUuid(String uuid) {
-		return locationTranslator.toFhirResource(locationDao.getLocationByUuid(uuid));
-	}
+	private LocationTranslator translator;
 	
 	@Override
 	@Transactional(readOnly = true)
 	public Collection<Location> searchForLocations(StringAndListParam name, StringAndListParam city,
 	        StringAndListParam country, StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag,
 	        ReferenceAndListParam parent, SortSpec sort) {
-		return locationDao.searchForLocations(name, city, country, postalCode, state, tag, parent, sort).stream()
-		        .map(locationTranslator::toFhirResource).collect(Collectors.toList());
+		return dao.searchForLocations(name, city, country, postalCode, state, tag, parent, sort).stream()
+		        .map(translator::toFhirResource).collect(Collectors.toList());
 	}
 }

@@ -73,8 +73,8 @@ public class FhirLocationServiceImplTest {
 	@Before
 	public void setUp() {
 		fhirLocationService = new FhirLocationServiceImpl();
-		fhirLocationService.setLocationDao(locationDao);
-		fhirLocationService.setLocationTranslator(locationTranslator);
+		fhirLocationService.setDao(locationDao);
+		fhirLocationService.setTranslator(locationTranslator);
 		
 		location = new Location();
 		location.setUuid(LOCATION_UUID);
@@ -101,10 +101,10 @@ public class FhirLocationServiceImplTest {
 	
 	@Test
 	public void getLocationByUuid_shouldGetLocationByUuid() {
-		when(locationDao.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		when(locationDao.get(LOCATION_UUID)).thenReturn(location);
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 		
-		org.hl7.fhir.r4.model.Location result = fhirLocationService.getLocationByUuid(LOCATION_UUID);
+		org.hl7.fhir.r4.model.Location result = fhirLocationService.get(LOCATION_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(LOCATION_UUID));

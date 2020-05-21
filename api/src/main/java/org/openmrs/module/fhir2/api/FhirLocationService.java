@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.validation.constraints.NotNull;
-
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -19,9 +17,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Location;
 
-public interface FhirLocationService {
-	
-	Location getLocationByUuid(@NotNull String uuid);
+public interface FhirLocationService extends FhirService<Location> {
 	
 	Collection<Location> searchForLocations(StringAndListParam name, StringAndListParam city, StringAndListParam country,
 	        StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,

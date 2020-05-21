@@ -24,35 +24,22 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirLocationDaoImpl extends BaseDao implements FhirLocationDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	SessionFactory sessionFactory;
-	
-	@Override
-	public Location getLocationByUuid(String uuid) {
-		return (Location) sessionFactory.getCurrentSession().createCriteria(Location.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
+public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
 	
 	@Override
 	public Collection<Location> searchForLocations(StringAndListParam name, StringAndListParam city,
 	        StringAndListParam country, StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag,
 	        ReferenceAndListParam parent, SortSpec sort) {
 		
-		Criteria criteria = this.sessionFactory.getCurrentSession().createCriteria(Location.class);
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Location.class);
 		
 		handleBooleanProperty("retired", false).ifPresent(criteria::add);
 		handleName(criteria, name);
@@ -70,7 +57,7 @@ public class FhirLocationDaoImpl extends BaseDao implements FhirLocationDao {
 	@Override
 	public List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(Location location,
 	        String locationAttributeTypeUuid) {
-		return (List<LocationAttribute>) sessionFactory.getCurrentSession().createCriteria(LocationAttribute.class)
+		return (List<LocationAttribute>) getSessionFactory().getCurrentSession().createCriteria(LocationAttribute.class)
 		        .createAlias("location", "l", JoinType.INNER_JOIN, eq("l.id", location.getId()))
 		        .createAlias("attributeType", "lat").add(eq("lat.uuid", locationAttributeTypeUuid)).add(eq("voided", false))
 		        .list();

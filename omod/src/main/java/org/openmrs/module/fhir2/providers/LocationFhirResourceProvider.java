@@ -54,7 +54,7 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	@Read
 	@SuppressWarnings("unused")
 	public Location getLocationById(@IdParam @NotNull IdType id) {
-		Location location = fhirLocationService.getLocationByUuid(id.getIdPart());
+		Location location = fhirLocationService.get(id.getIdPart());
 		if (location == null) {
 			throw new ResourceNotFoundException("Could not find location with Id " + id.getIdPart());
 		}
@@ -64,7 +64,7 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getLocationHistoryById(@IdParam @NotNull IdType id) {
-		Location location = fhirLocationService.getLocationByUuid(id.getIdPart());
+		Location location = fhirLocationService.get(id.getIdPart());
 		if (location == null) {
 			throw new ResourceNotFoundException("Could not find location with Id " + id.getIdPart());
 		}
