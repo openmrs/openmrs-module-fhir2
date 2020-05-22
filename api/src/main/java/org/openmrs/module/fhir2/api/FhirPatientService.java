@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import javax.validation.constraints.NotNull;
+
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -19,9 +21,9 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifierType;
 
-public interface FhirPatientService {
+public interface FhirPatientService extends FhirService<Patient> {
 	
-	Patient getPatientByUuid(String uuid);
+	Patient get(@NotNull String uuid);
 	
 	PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier);
 	

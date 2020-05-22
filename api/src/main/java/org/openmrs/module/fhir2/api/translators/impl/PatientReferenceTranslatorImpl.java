@@ -49,6 +49,6 @@ public class PatientReferenceTranslatorImpl extends BaseReferenceHandlingTransla
 			return null;
 		}
 		
-		return patientDao.getPatientByUuid(uuid);
+		return patientDao.get(uuid);
 	}
 }

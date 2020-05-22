@@ -20,11 +20,11 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 
-public interface FhirPatientDao {
+public interface FhirPatientDao extends FhirDao<Patient> {
 	
 	Patient getPatientById(@NotNull Integer id);
 	
-	Patient getPatientByUuid(@NotNull String uuid);
+	Patient get(@NotNull String uuid);
 	
 	PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid);
 	

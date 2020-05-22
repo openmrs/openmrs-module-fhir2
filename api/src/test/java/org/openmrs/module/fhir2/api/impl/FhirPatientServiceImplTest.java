@@ -126,10 +126,10 @@ public class FhirPatientServiceImplTest {
 	
 	@Test
 	public void getPatientByUuid_shouldRetrievePatientByUuid() {
-		when(dao.getPatientByUuid(PATIENT_UUID)).thenReturn(patient);
+		when(dao.get(PATIENT_UUID)).thenReturn(patient);
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
-		org.hl7.fhir.r4.model.Patient result = patientService.getPatientByUuid(PATIENT_UUID);
+		org.hl7.fhir.r4.model.Patient result = patientService.get(PATIENT_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
