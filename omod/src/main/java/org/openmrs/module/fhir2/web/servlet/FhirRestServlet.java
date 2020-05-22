@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 @Component
-@Setter(AccessLevel.PACKAGE)
+@Setter(AccessLevel.PUBLIC)
 public class FhirRestServlet extends RestfulServer {
 	
 	private static final long serialVersionUID = 1L;

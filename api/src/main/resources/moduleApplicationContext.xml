@@ -22,5 +22,6 @@
             </list>
         </property>
     </bean>
+    <bean name="fhirR3" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3"/>
     <bean name="fhirR4" class="ca.uhn.fhir.context.FhirContext" factory-method="forR4"/>
 </beans>

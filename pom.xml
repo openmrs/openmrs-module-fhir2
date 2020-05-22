@@ -190,7 +190,17 @@
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-structures-dstu3</artifactId>
+				<version>${hapifhirVersion}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-structures-r4</artifactId>
+				<version>${hapifhirVersion}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-converter</artifactId>
 				<version>${hapifhirVersion}</version>
 			</dependency>
 			<dependency>
@@ -623,6 +633,6 @@
 		<lombokVersion>1.18.10</lombokVersion>
         <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
 		<openmrsPlatformToolsVersion>2.0.5</openmrsPlatformToolsVersion>
-		<hapifhirVersion>4.2.0</hapifhirVersion>
+		<hapifhirVersion>5.0.0</hapifhirVersion>
     </properties>
 </project>
