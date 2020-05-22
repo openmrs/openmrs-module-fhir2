@@ -248,18 +248,14 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		
 		switch (severity) {
 			case MILD:
-				return conceptService.getConceptByUuid(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD))
-				        .orElse(null);
+				return conceptService.get(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD));
 			case MODERATE:
-				return conceptService.getConceptByUuid(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE))
-				        .orElse(null);
+				return conceptService.get(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE));
 			case SEVERE:
-				return conceptService.getConceptByUuid(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE))
-				        .orElse(null);
+				return conceptService.get(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE));
 			case NULL:
 			default:
-				return conceptService.getConceptByUuid(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER))
-				        .orElse(null);
+				return conceptService.get(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER));
 		}
 	}
 	

@@ -15,7 +15,7 @@ import org.openmrs.Concept;
 
 public interface FhirConceptService {
 	
-	Optional<Concept> getConceptByUuid(String uuid);
+	Concept get(String uuid);
 	
 	Optional<Concept> getConceptBySourceNameAndCode(String sourceName, String code);
 }

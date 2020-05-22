@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.CoreMatchers;
@@ -613,7 +612,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
 		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
-		when(conceptService.getConceptByUuid(GLOBAL_PROPERTY_MILD_VALUE)).thenReturn(Optional.of(mildConcept));
+		when(conceptService.get(GLOBAL_PROPERTY_MILD_VALUE)).thenReturn(mildConcept);
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
@@ -672,7 +671,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
 		
-		when(conceptService.getConceptByUuid(GLOBAL_PROPERTY_MODERATE_VALUE)).thenReturn(Optional.of(moderateConcept));
+		when(conceptService.get(GLOBAL_PROPERTY_MODERATE_VALUE)).thenReturn(moderateConcept);
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
@@ -692,7 +691,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
 		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
-		when(conceptService.getConceptByUuid(GLOBAL_PROPERTY_SEVERE_VALUE)).thenReturn(Optional.of(severeConcept));
+		when(conceptService.get(GLOBAL_PROPERTY_SEVERE_VALUE)).thenReturn(severeConcept);
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
@@ -713,7 +712,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
 		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
 		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
-		when(conceptService.getConceptByUuid(GLOBAL_PROPERTY_OTHER_VALUE)).thenReturn(Optional.of(otherConcept));
+		when(conceptService.get(GLOBAL_PROPERTY_OTHER_VALUE)).thenReturn(otherConcept);
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());

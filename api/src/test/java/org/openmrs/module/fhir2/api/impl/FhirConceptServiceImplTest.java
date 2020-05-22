@@ -12,6 +12,8 @@ package org.openmrs.module.fhir2.api.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -47,19 +49,21 @@ public class FhirConceptServiceImplTest {
 	public void getConceptByUuid_shouldGetConceptByUuid() {
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
-		when(conceptDao.getConceptByUuid(CONCEPT_UUID)).thenReturn(Optional.of(concept));
+		when(conceptDao.get(CONCEPT_UUID)).thenReturn(concept);
 		
-		Optional<Concept> result = fhirConceptService.getConceptByUuid(CONCEPT_UUID);
-		assertThat(result.isPresent(), is(true));
-		assertThat(result.get().getUuid(), equalTo(CONCEPT_UUID));
+		Concept result = fhirConceptService.get(CONCEPT_UUID);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(CONCEPT_UUID));
 	}
 	
 	@Test
 	public void getConceptByUuid_shouldReturnNullWhenConceptUuidNotFound() {
-		when(conceptDao.getConceptByUuid(BAD_CONCEPT_UUID)).thenReturn(Optional.empty());
+		when(conceptDao.get(BAD_CONCEPT_UUID)).thenReturn(null);
 		
-		Optional<Concept> result = fhirConceptService.getConceptByUuid(BAD_CONCEPT_UUID);
-		assertThat(result.isPresent(), is(false));
+		Concept result = fhirConceptService.get(BAD_CONCEPT_UUID);
+		
+		assertThat(result, nullValue());
 	}
 	
 	@Test

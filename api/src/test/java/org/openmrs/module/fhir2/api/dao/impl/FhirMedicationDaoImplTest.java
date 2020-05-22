@@ -62,8 +62,6 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private FhirMedicationDaoImpl medicationDao;
 	
-	private BaseFhirDao<Drug> baseFhirDao;
-	
 	@Before
 	public void setup() throws Exception {
 		medicationDao = new FhirMedicationDaoImpl();
@@ -134,7 +132,7 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 		Drug drug = new Drug();
 		drug.setUuid(NEW_MEDICATION_UUID);
 		
-		Concept concept = fhirConceptDao.getConceptByUuid(NEW_CONCEPT_UUID).orElse(null);
+		Concept concept = fhirConceptDao.get(NEW_CONCEPT_UUID);
 		drug.setConcept(concept);
 		
 		DrugIngredient ingredient = new DrugIngredient();

@@ -394,7 +394,7 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 		newAllergy.setAllergen(existing.getAllergen());
 		newAllergy.setUuid(NEW_ALLERGY_UUID);
 		
-		Concept codedReaction = fhirConceptDao.getConceptByUuid(CODED_REACTION_UUID).orElse(null);
+		Concept codedReaction = fhirConceptDao.get(CODED_REACTION_UUID);
 		
 		AllergyReaction reaction = new AllergyReaction(newAllergy, codedReaction, "Test Reaction");
 		newAllergy.addReaction(reaction);
