@@ -11,25 +11,12 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirServiceRequestDaoImpl implements FhirServiceRequestDao<TestOrder> {
+public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements FhirServiceRequestDao<TestOrder> {
 	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Override
-	public TestOrder getServiceRequestByUuid(String uuid) {
-		return (TestOrder) sessionFactory.getCurrentSession().createCriteria(TestOrder.class)
-		        .add(Restrictions.eq("uuid", uuid)).uniqueResult();
-	}
 }

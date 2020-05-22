@@ -62,7 +62,7 @@ public class ServiceRequestFhirResourceProviderTest {
 	public void getServiceRequestById_shouldReturnServiceRequest() {
 		IdType id = new IdType();
 		id.setValue(SERVICE_REQUEST_UUID);
-		when(serviceRequestService.getServiceRequestByUuid(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);
+		when(serviceRequestService.get(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);
 		
 		ServiceRequest result = resourceProvider.getServiceRequestById(id);
 		assertThat(result.isResource(), is(true));

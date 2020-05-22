@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.TestOrder;
 
-public interface ServiceRequestTranslator<T> extends ToFhirTranslator<T, ServiceRequest> {
+public interface ServiceRequestTranslator<T> extends OpenmrsFhirTranslator<T, ServiceRequest> {
 	
 	/**
 	 * Maps a {@link TestOrder} to a {@link ServiceRequest}

@@ -49,7 +49,7 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirResourceP
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setId(SERVICE_REQUEST_UUID);
 		
-		when(service.getServiceRequestByUuid(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);
+		when(service.get(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);
 		
 		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
 		

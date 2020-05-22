@@ -57,7 +57,7 @@ public class ObservationBasedOnReferenceTranslatorImpl extends BaseReferenceHand
 		}
 		
 		if (reference.getType().equals(FhirConstants.SERVICE_REQUEST)) {
-			return serviceRequestDao.getServiceRequestByUuid(uuid);
+			return serviceRequestDao.get(uuid);
 		}
 		
 		return medicationRequestDao.get(uuid);
