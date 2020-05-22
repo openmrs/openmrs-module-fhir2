@@ -21,9 +21,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 
-public interface FhirLocationDao {
-	
-	Location getLocationByUuid(@NotNull String uuid);
+public interface FhirLocationDao extends FhirDao<Location> {
 	
 	Collection<Location> searchForLocations(StringAndListParam name, StringAndListParam city, StringAndListParam country,
 	        StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,

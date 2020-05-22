@@ -39,6 +39,6 @@ public class EncounterLocationTranslatorImpl extends BaseReferenceHandlingTransl
 	@Override
 	public Location toOpenmrsType(Encounter.EncounterLocationComponent encounterLocationComponent) {
 		String locationUuid = getReferenceId(encounterLocationComponent.getLocation());
-		return locationTranslator.toOpenmrsType(locationService.getLocationByUuid(locationUuid));
+		return locationTranslator.toOpenmrsType(locationService.get(locationUuid));
 	}
 }

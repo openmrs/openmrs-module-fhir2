@@ -120,7 +120,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 	public void getLocationById_shouldReturnLocationWithMatchingUuid() throws Exception {
 		Location location = new Location();
 		location.setId(LOCATION_UUID);
-		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		when(locationService.get(LOCATION_UUID)).thenReturn(location);
 		
 		MockHttpServletResponse response = get("/Location/" + LOCATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -326,7 +326,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 	
 	@Test
 	public void shouldReturn404IfLocationNotFound() throws Exception {
-		when(locationService.getLocationByUuid(WRONG_LOCATION_UUID)).thenReturn(null);
+		when(locationService.get(WRONG_LOCATION_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/Location/" + WRONG_LOCATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -337,7 +337,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 	public void shouldVerifyGetLocationHistoryByIdUri() throws Exception {
 		Location location = new Location();
 		location.setId(LOCATION_UUID);
-		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		when(locationService.get(LOCATION_UUID)).thenReturn(location);
 		
 		MockHttpServletResponse response = getLocationHistoryByIdRequest();
 		
@@ -361,7 +361,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		location.setId(LOCATION_UUID);
 		location.addContained(provenance);
 		
-		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		when(locationService.get(LOCATION_UUID)).thenReturn(location);
 		
 		MockHttpServletResponse response = getLocationHistoryByIdRequest();
 		
@@ -379,7 +379,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirResourceProvide
 		Location location = new Location();
 		location.setId(LOCATION_UUID);
 		location.setContained(new ArrayList<>());
-		when(locationService.getLocationByUuid(LOCATION_UUID)).thenReturn(location);
+		when(locationService.get(LOCATION_UUID)).thenReturn(location);
 		
 		MockHttpServletResponse response = getLocationHistoryByIdRequest();
 		Bundle results = readBundleResponse(response);
