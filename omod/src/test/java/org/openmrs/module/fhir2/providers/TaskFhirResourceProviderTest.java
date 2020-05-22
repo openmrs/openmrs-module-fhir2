@@ -83,7 +83,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	public void getTaskById_shouldReturnMatchingTask() {
 		IdType id = new IdType();
 		id.setValue(TASK_UUID);
-		when(taskService.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(taskService.getTask(TASK_UUID)).thenReturn(task);
 		
 		Task result = resourceProvider.getTaskById(id);
 		
@@ -106,7 +106,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	public void getTaskHistoryById_shouldReturnListOfResource() {
 		IdType id = new IdType();
 		id.setValue(TASK_UUID);
-		when(taskService.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(taskService.getTask(TASK_UUID)).thenReturn(task);
 		
 		List<Resource> resources = resourceProvider.getTaskHistoryById(id);
 		assertThat(resources, Matchers.notNullValue());
@@ -118,7 +118,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	public void getTaskHistoryById_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(TASK_UUID);
-		when(taskService.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(taskService.getTask(TASK_UUID)).thenReturn(task);
 		
 		List<Resource> resources = resourceProvider.getTaskHistoryById(id);
 		assertThat(resources, not(empty()));

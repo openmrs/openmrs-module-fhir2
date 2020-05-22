@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirTaskServiceImpl implements FhirTaskService {
+public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> implements FhirTaskService {
 	
 	@Autowired
 	private FhirTaskDao dao;
@@ -50,8 +50,8 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public Task getTaskByUuid(String uuid) {
-		return translator.toFhirResource(dao.getTaskByUuid(uuid));
+	public Task getTask(String uuid) {
+		return translator.toFhirResource(dao.getTask(uuid));
 	}
 	
 	/**
@@ -85,7 +85,7 @@ public class FhirTaskServiceImpl implements FhirTaskService {
 		FhirTask openmrsTask = null;
 		
 		if (uuid != null) {
-			openmrsTask = dao.getTaskByUuid(task.getId());
+			openmrsTask = dao.getTask(task.getId());
 		}
 		
 		if (openmrsTask == null) {

@@ -79,7 +79,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 		
 		task = new Task();
 		task.setId(TASK_UUID);
-		when(service.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(service.getTask(TASK_UUID)).thenReturn(task);
 	}
 	
 	@Test

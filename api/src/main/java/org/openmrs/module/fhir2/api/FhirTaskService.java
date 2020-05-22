@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.Task;
 /**
  * Contains methods pertaining to creating/updating/voiding Tasks
  */
-public interface FhirTaskService {
+public interface FhirTaskService extends FhirService<Task> {
 	
 	/**
 	 * Get task by the UUID
@@ -28,7 +28,7 @@ public interface FhirTaskService {
 	 * @param uuid
 	 * @return task with given internal identifier
 	 */
-	Task getTaskByUuid(String uuid);
+	Task getTask(String uuid);
 	
 	/**
 	 * Save task to the DB

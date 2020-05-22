@@ -75,17 +75,17 @@ public class FhirTaskServiceImplTest {
 	}
 	
 	@Test
-	public void getTaskByUuid_shouldRetrieveTaskByUuid() {
+	public void getTask_shouldRetrieveTaskByUuid() {
 		FhirTask task = new FhirTask();
 		org.hl7.fhir.r4.model.Task translatedTask = new org.hl7.fhir.r4.model.Task();
 		
 		task.setUuid(TASK_UUID);
 		translatedTask.setId(TASK_UUID);
 		
-		when(dao.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(dao.getTask(TASK_UUID)).thenReturn(task);
 		when(translator.toFhirResource(task)).thenReturn(translatedTask);
 		
-		org.hl7.fhir.r4.model.Task result = fhirTaskService.getTaskByUuid(TASK_UUID);
+		org.hl7.fhir.r4.model.Task result = fhirTaskService.getTask(TASK_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(translatedTask));
@@ -133,7 +133,7 @@ public class FhirTaskServiceImplTest {
 		
 		when(translator.toOpenmrsType(openmrsTask, fhirTask)).thenReturn(updatedOpenmrsTask);
 		when(dao.saveTask(updatedOpenmrsTask)).thenReturn(updatedOpenmrsTask);
-		when(dao.getTaskByUuid(TASK_UUID)).thenReturn(openmrsTask);
+		when(dao.getTask(TASK_UUID)).thenReturn(openmrsTask);
 		when(translator.toFhirResource(updatedOpenmrsTask)).thenReturn(fhirTask);
 		
 		org.hl7.fhir.r4.model.Task result = fhirTaskService.updateTask(TASK_UUID, fhirTask);
@@ -162,7 +162,7 @@ public class FhirTaskServiceImplTest {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		fhirTask.setId(WRONG_TASK_UUID);
 		
-		when(dao.getTaskByUuid(WRONG_TASK_UUID)).thenReturn(null);
+		when(dao.getTask(WRONG_TASK_UUID)).thenReturn(null);
 		
 		fhirTaskService.updateTask(WRONG_TASK_UUID, fhirTask);
 	}

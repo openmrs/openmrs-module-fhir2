@@ -55,7 +55,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@Read
 	@SuppressWarnings("unused")
 	public Task getTaskById(@IdParam IdType id) {
-		Task task = service.getTaskByUuid(id.getIdPart());
+		Task task = service.getTask(id.getIdPart());
 		if (task == null) {
 			throw new ResourceNotFoundException("Could not find Task with Id " + id.getIdPart());
 		}
@@ -65,7 +65,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getTaskHistoryById(@IdParam IdType id) {
-		Task task = service.getTaskByUuid(id.getIdPart());
+		Task task = service.getTask(id.getIdPart());
 		if (task == null) {
 			throw new ResourceNotFoundException("Could not find Task with Id " + id.getIdPart());
 		}

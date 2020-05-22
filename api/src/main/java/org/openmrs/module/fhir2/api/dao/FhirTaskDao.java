@@ -19,14 +19,15 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.module.fhir2.FhirTask;
 
-public interface FhirTaskDao {
+public interface FhirTaskDao extends FhirDao<FhirTask> {
 	
-	FhirTask saveTask(FhirTask task);
+	FhirTask getTask(@NotNull String taskUUID);
 	
-	FhirTask getTaskByUuid(@NotNull String taskUUID);
-	
+	//Do we need this line
 	Collection<FhirTask> getTasksByBasedOnUuid(Class<? extends DomainResource> resourceType, String uuid);
 	
 	Collection<FhirTask> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
 	        TokenAndListParam status, SortSpec sort);
+	
+	FhirTask saveTask(FhirTask task);
 }
