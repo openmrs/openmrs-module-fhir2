@@ -33,18 +33,18 @@ public class FhirRelatedPersonServiceImplTest {
 	private static final String WRONG_RELATED_PERSON_UUID = "1a1d2623-2f67-47de-8fb0-b02f51e378b7";
 	
 	@Mock
-	private FhirRelatedPersonDao relatedPersonDao;
+	private FhirRelatedPersonDao dao;
 	
 	@Mock
-	private RelatedPersonTranslator relatedPersonTranslator;
+	private RelatedPersonTranslator translator;
 	
 	private FhirRelatedPersonServiceImpl relatedPersonService;
 	
 	@Before
 	public void setup() {
 		relatedPersonService = new FhirRelatedPersonServiceImpl();
-		relatedPersonService.setFhirRelatedPersonDao(relatedPersonDao);
-		relatedPersonService.setRelatedPersonTranslator(relatedPersonTranslator);
+		relatedPersonService.setDao(dao);
+		relatedPersonService.setTranslator(translator);
 	}
 	
 	@Test
@@ -55,10 +55,10 @@ public class FhirRelatedPersonServiceImplTest {
 		RelatedPerson relatedPerson = new RelatedPerson();
 		relatedPerson.setId(RELATED_PERSON_UUID);
 		
-		when(relatedPersonDao.getRelationshipByUuid(RELATED_PERSON_UUID)).thenReturn(relationship);
-		when(relatedPersonTranslator.toFhirResource(relationship)).thenReturn(relatedPerson);
+		when(dao.get(RELATED_PERSON_UUID)).thenReturn(relationship);
+		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		
-		RelatedPerson result = relatedPersonService.getRelatedPersonById(RELATED_PERSON_UUID);
+		RelatedPerson result = relatedPersonService.get(RELATED_PERSON_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(RELATED_PERSON_UUID));
@@ -66,7 +66,7 @@ public class FhirRelatedPersonServiceImplTest {
 	
 	@Test
 	public void shouldReturnNullWhenGetByWrongUuid() {
-		when(relatedPersonDao.getRelationshipByUuid(WRONG_RELATED_PERSON_UUID)).thenReturn(null);
-		assertThat(relatedPersonService.getRelatedPersonById(WRONG_RELATED_PERSON_UUID), nullValue());
+		when(dao.get(WRONG_RELATED_PERSON_UUID)).thenReturn(null);
+		assertThat(relatedPersonService.get(WRONG_RELATED_PERSON_UUID), nullValue());
 	}
 }

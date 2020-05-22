@@ -99,4 +99,9 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		
 		return relatedPerson;
 	}
+	
+	@Override
+	public Relationship toOpenmrsType(RelatedPerson resource) {
+		throw new UnsupportedOperationException();
+	}
 }

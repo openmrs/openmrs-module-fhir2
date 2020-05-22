@@ -59,7 +59,7 @@ public class RelatedPersonFhirResourceProviderTest {
 	
 	@Test
 	public void getRelatedPersonById_shouldReturnMatchingRelatedPerson() {
-		when(relatedPersonService.getRelatedPersonById(RELATED_PERSON_UUID)).thenReturn(relatedPerson);
+		when(relatedPersonService.get(RELATED_PERSON_UUID)).thenReturn(relatedPerson);
 		IdType id = new IdType();
 		id.setValue(RELATED_PERSON_UUID);
 		RelatedPerson relatedPerson = resourceProvider.getRelatedPersonById(id);

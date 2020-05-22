@@ -13,13 +13,8 @@ import javax.validation.constraints.NotNull;
 
 import org.hl7.fhir.r4.model.RelatedPerson;
 
-public interface FhirRelatedPersonService {
+public interface FhirRelatedPersonService extends FhirService<RelatedPerson> {
 	
-	/**
-	 * Get {@link org.hl7.fhir.r4.model.RelatedPerson} by Id
-	 * 
-	 * @param Id the Id of related person
-	 * @return corresponding {@link org.hl7.fhir.r4.model.RelatedPerson} resource
-	 */
-	RelatedPerson getRelatedPersonById(@NotNull String Id);
+	@Override
+	RelatedPerson get(@NotNull String uuid);
 }
