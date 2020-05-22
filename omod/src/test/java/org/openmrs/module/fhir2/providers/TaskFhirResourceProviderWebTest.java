@@ -79,7 +79,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 		
 		task = new Task();
 		task.setId(TASK_UUID);
-		when(service.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(service.get(TASK_UUID)).thenReturn(task);
 	}
 	
 	@Test
@@ -93,7 +93,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 	
 	@Test
 	public void getTaskByWrongUuid_shouldReturn404() throws Exception {
-		when(service.getTaskByUuid(WRONG_TASK_UUID)).thenReturn(null);
+		when(service.get(WRONG_TASK_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -162,7 +162,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 			jsonTask = IOUtils.toString(is);
 		}
 		
-		when(service.saveTask(any(Task.class))).thenReturn(task);
+		when(service.create(any(Task.class))).thenReturn(task);
 		
 		MockHttpServletResponse response = post("/Task").jsonContent(jsonTask).accept(FhirMediaTypes.JSON).go();
 		
@@ -176,7 +176,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 			jsonTask = IOUtils.toString(is);
 		}
 		
-		when(service.updateTask(anyString(), any(Task.class))).thenReturn(task);
+		when(service.update(anyString(), any(Task.class))).thenReturn(task);
 		
 		MockHttpServletResponse response = put("/Task/" + TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON).go();
 		
@@ -217,7 +217,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirResourceProviderTes
 			jsonTask = IOUtils.toString(is);
 		}
 		
-		when(service.updateTask(eq(WRONG_TASK_UUID), any(Task.class)))
+		when(service.update(eq(WRONG_TASK_UUID), any(Task.class)))
 		        .thenThrow(new MethodNotAllowedException("Can't find Task"));
 		
 		MockHttpServletResponse response = put("/Task/" + WRONG_TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON)

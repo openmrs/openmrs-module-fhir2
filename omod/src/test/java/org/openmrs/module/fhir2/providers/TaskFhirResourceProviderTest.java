@@ -83,7 +83,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	public void getTaskById_shouldReturnMatchingTask() {
 		IdType id = new IdType();
 		id.setValue(TASK_UUID);
-		when(taskService.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(taskService.get(TASK_UUID)).thenReturn(task);
 		
 		Task result = resourceProvider.getTaskById(id);
 		
@@ -106,7 +106,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	public void getTaskHistoryById_shouldReturnListOfResource() {
 		IdType id = new IdType();
 		id.setValue(TASK_UUID);
-		when(taskService.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(taskService.get(TASK_UUID)).thenReturn(task);
 		
 		List<Resource> resources = resourceProvider.getTaskHistoryById(id);
 		assertThat(resources, Matchers.notNullValue());
@@ -118,7 +118,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	public void getTaskHistoryById_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(TASK_UUID);
-		when(taskService.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(taskService.get(TASK_UUID)).thenReturn(task);
 		
 		List<Resource> resources = resourceProvider.getTaskHistoryById(id);
 		assertThat(resources, not(empty()));
@@ -137,7 +137,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	
 	@Test
 	public void createTask_shouldCreateNewTask() {
-		when(taskService.saveTask(task)).thenReturn(task);
+		when(taskService.create(task)).thenReturn(task);
 		
 		MethodOutcome result = resourceProvider.createTask(task);
 		assertThat(result.getResource(), equalTo(task));
@@ -145,7 +145,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	
 	@Test
 	public void updateTask_shouldUpdateTask() {
-		when(taskService.updateTask(TASK_UUID, task)).thenReturn(task);
+		when(taskService.update(TASK_UUID, task)).thenReturn(task);
 		
 		IdType uuid = new IdType();
 		uuid.setValue(TASK_UUID);
@@ -156,7 +156,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateTask_shouldThrowInvalidRequestForTaskUuidMismatch() {
-		when(taskService.updateTask(WRONG_TASK_UUID, task)).thenThrow(InvalidRequestException.class);
+		when(taskService.update(WRONG_TASK_UUID, task)).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), task);
 	}
@@ -165,7 +165,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	public void updateTask_shouldThrowInvalidRequestIfTaskHasNoUuid() {
 		Task noIdTask = new Task();
 		
-		when(taskService.updateTask(TASK_UUID, noIdTask)).thenThrow(InvalidRequestException.class);
+		when(taskService.update(TASK_UUID, noIdTask)).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateTask(new IdType().setValue(TASK_UUID), noIdTask);
 	}
@@ -175,7 +175,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		Task wrongTask = new Task();
 		wrongTask.setId(WRONG_TASK_UUID);
 		
-		when(taskService.updateTask(WRONG_TASK_UUID, wrongTask)).thenThrow(MethodNotAllowedException.class);
+		when(taskService.update(WRONG_TASK_UUID, wrongTask)).thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), wrongTask);
 	}

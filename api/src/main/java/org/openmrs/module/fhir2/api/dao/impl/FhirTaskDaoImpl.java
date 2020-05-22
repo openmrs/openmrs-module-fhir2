@@ -16,62 +16,30 @@ import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Optional;
 
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
+@Getter(AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)
-public class FhirTaskDaoImpl extends BaseDao implements FhirTaskDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	SessionFactory sessionFactory;
-	
-	@Override
-	public FhirTask saveTask(FhirTask task) throws DAOException {
-		// TODO: Refactor - and figure out why CascadeType.ALL does not take care of this.
-		if (task.getOwnerReference() != null && task.getOwnerReference().getReference() != null) {
-			sessionFactory.getCurrentSession().saveOrUpdate(task.getOwnerReference());
-		}
-		
-		sessionFactory.getCurrentSession().saveOrUpdate(task);
-		
-		return task;
-	}
-	
-	@Override
-	public FhirTask getTaskByUuid(String uuid) {
-		return (FhirTask) sessionFactory.getCurrentSession().createCriteria(FhirTask.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
-	
-	@Override
-	public Collection<FhirTask> getTasksByBasedOnUuid(Class<? extends DomainResource> clazz, String uuid) {
-		return (Collection<FhirTask>) sessionFactory.getCurrentSession().createCriteria(FhirTask.class)
-		        .createAlias("basedOnReferences", "bo").add(eq("bo.type", clazz.getAnnotation(ResourceDef.class).name()))
-		        .add(eq("bo.reference", uuid)).list();
-	}
+public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDao {
 	
 	@Override
 	public Collection<FhirTask> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
 	        TokenAndListParam status, SortSpec sort) {
 		
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirTask.class);
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(FhirTask.class);
 		
 		// TODO: Refactor with BaseDaoImpl search support
 		// TODO: Handle optional params
@@ -94,6 +62,18 @@ public class FhirTaskDaoImpl extends BaseDao implements FhirTaskDao {
 		handleSort(criteria, sort);
 		
 		return criteria.list();
+	}
+	
+	@Override
+	public FhirTask createOrUpdate(FhirTask task) throws DAOException {
+		// TODO: Refactor - and figure out why CascadeType.ALL does not take care of this.
+		if (task.getOwnerReference() != null && task.getOwnerReference().getReference() != null) {
+			getSessionFactory().getCurrentSession().saveOrUpdate(task.getOwnerReference());
+		}
+		
+		getSessionFactory().getCurrentSession().saveOrUpdate(task);
+		
+		return task;
 	}
 	
 	@Override

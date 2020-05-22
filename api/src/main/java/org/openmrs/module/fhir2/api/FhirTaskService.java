@@ -14,13 +14,12 @@ import java.util.Collection;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Task;
 
 /**
  * Contains methods pertaining to creating/updating/voiding Tasks
  */
-public interface FhirTaskService {
+public interface FhirTaskService extends FhirService<Task> {
 	
 	/**
 	 * Get task by the UUID
@@ -28,7 +27,7 @@ public interface FhirTaskService {
 	 * @param uuid
 	 * @return task with given internal identifier
 	 */
-	Task getTaskByUuid(String uuid);
+	Task get(String uuid);
 	
 	/**
 	 * Save task to the DB
@@ -36,7 +35,7 @@ public interface FhirTaskService {
 	 * @param task the task to save
 	 * @return the saved task
 	 */
-	Task saveTask(Task task);
+	Task create(Task task);
 	
 	/**
 	 * Save task to the DB
@@ -44,16 +43,7 @@ public interface FhirTaskService {
 	 * @param task the task to save
 	 * @return the saved task
 	 */
-	Task updateTask(String uuid, Task task);
-	
-	/**
-	 * Get list of tasks that reference the object type/UUID combo provided
-	 * 
-	 * @param obj FHIR ServiceRequest or MedicationRequest or CarePlan class
-	 * @param uuid
-	 * @return the collection of Tasks where the basedOn field points to the given object
-	 */
-	Collection<Task> getTasksByBasedOn(Class<? extends DomainResource> obj, String uuid);
+	Task update(String uuid, Task task);
 	
 	/**
 	 * Get list of tasks that reference the object type/UUID combo provided
