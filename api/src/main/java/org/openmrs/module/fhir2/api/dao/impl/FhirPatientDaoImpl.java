@@ -41,12 +41,6 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	public Patient getPatientByUuid(String uuid) {
-		return (Patient) getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
-	
-	@Override
 	@SuppressWarnings("unchecked")
 	public PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid) {
 		List<PatientIdentifierType> identifierTypes = (List<PatientIdentifierType>) getSessionFactory().getCurrentSession()

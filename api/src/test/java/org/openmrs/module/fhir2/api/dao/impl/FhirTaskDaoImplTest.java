@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hibernate.SessionFactory;
-import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
@@ -99,7 +98,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getTaskByUuid_shouldRetrieveTaskByUuid() {
-		FhirTask result = dao.getTaskByUuid(TASK_UUID);
+		FhirTask result = dao.get(TASK_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(TASK_UUID));
@@ -112,9 +111,9 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		newTask.setName(TASK_INTENT.toString());
 		newTask.setIntent(TASK_INTENT);
 		
-		dao.saveTask(newTask);
+		dao.createOrUpdate(newTask);
 		
-		FhirTask result = dao.getTaskByUuid(TASK_UUID);
+		FhirTask result = dao.get(TASK_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getStatus(), equalTo(NEW_STATUS));
@@ -122,17 +121,17 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void saveTask_shouldUpdateTaskStatus() {
-		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
+		FhirTask toUpdate = dao.get(TASK_UUID);
 		toUpdate.setStatus(NEW_STATUS);
 		
-		dao.saveTask(toUpdate);
+		dao.createOrUpdate(toUpdate);
 		
-		assertThat(dao.getTaskByUuid(TASK_UUID).getStatus(), equalTo(NEW_STATUS));
+		assertThat(dao.get(TASK_UUID).getStatus(), equalTo(NEW_STATUS));
 	}
 	
 	@Test
 	public void saveTask_shouldUpdateOwnerReference() {
-		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
+		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference ownerReference = new FhirReference();
 		ownerReference.setType(FhirConstants.PRACTITIONER);
@@ -141,9 +140,9 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		toUpdate.setOwnerReference(ownerReference);
 		
-		dao.saveTask(toUpdate);
+		dao.createOrUpdate(toUpdate);
 		
-		FhirTask result = dao.getTaskByUuid(TASK_UUID);
+		FhirTask result = dao.get(TASK_UUID);
 		
 		assertThat(result.getOwnerReference(), notNullValue());
 		assertThat(result.getOwnerReference().getId(), notNullValue());
@@ -153,7 +152,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void saveTask_shouldUpdateForReference() {
-		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
+		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference forReference = new FhirReference();
 		forReference.setType(FhirConstants.PATIENT);
@@ -162,9 +161,9 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		toUpdate.setForReference(forReference);
 		
-		dao.saveTask(toUpdate);
+		dao.createOrUpdate(toUpdate);
 		
-		FhirTask result = dao.getTaskByUuid(TASK_UUID);
+		FhirTask result = dao.get(TASK_UUID);
 		
 		assertThat(result.getForReference(), notNullValue());
 		assertThat(result.getForReference().getId(), notNullValue());
@@ -174,7 +173,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void saveTask_shouldUpdateEncounterReference() {
-		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
+		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference forReference = new FhirReference();
 		forReference.setType(FhirConstants.ENCOUNTER);
@@ -183,9 +182,9 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		toUpdate.setEncounterReference(forReference);
 		
-		dao.saveTask(toUpdate);
+		dao.createOrUpdate(toUpdate);
 		
-		FhirTask result = dao.getTaskByUuid(TASK_UUID);
+		FhirTask result = dao.get(TASK_UUID);
 		
 		assertThat(result.getEncounterReference(), notNullValue());
 		assertThat(result.getEncounterReference().getId(), notNullValue());
@@ -195,7 +194,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void saveTask_shouldUpdateBasedOnReferences() {
-		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
+		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference basedOnReference = new FhirReference();
 		basedOnReference.setType(FhirConstants.SERVICE_REQUEST);
@@ -204,9 +203,9 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		toUpdate.setBasedOnReferences(Collections.singleton(basedOnReference));
 		
-		dao.saveTask(toUpdate);
+		dao.createOrUpdate(toUpdate);
 		
-		FhirTask result = dao.getTaskByUuid(TASK_UUID);
+		FhirTask result = dao.get(TASK_UUID);
 		
 		assertThat(result.getBasedOnReferences(), notNullValue());
 		assertThat(result.getBasedOnReferences().size(), greaterThan(0));
@@ -221,7 +220,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		HibernateConceptDAO cd = new HibernateConceptDAO();
 		cd.setSessionFactory(sessionFactory);
 		
-		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
+		FhirTask toUpdate = dao.get(TASK_UUID);
 		Double someNumericVal = 123123.11;
 		
 		Concept type = cd.getConceptByUuid(CONCEPT_UUID);
@@ -238,7 +237,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		toUpdate.setInput(Collections.singleton(input));
 		
-		FhirTask result = dao.getTaskByUuid(TASK_UUID);
+		FhirTask result = dao.get(TASK_UUID);
 		
 		assertThat(result.getInput(), notNullValue());
 		assertThat(result.getInput(), not(empty()));
@@ -255,7 +254,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		HibernateConceptDAO cd = new HibernateConceptDAO();
 		cd.setSessionFactory(sessionFactory);
 		
-		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
+		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference outputReference = new FhirReference();
 		outputReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
@@ -276,7 +275,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		
 		toUpdate.setOutput(Collections.singleton(output));
 		
-		FhirTask result = dao.getTaskByUuid(TASK_UUID);
+		FhirTask result = dao.get(TASK_UUID);
 		
 		assertThat(result.getOutput(), notNullValue());
 		assertThat(result.getOutput(), not(empty()));
@@ -288,7 +287,8 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getTasksByBasedOnUuid_shouldRetrieveTasksByBasedOn() {
-		Collection<FhirTask> results = dao.getTasksByBasedOnUuid(ServiceRequest.class, BASED_ON_ORDER_UUID);
+		Collection<FhirTask> results = dao.searchForTasks(new ReferenceParam("ServiceRequest", null, BASED_ON_ORDER_UUID),
+		    null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, not(empty()));
@@ -297,7 +297,8 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getTasksByBasedOnUuid_shouldReturnEmptyTaskListForOrderWithNoTask() {
-		Collection<FhirTask> results = dao.getTasksByBasedOnUuid(ServiceRequest.class, OTHER_ORDER_UUID);
+		Collection<FhirTask> results = dao.searchForTasks(new ReferenceParam("ServiceRequest", null, OTHER_ORDER_UUID), null,
+		    null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results, empty());
@@ -441,7 +442,7 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForTasks_shouldHandleNullBasedOnRefs() {
-		FhirTask toUpdate = dao.getTaskByUuid(TASK_UUID);
+		FhirTask toUpdate = dao.get(TASK_UUID);
 		
 		FhirReference nullTypeRef = new FhirReference();
 		nullTypeRef.setType(null);
@@ -451,9 +452,9 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		toUpdate.setOwnerReference(nullTypeRef);
 		toUpdate.setBasedOnReferences(Collections.singleton(nullTypeRef));
 		
-		dao.saveTask(toUpdate);
+		dao.createOrUpdate(toUpdate);
 		
-		FhirTask result = dao.getTaskByUuid(TASK_UUID);
+		FhirTask result = dao.get(TASK_UUID);
 		
 		assertThat(result.getBasedOnReferences(), notNullValue());
 		assertThat(result.getBasedOnReferences().size(), greaterThan(0));

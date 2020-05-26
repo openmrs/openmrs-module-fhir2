@@ -9,9 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
+import org.openmrs.Auditable;
+import org.openmrs.OpenmrsObject;
 
-public interface FhirServiceRequestDao<T> {
+public interface FhirServiceRequestDao<T extends OpenmrsObject & Auditable> extends FhirDao<T> {
 	
-	T getServiceRequestByUuid(@NotNull String uuid);
 }

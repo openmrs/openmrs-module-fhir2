@@ -78,8 +78,8 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			person.setTelecom(telecomTranslator.toFhirResource(openmrsPerson));
 			
 			if (openmrsPerson.getIsPatient()) {
-				person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent().setTarget(
-				    patientReferenceTranslator.toFhirResource(patientDao.getPatientByUuid(openmrsPerson.getUuid()))));
+				person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent()
+				        .setTarget(patientReferenceTranslator.toFhirResource(patientDao.get(openmrsPerson.getUuid()))));
 			}
 			person.getMeta().setLastUpdated(openmrsPerson.getDateChanged());
 			person.addContained(provenanceTranslator.getCreateProvenance(openmrsPerson));

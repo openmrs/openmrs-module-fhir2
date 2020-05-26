@@ -53,7 +53,7 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	
 	@Test
 	public void shouldRetrieveTestOrderByUuid() {
-		TestOrder result = dao.getServiceRequestByUuid(TEST_ORDER_UUID);
+		TestOrder result = dao.get(TEST_ORDER_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, instanceOf(TestOrder.class));
@@ -63,13 +63,13 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	
 	@Test
 	public void shouldReturnNullIfUuidNotFound() {
-		TestOrder result = dao.getServiceRequestByUuid(WRONG_UUID);
+		TestOrder result = dao.get(WRONG_UUID);
 		assertThat(result, nullValue());
 	}
 	
 	@Test
 	public void shouldReturnNullIfUuidIsNotValidTestOrder() {
-		TestOrder result = dao.getServiceRequestByUuid(OTHER_ORDER_UUID);
+		TestOrder result = dao.get(OTHER_ORDER_UUID);
 		assertThat(result, nullValue());
 	}
 }

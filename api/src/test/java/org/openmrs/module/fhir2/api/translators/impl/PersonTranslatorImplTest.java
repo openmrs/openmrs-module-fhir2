@@ -385,7 +385,7 @@ public class PersonTranslatorImplTest {
 		patientReference.setReference(FhirConstants.PATIENT + "/" + PERSON_UUID);
 		
 		when(personMock.getIsPatient()).thenReturn(true);
-		when(patientDao.getPatientByUuid(personMock.getUuid())).thenReturn(patient);
+		when(patientDao.get(personMock.getUuid())).thenReturn(patient);
 		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientReference);
 		
 		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(personMock);

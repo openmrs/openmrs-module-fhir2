@@ -48,7 +48,7 @@ public class RelatedPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getRelationshipByUuid_shouldReturnMatchingRelationship() {
-		Relationship relationship = relatedPersonDao.getRelationshipByUuid(RELATIONSHIP_UUID);
+		Relationship relationship = relatedPersonDao.get(RELATIONSHIP_UUID);
 		assertThat(relationship, notNullValue());
 		assertThat(relationship.getUuid(), notNullValue());
 		assertThat(relationship.getUuid(), equalTo(RELATIONSHIP_UUID));
@@ -56,7 +56,7 @@ public class RelatedPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getRelationshipWithWrongUuid_shouldReturnNull() {
-		Relationship relationship = relatedPersonDao.getRelationshipByUuid(BAD_RELATIONSHIP_UUID);
+		Relationship relationship = relatedPersonDao.get(BAD_RELATIONSHIP_UUID);
 		assertThat(relationship, nullValue());
 	}
 	

@@ -68,7 +68,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		
 		for (Coding coding : concept.getCoding()) {
 			if (!coding.hasSystem()) {
-				concept_ = conceptService.getConceptByUuid(coding.getCode()).orElse(null);
+				concept_ = conceptService.get(coding.getCode());
 				continue;
 			}
 			

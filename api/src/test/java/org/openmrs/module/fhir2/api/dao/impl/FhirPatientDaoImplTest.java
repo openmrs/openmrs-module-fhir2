@@ -176,7 +176,7 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getPatientByUuid_shouldRetrievePatientByUuid() {
-		Patient result = dao.getPatientByUuid(PATIENT_UUID);
+		Patient result = dao.get(PATIENT_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(PATIENT_UUID));
@@ -184,7 +184,7 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getPatientByUuid_shouldReturnNullIfPatientNotFound() {
-		Patient result = dao.getPatientByUuid(BAD_PATIENT_UUID);
+		Patient result = dao.get(BAD_PATIENT_UUID);
 		
 		assertThat(result, nullValue());
 	}

@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.api;
 
 import org.hl7.fhir.r4.model.ServiceRequest;
 
-public interface FhirServiceRequestService {
+public interface FhirServiceRequestService extends FhirService<ServiceRequest> {
 	
-	ServiceRequest getServiceRequestByUuid(String uuid);
 }

@@ -66,4 +66,9 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 		
 		return serviceRequest;
 	}
+	
+	@Override
+	public TestOrder toOpenmrsType(ServiceRequest resource) {
+		throw new UnsupportedOperationException();
+	}
 }

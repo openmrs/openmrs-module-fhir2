@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.TestOrder;
@@ -22,19 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
+@Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.PACKAGE)
-public class FhirServiceRequestServiceImpl implements FhirServiceRequestService {
+public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceRequest, TestOrder> implements FhirServiceRequestService {
 	
 	@Autowired
 	private ServiceRequestTranslator<TestOrder> translator;
 	
 	@Autowired
 	private FhirServiceRequestDao<TestOrder> dao;
-	
-	@Transactional(readOnly = true)
-	public ServiceRequest getServiceRequestByUuid(String uuid) {
-		TestOrder openmrsOrder = dao.getServiceRequestByUuid(uuid);
-		
-		return translator.toFhirResource(openmrsOrder);
-	}
 }

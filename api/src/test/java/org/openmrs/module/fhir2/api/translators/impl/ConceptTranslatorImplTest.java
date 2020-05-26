@@ -158,7 +158,7 @@ public class ConceptTranslatorImplTest {
 		
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
-		when(conceptService.getConceptByUuid(CONCEPT_UUID)).thenReturn(Optional.of(concept));
+		when(conceptService.get(CONCEPT_UUID)).thenReturn(concept);
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());
@@ -210,7 +210,7 @@ public class ConceptTranslatorImplTest {
 		
 		Concept defaultConcept = new Concept();
 		defaultConcept.setUuid(CONCEPT_UUID);
-		when(conceptService.getConceptByUuid(CONCEPT_UUID)).thenReturn(Optional.of(defaultConcept));
+		when(conceptService.get(CONCEPT_UUID)).thenReturn(defaultConcept);
 		
 		Concept loincConcept = new Concept();
 		ConceptMap conceptMap = new ConceptMap();

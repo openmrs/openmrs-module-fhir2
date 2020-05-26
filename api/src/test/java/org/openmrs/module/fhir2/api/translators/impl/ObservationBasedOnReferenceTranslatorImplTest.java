@@ -119,7 +119,7 @@ public class ObservationBasedOnReferenceTranslatorImplTest {
 		TestOrder order = new TestOrder();
 		order.setUuid(ORDER_UUID);
 		
-		when(orderDao.getServiceRequestByUuid(ORDER_UUID)).thenReturn(order);
+		when(orderDao.get(ORDER_UUID)).thenReturn(order);
 		
 		Order result = translator.toOpenmrsType(orderReference);
 		

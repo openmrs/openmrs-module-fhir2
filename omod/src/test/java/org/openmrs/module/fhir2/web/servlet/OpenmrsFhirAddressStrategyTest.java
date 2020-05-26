@@ -42,7 +42,7 @@ public class OpenmrsFhirAddressStrategyTest {
 	}
 	
 	@Test
-	public void should_determineServerBase() {
+	public void should_determineServerBaseR3() {
 		ServletContext servletContext = Mockito.mock(ServletContext.class);
 		HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
 		
@@ -50,9 +50,28 @@ public class OpenmrsFhirAddressStrategyTest {
 		when(httpServletRequest.getServerPort()).thenReturn(8080);
 		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
 		when(httpServletRequest.getServerName()).thenReturn("localhost");
+		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R3/Person");
 		
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
+		
 		assertThat(serverBase, notNullValue());
-		assertThat(serverBase, equalTo(FHIR_SERVER_BASE_URL));
+		assertThat(serverBase, equalTo(FHIR_SERVER_BASE_URL + "R3"));
+	}
+	
+	@Test
+	public void should_determineServerBaseR4() {
+		ServletContext servletContext = Mockito.mock(ServletContext.class);
+		HttpServletRequest httpServletRequest = Mockito.mock(HttpServletRequest.class);
+		
+		when(httpServletRequest.getScheme()).thenReturn("https");
+		when(httpServletRequest.getServerPort()).thenReturn(8080);
+		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
+		when(httpServletRequest.getServerName()).thenReturn("localhost");
+		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
+		
+		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
+		
+		assertThat(serverBase, notNullValue());
+		assertThat(serverBase, equalTo(FHIR_SERVER_BASE_URL + "R4"));
 	}
 }

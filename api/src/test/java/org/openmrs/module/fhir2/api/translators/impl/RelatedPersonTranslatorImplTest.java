@@ -274,7 +274,7 @@ public class RelatedPersonTranslatorImplTest {
 		
 		when(personMock.getIsPatient()).thenReturn(true);
 		when(personMock.getUuid()).thenReturn(PERSON_B_UUID);
-		when(patientDao.getPatientByUuid(PERSON_B_UUID)).thenReturn(patient);
+		when(patientDao.get(PERSON_B_UUID)).thenReturn(patient);
 		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientReference);
 		
 		RelatedPerson result = relatedPersonTranslator.toFhirResource(relationship);

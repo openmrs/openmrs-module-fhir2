@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -101,7 +102,7 @@ public class ServiceRequestTranslatorImplTest {
 		
 		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REQUESTED);
 		
-		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -116,7 +117,7 @@ public class ServiceRequestTranslatorImplTest {
 		
 		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REJECTED);
 		
-		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -131,7 +132,7 @@ public class ServiceRequestTranslatorImplTest {
 		
 		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.ACCEPTED);
 		
-		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -146,7 +147,7 @@ public class ServiceRequestTranslatorImplTest {
 		
 		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.COMPLETED);
 		
-		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -161,7 +162,7 @@ public class ServiceRequestTranslatorImplTest {
 		
 		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.DRAFT);
 		
-		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -174,7 +175,7 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
-		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(Collections.emptyList());
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(Collections.emptyList());
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -199,7 +200,7 @@ public class ServiceRequestTranslatorImplTest {
 		
 		Collection<Task> tasks = Arrays.asList(firstTask, secondTask);
 		
-		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -314,8 +315,7 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder order = new TestOrder();
 		order.setUuid(SERVICE_REQUEST_UUID);
 		
-		when(taskService.getTasksByBasedOn(ServiceRequest.class, SERVICE_REQUEST_UUID))
-		        .thenReturn(setUpPerformerScenario(ORGANIZATION_UUID));
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(setUpPerformerScenario(ORGANIZATION_UUID));
 		
 		Collection<Reference> result = translator.toFhirResource(order).getPerformer();
 		
@@ -356,11 +356,11 @@ public class ServiceRequestTranslatorImplTest {
 		return Collections.singletonList(task);
 	}
 	
-	private Collection<Task> setUpPerformerScenario(String performerUUID) {
+	private Collection<Task> setUpPerformerScenario(String performerUuid) {
 		Reference performerRef = new Reference();
 		Task task = new Task();
 		
-		performerRef.setReference(FhirConstants.ORGANIZATION + "/" + performerUUID);
+		performerRef.setReference(FhirConstants.ORGANIZATION + "/" + performerUuid);
 		performerRef.setType(FhirConstants.ORGANIZATION);
 		
 		task.setOwner(performerRef);

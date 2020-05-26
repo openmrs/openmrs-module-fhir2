@@ -20,14 +20,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,24 +71,24 @@ public class FhirTaskServiceImplTest {
 	}
 	
 	@Test
-	public void getTaskByUuid_shouldRetrieveTaskByUuid() {
+	public void getTask_shouldRetrieveTaskByUuid() {
 		FhirTask task = new FhirTask();
 		org.hl7.fhir.r4.model.Task translatedTask = new org.hl7.fhir.r4.model.Task();
 		
 		task.setUuid(TASK_UUID);
 		translatedTask.setId(TASK_UUID);
 		
-		when(dao.getTaskByUuid(TASK_UUID)).thenReturn(task);
+		when(dao.get(TASK_UUID)).thenReturn(task);
 		when(translator.toFhirResource(task)).thenReturn(translatedTask);
 		
-		org.hl7.fhir.r4.model.Task result = fhirTaskService.getTaskByUuid(TASK_UUID);
+		org.hl7.fhir.r4.model.Task result = fhirTaskService.get(TASK_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(translatedTask));
 	}
 	
 	@Test
-	public void saveTask_shouldSaveNewTask() {
+	public void saveTask_shouldCreateNewTask() {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		FhirTask openmrsTask = new FhirTask();
 		
@@ -104,10 +100,10 @@ public class FhirTaskServiceImplTest {
 		openmrsTask.setIntent(OPENMRS_TASK_INTENT);
 		
 		when(translator.toOpenmrsType(fhirTask)).thenReturn(openmrsTask);
-		when(dao.saveTask(openmrsTask)).thenReturn(openmrsTask);
+		when(dao.createOrUpdate(openmrsTask)).thenReturn(openmrsTask);
 		when(translator.toFhirResource(openmrsTask)).thenReturn(fhirTask);
 		
-		org.hl7.fhir.r4.model.Task result = fhirTaskService.saveTask(fhirTask);
+		org.hl7.fhir.r4.model.Task result = fhirTaskService.create(fhirTask);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(fhirTask));
@@ -132,11 +128,11 @@ public class FhirTaskServiceImplTest {
 		openmrsTask.setIntent(OPENMRS_TASK_INTENT);
 		
 		when(translator.toOpenmrsType(openmrsTask, fhirTask)).thenReturn(updatedOpenmrsTask);
-		when(dao.saveTask(updatedOpenmrsTask)).thenReturn(updatedOpenmrsTask);
-		when(dao.getTaskByUuid(TASK_UUID)).thenReturn(openmrsTask);
+		when(dao.createOrUpdate(updatedOpenmrsTask)).thenReturn(updatedOpenmrsTask);
+		when(dao.get(TASK_UUID)).thenReturn(openmrsTask);
 		when(translator.toFhirResource(updatedOpenmrsTask)).thenReturn(fhirTask);
 		
-		org.hl7.fhir.r4.model.Task result = fhirTaskService.updateTask(TASK_UUID, fhirTask);
+		org.hl7.fhir.r4.model.Task result = fhirTaskService.update(TASK_UUID, fhirTask);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(fhirTask));
@@ -147,14 +143,14 @@ public class FhirTaskServiceImplTest {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		fhirTask.setId(TASK_UUID);
 		
-		fhirTaskService.updateTask(WRONG_TASK_UUID, fhirTask);
+		fhirTaskService.update(WRONG_TASK_UUID, fhirTask);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateTask_shouldThrowInvalidRequestForMissingUuid() {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		
-		fhirTaskService.updateTask(TASK_UUID, fhirTask);
+		fhirTaskService.update(TASK_UUID, fhirTask);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -162,56 +158,9 @@ public class FhirTaskServiceImplTest {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		fhirTask.setId(WRONG_TASK_UUID);
 		
-		when(dao.getTaskByUuid(WRONG_TASK_UUID)).thenReturn(null);
+		when(dao.get(WRONG_TASK_UUID)).thenReturn(null);
 		
-		fhirTaskService.updateTask(WRONG_TASK_UUID, fhirTask);
-	}
-	
-	@Test
-	public void getTaskByBasedOn_shouldGetTasksByBasedOnServiceRequest() {
-		Collection<FhirTask> basedOnTasks;
-		Collection<org.hl7.fhir.r4.model.Task> basedOnFhirTasks;
-		
-		FhirTask t1 = new FhirTask();
-		t1.setId(1);
-		FhirTask t2 = new FhirTask();
-		t2.setId(2);
-		
-		org.hl7.fhir.r4.model.Task f1 = new org.hl7.fhir.r4.model.Task();
-		org.hl7.fhir.r4.model.Task f2 = new org.hl7.fhir.r4.model.Task();
-		
-		basedOnTasks = Arrays.asList(t1, t2);
-		basedOnFhirTasks = Arrays.asList(f1, f2);
-		
-		when(dao.getTasksByBasedOnUuid(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(basedOnTasks);
-		when(translator.toFhirResource(t1)).thenReturn(f1);
-		when(translator.toFhirResource(t2)).thenReturn(f2);
-		
-		Collection<org.hl7.fhir.r4.model.Task> result = fhirTaskService.getTasksByBasedOn(ServiceRequest.class,
-		    SERVICE_REQUEST_UUID);
-		
-		assertThat(result, notNullValue());
-		assertThat(result, equalTo(basedOnFhirTasks));
-	}
-	
-	@Test
-	public void shouldReturnEmptyListForTaskByBasedOnForUnsupportedResources() {
-		Collection<org.hl7.fhir.r4.model.Task> result = fhirTaskService.getTasksByBasedOn(Patient.class,
-		    SERVICE_REQUEST_UUID);
-		
-		assertThat(result, notNullValue());
-		assertThat(result, empty());
-	}
-	
-	@Test
-	public void shouldReturnEmptyListForNoAssociatedTasks() {
-		when(dao.getTasksByBasedOnUuid(ServiceRequest.class, SERVICE_REQUEST_UUID)).thenReturn(Collections.emptyList());
-		
-		Collection<org.hl7.fhir.r4.model.Task> result = fhirTaskService.getTasksByBasedOn(ServiceRequest.class,
-		    SERVICE_REQUEST_UUID);
-		
-		assertThat(result, notNullValue());
-		assertThat(result, empty());
+		fhirTaskService.update(WRONG_TASK_UUID, fhirTask);
 	}
 	
 	@Test

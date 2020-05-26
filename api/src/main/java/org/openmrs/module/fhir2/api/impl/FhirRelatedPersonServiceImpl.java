@@ -10,8 +10,10 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.RelatedPerson;
+import org.openmrs.Relationship;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
 import org.openmrs.module.fhir2.api.dao.FhirRelatedPersonDao;
 import org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator;
@@ -21,21 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
+@Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.PACKAGE)
-public class FhirRelatedPersonServiceImpl implements FhirRelatedPersonService {
+public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson, org.openmrs.Relationship> implements FhirRelatedPersonService {
 	
 	@Autowired
-	private FhirRelatedPersonDao fhirRelatedPersonDao;
+	private FhirRelatedPersonDao dao;
 	
 	@Autowired
-	private RelatedPersonTranslator relatedPersonTranslator;
+	private RelatedPersonTranslator translator;
 	
-	/**
-	 * @see org.openmrs.module.fhir2.api.FhirRelatedPersonService#getRelatedPersonById(java.lang.String)
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public RelatedPerson getRelatedPersonById(String Id) {
-		return relatedPersonTranslator.toFhirResource(fhirRelatedPersonDao.getRelationshipByUuid(Id));
-	}
 }

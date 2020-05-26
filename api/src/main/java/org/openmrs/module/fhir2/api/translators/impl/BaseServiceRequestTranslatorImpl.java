@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -26,7 +27,8 @@ public class BaseServiceRequestTranslatorImpl {
 	private FhirTaskService taskService;
 	
 	protected ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(String orderUuid) {
-		Collection<Task> serviceRequestTasks = taskService.getTasksByBasedOn(ServiceRequest.class, orderUuid);
+		Collection<Task> serviceRequestTasks = taskService
+		        .searchForTasks(new ReferenceParam("ServiceRequest", null, orderUuid), null, null, null);
 		
 		ServiceRequest.ServiceRequestStatus serviceRequestStatus = ServiceRequest.ServiceRequestStatus.UNKNOWN;
 		
@@ -54,7 +56,8 @@ public class BaseServiceRequestTranslatorImpl {
 	}
 	
 	protected Reference determineServiceRequestPerformer(String orderUuid) {
-		Collection<Task> serviceRequestTasks = taskService.getTasksByBasedOn(ServiceRequest.class, orderUuid);
+		Collection<Task> serviceRequestTasks = taskService
+		        .searchForTasks(new ReferenceParam("ServiceRequest", null, orderUuid), null, null, null);
 		
 		if (serviceRequestTasks.size() != 1) {
 			return null;
