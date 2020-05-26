@@ -56,11 +56,14 @@ public class FhirConstants {
 	
 	public static final String RESOURCE_TYPES_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/resource-types";
 	
+	public static final String OBSERVATION_REFERENCE_RANGE_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
+	        + "/referencerange-meaning";
+	
 	public static final String OBSERVATION_REFERENCE_NORMAL = "normal";
 	
 	public static final String OBSERVATION_REFERENCE_TREATMENT = "treatment";
 	
-	public static final String OBSERVATION_REFERENCE_RANGE_URI = "http://terminology.hl7.org/CodeSystem/referencerange-meaning";
+	public static final String OBSERVATION_CATEGORY_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/observation-category";
 	
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
@@ -144,6 +147,8 @@ public class FhirConstants {
 	public static final String PATIENT_REFERENCE_SEARCH_HANDLER = "patient.reference.search.handler";
 	
 	public static final String CODED_SEARCH_HANDLER = "coded.search.handler";
+	
+	public static final String CATEGORY_SEARCH_HANDLER = "category.search.handler";
 	
 	public static final String VALUE_CODED_SEARCH_HANDLER = "value.coded.search.handler";
 	

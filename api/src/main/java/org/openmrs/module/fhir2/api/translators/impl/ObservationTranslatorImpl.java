@@ -23,6 +23,7 @@ import org.openmrs.Person;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationBasedOnReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationCategoryTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationEffectiveDatetimeTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationInterpretationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceRangeTranslator;
@@ -50,6 +51,9 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
+	
+	@Autowired
+	private ObservationCategoryTranslator categoryTranslator;
 	
 	@Autowired
 	private EncounterReferenceTranslator encounterReferenceTranslator;
@@ -93,6 +97,7 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		}
 		
 		obs.setCode(conceptTranslator.toFhirResource(observation.getConcept()));
+		obs.addCategory(categoryTranslator.toFhirResource(observation.getConcept()));
 		
 		if (observation.isObsGrouping()) {
 			for (Obs groupObs : observation.getGroupMembers()) {

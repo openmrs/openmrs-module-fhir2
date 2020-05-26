@@ -103,7 +103,7 @@ public class FhirObservationServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
 		
 		IBundleProvider results = fhirObservationService.searchForObservations(null, patientReference, null, null, null,
-		    null, null, null, null, null);
+		    null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));

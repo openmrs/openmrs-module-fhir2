@@ -82,6 +82,8 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 	
 	public abstract void describeOperationOutcome(Description mismatchDescription, IBaseOperationOutcome operationOutcome);
 	
+	public abstract Class<? extends IBaseOperationOutcome> getOperationOutcomeClass();
+	
 	public void setupFhirServlet() throws ServletException {
 		servlet = getRestfulServer();
 		servlet.setFhirContext(getFhirContext());
@@ -182,7 +184,7 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 			
 			IBaseOperationOutcome operationOutcome = null;
 			try {
-				operationOutcome = parser.parseResource(IBaseOperationOutcome.class, item.getContentAsString());
+				operationOutcome = parser.parseResource(getOperationOutcomeClass(), item.getContentAsString());
 			}
 			catch (DataFormatException ignored) {}
 			
