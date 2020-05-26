@@ -103,8 +103,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		observation = new Observation();
 		observation.setId(OBSERVATION_UUID);
 		
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
@@ -112,7 +112,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		code.addAnd(codingToken);
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, code,
-		    null);
+		    null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
 		assertThat(results.getResources(1, 5).get(0), notNullValue());
