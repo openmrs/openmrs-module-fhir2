@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -308,12 +309,18 @@ public class AllergyIntoleranceTranslatorImplTest {
 		reaction.setReaction(concept);
 		reaction.setAllergy(omrsAllergy);
 		reaction.setReactionNonCoded(NON_CODED_REACTION);
+		omrsAllergy.setReactions(Collections.singletonList(reaction));
 		
-		omrsAllergy.addReaction(reaction);
-		when(conceptTranslator.toFhirResource(concept))
-		        .thenReturn(new CodeableConcept().addCoding(new Coding("", CONCEPT_UUID, "")));
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID));
+		codeableConcept.setText(NON_CODED_REACTION);
+		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getReaction(), hasSize(greaterThanOrEqualTo(1)));
+		assertThat(allergyIntolerance.getReaction().get(0).getManifestation(), hasSize(greaterThanOrEqualTo(1)));
+		assertThat(allergyIntolerance.getReaction().get(0).getManifestation().get(0).getCoding(),
+		    hasSize(greaterThanOrEqualTo(1)));
 		assertThat(allergyIntolerance.getReaction().get(0).getManifestation().size(), greaterThanOrEqualTo(1));
 		assertThat(allergyIntolerance.getReaction().get(0).getManifestation().get(0).getCoding().get(0).getCode(),
 		    equalTo(CONCEPT_UUID));
