@@ -99,7 +99,9 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	public Long getResultCounts(SearchParameterMap theParams) {
-		return (Long) createCriteria(theParams).setProjection(Projections.rowCount()).uniqueResult();
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
+		setupSearchParams(criteria, theParams);
+		return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
 	}
 	
 	@Override
@@ -114,11 +116,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	protected Criteria createCriteria(SearchParameterMap theParams) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
-		
 		setupSearchParams(criteria, theParams);
-		
 		handleSort(criteria, theParams.getSortSpec());
-		
 		return criteria;
 	}
 	

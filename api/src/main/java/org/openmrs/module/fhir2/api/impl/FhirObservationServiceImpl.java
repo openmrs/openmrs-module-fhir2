@@ -58,16 +58,17 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 	public IBundleProvider searchForObservations(ReferenceAndListParam encounterReference,
 	        ReferenceAndListParam patientReference, ReferenceParam hasMemberReference, TokenAndListParam valueConcept,
 	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
-	        DateRangeParam date, TokenAndListParam code, SortSpec sort) {
+	        DateRangeParam date, TokenAndListParam code, TokenAndListParam category, SortSpec sort) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, "category", category)
 		        .addParameter(FhirConstants.VALUE_CODED_SEARCH_HANDLER, valueConcept)
 		        .addParameter(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, hasMemberReference)
-		        .addParameter(FhirConstants.AND_LIST_PARAMS_SEARCH_HANDLER, "valueText", valueStringParam)
-		        .addParameter(FhirConstants.AND_LIST_PARAMS_SEARCH_HANDLER, "valueNumeric", valueQuantityParam)
+		        .addParameter(FhirConstants.VALUE_STRING_SEARCH_HANDLER, "valueText", valueStringParam)
+		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", valueQuantityParam)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime", date)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "valueDatetime", valueDateParam).setSortSpec(sort);
 		
