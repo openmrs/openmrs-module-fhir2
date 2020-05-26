@@ -11,7 +11,7 @@
 <!DOCTYPE module PUBLIC "-//OpenMRS//DTD OpenMRS Config 1.0//EN"
 		"https://resources.openmrs.org/doctype/config-1.6.dtd">
 <module configVersion="1.6">
-	
+
 	<!-- Base Module Properties -->
 	<id>${project.parent.artifactId}</id>
 	<name>${project.parent.name}</name>
@@ -19,26 +19,26 @@
 	<package>org.openmrs.module.fhir2</package>
 	<author>ibacher</author>
 	<description>
-			${project.parent.description}
+		${project.parent.description}
 	</description>
 
 	<activator>${project.parent.groupId}.${project.parent.artifactId}.FhirActivator</activator>
-	
+
 	<!-- <updateURL>https://modules.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
-	
+
 	<require_version>2.0.5 - 2.*</require_version>
 
-    <conditionalResources>
+	<conditionalResources>
 		<conditionalResource>
 			<path>/lib/fhir2-api-2.1-${project.parent.version}.jar</path>
 			<openmrsVersion>2.1.* - 2.*</openmrsVersion>
 		</conditionalResource>
-        <conditionalResource>
-            <path>/lib/fhir2-api-2.2-${project.parent.version}.jar</path>
-            <openmrsVersion>2.2.* - 2.*</openmrsVersion>
-        </conditionalResource>
-    </conditionalResources>
+		<conditionalResource>
+			<path>/lib/fhir2-api-2.2-${project.parent.version}.jar</path>
+			<openmrsVersion>2.2.* - 2.*</openmrsVersion>
+		</conditionalResource>
+	</conditionalResources>
 
 
 	<aware_of_modules>
@@ -92,7 +92,7 @@
 		<file>messages_es.properties</file>
 	</messages>
 	<!-- /Internationalization -->
-	
+
 	<globalProperty>
 		<property>${project.parent.artifactId}.uriPrefix</property>
 		<description>Prefix for the FHIR server in case this cannot be automatically detected</description>

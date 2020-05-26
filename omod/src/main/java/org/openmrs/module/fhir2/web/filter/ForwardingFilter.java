@@ -54,9 +54,11 @@ public class ForwardingFilter implements Filter {
 					((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
 					return;
 			}
-			
-			String newURI = requestURI.replace(prefix.toString(), replacement);
-			req.getRequestDispatcher(newURI).forward(req, res);
+
+			String newURI = requestURI.replace(prefix, replacement);
+			if (!requestURI.contains("/.well-known")) {
+				req.getRequestDispatcher(newURI).forward(req, res);
+			}
 			return;
 		}
 		
