@@ -57,7 +57,29 @@ public class ForwardingFilter implements Filter {
 
 			String newURI = requestURI.replace(prefix, replacement);
 			if (!requestURI.contains("/.well-known")) {
+				
+				String contextPath = ((HttpServletRequest) req).getContextPath();
+				String prefix = contextPath + "/ws/fhir2";
+				Enum<FhirVersionUtils.FhirVersion> fhirVersionCase = FhirVersionUtils.getFhirResourceVersion(request);
+				String fhirVersion = String.valueOf(FhirVersionUtils.getFhirResourceVersion(request));
+				
+				String replacement;
+				if (R3.equals(fhirVersionCase)) {
+					prefix += "/" + fhirVersion;
+					replacement = "/ms/fhir2R3Servlet";
+				} else if (R4.equals(fhirVersionCase)) {
+					prefix += "/" + fhirVersion;
+					replacement = "/ms/fhir2Servlet";
+				} else {
+					((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
+					return;
+				}
+				
+				String newURI = requestURI.replace(prefix, replacement);
+				
 				req.getRequestDispatcher(newURI).forward(req, res);
+			} else {
+				req.getRequestDispatcher(requestURI).forward(req, res);
 			}
 			return;
 		}
