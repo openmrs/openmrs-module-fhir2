@@ -13,6 +13,8 @@ import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Optional;
+
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -25,11 +27,16 @@ import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
+import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObservationDao {
+	
+	@Autowired
+	private ObservationCategoryMap categoryMap;
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
@@ -45,6 +52,10 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue().forEach(code -> handleCodedConcept(criteria, (TokenAndListParam) code.getParam()));
+					break;
+				case FhirConstants.CATEGORY_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(category -> handleConceptClass(criteria, (TokenAndListParam) category.getParam()));
 					break;
 				case FhirConstants.VALUE_CODED_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -99,8 +110,35 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			if (!containsAlias(criteria, "c")) {
 				criteria.createAlias("concept", "c");
 			}
+			
 			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
 		}
+	}
+	
+	private void handleConceptClass(Criteria criteria, TokenAndListParam category) {
+		if (category != null) {
+			if (!containsAlias(criteria, "c")) {
+				criteria.createAlias("concept", "c");
+			}
+			
+			if (!containsAlias(criteria, "cc")) {
+				criteria.createAlias("c.conceptClass", "cc");
+			}
+		}
+		
+		handleAndListParam(category, (param) -> {
+			if (param.getValue() == null) {
+				return Optional.empty();
+			}
+			
+			String conceptClass = categoryMap.getConceptClassUuid(param.getValue());
+			
+			if (conceptClass == null) {
+				return Optional.empty();
+			}
+			
+			return Optional.of(eq("cc.uuid", conceptClass));
+		}).ifPresent(criteria::add);
 	}
 	
 	private void handleValueCodedConcept(Criteria criteria, TokenAndListParam valueConcept) {

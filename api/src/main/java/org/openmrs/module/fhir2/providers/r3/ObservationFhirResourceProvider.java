@@ -75,9 +75,10 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Observation.SP_VALUE_QUANTITY) QuantityAndListParam valueQuantityParam,
 	        @OptionalParam(name = Observation.SP_VALUE_STRING) StringAndListParam valueStringParam,
 	        @OptionalParam(name = Observation.SP_DATE) DateRangeParam date,
-	        @OptionalParam(name = Observation.SP_CODE) TokenAndListParam code, @Sort SortSpec sort) {
+	        @OptionalParam(name = Observation.SP_CODE) TokenAndListParam code,
+	        @OptionalParam(name = Observation.SP_CATEGORY) TokenAndListParam category, @Sort SortSpec sort) {
 		return observationService.searchForObservations(encounterReference, patientReference, hasMemberReference,
-		    valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date, code, sort);
+		    valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date, code, category, sort);
 	}
 	
 }

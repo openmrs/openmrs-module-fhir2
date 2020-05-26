@@ -59,6 +59,11 @@ public abstract class BaseFhirR3ResourceProviderWebTest<T extends IResourceProvi
 	}
 	
 	@Override
+	public Class<? extends IBaseOperationOutcome> getOperationOutcomeClass() {
+		return OperationOutcome.class;
+	}
+	
+	@Override
 	public Bundle readBundleResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (Bundle) super.readBundleResponse(response);
 	}
