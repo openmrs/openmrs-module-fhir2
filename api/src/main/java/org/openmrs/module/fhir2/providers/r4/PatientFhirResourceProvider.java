@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -28,12 +29,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirPatientService;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -73,7 +72,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	@SuppressWarnings("unused")
-	public Bundle searchPatients(@OptionalParam(name = Patient.SP_NAME) StringAndListParam name,
+	public IBundleProvider searchPatients(@OptionalParam(name = Patient.SP_NAME) StringAndListParam name,
 	        @OptionalParam(name = Patient.SP_GIVEN) StringAndListParam given,
 	        @OptionalParam(name = Patient.SP_FAMILY) StringAndListParam family,
 	        @OptionalParam(name = Patient.SP_IDENTIFIER) TokenAndListParam identifier,
@@ -85,7 +84,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Patient.SP_ADDRESS_STATE) StringAndListParam state,
 	        @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
 	        @OptionalParam(name = Patient.SP_ADDRESS_COUNTRY) StringAndListParam country, @Sort SortSpec sort) {
-		return FhirProviderUtils.convertSearchResultsToBundle(patientService.searchForPatients(name, given, family,
-		    identifier, gender, birthDate, deathDate, deceased, city, state, postalCode, country, sort));
+		return patientService.searchForPatients(name, given, family, identifier, gender, birthDate, deathDate, deceased,
+		    city, state, postalCode, country, sort);
 	}
 }

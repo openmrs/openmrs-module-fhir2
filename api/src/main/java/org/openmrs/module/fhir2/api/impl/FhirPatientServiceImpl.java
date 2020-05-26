@@ -9,10 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -21,9 +19,12 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	@Autowired
 	private FhirPatientDao dao;
 	
+	@Autowired
+	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator> searchQuery;
+	
 	@Override
 	@Transactional(readOnly = true)
 	public Patient get(String uuid) {
@@ -56,12 +60,27 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Collection<Patient> searchForPatients(StringAndListParam name, StringAndListParam given,
-	        StringAndListParam family, TokenAndListParam identifier, TokenAndListParam gender, DateRangeParam birthDate,
-	        DateRangeParam deathDate, TokenAndListParam deceased, StringAndListParam city, StringAndListParam state,
-	        StringAndListParam postalCode, StringAndListParam country, SortSpec sort) {
-		return dao.searchForPatients(name, given, family, identifier, gender, birthDate, deathDate, deceased, city, state,
-		    postalCode, country, sort).stream().map(translator::toFhirResource).collect(Collectors.toList());
+	public IBundleProvider searchForPatients(StringAndListParam name, StringAndListParam given, StringAndListParam family,
+	        TokenAndListParam identifier, TokenAndListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
+	        TokenAndListParam deceased, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
+	        StringAndListParam country, SortSpec sort) {
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.NAME_PROPERTY, name)
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY, given)
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY, family)
+		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier)
+		        .addParameter(FhirConstants.GENDER_SEARCH_HANDLER, "gender", gender)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "birthdate", birthDate)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "deathDate", deathDate)
+		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, deceased)
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, state)
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, postalCode)
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country)
+		        .setSortSpec(sort);
+		
+		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
 	@Override

@@ -51,6 +51,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -501,10 +502,10 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 	}
 	
 	private void verifyUri(String uri) throws Exception {
-		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
+		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
 		when(patientService.searchForPatients(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any())).thenReturn(Collections.singletonList(patient));
+		    any(), any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
