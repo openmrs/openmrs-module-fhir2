@@ -7,23 +7,23 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.web.controller;
+package org.openmrs.module.fhir2.web.servlet;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 import java.util.HashMap;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
-@RestController
-public class WellKnownController {
+//@WebServlet(name = "WellKnownServlet", urlPatterns = "/ws/fhir2/R4/.well-known/smart-configuration")
+@Component
+public class WellKnownServlet extends HttpServlet {
 	
-	@RequestMapping(value = "/ws/fhir2/{fhirVersion:R[1-9][0-9]*}/.well-known/smart-configuration", method = RequestMethod.GET)
-	public ResponseEntity<HashMap<String, Object>> getConfigurationData(@PathVariable("fhirVersion") String fhirVersion) {
-		
+	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		//TODO correct this
 		HashMap<String, Object> hashMap = new HashMap<>();
 		hashMap.put("authorization_endpoint", "https://ehr.example.com/auth/authorize");
@@ -38,7 +38,6 @@ public class WellKnownController {
 		hashMap.put("capabilities", "https://ehr.example.com/user/revoke");
 		hashMap.put("management_endpoint",
 		    "[\"launch-ehr\", \"client-public\", \"client-confidential-symmetric\", \"context-ehr-patient\", \"sso-openid-connect\"]");
-		
-		return new ResponseEntity<HashMap<String, Object>>(hashMap, HttpStatus.OK);
+		res.setStatus(200);
 	}
 }

@@ -55,6 +55,17 @@
 		<servlet-class>org.openmrs.module.fhir2.web.servlet.FhirR3RestServlet</servlet-class>
 	</servlet>
 
+	<servlet>
+		<servlet-name>WellKnownServlet</servlet-name>
+		<servlet-class>org.openmrs.module.fhir2.web.servlet.WellKnownServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>WellKnownServlet</servlet-name>
+		<url-pattern>/ws/fhir2/R4/.well-known/smart-configuration</url-pattern>
+		<url-pattern>/ws/fhir2/R4/.well-known/*</url-pattern>
+	</servlet-mapping>
+
 	<filter>
 		<filter-name>fhir2AuthenticationFilter</filter-name>
 		<filter-class>org.openmrs.module.fhir2.web.filter.AuthenticationFilter</filter-class>

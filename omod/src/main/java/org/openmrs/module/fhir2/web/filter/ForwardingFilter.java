@@ -37,49 +37,27 @@ public class ForwardingFilter implements Filter {
 			String requestURI = request.getRequestURI();
 			
 			String contextPath = ((HttpServletRequest) req).getContextPath();
-			StringBuilder prefix = new StringBuilder(contextPath).append("/ws/fhir2/");
-			String replacement;
+			String prefix = contextPath + "/ws/fhir2";
+			Enum<FhirVersionUtils.FhirVersion> fhirVersionCase = FhirVersionUtils.getFhirResourceVersion(request);
+			String fhirVersion = String.valueOf(FhirVersionUtils.getFhirResourceVersion(request));
 			
-			FhirVersionUtils.FhirVersion fhirVersion = FhirVersionUtils.getFhirVersion(request);
-			switch (fhirVersion) {
-				case R3:
-					prefix.append(fhirVersion.toString());
-					replacement = "/ms/fhir2R3Servlet";
-					break;
-				case R4:
-					prefix.append(fhirVersion.toString());
-					replacement = "/ms/fhir2Servlet";
-					break;
-				default:
-					((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
-					return;
+			String replacement;
+			if (R3.equals(fhirVersionCase)) {
+				prefix += "/" + fhirVersion;
+				replacement = "/ms/fhir2R3Servlet";
+			} else if (R4.equals(fhirVersionCase)) {
+				prefix += "/" + fhirVersion;
+				replacement = "/ms/fhir2Servlet";
+			} else {
+				((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
 			}
-
+			
 			String newURI = requestURI.replace(prefix, replacement);
 			if (!requestURI.contains("/.well-known")) {
-				
-				String contextPath = ((HttpServletRequest) req).getContextPath();
-				String prefix = contextPath + "/ws/fhir2";
-				Enum<FhirVersionUtils.FhirVersion> fhirVersionCase = FhirVersionUtils.getFhirResourceVersion(request);
-				String fhirVersion = String.valueOf(FhirVersionUtils.getFhirResourceVersion(request));
-				
-				String replacement;
-				if (R3.equals(fhirVersionCase)) {
-					prefix += "/" + fhirVersion;
-					replacement = "/ms/fhir2R3Servlet";
-				} else if (R4.equals(fhirVersionCase)) {
-					prefix += "/" + fhirVersion;
-					replacement = "/ms/fhir2Servlet";
-				} else {
-					((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
-					return;
-				}
-				
-				String newURI = requestURI.replace(prefix, replacement);
-				
 				req.getRequestDispatcher(newURI).forward(req, res);
 			} else {
-				req.getRequestDispatcher(requestURI).forward(req, res);
+				chain.doFilter(req, res);
 			}
 			return;
 		}
