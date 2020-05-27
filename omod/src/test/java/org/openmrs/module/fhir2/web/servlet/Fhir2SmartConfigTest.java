@@ -17,13 +17,13 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-public class WellKnownServletTest {
+public class Fhir2SmartConfigTest {
 	
-	private WellKnownServlet servlet;
+	private Fhir2SmartConfig servlet;
 	
 	@Before
 	public void setup() {
-		servlet = new WellKnownServlet();
+		servlet = new Fhir2SmartConfig();
 	}
 	
 	@Test
