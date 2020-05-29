@@ -73,6 +73,23 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldSetNullDurationIfDrugOrderDurationIsNull() {
+		drugOrder.setDuration(null);
+		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getDuration(), nullValue());
+	}
+	
+	@Test
+	public void toFhirResource_shouldNotSetPeriodAndItsUnitsIfFrequencyIsNull() {
+		drugOrder.setFrequency(null);
+		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getPeriod(), nullValue());
+		assertThat(result.getPeriodUnit(), nullValue());
+	}
+	
+	@Test
 	public void toFhirResource_shouldNotSetPeriodAndItsUnitsIfFrequencyPerDayIsNull() {
 		drugOrder.setFrequency(new OrderFrequency());
 		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);

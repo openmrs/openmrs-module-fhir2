@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.DrugOrder;
+import org.openmrs.OrderFrequency;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingComponentTranslator;
 import org.springframework.stereotype.Component;
 
@@ -23,19 +24,21 @@ public class MedicationRequestTimingComponentTranslatorImpl implements Medicatio
 			return null;
 		}
 		Timing.TimingRepeatComponent repeatComponent = new Timing.TimingRepeatComponent();
-		repeatComponent.setDuration(drugOrder.getDuration());
+		if (drugOrder.getDuration() != null)
+			repeatComponent.setDuration(drugOrder.getDuration());
 		/*
 		 * TODO
 		 * Figure out how to map DurationUnit to UnitsOfTime since openMrs duration units is concept
 		 * which differs across implementation. Make use of concept mappings
 		 */
 		//repeatComponent.setDurationUnit(drugOrder.getDurationUnits());
-		if (drugOrder.getFrequency().getFrequencyPerDay() != null) {
-			// what does it mean when openMrs orderFrequency value is 4.8
-			// Seems this isn't right mapping for frequency
-			repeatComponent.setFrequency(drugOrder.getFrequency().getFrequencyPerDay().intValue());
-			repeatComponent.setPeriod(1);
-			repeatComponent.setPeriodUnit(Timing.UnitsOfTime.D);
+		OrderFrequency frequency = drugOrder.getFrequency();
+		if (frequency != null) {
+			if (frequency.getFrequencyPerDay() != null) {
+				repeatComponent.setFrequency(frequency.getFrequencyPerDay().intValue());
+				repeatComponent.setPeriod(1);
+				repeatComponent.setPeriodUnit(Timing.UnitsOfTime.D);
+			}
 		}
 		
 		return repeatComponent;
