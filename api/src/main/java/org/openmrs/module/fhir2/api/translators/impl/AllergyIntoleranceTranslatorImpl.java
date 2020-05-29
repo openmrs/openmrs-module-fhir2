@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -23,11 +22,9 @@ import org.openmrs.Allergen;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
 import org.openmrs.AllergyReaction;
-import org.openmrs.Concept;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirConceptService;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceSeverityTranslator;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -47,16 +44,13 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Autowired
-	private FhirGlobalPropertyService globalPropertyService;
-	
-	@Autowired
-	private FhirConceptService conceptService;
-	
-	@Autowired
 	private ProvenanceTranslator<Allergy> provenanceTranslator;
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
+	
+	@Autowired
+	private AllergyIntoleranceSeverityTranslator severityTranslator;
 	
 	@Override
 	public AllergyIntolerance toFhirResource(Allergy omrsAllergy) {
@@ -94,7 +88,7 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
 		reactionComponent.setSubstance(getAllergySubstance(omrsAllergy.getAllergen()));
 		reactionComponent.setManifestation(getManifestation(omrsAllergy.getReactions()));
-		reactionComponent.setSeverity(getFhirSeverity(omrsAllergy.getSeverity()));
+		reactionComponent.setSeverity(severityTranslator.toFhirResource(omrsAllergy.getSeverity()));
 		allergy.addReaction(reactionComponent);
 		allergy.addContained(provenanceTranslator.getCreateProvenance(omrsAllergy));
 		allergy.addContained(provenanceTranslator.getUpdateProvenance(omrsAllergy));
@@ -151,9 +145,10 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		List<AllergyReaction> reactions = new ArrayList<>();
 		
 		if (fhirAllergy.hasReaction()) {
-			allergy.setSeverity(getOpenmrsSeverity(fhirAllergy.getReaction().get(0).getSeverity()));
-			
 			for (AllergyIntolerance.AllergyIntoleranceReactionComponent reaction : fhirAllergy.getReaction()) {
+				if (reaction.hasSeverity()) {
+					allergy.setSeverity(severityTranslator.toOpenmrsType(reaction.getSeverity()));
+				}
 				if (reaction.hasManifestation()) {
 					reaction.getManifestation().forEach(manifestation -> {
 						reactions.add(new AllergyReaction(allergy, conceptTranslator.toOpenmrsType(manifestation),
@@ -213,57 +208,5 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		}
 		
 		return manifestations;
-	}
-	
-	private AllergyIntolerance.AllergyIntoleranceSeverity getFhirSeverity(Concept severityConcept) {
-		if (severityConcept == null) {
-			return null;
-		}
-		
-		Map<String, String> severityConceptUuids = getSeverityConceptUuids();
-		
-		if (severityConceptUuids.isEmpty()) {
-			return null;
-		}
-		
-		if (severityConcept.getUuid().equals(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD))) {
-			return AllergyIntolerance.AllergyIntoleranceSeverity.MILD;
-		} else if (severityConcept.getUuid().equals(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE))) {
-			return AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE;
-		} else if (severityConcept.getUuid().equals(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE))) {
-			return AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE;
-		} else {
-			return AllergyIntolerance.AllergyIntoleranceSeverity.NULL;
-		}
-	}
-	
-	private Concept getOpenmrsSeverity(AllergyIntolerance.AllergyIntoleranceSeverity severity) {
-		if (severity == null) {
-			return null;
-		}
-		
-		Map<String, String> severityConceptUuids = getSeverityConceptUuids();
-		
-		if (severityConceptUuids.isEmpty()) {
-			return null;
-		}
-		
-		switch (severity) {
-			case MILD:
-				return conceptService.get(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MILD));
-			case MODERATE:
-				return conceptService.get(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_MODERATE));
-			case SEVERE:
-				return conceptService.get(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_SEVERE));
-			case NULL:
-			default:
-				return conceptService.get(severityConceptUuids.get(FhirConstants.GLOBAL_PROPERTY_OTHER));
-		}
-	}
-	
-	private Map<String, String> getSeverityConceptUuids() {
-		return globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER);
 	}
 }

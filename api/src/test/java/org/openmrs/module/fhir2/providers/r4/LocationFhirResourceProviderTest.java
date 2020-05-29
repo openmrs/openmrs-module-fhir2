@@ -215,82 +215,81 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		ReferenceAndListParam locationParentName = new ReferenceAndListParam();
 		locationParentName.addValue(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("chulaimbo").setChain(Location.SP_NAME)));
-
+		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(Matchers.is(locationParentName)), isNull())).thenReturn(Collections.singletonList(location));
-
+		
 		Bundle results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentName, null);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
 	}
-
+	
 	@Test
 	public void searchLocations_shouldReturnMatchingBundleOfChianedLocationsByCity() {
 		ReferenceAndListParam locationParentCity = new ReferenceAndListParam();
 		locationParentCity.addValue(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("kampala").setChain(Location.SP_ADDRESS_CITY)));
-
+		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(Matchers.is(locationParentCity)), isNull())).thenReturn(Collections.singletonList(location));
-
+		
 		Bundle results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentCity, null);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
 	}
-
+	
 	@Test
 	public void searchLocations_shouldReturnMatchingBundleOfChianedLocationsByCountry() {
 		ReferenceAndListParam locationParentCountry = new ReferenceAndListParam();
 		locationParentCountry.addValue(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("uganda").setChain(Location.SP_ADDRESS_COUNTRY)));
-
+		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(Matchers.is(locationParentCountry)), isNull())).thenReturn(Collections.singletonList(location));
-
+		
 		Bundle results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentCountry, null);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
 	}
-
+	
 	@Test
 	public void searchLocations_shouldReturnMatchingBundleOfChianedLocationsByPostalCode() {
 		ReferenceAndListParam locationParentPostalCode = new ReferenceAndListParam();
 		locationParentPostalCode.addValue(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue("234-30100").setChain(Location.SP_ADDRESS_POSTALCODE)));
-
+		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(Matchers.is(locationParentPostalCode)), isNull())).thenReturn(Collections.singletonList(location));
-
+		
 		Bundle results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentPostalCode,
 		    null);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
 	}
-
+	
 	@Test
 	public void searchLocations_shouldReturnMatchingBundleOfChianedLocationsByState() {
 		ReferenceAndListParam locationParentState = new ReferenceAndListParam();
 		locationParentState.addValue(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue("najjanankumbi").setChain(Location.SP_ADDRESS_STATE)));
-
+		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    argThat(Matchers.is(locationParentState)), isNull())).thenReturn(Collections.singletonList(location));
-
+		
 		Bundle results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentState, null);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
 	}
-
 	
 	@Test
 	public void searchLocations_shouldReturnMatchingBundleOfLocations() {
