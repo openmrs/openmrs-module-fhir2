@@ -51,8 +51,7 @@ import org.openmrs.Patient;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
-import org.openmrs.module.fhir2.api.FhirConceptService;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceSeverityTranslator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
@@ -86,8 +85,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 	
 	private static final String GLOBAL_PROPERTY_OTHER_VALUE = "402553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String ALLERGY_SUBSTANCE_CODE = "http://hl7.org/fhir/ValueSet/substance-code";
-	
 	@Mock
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
@@ -95,16 +92,13 @@ public class AllergyIntoleranceTranslatorImplTest {
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Mock
-	private FhirGlobalPropertyService globalPropertyService;
-	
-	@Mock
-	private FhirConceptService conceptService;
-	
-	@Mock
 	private ProvenanceTranslator<Allergy> provenanceTranslator;
 	
 	@Mock
 	private ConceptTranslator conceptTranslator;
+	
+	@Mock
+	private AllergyIntoleranceSeverityTranslator severityTranslator;
 	
 	private AllergyIntoleranceTranslatorImpl allergyIntoleranceTranslator;
 	
@@ -117,10 +111,9 @@ public class AllergyIntoleranceTranslatorImplTest {
 		allergyIntoleranceTranslator = new AllergyIntoleranceTranslatorImpl();
 		allergyIntoleranceTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 		allergyIntoleranceTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
-		allergyIntoleranceTranslator.setGlobalPropertyService(globalPropertyService);
-		allergyIntoleranceTranslator.setConceptService(conceptService);
 		allergyIntoleranceTranslator.setProvenanceTranslator(provenanceTranslator);
 		allergyIntoleranceTranslator.setConceptTranslator(conceptTranslator);
+		allergyIntoleranceTranslator.setSeverityTranslator(severityTranslator);
 		
 		omrsAllergy = new Allergy();
 		Allergen allergen = new Allergen(AllergenType.FOOD, null, "Test allergen");
@@ -357,9 +350,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		mildConcept.setUuid(GLOBAL_PROPERTY_MILD_VALUE);
 		omrsAllergy.setSeverity(mildConcept);
 		
-		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
+		when(severityTranslator.toFhirResource(mildConcept)).thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.MILD);
 		
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
@@ -373,9 +364,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		moderateConcept.setUuid(GLOBAL_PROPERTY_MODERATE_VALUE);
 		omrsAllergy.setSeverity(moderateConcept);
 		
-		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
+		when(severityTranslator.toFhirResource(moderateConcept))
+		        .thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE);
 		
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
@@ -389,9 +379,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		severeConcept.setUuid(GLOBAL_PROPERTY_SEVERE_VALUE);
 		omrsAllergy.setSeverity(severeConcept);
 		
-		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
+		when(severityTranslator.toFhirResource(severeConcept))
+		        .thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE);
 		
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
@@ -405,9 +394,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
 		omrsAllergy.setSeverity(otherConcept);
 		
-		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
+		when(severityTranslator.toFhirResource(otherConcept)).thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.NULL);
 		
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
@@ -616,10 +603,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		Concept mildConcept = new Concept();
 		mildConcept.setUuid(GLOBAL_PROPERTY_MILD_VALUE);
 		
-		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
-		when(conceptService.get(GLOBAL_PROPERTY_MILD_VALUE)).thenReturn(mildConcept);
+		when(severityTranslator.toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity.MILD)).thenReturn(mildConcept);
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
@@ -674,11 +658,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		Concept moderateConcept = new Concept();
 		moderateConcept.setUuid(GLOBAL_PROPERTY_MODERATE_VALUE);
 		
-		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
-		
-		when(conceptService.get(GLOBAL_PROPERTY_MODERATE_VALUE)).thenReturn(moderateConcept);
+		when(severityTranslator.toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE))
+		        .thenReturn(moderateConcept);
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
@@ -695,10 +676,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		
 		Concept severeConcept = new Concept();
 		severeConcept.setUuid(GLOBAL_PROPERTY_SEVERE_VALUE);
-		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
-		when(conceptService.get(GLOBAL_PROPERTY_SEVERE_VALUE)).thenReturn(severeConcept);
+		when(severityTranslator.toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE))
+		        .thenReturn(severeConcept);
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
@@ -716,10 +695,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		Concept otherConcept = new Concept();
 		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
 		
-		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
-		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
-		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(severityConceptUuids);
-		when(conceptService.get(GLOBAL_PROPERTY_OTHER_VALUE)).thenReturn(otherConcept);
+		when(severityTranslator.toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity.NULL)).thenReturn(otherConcept);
 		
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
