@@ -77,8 +77,9 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Location.SP_ADDRESS_STATE) StringAndListParam state,
 	        @OptionalParam(name = "_tag") TokenAndListParam tag,
 	        @OptionalParam(name = Location.SP_PARTOF, chainWhitelist = { "", Location.SP_NAME, Location.SP_ADDRESS_CITY,
-					Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
-					Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam parent, @Sort SortSpec sort) {
+	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
+	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam parent,
+	        @Sort SortSpec sort) {
 		return Bundle30_40.convertBundle(FhirProviderUtils.convertSearchResultsToBundle(
 		    locationService.searchForLocations(name, city, country, postalCode, state, tag, parent, sort)));
 	}
