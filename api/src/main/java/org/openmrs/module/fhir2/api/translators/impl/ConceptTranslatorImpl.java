@@ -13,17 +13,24 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
+import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
+import org.openmrs.module.fhir2.api.FhirUserDefaultProperties;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class ConceptTranslatorImpl implements ConceptTranslator {
@@ -34,6 +41,9 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	@Autowired
 	private FhirConceptSourceService conceptSourceService;
 	
+	@Autowired
+	private FhirUserDefaultProperties userDefaultProperties;
+	
 	@Override
 	public CodeableConcept toFhirResource(Concept concept) {
 		if (concept == null) {
@@ -41,9 +51,8 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		}
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
-		
 		// TODO fix this so it refers to a specific system
-		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid());
+		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
 		
 		for (ConceptMap mapping : concept.getConceptMappings()) {
 			ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
@@ -52,7 +61,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 				continue;
 			}
 			
-			addConceptCoding(codeableConcept.addCoding(), sourceUrl, crt.getCode());
+			addConceptCoding(codeableConcept.addCoding(), sourceUrl, crt.getCode(), concept);
 		}
 		
 		return codeableConcept;
@@ -90,9 +99,22 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		return concept_;
 	}
 	
-	private void addConceptCoding(Coding coding, String system, String code) {
+	private void addConceptCoding(Coding coding, String system, String code, Concept concept) {
 		coding.setSystem(system);
 		coding.setCode(code);
+		ConceptName conceptName = concept.getName(userDefaultProperties.getDefaultLocale());
+		if (conceptName.getName() == null) {
+			conceptName = concept.getName();
+		}
+		
+		String display = conceptName.getName() == null ? "" : conceptName.getName();
+		coding.setDisplay(display);
+		
+		for (ConceptName name : concept.getNames()) {
+			Extension ext = coding.addExtension().setUrl(FhirConstants.FHIR_EXT_TRANSLATIONS);
+			ext.addExtension("lang", new StringType(name.getLocale().toLanguageTag()));
+			ext.addExtension("content", new StringType(name.getName()));
+		}
 	}
 	
 	private String conceptSourceToURL(String conceptSourceName) {

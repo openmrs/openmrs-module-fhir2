@@ -78,6 +78,10 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_MEDICINE = OPENMRS_FHIR_EXT_PREFIX + "/medicine";
 	
+	public static final String FHIR_STRUCTURE_DEF_PREFIX = "http://hl7.org/fhir/StructureDefinition";
+	
+	public static final String FHIR_EXT_TRANSLATIONS = FHIR_STRUCTURE_DEF_PREFIX + "/translation";
+	
 	public static final String RELATED_PERSON = "RelatedPerson";
 	
 	public static final String PERSON = "Person";
