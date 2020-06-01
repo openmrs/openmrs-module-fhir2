@@ -32,6 +32,9 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -40,6 +43,7 @@ import lombok.Getter;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.junit.Before;
@@ -118,7 +122,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		codingToken.setValue("1000");
 		code.addAnd(codingToken);
 		
-		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, code,
+		IBundleProvider results = resourceProvider.searchObservations(null, null,null, null, null, null, null, null, null, code,
 		    null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
@@ -127,6 +131,27 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
 	
+	@Test
+	public void searchObservations_shouldReturnMatchingObservationsWhenPatientParamIsSpecified() {
+
+		observation = new org.hl7.fhir.r4.model.Observation();
+		observation.setId(OBSERVATION_UUID);
+		
+		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new BaseFhirIBundleResourceProviderTest<>(Collections.singletonList(observation), 10, 1));
+		
+		ReferenceAndListParam patientParam = new ReferenceAndListParam();
+		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
+
+		IBundleProvider results = resourceProvider.searchObservations(null, patientParam,null, null, null, null, null, null, null, null,
+		    null, null);
+		assertThat(results, notNullValue());
+		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
+		assertThat(results.getResources(1, 5).get(0), notNullValue());
+		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo("Observation"));
+		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+	}
+
 	@Test
 	public void getPatientResourceHistory_shouldReturnListOfResource() {
 		IdType id = new IdType();

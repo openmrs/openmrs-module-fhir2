@@ -85,9 +85,14 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
 	        @OptionalParam(name = DiagnosticReport.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
 	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
+					Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
+			@OptionalParam(name = DiagnosticReport.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_NAME,
+	                Patient.SP_GIVEN, Patient.SP_FAMILY }) ReferenceAndListParam subjectReference,		
 	        @OptionalParam(name = DiagnosticReport.SP_ISSUED) DateRangeParam issueDate,
 	        @OptionalParam(name = DiagnosticReport.SP_CODE) TokenAndListParam code, @Sort SortSpec sort) {
+				if (patientReference == null){
+					patientReference = subjectReference;
+				}
 		return FhirProviderUtils.convertSearchResultsToBundle(
 		    service.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code, sort));
 	}

@@ -74,7 +74,12 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
 	        @OptionalParam(name = Encounter.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference) {
+					Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
+			@OptionalParam(name = Encounter.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
+	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientParam) {
+						if(patientParam != null){
+							subjectReference = patientParam;
+						}
 		return Bundle30_40.convertBundle(FhirProviderUtils.convertSearchResultsToBundle(
 		    encounterService.searchForEncounters(date, location, participantReference, subjectReference)));
 		

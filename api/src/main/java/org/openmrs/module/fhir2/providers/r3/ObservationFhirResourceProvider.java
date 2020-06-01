@@ -67,7 +67,9 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Observation.SP_ENCOUNTER) ReferenceAndListParam encounterReference,
 	        @OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
+					Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
+			@OptionalParam(name = Observation.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
+	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientParam,		
 	        @OptionalParam(name = Observation.SP_RELATED_TYPE, chainWhitelist = { "",
 	                Observation.SP_CODE }, targetTypes = Observation.class) ReferenceParam hasMemberReference,
 	        @OptionalParam(name = Observation.SP_VALUE_CONCEPT) TokenAndListParam valueConcept,
@@ -77,6 +79,9 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Observation.SP_DATE) DateRangeParam date,
 	        @OptionalParam(name = Observation.SP_CODE) TokenAndListParam code,
 	        @OptionalParam(name = Observation.SP_CATEGORY) TokenAndListParam category, @Sort SortSpec sort) {
+				if(patientParam != null){
+					patientReference = patientParam;
+				}
 		return observationService.searchForObservations(encounterReference, patientReference, hasMemberReference,
 		    valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date, code, category, sort);
 	}
