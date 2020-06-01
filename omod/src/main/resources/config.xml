@@ -61,6 +61,16 @@
 	</servlet>
 
 	<filter>
+		<filter-name>clientAuthenticationFilter</filter-name>
+		<filter-class>org.openmrs.module.fhir2.web.filter.ClientAuthenticationFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>clientAuthenticationFilter</filter-name>
+		<url-pattern>/keycloak/*</url-pattern>
+		<url-pattern>/protected/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
 		<filter-name>fhir2AuthenticationFilter</filter-name>
 		<filter-class>org.openmrs.module.fhir2.web.filter.AuthenticationFilter</filter-class>
 	</filter>
