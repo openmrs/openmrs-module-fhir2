@@ -50,6 +50,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -192,18 +193,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	
 	@Test
 	public void findLocationsByTag_shouldReturnBundleOfLocationsWithMatchingTag() throws Exception {
-		Location location = new Location();
-		location.getMeta().setTag(Collections.singletonList(new Coding(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG,
-		        LOGIN_LOCATION_TAG_NAME, LOGIN_LOCATION_TAG_DESCRIPTION)));
-		
-		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(TokenAndListParam.class), any(),
-		    any())).thenReturn(Collections.singletonList(location));
-		
-		MockHttpServletResponse response = get("/Location?_tag=" + LOGIN_LOCATION_TAG_NAME).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
+		verifyURI(String.format("/Location?_tag=%s", LOGIN_LOCATION_TAG_NAME));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), tagCaptor.capture(),
 		    isNull(), isNull());
@@ -401,7 +391,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		Location location = new Location();
 		location.setId(LOCATION_UUID);
 		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(Collections.singleton(location));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		

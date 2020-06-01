@@ -190,5 +190,15 @@ public class FhirConstants {
 	
 	public static final String PARTICIPANT_REFERENCE_SEARCH_HANDLER = "participant.reference.search.handler";
 	
+	public static final String CITY_SEARCH_HANDLER = "city.search.handler";
+	
+	public static final String STATE_SEARCH_HANDLER = "state.search.handler";
+	
+	public static final String COUNTRY_SEARCH_HANDLER = "country.search.handler";
+	
+	public static final String POSTALCODE_SEARCH_HANDLER = "postalcode.search.handler";
+	
 	public static final String LOCATION_REFERENCE_SEARCH_HANDLER = "location.reference.search.handler";
+	
+	public static final String TAG_SEARCH_HANDLER = "tag.search.handler";
 }

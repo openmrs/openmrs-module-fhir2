@@ -11,21 +11,12 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 
 public interface FhirLocationDao extends FhirDao<Location> {
-	
-	Collection<Location> searchForLocations(StringAndListParam name, StringAndListParam city, StringAndListParam country,
-	        StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,
-	        SortSpec sort);
 	
 	List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@NotNull Location location,
 	        @NotNull String locationAttributeTypeUuid);

@@ -33,7 +33,6 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Location;
@@ -51,6 +50,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -140,7 +140,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(LOCATION_NAME));
+		    equalTo(LOCATION_NAME));
 	}
 	
 	@Test
@@ -152,7 +152,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(CITY));
+		    equalTo(CITY));
 	}
 	
 	@Test
@@ -164,7 +164,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(COUNTRY));
+		    equalTo(COUNTRY));
 	}
 	
 	@Test
@@ -176,7 +176,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(POSTAL_CODE));
+		    equalTo(POSTAL_CODE));
 	}
 	
 	@Test
@@ -188,29 +188,18 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(STATE));
+		    equalTo(STATE));
 	}
 	
 	@Test
 	public void findLocationsByTag_shouldReturnBundleOfLocationsWithMatchingTag() throws Exception {
-		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
-		location.getMeta().setTag(Collections.singletonList(new Coding(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG,
-		        LOGIN_LOCATION_TAG_NAME, LOGIN_LOCATION_TAG_DESCRIPTION)));
-		
-		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(TokenAndListParam.class), any(),
-		    any())).thenReturn(Collections.singletonList(location));
-		
-		MockHttpServletResponse response = get("/Location?_tag=" + LOGIN_LOCATION_TAG_NAME).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
+		verifyURI(String.format("/Location?_tag=%s", LOGIN_LOCATION_TAG_NAME));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), tagCaptor.capture(),
 		    isNull(), isNull());
 		assertThat(tagCaptor.getValue(), notNullValue());
 		assertThat(tagCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    CoreMatchers.equalTo(LOGIN_LOCATION_TAG_NAME));
+		    equalTo(LOGIN_LOCATION_TAG_NAME));
 	}
 	
 	@Test
@@ -234,7 +223,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    CoreMatchers.equalTo(PARENT_LOCATION_NAME));
+		    equalTo(PARENT_LOCATION_NAME));
 	}
 	
 	@Test
@@ -246,7 +235,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    CoreMatchers.equalTo(PARENT_LOCATION_CITY));
+		    equalTo(PARENT_LOCATION_CITY));
 	}
 	
 	@Test
@@ -258,7 +247,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    CoreMatchers.equalTo(PARENT_LOCATION_COUNTRY));
+		    equalTo(PARENT_LOCATION_COUNTRY));
 	}
 	
 	@Test
@@ -270,7 +259,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    CoreMatchers.equalTo(PARENT_LOCATION_POSTAL_CODE));
+		    equalTo(PARENT_LOCATION_POSTAL_CODE));
 	}
 	
 	@Test
@@ -282,7 +271,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    CoreMatchers.equalTo(PARENT_LOCATION_STATE));
+		    equalTo(PARENT_LOCATION_STATE));
 	}
 	
 	@Test
@@ -378,10 +367,10 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	}
 	
 	private void verifyURI(String uri) throws Exception {
-		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
+		Location location = new Location();
 		location.setId(LOCATION_UUID);
 		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(Collections.singleton(location));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		

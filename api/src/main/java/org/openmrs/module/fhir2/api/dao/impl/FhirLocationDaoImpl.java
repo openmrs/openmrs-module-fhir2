@@ -13,11 +13,9 @@ import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -27,7 +25,9 @@ import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,23 +35,34 @@ import org.springframework.stereotype.Component;
 public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
 	
 	@Override
-	public Collection<Location> searchForLocations(StringAndListParam name, StringAndListParam city,
-	        StringAndListParam country, StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag,
-	        ReferenceAndListParam parent, SortSpec sort) {
-		
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Location.class);
-		
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		handleBooleanProperty("retired", false).ifPresent(criteria::add);
-		handleName(criteria, name);
-		handleCity(criteria, city);
-		handleCountry(criteria, country);
-		handlePostalCode(criteria, postalCode);
-		handleState(criteria, state);
-		handleTag(criteria, tag);
-		handleParentLocation(criteria, parent);
-		handleSort(criteria, sort);
-		
-		return criteria.list();
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case FhirConstants.NAME_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleName(criteria, (StringAndListParam) param.getParam()));
+					break;
+				case FhirConstants.CITY_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleCity(criteria, (StringAndListParam) param.getParam()));
+					break;
+				case FhirConstants.STATE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleState(criteria, (StringAndListParam) param.getParam()));
+					break;
+				case FhirConstants.COUNTRY_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleCountry(criteria, (StringAndListParam) param.getParam()));
+					break;
+				case FhirConstants.POSTALCODE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handlePostalCode(criteria, (StringAndListParam) param.getParam()));
+					break;
+				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handleParentLocation(criteria, (ReferenceAndListParam) param.getParam()));
+					break;
+				case FhirConstants.TAG_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleTag(criteria, (TokenAndListParam) param.getParam()));
+					break;
+			}
+		});
 	}
 	
 	@Override
@@ -64,34 +75,24 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	private void handleName(Criteria criteria, StringAndListParam namePattern) {
-		if (namePattern != null) {
-			handleAndListParam(namePattern, (name) -> propertyLike("name", name)).ifPresent(criteria::add);
-		}
+		handleAndListParam(namePattern, (name) -> propertyLike("name", name)).ifPresent(criteria::add);
 	}
 	
 	private void handleCity(Criteria criteria, StringAndListParam cityPattern) {
-		if (cityPattern != null) {
-			handleAndListParam(cityPattern, (city) -> propertyLike("cityVillage", city)).ifPresent(criteria::add);
-		}
+		handleAndListParam(cityPattern, (city) -> propertyLike("cityVillage", city)).ifPresent(criteria::add);
 	}
 	
 	private void handleCountry(Criteria criteria, StringAndListParam countryPattern) {
-		if (countryPattern != null) {
-			handleAndListParam(countryPattern, (country) -> propertyLike("country", country)).ifPresent(criteria::add);
-		}
+		handleAndListParam(countryPattern, (country) -> propertyLike("country", country)).ifPresent(criteria::add);
 	}
 	
 	private void handlePostalCode(Criteria criteria, StringAndListParam postalCodePattern) {
-		if (postalCodePattern != null) {
-			handleAndListParam(postalCodePattern, (postalCode) -> propertyLike("postalCode", postalCode))
-			        .ifPresent(criteria::add);
-		}
+		handleAndListParam(postalCodePattern, (postalCode) -> propertyLike("postalCode", postalCode))
+		        .ifPresent(criteria::add);
 	}
 	
 	private void handleState(Criteria criteria, StringAndListParam statePattern) {
-		if (statePattern != null) {
-			handleAndListParam(statePattern, (state) -> propertyLike("stateProvince", state)).ifPresent(criteria::add);
-		}
+		handleAndListParam(statePattern, (state) -> propertyLike("stateProvince", state)).ifPresent(criteria::add);
 	}
 	
 	private void handleTag(Criteria criteria, TokenAndListParam tags) {
@@ -102,9 +103,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	private void handleParentLocation(Criteria criteria, ReferenceAndListParam parent) {
-		if (parent != null) {
-			handleLocationReference("loc", parent).ifPresent(loc -> criteria.createAlias("parentLocation", "loc").add(loc));
-		}
+		handleLocationReference("loc", parent).ifPresent(loc -> criteria.createAlias("parentLocation", "loc").add(loc));
 	}
 	
 	@Override
