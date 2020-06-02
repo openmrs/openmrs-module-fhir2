@@ -78,19 +78,19 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	public Bundle searchForAllergies(
 	        @OptionalParam(name = AllergyIntolerance.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
 	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-					Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
-			
-			@OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
+	        
+	        @OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,	
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
 	        @OptionalParam(name = AllergyIntolerance.SP_CATEGORY) TokenAndListParam category,
 	        @OptionalParam(name = AllergyIntolerance.SP_CODE) TokenAndListParam allergen,
 	        @OptionalParam(name = AllergyIntolerance.SP_SEVERITY) TokenAndListParam severity,
 	        @OptionalParam(name = AllergyIntolerance.SP_MANIFESTATION) TokenAndListParam manifestationCode,
 	        @OptionalParam(name = AllergyIntolerance.SP_CLINICAL_STATUS) TokenAndListParam clinicalStatus) {
-				if (patientReference == null){
-					patientReference = subjectReference;
-				}
+		if (patientReference == null) {
+			patientReference = subjectReference;
+		}
 		return FhirProviderUtils.convertSearchResultsToBundle(fhirAllergyIntoleranceService
 		        .searchForAllergies(patientReference, category, allergen, severity, manifestationCode, clinicalStatus));
 	}

@@ -137,7 +137,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.searchForAllergies(argThat(is(patient)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
-		Bundle results = resourceProvider.searchForAllergies(patient,null, null, null, null, null, null);
+		Bundle results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
@@ -151,7 +151,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.searchForAllergies(argThat(is(patient)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
-		Bundle results = resourceProvider.searchForAllergies(patient,null, null, null, null, null, null);
+		Bundle results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
@@ -165,7 +165,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.searchForAllergies(argThat(is(patient)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
-		Bundle results = resourceProvider.searchForAllergies(patient,null, null, null, null, null, null);
+		Bundle results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
@@ -180,7 +180,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.searchForAllergies(argThat(is(patient)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
-		Bundle results = resourceProvider.searchForAllergies(patient,null, null, null, null, null, null);
+		Bundle results = resourceProvider.searchForAllergies(patient, null, null, null, null, null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
@@ -194,7 +194,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.searchForAllergies(argThat(is(subject)), isNull(), isNull(), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
-		Bundle results = resourceProvider.searchForAllergies(null,subject, null, null, null, null, null);
+		Bundle results = resourceProvider.searchForAllergies(null, subject, null, null, null, null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
@@ -208,7 +208,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.searchForAllergies(isNull(), argThat(is(category)), isNull(), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
-		Bundle results = resourceProvider.searchForAllergies(null,null, category, null, null, null, null);
+		Bundle results = resourceProvider.searchForAllergies(null, null, category, null, null, null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
@@ -222,7 +222,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.searchForAllergies(isNull(), isNull(), argThat(is(allergen)), isNull(), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
-		Bundle results = resourceProvider.searchForAllergies(null,null, null, allergen, null, null, null);
+		Bundle results = resourceProvider.searchForAllergies(null, null, null, allergen, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -237,7 +237,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.searchForAllergies(isNull(), isNull(), isNull(), argThat(is(severity)), isNull(), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
-		Bundle results = resourceProvider.searchForAllergies(null,null, null, null, severity, null, null);
+		Bundle results = resourceProvider.searchForAllergies(null, null, null, null, severity, null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
@@ -251,7 +251,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.searchForAllergies(isNull(), isNull(), isNull(), isNull(), argThat(is(manifestation)), isNull()))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
-		Bundle results = resourceProvider.searchForAllergies(null,null, null, null, null, manifestation, null);
+		Bundle results = resourceProvider.searchForAllergies(null, null, null, null, null, manifestation, null);
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
@@ -265,7 +265,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.searchForAllergies(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(status))))
 		        .thenReturn(Collections.singletonList(allergyIntolerance));
 		
-		Bundle results = resourceProvider.searchForAllergies(null,null, null, null, null, null, status);
+		Bundle results = resourceProvider.searchForAllergies(null, null, null, null, null, null, status);
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
 		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));

@@ -105,7 +105,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		ReferenceAndListParam subjectreference = new ReferenceAndListParam();
 		subjectreference.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
-		Bundle results = resourceProvider.searchEncounter(null, null, null, subjectreference,null);
+		Bundle results = resourceProvider.searchEncounter(null, null, null, subjectreference, null);
 		assertThat(results, notNullValue());
 		assertThat(results.getTotal(), equalTo(1));
 		assertThat(results.getEntry(), notNullValue());
@@ -122,13 +122,14 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
-		Bundle results = resourceProvider.searchEncounter(null, null, null,null, patientParam);
+		Bundle results = resourceProvider.searchEncounter(null, null, null, null, patientParam);
 		assertThat(results, notNullValue());
 		assertThat(results.getTotal(), equalTo(1));
 		assertThat(results.getEntry(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("Encounter"));
 		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(ENCOUNTER_UUID));
 	}
+	
 	@Test
 	public void getEncounterHistory_shouldReturnProvenanceResources() {
 		IdType id = new IdType();

@@ -18,9 +18,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -31,7 +29,6 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -152,7 +149,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any()))
 		        .thenReturn(Collections.singletonList(diagnosticReport));
 		
-		Bundle results = resourceProvider.searchForDiagnosticReports(null, null,null, null, null, null);
+		Bundle results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
@@ -160,17 +157,17 @@ public class DiagnosticReportFhirResourceProviderTest {
 		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("DiagnosticReport"));
 		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(UUID));
 	}
-
+	
 	@Test
 	public void findDiagnosticReports_shouldReturnMatchingBundleOfDiagnosticReportsWhenSubjectIsSpecified() {
-	
+		
 		ReferenceAndListParam subject = new ReferenceAndListParam();
 		subject.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
-	
+		
 		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any()))
 		        .thenReturn(Collections.singletonList(diagnosticReport));
 		
-		Bundle results = resourceProvider.searchForDiagnosticReports(null, null,subject, null, null, null);
+		Bundle results = resourceProvider.searchForDiagnosticReports(null, null, subject, null, null, null);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.isResource(), is(true));
