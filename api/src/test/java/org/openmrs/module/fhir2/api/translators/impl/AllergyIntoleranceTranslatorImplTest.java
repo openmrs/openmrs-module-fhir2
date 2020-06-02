@@ -51,6 +51,7 @@ import org.openmrs.Patient;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
+import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceCriticalityTranslator;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceSeverityTranslator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -100,6 +101,9 @@ public class AllergyIntoleranceTranslatorImplTest {
 	@Mock
 	private AllergyIntoleranceSeverityTranslator severityTranslator;
 	
+	@Mock
+	private AllergyIntoleranceCriticalityTranslator criticalityTranslator;
+	
 	private AllergyIntoleranceTranslatorImpl allergyIntoleranceTranslator;
 	
 	private Allergy omrsAllergy;
@@ -114,6 +118,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		allergyIntoleranceTranslator.setProvenanceTranslator(provenanceTranslator);
 		allergyIntoleranceTranslator.setConceptTranslator(conceptTranslator);
 		allergyIntoleranceTranslator.setSeverityTranslator(severityTranslator);
+		allergyIntoleranceTranslator.setCriticalityTranslator(criticalityTranslator);
 		
 		omrsAllergy = new Allergy();
 		Allergen allergen = new Allergen(AllergenType.FOOD, null, "Test allergen");
@@ -400,6 +405,50 @@ public class AllergyIntoleranceTranslatorImplTest {
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(),
 		    equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.NULL));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateToHighCriticality() {
+		Concept severeConcept = new Concept();
+		severeConcept.setUuid(GLOBAL_PROPERTY_SEVERE_VALUE);
+		omrsAllergy.setSeverity(severeConcept);
+		
+		when(severityTranslator.toFhirResource(severeConcept))
+		        .thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE);
+		when(criticalityTranslator.toFhirResource(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE))
+		        .thenReturn(AllergyIntolerance.AllergyIntoleranceCriticality.HIGH);
+		
+		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getCriticality(), equalTo(AllergyIntolerance.AllergyIntoleranceCriticality.HIGH));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateToLowCriticality() {
+		Concept mildConcept = new Concept();
+		mildConcept.setUuid(GLOBAL_PROPERTY_MILD_VALUE);
+		omrsAllergy.setSeverity(mildConcept);
+		when(severityTranslator.toFhirResource(mildConcept)).thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.MILD);
+		when(criticalityTranslator.toFhirResource(AllergyIntolerance.AllergyIntoleranceSeverity.MILD))
+		        .thenReturn(AllergyIntolerance.AllergyIntoleranceCriticality.LOW);
+		
+		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getCriticality(), equalTo(AllergyIntolerance.AllergyIntoleranceCriticality.LOW));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateToNullCriticality() {
+		Concept otherConcept = new Concept();
+		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
+		omrsAllergy.setSeverity(otherConcept);
+		when(severityTranslator.toFhirResource(otherConcept)).thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.NULL);
+		when(criticalityTranslator.toFhirResource(AllergyIntolerance.AllergyIntoleranceSeverity.NULL))
+		        .thenReturn(AllergyIntolerance.AllergyIntoleranceCriticality.NULL);
+		
+		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getCriticality(), equalTo(AllergyIntolerance.AllergyIntoleranceCriticality.NULL));
 	}
 	
 	@Test

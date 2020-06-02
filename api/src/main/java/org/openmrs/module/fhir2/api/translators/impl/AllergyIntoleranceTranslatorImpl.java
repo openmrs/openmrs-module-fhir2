@@ -24,6 +24,7 @@ import org.openmrs.Allergy;
 import org.openmrs.AllergyReaction;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceCriticalityTranslator;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceSeverityTranslator;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
@@ -51,6 +52,9 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 	
 	@Autowired
 	private AllergyIntoleranceSeverityTranslator severityTranslator;
+	
+	@Autowired
+	private AllergyIntoleranceCriticalityTranslator criticalityTranslator;
 	
 	@Override
 	public AllergyIntolerance toFhirResource(Allergy omrsAllergy) {
@@ -84,7 +88,8 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		allergy.setType(AllergyIntolerance.AllergyIntoleranceType.ALLERGY);
 		allergy.setCode(getAllergySubstance(omrsAllergy.getAllergen()));
 		allergy.addNote(new Annotation().setText(omrsAllergy.getComment()));
-		
+		allergy.setCriticality(
+		    criticalityTranslator.toFhirResource(severityTranslator.toFhirResource(omrsAllergy.getSeverity())));
 		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
 		reactionComponent.setSubstance(getAllergySubstance(omrsAllergy.getAllergen()));
 		reactionComponent.setManifestation(getManifestation(omrsAllergy.getReactions()));
