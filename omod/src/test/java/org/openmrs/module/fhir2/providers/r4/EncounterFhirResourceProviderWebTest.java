@@ -55,6 +55,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -508,7 +509,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		Encounter encounter = new Encounter();
 		encounter.setId(ENCOUNTER_UUID);
 		when(encounterService.searchForEncounters(any(), any(), any(), any()))
-		        .thenReturn(Collections.singletonList(encounter));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		

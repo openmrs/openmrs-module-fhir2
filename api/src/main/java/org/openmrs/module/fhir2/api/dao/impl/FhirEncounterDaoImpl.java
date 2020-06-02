@@ -9,15 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.openmrs.Encounter;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,16 +25,26 @@ import org.springframework.stereotype.Component;
 public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements FhirEncounterDao {
 	
 	@Override
-	public Collection<Encounter> searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
-	        ReferenceAndListParam participant, ReferenceAndListParam subject) {
-		
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
-		
-		handleDateRange("encounterDatetime", date).ifPresent(criteria::add);
-		handleLocationReference("l", location).ifPresent(l -> criteria.createAlias("location", "l").add(l));
-		handleParticipantReference(criteria, participant);
-		handlePatientReference(criteria, subject);
-		
-		return criteria.list();
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleDateRange("encounterDatetime", (DateRangeParam) param.getParam())
+					        .ifPresent(criteria::add));
+					break;
+				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleLocationReference("l", (ReferenceAndListParam) param.getParam())
+					        .ifPresent(l -> criteria.createAlias("location", "l").add(l)));
+					break;
+				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    param -> handleParticipantReference(criteria, (ReferenceAndListParam) param.getParam()));
+					break;
+				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
+					break;
+			}
+		});
 	}
 }

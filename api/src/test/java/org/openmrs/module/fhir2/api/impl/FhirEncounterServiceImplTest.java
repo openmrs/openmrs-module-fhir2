@@ -14,21 +14,23 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -38,7 +40,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Encounter;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,11 +60,18 @@ public class FhirEncounterServiceImplTest {
 	
 	private static final String PARTICIPANT_IDENTIFIER = "1";
 	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
+	
 	@Mock
 	private FhirEncounterDao dao;
 	
 	@Mock
 	private EncounterTranslator encounterTranslator;
+	
+	@Mock
+	private SearchQuery<Encounter, org.hl7.fhir.r4.model.Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
 	
 	private FhirEncounterServiceImpl encounterService;
 	
@@ -71,12 +84,17 @@ public class FhirEncounterServiceImplTest {
 		encounterService = new FhirEncounterServiceImpl();
 		encounterService.setDao(dao);
 		encounterService.setTranslator(encounterTranslator);
+		encounterService.setSearchQuery(searchQuery);
 		
 		openMrsEncounter = new Encounter();
 		openMrsEncounter.setUuid(ENCOUNTER_UUID);
 		
 		fhirEncounter = new org.hl7.fhir.r4.model.Encounter();
 		fhirEncounter.setId(ENCOUNTER_UUID);
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	@Test
@@ -96,16 +114,22 @@ public class FhirEncounterServiceImplTest {
 		
 		encounters.add(openMrsEncounter);
 		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    dateRangeParam);
+		
 		fhirEncounter.setId(ENCOUNTER_UUID);
-		when(dao.searchForEncounters(argThat(is(dateRangeParam)), any(), any(), any())).thenReturn(encounters);
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(encounters);
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
 		
-		Collection<org.hl7.fhir.r4.model.Encounter> results = encounterService.searchForEncounters(dateRangeParam, null,
-		    null, null);
+		IBundleProvider results = encounterService.searchForEncounters(dateRangeParam, null, null, null);
 		
-		assertThat(results, Matchers.notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.iterator().next().getId(), equalTo(ENCOUNTER_UUID));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(((org.hl7.fhir.r4.model.Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
 	@Test
@@ -113,21 +137,27 @@ public class FhirEncounterServiceImplTest {
 		ReferenceAndListParam location = new ReferenceAndListParam();
 		
 		location.addValue(new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(ENCOUNTER_ADDRESS_STATE).setChain(Location.SP_ADDRESS_CITY)));
+		        .add(new ReferenceParam().setValue(ENCOUNTER_ADDRESS_STATE).setChain(Location.SP_ADDRESS_STATE)));
 		
 		Collection<Encounter> encounters = new ArrayList<>();
 		encounters.add(openMrsEncounter);
 		fhirEncounter.setId(ENCOUNTER_UUID);
 		
-		when(dao.searchForEncounters(any(), argThat(is(location)), any(), any())).thenReturn(encounters);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER,
+		    location);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(encounters);
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
 		
-		Collection<org.hl7.fhir.r4.model.Encounter> results = encounterService.searchForEncounters(null, location, null,
-		    null);
+		IBundleProvider results = encounterService.searchForEncounters(null, location, null, null);
 		
-		assertThat(results, Matchers.notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
@@ -142,15 +172,21 @@ public class FhirEncounterServiceImplTest {
 		
 		fhirEncounter.setId(ENCOUNTER_UUID);
 		
-		when(dao.searchForEncounters(any(), any(), argThat(is(participant)), any())).thenReturn(encounters);
-		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
 		
-		Collection<org.hl7.fhir.r4.model.Encounter> results = encounterService.searchForEncounters(null, null, participant,
-		    null);
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
+		
+		IBundleProvider results = encounterService.searchForEncounters(null, null, participant, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, Matchers.notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
@@ -165,14 +201,20 @@ public class FhirEncounterServiceImplTest {
 		
 		fhirEncounter.setId(ENCOUNTER_UUID);
 		
-		when(dao.searchForEncounters(any(), any(), any(), argThat(is(subject)))).thenReturn(encounters);
-		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
-		
-		Collection<org.hl7.fhir.r4.model.Encounter> results = encounterService.searchForEncounters(null, null, null,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    subject);
 		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
+		
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, subject);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, Matchers.notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 }
