@@ -42,23 +42,23 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 	
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+		super.doFilter(req, res, chain);
 		if (req instanceof HttpServletRequest) {
 			HttpServletRequest httpRequest = (HttpServletRequest) req;
 			if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
 				Context.logout();
 			}
-			if(httpRequest.getAttribute(KeycloakAccount.class.getName())!=null)
-			{
-				OidcKeycloakAccount account = (OidcKeycloakAccount) httpRequest.getAttribute(KeycloakAccount.class.getName());
+			if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
+				OidcKeycloakAccount account = (OidcKeycloakAccount) httpRequest
+				        .getAttribute(KeycloakAccount.class.getName());
 				Context.becomeUser(account.getPrincipal().getName());
-			}
-			else {
+			} else {
 				HttpServletResponse httpResponse = (HttpServletResponse) res;
 				httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
 				return;
 			}
 		}
-		super.doFilter(req, res, chain);
+		chain.doFilter(req, res);
 	}
 	
 	@Override

@@ -66,7 +66,6 @@
 	</filter>
 	<filter-mapping>
 		<filter-name>clientAuthenticationFilter</filter-name>
-		<url-pattern>/keycloak/*</url-pattern>
 		<url-pattern>/ws/fhir2</url-pattern>
 		<url-pattern>/ws/fhir2/*</url-pattern>
 		<url-pattern>/ms/fhir2Servlet</url-pattern>
