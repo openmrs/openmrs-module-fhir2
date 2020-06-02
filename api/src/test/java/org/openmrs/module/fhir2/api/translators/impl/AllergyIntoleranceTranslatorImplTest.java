@@ -408,7 +408,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFirResource_shouldTranslateToHighCriticality() {
+	public void toFhirResource_shouldTranslateToHighCriticality() {
 		Concept severeConcept = new Concept();
 		severeConcept.setUuid(GLOBAL_PROPERTY_SEVERE_VALUE);
 		omrsAllergy.setSeverity(severeConcept);
@@ -424,7 +424,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFirResource_shouldTranslateToLowCriticality() {
+	public void toFhirResource_shouldTranslateToLowCriticality() {
 		Concept mildConcept = new Concept();
 		mildConcept.setUuid(GLOBAL_PROPERTY_MILD_VALUE);
 		omrsAllergy.setSeverity(mildConcept);
@@ -438,7 +438,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFirResource_shouldTranslateToNullCriticality() {
+	public void toFhirResource_shouldTranslateToNullCriticality() {
 		Concept otherConcept = new Concept();
 		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
 		omrsAllergy.setSeverity(otherConcept);
