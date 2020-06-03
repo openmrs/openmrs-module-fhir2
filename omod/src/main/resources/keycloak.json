@@ -1,0 +1,6 @@
+{
+  "realm": "openmrs",
+  "resource": "smartClient",
+  "auth-server-url": "https://localhost:8080/auth",
+  "disable-trust-manager": true
+}

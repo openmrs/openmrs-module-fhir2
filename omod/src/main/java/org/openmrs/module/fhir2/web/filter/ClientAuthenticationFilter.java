@@ -43,7 +43,7 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		super.doFilter(req, res, chain);
-		if (req instanceof HttpServletRequest) {
+		if (!res.isCommitted() && req instanceof HttpServletRequest) {
 			HttpServletRequest httpRequest = (HttpServletRequest) req;
 			if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
 				Context.logout();
