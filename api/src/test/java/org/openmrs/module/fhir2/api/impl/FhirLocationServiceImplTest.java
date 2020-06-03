@@ -17,15 +17,17 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +37,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,11 +63,18 @@ public class FhirLocationServiceImplTest {
 	
 	private static final String LOGIN_LOCATION_TAG_DESCRIPTION = "Identify login locations";
 	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
+	
 	@Mock
 	FhirLocationDao locationDao;
 	
 	@Mock
 	LocationTranslator locationTranslator;
+	
+	@Mock
+	SearchQuery<Location, org.hl7.fhir.r4.model.Location, FhirLocationDao, LocationTranslator> searchQuery;
 	
 	private FhirLocationServiceImpl fhirLocationService;
 	
@@ -75,6 +87,7 @@ public class FhirLocationServiceImplTest {
 		fhirLocationService = new FhirLocationServiceImpl();
 		fhirLocationService.setDao(locationDao);
 		fhirLocationService.setTranslator(locationTranslator);
+		fhirLocationService.setSearchQuery(searchQuery);
 		
 		location = new Location();
 		location.setUuid(LOCATION_UUID);
@@ -116,14 +129,23 @@ public class FhirLocationServiceImplTest {
 	public void searchForLocations_shouldReturnLocationsByParameters() {
 		List<Location> locations = new ArrayList<>();
 		locations.add(location);
-		when(locationDao.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(locations);
-		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 		
-		Collection<org.hl7.fhir.r4.model.Location> results = fhirLocationService.searchForLocations(null, null, null, null,
-		    null, null, null, null);
+		SearchParameterMap theParams = new SearchParameterMap();
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, locationDao, locationTranslator));
+		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
+		when(locationDao.search(any(), anyInt(), anyInt())).thenReturn(locations);
+		
+		IBundleProvider results = fhirLocationService.searchForLocations(null, null, null, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("id", equalTo(LOCATION_UUID))));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(LOCATION_UUID))));
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 }

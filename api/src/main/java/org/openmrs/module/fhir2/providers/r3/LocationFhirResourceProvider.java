@@ -15,6 +15,7 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -22,15 +23,12 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.convertors.conv30_40.Bundle30_40;
 import org.hl7.fhir.convertors.conv30_40.Location30_40;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirLocationService;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -70,7 +68,7 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	public Bundle searchLocations(@OptionalParam(name = Location.SP_NAME) StringAndListParam name,
+	public IBundleProvider searchLocations(@OptionalParam(name = Location.SP_NAME) StringAndListParam name,
 	        @OptionalParam(name = Location.SP_ADDRESS_CITY) StringAndListParam city,
 	        @OptionalParam(name = Location.SP_ADDRESS_COUNTRY) StringAndListParam country,
 	        @OptionalParam(name = Location.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
@@ -80,7 +78,6 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
 	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam parent,
 	        @Sort SortSpec sort) {
-		return Bundle30_40.convertBundle(FhirProviderUtils.convertSearchResultsToBundle(
-		    locationService.searchForLocations(name, city, country, postalCode, state, tag, parent, sort)));
+		return locationService.searchForLocations(name, city, country, postalCode, state, tag, parent, sort);
 	}
 }
