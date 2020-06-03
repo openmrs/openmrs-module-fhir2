@@ -9,17 +9,18 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,11 +38,17 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	@Autowired
 	EncounterTranslator translator;
 	
+	@Autowired
+	SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
+	
 	@Override
 	@Transactional(readOnly = true)
-	public Collection<Encounter> searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
+	public IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
 	        ReferenceAndListParam participant, ReferenceAndListParam subject) {
-		return dao.searchForEncounters(date, location, participant, subject).stream().map(translator::toFhirResource)
-		        .collect(Collectors.toList());
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, date)
+		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, location)
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant)
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, subject);
+		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 }

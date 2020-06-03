@@ -14,6 +14,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,12 +23,13 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -40,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Encounter> {
@@ -48,7 +51,13 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	
 	private static final String WRONG_ENCOUNTER_UUID = "c3467w-hi4jer83-56hj34-23hjy5";
 	
-	private static final String PATIENT_IDENTIFIER = "1003DE";
+	private static final int PREFERRED_SIZE = 10;
+	
+	private static final int COUNT = 1;
+	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
 	
 	@Mock
 	private FhirEncounterService encounterService;
@@ -69,6 +78,10 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		encounter.setId(ENCOUNTER_UUID);
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
 		setProvenanceResources(encounter);
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	@Test
@@ -101,34 +114,40 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	public void searchEncounters_shouldReturnMatchingEncounters() {
 		List<Encounter> encounters = new ArrayList<>();
 		encounters.add(encounter);
-		when(encounterService.searchForEncounters(any(), any(), any(), any())).thenReturn(encounters);
+		when(encounterService.searchForEncounters(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
 		
-		ReferenceAndListParam subjectreference = new ReferenceAndListParam();
-		subjectreference.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
+		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
+		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
-		Bundle results = resourceProvider.searchEncounter(null, null, null, subjectreference, null);
+		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, subjectReference, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.getTotal(), equalTo(1));
-		assertThat(results.getEntry(), notNullValue());
-		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("Encounter"));
-		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(ENCOUNTER_UUID));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.get(0).fhirType(), equalTo("Encounter"));
+		assertThat(((org.hl7.fhir.r4.model.Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
 	@Test
 	public void searchEncounters_shouldReturnMatchingEncountersWhenPatientParamIsSpecified() {
 		List<org.hl7.fhir.r4.model.Encounter> encounters = new ArrayList<>();
 		encounters.add(encounter);
-		when(encounterService.searchForEncounters(any(), any(), any(), any())).thenReturn(encounters);
+		when(encounterService.searchForEncounters(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
 		
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
-		Bundle results = resourceProvider.searchEncounter(null, null, null, null, patientParam);
+		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, patientParam);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.getTotal(), equalTo(1));
-		assertThat(results.getEntry(), notNullValue());
-		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("Encounter"));
-		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(ENCOUNTER_UUID));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.get(0).fhirType(), equalTo("Encounter"));
+		assertThat(((org.hl7.fhir.r4.model.Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
 	@Test

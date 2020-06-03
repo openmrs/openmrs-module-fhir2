@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -25,7 +26,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -71,7 +70,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	public Bundle searchEncounter(@OptionalParam(name = Encounter.SP_DATE) DateRangeParam date,
+	public IBundleProvider searchEncounter(@OptionalParam(name = Encounter.SP_DATE) DateRangeParam date,
 	        @OptionalParam(name = Encounter.SP_LOCATION, chainWhitelist = { "", Location.SP_ADDRESS_CITY,
 	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
 	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam location,
@@ -87,9 +86,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			subjectReference = patientParam;
 		}
 		
-		return FhirProviderUtils.convertSearchResultsToBundle(
-		    encounterService.searchForEncounters(date, location, participantReference, subjectReference));
-		
+		return encounterService.searchForEncounters(date, location, participantReference, subjectReference);
 	}
 	
 }

@@ -188,4 +188,7 @@ public class FhirConstants {
 	
 	public static final String POSTAL_CODE_PROPERTY = "postalCode.property";
 	
+	public static final String PARTICIPANT_REFERENCE_SEARCH_HANDLER = "participant.reference.search.handler";
+	
+	public static final String LOCATION_REFERENCE_SEARCH_HANDLER = "location.reference.search.handler";
 }
