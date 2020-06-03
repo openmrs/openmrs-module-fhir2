@@ -9,29 +9,40 @@
  */
 package org.openmrs.module.fhir2.web;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class SmartConformance {
 	
-	private String authorization_endpoint;
+	@JsonProperty("authorization_endpoint")
+	private String authorizationEndpoint;
 	
-	private String token_endpoint;
+	@JsonProperty("token_endpoint")
+	private String tokenEndpoint;
 	
-	private String[] token_endpoint_auth_methods_supported;
+	@JsonProperty("token_endpoint_auth_methods_supported")
+	private String[] tokenEndpointAuthMethodsSupported;
 	
-	private String registration_endpoint;
+	@JsonProperty("registration_endpoint")
+	private String registrationEndpoint;
 	
-	private String[] scopes_supported;
+	@JsonProperty("scopes_supported")
+	private String[] scopesSupported;
 	
-	private String[] response_types_supported;
+	@JsonProperty("response_types_supported")
+	private String[] responseTypesSupported;
 	
-	private String management_endpoint;
+	@JsonProperty("management_endpoint")
+	private String managementEndpoint;
 	
-	private String introspection_endpoint;
+	@JsonProperty("introspection_endpoint")
+	private String introspectionEndpoint;
 	
-	private String revocation_endpoint;
+	@JsonProperty("revocation_endpoint")
+	private String revocationEndpoint;
 	
+	@JsonProperty("capabilities")
 	private String[] capabilities;
 	
 }

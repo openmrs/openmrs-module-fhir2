@@ -44,7 +44,7 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		if (req instanceof HttpServletRequest) {
 			HttpServletRequest httpRequest = (HttpServletRequest) req;
-			if (!httpRequest.getAuthType().contains("BASIC")) {
+			if (httpRequest.getAuthType() != null && !httpRequest.getAuthType().equals(HttpServletRequest.BASIC_AUTH)) {
 				
 				super.doFilter(req, res, chain);
 				if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
@@ -65,10 +65,5 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 		}
 		
 		chain.doFilter(req, res);
-	}
-	
-	@Override
-	public void destroy() {
-		super.destroy();
 	}
 }

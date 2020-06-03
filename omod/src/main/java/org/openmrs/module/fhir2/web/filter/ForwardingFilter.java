@@ -48,12 +48,10 @@ public class ForwardingFilter implements Filter {
 			} else if (R4.equals(fhirVersionCase)) {
 				prefix += "/" + fhirVersion;
 				replacement = "/ms/fhir2Servlet";
-				
 			} else {
 				((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
 			}
-
 			if (requestURI.contains("/.well-known")) {
 				replacement = "/ms/fhir2SmartConfig";
 			}

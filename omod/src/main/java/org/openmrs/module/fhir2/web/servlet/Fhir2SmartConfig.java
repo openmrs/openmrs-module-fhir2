@@ -26,19 +26,20 @@ public class Fhir2SmartConfig extends HttpServlet {
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		
+		SmartConformance smartConformance = new SmartConformance();
+		
 		ObjectMapper objectMapper = new ObjectMapper();
 		
-		SmartConformance smartConformance = new SmartConformance();
-		smartConformance.setAuthorization_endpoint("https://ehr.example.com/auth/authorize");
-		smartConformance.setToken_endpoint("https://ehr.example.com/auth/token");
-		smartConformance.setToken_endpoint_auth_methods_supported(new String[] { "client_secret_basic" });
-		smartConformance.setRegistration_endpoint("https://ehr.example.com/auth/register");
-		smartConformance.setScopes_supported(
+		smartConformance.setAuthorizationEndpoint("https://ehr.example.com/auth/authorize");
+		smartConformance.setTokenEndpoint("https://ehr.example.com/auth/token");
+		smartConformance.setTokenEndpointAuthMethodsSupported(new String[] { "client_secret_basic" });
+		smartConformance.setRegistrationEndpoint("https://ehr.example.com/auth/register");
+		smartConformance.setScopesSupported(
 		    new String[] { "openid", "profile", "launch", "launch/patient", "patient/*.*", "user/*.*", "offline_access" });
-		smartConformance.setResponse_types_supported(new String[] { "code", "code id_token", "id_token", "refresh_token" });
-		smartConformance.setManagement_endpoint("https://ehr.example.com/user/manage");
-		smartConformance.setIntrospection_endpoint("https://ehr.example.com/user/introspect");
-		smartConformance.setRevocation_endpoint("https://ehr.example.com/user/revoke");
+		smartConformance.setResponseTypesSupported(new String[] { "code", "code id_token", "id_token", "refresh_token" });
+		smartConformance.setManagementEndpoint("https://ehr.example.com/user/manage");
+		smartConformance.setIntrospectionEndpoint("https://ehr.example.com/user/introspect");
+		smartConformance.setRevocationEndpoint("https://ehr.example.com/user/revoke");
 		smartConformance.setCapabilities(new String[] { "launch-ehr", "client-public", "client-confidential-symmetric",
 		        "context-ehr-patient", "sso-openid-connect" });
 		
@@ -49,18 +50,5 @@ public class Fhir2SmartConfig extends HttpServlet {
 		objectMapper.writeValue(out, smartConformance);
 		out.print(objectMapper);
 		out.flush();
-		
-		//		HashMap<String, Object> hashMap = new HashMap<>();
-		//		hashMap.put("token_endpoint_auth_methods_supported", "[\"client_secret_basic\"]");
-		//		hashMap.put("registration_endpoint", "https://ehr.example.com/auth/register");
-		//		hashMap.put("scopes_supported",
-		//		    "[\"openid\", \"profile\", \"launch\", \"launch/patient\", \"patient/*.*\", \"user/*.*\", \"offline_access\"]");
-		//		hashMap.put("response_types_supported", "[\"code\", \"code id_token\", \"id_token\", \"refresh_token\"]");
-		//		hashMap.put("introspection_endpoint", "https://ehr.example.com/user/manage");
-		//		hashMap.put("revocation_endpoint", "https://ehr.example.com/user/introspect");
-		//		hashMap.put("capabilities", "https://ehr.example.com/user/revoke");
-		//		hashMap.put("management_endpoint",
-		//		    "[\"launch-ehr\", \"client-public\", \"client-confidential-symmetric\", \"context-ehr-patient\", \"sso-openid-connect\"]");
-		
 	}
 }
