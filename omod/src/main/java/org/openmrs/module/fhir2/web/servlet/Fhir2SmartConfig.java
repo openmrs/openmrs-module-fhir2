@@ -24,12 +24,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class Fhir2SmartConfig extends HttpServlet {
 	
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		
-		SmartConformance smartConformance = new SmartConformance();
-		
-		ObjectMapper objectMapper = new ObjectMapper();
-		
+	private static final ObjectMapper objectMapper = new ObjectMapper();
+	
+	private final SmartConformance smartConformance;
+	
+	public Fhir2SmartConfig() {
+		this.smartConformance = new SmartConformance();
 		smartConformance.setAuthorizationEndpoint("https://ehr.example.com/auth/authorize");
 		smartConformance.setTokenEndpoint("https://ehr.example.com/auth/token");
 		smartConformance.setTokenEndpointAuthMethodsSupported(new String[] { "client_secret_basic" });
@@ -42,13 +42,15 @@ public class Fhir2SmartConfig extends HttpServlet {
 		smartConformance.setRevocationEndpoint("https://ehr.example.com/user/revoke");
 		smartConformance.setCapabilities(new String[] { "launch-ehr", "client-public", "client-confidential-symmetric",
 		        "context-ehr-patient", "sso-openid-connect" });
-		
+	}
+	
+	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		PrintWriter out = res.getWriter();
 		res.setContentType("application/json");
 		res.setCharacterEncoding("UTF-8");
 		res.setStatus(200);
 		objectMapper.writeValue(out, smartConformance);
-		out.print(objectMapper);
-		out.flush();
+		//		out.print(objectMapper);
+		//		out.flush();
 	}
 }
