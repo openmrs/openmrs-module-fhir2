@@ -15,17 +15,16 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
-import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-
+@Getter(AccessLevel.PROTECTED)
 public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs.Patient> implements FhirPatientService {
 	
 	@Autowired
@@ -45,12 +44,6 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	
 	@Autowired
 	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator> searchQuery;
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Patient get(String uuid) {
-		return translator.toFhirResource(dao.get(uuid));
-	}
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -81,17 +74,5 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 		        .setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);
-	}
-	
-	@Override
-	protected FhirDao<org.openmrs.Patient> getDao() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	@Override
-	protected OpenmrsFhirTranslator<org.openmrs.Patient, Patient> getTranslator() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
