@@ -201,4 +201,6 @@ public class FhirConstants {
 	public static final String LOCATION_REFERENCE_SEARCH_HANDLER = "location.reference.search.handler";
 	
 	public static final String TAG_SEARCH_HANDLER = "tag.search.handler";
+	
+	public static final String HAPI_DEFAULT_NARRATIVES_PROPERTY_FILE = "classpath:ca/uhn/fhir/narrative/narratives.properties";
 }
