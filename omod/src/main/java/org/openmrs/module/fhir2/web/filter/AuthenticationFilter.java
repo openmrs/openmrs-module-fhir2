@@ -65,7 +65,9 @@ public class AuthenticationFilter implements Filter {
 			}
 		}
 		
-		chain.doFilter(request, response);
+		if (!response.isCommitted()) {
+			chain.doFilter(request, response);
+		}
 	}
 	
 	@Override

@@ -37,7 +37,7 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 	@Override
 	public void init(FilterConfig filterConfig) {
 		final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-		final Resource keycloakConfig = resolver.getResource("classpath*:keycloak.json");
+		final Resource keycloakConfig = resolver.getResource("classpath:keycloak.json");
 		final KeycloakDeployment deployment;
 		try {
 			deployment = KeycloakDeploymentBuilder.build(keycloakConfig.getInputStream());
@@ -62,27 +62,27 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 		if (req instanceof HttpServletRequest) {
 			HttpServletRequest httpRequest = (HttpServletRequest) req;
 			
-			if (httpRequest.getAuthType() != null && !httpRequest.getAuthType().equals(HttpServletRequest.BASIC_AUTH)) {
-				super.doFilter(req, res, chain);
+			super.doFilter(req, res, chain);
+			
+			if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
+				Context.logout();
+			}
+			
+			if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
+				KeycloakAccount account = (KeycloakAccount) httpRequest.getAttribute(KeycloakAccount.class.getName());
 				
-				if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
-					Context.logout();
-				}
-				
-				if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
-					KeycloakAccount account = (KeycloakAccount) httpRequest.getAttribute(KeycloakAccount.class.getName());
-					
-					Context.becomeUser(account.getPrincipal().getName());
-				} else {
-					if (!res.isCommitted()) {
-						HttpServletResponse httpResponse = (HttpServletResponse) res;
-						httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
-						return;
-					}
+				Context.becomeUser(account.getPrincipal().getName());
+			} else {
+				if (!res.isCommitted()) {
+					HttpServletResponse httpResponse = (HttpServletResponse) res;
+					httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+					return;
 				}
 			}
 		}
 		
-		chain.doFilter(req, res);
+		if (!res.isCommitted()) {
+			chain.doFilter(req, res);
+		}
 	}
 }
