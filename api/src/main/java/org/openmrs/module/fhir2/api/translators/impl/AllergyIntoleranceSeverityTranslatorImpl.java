@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import java.util.Map;
 
+import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.Concept;
@@ -22,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@Setter
+@Setter(AccessLevel.PROTECTED)
 public class AllergyIntoleranceSeverityTranslatorImpl implements AllergyIntoleranceSeverityTranslator {
 	
 	@Autowired

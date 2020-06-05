@@ -9,15 +9,14 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.Collection;
-
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 
 public interface FhirAllergyIntoleranceService extends FhirService<AllergyIntolerance> {
 	
-	Collection<AllergyIntolerance> searchForAllergies(ReferenceAndListParam patientReference, TokenAndListParam category,
+	IBundleProvider searchForAllergies(ReferenceAndListParam patientReference, TokenAndListParam category,
 	        TokenAndListParam allergen, TokenAndListParam severity, TokenAndListParam manifestationCode,
 	        TokenAndListParam clinicalStatus);
 }

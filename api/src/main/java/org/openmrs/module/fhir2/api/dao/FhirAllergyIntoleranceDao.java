@@ -9,15 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import java.util.Collection;
-
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Allergy;
 
 public interface FhirAllergyIntoleranceDao extends FhirDao<Allergy> {
 	
-	Collection<Allergy> searchForAllergies(ReferenceAndListParam patientReference, TokenAndListParam category,
-	        TokenAndListParam allergen, TokenAndListParam severity, TokenAndListParam manifestationCode,
-	        TokenAndListParam clinicalStatus);
 }

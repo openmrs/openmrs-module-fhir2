@@ -33,13 +33,11 @@ import java.util.List;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hl7.fhir.convertors.conv30_40.AllergyIntolerance30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -56,6 +54,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -75,15 +74,9 @@ public class AllergyIntoleranceFhirR3ResourceProviderWebTest extends BaseFhirR3R
 	private ArgumentCaptor<ReferenceAndListParam> patientCaptor;
 	
 	@Captor
-	private ArgumentCaptor<StringOrListParam> stringOrListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<TokenOrListParam> tokenOrListParamArgumentCaptor;
-	
-	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
-	AllergyIntolerance allergyIntolerance;
+	private AllergyIntolerance allergyIntolerance;
 	
 	@Before
 	@Override
@@ -260,8 +253,9 @@ public class AllergyIntoleranceFhirR3ResourceProviderWebTest extends BaseFhirR3R
 		
 		verify(allergyService).searchForAllergies(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
 		    isNull(), isNull());
-		assertThat(tokenOrListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenOrListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
 		    equalTo("d1b98543-10ff-4911-83a2-b7f5fafe2751"));
 	}
 	
@@ -383,8 +377,8 @@ public class AllergyIntoleranceFhirR3ResourceProviderWebTest extends BaseFhirR3R
 	private void verifyUri(String uri) throws Exception {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.setId(ALLERGY_UUID);
-		when(allergyService.searchForAllergies(any(), any(), any(), any(), any(), any())).thenReturn(
-		    Collections.singletonList(AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance)));
+		when(allergyService.searchForAllergies(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		

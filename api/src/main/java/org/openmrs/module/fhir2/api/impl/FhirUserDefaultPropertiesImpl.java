@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 @Transactional
-@Setter(AccessLevel.PACKAGE)
+@Setter(AccessLevel.PROTECTED)
 public class FhirUserDefaultPropertiesImpl implements FhirUserDefaultProperties {
 	
 	@Autowired
@@ -33,7 +33,6 @@ public class FhirUserDefaultPropertiesImpl implements FhirUserDefaultProperties 
 	public Locale getDefaultLocale() {
 		String locale = globalPropertyService.getGlobalProperty("default_locale", "en_GB");
 		locale = locale.replace("_", "-");
-		
 		return new Locale.Builder().setLanguageTag(locale).build();
 	}
 }

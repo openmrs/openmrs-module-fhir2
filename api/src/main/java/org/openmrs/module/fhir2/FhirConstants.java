@@ -98,6 +98,8 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
 	
+	public static final String ALLERGY_INTOLERANCE = "AllergyIntolerance";
+	
 	public static final String ENCOUNTER = "Encounter";
 	
 	public static final String OBSERVATION = "Observation";
@@ -201,4 +203,8 @@ public class FhirConstants {
 	public static final String LOCATION_REFERENCE_SEARCH_HANDLER = "location.reference.search.handler";
 	
 	public static final String TAG_SEARCH_HANDLER = "tag.search.handler";
+	
+	public static final String ALLERGEN_SEARCH_HANDLER = "allergen.search.handler";
+	
+	public static final String SEVERITY_SEARCH_HANDLER = "severity.search.handler";
 }
