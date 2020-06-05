@@ -1,11 +1,8 @@
 {
   "realm": "openmrs",
-  "auth-server-url": "http://localhost:8080/auth/",
+  "auth-server-url": "http://localhost:8180/auth/",
   "ssl-required": "external",
   "resource": "smartClient",
   "public-client": true,
-  "confidential-port": 0,
-  "policy-enforcer": {
-    "on-deny-redirect-to": "http://localhost:8081/openmrs/"
-  }
+  "confidential-port": 0
 }

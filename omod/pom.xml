@@ -87,6 +87,7 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-servlet-filter-adapter</artifactId>
@@ -105,6 +106,12 @@
 					<artifactId>jackson-annotations</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-authz-client -->
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-authz-client</artifactId>
+			<version>10.0.1</version>
 		</dependency>
 	</dependencies>
 
