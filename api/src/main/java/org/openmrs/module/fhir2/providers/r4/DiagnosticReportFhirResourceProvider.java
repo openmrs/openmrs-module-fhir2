@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -29,7 +30,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
@@ -80,7 +80,7 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	public Bundle searchForDiagnosticReports(
+	public IBundleProvider searchForDiagnosticReports(
 	        @OptionalParam(name = DiagnosticReport.SP_ENCOUNTER, chainWhitelist = {
 	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
 	        @OptionalParam(name = DiagnosticReport.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
@@ -93,7 +93,6 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
-		return FhirProviderUtils.convertSearchResultsToBundle(
-		    service.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code, sort));
+		return service.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code, sort);
 	}
 }

@@ -17,15 +17,17 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +36,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,15 +50,18 @@ public class FhirDiagnosticReportServiceImplTest {
 	
 	private static final String WRONG_UUID = "dd0649b4-efa1-4288-a317-e4c141d89859";
 	
-	private static final DiagnosticReport.DiagnosticReportStatus INITIAL_STATUS = DiagnosticReport.DiagnosticReportStatus.PRELIMINARY;
+	private static final int START_INDEX = 0;
 	
-	private static final DiagnosticReport.DiagnosticReportStatus FINAL_STATUS = DiagnosticReport.DiagnosticReportStatus.FINAL;
+	private static final int END_INDEX = 10;
 	
 	@Mock
 	private FhirDiagnosticReportDao dao;
 	
 	@Mock
 	private DiagnosticReportTranslator translator;
+	
+	@Mock
+	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
 	
 	private FhirDiagnosticReportServiceImpl service;
 	
@@ -62,6 +70,11 @@ public class FhirDiagnosticReportServiceImplTest {
 		service = new FhirDiagnosticReportServiceImpl();
 		service.setTranslator(translator);
 		service.setDao(dao);
+		service.setSearchQuery(searchQuery);
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	@Test
@@ -169,13 +182,19 @@ public class FhirDiagnosticReportServiceImplTest {
 		List<Obs> obsList = new ArrayList<>();
 		obsList.add(obs);
 		
-		when(dao.searchForDiagnosticReports(any(), any(), any(), any(), any())).thenReturn(obsList);
-		when(translator.toFhirResource(obs)).thenReturn(diagnosticReport);
+		SearchParameterMap theParams = new SearchParameterMap();
 		
-		Collection<DiagnosticReport> results = service.searchForDiagnosticReports(null, null, null, null, null);
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(obsList);
+		when(translator.toFhirResource(obs)).thenReturn(diagnosticReport);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		
+		IBundleProvider results = service.searchForDiagnosticReports(null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("id", equalTo(UUID))));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(UUID))));
 	}
 }

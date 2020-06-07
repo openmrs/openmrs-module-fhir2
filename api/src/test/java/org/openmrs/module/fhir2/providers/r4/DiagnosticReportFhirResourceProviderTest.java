@@ -19,8 +19,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -29,16 +31,18 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiagnosticReportFhirResourceProviderTest {
@@ -46,6 +50,14 @@ public class DiagnosticReportFhirResourceProviderTest {
 	private static final String UUID = "bdd7e368-3d1a-42a9-9538-395391b64adf";
 	
 	private static final String WRONG_UUID = "df34a1c1-f57b-4c33-bee5-e601b56b9d5b";
+	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
+	
+	private static final int PREFERRED_PAGE_SIZE = 10;
+	
+	private static final int COUNT = 1;
 	
 	@Mock
 	private FhirDiagnosticReportService service;
@@ -65,6 +77,10 @@ public class DiagnosticReportFhirResourceProviderTest {
 	public void initDiagnosticReport() {
 		diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	@Test
@@ -146,16 +162,17 @@ public class DiagnosticReportFhirResourceProviderTest {
 	
 	@Test
 	public void findDiagnosticReports_shouldReturnMatchingBundleOfDiagnosticReports() {
-		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any()))
-		        .thenReturn(Collections.singletonList(diagnosticReport));
+		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any())).thenReturn(
+		    new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("DiagnosticReport"));
-		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(UUID));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
 	}
 	
 	@Test
@@ -164,15 +181,16 @@ public class DiagnosticReportFhirResourceProviderTest {
 		ReferenceAndListParam subject = new ReferenceAndListParam();
 		subject.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
-		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any()))
-		        .thenReturn(Collections.singletonList(diagnosticReport));
+		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any())).thenReturn(
+		    new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchForDiagnosticReports(null, null, subject, null, null, null);
+		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, subject, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("DiagnosticReport"));
-		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(UUID));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
 	}
 }

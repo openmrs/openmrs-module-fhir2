@@ -13,13 +13,20 @@ import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.convertors.conv30_40.DiagnosticReport30_40;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -67,5 +74,23 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 		
 		return FhirProviderUtils.buildUpdate(
 		    diagnosticReportService.update(idPart, DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport)));
+	}
+	
+	@Search
+	public IBundleProvider searchForDiagnosticReports(
+	        @OptionalParam(name = DiagnosticReport.SP_ENCOUNTER, chainWhitelist = {
+	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
+	        @OptionalParam(name = DiagnosticReport.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
+	                Patient.SP_GIVEN, Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
+	        @OptionalParam(name = DiagnosticReport.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_NAME,
+	                Patient.SP_GIVEN, Patient.SP_FAMILY }) ReferenceAndListParam subjectReference,
+	        @OptionalParam(name = DiagnosticReport.SP_ISSUED) DateRangeParam issueDate,
+	        @OptionalParam(name = DiagnosticReport.SP_CODE) TokenAndListParam code, @Sort SortSpec sort) {
+		if (patientReference == null) {
+			patientReference = subjectReference;
+		}
+		return diagnosticReportService.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code,
+		    sort);
 	}
 }

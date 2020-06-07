@@ -9,10 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -21,8 +19,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Obs;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,15 +36,24 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticReport, Obs> implements FhirDiagnosticReportService {
 	
 	@Autowired
-	FhirDiagnosticReportDao dao;
+	private FhirDiagnosticReportDao dao;
 	
 	@Autowired
-	DiagnosticReportTranslator translator;
+	private DiagnosticReportTranslator translator;
+	
+	@Autowired
+	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
 	
 	@Override
-	public Collection<DiagnosticReport> searchForDiagnosticReports(ReferenceAndListParam encounterReference,
+	public IBundleProvider searchForDiagnosticReports(ReferenceAndListParam encounterReference,
 	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code, SortSpec sort) {
-		return dao.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code, sort).stream()
-		        .map(translator::toFhirResource).collect(Collectors.toList());
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, issueDate)
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code).setSortSpec(sort);
+		
+		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 }

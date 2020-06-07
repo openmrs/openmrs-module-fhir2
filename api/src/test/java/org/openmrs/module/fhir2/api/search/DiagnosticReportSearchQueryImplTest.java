@@ -1,0 +1,447 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.fhir2.api.search;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.Before;
+import org.junit.Test;
+import org.openmrs.Obs;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
+import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+
+@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
+public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+	
+	private static final String DIAGNOSTIC_REPORT_UUID = "dchf6962-1c42-49ea-bed2-97650c66f246";
+	
+	private static final String ENCOUNTER_UUID = "y403fafb-e5e4-42d0-9d11-4f52e89d123r";
+	
+	private static final String WRONG_ENCOUNTER_UUID = "6519d653-393b-4118-9c83-a3715b82d4az";
+	
+	private static final String PATIENT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
+	
+	private static final String WRONG_PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23043";
+	
+	private static final String PATIENT_GIVEN_NAME = "Horatio";
+	
+	private static final String WRONG_PATIENT_GIVEN_NAME = "Colletas";
+	
+	private static final String PATIENT_FAMILY_NAME = "Hornblower";
+	
+	private static final String WRONG_PATIENT_FAMILY_NAME = "Chebaskwonyop";
+	
+	private static final String DIAGNOSTIC_REPORT_DATETIME = "2018-08-18T14:09:35.0";
+	
+	private static final String DIAGNOSTIC_REPORT_WRONG_DATETIME = "2008-08-18T14:11:15.0";
+	
+	private static final String DIAGNOSTIC_REPORT_DATE = "2018-08-18 14:09:35.0";
+	
+	private static final String DIAGNOSTIC_REPORT_CODE = "23";
+	
+	private static final String CODEABLE_CONCEPT_UUID = "0f97e14e-cdc2-49ac-9255-b5126f8a5147";
+	
+	private static final String DIAGNOSTIC_REPORT_WRONG_CODE = "5499";
+	
+	private static final String PATIENT_IDENTIFIER = "101-6";
+	
+	private static final String WRONG_PATIENT_IDENTIFIER = "6TS-3";
+	
+	private static final String DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirDiagnosticReportDaoImplTest_initial_data.xml";
+	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
+	
+	@Autowired
+	private FhirDiagnosticReportDao dao;
+	
+	@Autowired
+	private DiagnosticReportTranslator translator;
+	
+	@Autowired
+	SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
+	
+	@Before
+	public void setup() throws Exception {
+		executeDataSet(DATA_XML);
+	}
+	
+	private IBundleProvider search(SearchParameterMap theParams) {
+		return searchQuery.getQueryResults(theParams, dao, translator);
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnCorrectObsByEncounterUUID() {
+		ReferenceAndListParam encounterReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID).setChain(null)));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getEncounter().getReferenceElement().getIdPart(),
+		    equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongEncounterUUID() {
+		ReferenceAndListParam encounterReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(WRONG_ENCOUNTER_UUID).setChain(null)));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientUUID() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_UUID).setChain(null)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
+		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientUUID() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(WRONG_PATIENT_UUID).setChain(null)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientIdentifier() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(PATIENT_IDENTIFIER).setChain(Patient.SP_IDENTIFIER)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
+		    equalTo(PATIENT_IDENTIFIER));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientIdentifier() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(WRONG_PATIENT_IDENTIFIER).setChain(Patient.SP_IDENTIFIER)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientName() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(DIAGNOSTIC_REPORT_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientName() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(WRONG_PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientGivenName() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(DIAGNOSTIC_REPORT_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientGivenName() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(WRONG_PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientFamilyName() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_FAMILY_NAME).setChain(Patient.SP_FAMILY)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(DIAGNOSTIC_REPORT_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientFamilyName() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(WRONG_PATIENT_FAMILY_NAME).setChain(Patient.SP_FAMILY)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnCorrectObsByIssueDate() {
+		DateRangeParam issueDate = new DateRangeParam(new DateParam(DIAGNOSTIC_REPORT_DATETIME));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    issueDate);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getIssued().toString(),
+		    equalTo(DIAGNOSTIC_REPORT_DATE));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongIssueDate() {
+		DateRangeParam issueDate = new DateRangeParam(new DateParam(DIAGNOSTIC_REPORT_WRONG_DATETIME));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    issueDate);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnCorrectObsByCode() {
+		TokenAndListParam code = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(new TokenParam(DIAGNOSTIC_REPORT_CODE)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getCode().getCodingFirstRep().getCode(),
+		    equalTo(CODEABLE_CONCEPT_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongCode() {
+		TokenAndListParam code = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(new TokenParam(DIAGNOSTIC_REPORT_WRONG_CODE)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldHandleComplexQuery() {
+		TokenAndListParam code = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(new TokenParam(DIAGNOSTIC_REPORT_CODE)));
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		
+		DiagnosticReport diagnosticReport = (DiagnosticReport) resultList.iterator().next();
+		assertThat(diagnosticReport.getCode().getCodingFirstRep().getCode(), equalTo(CODEABLE_CONCEPT_UUID));
+		assertThat(diagnosticReport.getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldSortDiagnosticReportsByIssueDateAsRequested() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName(DiagnosticReport.SP_ISSUED);
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		List<DiagnosticReport> resultsList = getNonNullObsListForSorting(sort);
+		// check if the sorting is indeed correct by ascending order
+		for (int i = 1; i < resultsList.size(); i++) {
+			assertThat(resultsList.get(i - 1).getIssued(), lessThanOrEqualTo(resultsList.get(i).getIssued()));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		resultsList = getNonNullObsListForSorting(sort);
+		// check if the sorting is indeed correct by descending order
+		for (int i = 1; i < resultsList.size(); i++) {
+			assertThat(resultsList.get(i - 1).getIssued(), greaterThanOrEqualTo(resultsList.get(i).getIssued()));
+		}
+	}
+	
+	private List<DiagnosticReport> getNonNullObsListForSorting(SortSpec sort) {
+		SearchParameterMap theParams = new SearchParameterMap().setSortSpec(sort);
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		// collect only those obs which are an obs group
+		List<DiagnosticReport> results = dao.search(theParams, START_INDEX, END_INDEX).stream().filter(Obs::isObsGrouping)
+		        .map(translator::toFhirResource).collect(Collectors.toList());
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(results, not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		// Remove diagnostic reports with sort parameter value null, to allow comparison while asserting.
+		switch (sort.getParamName()) {
+			case DiagnosticReport.SP_ISSUED:
+				results.removeIf(p -> p.getIssued() == null);
+				break;
+		}
+		
+		return results;
+	}
+	
+}
