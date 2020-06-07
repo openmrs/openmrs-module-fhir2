@@ -13,9 +13,15 @@ import javax.validation.constraints.NotNull;
 
 import org.hl7.fhir.r4.model.MedicationRequest;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+
 public interface FhirMedicationRequestService extends FhirService<MedicationRequest> {
 	
 	@Override
 	MedicationRequest get(@NotNull String uuid);
 	
+	IBundleProvider searchForMedicationRequests(ReferenceAndListParam patientReference,ReferenceAndListParam encounterReference,TokenAndListParam code,
+			ReferenceAndListParam participantReference, ReferenceAndListParam medicationReference);
 }
