@@ -1,0 +1,91 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <table class="hapiPropertyTable">
+        <tbody>
+        <tr th:if="${resource.id}">
+            <td>Id:</td>
+            <td th:text="${resource.id}"></td>
+        </tr>
+        <tr th:if="${not resource.name.empty}">
+            <td>Name:</td>
+            <td>
+                <th:block th:each="name, nameItr: ${resource.name}">
+                    <th:block th:if="${nameItr.index}">,</th:block>
+                    <th:block th:narrative="${name}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <th:block th:if="resource.photo">
+            <tr th:if="${resource.photo.url}">
+                <td>Photo:</td>
+                <td><img src="${resource.photo.url}" /></td>
+            </tr>
+        </th:block>
+        <tr th:if="${resource.gender}">
+            <td>Gender:</td>
+            <td th:text="${resource.gender}"></td>
+        </tr>
+        <tr th:if="${resource.birthDate}">
+            <td>Birth Date:</td>
+            <td th:text="${#dates.format(resource.birthDate,'dd/MM/yyyy')}"></td>
+        </tr>
+        <tr th:if="${not resource.addressFirstRep.empty}">
+            <td>Address:</td>
+            <td th:narrative="${resource.addressFirstRep}"></td>
+        </tr>
+        <tr th:if="${not resource.telecom.empty}">
+            <td>Telecom:</td>
+            <td>
+                <th:block th:each="telecom, telecomItr: ${resource.telecom}">
+                    <th:block th:if="${telecomItr.index}">,</th:block>
+                    <th:block th:narrative="${telecom}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.identifier.empty}">
+            <td>Identifier:</td>
+            <td>
+                <th:block th:each="identifier: ${resource.identifier}">
+                    <div th:narrative="${identifier}"></div>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.managingOrganization.empty}">
+            <td>Managing Organisation:</td>
+            <td th:narrative="${resource.managingOrganization}"></td>
+        </tr>
+        <tr th:if="${resource.active}">
+            <td>Active:</td>
+            <td th:text="${resource.active}"></td>
+        </tr>
+        <tr th:if="${not resource.link.empty}">
+            <td>Link:</td>
+            <td>
+                <th:block th:each="link, linkItr: ${resource.link}">
+                    <th:block th:if="${linkItr.index}">,</th:block>
+                    <th:block th:narrative="${link.target}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->

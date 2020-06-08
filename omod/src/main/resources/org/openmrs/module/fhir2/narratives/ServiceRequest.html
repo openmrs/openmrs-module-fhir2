@@ -1,0 +1,221 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <table class="hapiPropertyTable">
+        <tbody>
+        <tr th:if="${resource.id}">
+            <td>Id:</td>
+            <td th:text="${resource.id}"></td>
+        </tr>
+        <tr th:if="${not resource.identifier.empty}">
+            <td>Identifier:</td>
+            <td>
+                <th:block th:each="identifier: ${resource.identifier}">
+                    <div th:narrative="${identifier}"></div>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.basedOn.empty}">
+            <td>Based On:</td>
+            <td>
+                <th:block th:each="basedOn, basedOnItr: ${resource.basedOn}">
+                    <th:block th:if="${basedOnItr.index}">,</th:block>
+                    <th:block th:narrative="${basedOn}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.replaces.empty}">
+            <td>Replaces:</td>
+            <td>
+                <th:block th:each="replaces, replacesItr: ${resource.replaces}">
+                    <th:block th:if="${replacesItr.index}">,</th:block>
+                    <th:block th:narrative="${replaces}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.requisition.empty}">
+            <td>Requisition:</td>
+            <td th:narrative="${resource.requisition}"></td>
+        </tr>
+        <tr th:if="${resource.status}">
+            <td>Status:</td>
+            <td th:text="${resource.status}"></td>
+        </tr>
+        <tr th:if="${resource.intent}">
+            <td>Intent:</td>
+            <td th:text="${resource.intent}"></td>
+        </tr>
+        <tr th:if="${not resource.category.empty}">
+            <td>Category:</td>
+            <td>
+                <th:block th:each="category, categoryItr: ${resource.category}">
+                    <th:block th:if="${categoryItr.index}">,</th:block>
+                    <th:block th:narrative="${category}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${resource.priority}">
+            <td>Priority:</td>
+            <td th:narrative="${resource.priority}"></td>
+        </tr>
+        <tr th:if="${resource.doNotPerform}">
+            <td>Do Not Perform:</td>
+            <td th:narrative="${resource.doNotPerform}"></td>
+        </tr>
+        <tr th:if="${not resource.code.empty}">
+            <td>Code:</td>
+            <td th:narrative="${resource.code}"></td>
+        </tr>
+        <tr th:if="${not resource.orderDetail.empty}">
+            <td>Order Detail:</td>
+            <td>
+                <th:block th:each="orderDetail, orderDetailItr: ${resource.orderDetail}">
+                    <th:block th:if="${orderDetailItr.index}">,</th:block>
+                    <th:block th:narrative="${orderDetail}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${resource.quantity}">
+            <td>Quantity:</td>
+            <td th:narrative="${resource.quantity}"></td>
+        </tr>
+        <tr th:if="${not resource.subject.empty}">
+            <td>Subject:</td>
+            <td th:narrative="${resource.subject}"></td>
+        </tr>
+        <tr th:if="${not resource.encounter.empty}">
+            <td>Encounter:</td>
+            <td th:narrative="${resource.encounter}"></td>
+        </tr>
+        <tr th:if="${resource.occurrence}">
+            <td>Occurrence:</td>
+            <td th:narrative="${resource.occurrence}"></td>
+        </tr>
+        <tr th:if="${resource.asNeeded}">
+            <td>As Needed:</td>
+            <td th:narrative="${resource.asNeeded}"></td>
+        </tr>
+        <tr th:if="${resource.authoredOn}">
+            <td>Authored On:</td>
+            <td th:text="${#dates.format(resource.authoredOn,'dd/MM/yyyy')}"></td>
+        </tr>
+        <tr th:if="${not resource.requester.empty}">
+            <td>Requester:</td>
+            <td th:narrative="${resource.requester}"></td>
+        </tr>
+        <tr th:if="${not resource.performerType.empty}">
+            <td>Performer Type:</td>
+            <td th:narrative="${resource.performerType}"></td>
+        </tr>
+        <tr th:if="${not resource.locationCode.empty}">
+            <td>Location Code:</td>
+            <td>
+                <th:block th:each="locationCode, locationCodeItr: ${resource.locationCode}">
+                    <th:block th:if="${locationCodeItr.index}">,</th:block>
+                    <th:block th:narrative="${locationCode}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.locationReference.empty}">
+            <td>Location Reference:</td>
+            <td>
+                <th:block th:each="locationReference, locationReferenceItr: ${resource.locationReference}">
+                    <th:block th:if="${locationReferenceItr.index}">,</th:block>
+                    <th:block th:narrative="${locationReference}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.reasonCode.empty}">
+            <td>Reason Code:</td>
+            <td>
+                <th:block th:each="reasonCode, reasonCodeItr: ${resource.reasonCode}">
+                    <th:block th:if="${reasonCodeItr.index}">,</th:block>
+                    <th:block th:narrative="${reasonCode}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.reasonReference.empty}">
+            <td>Reason Reference:</td>
+            <td>
+                <th:block th:each="reasonReference, reasonReferenceItr: ${resource.reasonReference}">
+                    <th:block th:if="${reasonReferenceItr.index}">,</th:block>
+                    <th:block th:narrative="${reasonReference}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.insurance.empty}">
+            <td>Insurance:</td>
+            <td>
+                <th:block th:each="insurance, insuranceItr: ${resource.insurance}">
+                    <th:block th:if="${insuranceItr.index}">,</th:block>
+                    <th:block th:narrative="${insurance}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.supportingInfo.empty}">
+            <td>Supporting Info:</td>
+            <td>
+                <th:block th:each="supportingInfo, supportingInfoItr: ${resource.supportingInfo}">
+                    <th:block th:if="${supportingInfoItr.index}">,</th:block>
+                    <th:block th:narrative="${supportingInfo}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.specimen.empty}">
+            <td>Specimen:</td>
+            <td>
+                <th:block th:each="specimen, specimenItr: ${resource.specimen}">
+                    <th:block th:if="${specimenItr.index}">,</th:block>
+                    <th:block th:narrative="${specimen}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.bodySite.empty}">
+            <td>Body Site:</td>
+            <td>
+                <th:block th:each="bodySite, bodySiteItr: ${resource.bodySite}">
+                    <th:block th:if="${bodySiteItr.index}">,</th:block>
+                    <th:block th:narrative="${bodySite}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.note.empty}">
+            <td>Note:</td>
+            <td>
+                <div th:each="note: ${resource.note}" th:text="${note.text}"></div>
+            </td>
+        </tr>
+        <tr th:if="${resource.patientInstruction}">
+            <td>Patient Instruction:</td>
+            <td th:text="${resource.patientInstruction}"></td>
+        </tr>
+        <tr th:if="${not resource.relevantHistory.empty}">
+            <td>Relevant History:</td>
+            <td>
+                <th:block th:each="relevantHistory, relevantHistoryItr: ${resource.relevantHistory}">
+                    <th:block th:if="${relevantHistoryItr.index}">,</th:block>
+                    <th:block th:narrative="${relevantHistory}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->
