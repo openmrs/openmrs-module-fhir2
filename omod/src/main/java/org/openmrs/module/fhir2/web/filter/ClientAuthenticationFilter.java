@@ -30,7 +30,7 @@ import org.keycloak.adapters.spi.KeycloakAccount;
 import org.openmrs.User;
 import org.openmrs.api.context.Authenticated;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.fhir2.web.oauth.OAuth2TokenCredentials;
+import org.openmrs.module.fhir2.web.oauth.SmartTokenCredentials;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -42,6 +42,7 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 		final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		final Resource keycloakConfig = resolver.getResource("classpath:keycloak.json");
 		final KeycloakDeployment deployment;
+		
 		try {
 			deployment = KeycloakDeploymentBuilder.build(keycloakConfig.getInputStream());
 			this.deploymentContext = new AdapterDeploymentContext(deployment);
@@ -63,9 +64,10 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		if (req instanceof HttpServletRequest) {
-			HttpServletRequest httpRequest = (HttpServletRequest) req;
+			final HttpServletRequest httpRequest = (HttpServletRequest) req;
 			
-			super.doFilter(req, res, chain);
+			// KeycloakOIDCFilter does the actual request handling
+			super.doFilter(req, res, (rq, rs) -> {});
 			
 			if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
 				Context.logout();
@@ -73,13 +75,14 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 			
 			if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
 				KeycloakAccount account = (KeycloakAccount) httpRequest.getAttribute(KeycloakAccount.class.getName());
-				System.out.println(account.getPrincipal().getName());
+				
 				User user = new User();
 				user.setUsername(account.getPrincipal().getName());
-				Authenticated authenticated = Context.authenticate(new OAuth2TokenCredentials(user));
-				log.info("The user '" + account.getPrincipal().getName()
-				        + "' was successfully authenticated with OpenMRS with user " + authenticated.getUser());
-				//				Context.becomeUser(account.getPrincipal().getName());
+				
+				Authenticated authenticated = Context.authenticate(new SmartTokenCredentials(user));
+				
+				log.debug("The user '{}' was successfully authenticated as OpenMRS user {}",
+				    account.getPrincipal().getName(), authenticated.getUser());
 			} else {
 				if (!res.isCommitted()) {
 					HttpServletResponse httpResponse = (HttpServletResponse) res;
@@ -89,6 +92,8 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 			}
 		}
 		
-		chain.doFilter(req, res);
+		if (!res.isCommitted()) {
+			chain.doFilter(req, res);
+		}
 	}
 }

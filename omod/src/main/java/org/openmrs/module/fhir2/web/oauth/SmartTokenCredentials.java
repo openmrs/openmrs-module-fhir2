@@ -25,18 +25,14 @@ import org.openmrs.api.context.Credentials;
  * Credentials consisting of the token received from the OAuth 2 provider. In pactise this token is
  * made of the user info sent over from the OAuth 2 provider.
  */
-public class OAuth2TokenCredentials implements Credentials {
+public class SmartTokenCredentials implements Credentials {
 	
 	final public static String SCHEME_NAME = "USER_TOKEN_AUTH_SCHEME";
 	
 	private User user;
 	
-	public OAuth2TokenCredentials(User oauth2User) {
+	public SmartTokenCredentials(User oauth2User) {
 		this.user = oauth2User;
-	}
-	
-	public User getOAuth2User() {
-		return user;
 	}
 	
 	@Override

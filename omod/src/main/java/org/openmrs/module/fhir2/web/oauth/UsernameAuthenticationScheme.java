@@ -18,38 +18,45 @@
 // */
 package org.openmrs.module.fhir2.web.oauth;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.User;
 import org.openmrs.api.context.Authenticated;
 import org.openmrs.api.context.AuthenticationScheme;
 import org.openmrs.api.context.BasicAuthenticated;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.api.context.Credentials;
+import org.openmrs.module.fhir2.api.dao.FhirUserDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
  * A scheme that authenticates with OpenMRS based on the 'username'.
  */
 @Component
+@Slf4j
 public class UsernameAuthenticationScheme implements AuthenticationScheme {
 	
-	protected Log log = LogFactory.getLog(getClass());
+	@Autowired
+	private FhirUserDao dao;
 	
 	@Override
 	public Authenticated authenticate(Credentials credentials) throws ContextAuthenticationException {
 		
-		OAuth2TokenCredentials creds;
-		try {
-			creds = (OAuth2TokenCredentials) credentials;
-		}
-		catch (ClassCastException e) {
-			throw new ContextAuthenticationException(
-			        "The credentials provided did not match those needed for the authentication scheme.", e);
+		if (!(credentials instanceof SmartTokenCredentials)) {
+			throw new ContextAuthenticationException("Invalid credentials");
 		}
 		
-		User user = new User();
-		user.setUsername(credentials.getClientName());
+		User user = null;
+		try {
+			user = dao.getUserByUserName(credentials.getClientName());
+		}
+		catch (Exception ignored) {
+			
+		}
+		
+		if (user == null) {
+			throw new ContextAuthenticationException("Invalid credentials");
+		}
 		
 		return new BasicAuthenticated(user, credentials.getAuthenticationScheme());
 	}

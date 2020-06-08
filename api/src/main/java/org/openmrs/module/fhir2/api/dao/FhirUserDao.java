@@ -16,4 +16,6 @@ import org.openmrs.User;
 public interface FhirUserDao {
 	
 	User getUserByUuid(@NotNull String uuid);
+	
+	User getUserByUserName(String clientName);
 }
