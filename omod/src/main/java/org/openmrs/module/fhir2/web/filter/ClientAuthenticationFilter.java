@@ -27,7 +27,10 @@ import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.NodesRegistrationManagement;
 import org.keycloak.adapters.servlet.KeycloakOIDCFilter;
 import org.keycloak.adapters.spi.KeycloakAccount;
+import org.openmrs.User;
+import org.openmrs.api.context.Authenticated;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.fhir2.web.oauth.OAuth2TokenCredentials;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -70,8 +73,13 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 			
 			if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
 				KeycloakAccount account = (KeycloakAccount) httpRequest.getAttribute(KeycloakAccount.class.getName());
-				
-				Context.becomeUser(account.getPrincipal().getName());
+				System.out.println(account.getPrincipal().getName());
+				User user = new User();
+				user.setUsername(account.getPrincipal().getName());
+				Authenticated authenticated = Context.authenticate(new OAuth2TokenCredentials(user));
+				log.info("The user '" + account.getPrincipal().getName()
+				        + "' was successfully authenticated with OpenMRS with user " + authenticated.getUser());
+				//				Context.becomeUser(account.getPrincipal().getName());
 			} else {
 				if (!res.isCommitted()) {
 					HttpServletResponse httpResponse = (HttpServletResponse) res;
@@ -81,8 +89,6 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 			}
 		}
 		
-		if (!res.isCommitted()) {
-			chain.doFilter(req, res);
-		}
+		chain.doFilter(req, res);
 	}
 }

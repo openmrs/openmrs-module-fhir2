@@ -678,7 +678,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.build.outputEncoding>UTF-8</project.build.outputEncoding>
 		<lombokVersion>1.18.10</lombokVersion>
-        <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
+        <openmrsPlatformVersion>2.3.0</openmrsPlatformVersion>
 		<openmrsPlatformToolsVersion>2.0.5</openmrsPlatformToolsVersion>
 		<hapifhirVersion>5.0.0</hapifhirVersion>
     </properties>

@@ -310,7 +310,7 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(1)));
+		assertThat(get(results), hasSize(equalTo(1)));
 		assertThat(get(results), hasItem(hasProperty("id", equalTo(PATIENT_BIRTHDATE_PATIENT_UUID))));
 	}
 	
