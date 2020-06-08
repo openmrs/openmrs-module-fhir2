@@ -1,0 +1,9 @@
+<th:block>
+    <div th:if="${resource.origin}">Origin: <th:block th:narrative="${resource.origin}"></th:block></div>
+    <div th:if="${resource.period}" th:text="'Period: ' + ${resource.period}"></div>
+    <div th:if="${resource.factor}" th:text="'Factor: ' + ${resource.factor}"></div>
+    <div th:if="${resource.lowerLimit}" th:text="'Lower Limit: ' + ${resource.lowerLimit}"></div>
+    <div th:if="${resource.upperLimit}" th:text="'Upper Limit: ' + ${resource.upperLimit}"></div>
+    <div th:if="${resource.dimensions}" th:text="'Dimensions: ' + ${resource.dimensions}"></div>
+    <div th:if="${resource.data}">Data: <th:block th:text="${resource.data}"></th:block></div>
+</th:block>
