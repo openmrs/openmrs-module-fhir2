@@ -1,0 +1,17 @@
+<th:block th:if="${resource.system}">
+    <th:block th:if="${resource.system.toString} eq 'EMAIL'">
+        <th:block th:if="${resource.system}" th:text="${resource.system}+':'"></th:block>
+        <a th:if="${resource.value}" th:href="'mailto:' + ${resource.value}" th:text="${resource.value}"></a>
+        <th:block th:if="${resource.use}" th:text="'('+${resource.use}+')'"></th:block>
+    </th:block>
+    <th:block th:unless="${resource.system.toString} eq 'EMAIL'">
+        <th:block th:if="${resource.system}" th:text="${resource.system}+':'"></th:block>
+        <th:block th:if="${resource.value}" th:text="${resource.value}"></th:block>
+        <th:block th:if="${resource.use}" th:text="'('+${resource.use}+')'"></th:block>
+    </th:block>
+</th:block>
+<th:block th:unless="${resource.system}">
+    <th:block th:if="${resource.system}" th:text="${resource.system}+':'"></th:block>
+    <a th:if="${resource.value}" th:href="'mailto:' + ${resource.value}" th:text="${resource.value}"></a>
+    <th:block th:if="${resource.use}" th:text="'('+${resource.use}+')'"></th:block>
+</th:block>
