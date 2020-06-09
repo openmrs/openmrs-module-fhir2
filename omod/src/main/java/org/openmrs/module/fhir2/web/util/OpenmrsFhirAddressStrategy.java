@@ -7,10 +7,9 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.web.servlet;
+package org.openmrs.module.fhir2.web.util;
 
-import static org.openmrs.module.fhir2.web.servlet.FhirVersionUtils.FhirVersion.R3;
-import static org.openmrs.module.fhir2.web.servlet.FhirVersionUtils.FhirVersion.R4;
+import static org.openmrs.module.fhir2.web.util.FhirVersionUtils.FhirVersion.UNKNOWN;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -36,13 +35,14 @@ public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 		String gpPrefix = globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX);
 		
 		if (StringUtils.isNotBlank(gpPrefix)) {
-			Enum<FhirVersionUtils.FhirVersion> fhirVersion = FhirVersionUtils.getFhirResourceVersion(request);
-			if (R3.equals(fhirVersion)) {
-				gpPrefix += "/R3/";
-			} else if (R4.equals(fhirVersion)) {
-				gpPrefix += "/R4/";
+			StringBuilder gpUrl = new StringBuilder().append(gpPrefix);
+			if (gpPrefix.endsWith("/")) {
+				gpUrl.deleteCharAt(gpUrl.length() - 1);
 			}
-			return gpPrefix;
+			
+			FhirVersionUtils.FhirVersion fhirVersion = FhirVersionUtils.getFhirVersion(request);
+			
+			return gpUrl.append('/').append(fhirVersion == UNKNOWN ? "" : fhirVersion.toString()).toString();
 		}
 		
 		int serverPort = request.getServerPort();
@@ -55,16 +55,10 @@ public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 			port = ":" + serverPort;
 		}
 		
-		String contextPath = StringUtils.defaultString(request.getContextPath());
-		if (contextPath.charAt(0) == '/') {
-			if (contextPath.length() > 1) {
-				contextPath = contextPath.substring(1);
-			} else {
-				contextPath = "";
-			}
-		}
+		FhirVersionUtils.FhirVersion fhirVersion = FhirVersionUtils.getFhirVersion(request);
 		
-		return request.getScheme() + "://" + request.getServerName() + port + "/" + contextPath + "/ws/fhir2/"
-		        + FhirVersionUtils.getFhirResourceVersion(request);
+		return request.getScheme() + "://" + request.getServerName() + port
+		        + StringUtils.defaultString(request.getContextPath()) + "/ws/fhir2/"
+		        + (fhirVersion == UNKNOWN ? "" : fhirVersion.toString());
 	}
 }

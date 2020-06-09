@@ -7,7 +7,7 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.web.servlet;
+package org.openmrs.module.fhir2.web.util;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,9 +19,10 @@ public class FhirVersionUtils {
 		R4
 	}
 	
-	public static Enum<FhirVersion> getFhirResourceVersion(HttpServletRequest request) {
+	public static FhirVersion getFhirVersion(HttpServletRequest request) {
 		String requestURI = request.getRequestURI();
 		String contextPath = request.getContextPath();
+		
 		String prefix = contextPath + "/ws/fhir2";
 		if (requestURI.startsWith(prefix)) {
 			int prefixIdx = requestURI.indexOf(prefix);

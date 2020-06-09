@@ -43,7 +43,7 @@ public class AuthenticationFilter implements Filter {
 			
 			if (!Context.isAuthenticated()) {
 				String basicAuth = httpRequest.getHeader("Authorization");
-				if (!StringUtils.isBlank(basicAuth)) {
+				if (!StringUtils.isBlank(basicAuth) && basicAuth.startsWith("Basic")) {
 					// this is "Basic ${base64encode(username + ":" + password)}"
 					try {
 						basicAuth = basicAuth.substring(6); // remove the leading "Basic "
@@ -51,7 +51,7 @@ public class AuthenticationFilter implements Filter {
 						String[] userAndPass = decoded.split(":");
 						Context.authenticate(userAndPass[0], userAndPass[1]);
 					}
-					catch (Exception ignored) {
+					catch (Exception e) {
 						HttpServletResponse httpResponse = (HttpServletResponse) response;
 						httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
 					}
