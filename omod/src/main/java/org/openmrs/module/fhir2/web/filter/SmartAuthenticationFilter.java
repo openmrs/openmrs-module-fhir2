@@ -37,7 +37,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 @Slf4j
 public class SmartAuthenticationFilter extends KeycloakOIDCFilter {
 	
-	private static final Pattern ACCESS_TOKEN = Pattern.compile("(access_token=[^&]+(?:&)?)");
+	private static final Pattern ACCESS_TOKEN = Pattern.compile("(&?access_token=[^&]+)");
 	
 	@Override
 	public void init(FilterConfig filterConfig) {
@@ -83,7 +83,7 @@ public class SmartAuthenticationFilter extends KeycloakOIDCFilter {
 					OidcKeycloakAccount account = (OidcKeycloakAccount) httpRequest
 					        .getAttribute(KeycloakAccount.class.getName());
 					
-					String userName = account.getKeycloakSecurityContext().getToken().getSubject();
+					String userName = account.getKeycloakSecurityContext().getToken().getPreferredUsername();
 					Authenticated authenticated = Context.authenticate(new SmartTokenCredentials(userName));
 					
 					log.debug("The user '{}' was successfully authenticated as OpenMRS user {}", userName,
@@ -95,10 +95,6 @@ public class SmartAuthenticationFilter extends KeycloakOIDCFilter {
 						String newQueryString = ACCESS_TOKEN.matcher(queryString).replaceFirst("");
 						
 						StringBuilder newRequestUri = new StringBuilder();
-						if (httpRequest.getContextPath() != null) {
-							newRequestUri.append(httpRequest.getContextPath());
-						}
-						
 						if (httpRequest.getServletPath() != null) {
 							newRequestUri.append(httpRequest.getServletPath());
 						}
