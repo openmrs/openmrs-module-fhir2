@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.web.servlet;
 import java.util.Collection;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -60,6 +61,9 @@ public class FhirRestServlet extends RestfulServer {
 		setPagingProvider(pp);
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 		registerInterceptor(loggingInterceptor);
+		
+		getFhirContext().setNarrativeGenerator(
+		    new CustomThymeleafNarrativeGenerator(FhirConstants.HAPI_DEFAULT_NARRATIVES_PROPERTY_FILE));
 	}
 	
 	@Override
