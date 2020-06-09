@@ -67,48 +67,31 @@ public class SmartAuthenticationFilter extends KeycloakOIDCFilter {
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		if (req instanceof HttpServletRequest) {
 			final HttpServletRequest httpRequest = (HttpServletRequest) req;
-			if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
-				Context.logout();
-			}
-			
-			if (!Context.isAuthenticated()) {
-				// KeycloakOIDCFilter does the actual request handling
-				super.doFilter(req, res, (rq, rs) -> {});
+			if (httpRequest.getHeader("Authorization").startsWith("Bearer")) {
 				
 				if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
 					Context.logout();
 				}
 				
-				if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
-					OidcKeycloakAccount account = (OidcKeycloakAccount) httpRequest
-					        .getAttribute(KeycloakAccount.class.getName());
+				if (!Context.isAuthenticated()) {
+					// KeycloakOIDCFilter does the actual request handling
+					super.doFilter(req, res, (rq, rs) -> {});
 					
-					String userName = account.getKeycloakSecurityContext().getToken().getPreferredUsername();
-					Authenticated authenticated = Context.authenticate(new SmartTokenCredentials(userName));
-					
-					log.debug("The user '{}' was successfully authenticated as OpenMRS user {}", userName,
-					    authenticated.getUser());
-					
-					// HAPI cannot process the "access_token" parameter, so we remove it and forward the request
-					if (httpRequest.getParameter("access_token") != null && httpRequest.getQueryString() != null) {
-						String queryString = httpRequest.getQueryString();
-						String newQueryString = ACCESS_TOKEN.matcher(queryString).replaceFirst("");
-						
-						StringBuilder newRequestUri = new StringBuilder();
-						if (httpRequest.getServletPath() != null) {
-							newRequestUri.append(httpRequest.getServletPath());
-						}
-						
-						if (httpRequest.getPathInfo() != null) {
-							newRequestUri.append(httpRequest.getPathInfo());
-						}
-						
-						newRequestUri.append('?').append(newQueryString);
-						
-						req.getRequestDispatcher(newRequestUri.toString()).forward(req, res);
+					if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
+						Context.logout();
 					}
-				} else {
-					if (!res.isCommitted()) {
+					
+					if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
+						OidcKeycloakAccount account = (OidcKeycloakAccount) httpRequest
+						        .getAttribute(KeycloakAccount.class.getName());
+						
+						String userName = account.getKeycloakSecurityContext().getToken().getPreferredUsername();
+						Authenticated authenticated = Context.authenticate(new SmartTokenCredentials(userName));
+						
+						log.debug("The user '{}' was successfully authenticated as OpenMRS user {}", userName,
+						    authenticated.getUser());
+						System.out.println(httpRequest.getHeader("Authorization"));
+					} else {
 						HttpServletResponse httpResponse = (HttpServletResponse) res;
 						httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
 						return;
@@ -117,8 +100,6 @@ public class SmartAuthenticationFilter extends KeycloakOIDCFilter {
 			}
 		}
 		
-		if (!res.isCommitted()) {
-			chain.doFilter(req, res);
-		}
+		chain.doFilter(req, res);
 	}
 }
