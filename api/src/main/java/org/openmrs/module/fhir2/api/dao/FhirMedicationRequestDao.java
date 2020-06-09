@@ -9,11 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-
 import javax.validation.constraints.NotNull;
 
 import org.openmrs.DrugOrder;
-
 
 public interface FhirMedicationRequestDao extends FhirDao<DrugOrder> {
 	

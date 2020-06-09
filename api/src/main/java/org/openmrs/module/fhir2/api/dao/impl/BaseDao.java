@@ -767,6 +767,16 @@ public abstract class BaseDao {
 		return Optional.of(or(toCriteriaArray(criterionList.stream())));
 	}
 	
+	protected Optional<Criterion> handleMedicationReference(@NotNull String medicationAlias,
+	        ReferenceAndListParam medicationReference) {
+		if (medicationReference == null) {
+			return Optional.empty();
+		}
+		
+		return handleAndListParam(medicationReference,
+		    token -> Optional.of(eq(String.format("%s.uuid", medicationAlias), token.getIdPart())));
+	}
+	
 	/**
 	 * Use this method to properly implement sorting for your query. Note that for this method to work,
 	 * you must override one or more of: {@link #paramToProps(SortState)},

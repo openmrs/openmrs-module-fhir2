@@ -29,7 +29,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(p -> handleEncounterReference("e", (ReferenceAndListParam) p.getParam())
+					entry.getValue().forEach(e -> handleEncounterReference("e", (ReferenceAndListParam) e.getParam())
 					        .ifPresent(c -> criteria.createAlias("encounter", "e").add(c)));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
@@ -44,8 +44,8 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					    (ReferenceAndListParam) participantReference.getParam()));
 					break;
 				case FhirConstants.MEDICATION_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(medicationReference -> handleMedicationCode(criteria,
-						(TokenAndListParam) medicationReference.getParam()));
+					entry.getValue().forEach(d -> handleMedicationReference("d", (ReferenceAndListParam) d.getParam())
+					        .ifPresent(c -> criteria.createAlias("drug", "d").add(c)));
 					break;
 			}
 		});
@@ -61,10 +61,4 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		}
 	}
 	
-	private void handleMedicationCode(Criteria criteria, TokenAndListParam code) {
-		if (code != null) {
-			criteria.createAlias("concept", "cc");
-			handleCodeableConcept(criteria, code, "cc", "ccm", "ccrt").ifPresent(criteria::add);
-		}
-	}
 }
