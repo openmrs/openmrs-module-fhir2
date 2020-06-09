@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.web.servlet;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,13 +21,13 @@ import org.openmrs.module.fhir2.web.SmartConformance;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Fhir2SmartConfig extends HttpServlet {
+public class FhirSmartConfigServlet extends HttpServlet {
 	
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 	
 	private final SmartConformance smartConformance;
 	
-	public Fhir2SmartConfig() {
+	public FhirSmartConfigServlet() {
 		this.smartConformance = new SmartConformance();
 		smartConformance.setAuthorizationEndpoint("https://ehr.example.com/auth/authorize");
 		smartConformance.setTokenEndpoint("https://ehr.example.com/auth/token");
@@ -44,13 +43,11 @@ public class Fhir2SmartConfig extends HttpServlet {
 		        "context-ehr-patient", "sso-openid-connect" });
 	}
 	
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+	public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		PrintWriter out = res.getWriter();
 		res.setContentType("application/json");
 		res.setCharacterEncoding("UTF-8");
 		res.setStatus(200);
 		objectMapper.writeValue(out, smartConformance);
-		//		out.print(objectMapper);
-		//		out.flush();
 	}
 }

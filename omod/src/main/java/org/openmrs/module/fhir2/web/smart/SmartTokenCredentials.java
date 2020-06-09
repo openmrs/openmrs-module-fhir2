@@ -16,9 +16,8 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.web.oauth;
+package org.openmrs.module.fhir2.web.smart;
 
-import org.openmrs.User;
 import org.openmrs.api.context.Credentials;
 
 /**
@@ -29,10 +28,10 @@ public class SmartTokenCredentials implements Credentials {
 	
 	final public static String SCHEME_NAME = "USER_TOKEN_AUTH_SCHEME";
 	
-	private User user;
+	private String oauth2User;
 	
-	public SmartTokenCredentials(User oauth2User) {
-		this.user = oauth2User;
+	public SmartTokenCredentials(String oauth2User) {
+		this.oauth2User = oauth2User;
 	}
 	
 	@Override
@@ -42,6 +41,6 @@ public class SmartTokenCredentials implements Credentials {
 	
 	@Override
 	public String getClientName() {
-		return user.getUsername();
+		return oauth2User;
 	}
 }

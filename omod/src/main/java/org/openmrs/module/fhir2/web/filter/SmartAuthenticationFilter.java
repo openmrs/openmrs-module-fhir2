@@ -25,17 +25,19 @@ import org.keycloak.adapters.AdapterDeploymentContext;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.NodesRegistrationManagement;
+import org.keycloak.adapters.OidcKeycloakAccount;
 import org.keycloak.adapters.servlet.KeycloakOIDCFilter;
 import org.keycloak.adapters.spi.KeycloakAccount;
-import org.openmrs.User;
 import org.openmrs.api.context.Authenticated;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.fhir2.web.oauth.SmartTokenCredentials;
+import org.openmrs.module.fhir2.web.smart.SmartTokenCredentials;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Slf4j
-public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
+public class SmartAuthenticationFilter extends KeycloakOIDCFilter {
+	
+	private static final Pattern ACCESS_TOKEN = Pattern.compile("(access_token=[^&]+(?:&)?)");
 	
 	@Override
 	public void init(FilterConfig filterConfig) {
@@ -65,29 +67,56 @@ public class ClientAuthenticationFilter extends KeycloakOIDCFilter {
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		if (req instanceof HttpServletRequest) {
 			final HttpServletRequest httpRequest = (HttpServletRequest) req;
-			
-			// KeycloakOIDCFilter does the actual request handling
-			super.doFilter(req, res, (rq, rs) -> {});
-			
 			if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
 				Context.logout();
 			}
 			
-			if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
-				KeycloakAccount account = (KeycloakAccount) httpRequest.getAttribute(KeycloakAccount.class.getName());
+			if (!Context.isAuthenticated()) {
+				// KeycloakOIDCFilter does the actual request handling
+				super.doFilter(req, res, (rq, rs) -> {});
 				
-				User user = new User();
-				user.setUsername(account.getPrincipal().getName());
+				if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
+					Context.logout();
+				}
 				
-				Authenticated authenticated = Context.authenticate(new SmartTokenCredentials(user));
-				
-				log.debug("The user '{}' was successfully authenticated as OpenMRS user {}",
-				    account.getPrincipal().getName(), authenticated.getUser());
-			} else {
-				if (!res.isCommitted()) {
-					HttpServletResponse httpResponse = (HttpServletResponse) res;
-					httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
-					return;
+				if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
+					OidcKeycloakAccount account = (OidcKeycloakAccount) httpRequest
+					        .getAttribute(KeycloakAccount.class.getName());
+					
+					String userName = account.getKeycloakSecurityContext().getToken().getSubject();
+					Authenticated authenticated = Context.authenticate(new SmartTokenCredentials(userName));
+					
+					log.debug("The user '{}' was successfully authenticated as OpenMRS user {}", userName,
+					    authenticated.getUser());
+					
+					// HAPI cannot process the "access_token" parameter, so we remove it and forward the request
+					if (httpRequest.getParameter("access_token") != null && httpRequest.getQueryString() != null) {
+						String queryString = httpRequest.getQueryString();
+						String newQueryString = ACCESS_TOKEN.matcher(queryString).replaceFirst("");
+						
+						StringBuilder newRequestUri = new StringBuilder();
+						if (httpRequest.getContextPath() != null) {
+							newRequestUri.append(httpRequest.getContextPath());
+						}
+						
+						if (httpRequest.getServletPath() != null) {
+							newRequestUri.append(httpRequest.getServletPath());
+						}
+						
+						if (httpRequest.getPathInfo() != null) {
+							newRequestUri.append(httpRequest.getPathInfo());
+						}
+						
+						newRequestUri.append('?').append(newQueryString);
+						
+						req.getRequestDispatcher(newRequestUri.toString()).forward(req, res);
+					}
+				} else {
+					if (!res.isCommitted()) {
+						HttpServletResponse httpResponse = (HttpServletResponse) res;
+						httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+						return;
+					}
 				}
 			}
 		}

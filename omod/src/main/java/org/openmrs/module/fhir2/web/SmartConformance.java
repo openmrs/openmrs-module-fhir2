@@ -44,5 +44,4 @@ public class SmartConformance {
 	
 	@JsonProperty("capabilities")
 	private String[] capabilities;
-	
 }
