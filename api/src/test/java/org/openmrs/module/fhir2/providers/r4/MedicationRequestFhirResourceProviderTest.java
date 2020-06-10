@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -27,6 +28,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
@@ -90,6 +92,9 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(medicationRequest, nullValue());
 	}
 
+	private List<IBaseResource> getResources(IBundleProvider results,int theFromIndex, int theToIndex){
+		return results.getResources(theFromIndex, theToIndex);
+	}
 	
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestUsingCode() {
@@ -103,11 +108,14 @@ public class MedicationRequestFhirResourceProviderTest {
 		code.addAnd(codingToken);
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, code, null, null);
+
+		List<IBaseResource>  resources = getResources(results,1, 5);
+
 		assertThat(results, notNullValue());
-		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
-		assertThat(results.getResources(1, 5).get(0), notNullValue());
-		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo("MedicationRequest"));
-		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), equalTo("MedicationRequest"));
+		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
 
 	@Test
@@ -121,11 +129,13 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(patientParam, null, null, null, null, null);
 
+		List<IBaseResource>  resources = getResources(results,1, 5);
+
 		assertThat(results, notNullValue());
-		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
-		assertThat(results.getResources(1, 5).get(0), notNullValue());
-		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo("MedicationRequest"));
-		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), equalTo("MedicationRequest"));
+		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
 
 	@Test
@@ -139,11 +149,13 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, medicationParam);
 
+		List<IBaseResource>  resources = getResources(results,1, 5);
+
 		assertThat(results, notNullValue());
-		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
-		assertThat(results.getResources(1, 5).get(0), notNullValue());
-		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo("MedicationRequest"));
-		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), equalTo("MedicationRequest"));
+		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
 
 	@Test
@@ -157,11 +169,13 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, participantParam, null);
 
+		List<IBaseResource>  resources = getResources(results,1, 5);
+
 		assertThat(results, notNullValue());
-		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
-		assertThat(results.getResources(1, 5).get(0), notNullValue());
-		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo("MedicationRequest"));
-		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), equalTo("MedicationRequest"));
+		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
 
 	@Test
@@ -175,11 +189,13 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, encounterParam, null, null, null);
 
+		List<IBaseResource>  resources = getResources(results,1, 5);
+
 		assertThat(results, notNullValue());
-		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
-		assertThat(results.getResources(1, 5).get(0), notNullValue());
-		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo("MedicationRequest"));
-		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), equalTo("MedicationRequest"));
+		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
 	
 }
