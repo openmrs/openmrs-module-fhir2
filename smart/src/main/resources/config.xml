@@ -46,35 +46,21 @@
 	</aware_of_modules>
 
 	<servlet>
-		<servlet-name>fhir2Servlet</servlet-name>
-		<servlet-class>org.openmrs.module.fhir2.web.servlet.FhirRestServlet</servlet-class>
-	</servlet>
-
-	<servlet>
-		<servlet-name>fhir2R3Servlet</servlet-name>
-		<servlet-class>org.openmrs.module.fhir2.web.servlet.FhirR3RestServlet</servlet-class>
+		<servlet-name>fhir2SmartConfig</servlet-name>
+		<servlet-class>org.openmrs.module.fhir2.web.servlet.FhirSmartConfigServlet</servlet-class>
 	</servlet>
 
 	<filter>
-		<filter-name>fhir2AuthenticationFilter</filter-name>
-		<filter-class>org.openmrs.module.fhir2.web.filter.AuthenticationFilter</filter-class>
+		<filter-name>clientAuthenticationFilter</filter-name>
+		<filter-class>org.openmrs.module.fhir2.web.filter.SmartAuthenticationFilter</filter-class>
 	</filter>
 	<filter-mapping>
-		<filter-name>fhir2AuthenticationFilter</filter-name>
+		<filter-name>clientAuthenticationFilter</filter-name>
 		<url-pattern>/ws/fhir2</url-pattern>
 		<url-pattern>/ws/fhir2/*</url-pattern>
 		<url-pattern>/ms/fhir2Servlet</url-pattern>
 		<url-pattern>/ms/fhir2Servlet/*</url-pattern>
 		<url-pattern>/ms/fhir2R3Servlet/*</url-pattern>
-	</filter-mapping>
-	<filter>
-		<filter-name>fhir2ForwardingFilter</filter-name>
-		<filter-class>org.openmrs.module.fhir2.web.filter.ForwardingFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>fhir2ForwardingFilter</filter-name>
-		<url-pattern>/ws/fhir2</url-pattern>
-		<url-pattern>/ws/fhir2/*</url-pattern>
 	</filter-mapping>
 
 	<!-- Internationalization -->
