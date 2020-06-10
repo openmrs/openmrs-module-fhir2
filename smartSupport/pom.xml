@@ -9,12 +9,18 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>smart</artifactId>
+	<artifactId>smartSupport</artifactId>
 	<packaging>jar</packaging>
 	<name>FHIR2 SMART Support</name>
 	<description>SMART on Fhir</description>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<version>2.3.0</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>${project.parent.artifactId}-api</artifactId>
