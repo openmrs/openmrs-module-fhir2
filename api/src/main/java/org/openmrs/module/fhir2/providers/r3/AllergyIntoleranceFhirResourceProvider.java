@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -26,10 +27,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.convertors.conv30_40.AllergyIntolerance30_40;
-import org.hl7.fhir.convertors.conv30_40.Bundle30_40;
 import org.hl7.fhir.convertors.conv30_40.Provenance30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -37,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Provenance;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -80,7 +78,7 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	
 	@Search
 	@SuppressWarnings("unused")
-	public Bundle searchForAllergies(
+	public IBundleProvider searchForAllergies(
 	        @OptionalParam(name = AllergyIntolerance.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
 	                Patient.SP_GIVEN, Patient.SP_FAMILY,
 	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
@@ -95,7 +93,7 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
-		return Bundle30_40.convertBundle(FhirProviderUtils.convertSearchResultsToBundle(allergyIntoleranceService
-		        .searchForAllergies(patientReference, category, allergen, severity, manifestationCode, clinicalStatus)));
+		return allergyIntoleranceService.searchForAllergies(patientReference, category, allergen, severity,
+		    manifestationCode, clinicalStatus);
 	}
 }
