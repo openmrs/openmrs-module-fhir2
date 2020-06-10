@@ -37,4 +37,13 @@
     <patient_identifier patient_identifier_id="1" patient_id="6" identifier="M4001-1" identifier_type="1" preferred="0" location_id="1" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689f"/>
     <patient_identifier patient_identifier_id="2" patient_id="7" identifier="M4001-2" identifier_type="1" preferred="0" location_id="1" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689g"/>
 
+    <allergy allergy_id="1014" patient_id="8" severity_concept_id="23" allergen_type="ENVIRONMENT" coded_allergen="5497" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1084AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+    <concept_name concept_id="5085" name="CD3+CD4+ABS CNT" locale="en_GB" creator="1" date_created="2006-06-06 14:03:53.0" concept_name_id="1480" locale_preferred="0" voided="false" uuid="8230adbf-30a9-4e18-b8d7-hc87e0c23cad"/>
+    <concept_name concept_id="5086" name="TREATMENT STATUS" locale="en_GB" creator="1" date_created="2008-08-15 16:22:03.0" concept_name_id="1461" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="f1d6bf98-6hg5-48a0-aafd-1e2b590e6ed1"/>
+    <concept_name concept_id="5087" name="ANTIRETROVIRAL TREATMENT GROUP" locale="en_GB" creator="1" date_created="2008-08-15 16:57:42.0" concept_name_id="1462" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="de1jhbe-33e1-422a-8d5e-9a4c28c1ea42"/>
+    <concept_name concept_id="5088" name="FOLLOWING" locale="en_GB" creator="1" date_created="2008-08-15 16:58:44.0" concept_name_id="1463" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="e821bc92-66b7-4948-8614-52dsfs6988bb"/>
+    <concept_name concept_id="5090" name="DIED" locale="en_GB" creator="1" date_created="2008-08-15 16:59:19.0" concept_name_id="1465" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="f3ba002f-801f-45fc-8cfe-5437e15a9b3b"/>
+    <concept_name concept_id="5091" name="WAITING FOR RESULTS" locale="en_GB" creator="1" date_created="2008-08-15 16:59:56.0" concept_name_id="1466" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="2f7ds3e4-2a57-49b5-aef0-af9a259aac65"/>
+
 </dataset>

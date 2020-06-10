@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -29,7 +30,6 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -75,7 +75,7 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	
 	@Search
 	@SuppressWarnings("unused")
-	public Bundle searchForAllergies(
+	public IBundleProvider searchForAllergies(
 	        @OptionalParam(name = AllergyIntolerance.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
 	                Patient.SP_GIVEN, Patient.SP_FAMILY,
 	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
@@ -91,8 +91,8 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
-		return FhirProviderUtils.convertSearchResultsToBundle(fhirAllergyIntoleranceService
-		        .searchForAllergies(patientReference, category, allergen, severity, manifestationCode, clinicalStatus));
+		return fhirAllergyIntoleranceService.searchForAllergies(patientReference, category, allergen, severity,
+		    manifestationCode, clinicalStatus);
 	}
 	
 	@Create
