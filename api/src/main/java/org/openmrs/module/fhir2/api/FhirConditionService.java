@@ -21,9 +21,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Condition;
 
-public interface FhirConditionService {
-	
-	Condition getConditionByUuid(@NotNull String uuid);
+public interface FhirConditionService extends FhirService<Condition> {
 	
 	Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
 	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,

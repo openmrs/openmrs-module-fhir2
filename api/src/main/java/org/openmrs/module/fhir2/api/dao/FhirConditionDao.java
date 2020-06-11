@@ -18,10 +18,10 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import org.openmrs.Auditable;
+import org.openmrs.OpenmrsObject;
 
-public interface FhirConditionDao<T> {
-	
-	T getConditionByUuid(@NotNull String uuid);
+public interface FhirConditionDao<T extends OpenmrsObject & Auditable> extends FhirDao<T> {
 	
 	T saveCondition(@NotNull T condition);
 	

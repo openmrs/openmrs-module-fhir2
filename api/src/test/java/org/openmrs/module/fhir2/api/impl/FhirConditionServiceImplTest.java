@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.module.fhir2.FhirException;
+import org.openmrs.module.fhir2.api.exceptions.FhirNotImplementedException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
@@ -36,17 +36,17 @@ public class FhirConditionServiceImplTest {
 		condition.setId(BAD_CONDITION_UUID);
 	}
 	
-	@Test(expected = FhirException.class)
+	@Test(expected = FhirNotImplementedException.class)
 	public void getConditionByUuid_shouldThrowFhirException() {
-		assertThat(conditionService.getConditionByUuid(BAD_CONDITION_UUID), nullValue());
+		assertThat(conditionService.get(BAD_CONDITION_UUID), nullValue());
 	}
 	
-	@Test(expected = FhirException.class)
+	@Test(expected = FhirNotImplementedException.class)
 	public void searchConditions_shouldThrowFhirException() {
 		assertThat(conditionService.searchConditions(null, null, null, null, null, null, null, null), nullValue());
 	}
 	
-	@Test(expected = FhirException.class)
+	@Test(expected = FhirNotImplementedException.class)
 	public void saveCondition_shouldThrowFhirException() {
 		assertThat(conditionService.saveCondition(condition), nullValue());
 	}

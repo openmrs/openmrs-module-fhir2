@@ -111,7 +111,6 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	@Mock
 	private CalendarFactory calendarFactory;
 	
-	@Autowired
 	private FhirConditionDaoImpl_2_2 dao;
 	
 	@Before
@@ -124,7 +123,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void shouldRetrieveConditionByUuid() {
-		Condition condition = dao.getConditionByUuid(CONDITION_UUID);
+		Condition condition = dao.get(CONDITION_UUID);
 		assertThat(condition, notNullValue());
 		assertThat(condition.getUuid(), notNullValue());
 		assertThat(condition.getUuid(), equalTo(CONDITION_UUID));
@@ -132,7 +131,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void shouldReturnNullWhenGetConditionByWrongUuid() {
-		Condition condition = dao.getConditionByUuid(WRONG_CONDITION_UUID);
+		Condition condition = dao.get(WRONG_CONDITION_UUID);
 		assertThat(condition, nullValue());
 	}
 	
@@ -475,7 +474,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		condition.setPatient(patient);
 		
 		dao.saveCondition(condition);
-		Condition result = dao.getConditionByUuid(CONDITION_UUID);
+		Condition result = dao.get(CONDITION_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(CONDITION_UUID));
 	}
@@ -514,7 +513,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		condition.setClinicalStatus(ConditionClinicalStatus.HISTORY_OF);
 		
 		dao.saveCondition(condition);
-		Condition result = dao.getConditionByUuid(EXISTING_CONDITION_UUID);
+		Condition result = dao.get(EXISTING_CONDITION_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(EXISTING_CONDITION_UUID));
@@ -532,7 +531,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		condition.setOnsetDate(new Date());
 		
 		dao.saveCondition(condition);
-		Condition result = dao.getConditionByUuid(EXISTING_CONDITION_UUID);
+		Condition result = dao.get(EXISTING_CONDITION_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getVoided(), is(true));
 	}
@@ -546,7 +545,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		condition.setEndReason(END_REASON);
 		
 		dao.saveCondition(condition);
-		Condition result = dao.getConditionByUuid(NEW_CONDITION_UUID);
+		Condition result = dao.get(NEW_CONDITION_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getEndDate(), notNullValue());
 		assertThat(result.getEndDate(), DateMatchers.sameDay(new Date()));
