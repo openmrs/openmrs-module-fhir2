@@ -25,8 +25,11 @@ import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
@@ -36,6 +39,8 @@ import org.hibernate.sql.JoinType;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.PersonName;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.search.param.PropParam;
 
 public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
@@ -122,6 +127,34 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 			default:
 				return null;
 		}
+	}
+	
+	protected void handleAddresses(Criteria criteria, Map.Entry<String, List<PropParam<?>>> entry) {
+		StringAndListParam city = null;
+		StringAndListParam country = null;
+		StringAndListParam postalCode = null;
+		StringAndListParam state = null;
+		for (PropParam<?> param : entry.getValue()) {
+			switch (param.getPropertyName()) {
+				case FhirConstants.CITY_PROPERTY:
+					city = ((StringAndListParam) param.getParam());
+					break;
+				case FhirConstants.STATE_PROPERTY:
+					state = ((StringAndListParam) param.getParam());
+					break;
+				case FhirConstants.POSTAL_CODE_PROPERTY:
+					postalCode = ((StringAndListParam) param.getParam());
+					break;
+				case FhirConstants.COUNTRY_PROPERTY:
+					country = ((StringAndListParam) param.getParam());
+					break;
+			}
+		}
+		
+		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
+			criteria.createAlias("addresses", "pad");
+			criteria.add(c);
+		});
 	}
 	
 }

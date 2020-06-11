@@ -11,26 +11,14 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 
 public interface FhirPersonDao extends FhirDao<Person> {
 	
-	@Override
-	Person get(@NotNull String uuid);
-	
 	List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@NotNull Person person,
 	        @NotNull String personAttributeTypeUuid);
-	
-	Collection<Person> searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
-	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
-	        SortSpec sort);
 	
 }

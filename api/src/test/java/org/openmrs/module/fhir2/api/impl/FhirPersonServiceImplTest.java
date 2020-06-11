@@ -9,29 +9,31 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +42,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -78,6 +84,10 @@ public class FhirPersonServiceImplTest {
 	
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
+	
 	private org.openmrs.Person person;
 	
 	@Mock
@@ -86,13 +96,19 @@ public class FhirPersonServiceImplTest {
 	@Mock
 	private PersonTranslator personTranslator;
 	
+	@Mock
+	private SearchQuery<org.openmrs.Person, Person, FhirPersonDao, PersonTranslator> searchQuery;
+	
 	private FhirPersonServiceImpl personService;
+	
+	private Person fhirPerson;
 	
 	@Before
 	public void setUp() {
 		personService = new FhirPersonServiceImpl();
 		personService.setDao(dao);
 		personService.setTranslator(personTranslator);
+		personService.setSearchQuery(searchQuery);
 		
 		PersonName name = new PersonName();
 		name.setUuid(PERSON_NAME_UUID);
@@ -109,73 +125,126 @@ public class FhirPersonServiceImplTest {
 		person.setUuid(PERSON_UUID);
 		person.setGender("M");
 		person.addName(name);
+		
+		HumanName humanName = new HumanName();
+		humanName.addGiven(GIVEN_NAME);
+		humanName.setFamily(FAMILY_NAME);
+		
+		fhirPerson = new Person();
+		fhirPerson.setId(PERSON_UUID);
+		fhirPerson.setGender(Enumerations.AdministrativeGender.MALE);
+		fhirPerson.addName(humanName);
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonForGivenNameMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(GIVEN_NAME)));
-		when(dao.searchForPeople(argThat(is(stringAndListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(person));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		
+		IBundleProvider results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(1));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonForPartialMatchOnName() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(PERSON_PARTIAL_NAME)));
-		when(dao.searchForPeople(argThat(is(stringAndListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(person));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		
+		IBundleProvider results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(1));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonNameNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NOT_FOUND_NAME)));
-		when(dao.searchForPeople(argThat(is(stringAndListParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		
+		IBundleProvider results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), equalTo(1));
+		assertThat(resultList, empty());
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonGenderMatched() {
 		TokenAndListParam tokenAndListParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(GENDER));
-		when(dao.searchForPeople(isNull(), argThat(is(tokenAndListParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, tokenAndListParam, null, null, null, null, null,
-		    null);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.GENDER_SEARCH_HANDLER,
+		    tokenAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(person));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		
+		IBundleProvider results = personService.searchForPeople(null, tokenAndListParam, null, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonGenderNotMatched() {
 		TokenAndListParam tokenAndListParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(WRONG_GENDER));
-		when(dao.searchForPeople(isNull(), argThat(is(tokenAndListParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, tokenAndListParam, null, null, null, null, null,
-		    null);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.GENDER_SEARCH_HANDLER,
+		    tokenAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		
+		IBundleProvider results = personService.searchForPeople(null, tokenAndListParam, null, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, empty());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -185,133 +254,218 @@ public class FhirPersonServiceImplTest {
 		
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(PERSON_BIRTH_DATE)
 		        .setUpperBound(PERSON_BIRTH_DATE);
-		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    dateRangeParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(person));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		
+		IBundleProvider results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonBirthDateNotMatched() {
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(NOT_FOUND_PERSON_BIRTH_DATE)
 		        .setUpperBound(NOT_FOUND_PERSON_BIRTH_DATE);
-		when(dao.searchForPeople(isNull(), isNull(), argThat(is(dateRangeParam)), isNull(), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    dateRangeParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		
+		IBundleProvider results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, empty());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonCityMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(CITY)));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, stringAndListParam, null, null, null,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.CITY_PROPERTY, stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(person));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, stringAndListParam, null, null, null,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonCityNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD)));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, stringAndListParam, null, null, null,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.CITY_PROPERTY, stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, stringAndListParam, null, null, null,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, empty());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonStateMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(STATE)));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, stringAndListParam, null, null,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.STATE_PROPERTY, stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(person));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, stringAndListParam, null, null,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonStateNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD)));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(), isNull(),
-		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, stringAndListParam, null, null,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.STATE_PROPERTY, stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, stringAndListParam, null, null,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, empty());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonPostalCodeMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(),
-		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, stringAndListParam, null,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.POSTAL_CODE_PROPERTY, stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(person));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, stringAndListParam, null,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonPostalCodeNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD)));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)), isNull(),
-		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, stringAndListParam, null,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.POSTAL_CODE_PROPERTY, stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, stringAndListParam, null,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, empty());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnCollectionOfPersonWhenPersonCountryMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)),
-		    isNull())).thenReturn(Collections.singletonList(person));
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, null, stringAndListParam,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.COUNTRY_PROPERTY, stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(person));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, null, stringAndListParam,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnEmptyCollectionWhenPersonCountryNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NOT_ADDRESS_FIELD)));
-		when(dao.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(stringAndListParam)),
-		    isNull())).thenReturn(Collections.emptyList());
 		
-		Collection<Person> results = personService.searchForPeople(null, null, null, null, null, null, stringAndListParam,
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.COUNTRY_PROPERTY, stringAndListParam);
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, null, stringAndListParam,
 		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results, empty());
+		assertThat(resultList, empty());
 	}
 	
 }
