@@ -50,6 +50,6 @@ public class PractitionerReferenceTranslatorProviderImpl extends BaseReferenceHa
 		if (uuid == null) {
 			return null;
 		}
-		return practitionerTranslator.toOpenmrsType(practitionerService.getPractitionerByUuid(uuid));
+		return practitionerTranslator.toOpenmrsType(practitionerService.get(uuid));
 	}
 }

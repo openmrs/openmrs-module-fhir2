@@ -73,7 +73,7 @@ public class PractitionerReferenceTranslatorProviderImplTest {
 		        .setType(FhirConstants.PRACTITIONER);
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
-		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
 		when(practitionerTranslator.toOpenmrsType(practitioner)).thenReturn(provider);
 		
 		Provider result = referenceTranslatorProvider.toOpenmrsType(practitionerReference);

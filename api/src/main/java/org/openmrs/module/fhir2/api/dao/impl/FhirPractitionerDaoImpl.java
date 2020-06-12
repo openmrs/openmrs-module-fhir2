@@ -9,55 +9,56 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import java.util.List;
+import java.util.Optional;
 
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirPractitionerDaoImpl implements FhirPractitionerDao {
-	
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
+public class FhirPractitionerDaoImpl extends BaseFhirDao<Provider> implements FhirPractitionerDao {
 	
 	@Override
-	public Provider getProviderByUuid(String uuid) {
-		return (Provider) sessionFactory.getCurrentSession().createCriteria(Provider.class).add(eq("uuid", uuid))
-		        .uniqueResult();
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		handleBooleanProperty("retired", false).ifPresent(criteria::add);
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case FhirConstants.NAME_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleName(criteria, (StringAndListParam) param.getParam()));
+					break;
+				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleIdentifier(criteria, (TokenAndListParam) param.getParam()));
+					break;
+			}
+		});
+	}
+	
+	private void handleName(Criteria criteria, StringAndListParam name) {
+		handleAndListParam(name, param -> propertyLike("name", param)).ifPresent(criteria::add);
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public List<Provider> findProviderByName(String name) {
-		return sessionFactory.getCurrentSession().createCriteria(Provider.class)
-		        .add(and(eq("name", name), eq("retired", false))).list();
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<Provider> findProviderByIdentifier(String identifier) {
-		return sessionFactory.getCurrentSession().createCriteria(Provider.class)
-		        .add(Restrictions.eq("identifier", identifier)).list();
+	protected void handleIdentifier(Criteria criteria, TokenAndListParam identifier) {
+		handleAndListParam(identifier, param -> Optional.of(eq("identifier", param.getValue()))).ifPresent(criteria::add);
 	}
 	
 	@Override
 	public List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(Provider provider,
 	        String providerAttributeTypeUuid) {
-		return (List<ProviderAttribute>) sessionFactory.getCurrentSession().createCriteria(ProviderAttribute.class)
+		return (List<ProviderAttribute>) getSessionFactory().getCurrentSession().createCriteria(ProviderAttribute.class)
 		        .createAlias("provider", "p", JoinType.INNER_JOIN, eq("p.id", provider.getId()))
 		        .createAlias("attributeType", "pat").add(eq("pat.uuid", providerAttributeTypeUuid)).add(eq("voided", false))
 		        .list();
