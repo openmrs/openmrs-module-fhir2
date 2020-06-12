@@ -57,7 +57,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		return medicationRequest;
 	}
 	
-	
 	@Search
 	@SuppressWarnings("unused")
 	public IBundleProvider searchForMedicationRequests(

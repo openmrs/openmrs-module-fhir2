@@ -608,6 +608,54 @@ public abstract class BaseDao {
 		}
 	}
 	
+	//Added this method to allow handling classes with provider instead  of encounterProvider
+	protected void handleProviderReference(Criteria criteria, ReferenceAndListParam providerReference) {
+		if (providerReference != null) {
+			criteria.createAlias("orderer", "or");
+			
+			handleAndListParam(providerReference, participantToken -> {
+				if (participantToken.getChain() != null) {
+					switch (participantToken.getChain()) {
+						case Practitioner.SP_IDENTIFIER:
+							criteria.add(ilike("or.identifier", participantToken.getValue()));
+							break;
+						case Practitioner.SP_GIVEN:
+							if ((!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))) {
+								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
+							}
+							criteria.add(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
+							break;
+						case Practitioner.SP_FAMILY:
+							if ((!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))) {
+								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
+							}
+							criteria.add(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
+							break;
+						case Practitioner.SP_NAME:
+							if ((!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))) {
+								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
+							}
+							
+							List<Optional<Criterion>> criterionList = new ArrayList<>();
+							
+							for (String token : StringUtils.split(participantToken.getValue(), " \t,")) {
+								criterionList.add(propertyLike("pn.givenName", token));
+								criterionList.add(propertyLike("pn.middleName", token));
+								criterionList.add(propertyLike("pn.familyName", token));
+							}
+							
+							criteria.add(or(toCriteriaArray(criterionList)));
+							break;
+					}
+				} else {
+					criteria.add(eq("or.uuid", participantToken.getValue()));
+				}
+				
+				return Optional.empty();
+			});
+		}
+	}
+	
 	protected Optional<Criterion> handleCodeableConcept(Criteria criteria, TokenAndListParam concepts,
 	        @NotNull String conceptAlias, @NotNull String conceptMapAlias, @NotNull String conceptReferenceTermAlias) {
 		if (concepts == null) {

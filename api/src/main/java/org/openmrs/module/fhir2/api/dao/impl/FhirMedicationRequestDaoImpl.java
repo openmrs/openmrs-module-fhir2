@@ -34,13 +34,13 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(patientReference -> handlePatientReference(criteria,
-					    (ReferenceAndListParam) patientReference.getParam(), "person"));
+					    (ReferenceAndListParam) patientReference.getParam(), "patient"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue().forEach(code -> handleCodedConcept(criteria, (TokenAndListParam) code.getParam()));
 					break;
 				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(participantReference -> handleParticipantReference(criteria,
+					entry.getValue().forEach(participantReference -> handleProviderReference(criteria,
 					    (ReferenceAndListParam) participantReference.getParam()));
 					break;
 				case FhirConstants.MEDICATION_REFERENCE_SEARCH_HANDLER:
