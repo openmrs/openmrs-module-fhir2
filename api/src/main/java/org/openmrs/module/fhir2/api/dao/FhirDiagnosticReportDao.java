@@ -9,16 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import java.util.Collection;
-
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Obs;
 
 public interface FhirDiagnosticReportDao extends FhirDao<Obs> {
 	
-	Collection<Obs> searchForDiagnosticReports(ReferenceAndListParam encounterReference,
-	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code, SortSpec sort);
 }

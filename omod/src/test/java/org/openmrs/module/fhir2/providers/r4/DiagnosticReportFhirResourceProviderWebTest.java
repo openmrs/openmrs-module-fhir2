@@ -47,6 +47,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -403,7 +404,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
 		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any()))
-		        .thenReturn(Collections.singletonList(diagnosticReport));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		

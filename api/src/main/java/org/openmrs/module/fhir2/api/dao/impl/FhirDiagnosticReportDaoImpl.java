@@ -11,9 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Collection;
-
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -23,7 +20,9 @@ import org.hibernate.Criteria;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Obs;
 import org.openmrs.api.db.DAOException;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -40,18 +39,26 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<Obs> implements Fhi
 	}
 	
 	@Override
-	public Collection<Obs> searchForDiagnosticReports(ReferenceAndListParam encounterReference,
-	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code, SortSpec sort) {
-		
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Obs.class);
-		
-		handleEncounterReference("e", encounterReference).ifPresent(c -> criteria.createAlias("encounter", "e").add(c));
-		handlePatientReference(criteria, patientReference, "person");
-		handleCodedConcept(criteria, code);
-		handleDateRange("dateCreated", issueDate).ifPresent(criteria::add);
-		handleSort(criteria, sort);
-		
-		return criteria.list();
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleEncounterReference("e", (ReferenceAndListParam) param.getParam())
+					        .ifPresent(c -> criteria.createAlias("encounter", "e").add(c)));
+					break;
+				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam(), "person"));
+					break;
+				case FhirConstants.CODED_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleCodedConcept(criteria, (TokenAndListParam) param.getParam()));
+					break;
+				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    param -> handleDateRange("dateCreated", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
+					break;
+			}
+		});
 	}
 	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
