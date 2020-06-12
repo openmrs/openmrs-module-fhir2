@@ -17,14 +17,22 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
@@ -36,8 +44,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Practitioner> {
@@ -55,6 +65,14 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	private static final String PRACTITIONER_IDENTIFIER = "nurse";
 	
 	private static final String WRONG_PRACTITIONER_IDENTIFIER = "wrong identifier";
+	
+	private static final int PREFERRED_PAGE_SIZE = 10;
+	
+	private static final int COUNT = 1;
+	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
 	
 	@Mock
 	private FhirPractitionerService practitionerService;
@@ -85,6 +103,10 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		setProvenanceResources(practitioner);
 	}
 	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
+	}
+	
 	@Test
 	public void getResourceType_shouldReturnResourceType() {
 		assertThat(resourceProvider.getResourceType(), equalTo(Practitioner.class));
@@ -95,7 +117,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	public void getPractitionerById_shouldReturnPractitioner() {
 		IdType id = new IdType();
 		id.setValue(PRACTITIONER_UUID);
-		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
 		
 		Practitioner result = resourceProvider.getPractitionerById(id);
 		assertThat(result.isResource(), is(true));
@@ -114,48 +136,70 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	
 	@Test
 	public void findPractitionersByName_shouldReturnMatchingBundleOfPractitioners() {
-		when(practitionerService.findPractitionerByName(GIVEN_NAME)).thenReturn(Collections.singletonList(practitioner));
+		StringAndListParam nameParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(GIVEN_NAME)));
+		when(practitionerService.searchForPractitioners(argThat(is(nameParam)), isNull()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.findPractitionersByName(GIVEN_NAME);
+		IBundleProvider results = resourceProvider.searchForPractitioners(nameParam, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-		assertThat(results.getEntryFirstRep().getResource().getChildByName("name").hasValues(), is(true));
+		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void findPractitionersByWrongName_shouldReturnBundleWithEmptyEntries() {
-		Bundle results = resourceProvider.findPractitionersByName(WRONG_NAME);
+		StringAndListParam nameParam = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(WRONG_NAME)));
+		when(practitionerService.searchForPractitioners(argThat(is(nameParam)), isNull()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchForPractitioners(nameParam, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry(), is(empty()));
+		assertThat(resultList, is(empty()));
 	}
 	
 	@Test
 	public void findPractitionersByIdentifier_shouldReturnMatchingBundleOfPractitioners() {
-		when(practitionerService.findPractitionerByIdentifier(PRACTITIONER_IDENTIFIER))
-		        .thenReturn(Collections.singletonList(practitioner));
+		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(PRACTITIONER_IDENTIFIER));
+		when(practitionerService.searchForPractitioners(isNull(), argThat(is(identifier))))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.findPractitionersByIdentifier(PRACTITIONER_IDENTIFIER);
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, identifier);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
-		assertThat(results.getEntryFirstRep().getResource().getChildByName("identifier").hasValues(), is(true));
+		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void findPractitionersByWrongIdentifier_shouldReturnBundleWithEmptyEntries() {
-		Bundle results = resourceProvider.findPractitionersByIdentifier(WRONG_PRACTITIONER_IDENTIFIER);
+		TokenAndListParam identifier = new TokenAndListParam()
+		        .addAnd(new TokenOrListParam().add(WRONG_PRACTITIONER_IDENTIFIER));
+		when(practitionerService.searchForPractitioners(isNull(), argThat(is(identifier))))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, identifier);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry(), is(empty()));
+		assertThat(resultList, is(empty()));
 	}
 	
 	@Test
 	public void getPractitionerHistoryById_shouldReturnListOfResource() {
 		IdType id = new IdType();
 		id.setValue(PRACTITIONER_UUID);
-		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
 		
 		List<Resource> resources = resourceProvider.getPractitionerHistoryById(id);
 		assertThat(resources, Matchers.notNullValue());
@@ -167,7 +211,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	public void getPractitionerHistoryById_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(PRACTITIONER_UUID);
-		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
 		
 		List<Resource> resources = resourceProvider.getPractitionerHistoryById(id);
 		assertThat(resources, not(empty()));

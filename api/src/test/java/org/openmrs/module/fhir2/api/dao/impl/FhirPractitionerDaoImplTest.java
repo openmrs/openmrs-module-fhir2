@@ -10,11 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.List;
@@ -36,14 +32,6 @@ public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest 
 	
 	private static final String PRACTITIONER_UUID = "f9badd80-ab76-11e2-9e96-0800200c9a66";
 	
-	private static final String PRACTITIONER_NAME = "John";
-	
-	private static final String PRACTITIONER_IDENTIFIER = "347834-gf";
-	
-	private static final String NOT_FOUND_PRACTITIONER_NAME = "waf";
-	
-	private static final String NOT_FOUND_PRACTITIONER_IDENTIFIER = "38934-t";
-	
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "FF89DD99-OOX78-KKG89D-XX89CC8";
 	
 	@Autowired
@@ -61,42 +49,10 @@ public class FhirPractitionerDaoImplTest extends BaseModuleContextSensitiveTest 
 	
 	@Test
 	public void shouldRetrievePractitionerByUuid() {
-		org.openmrs.Provider provider = dao.getProviderByUuid(PRACTITIONER_UUID);
+		org.openmrs.Provider provider = dao.get(PRACTITIONER_UUID);
 		assertThat(provider, notNullValue());
 		assertThat(provider.getUuid(), notNullValue());
 		assertThat(provider.getUuid(), equalTo(PRACTITIONER_UUID));
-	}
-	
-	@Test
-	public void shouldSearchForPractitionersByName() {
-		List<org.openmrs.Provider> results = dao.findProviderByName(PRACTITIONER_NAME);
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void shouldReturnNullForPractitionerNameNotMatched() {
-		List<org.openmrs.Provider> results = dao.findProviderByName(NOT_FOUND_PRACTITIONER_NAME);
-		assertThat(results, notNullValue());
-		assertThat(results, empty());
-	}
-	
-	@Test
-	public void shouldSearchForPractitionerByIdentifier() {
-		List<org.openmrs.Provider> results = dao.findProviderByIdentifier(PRACTITIONER_IDENTIFIER);
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThanOrEqualTo(1));
-		assertThat(results.get(0).getIdentifier(), equalTo(PRACTITIONER_IDENTIFIER));
-		
-	}
-	
-	@Test
-	public void shouldReturnEmptyListForIdentifierNotMatched() {
-		List<org.openmrs.Provider> results = dao.findProviderByIdentifier(NOT_FOUND_PRACTITIONER_IDENTIFIER);
-		assertThat(results, notNullValue());
-		assertThat(results, is(empty()));
 	}
 	
 	@Test

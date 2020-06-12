@@ -44,8 +44,7 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 			return encounterProvider;
 		}
 		String practitionerUuid = getReferenceId(encounterParticipantComponent.getIndividual());
-		Provider provider = practitionerTranslator
-		        .toOpenmrsType(practitionerService.getPractitionerByUuid(practitionerUuid));
+		Provider provider = practitionerTranslator.toOpenmrsType(practitionerService.get(practitionerUuid));
 		encounterProvider.setProvider(provider);
 		return encounterProvider;
 	}

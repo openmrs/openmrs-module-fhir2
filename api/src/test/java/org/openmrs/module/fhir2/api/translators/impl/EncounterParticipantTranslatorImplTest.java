@@ -96,7 +96,7 @@ public class EncounterParticipantTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateEncounterParticipantToEncounterProviderWithCorrectProvider() {
-		when(practitionerService.getPractitionerByUuid(PROVIDER_UUID)).thenReturn(practitioner);
+		when(practitionerService.get(PROVIDER_UUID)).thenReturn(practitioner);
 		when(practitionerTranslator.toOpenmrsType(practitioner)).thenReturn(provider);
 		EncounterProvider encounterProvider = participantTranslator.toOpenmrsType(new EncounterProvider(),
 		    encounterParticipantComponent);

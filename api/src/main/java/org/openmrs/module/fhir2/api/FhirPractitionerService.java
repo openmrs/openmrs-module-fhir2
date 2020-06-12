@@ -9,15 +9,13 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.Collection;
-
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Practitioner;
 
-public interface FhirPractitionerService {
+public interface FhirPractitionerService extends FhirService<Practitioner> {
 	
-	Practitioner getPractitionerByUuid(String uuid);
+	IBundleProvider searchForPractitioners(StringAndListParam name, TokenAndListParam identifier);
 	
-	Collection<Practitioner> findPractitionerByName(String name);
-	
-	Collection<Practitioner> findPractitionerByIdentifier(String identifier);
 }

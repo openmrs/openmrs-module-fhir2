@@ -15,20 +15,21 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -49,7 +50,7 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	@Read
 	@SuppressWarnings("unused")
 	public Practitioner getPractitionerById(@IdParam @NotNull IdType id) {
-		Practitioner practitioner = practitionerService.getPractitionerByUuid(id.getIdPart());
+		Practitioner practitioner = practitionerService.get(id.getIdPart());
 		if (practitioner == null) {
 			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
 		}
@@ -59,7 +60,7 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getPractitionerHistoryById(@IdParam @NotNull IdType id) {
-		Practitioner practitioner = practitionerService.getPractitionerByUuid(id.getIdPart());
+		Practitioner practitioner = practitionerService.get(id.getIdPart());
 		if (practitioner == null) {
 			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
 		}
@@ -67,16 +68,8 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	@SuppressWarnings("unused")
-	public Bundle findPractitionersByName(@RequiredParam(name = Practitioner.SP_NAME) @NotNull String name) {
-		return FhirProviderUtils.convertSearchResultsToBundle(practitionerService.findPractitionerByName(name));
+	public IBundleProvider searchForPractitioners(@OptionalParam(name = Practitioner.SP_NAME) StringAndListParam name,
+	        @OptionalParam(name = Practitioner.SP_IDENTIFIER) TokenAndListParam identifier) {
+		return practitionerService.searchForPractitioners(name, identifier);
 	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public Bundle findPractitionersByIdentifier(
-	        @RequiredParam(name = Practitioner.SP_IDENTIFIER) @NotNull String identifier) {
-		return FhirProviderUtils.convertSearchResultsToBundle(practitionerService.findPractitionerByIdentifier(identifier));
-	}
-	
 }

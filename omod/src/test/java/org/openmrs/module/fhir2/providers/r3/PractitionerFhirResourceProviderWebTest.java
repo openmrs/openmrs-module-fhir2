@@ -12,9 +12,11 @@ package org.openmrs.module.fhir2.providers.r3;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.AUT;
 import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
@@ -26,8 +28,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -36,11 +41,14 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,17 +60,19 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 	
 	private static final String NAME = "Ricky sanchez";
 	
-	private static final String BAD_NAME = "bad name";
-	
 	private static final String PRACTITIONER_IDENTIFIER = "eu984ot-k";
-	
-	private static final String BAD_PRACTITIONER_IDENTIFIER = "bad identifier";
 	
 	@Getter(AccessLevel.PUBLIC)
 	private PractitionerFhirResourceProvider resourceProvider;
 	
 	@Mock
 	private FhirPractitionerService practitionerService;
+	
+	@Captor
+	private ArgumentCaptor<StringAndListParam> stringAndListParamArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
 	@Override
 	public void setup() throws ServletException {
@@ -75,7 +85,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 	public void getPractitionerById_shouldReturnPractitioner() throws Exception {
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
-		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
 		
 		MockHttpServletResponse response = get("/Practitioner/" + PRACTITIONER_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -93,61 +103,56 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 	}
 	
 	@Test
-	public void findPractitionersByName_shouldReturnBundleOfPractitioners() throws IOException, ServletException {
-		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
-		practitioner.setId(PRACTITIONER_UUID);
-		when(practitionerService.findPractitionerByName(NAME)).thenReturn(Collections.singletonList(practitioner));
+	public void findPractitionersByName_shouldReturnBundleOfPractitioners() throws Exception {
+		verifyUri(String.format("/Practitioner?name=%s", NAME));
 		
-		MockHttpServletResponse response = get("/Practitioner?name=" + NAME).accept(FhirMediaTypes.JSON).go();
+		verify(practitionerService).searchForPractitioners(stringAndListParamArgumentCaptor.capture(), any());
 		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		        .get(0).getValue(),
+		    equalTo(NAME));
 	}
 	
 	@Test
-	public void findPractitionersByBadName_shouldReturnBundleWithEmptyEntries() throws IOException, ServletException {
-		when(practitionerService.findPractitionerByName(BAD_NAME)).thenReturn(new ArrayList<>());
+	public void findPractitionersByIdentifier_shouldReturnBundleOfPractitioners() throws Exception {
+		verifyUri(String.format("/Practitioner?identifier=%s", PRACTITIONER_IDENTIFIER));
 		
-		MockHttpServletResponse response = get("/Practitioner?name=" + BAD_NAME).accept(FhirMediaTypes.JSON).go();
+		verify(practitionerService).searchForPractitioners(any(), tokenAndListParamArgumentCaptor.capture());
 		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-		assertThat(readBundleResponse(response).getEntry(), is(empty()));
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo(PRACTITIONER_IDENTIFIER));
 	}
 	
 	@Test
-	public void findPractitionersByIdentifier_shouldReturnBundleOfPractitioners() throws IOException, ServletException {
-		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
-		practitioner.setId(PRACTITIONER_UUID);
-		when(practitionerService.findPractitionerByIdentifier(PRACTITIONER_IDENTIFIER))
-		        .thenReturn(Collections.singletonList(practitioner));
+	public void findPractitioners_shouldHandleComplexQuery() throws Exception {
+		verifyUri(String.format("/Practitioner?identifier=%s&name=%s", PRACTITIONER_IDENTIFIER, NAME));
 		
-		MockHttpServletResponse response = get("/Practitioner?identifier=" + PRACTITIONER_IDENTIFIER)
-		        .accept(FhirMediaTypes.JSON).go();
+		verify(practitionerService).searchForPractitioners(stringAndListParamArgumentCaptor.capture(),
+		    tokenAndListParamArgumentCaptor.capture());
 		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void findPractitionersByBadIdentifier_shouldReturnBundleWithEmptyEntries() throws IOException, ServletException {
-		when(practitionerService.findPractitionerByIdentifier(BAD_PRACTITIONER_IDENTIFIER)).thenReturn(new ArrayList<>());
+		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		        .get(0).getValue(),
+		    equalTo(NAME));
 		
-		MockHttpServletResponse response = get("/Practitioner?identifier=" + BAD_PRACTITIONER_IDENTIFIER)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-		assertThat(readBundleResponse(response).getEntry(), is(empty()));
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo(PRACTITIONER_IDENTIFIER));
 	}
 	
 	@Test
 	public void shouldVerifyGetPractitionerHistoryByIdUri() throws Exception {
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
-		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
 		
 		MockHttpServletResponse response = getPractitionerHistoryByIdRequest();
 		
@@ -171,7 +176,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 		practitioner.setId(PRACTITIONER_UUID);
 		practitioner.addContained(provenance);
 		
-		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
 		
 		MockHttpServletResponse response = getPractitionerHistoryByIdRequest();
 		
@@ -190,7 +195,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
 		practitioner.setContained(new ArrayList<>());
-		when(practitionerService.getPractitionerByUuid(PRACTITIONER_UUID)).thenReturn(practitioner);
+		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
 		
 		MockHttpServletResponse response = getPractitionerHistoryByIdRequest();
 		Bundle results = readBundleResponse(response);
@@ -209,4 +214,20 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 		return get("/Practitioner/" + PRACTITIONER_UUID + "/_history").accept(FhirMediaTypes.JSON).go();
 	}
 	
+	private void verifyUri(String uri) throws Exception {
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId(PRACTITIONER_UUID);
+		when(practitionerService.searchForPractitioners(any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(practitioner), 10, 1));
+		
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
+		
+		MatcherAssert.assertThat(response, isOk());
+		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		
+		Bundle results = readBundleResponse(response);
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results.getEntry().get(0).getResource(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+	}
 }
