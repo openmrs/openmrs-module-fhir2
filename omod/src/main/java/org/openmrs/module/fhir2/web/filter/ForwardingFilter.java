@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.web.filter;
 
+import static org.openmrs.module.fhir2.web.util.FhirVersionUtils.FhirVersion.R3;
+import static org.openmrs.module.fhir2.web.util.FhirVersionUtils.FhirVersion.R4;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -38,8 +41,8 @@ public class ForwardingFilter implements Filter {
 			
 			String contextPath = ((HttpServletRequest) req).getContextPath();
 			String prefix = contextPath + "/ws/fhir2";
-			Enum<FhirVersionUtils.FhirVersion> fhirVersionCase = FhirVersionUtils.getFhirResourceVersion(request);
-			String fhirVersion = String.valueOf(FhirVersionUtils.getFhirResourceVersion(request));
+			Enum<FhirVersionUtils.FhirVersion> fhirVersionCase = FhirVersionUtils.getFhirVersion(request);
+			String fhirVersion = String.valueOf(FhirVersionUtils.getFhirVersion(request));
 			
 			String replacement;
 			if (R3.equals(fhirVersionCase)) {
