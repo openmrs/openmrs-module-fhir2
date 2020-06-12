@@ -34,7 +34,6 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
@@ -42,7 +41,6 @@ import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.util.CalendarFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -50,21 +48,11 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 @OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
-public class FhirConditionDaoImpl_2_2 extends BaseDao implements FhirConditionDao<Condition> {
+public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements FhirConditionDao<Condition> {
 	// TODO: Change the BaseDaoImpl inheritance pattern to one of composition; here and everywhere else.
 	
 	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Autowired
 	private CalendarFactory calendarFactory;
-	
-	@Override
-	public Condition getConditionByUuid(String uuid) {
-		return (Condition) sessionFactory.getCurrentSession().createCriteria(Condition.class).add(eq("uuid", uuid))
-		        .uniqueResult();
-	}
 	
 	private ConditionClinicalStatus convertStatus(String status) {
 		if ("active".equalsIgnoreCase(status)) {
@@ -156,7 +144,7 @@ public class FhirConditionDaoImpl_2_2 extends BaseDao implements FhirConditionDa
 	public Collection<Condition> searchForConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
 	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
 	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, SortSpec sort) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Condition.class);
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Condition.class);
 		
 		handlePatientReference(criteria, patientParam);
 		if (patientParam == null) {
@@ -180,13 +168,13 @@ public class FhirConditionDaoImpl_2_2 extends BaseDao implements FhirConditionDa
 	
 	@Override
 	public Condition saveCondition(Condition condition) {
-		Session session = sessionFactory.getCurrentSession();
+		Session session = getSessionFactory().getCurrentSession();
 		Date endDate = condition.getEndDate() != null ? condition.getEndDate() : new Date();
 		if (condition.getEndReason() != null) {
 			condition.setEndDate(endDate);
 		}
 		
-		Condition existingCondition = getConditionByUuid(condition.getUuid());
+		Condition existingCondition = get(condition.getUuid());
 		if (condition.equals(existingCondition)) {
 			return existingCondition;
 		}

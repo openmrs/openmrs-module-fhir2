@@ -19,12 +19,13 @@ import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.FhirConditionService;
-import org.openmrs.module.fhir2.api.dao.impl.FhirConditionDaoImpl_2_2;
-import org.openmrs.module.fhir2.api.translators.impl.ConditionTranslatorImpl_2_2;
+import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
+import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -34,31 +35,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
+@Getter(AccessLevel.PROTECTED)
 @OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
-public class FhirConditionServiceImpl_2_2 implements FhirConditionService {
+public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org.openmrs.Condition> implements FhirConditionService {
 	
 	@Autowired
-	private FhirConditionDaoImpl_2_2 dao;
+	private FhirConditionDao<org.openmrs.Condition> dao;
 	
 	@Autowired
-	private ConditionTranslatorImpl_2_2 conditionTranslator;
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Condition getConditionByUuid(String uuid) {
-		return conditionTranslator.toFhirResource(dao.getConditionByUuid(uuid));
-	}
+	private ConditionTranslator<org.openmrs.Condition> translator;
 	
 	@Override
 	public Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
 	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
 	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, @Sort SortSpec sort) {
 		return dao.searchForConditions(patientParam, subjectParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate,
-		    sort).stream().map(conditionTranslator::toFhirResource).collect(Collectors.toList());
+		    sort).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Override
 	public Condition saveCondition(Condition condition) {
-		return conditionTranslator.toFhirResource(dao.saveCondition(conditionTranslator.toOpenmrsType(condition)));
+		return translator.toFhirResource(dao.saveCondition(translator.toOpenmrsType(condition)));
 	}
 }

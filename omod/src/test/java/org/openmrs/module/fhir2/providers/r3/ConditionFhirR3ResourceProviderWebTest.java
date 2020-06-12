@@ -69,7 +69,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void shouldReturnConditionByUuid() throws Exception {
 		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
 		condition.setId(CONDITION_UUID);
-		when(conditionService.getConditionByUuid(CONDITION_UUID)).thenReturn(condition);
+		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
 		
 		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -82,7 +82,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	
 	@Test
 	public void shouldReturn404IfConditionNotFound() throws Exception {
-		when(conditionService.getConditionByUuid(WRONG_CONDITION_UUID)).thenReturn(null);
+		when(conditionService.get(WRONG_CONDITION_UUID)).thenReturn(null);
 		
 		MockHttpServletResponse response = get("/Condition/" + WRONG_CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -93,7 +93,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	public void shouldVerifyConditionHistoryByIdUri() throws Exception {
 		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
 		condition.setId(CONDITION_UUID);
-		when(conditionService.getConditionByUuid(CONDITION_UUID)).thenReturn(condition);
+		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
 		
 		MockHttpServletResponse response = getConditionHistoryRequest();
 		
@@ -117,7 +117,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		condition.setId(CONDITION_UUID);
 		condition.addContained(provenance);
 		
-		when(conditionService.getConditionByUuid(CONDITION_UUID)).thenReturn(condition);
+		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
 		
 		MockHttpServletResponse response = getConditionHistoryRequest();
 		
@@ -135,7 +135,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
 		condition.setId(CONDITION_UUID);
 		condition.setContained(new ArrayList<>());
-		when(conditionService.getConditionByUuid(CONDITION_UUID)).thenReturn(condition);
+		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
 		
 		MockHttpServletResponse response = getConditionHistoryRequest();
 		Bundle results = readBundleResponse(response);

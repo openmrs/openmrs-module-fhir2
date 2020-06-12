@@ -84,7 +84,7 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	
 	@Test
 	public void getConditionByUuid_shouldReturnMatchingEncounter() {
-		when(conditionService.getConditionByUuid(CONDITION_UUID)).thenReturn(condition);
+		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
 		IdType id = new IdType();
 		id.setValue(CONDITION_UUID);
 		Condition condition = resourceProvider.getConditionByUuid(id);
@@ -105,7 +105,7 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	public void getConditionHistory_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(CONDITION_UUID);
-		when(conditionService.getConditionByUuid(CONDITION_UUID)).thenReturn(condition);
+		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
 		
 		List<Resource> resources = resourceProvider.getConditionHistoryById(id);
 		assertThat(resources, not(empty()));

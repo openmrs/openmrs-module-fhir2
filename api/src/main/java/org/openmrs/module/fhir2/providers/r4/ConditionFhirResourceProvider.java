@@ -58,7 +58,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	public Condition getConditionByUuid(@IdParam @NotNull IdType id) {
-		Condition condition = conditionService.getConditionByUuid(id.getIdPart());
+		Condition condition = conditionService.get(id.getIdPart());
 		if (condition == null) {
 			throw new ResourceNotFoundException("Could not find condition with Id " + id.getIdPart());
 		}
@@ -68,7 +68,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getConditionHistoryById(@IdParam @NotNull IdType id) {
-		Condition condition = conditionService.getConditionByUuid(id.getIdPart());
+		Condition condition = conditionService.get(id.getIdPart());
 		if (condition == null) {
 			throw new ResourceNotFoundException("Could not find condition with Id " + id.getIdPart());
 		}

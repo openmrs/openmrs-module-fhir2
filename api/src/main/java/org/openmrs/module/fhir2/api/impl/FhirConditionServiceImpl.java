@@ -16,28 +16,47 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.Condition;
-import org.openmrs.module.fhir2.FhirException;
+import org.openmrs.Auditable;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.api.FhirConditionService;
+import org.openmrs.module.fhir2.api.dao.FhirDao;
+import org.openmrs.module.fhir2.api.exceptions.FhirNotImplementedException;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirConditionServiceImpl implements FhirConditionService {
+@Getter(AccessLevel.PROTECTED)
+public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> extends BaseFhirService<Condition, U> implements FhirConditionService {
+	
+	private static final String MESSAGE = "";
 	
 	@Override
-	public Condition getConditionByUuid(String uuid) {
-		throw new FhirException("Please install org.openmrs.module.fhir2conditions");
+	public Condition get(String uuid) {
+		throw new FhirNotImplementedException(MESSAGE);
+	}
+	
+	@Override
+	protected FhirDao<U> getDao() {
+		throw new FhirNotImplementedException(MESSAGE);
+	}
+	
+	@Override
+	protected OpenmrsFhirTranslator<U, Condition> getTranslator() {
+		throw new FhirNotImplementedException(MESSAGE);
 	}
 	
 	@Override
 	public Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
 	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
 	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, SortSpec sort) {
-		throw new FhirException("Please install org.openmrs.module.fhir2conditions");
+		throw new FhirNotImplementedException(MESSAGE);
 	}
 	
 	@Override
 	public Condition saveCondition(Condition condition) {
-		throw new FhirException("Please install org.openmrs.module.fhir2conditions");
+		throw new FhirNotImplementedException(MESSAGE);
 	}
 }

@@ -62,7 +62,7 @@ public class FhirConditionServiceImpl_2_2Test {
 	public void setup() {
 		conditionService = new FhirConditionServiceImpl_2_2();
 		conditionService.setDao(dao);
-		conditionService.setConditionTranslator(conditionTranslator);
+		conditionService.setTranslator(conditionTranslator);
 		
 		openmrsCondition = new Condition();
 		openmrsCondition.setUuid(CONDITION_UUID);
@@ -73,9 +73,9 @@ public class FhirConditionServiceImpl_2_2Test {
 	
 	@Test
 	public void shouldGetConditionByUuid() {
-		when(dao.getConditionByUuid(CONDITION_UUID)).thenReturn(openmrsCondition);
+		when(dao.get(CONDITION_UUID)).thenReturn(openmrsCondition);
 		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
-		org.hl7.fhir.r4.model.Condition condition = conditionService.getConditionByUuid(CONDITION_UUID);
+		org.hl7.fhir.r4.model.Condition condition = conditionService.get(CONDITION_UUID);
 		assertThat(condition, notNullValue());
 		assertThat(condition.getId(), notNullValue());
 		assertThat(condition.getId(), equalTo(CONDITION_UUID));
@@ -83,7 +83,7 @@ public class FhirConditionServiceImpl_2_2Test {
 	
 	@Test
 	public void whenGetConditionByWrongUuidShouldReturnNull() {
-		assertThat(conditionService.getConditionByUuid(WRONG_CONDITION_UUID), nullValue());
+		assertThat(conditionService.get(WRONG_CONDITION_UUID), nullValue());
 	}
 	
 	@Test
