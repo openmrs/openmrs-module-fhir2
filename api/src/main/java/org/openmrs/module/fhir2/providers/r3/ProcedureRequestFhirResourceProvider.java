@@ -13,6 +13,8 @@ import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -47,5 +49,10 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find serviceRequest with Id " + id.getIdPart());
 		}
 		return (ProcedureRequest) VersionConvertor_30_40.convertResource(serviceRequest, false);
+	}
+	
+	@Search
+	public IBundleProvider searchForProcedureRequests() {
+		return serviceRequestService.searchForServiceRequests();
 	}
 }
