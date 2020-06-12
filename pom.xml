@@ -39,7 +39,7 @@
 		<module>api-2.1</module>
         <module>api-2.2</module>
 		<module>omod</module>
-		<module>smartSupport</module>
+		<module>smart-support</module>
 	</modules>
 
 	<repositories>
@@ -679,7 +679,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.build.outputEncoding>UTF-8</project.build.outputEncoding>
 		<lombokVersion>1.18.10</lombokVersion>
-        <openmrsPlatformVersion>2.0.2</openmrsPlatformVersion>
+        <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
 		<openmrsPlatformToolsVersion>2.0.5</openmrsPlatformToolsVersion>
 		<hapifhirVersion>5.0.0</hapifhirVersion>
     </properties>
