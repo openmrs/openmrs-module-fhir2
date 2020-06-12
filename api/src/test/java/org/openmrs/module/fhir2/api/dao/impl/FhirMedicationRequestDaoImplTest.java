@@ -14,15 +14,22 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.util.Collection;
+
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.DrugOrder;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
+
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitiveTest {
@@ -33,6 +40,8 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	
 	private static final String MEDICATION_REQUEST_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationRequestDaoImpl_initial_data.xml";
 	
+	private static final String MEDICATION_REQUEST_CONCEPT_ID = "4020";
+
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
@@ -58,6 +67,20 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	public void getMedicationRequestByUuid_shouldReturnNullWhenCalledWithBadUuid() {
 		DrugOrder drugOrder = medicationRequestDao.get(BAD_DRUG_ORDER_UUID);
 		assertThat(drugOrder, nullValue());
+	}
+	
+	@Test
+	public void search_shouldReturnSearchQuery() {
+		TokenAndListParam code = new TokenAndListParam();
+		TokenParam codingToken = new TokenParam();
+		codingToken.setValue(MEDICATION_REQUEST_CONCEPT_ID);
+		code.addAnd(codingToken);
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
+		Collection<DrugOrder> drugOrder = medicationRequestDao.search(theParams);
+		
+		assertThat(drugOrder, notNullValue());
 	}
 	
 }
