@@ -16,6 +16,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitiveTest {
 	
@@ -41,7 +40,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	private static final String MEDICATION_REQUEST_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationRequestDaoImpl_initial_data.xml";
 	
 	private static final String MEDICATION_REQUEST_CONCEPT_ID = "4020";
-
+	
 	@Autowired
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
