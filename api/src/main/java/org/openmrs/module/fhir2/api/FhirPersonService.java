@@ -9,9 +9,8 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -19,10 +18,7 @@ import org.hl7.fhir.r4.model.Person;
 
 public interface FhirPersonService extends FhirService<Person> {
 	
-	@Override
-	Person get(String uuid);
-	
-	Collection<Person> searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
+	IBundleProvider searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
 	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
 	        SortSpec sort);
 	

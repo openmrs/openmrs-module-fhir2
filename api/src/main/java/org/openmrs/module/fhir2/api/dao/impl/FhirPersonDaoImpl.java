@@ -11,10 +11,8 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import java.util.Collection;
 import java.util.List;
 
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -24,7 +22,9 @@ import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,22 +41,26 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	public Collection<Person> searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
-	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
-	        SortSpec sort) {
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Person.class);
-		
-		handleNames(criteria, name, null, null);
-		handleGender("gender", gender).ifPresent(criteria::add);
-		handleDateRange("birthdate", birthDate).ifPresent(criteria::add);
-		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
-			criteria.createAlias("addresses", "pad");
-			criteria.add(c);
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case FhirConstants.NAME_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handleNames(criteria, (StringAndListParam) param.getParam(), null, null));
+					break;
+				case FhirConstants.GENDER_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    param -> handleGender("gender", (TokenAndListParam) param.getParam()).ifPresent(criteria::add));
+					break;
+				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    param -> handleDateRange("birthdate", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
+					break;
+				case FhirConstants.ADDRESS_SEARCH_HANDLER:
+					handleAddresses(criteria, entry);
+					break;
+			}
 		});
-		
-		handleSort(criteria, sort);
-		
-		return criteria.list();
 	}
 	
 	@Override

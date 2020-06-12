@@ -15,7 +15,6 @@ import static org.hibernate.criterion.Restrictions.or;
 import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -128,33 +127,5 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		}
 		
 		handleNames(criteria, name, given, family);
-	}
-	
-	private void handleAddresses(Criteria criteria, Map.Entry<String, List<PropParam<?>>> entry) {
-		StringAndListParam city = null;
-		StringAndListParam country = null;
-		StringAndListParam postalCode = null;
-		StringAndListParam state = null;
-		for (PropParam<?> param : entry.getValue()) {
-			switch (param.getPropertyName()) {
-				case FhirConstants.CITY_PROPERTY:
-					city = ((StringAndListParam) param.getParam());
-					break;
-				case FhirConstants.STATE_PROPERTY:
-					state = ((StringAndListParam) param.getParam());
-					break;
-				case FhirConstants.POSTAL_CODE_PROPERTY:
-					postalCode = ((StringAndListParam) param.getParam());
-					break;
-				case FhirConstants.COUNTRY_PROPERTY:
-					country = ((StringAndListParam) param.getParam());
-					break;
-			}
-		}
-		
-		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
-			criteria.createAlias("addresses", "pad");
-			criteria.add(c);
-		});
 	}
 }

@@ -15,6 +15,7 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -22,15 +23,12 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.convertors.conv30_40.Bundle30_40;
 import org.hl7.fhir.convertors.conv30_40.Person30_40;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirPersonService;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -71,15 +69,14 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	@SuppressWarnings("unused")
-	public Bundle searchPeople(@OptionalParam(name = Person.SP_NAME) StringAndListParam name,
+	public IBundleProvider searchPeople(@OptionalParam(name = Person.SP_NAME) StringAndListParam name,
 	        @OptionalParam(name = Person.SP_GENDER) TokenAndListParam gender,
 	        @OptionalParam(name = Person.SP_BIRTHDATE) DateRangeParam birthDate,
 	        @OptionalParam(name = Person.SP_ADDRESS_CITY) StringAndListParam city,
 	        @OptionalParam(name = Person.SP_ADDRESS_STATE) StringAndListParam state,
 	        @OptionalParam(name = Person.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
 	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringAndListParam country, @Sort SortSpec sort) {
-		return Bundle30_40.convertBundle(FhirProviderUtils.convertSearchResultsToBundle(
-		    personService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort)));
+		return personService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort);
 	}
 	
 }

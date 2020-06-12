@@ -24,6 +24,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -31,10 +32,10 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Provenance;
@@ -43,7 +44,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPersonService;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.Person> {
@@ -67,6 +70,14 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 	private static final String POSTAL_CODE = "98136";
 	
 	private static final String COUNTRY = "Canada";
+	
+	private static final int PREFERRED_PAGE_SIZE = 10;
+	
+	private static final int COUNT = 1;
+	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
 	
 	@Mock
 	private FhirPersonService fhirPersonService;
@@ -92,6 +103,10 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		person.setGender(Enumerations.AdministrativeGender.MALE);
 		person.addName(name);
 		setProvenanceResources(person);
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	@Test
@@ -126,65 +141,80 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		StringAndListParam nameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(GIVEN_NAME)));
 		when(fhirPersonService.searchForPeople(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		    isNull(), isNull()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(person), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchPeople(nameParam, null, null, null, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchPeople(nameParam, null, null, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PERSON));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByGender() {
 		TokenAndListParam genderParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(GENDER));
 		when(fhirPersonService.searchForPeople(isNull(), argThat(is(genderParam)), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		    isNull(), isNull()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(person), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchPeople(null, genderParam, null, null, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchPeople(null, genderParam, null, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PERSON));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByBirthDate() {
 		DateRangeParam birthDateParam = new DateRangeParam().setLowerBound(BIRTH_DATE).setUpperBound(BIRTH_DATE);
 		when(fhirPersonService.searchForPeople(isNull(), isNull(), argThat(is(birthDateParam)), isNull(), isNull(), isNull(),
-		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		    isNull(), isNull()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(person), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchPeople(null, null, birthDateParam, null, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchPeople(null, null, birthDateParam, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PERSON));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByCity() {
 		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
 		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), argThat(is(cityParam)), isNull(), isNull(),
-		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		    isNull(), isNull()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(person), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchPeople(null, null, null, cityParam, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchPeople(null, null, null, cityParam, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PERSON));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
 	public void searchForPeople_shouldReturnMatchingBundleOfPeopleByState() {
 		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
 		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), isNull(), argThat(is(stateParam)), isNull(),
-		    isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		    isNull(), isNull()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(person), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchPeople(null, null, null, null, stateParam, null, null, null);
+		IBundleProvider results = resourceProvider.searchPeople(null, null, null, null, stateParam, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PERSON));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
@@ -192,13 +222,16 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		StringAndListParam postalCodeParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
 		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(postalCodeParam)), isNull(), isNull())).thenReturn(Collections.singletonList(person));
+		    argThat(is(postalCodeParam)), isNull(), isNull()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(person), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchPeople(null, null, null, null, null, postalCodeParam, null, null);
+		IBundleProvider results = resourceProvider.searchPeople(null, null, null, null, null, postalCodeParam, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PERSON));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
@@ -206,13 +239,16 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		StringAndListParam countryParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
 		when(fhirPersonService.searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(countryParam)), isNull())).thenReturn(Collections.singletonList(person));
+		    argThat(is(countryParam)), isNull()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(person), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchPeople(null, null, null, null, null, null, countryParam, null);
+		IBundleProvider results = resourceProvider.searchPeople(null, null, null, null, null, null, countryParam, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PERSON));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
