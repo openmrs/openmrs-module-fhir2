@@ -19,11 +19,9 @@ import javax.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
@@ -38,7 +36,9 @@ import org.hibernate.criterion.Criterion;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.annotation.OpenmrsProfile;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.util.CalendarFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 
 @Primary
 @Component
-@Setter(AccessLevel.PACKAGE)
+@Setter(AccessLevel.PROTECTED)
 @OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
 public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements FhirConditionDao<Condition> {
 	// TODO: Change the BaseDaoImpl inheritance pattern to one of composition; here and everywhere else.
@@ -141,29 +141,46 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 	}
 	
 	@Override
-	public Collection<Condition> searchForConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
-	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, SortSpec sort) {
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Condition.class);
-		
-		handlePatientReference(criteria, patientParam);
-		if (patientParam == null) {
-			handlePatientReference(criteria, subjectParam);
-		}
-		handleDateRange("onsetDate", onsetDate).ifPresent(criteria::add);
-		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("onsetDate", onsetAgeParam))
-		        .ifPresent(criteria::add);
-		handleDateRange("dateCreated", recordedDate).ifPresent(criteria::add);
-		handleAndListParam(clinicalStatus,
-		    tokenParam -> Optional.of(eq("clinicalStatus", convertStatus(tokenParam.getValue())))).ifPresent(criteria::add);
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
+					break;
+				case FhirConstants.CODED_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleCode(criteria, (TokenAndListParam) param.getParam()));
+					break;
+				case FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER:
+					entry.getValue().forEach(param -> handleClinicalStatus(criteria, (TokenAndListParam) param.getParam()));
+					break;
+				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handleDateRange(param.getPropertyName(), (DateRangeParam) param.getParam())
+					                .ifPresent(criteria::add));
+					break;
+				case FhirConstants.QUANTITY_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleOnsetAge(criteria, (QuantityAndListParam) param.getParam()));
+					break;
+			}
+		});
+	}
+	
+	private void handleCode(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("condition.coded", "cd");
 			handleCodeableConcept(criteria, code, "cd", "map", "term").ifPresent(criteria::add);
 		}
-		
-		handleSort(criteria, sort);
-		
-		return criteria.list();
+	}
+	
+	private void handleClinicalStatus(Criteria criteria, TokenAndListParam status) {
+		handleAndListParam(status, tokenParam -> Optional.of(eq("clinicalStatus", convertStatus(tokenParam.getValue()))))
+		        .ifPresent(criteria::add);
+	}
+	
+	private void handleOnsetAge(Criteria criteria, QuantityAndListParam onsetAge) {
+		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("onsetDate", onsetAgeParam))
+		        .ifPresent(criteria::add);
 	}
 	
 	@Override

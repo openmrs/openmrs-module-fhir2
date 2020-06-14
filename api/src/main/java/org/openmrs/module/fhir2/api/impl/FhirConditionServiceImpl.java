@@ -9,9 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -49,9 +48,9 @@ public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> exten
 	}
 	
 	@Override
-	public Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
-	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, SortSpec sort) {
+	public IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
+	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
+	        DateRangeParam recordedDate, SortSpec sort) {
 		throw new FhirNotImplementedException(MESSAGE);
 	}
 	

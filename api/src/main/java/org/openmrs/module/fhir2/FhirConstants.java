@@ -102,6 +102,8 @@ public class FhirConstants {
 	
 	public static final String ENCOUNTER = "Encounter";
 	
+	public static final String CONDITION = "Condition";
+	
 	public static final String OBSERVATION = "Observation";
 	
 	public static final String ORGANIZATION = "Organization";
@@ -211,4 +213,6 @@ public class FhirConstants {
 	public static final String ALLERGEN_SEARCH_HANDLER = "allergen.search.handler";
 	
 	public static final String SEVERITY_SEARCH_HANDLER = "severity.search.handler";
+	
+	public static final String CONDITION_CLINICAL_STATUS_HANDLER = "condition.clinical.status.handler";
 }

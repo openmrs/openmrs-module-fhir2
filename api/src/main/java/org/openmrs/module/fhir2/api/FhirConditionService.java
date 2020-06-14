@@ -11,10 +11,9 @@ package org.openmrs.module.fhir2.api;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -23,9 +22,9 @@ import org.hl7.fhir.r4.model.Condition;
 
 public interface FhirConditionService extends FhirService<Condition> {
 	
-	Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
-	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, @Sort SortSpec sort);
+	IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
+	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
+	        DateRangeParam recordedDate, @Sort SortSpec sort);
 	
 	Condition saveCondition(@NotNull Condition condition);
 }
