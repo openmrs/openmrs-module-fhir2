@@ -31,21 +31,21 @@ public class FhirUserServiceImplTest {
 	private static final String WRONG_USER_UUID = "1a1d2623-2f67-47de-8fb0-b02f51e378b7";
 	
 	@Mock
-	private FhirUserDao userDao;
+	private FhirUserDao dao;
 	
 	private FhirUserServiceImpl userService;
 	
 	@Before
 	public void setup() {
 		userService = new FhirUserServiceImpl();
-		userService.setUserDao(userDao);
+		userService.setDao(dao);
 	}
 	
 	@Test
 	public void shouldGetUserByUuid() {
 		User user = new User();
 		user.setUuid(USER_UUID);
-		when(userDao.getUserByUuid(USER_UUID)).thenReturn(user);
+		when(dao.getUserByUuid(USER_UUID)).thenReturn(user);
 		User result = userService.getUserByUuid(USER_UUID);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), notNullValue());
@@ -54,7 +54,7 @@ public class FhirUserServiceImplTest {
 	
 	@Test
 	public void shouldReturnNullWhenGetByWrongUuid() {
-		when(userDao.getUserByUuid(WRONG_USER_UUID)).thenReturn(null);
+		when(dao.getUserByUuid(WRONG_USER_UUID)).thenReturn(null);
 		assertThat(userService.getUserByUuid(WRONG_USER_UUID), nullValue());
 	}
 	

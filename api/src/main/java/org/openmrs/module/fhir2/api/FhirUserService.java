@@ -11,9 +11,17 @@ package org.openmrs.module.fhir2.api;
 
 import javax.validation.constraints.NotNull;
 
+import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.User;
 
-public interface FhirUserService {
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+
+public interface FhirUserService extends FhirService<Practitioner>{
 	
 	User getUserByUuid(@NotNull String uuid);
+
+	IBundleProvider searchForUsers(StringAndListParam name, TokenAndListParam identifier);
+
 }

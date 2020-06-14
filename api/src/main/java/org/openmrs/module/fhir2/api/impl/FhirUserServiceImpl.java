@@ -9,11 +9,21 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.User;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,14 +31,34 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
-public class FhirUserServiceImpl implements FhirUserService {
+@Getter(AccessLevel.PROTECTED)
+public class FhirUserServiceImpl extends BaseFhirService<Practitioner, User> implements FhirUserService {
 	
 	@Autowired
-	private FhirUserDao userDao;
+	private FhirUserDao dao;
+	
+	@Autowired
+	private PractitionerTranslator<User> translator;
+	
+	@Autowired
+	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>> searchQuery;
 	
 	@Override
 	@Transactional(readOnly = true)
 	public User getUserByUuid(String uuid) {
-		return userDao.getUserByUuid(uuid);
+		return dao.getUserByUuid(uuid);
 	}
+	
+	@Override
+	public Practitioner get(String uuid) {
+		return translator.toFhirResource(getDao().get(uuid));
+	}
+	
+	@Override
+	public IBundleProvider searchForUsers(StringAndListParam name, TokenAndListParam identifier) {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name)
+		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier);
+		return searchQuery.getQueryResults(theParams, dao, translator);
+	}
+	
 }
