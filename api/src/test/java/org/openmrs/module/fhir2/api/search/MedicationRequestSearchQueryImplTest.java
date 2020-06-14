@@ -186,7 +186,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, not(empty()));
-		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));		
+		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -242,7 +242,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(10)));	
+		assertThat(resources, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -261,7 +261,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(10)));		
+		assertThat(resources, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -281,7 +281,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(10)));		
+		assertThat(resources, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -299,7 +299,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(10)));	
+		assertThat(resources, hasSize(equalTo(10)));
 	}
 	
 	@Test
