@@ -7,7 +7,7 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2;
+package org.openmrs.module.fhir2.api.exceptions;
 
 public class FhirException extends RuntimeException {
 	
