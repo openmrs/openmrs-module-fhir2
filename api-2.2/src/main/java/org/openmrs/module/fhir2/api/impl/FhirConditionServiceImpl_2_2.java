@@ -9,11 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -23,8 +21,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.annotation.OpenmrsProfile;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -45,12 +46,23 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 	@Autowired
 	private ConditionTranslator<org.openmrs.Condition> translator;
 	
+	@Autowired
+	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao<org.openmrs.Condition>, ConditionTranslator<org.openmrs.Condition>> searchQuery;
+	
 	@Override
-	public Collection<Condition> searchConditions(ReferenceAndListParam patientParam, ReferenceAndListParam subjectParam,
-	        TokenAndListParam code, TokenAndListParam clinicalStatus, DateRangeParam onsetDate,
-	        QuantityAndListParam onsetAge, DateRangeParam recordedDate, @Sort SortSpec sort) {
-		return dao.searchForConditions(patientParam, subjectParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate,
-		    sort).stream().map(translator::toFhirResource).collect(Collectors.toList());
+	public IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
+	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
+	        DateRangeParam recordedDate, @Sort SortSpec sort) {
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientParam)
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER, clinicalStatus)
+		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, onsetAge)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate", onsetDate)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordedDate).setSortSpec(sort);
+		
+		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
 	@Override

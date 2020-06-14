@@ -16,6 +16,7 @@ import java.util.List;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -24,7 +25,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.convertors.conv30_40.Bundle30_40;
 import org.hl7.fhir.convertors.conv30_40.Condition30_40;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -48,7 +48,6 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Read
-	@SuppressWarnings("unused")
 	public Condition getConditionById(@IdParam @NotNull IdType id) {
 		org.hl7.fhir.r4.model.Condition condition = conditionService.get(id.getIdPart());
 		if (condition == null) {
@@ -59,7 +58,6 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@History
-	@SuppressWarnings("unused")
 	public List<Resource> getConditionHistoryById(@IdParam @NotNull IdType id) {
 		org.hl7.fhir.r4.model.Condition condition = conditionService.get(id.getIdPart());
 		if (condition == null) {
@@ -75,8 +73,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	@SuppressWarnings("unused")
-	public Bundle searchConditions(
+	public IBundleProvider searchConditions(
 	        @OptionalParam(name = Condition.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_NAME,
 	                Patient.SP_GIVEN, Patient.SP_FAMILY }) ReferenceAndListParam patientParam,
 	        @OptionalParam(name = Condition.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_NAME,
@@ -86,8 +83,11 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Condition.SP_ONSET_DATE) DateRangeParam onsetDate,
 	        @OptionalParam(name = Condition.SP_ONSET_AGE) QuantityAndListParam onsetAge,
 	        @OptionalParam(name = Condition.SP_ASSERTED_DATE) DateRangeParam recordedDate, @Sort SortSpec sort) {
-		return Bundle30_40
-		        .convertBundle(FhirProviderUtils.convertSearchResultsToBundle(conditionService.searchConditions(patientParam,
-		            subjectParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate, sort)));
+		if (patientParam == null) {
+			patientParam = subjectParam;
+		}
+		
+		return conditionService.searchConditions(patientParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate,
+		    sort);
 	}
 }
