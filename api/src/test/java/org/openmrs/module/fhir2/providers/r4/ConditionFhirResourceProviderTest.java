@@ -180,36 +180,36 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.CONDITION));
 	}
-
+	
 	@Test
 	public void searchConditions_shouldReturnConditionReturnedByServiceWhenPatientIsNull() {
 		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
 		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "subject name")));
-
+		
 		TokenAndListParam codeList = new TokenAndListParam();
 		codeList.addValue(new TokenOrListParam().add(new TokenParam("test code")));
-
+		
 		TokenAndListParam clinicalList = new TokenAndListParam();
 		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
-
+		
 		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("lower date").setUpperBound("upper date");
-
+		
 		QuantityAndListParam onsetAge = new QuantityAndListParam();
 		onsetAge.addValue(new QuantityOrListParam().add(new QuantityParam(12)));
-
+		
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
-				.setUpperBound("upper record date");
-
+		        .setUpperBound("upper record date");
+		
 		SortSpec sort = new SortSpec("sort param");
-
+		
 		when(conditionService.searchConditions(subjectReference, codeList, clinicalList, onsetDate, onsetAge, recordDate,
-				sort)).thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
-
-		IBundleProvider result = resourceProvider.searchConditions(null, subjectReference, codeList,
-				clinicalList, onsetDate, onsetAge, recordDate, sort);
-
+		    sort)).thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		
+		IBundleProvider result = resourceProvider.searchConditions(null, subjectReference, codeList, clinicalList, onsetDate,
+		    onsetAge, recordDate, sort);
+		
 		List<IBaseResource> resultList = get(result);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.CONDITION));
