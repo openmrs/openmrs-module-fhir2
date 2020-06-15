@@ -1,0 +1,72 @@
+{
+  "resourceType": "AllergyIntolerance",
+  "id": "2085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+        "code": "active",
+        "display": "Active"
+      }
+    ],
+    "text": "Active"
+  },
+  "type": "allergy",
+  "category": [
+    "medication"
+  ],
+  "code": {
+    "text": "value for allergen non coded. 123456"
+  },
+  "patient": {
+    "reference": "Patient/dd55571f-1691-11df-97a5-7038c432aabf",
+    "type": "Patient",
+    "identifier": {
+      "id": "dce9740a-1691-11df-97a5-7038c432aabf",
+      "use": "usual",
+      "system": "OpenMRS Identification Number",
+      "value": "35TU-9"
+    },
+    "display": "Kimetto Akimena Ediati(OpenMRS Identification Number:35TU-9)"
+  },
+  "recorder": {
+    "reference": "Practitioner/842f4bae-1692-11df-97a5-7038c432aabf",
+    "type": "Practitioner",
+    "display": "Super User"
+  },
+  "note": [
+    {
+      "text": "allergy comment"
+    }
+  ],
+  "reaction": [
+    {
+      "substance": {
+        "coding": [
+          {
+            "code": "162298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+          },
+          {
+            "system": "urn:oid:2.16.840.1.113883.3.7201",
+            "code": "162298"
+          }
+        ]
+      },
+      "manifestation": [
+        {
+          "coding": [
+            {
+              "code": "1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.3.7201",
+              "code": "1513"
+            }
+          ],
+          "text": "1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA text"
+        }
+      ],
+      "severity": "severe"
+    }
+  ]
+}

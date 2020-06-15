@@ -18,18 +18,23 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -45,6 +50,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
+import org.openmrs.module.fhir2.providers.util.TaskVersionConverter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.Task> {
@@ -144,50 +150,43 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		assertThat(resourceProvider.getTaskHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 	
-	//	@Test
-	//	public void createTask_shouldCreateNewTask() {
-	//		when(taskService.saveTask(task)).thenReturn(task);
-	//
-	//		MethodOutcome result = resourceProvider.createTask(TaskVersionConverter.convertTask(task));
-	//		assertThat(result.getResource(), equalTo(task));
-	//	}
-	//
-	//	@Test
-	//	public void updateTask_shouldUpdateTask() {
-	//		when(taskService.updateTask(TASK_UUID, task)).thenReturn(task);
-	//
-	//		IdType uuid = new IdType();
-	//		uuid.setValue(TASK_UUID);
-	//
-	//		MethodOutcome result = resourceProvider.updateTask(uuid, TaskVersionConverter.convertTask(task));
-	//		assertThat(result.getResource(), equalTo(task));
-	//	}
-	//
-	//	@Test(expected = InvalidRequestException.class)
-	//	public void updateTask_shouldThrowInvalidRequestForTaskUuidMismatch() {
-	//		when(taskService.updateTask(WRONG_TASK_UUID, task)).thenThrow(InvalidRequestException.class);
-	//
-	//		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), TaskVersionConverter.convertTask(task));
-	//	}
-	//
-	//	@Test(expected = InvalidRequestException.class)
-	//	public void updateTask_shouldThrowInvalidRequestIfTaskHasNoUuid() {
-	//		Task noIdTask = new Task();
-	//
-	//		when(taskService.updateTask(TASK_UUID, TaskVersionConverter.convertTask(noIdTask))).thenThrow(InvalidRequestException.class);
-	//
-	//		resourceProvider.updateTask(new IdType().setValue(TASK_UUID), noIdTask);
-	//	}
-	//
-	//	@Test(expected = MethodNotAllowedException.class)
-	//	public void updateTask_shouldThrowMethodNotAllowedIfTaskDoesNotExist() {
-	//		Task wrongTask = new Task();
-	//		wrongTask.setId(WRONG_TASK_UUID);
-	//
-	//		when(taskService.updateTask(WRONG_TASK_UUID, TaskVersionConverter.convertTask(wrongTask))).thenThrow(MethodNotAllowedException.class);
-	//
-	//		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), wrongTask);
-	//	}
+	@Test
+	public void createTask_shouldCreateNewTask() {
+		when(taskService.create(any(org.hl7.fhir.r4.model.Task.class))).thenReturn(task);
+		
+		MethodOutcome result = resourceProvider.createTask(TaskVersionConverter.convertTask(task));
+		
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), CoreMatchers.equalTo(task));
+	}
+	
+	@Test
+	public void updateTask_shouldUpdateTask() {
+		when(taskService.update(eq(TASK_UUID), any(org.hl7.fhir.r4.model.Task.class))).thenReturn(task);
+		
+		MethodOutcome result = resourceProvider.updateTask(new IdType().setValue(TASK_UUID),
+		    TaskVersionConverter.convertTask(task));
+		
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(task));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateTask_shouldThrowInvalidRequestForUuidMismatch() {
+		when(taskService.update(eq(WRONG_TASK_UUID), any(org.hl7.fhir.r4.model.Task.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), TaskVersionConverter.convertTask(task));
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateTask_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		when(taskService.update(eq(WRONG_TASK_UUID), any(org.hl7.fhir.r4.model.Task.class)))
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), TaskVersionConverter.convertTask(task));
+	}
 	
 	@Test
 	public void searchTasks_shouldReturnMatchingTasks() {

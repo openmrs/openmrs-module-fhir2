@@ -14,18 +14,24 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -33,12 +39,14 @@ import org.hl7.fhir.convertors.conv30_40.AllergyIntolerance30_40;
 import org.hl7.fhir.convertors.conv30_40.Provenance30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Provenance;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -77,6 +85,36 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		
 		return allergyIntolerance.getContained().stream().filter(r -> r instanceof Provenance).map(r -> (Provenance) r)
 		        .map(Provenance30_40::convertProvenance).collect(Collectors.toList());
+	}
+	
+	@Create
+	@SuppressWarnings("unused")
+	public MethodOutcome creatAllergyIntolerance(@ResourceParam AllergyIntolerance allergyIntolerance) {
+		return FhirProviderUtils.buildCreate(
+		    allergyIntoleranceService.create(AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance)));
+	}
+	
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updateAllergyIntolerance(@IdParam IdType id, @ResourceParam AllergyIntolerance allergyIntolerance) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+		
+		allergyIntolerance.setId(id.getIdPart());
+		
+		return FhirProviderUtils.buildUpdate(allergyIntoleranceService.update(id.getIdPart(),
+		    AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance)));
+	}
+	
+	@Delete
+	@SuppressWarnings("unused")
+	public OperationOutcome deleteAllergyIntolerance(@IdParam @NotNull IdType id) {
+		org.hl7.fhir.r4.model.AllergyIntolerance allergyIntolerance = allergyIntoleranceService.delete(id.getIdPart());
+		if (allergyIntolerance == null) {
+			throw new ResourceNotFoundException("Could not find allergyIntolerance to delete with id " + id.getIdPart());
+		}
+		return FhirProviderUtils.buildDelete(AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance));
 	}
 	
 	@Search
