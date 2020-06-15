@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.mockito.Mockito.when;
@@ -151,6 +152,12 @@ public class ConditionTranslatorImpl_2_2Test {
 		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
 		assertThat(condition, notNullValue());
 		assertThat(condition.getUuid(), equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldReturnNullIfConditionToTranslateIsNull() {
+		Condition condition = conditionTranslator.toFhirResource(null);
+		assertThat(condition, nullValue());
 	}
 	
 	@Test
