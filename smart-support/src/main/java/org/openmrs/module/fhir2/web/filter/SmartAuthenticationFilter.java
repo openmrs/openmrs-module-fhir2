@@ -67,12 +67,10 @@ public class SmartAuthenticationFilter extends KeycloakOIDCFilter {
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		if (req instanceof HttpServletRequest) {
 			final HttpServletRequest httpRequest = (HttpServletRequest) req;
+			if (httpRequest.getRequestedSessionId() != null) {
+				Context.logout();
+			}
 			if (httpRequest.getHeader("Authorization").startsWith("Bearer")) {
-				
-				if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
-					Context.logout();
-				}
-				
 				if (!Context.isAuthenticated()) {
 					// KeycloakOIDCFilter does the actual request handling
 					super.doFilter(req, res, (rq, rs) -> {});
