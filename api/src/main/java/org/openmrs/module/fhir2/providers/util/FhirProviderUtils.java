@@ -15,7 +15,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -31,6 +33,22 @@ public class FhirProviderUtils {
 		MethodOutcome methodOutcome = new MethodOutcome();
 		methodOutcome.setCreated(true);
 		return buildWithResource(methodOutcome, resource);
+	}
+	
+	public static OperationOutcome buildDelete(DomainResource resource) {
+		
+		final CodeableConcept MSG_DELETED = new CodeableConcept();
+		{
+			MSG_DELETED.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/operation-outcome")
+			        .setCode("MSG_DELETED").setDisplay("This resource has been deleted");
+			MSG_DELETED.setText("This resource has been deleted");
+		}
+		
+		OperationOutcome outcome = new OperationOutcome();
+		outcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.INFORMATION)
+		        .setCode(OperationOutcome.IssueType.INFORMATIONAL).setDetails(MSG_DELETED);
+		return outcome;
+		
 	}
 	
 	private static MethodOutcome buildWithResource(MethodOutcome methodOutcome, DomainResource resource) {
