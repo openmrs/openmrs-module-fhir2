@@ -44,7 +44,7 @@ public class ForwardingFilter implements Filter {
 			Enum<FhirVersionUtils.FhirVersion> fhirVersionCase = FhirVersionUtils.getFhirVersion(request);
 			String fhirVersion = String.valueOf(FhirVersionUtils.getFhirVersion(request));
 			
-			String replacement;
+			String replacement = "";
 			if (R3.equals(fhirVersionCase)) {
 				prefix += "/" + fhirVersion;
 				replacement = "/ms/fhir2R3Servlet";
@@ -52,7 +52,9 @@ public class ForwardingFilter implements Filter {
 				prefix += "/" + fhirVersion;
 				replacement = "/ms/fhir2Servlet";
 			} else {
-				((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
+				if (!res.isCommitted()) {
+					((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
+				}
 				return;
 			}
 			if (requestURI.contains("/.well-known")) {
@@ -63,7 +65,9 @@ public class ForwardingFilter implements Filter {
 			return;
 		}
 		
-		((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
+		if (!res.isCommitted()) {
+			((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
+		}
 	}
 	
 	@Override

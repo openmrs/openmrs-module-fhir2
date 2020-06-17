@@ -90,8 +90,10 @@ public class SmartAuthenticationFilter extends KeycloakOIDCFilter {
 						    authenticated.getUser());
 						System.out.println(httpRequest.getHeader("Authorization"));
 					} else {
-						HttpServletResponse httpResponse = (HttpServletResponse) res;
-						httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+						if (!res.isCommitted()) {
+							HttpServletResponse httpResponse = (HttpServletResponse) res;
+							httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+						}
 						return;
 					}
 				}

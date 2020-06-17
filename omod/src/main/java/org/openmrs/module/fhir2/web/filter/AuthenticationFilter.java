@@ -54,13 +54,18 @@ public class AuthenticationFilter implements Filter {
 							Context.authenticate(userAndPass[0], userAndPass[1]);
 						}
 						catch (Exception ignored) {
-							HttpServletResponse httpResponse = (HttpServletResponse) response;
-							httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+							if (!response.isCommitted()) {
+								HttpServletResponse httpResponse = (HttpServletResponse) response;
+								httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+							}
+							return;
 						}
 					} else {
 						// This sends 401 error if not authenticated
-						HttpServletResponse httpResponse = (HttpServletResponse) response;
-						httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+						if (!response.isCommitted()) {
+							HttpServletResponse httpResponse = (HttpServletResponse) response;
+							httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+						}
 						return;
 					}
 				}
