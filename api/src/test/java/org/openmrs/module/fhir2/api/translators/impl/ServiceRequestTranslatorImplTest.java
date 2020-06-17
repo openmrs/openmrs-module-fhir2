@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -47,13 +48,12 @@ import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceRequestTranslatorImplTest {
 	
 	private static final String SERVICE_REQUEST_UUID = "4e4851c3-c265-400e-acc9-1f1b0ac7f9c4";
-	
-	private static final TestOrder.Action ORDER_ACTION = TestOrder.Action.NEW;
 	
 	private static final String LOINC_CODE = "1000-1";
 	
@@ -62,6 +62,10 @@ public class ServiceRequestTranslatorImplTest {
 	private static final String PRACTITIONER_UUID = "b156e76e-b87a-4458-964c-a48e64a20fbb";
 	
 	private static final String ORGANIZATION_UUID = "44f7a79e-1de6-4b0b-9daf-bbcb7ed18b7e";
+	
+	private static final int PREFERRED_PAGE_SIZE = 10;
+	
+	private static final int COUNT = 1;
 	
 	private ServiceRequestTranslatorImpl translator;
 	
@@ -89,6 +93,10 @@ public class ServiceRequestTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateOpenmrsTestOrderToFhirServiceRequest() {
 		TestOrder order = new TestOrder();
+		
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
 		ServiceRequest result = translator.toFhirResource(order);
 		
 		assertThat(result, notNullValue());
@@ -100,9 +108,10 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
-		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REQUESTED);
+		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REQUESTED);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -115,9 +124,10 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
-		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REJECTED);
+		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REJECTED);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -130,9 +140,10 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
-		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.ACCEPTED);
+		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.ACCEPTED);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -145,9 +156,10 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
-		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.COMPLETED);
+		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.COMPLETED);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -160,9 +172,10 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
-		Collection<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.DRAFT);
+		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.DRAFT);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -175,7 +188,8 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder newOrder = new TestOrder();
 		newOrder.setUuid(SERVICE_REQUEST_UUID);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(Collections.emptyList());
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -198,9 +212,10 @@ public class ServiceRequestTranslatorImplTest {
 		firstTask.addBasedOn(basedOnRef);
 		secondTask.addBasedOn(basedOnRef);
 		
-		Collection<Task> tasks = Arrays.asList(firstTask, secondTask);
+		List<Task> tasks = Arrays.asList(firstTask, secondTask);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -214,6 +229,9 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder testOrder = new TestOrder();
 		
 		testOrder.setConcept(openmrsConcept);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding loincCoding = codeableConcept.addCoding();
@@ -239,6 +257,9 @@ public class ServiceRequestTranslatorImplTest {
 		testOrder.setDateActivated(fromDate);
 		testOrder.setAutoExpireDate(toDate);
 		
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
 		Period result = translator.toFhirResource(testOrder).getOccurrencePeriod();
 		
 		assertThat(result, notNullValue());
@@ -253,6 +274,9 @@ public class ServiceRequestTranslatorImplTest {
 		
 		testOrder.setAutoExpireDate(toDate);
 		
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
 		Period result = translator.toFhirResource(testOrder).getOccurrencePeriod();
 		
 		assertThat(result, notNullValue());
@@ -266,6 +290,9 @@ public class ServiceRequestTranslatorImplTest {
 		Date fromDate = new Date();
 		
 		testOrder.setDateActivated(fromDate);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		Period result = translator.toFhirResource(testOrder).getOccurrencePeriod();
 		
@@ -283,6 +310,9 @@ public class ServiceRequestTranslatorImplTest {
 		testOrder.setUrgency(TestOrder.Urgency.ON_SCHEDULED_DATE);
 		testOrder.setScheduledDate(fromDate);
 		testOrder.setAutoExpireDate(toDate);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		Period result = translator.toFhirResource(testOrder).getOccurrencePeriod();
 		
@@ -302,6 +332,8 @@ public class ServiceRequestTranslatorImplTest {
 		order.setPatient(subject);
 		subjectReference.setType(FhirConstants.PATIENT).setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID);
 		
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		when(patientReferenceTranslator.toFhirResource(subject)).thenReturn(subjectReference);
 		
 		Reference result = translator.toFhirResource(order).getSubject();
@@ -315,7 +347,8 @@ public class ServiceRequestTranslatorImplTest {
 		TestOrder order = new TestOrder();
 		order.setUuid(SERVICE_REQUEST_UUID);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(setUpPerformerScenario(ORGANIZATION_UUID));
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(
+		    new MockIBundleProvider<>(setUpPerformerScenario(ORGANIZATION_UUID), PREFERRED_PAGE_SIZE, COUNT));
 		
 		Collection<Reference> result = translator.toFhirResource(order).getPerformer();
 		
@@ -337,6 +370,8 @@ public class ServiceRequestTranslatorImplTest {
 		requesterReference.setType(FhirConstants.PRACTITIONER)
 		        .setReference(FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID);
 		
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		when(practitionerReferenceTranslator.toFhirResource(requester)).thenReturn(requesterReference);
 		
 		Reference result = translator.toFhirResource(order).getRequester();
@@ -345,7 +380,7 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result.getReference(), containsString(PRACTITIONER_UUID));
 	}
 	
-	private Collection<Task> setUpBasedOnScenario(Task.TaskStatus status) {
+	private List<Task> setUpBasedOnScenario(Task.TaskStatus status) {
 		Reference basedOnRef = new Reference();
 		Task task = new Task();
 		task.setStatus(status);
@@ -356,7 +391,7 @@ public class ServiceRequestTranslatorImplTest {
 		return Collections.singletonList(task);
 	}
 	
-	private Collection<Task> setUpPerformerScenario(String performerUuid) {
+	private List<Task> setUpPerformerScenario(String performerUuid) {
 		Reference performerRef = new Reference();
 		Task task = new Task();
 		
@@ -372,6 +407,9 @@ public class ServiceRequestTranslatorImplTest {
 	public void shouldTranslateOpenMrsDateChangedToLastUpdatedDate() {
 		TestOrder order = new TestOrder();
 		order.setDateChanged(new Date());
+		
+		when(taskService.searchForTasks(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		ServiceRequest result = translator.toFhirResource(order);
 		assertThat(result, notNullValue());

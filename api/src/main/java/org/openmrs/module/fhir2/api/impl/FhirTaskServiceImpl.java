@@ -9,19 +9,20 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Task;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,9 @@ public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> impleme
 	@Autowired
 	private TaskTranslator translator;
 	
+	@Autowired
+	private SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator> searchQuery;
+	
 	/**
 	 * Get a list of Tasks that match the given search and sort criteria
 	 *
@@ -50,9 +54,14 @@ public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> impleme
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public Collection<Task> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
+	public IBundleProvider searchForTasks(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,
 	        TokenAndListParam status, SortSpec sort) {
-		return dao.searchForTasks(basedOnReference, ownerReference, status, sort).stream().map(translator::toFhirResource)
-		        .collect(Collectors.toList());
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER, basedOnReference)
+		        .addParameter(FhirConstants.OWNER_REFERENCE_SEARCH_HANDLER, ownerReference)
+		        .addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status).setSortSpec(sort);
+		
+		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 }

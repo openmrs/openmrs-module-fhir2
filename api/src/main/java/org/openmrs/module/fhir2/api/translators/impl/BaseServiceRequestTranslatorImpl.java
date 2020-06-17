@@ -10,7 +10,11 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -23,12 +27,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Setter(AccessLevel.PROTECTED)
 public class BaseServiceRequestTranslatorImpl {
 	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
+	
 	@Autowired
 	private FhirTaskService taskService;
 	
 	protected ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(String orderUuid) {
-		Collection<Task> serviceRequestTasks = taskService
-		        .searchForTasks(new ReferenceParam("ServiceRequest", null, orderUuid), null, null, null);
+		IBundleProvider results = taskService.searchForTasks(new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))), null, null, null);
+		
+		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
+		        .collect(Collectors.toList());
 		
 		ServiceRequest.ServiceRequestStatus serviceRequestStatus = ServiceRequest.ServiceRequestStatus.UNKNOWN;
 		
@@ -56,8 +67,11 @@ public class BaseServiceRequestTranslatorImpl {
 	}
 	
 	protected Reference determineServiceRequestPerformer(String orderUuid) {
-		Collection<Task> serviceRequestTasks = taskService
-		        .searchForTasks(new ReferenceParam("ServiceRequest", null, orderUuid), null, null, null);
+		IBundleProvider results = taskService.searchForTasks(new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))), null, null, null);
+		
+		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
+		        .collect(Collectors.toList());
 		
 		if (serviceRequestTasks.size() != 1) {
 			return null;

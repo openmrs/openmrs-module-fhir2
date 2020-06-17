@@ -215,4 +215,10 @@ public class FhirConstants {
 	public static final String SEVERITY_SEARCH_HANDLER = "severity.search.handler";
 	
 	public static final String CONDITION_CLINICAL_STATUS_HANDLER = "condition.clinical.status.handler";
+	
+	public static final String STATUS_SEARCH_HANDLER = "status.search.handler";
+	
+	public static final String BASED_ON_REFERENCE_SEARCH_HANDLER = "based.on.reference.search.handler";
+	
+	public static final String OWNER_REFERENCE_SEARCH_HANDLER = "owner.reference.search.handler";
 }

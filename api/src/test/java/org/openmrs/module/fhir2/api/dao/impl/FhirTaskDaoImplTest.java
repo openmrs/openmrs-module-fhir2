@@ -9,30 +9,18 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
-import static org.exparity.hamcrest.date.DateMatchers.sameOrBefore;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import org.hibernate.SessionFactory;
-import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;
@@ -52,23 +40,11 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String TASK_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirTaskDaoImplTest_initial_data.xml";
 	
-	private static final String TASK_DATA_OWNER_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirTaskDaoImplTest_owner_data.xml";
-	
 	private static final String CONCEPT_DATA_XML = "org/openmrs/api/include/ConceptServiceTest-initialConcepts.xml";
 	
 	private static final String TASK_UUID = "d899333c-5bd4-45cc-b1e7-2f9542dbcbf6";
 	
-	private static final String BASED_ON_TASK_UUID = "3dc9f4a7-44dc-4b29-adfd-a8b297a41f33";
-	
 	private static final String BASED_ON_ORDER_UUID = "7d96f25c-4949-4f72-9931-d808fbc226de";
-	
-	private static final String OTHER_ORDER_UUID = "cbcb84f3-4576-452f-ba74-7cdeaa9aa602";
-	
-	private static final String OWNER_TASK_UUID = "c1a3af38-c0a9-4c2e-9cc0-8e0440e357e5";
-	
-	private static final String OWNER_USER_UUID = "7f8aec9d-8269-4bb4-8bc5-1820bb31092c";
-	
-	private static final FhirTask.TaskStatus TASK_STATUS = FhirTask.TaskStatus.REQUESTED;
 	
 	private static final FhirTask.TaskStatus NEW_STATUS = FhirTask.TaskStatus.ACCEPTED;
 	
@@ -286,161 +262,6 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void getTasksByBasedOnUuid_shouldRetrieveTasksByBasedOn() {
-		Collection<FhirTask> results = dao.searchForTasks(new ReferenceParam("ServiceRequest", null, BASED_ON_ORDER_UUID),
-		    null, null, null);
-		
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.iterator().next().getUuid(), equalTo(BASED_ON_TASK_UUID));
-	}
-	
-	@Test
-	public void getTasksByBasedOnUuid_shouldReturnEmptyTaskListForOrderWithNoTask() {
-		Collection<FhirTask> results = dao.searchForTasks(new ReferenceParam("ServiceRequest", null, OTHER_ORDER_UUID), null,
-		    null, null);
-		
-		assertThat(results, notNullValue());
-		assertThat(results, empty());
-	}
-	
-	@Test
-	public void searchForTasks_shouldReturnTasksByBasedOn() {
-		ReferenceParam basedOnReference = new ReferenceParam();
-		basedOnReference.setValue(FhirConstants.SERVICE_REQUEST + "/" + BASED_ON_ORDER_UUID);
-		
-		Collection<FhirTask> results = dao.searchForTasks(basedOnReference, null, null, null);
-		
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("uuid", equalTo(BASED_ON_TASK_UUID))));
-		assertThat(results, not(hasItem(hasProperty("uuid", equalTo(TASK_UUID)))));
-		
-	}
-	
-	@Test
-	public void searchForTasks_shouldReturnTasksByOwner() throws Exception {
-		ReferenceParam ownerReference = new ReferenceParam();
-		ownerReference.setValue(FhirConstants.PRACTITIONER + "/" + OWNER_USER_UUID);
-		
-		executeDataSet(TASK_DATA_OWNER_XML);
-		
-		Collection<FhirTask> results = dao.searchForTasks(null, ownerReference, null, null);
-		
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("uuid", equalTo(OWNER_TASK_UUID))));
-		assertThat(results, not(hasItem(hasProperty("uuid", equalTo(TASK_UUID)))));
-	}
-	
-	@Test
-	public void searchForTasks_shouldReturnTasksByStatus() {
-		TokenAndListParam status = new TokenAndListParam().addAnd(
-		    new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, Task.TaskStatus.ACCEPTED.toString()));
-		
-		Collection<FhirTask> results = dao.searchForTasks(null, null, status, null);
-		
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("uuid", equalTo(TASK_UUID))));
-	}
-	
-	@Test
-	public void searchForTasks_shouldSortTasksAsRequested() {
-		SortSpec sort = new SortSpec();
-		sort.setParamName("date");
-		sort.setOrder(SortOrderEnum.ASC);
-		
-		Collection<FhirTask> results = dao.searchForTasks(null, null, null, sort);
-		
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThan(1));
-		
-		List<FhirTask> resultsList = new ArrayList<>(results);
-		// pair-wise compare of all obs by date
-		for (int i = 1; i < resultsList.size(); i++) {
-			assertThat(resultsList.get(i - 1).getDateChanged(), sameOrBefore(resultsList.get(i).getDateChanged()));
-		}
-		
-		sort.setOrder(SortOrderEnum.DESC);
-		
-		results = dao.searchForTasks(null, null, null, sort);
-		
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results.size(), greaterThan(1));
-		
-		resultsList = new ArrayList<>(results);
-		// pair-wise compare of all obs by date
-		for (int i = 1; i < resultsList.size(); i++) {
-			assertThat(resultsList.get(i - 1).getDateChanged(), sameOrAfter(resultsList.get(i).getDateChanged()));
-		}
-	}
-	
-	@Test
-	public void searchForTasks_shouldIgnoreSearchByUnknownProperty() {
-		SortSpec sort = new SortSpec();
-		sort.setParamName("date");
-		sort.setOrder(SortOrderEnum.DESC);
-		
-		Collection<FhirTask> baseline = dao.searchForTasks(null, null, null, sort);
-		
-		assertThat(baseline, notNullValue());
-		assertThat(baseline, not(empty()));
-		
-		SortSpec subSort = new SortSpec();
-		sort.setChain(subSort);
-		subSort.setParamName("dummy");
-		subSort.setOrder(SortOrderEnum.ASC);
-		
-		Collection<FhirTask> results = dao.searchForTasks(null, null, null, sort);
-		
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, equalTo(baseline));
-	}
-	
-	@Test
-	public void searchForTasks_shouldHandleAComplexQuery() throws Exception {
-		executeDataSet(TASK_DATA_OWNER_XML);
-		
-		TokenAndListParam status = new TokenAndListParam();
-		
-		status.addAnd(
-		    new TokenOrListParam().add(FhirConstants.TASK_STATUS_VALUE_SET_URI, Task.TaskStatus.ACCEPTED.toString())
-		            .add(FhirConstants.TASK_STATUS_VALUE_SET_URI, Task.TaskStatus.REQUESTED.toString()));
-		
-		ReferenceParam ownerReference = new ReferenceParam();
-		ownerReference.setValue(FhirConstants.PRACTITIONER + "/" + OWNER_USER_UUID);
-		ownerReference.setChain("");
-		
-		SortSpec sort = new SortSpec();
-		sort.setParamName("date");
-		sort.setOrder(SortOrderEnum.DESC);
-		
-		// TODO: figure out fk integrity issue with setting owner_reference_id in the initial_data.xml file
-		Collection<FhirTask> results = dao.searchForTasks(null, ownerReference, status, sort);
-		
-		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, hasSize(greaterThan(1)));
-		
-		assertThat(results, hasItem(hasProperty("status", equalTo(FhirTask.TaskStatus.ACCEPTED))));
-		assertThat(results, hasItem(hasProperty("status", equalTo(FhirTask.TaskStatus.REQUESTED))));
-		assertThat(results, not(hasItem(hasProperty("status", equalTo(FhirTask.TaskStatus.REJECTED)))));
-		
-		assertThat(results, not(hasItem(hasProperty("uuid", equalTo(TASK_UUID)))));
-		assertThat(results, hasItem(hasProperty("uuid", equalTo(OWNER_TASK_UUID))));
-		
-		List<FhirTask> resultsList = new ArrayList<>(results);
-		// pair-wise compare of all obs by date
-		for (int i = 1; i < resultsList.size(); i++) {
-			assertThat(resultsList.get(i - 1).getDateChanged(), sameOrAfter(resultsList.get(i).getDateChanged()));
-		}
-	}
-	
-	@Test
 	public void searchForTasks_shouldHandleNullBasedOnRefs() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
@@ -459,4 +280,5 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(result.getBasedOnReferences(), notNullValue());
 		assertThat(result.getBasedOnReferences().size(), greaterThan(0));
 	}
+	
 }
