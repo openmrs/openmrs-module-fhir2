@@ -450,8 +450,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		TokenAndListParam listParam = new TokenAndListParam();
 		listParam.addValue(new TokenOrListParam().add(new TokenParam(STATUS_ACTIVE)));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER,
-		    listParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER, listParam);
 		
 		IBundleProvider results = search(theParams);
 		
@@ -464,8 +463,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		TokenAndListParam listParam = new TokenAndListParam();
 		listParam.addValue(new TokenOrListParam().add(new TokenParam(STATUS_INACTIVE)));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER,
-		    listParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER, listParam);
 		
 		IBundleProvider results = search(theParams);
 		
@@ -478,8 +476,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		TokenAndListParam listParam = new TokenAndListParam();
 		listParam.addValue(new TokenOrListParam().add(new TokenParam(STATUS_ACTIVE)).add(new TokenParam(STATUS_INACTIVE)));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER,
-		    listParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER, listParam);
 		
 		IBundleProvider results = search(theParams);
 		

@@ -214,5 +214,5 @@ public class FhirConstants {
 	
 	public static final String SEVERITY_SEARCH_HANDLER = "severity.search.handler";
 	
-	public static final String CONDITION_CLINICAL_STATUS_HANDLER = "condition.clinical.status.handler";
+	public static final String STATUS_SEARCH_HANDLER = "status.search.handler";
 }

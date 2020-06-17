@@ -57,7 +57,7 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientParam)
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
-		        .addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER, clinicalStatus)
+		        .addParameter(FhirConstants.STATUS_SEARCH_HANDLER, clinicalStatus)
 		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, onsetAge)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate", onsetDate)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordedDate).setSortSpec(sort);

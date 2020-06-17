@@ -151,7 +151,7 @@ public class FhirConditionServiceImpl_2_2Test {
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, codeList)
-		        .addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER, clinicalList)
+		        .addParameter(FhirConstants.STATUS_SEARCH_HANDLER, clinicalList)
 		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, onsetAge)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate", onsetDate)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordDate).setSortSpec(sort);

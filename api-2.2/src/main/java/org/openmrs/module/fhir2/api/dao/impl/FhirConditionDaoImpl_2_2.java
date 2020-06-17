@@ -151,7 +151,7 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleCode(criteria, (TokenAndListParam) param.getParam()));
 					break;
-				case FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER:
+				case FhirConstants.STATUS_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleClinicalStatus(criteria, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
