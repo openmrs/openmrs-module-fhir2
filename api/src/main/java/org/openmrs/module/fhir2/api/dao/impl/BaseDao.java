@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static ca.uhn.fhir.rest.api.SortOrderEnum.ASC;
-import static ca.uhn.fhir.rest.api.SortOrderEnum.DESC;
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.between;
@@ -559,24 +557,21 @@ public abstract class BaseDao {
 							if (!containsAlias(criteria, "p")) {
 								criteria.createAlias("ep.provider", "p");
 							}
-							criteria.add(ilike("p.identifier", participantToken.getValue()));
-							break;
+							return Optional.of(ilike("p.identifier", participantToken.getValue()));
 						case Practitioner.SP_GIVEN:
 							if ((!containsAlias(criteria, "pro")
 							        && (!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn"))))) {
 								criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
 								        .createAlias("ps.names", "pn");
 							}
-							criteria.add(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
-							break;
+							return Optional.of(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
 						case Practitioner.SP_FAMILY:
 							if ((!containsAlias(criteria, "pro")
 							        && (!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn"))))) {
 								criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
 								        .createAlias("ps.names", "pn");
 							}
-							criteria.add(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
-							break;
+							return Optional.of(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
 						case Practitioner.SP_NAME:
 							if ((!containsAlias(criteria, "pro")
 							        && (!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn"))))) {
@@ -592,18 +587,17 @@ public abstract class BaseDao {
 								criterionList.add(propertyLike("pn.familyName", token));
 							}
 							
-							criteria.add(or(toCriteriaArray(criterionList)));
-							break;
+							return Optional.of(or(toCriteriaArray(criterionList)));
 					}
 				} else {
 					if (!containsAlias(criteria, "pro")) {
 						criteria.createAlias("ep.provider", "pro");
 					}
-					criteria.add(eq("pro.uuid", participantToken.getValue()));
+					return Optional.of(eq("pro.uuid", participantToken.getValue()));
 				}
 				
 				return Optional.empty();
-			});
+			}).ifPresent(criteria::add);
 			
 		}
 	}
@@ -617,20 +611,17 @@ public abstract class BaseDao {
 				if (participantToken.getChain() != null) {
 					switch (participantToken.getChain()) {
 						case Practitioner.SP_IDENTIFIER:
-							criteria.add(ilike("or.identifier", participantToken.getValue()));
-							break;
+							return Optional.of(ilike("or.identifier", participantToken.getValue()));
 						case Practitioner.SP_GIVEN:
 							if ((!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))) {
 								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
 							}
-							criteria.add(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
-							break;
+							return Optional.of(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
 						case Practitioner.SP_FAMILY:
 							if ((!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))) {
 								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
 							}
-							criteria.add(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
-							break;
+							return Optional.of(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
 						case Practitioner.SP_NAME:
 							if ((!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))) {
 								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
@@ -644,15 +635,14 @@ public abstract class BaseDao {
 								criterionList.add(propertyLike("pn.familyName", token));
 							}
 							
-							criteria.add(or(toCriteriaArray(criterionList)));
-							break;
+							return Optional.of(or(toCriteriaArray(criterionList)));
 					}
 				} else {
-					criteria.add(eq("or.uuid", participantToken.getValue()));
+					return Optional.of(eq("or.uuid", participantToken.getValue()));
 				}
 				
 				return Optional.empty();
-			});
+			}).ifPresent(criteria::add);
 		}
 	}
 	
@@ -742,20 +732,17 @@ public abstract class BaseDao {
 							if (!containsAlias(criteria, "pi")) {
 								criteria.createAlias("p.identifiers", "pi");
 							}
-							criteria.add(ilike("pi.identifier", patientToken.getValue()));
-							break;
+							return Optional.of(ilike("pi.identifier", patientToken.getValue()));
 						case Patient.SP_GIVEN:
 							if (!containsAlias(criteria, "pn")) {
 								criteria.createAlias("p.names", "pn");
 							}
-							criteria.add(ilike("pn.givenName", patientToken.getValue(), MatchMode.START));
-							break;
+							return Optional.of(ilike("pn.givenName", patientToken.getValue(), MatchMode.START));
 						case Patient.SP_FAMILY:
 							if (!containsAlias(criteria, "pn")) {
 								criteria.createAlias("p.names", "pn");
 							}
-							criteria.add(ilike("pn.familyName", patientToken.getValue(), MatchMode.START));
-							break;
+							return Optional.of(ilike("pn.familyName", patientToken.getValue(), MatchMode.START));
 						case Patient.SP_NAME:
 							if (!containsAlias(criteria, "pn")) {
 								criteria.createAlias("p.names", "pn");
@@ -768,15 +755,14 @@ public abstract class BaseDao {
 								criterionList.add(propertyLike("pn.familyName", token));
 							}
 							
-							criteria.add(or(toCriteriaArray(criterionList)));
-							break;
+							return Optional.of(or(toCriteriaArray(criterionList)));
 					}
 				} else {
-					criteria.add(eq("p.uuid", patientToken.getValue()));
+					return Optional.of(eq("p.uuid", patientToken.getValue()));
 				}
 				
 				return Optional.empty();
-			});
+			}).ifPresent(criteria::add);
 		}
 	}
 	

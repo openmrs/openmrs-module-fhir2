@@ -58,13 +58,23 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	
 	private static final String PATIENT_UUID = "a7e04421-525f-442f-8138-05b619d16def";
 	
+	private static final String PATIENT_WRONG_UUID = "c2299800-cca9-11e0-9572-abcdef0c9a66";
+	
 	private static final String PATIENT_GIVEN_NAME = "Johnny";
+	
+	private static final String PATIENT_WRONG_GIVEN_NAME = "Wrong given name";
 	
 	private static final String PATIENT_PARTIAL_NAME = "Johnn";
 	
 	private static final String PATIENT_FAMILY_NAME = "Doe";
 	
+	private static final String PATIENT_WRONG_FAMILY_NAME = "Wrong family name";
+	
 	private static final String PATIENT_NOT_FOUND_NAME = "Igor";
+	
+	private static final String PATIENT_IDENTIFIER = "12345K";
+	
+	private static final String PATIENT_WRONG_IDENTIFIER = "Wrong identifier";
 	
 	private static final String ONSET_DATE_TIME = "2020-03-05T19:00:00";
 	
@@ -128,6 +138,80 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	@Test
+	public void searchForConditions_shouldReturnConditionByPatientIdentifier() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_IDENTIFIER, PATIENT_IDENTIFIER);
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addAnd(new ReferenceOrListParam().addOr(patientReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientList);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
+		    equalTo(PATIENT_IDENTIFIER));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByMultiplePatientIdentifierOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
+		    equalTo(PATIENT_IDENTIFIER));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldReturnEmptyListOfAllergiesByMultiplePatientIdentifierAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForConditions_shouldReturnConditionByPatientUuid() {
 		ReferenceParam patientReference = new ReferenceParam(null, PATIENT_UUID);
 		ReferenceAndListParam patientList = new ReferenceAndListParam();
@@ -149,6 +233,57 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	@Test
+	public void searchForConditions_shouldSearchForConditionsByMultiplePatientUuidOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(
+		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
+		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnEmptyListOfConditionsByMultiplePatientUuidAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForConditions_shouldReturnConditionByPatientGivenName() {
 		ReferenceParam patientReference = new ReferenceParam(Patient.SP_GIVEN, PATIENT_GIVEN_NAME);
 		ReferenceAndListParam patientList = new ReferenceAndListParam();
@@ -167,6 +302,57 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldSearchForConditionsByMultiplePatientGivenNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnEmptyListOfConditionsByMultiplePatientGivenNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -208,6 +394,57 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	@Test
+	public void searchForConditions_shouldSearchForConditionsByMultiplePatientFamilyNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnEmptyListOfConditionsByMultiplePatientFamilyNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForConditions_shouldReturnConditionByPatientName() {
 		ReferenceParam patientReference = new ReferenceParam(Patient.SP_NAME, PATIENT_PARTIAL_NAME);
 		ReferenceAndListParam patientList = new ReferenceAndListParam();
@@ -226,6 +463,57 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldSearchForConditionsByMultiplePatientNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_PARTIAL_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_NOT_FOUND_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnEmptyListOfConditionsByMultiplePatientNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_PARTIAL_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_NOT_FOUND_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
