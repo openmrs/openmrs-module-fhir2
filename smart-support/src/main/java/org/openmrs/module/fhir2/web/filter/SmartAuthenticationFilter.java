@@ -17,7 +17,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +32,9 @@ import org.keycloak.adapters.servlet.KeycloakOIDCFilter;
 import org.keycloak.adapters.spi.KeycloakAccount;
 import org.openmrs.api.context.Authenticated;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.fhir2.web.smart.SmartTokenCredentials;
+import org.openmrs.util.OpenmrsUtil;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -41,17 +45,20 @@ public class SmartAuthenticationFilter extends KeycloakOIDCFilter {
 	
 	@Override
 	public void init(FilterConfig filterConfig) {
-		final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-		final Resource keycloakConfig = resolver.getResource("classpath:keycloak.json");
-		final KeycloakDeployment deployment;
+		final Resource keycloakConfig = getKeycloakConfig();
 		
-		try {
-			deployment = KeycloakDeploymentBuilder.build(keycloakConfig.getInputStream());
-			this.deploymentContext = new AdapterDeploymentContext(deployment);
-		}
-		catch (IOException e) {
-			log.error("Error while trying to load Keycloak configuration", e);
+		if (keycloakConfig == null) {
+			log.error("Could not find Keycloak configuration file");
 			this.deploymentContext = new AdapterDeploymentContext(new KeycloakDeployment());
+		} else {
+			try {
+				this.deploymentContext = new AdapterDeploymentContext(
+				        KeycloakDeploymentBuilder.build(keycloakConfig.getInputStream()));
+			}
+			catch (IOException e) {
+				log.error("Error while trying to load Keycloak configuration", e);
+				this.deploymentContext = new AdapterDeploymentContext(new KeycloakDeployment());
+			}
 		}
 		
 		String skipPatternDefinition = filterConfig.getInitParameter(SKIP_PATTERN_PARAM);
@@ -70,36 +77,59 @@ public class SmartAuthenticationFilter extends KeycloakOIDCFilter {
 			if (httpRequest.getRequestedSessionId() != null) {
 				Context.logout();
 			}
-			if (httpRequest.getHeader("Authorization").startsWith("Bearer")) {
-				if (!Context.isAuthenticated()) {
-					// KeycloakOIDCFilter does the actual request handling
-					super.doFilter(req, res, (rq, rs) -> {});
+			
+			String authorization = httpRequest.getHeader("Authorization");
+			if (!Context.isAuthenticated() && (authorization == null || !authorization.startsWith("Basic"))) {
+				// KeycloakOIDCFilter does the actual request handling
+				super.doFilter(req, res, (rq, rs) -> {});
+				
+				if (res.isCommitted()) {
+					return;
+				}
+				
+				if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
+					OidcKeycloakAccount account = (OidcKeycloakAccount) httpRequest
+					        .getAttribute(KeycloakAccount.class.getName());
 					
-					if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
-						Context.logout();
+					String userName = account.getKeycloakSecurityContext().getToken().getPreferredUsername();
+					Authenticated authenticated;
+					try {
+						authenticated = Context.authenticate(new SmartTokenCredentials(userName));
 					}
-					
-					if (httpRequest.getAttribute(KeycloakAccount.class.getName()) != null) {
-						OidcKeycloakAccount account = (OidcKeycloakAccount) httpRequest
-						        .getAttribute(KeycloakAccount.class.getName());
-						
-						String userName = account.getKeycloakSecurityContext().getToken().getPreferredUsername();
-						Authenticated authenticated = Context.authenticate(new SmartTokenCredentials(userName));
-						
-						log.debug("The user '{}' was successfully authenticated as OpenMRS user {}", userName,
-						    authenticated.getUser());
-						System.out.println(httpRequest.getHeader("Authorization"));
-					} else {
-						if (!res.isCommitted()) {
-							HttpServletResponse httpResponse = (HttpServletResponse) res;
-							httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
-						}
+					catch (ContextAuthenticationException e) {
+						HttpServletResponse httpResponse = (HttpServletResponse) res;
+						httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
 						return;
 					}
+					
+					log.debug("The user '{}' was successfully authenticated as OpenMRS user {}", userName,
+					    authenticated.getUser());
+					
+					// attempt to remove access_token from the query string
+					Matcher m = ACCESS_TOKEN.matcher(httpRequest.getRequestURI());
+					if (m.matches()) {
+						httpRequest.getRequestDispatcher(m.replaceFirst("")).forward(req, res);
+						return;
+					}
+				} else {
+					HttpServletResponse httpResponse = (HttpServletResponse) res;
+					httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+					return;
 				}
 			}
 		}
 		
 		chain.doFilter(req, res);
+	}
+	
+	private Resource getKeycloakConfig() {
+		final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		Resource resource = resolver.getResource(
+		    OpenmrsUtil.getDirectoryInApplicationDataDirectory("config") + File.separator + "smart-keycloak.json");
+		if (resource != null) {
+			resource = resolver.getResource("classpath:smart-keycloak.json");
+		}
+		
+		return resource;
 	}
 }

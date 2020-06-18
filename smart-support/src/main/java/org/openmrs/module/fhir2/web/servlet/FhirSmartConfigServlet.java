@@ -14,13 +14,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.module.fhir2.web.SmartConformance;
-import org.springframework.stereotype.Component;
 
-@Component
 public class FhirSmartConfigServlet extends HttpServlet {
 	
 	private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -34,7 +31,7 @@ public class FhirSmartConfigServlet extends HttpServlet {
 		smartConformance.setTokenEndpointAuthMethodsSupported(new String[] { "client_secret_basic" });
 		smartConformance.setRegistrationEndpoint("https://ehr.example.com/auth/register");
 		smartConformance.setScopesSupported(
-		    new String[] { "openid", "profile", "launch", "launch/patient", "patient/*.*", "user/*.*", "offline_access" });
+		    new String[] { "openid", "profile", "launch", "launch/patient", "patient/*.*", "user/*.*" });
 		smartConformance.setResponseTypesSupported(new String[] { "code", "code id_token", "id_token", "refresh_token" });
 		smartConformance.setManagementEndpoint("https://ehr.example.com/user/manage");
 		smartConformance.setIntrospectionEndpoint("https://ehr.example.com/user/introspect");
@@ -44,10 +41,9 @@ public class FhirSmartConfigServlet extends HttpServlet {
 	}
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		PrintWriter out = res.getWriter();
 		res.setContentType("application/json");
 		res.setCharacterEncoding("UTF-8");
 		res.setStatus(200);
-		objectMapper.writeValue(out, smartConformance);
+		objectMapper.writeValue(res.getWriter(), smartConformance);
 	}
 }

@@ -525,6 +525,21 @@
 						</execution>
 					</executions>
 				</plugin>
+				<plugin>
+					<groupId>org.openmrs.maven.plugins</groupId>
+					<artifactId>maven-openmrs-plugin</artifactId>
+					<version>1.0.1</version>
+					<extensions>true</extensions>
+					<executions>
+						<execution>
+							<id>pack</id>
+							<phase>package</phase>
+							<goals>
+								<goal>package-module</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 				<!-- NB must be declare *before* the license-maven-plugin -->
 				<plugin>
 					<groupId>org.commonjava.maven.plugins</groupId>

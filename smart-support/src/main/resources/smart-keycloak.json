@@ -1,6 +1,6 @@
 {
   "realm": "openmrs",
-  "auth-server-url": "http://localhost:8180/auth/",
+  "auth-server-url": "http://localhost:8888/auth/",
   "ssl-required": "external",
   "resource": "smartClient",
   "public-client": true,

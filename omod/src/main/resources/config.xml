@@ -38,6 +38,10 @@
 			<path>/lib/fhir2-api-2.2-${project.parent.version}.jar</path>
 			<openmrsVersion>2.2.* - 2.*</openmrsVersion>
 		</conditionalResource>
+		<conditionalResource>
+			<path>/lib/fhir2-smart-support-${project.parent.version}.jar</path>
+			<openmrsVersion>2.3.* - 2.*</openmrsVersion>
+		</conditionalResource>
 	</conditionalResources>
 
 
@@ -60,18 +64,6 @@
 	</servlet>
 
 	<filter>
-		<filter-name>clientAuthenticationFilter</filter-name>
-		<filter-class>org.openmrs.module.fhir2.web.filter.SmartAuthenticationFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>clientAuthenticationFilter</filter-name>
-		<url-pattern>/ws/fhir2</url-pattern>
-		<url-pattern>/ws/fhir2/*</url-pattern>
-		<url-pattern>/ms/fhir2Servlet</url-pattern>
-		<url-pattern>/ms/fhir2Servlet/*</url-pattern>
-		<url-pattern>/ms/fhir2R3Servlet/*</url-pattern>
-	</filter-mapping>
-	<filter>
 		<filter-name>fhir2AuthenticationFilter</filter-name>
 		<filter-class>org.openmrs.module.fhir2.web.filter.AuthenticationFilter</filter-class>
 	</filter>
@@ -81,6 +73,7 @@
 		<url-pattern>/ws/fhir2/*</url-pattern>
 		<url-pattern>/ms/fhir2Servlet</url-pattern>
 		<url-pattern>/ms/fhir2Servlet/*</url-pattern>
+		<url-pattern>/ms/fhir2R3Servlet</url-pattern>
 		<url-pattern>/ms/fhir2R3Servlet/*</url-pattern>
 	</filter-mapping>
 	<filter>

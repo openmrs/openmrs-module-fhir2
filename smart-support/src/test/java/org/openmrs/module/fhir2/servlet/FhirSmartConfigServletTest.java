@@ -29,7 +29,6 @@ public class FhirSmartConfigServletTest {
 	
 	@Test
 	public void shouldReturn200Status() throws Exception {
-		
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
 		request.setRequestURI("/ws/fhir2/R4/.well-known/smart-configuration");
@@ -38,6 +37,5 @@ public class FhirSmartConfigServletTest {
 		servlet.doGet(request, response);
 		
 		assertThat(response.getStatus(), equalTo(200));
-		
 	}
 }

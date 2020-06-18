@@ -26,12 +26,12 @@ import org.openmrs.api.context.Credentials;
  */
 public class SmartTokenCredentials implements Credentials {
 	
-	final public static String SCHEME_NAME = "USER_TOKEN_AUTH_SCHEME";
+	final public static String SCHEME_NAME = "SMART_AUTH_SCHEME";
 	
-	private String oauth2User;
+	private final String smartUser;
 	
-	public SmartTokenCredentials(String oauth2User) {
-		this.oauth2User = oauth2User;
+	public SmartTokenCredentials(String smartUser) {
+		this.smartUser = smartUser;
 	}
 	
 	@Override
@@ -41,6 +41,6 @@ public class SmartTokenCredentials implements Credentials {
 	
 	@Override
 	public String getClientName() {
-		return oauth2User;
+		return smartUser;
 	}
 }

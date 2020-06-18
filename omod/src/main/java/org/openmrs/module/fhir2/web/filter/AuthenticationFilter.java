@@ -38,15 +38,13 @@ public class AuthenticationFilter implements Filter {
 		if (request instanceof HttpServletRequest) {
 			HttpServletRequest httpRequest = (HttpServletRequest) request;
 			if (httpRequest.getHeader("Authorization").startsWith("Basic")) {
-				System.out.println(httpRequest.getHeader("Authorization"));
-				
 				if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
 					Context.logout();
 				}
+				
 				if (!Context.isAuthenticated()) {
 					String basicAuth = httpRequest.getHeader("Authorization");
 					if (!StringUtils.isBlank(basicAuth)) {
-						// this is "Basic ${base64encode(username + ":" + password)}"
 						try {
 							basicAuth = basicAuth.substring(6); // remove the leading "Basic "
 							String decoded = new String(Base64.decodeBase64(basicAuth), StandardCharsets.UTF_8);
