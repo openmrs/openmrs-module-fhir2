@@ -64,6 +64,19 @@
 	</servlet>
 
 	<filter>
+		<filter-name>smartAuthenticationFilter</filter-name>
+		<filter-class>org.openmrs.module.fhir2.web.filter.SmartAuthenticationFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>smartAuthenticationFilter</filter-name>
+		<url-pattern>/ws/fhir2</url-pattern>
+		<url-pattern>/ws/fhir2/*</url-pattern>
+		<url-pattern>/ms/fhir2Servlet</url-pattern>
+		<url-pattern>/ms/fhir2Servlet/*</url-pattern>
+		<url-pattern>/ms/fhir2R3Servlet/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
 		<filter-name>fhir2AuthenticationFilter</filter-name>
 		<filter-class>org.openmrs.module.fhir2.web.filter.AuthenticationFilter</filter-class>
 	</filter>
