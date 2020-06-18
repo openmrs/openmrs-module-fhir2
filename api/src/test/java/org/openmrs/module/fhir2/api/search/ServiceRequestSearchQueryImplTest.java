@@ -7,43 +7,41 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api.impl;
+package org.openmrs.module.fhir2.api.search;
 
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.junit.Before;
+import org.junit.Test;
 import org.openmrs.TestOrder;
-import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
-import org.openmrs.module.fhir2.api.search.SearchQuery;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
+import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ContextConfiguration;
 
-@Component
-@Transactional
-@Getter(AccessLevel.PROTECTED)
-@Setter(AccessLevel.PACKAGE)
-public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceRequest, TestOrder> implements FhirServiceRequestService {
+@ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
+public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
-	@Autowired
-	private ServiceRequestTranslator<TestOrder> translator;
+	private static final String TEST_ORDER_INITIAL_DATA = "org/openmrs/module/fhir2/api/dao/impl/FhirServiceRequestTest_initial_data.xml";
 	
 	@Autowired
 	private FhirServiceRequestDao<TestOrder> dao;
 	
 	@Autowired
+	private ServiceRequestTranslator<TestOrder> translator;
+	
+	@Autowired
 	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>> searchQuery;
 	
-	@Override
-	public IBundleProvider searchForServiceRequests() {
-		SearchParameterMap theParams = new SearchParameterMap();
+	@Before
+	public void setup() throws Exception {
+		executeDataSet(TEST_ORDER_INITIAL_DATA);
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldHandleComplexQuery() {
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
 }
