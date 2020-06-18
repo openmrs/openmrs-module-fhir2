@@ -62,8 +62,8 @@ public class FhirRestServlet extends RestfulServer {
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 		registerInterceptor(loggingInterceptor);
 		
-		getFhirContext().setNarrativeGenerator(
-		    new CustomThymeleafNarrativeGenerator(FhirConstants.HAPI_DEFAULT_NARRATIVES_PROPERTY_FILE));
+		getFhirContext().setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(
+		        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE, FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
 	}
 	
 	@Override

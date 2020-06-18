@@ -1,0 +1,180 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <table class="hapiPropertyTable">
+        <tbody>
+        <tr th:if="${resource.id}">
+            <td>Id:</td>
+            <td th:text="${resource.id}"></td>
+        </tr>
+        <tr th:if="${not resource.identifier.empty}">
+            <td>Identifier:</td>
+            <td>
+                <th:block th:each="identifier: ${resource.identifier}">
+                    <div th:narrative="${identifier}"></div>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${resource.clinicalStatus}">
+            <td>Clinical Status:</td>
+            <td th:narrative="${resource.clinicalStatus}"></td>
+        </tr>
+        <tr th:if="${resource.verificationStatus}">
+            <td>Verification Status:</td>
+            <td th:narrative="${resource.verificationStatus}"></td>
+        </tr>
+        <tr th:if="${not resource.category.empty}">
+            <td>Category:</td>
+            <td>
+                <th:block th:each="category: ${resource.category}">
+                    <th:block th:narrative="${category}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.severity.empty}">
+            <td>Severity:</td>
+            <td th:narrative="${resource.severity}"></td>
+        </tr>
+        <tr th:if="${not resource.code.empty}">
+            <td>Code:</td>
+            <td th:narrative="${resource.code}"></td>
+        </tr>
+        <tr th:if="${not resource.bodySite.empty}">
+            <td>Body Site:</td>
+            <td>
+                <th:block th:each="bodySite: ${resource.bodySite}">
+                    <th:block th:narrative="${bodySite}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.subject.empty}">
+            <td>Subject:</td>
+            <td th:narrative="${resource.subject}"></td>
+        </tr>
+        <th:block th:if="${fhirVersion} eq 'R4'">
+            <tr th:if="${not resource.encounter.empty}">
+                <td>Encounter:</td>
+                <td th:narrative="${resource.encounter}"></td>
+            </tr>
+        </th:block>
+        <tr th:if="${resource.onset}">
+            <td>Onset:</td>
+            <td th:narrative="${resource.onset}"></td>
+        </tr>
+        <tr th:if="${resource.abatement}">
+            <td>Abatement:</td>
+            <td th:narrative="${resource.abatement}"></td>
+        </tr>
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${resource.assertedDate}">
+                <td>Asserted Date:</td>
+                <td th:text="${#dates.format(resource.assertedDate,'dd/MM/yyyy')}"></td>
+            </tr>
+        </th:block>
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${resource.recordedDate}">
+                <td>Recorded Date:</td>
+                <td th:text="${#dates.format(resource.recordedDate,'dd/MM/yyyy')}"></td>
+            </tr>
+        </th:block>
+        <th:block th:if="${fhirVersion} eq 'R4'">
+            <tr th:if="${not resource.recorder.empty}">
+                <td>Recorder:</td>
+                <td th:narrative="${resource.recorder}"></td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.asserter.empty}">
+            <td>Asserter:</td>
+            <td th:narrative="${resource.asserter}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <th:block th:if="${not resource.stage.empty}">
+        <h2>Stages</h2>
+        <table class="subPropertyTable">
+            <tbody>
+            <tr>
+                <th>-</th>
+                <th>Summary</th>
+                <th>Assessment</th>
+                <th:block th:if="${fhirVersion} eq 'R4'">
+                    <th>Type</th>
+                </th:block>
+            </tr>
+            <tr th:each="stage, stageItr: ${resource.stage}">
+                <td th:text="${stageItr.count}"></td>
+                <td>
+                    <th:block th:if="${stage.summary}" th:narrative="${stage.summary}"></th:block>
+                </td>
+                <td>
+                    <th:block th:each="assessment: ${stage.assessment}">
+                        <div th:narrative="${assessment}"></div>
+                    </th:block>
+                </td>
+                <th:block th:if="${fhirVersion} eq 'R4'">
+                    <td>
+                        <th:block th:if="${stage.type}" th:narrative="${stage.type}"></th:block>
+                    </td>
+                </th:block>
+            </tr>
+            </tbody>
+        </table>
+    </th:block>
+
+    <th:block th:if="${not resource.evidence.empty}">
+        <h2>Evidences</h2>
+        <table class="subPropertyTable">
+            <tbody>
+            <tr>
+                <th>-</th>
+                <th>Code</th>
+                <th>Detail</th>
+            </tr>
+            <tr th:each="evidence, evidenceItr: ${resource.evidence}">
+                <td th:text="${evidenceItr.count}"></td>
+                <td>
+                    <th:block th:each="code: ${evidence.code}">
+                        <div th:narrative="${code}"></div>
+                    </th:block>
+                </td>
+                <td>
+                    <th:block th:each="detail: ${evidence.detail}">
+                        <div th:narrative="${detail}"></div>
+                    </th:block>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </th:block>
+
+    <br/>
+    <table class="hapiPropertyTable">
+        <tbody>
+        <tr th:if="${not resource.note.empty}">
+            <td>Note:</td>
+            <td>
+                <div th:each="note: ${resource.note}" th:text="${note.text}"></div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->
