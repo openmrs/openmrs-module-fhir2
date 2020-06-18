@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -37,13 +38,17 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
@@ -449,4 +454,63 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
+	
+	@Test
+	public void updateLocation_shouldUpdateLocation() {
+		Location newLocation = location;
+		
+		when(locationService.update(LOCATION_UUID, location)).thenReturn(newLocation);
+		
+		MethodOutcome result = resourceProvider.updateLocation(new IdType().setValue(LOCATION_UUID), location);
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(newLocation));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateLocation_shouldThrowInvalidRequestExceptionForWrongLocationUuid() {
+		when(locationService.update(WRONG_LOCATION_UUID, location)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID), location);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateLocation_ShouldThrowMethodNotAllowedIfDoesNotExist() {
+		Location wrongLocation = new Location();
+		
+		wrongLocation.setId(WRONG_LOCATION_UUID);
+		
+		when(locationService.update(WRONG_LOCATION_UUID, wrongLocation)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID), wrongLocation);
+	}
+	
+	@Test
+	public void deleteLocation_shouldDeleteLocation() {
+		when(locationService.delete(LOCATION_UUID)).thenReturn(location);
+
+		OperationOutcome result = resourceProvider.deleteLocation(new IdType().setValue(LOCATION_UUID));
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteLocation_shouldThrowResourceNotFoundException() {
+		when(locationService.delete(WRONG_LOCATION_UUID)).thenReturn(null);
+		resourceProvider.deleteLocation(new IdType().setValue(WRONG_LOCATION_UUID));
+	}
+	
+	@Test
+	public void createLocation_shouldCreateNewLocation() {
+		when(locationService.create(location)).thenReturn(location);
+		
+		MethodOutcome result = resourceProvider.createLocation(location);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(location));
+	}
+	
 }
