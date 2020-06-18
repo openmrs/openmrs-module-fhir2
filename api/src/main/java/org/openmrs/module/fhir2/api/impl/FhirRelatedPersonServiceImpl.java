@@ -9,6 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,5 +39,19 @@ public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson,
 	
 	@Autowired
 	private RelatedPersonTranslator translator;
+	
+	@Override
+	@Transactional(readOnly = true)
+	public RelatedPerson get(String uuid) {
+		return translator.toFhirResource(dao.get(uuid));
+	}
+	
+	@Override
+	public Collection<RelatedPerson> searchForRelatedPeople(StringAndListParam name, TokenAndListParam gender,
+	        DateRangeParam birthDate, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
+	        StringAndListParam country, SortSpec sort) {
+		return dao.searchRelationships(name, gender, birthDate, city, state, postalCode, country, sort).stream()
+		        .map(translator::toFhirResource).collect(Collectors.toList());
+	}
 	
 }

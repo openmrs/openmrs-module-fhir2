@@ -691,11 +691,20 @@ public abstract class BaseDao {
 	
 	protected void handleNames(Criteria criteria, StringAndListParam name, StringAndListParam given,
 	        StringAndListParam family) {
+		handleNames(criteria, name, given, family, null);
+	}
+	
+	protected void handleNames(Criteria criteria, StringAndListParam name, StringAndListParam given,
+	        StringAndListParam family, String personAlias) {
 		if (name == null && given == null && family == null) {
 			return;
 		}
 		
-		criteria.createAlias("names", "pn");
+		if (StringUtils.isNotBlank(personAlias)) {
+			criteria.createAlias(String.format("%s.names", personAlias), "pn");
+		} else {
+			criteria.createAlias("names", "pn");
+		}
 		
 		if (name != null) {
 			handleAndListParamAsStream(name,

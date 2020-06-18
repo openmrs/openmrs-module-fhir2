@@ -12,15 +12,24 @@ package org.openmrs.module.fhir2.providers.r4;
 import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -45,5 +54,18 @@ public class RelatedPersonFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find related person with Id " + id.getIdPart());
 		}
 		return relatedPerson;
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public Bundle searchRelatedPerson(@OptionalParam(name = RelatedPerson.SP_NAME) StringAndListParam name,
+	        @OptionalParam(name = RelatedPerson.SP_GENDER) TokenAndListParam gender,
+	        @OptionalParam(name = RelatedPerson.SP_BIRTHDATE) DateRangeParam birthDate,
+	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_CITY) StringAndListParam city,
+	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_STATE) StringAndListParam state,
+	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
+	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_COUNTRY) StringAndListParam country, @Sort SortSpec sort) {
+		return FhirProviderUtils.convertSearchResultsToBundle(
+		    relatedPersonService.searchForRelatedPeople(name, gender, birthDate, city, state, postalCode, country, sort));
 	}
 }
