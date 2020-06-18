@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
@@ -82,11 +83,19 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 	
 	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
 	
+	private static final String PATIENT_WRONG_UUID = "c2299800-cca9-11e0-9572-abcdef0c9a66";
+	
 	private static final String PATIENT_GIVEN_NAME = "Collet";
+	
+	private static final String PATIENT_WRONG_GIVEN_NAME = "Wrong given name";
 	
 	private static final String PATIENT_FAMILY_NAME = "Chebaskwony";
 	
+	private static final String PATIENT_WRONG_FAMILY_NAME = "Wrong family name";
+	
 	private static final String PATIENT_IDENTIFIER = "6TS-4";
+	
+	private static final String PATIENT_WRONG_IDENTIFIER = "Wrong identifier";
 	
 	private static final String ENCOUNTER_UUID = "6519d653-393b-4118-9c83-a3715b82d4ac";
 	
@@ -265,6 +274,54 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 	}
 	
 	@Test
+	public void searchForObs_shouldSearchForObsByMultiplePatientUuidOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnEmptyListOfObsByMultiplePatientUuidAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForObs_shouldReturnObsByPatientGivenName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
@@ -280,6 +337,57 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, hasItem(hasProperty("id", equalTo(OBS_UUID))));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchForObsByMultiplePatientGivenNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnEmptyListOfObsByMultiplePatientGivenNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -301,6 +409,57 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 	}
 	
 	@Test
+	public void searchForObs_shouldSearchForObsByMultiplePatientFamilyNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnEmptyListOfObsByMultiplePatientFamilyNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForObs_shouldReturnObsByPatientName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(
 		    new ReferenceParam().setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME).setChain(Patient.SP_NAME)));
@@ -316,6 +475,57 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, hasItem(hasProperty("id", equalTo(OBS_UUID))));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchForObsByMultiplePatientNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME + " " + PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnEmptyListOfObsByMultiplePatientNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME + " " + PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -337,6 +547,60 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		// obs.getSubject().getIdentifier().getValue() == PATIENT_IDENTIFIER
 		assertThat(resources,
 		    everyItem(hasProperty("subject", hasProperty("identifier", hasProperty("value", equalTo(PATIENT_IDENTIFIER))))));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchForObsByMultiplePatientIdentifierOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList,
+		    everyItem(hasProperty("subject", hasProperty("identifier", hasProperty("value", equalTo(PATIENT_IDENTIFIER))))));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnEmptyListOfObsByMultiplePatientIdentifierAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test

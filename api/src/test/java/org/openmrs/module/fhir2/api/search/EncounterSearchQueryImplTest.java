@@ -57,7 +57,11 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 	
 	private static final String PARTICIPANT_FULL_NAME = "Super User";
 	
+	private static final String WRONG_NAME = "Wrong name";
+	
 	private static final String PARTICIPANT_UUID = "c2299800-cca9-11e0-9572-0800200c9a66";
+	
+	private static final String WRONG_UUID = "c2299800-cca9-11e0-9572-abcdef0c9a66";
 	
 	private static final String ENCOUNTER_DATETIME = "2008-08-15T00:00:00.0";
 	
@@ -77,9 +81,15 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 	
 	private static final String PARTICIPANT_IDENTIFIER = "Test";
 	
+	private static final String WRONG_IDENTIFIER = "Wrong identifier";
+	
 	private static final String PARTICIPANT_FAMILY_NAME = "User";
 	
+	private static final String WRONG_FAMILY_NAME = "Wrong family name";
+	
 	private static final String PARTICIPANT_GIVEN_NAME = "Super";
+	
+	private static final String WRONG_GIVEN_NAME = "Wrong given name";
 	
 	private static final int START_INDEX = 0;
 	
@@ -139,6 +149,57 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void searchForEncounters_shouldSearchForEncountersByMultipleSubjectNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FULL_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyListOfEncountersByMultipleSubjectNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FULL_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForEncounters_shouldSearchForEncountersBySubjectFamilyName() {
 		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
 		ReferenceParam subject = new ReferenceParam();
@@ -158,6 +219,57 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByMultipleSubjectFamilyNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyListOfEncountersByMultipleSubjectFamilyNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -183,6 +295,57 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void searchForEncounters_shouldSearchForEncountersByMultipleSubjectGivenNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyListOfEncountersByMultipleSubjectGivenNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForEncounters_shouldSearchForEncountersBySubjectUuid() {
 		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
 		ReferenceParam subject = new ReferenceParam();
@@ -202,6 +365,56 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((Encounter) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByMultipleSubjectUuidOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((Encounter) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
+		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyListOfEncountersByMultipleSubjectUuidAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -248,6 +461,60 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void searchForEncounters_shouldSearchForEncountersByMultipleSubjectIdentifierOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((Encounter) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
+		    equalTo(PATIENT_IDENTIFIER));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyListOfEncountersByMultipleSubjectIdentifierAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForEncounters_shouldSearchForEncountersByParticipantIdentifier() {
 		ReferenceAndListParam participantReference = new ReferenceAndListParam();
 		ReferenceParam participant = new ReferenceParam();
@@ -272,6 +539,61 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void searchForEncounters_shouldSearchForEncountersByMultipleParticipantIdentifierOr() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_IDENTIFIER);
+		participant.setChain(Practitioner.SP_IDENTIFIER);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_IDENTIFIER);
+		badParticipant.setChain(Practitioner.SP_IDENTIFIER);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant).add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(
+		    ((Encounter) resultList.iterator().next()).getParticipantFirstRep().getIndividual().getIdentifier().getValue(),
+		    equalTo(PARTICIPANT_IDENTIFIER));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyListOfEncountersByMultipleParticipantIdentifierAnd() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_IDENTIFIER);
+		participant.setChain(Practitioner.SP_IDENTIFIER);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_IDENTIFIER);
+		badParticipant.setChain(Practitioner.SP_IDENTIFIER);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant))
+		        .addAnd(new ReferenceOrListParam().add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForEncounters_shouldSearchForEncountersByParticipantGivenName() {
 		ReferenceAndListParam participantReference = new ReferenceAndListParam();
 		ReferenceParam participant = new ReferenceParam();
@@ -290,6 +612,58 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByMultipleParticipantGivenNameOr() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_GIVEN_NAME);
+		participant.setChain(Practitioner.SP_GIVEN);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_GIVEN_NAME);
+		badParticipant.setChain(Practitioner.SP_GIVEN);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant).add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyListOfEncountersByMultipleParticipantGivenNameAnd() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_GIVEN_NAME);
+		participant.setChain(Practitioner.SP_GIVEN);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_GIVEN_NAME);
+		badParticipant.setChain(Practitioner.SP_GIVEN);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant))
+		        .addAnd(new ReferenceOrListParam().add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -314,6 +688,58 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void searchForEncounters_shouldSearchForEncountersByMultipleParticipantFamilyNameOr() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_FAMILY_NAME);
+		participant.setChain(Practitioner.SP_FAMILY);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_FAMILY_NAME);
+		badParticipant.setChain(Practitioner.SP_FAMILY);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant).add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyListOfEncountersByMultipleParticipantFamilyNameAnd() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_FAMILY_NAME);
+		participant.setChain(Practitioner.SP_FAMILY);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_FAMILY_NAME);
+		badParticipant.setChain(Practitioner.SP_FAMILY);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant))
+		        .addAnd(new ReferenceOrListParam().add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForEncounters_shouldSearchForEncountersByParticipantName() {
 		ReferenceAndListParam participantReference = new ReferenceAndListParam();
 		ReferenceParam participant = new ReferenceParam();
@@ -332,6 +758,58 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByMultipleParticipantNameOr() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_FULL_NAME);
+		participant.setChain(Practitioner.SP_NAME);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_NAME);
+		badParticipant.setChain(Practitioner.SP_NAME);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant).add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyListOfEncountersByMultipleParticipantNameAnd() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_FULL_NAME);
+		participant.setChain(Practitioner.SP_NAME);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_NAME);
+		badParticipant.setChain(Practitioner.SP_NAME);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant))
+		        .addAnd(new ReferenceOrListParam().add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -355,6 +833,54 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		assertThat(((Encounter) resultList.iterator().next()).getParticipantFirstRep().getIndividual().getReferenceElement()
 		        .getIdPart(),
 		    equalTo(PARTICIPANT_UUID));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByMultipleParticipantUuidOr() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_UUID);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_UUID);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant).add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnEmptyListOfEncountersByMultipleParticipantUuidAnd() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_UUID);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_UUID);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant))
+		        .addAnd(new ReferenceOrListParam().add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -476,7 +1002,8 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		subjectGiven.setValue(PATIENT_GIVEN_NAME);
 		subjectGiven.setChain(Patient.SP_GIVEN);
 		
-		subjectReference.addValue(new ReferenceOrListParam().add(subjectIdentifier).add(subjectGiven));
+		subjectReference.addValue(new ReferenceOrListParam().add(subjectIdentifier))
+		        .addAnd(new ReferenceOrListParam().add(subjectGiven));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    subjectReference);
@@ -508,7 +1035,9 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		participantFamily.setValue(PARTICIPANT_FAMILY_NAME);
 		participantFamily.setChain(Practitioner.SP_FAMILY);
 		
-		participantReference.addValue(new ReferenceOrListParam().add(participantName));
+		participantReference.addValue(new ReferenceOrListParam().add(participantName))
+		        .addAnd(new ReferenceOrListParam().add(participantGiven))
+		        .addAnd(new ReferenceOrListParam().add(participantFamily));
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
@@ -537,7 +1066,9 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		locationCountry.setValue(ENCOUNTER_LOCATION_COUNTRY);
 		locationCountry.setChain(Location.SP_ADDRESS_COUNTRY);
 		
-		locationReference.addValue(new ReferenceOrListParam().add(locationCity).add(locationCountry).add(locationState));
+		locationReference.addValue(new ReferenceOrListParam().add(locationCity))
+		        .addAnd(new ReferenceOrListParam().add(locationCountry))
+		        .addAnd(new ReferenceOrListParam().add(locationState));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER,
 		    locationReference);

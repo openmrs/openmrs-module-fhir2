@@ -12,9 +12,11 @@ package org.openmrs.module.fhir2.api.search;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -66,13 +68,23 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 	
 	private static final String PATIENT_UUID = "8adf539e-4b5a-47aa-80c0-ba1025c957fa";
 	
+	private static final String PATIENT_WRONG_UUID = "c2299800-cca9-11e0-9572-abcdef0c9a66";
+	
 	private static final String PATIENT_IDENTIFIER = "7TU-8";
+	
+	private static final String PATIENT_WRONG_IDENTIFIER = "Wrong identifier";
 	
 	private static final String PATIENT_GIVEN_NAME = "Anet";
 	
+	private static final String PATIENT_WRONG_GIVEN_NAME = "Wrong given name";
+	
 	private static final String PATIENT_FAMILY_NAME = "Oloo";
 	
+	private static final String PATIENT_WRONG_FAMILY_NAME = "Wrong family name";
+	
 	private static final String PATIENT_NAME = "Anet Oloo";
+	
+	private static final String PATIENT_WRONG_NAME = "Wrong name";
 	
 	private static final String CATEGORY_FOOD = "food";
 	
@@ -159,6 +171,60 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 	}
 	
 	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByMultiplePatientIdentifierOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getIdentifier().getValue(),
+		    equalTo(PATIENT_IDENTIFIER));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldReturnEmptyListOfAllergiesByMultiplePatientIdentifierAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByPatientUUID() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam allergyParam = new ReferenceParam();
@@ -179,6 +245,56 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByMultiplePatientUuidOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getReferenceElement().getIdPart(),
+		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldReturnEmptyListOfAllergiesByMultiplePatientUuidAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -204,6 +320,57 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 	}
 	
 	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByMultiplePatientGivenNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldReturnEmptyListOfAllergiesByMultiplePatientGivenNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyName() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam allergyParam = new ReferenceParam();
@@ -223,6 +390,57 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByMultiplePatientFamilyNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldReturnEmptyListOfAllergiesByMultiplePatientFamilyNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -248,6 +466,57 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 	}
 	
 	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByMultiplePatientNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldReturnEmptyListOfAllergiesByMultiplePatientNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyNameAndGivenName() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam allergyParamName = new ReferenceParam();
@@ -259,7 +528,8 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		allergyParamGiven.setValue(PATIENT_GIVEN_NAME);
 		allergyParamGiven.setChain(Patient.SP_GIVEN);
 		
-		referenceParam.addValue(new ReferenceOrListParam().add(allergyParamName).add(allergyParamGiven));
+		referenceParam.addValue(new ReferenceOrListParam().add(allergyParamName))
+		        .addAnd(new ReferenceOrListParam().add(allergyParamGiven));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    referenceParam);

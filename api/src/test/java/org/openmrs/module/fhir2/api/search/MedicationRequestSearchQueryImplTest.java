@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
@@ -64,11 +65,21 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 	
 	private static final String PARTICIPANT_UUID = "c2299800-cca9-11e0-9572-0800200c9a66";
 	
+	private static final String WRONG_UUID = "c2299800-cca9-11e0-9572-abcdef0c9a66";
+	
 	private static final String PARTICIPANT_GIVEN_NAME = "Super";
+	
+	private static final String WRONG_GIVEN_NAME = "Wrong given name";
 	
 	private static final String PARTICIPANT_FAMILY_NAME = "User";
 	
+	private static final String WRONG_FAMILY_NAME = "Wrong family name";
+	
 	private static final String PARTICIPANT_IDENTIFIER = "Test";
+	
+	private static final String WRONG_IDENTIFIER = "Wrong identifier";
+	
+	private static final String WRONG_NAME = "Wrong name";
 	
 	private static final String MEDICATION_UUID = "42f00b94-26fe-102b-80cb-0017a47871b2";
 	
@@ -119,6 +130,55 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 	}
 	
 	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMultiplePatientUuidOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldReturnEmptyListOfMedicationRequestsByMultiplePatientUuidAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForMedicationRequest_shouldReturnMedicationRequestByPatientGivenName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
@@ -134,6 +194,57 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMultiplePatientGivenNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldReturnEmptyListOfMedicationRequestsByMultiplePatientGivenNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -155,6 +266,57 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 	}
 	
 	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMultiplePatientFamilyNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldReturnEmptyListOfMedicationRequestsByMultiplePatientFamilyNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForMedicationRequest_shouldReturnMedicationRequestByPatientName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(
 		    new ReferenceParam().setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME).setChain(Patient.SP_NAME)));
@@ -173,6 +335,57 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 	}
 	
 	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMultiplePatientNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldReturnEmptyListOfMedicationRequestsByMultiplePatientNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForMedicationRequest_shouldReturnMedicationRequestByPatientIdentifier() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue(PATIENT_IDENTIFIER).setChain(Patient.SP_IDENTIFIER)));
@@ -187,6 +400,58 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMultiplePatientIdentifierOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldReturnEmptyListOfMedicationRequestsByMultiplePatientIdentifierAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -227,6 +492,55 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 	}
 	
 	@Test
+	public void searchForMedicationRequest_shouldSearchForMedicationRequestByMultipleParticipantUuidOr() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_UUID);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_UUID);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant).add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(13));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
+	}
+	
+	@Test
+	public void searchForMedicationRequest_shouldReturnEmptyListOfMedicationRequestByMultipleParticipantUuidAnd() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_UUID);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_UUID);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant))
+		        .addAnd(new ReferenceOrListParam().add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForMedicationRequest_shouldReturnMedicationRequestByParticipantGivenName() {
 		ReferenceAndListParam participantReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue(PARTICIPANT_GIVEN_NAME).setChain(Practitioner.SP_GIVEN)));
@@ -246,6 +560,59 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 	}
 	
 	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMultipleParticipantGivenNameOr() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_GIVEN_NAME);
+		participant.setChain(Practitioner.SP_GIVEN);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_GIVEN_NAME);
+		badParticipant.setChain(Practitioner.SP_GIVEN);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant).add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(13));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldReturnEmptyListOfMedicationRequestsByMultipleParticipantGivenNameAnd() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_GIVEN_NAME);
+		participant.setChain(Practitioner.SP_GIVEN);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_GIVEN_NAME);
+		badParticipant.setChain(Practitioner.SP_GIVEN);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant))
+		        .addAnd(new ReferenceOrListParam().add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForMedicationRequest_shouldReturnMedicationRequestByParticipantFamilyName() {
 		ReferenceAndListParam participantReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue(PARTICIPANT_FAMILY_NAME).setChain(Practitioner.SP_FAMILY)));
@@ -262,6 +629,59 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(10)));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMultipleParticipantFamilyNameOr() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_FAMILY_NAME);
+		participant.setChain(Practitioner.SP_FAMILY);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_FAMILY_NAME);
+		badParticipant.setChain(Practitioner.SP_FAMILY);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant).add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(13));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldReturnEmptyListOfMedicationRequestsByMultipleParticipantFamilyNameAnd() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_FAMILY_NAME);
+		participant.setChain(Practitioner.SP_FAMILY);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_FAMILY_NAME);
+		badParticipant.setChain(Practitioner.SP_FAMILY);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant))
+		        .addAnd(new ReferenceOrListParam().add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -285,6 +705,59 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 	}
 	
 	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMultipleParticipantNameOr() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PATIENT_GIVEN_NAME + " " + PARTICIPANT_FAMILY_NAME);
+		participant.setChain(Practitioner.SP_NAME);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_NAME);
+		badParticipant.setChain(Practitioner.SP_NAME);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant).add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(13));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldReturnEmptyListOfMedicationRequestsByMultipleParticipantNameAnd() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PATIENT_GIVEN_NAME + " " + PARTICIPANT_FAMILY_NAME);
+		participant.setChain(Practitioner.SP_NAME);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_NAME);
+		badParticipant.setChain(Practitioner.SP_NAME);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant))
+		        .addAnd(new ReferenceOrListParam().add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForMedicationRequest_shouldReturnMedicationRequestByParticipantIdentifier() {
 		ReferenceAndListParam participantReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue(PARTICIPANT_IDENTIFIER).setChain(Practitioner.SP_IDENTIFIER)));
@@ -300,6 +773,61 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(10)));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMultipleParticipantIdentifierOr() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_IDENTIFIER);
+		participant.setChain(Practitioner.SP_IDENTIFIER);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_IDENTIFIER);
+		badParticipant.setChain(Practitioner.SP_IDENTIFIER);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant).add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(13));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(((MedicationRequest) resultList.iterator().next()).getRequester().getIdentifier().getValue(),
+		    equalTo(PARTICIPANT_IDENTIFIER));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldReturnEmptyListOfMedicationRequestsByMultipleParticipantIdentifierAnd() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam();
+		ReferenceParam participant = new ReferenceParam();
+		
+		participant.setValue(PARTICIPANT_IDENTIFIER);
+		participant.setChain(Practitioner.SP_IDENTIFIER);
+		
+		ReferenceParam badParticipant = new ReferenceParam();
+		
+		badParticipant.setValue(WRONG_IDENTIFIER);
+		badParticipant.setChain(Practitioner.SP_IDENTIFIER);
+		
+		participantReference.addValue(new ReferenceOrListParam().add(participant))
+		        .addAnd(new ReferenceOrListParam().add(badParticipant));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
