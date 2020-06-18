@@ -15,11 +15,18 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,13 +34,16 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Task;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.Task> {
@@ -41,6 +51,10 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 	private static final String TASK_UUID = "bdd7e368-3d1a-42a9-9538-395391b64adf";
 	
 	private static final String WRONG_TASK_UUID = "df34a1c1-f57b-4c33-bee5-e601b56b9d5b";
+	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
 	
 	@Mock
 	private FhirTaskService taskService;
@@ -61,6 +75,10 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		task = new org.hl7.fhir.r4.model.Task();
 		task.setId(TASK_UUID);
 		setProvenanceResources(task);
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	@Test
@@ -170,25 +188,24 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 	//		resourceProvider.updateTask(new IdType().setValue(WRONG_TASK_UUID), wrongTask);
 	//	}
 	
-	//TODO ERROR
-	//	@Test
-	//	public void searchTasks_shouldReturnMatchingTasks() {
-	//		List<org.hl7.fhir.r4.model.Task> tasks = new ArrayList<>();
-	//		tasks.add(task);
-	//
-	//		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(tasks);
-	//
-	//		TokenOrListParam status = new TokenOrListParam();
-	//		TokenParam statusToken = new TokenParam();
-	//		statusToken.setValue("ACCEPTED");
-	//		status.add(statusToken);
-	//
-	//		Bundle results = resourceProvider.searchTasks(null, null, status, null);
-	//
-	//		assertThat(results, notNullValue());
-	//		assertThat(results.getTotal(), equalTo(1));
-	//		assertThat(results.getEntry(), notNullValue());
-	//		assertThat(results.getEntry().get(0).getResource().fhirType(), equalTo("Task"));
-	//		assertThat(results.getEntry().get(0).getResource().getId(), equalTo(TASK_UUID));
-	//	}
+	@Test
+	public void searchTasks_shouldReturnMatchingTasks() {
+		List<org.hl7.fhir.r4.model.Task> tasks = new ArrayList<>();
+		tasks.add(task);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(new MockIBundleProvider<>(tasks, 10, 1));
+		
+		TokenAndListParam status = new TokenAndListParam();
+		TokenParam statusToken = new TokenParam();
+		statusToken.setValue("ACCEPTED");
+		status.addAnd(new TokenOrListParam().add(statusToken));
+		
+		IBundleProvider results = resourceProvider.searchTasks(null, null, status, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.TASK));
+	}
 }

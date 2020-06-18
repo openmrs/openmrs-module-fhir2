@@ -24,14 +24,13 @@ import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.convertors.conv30_40.Bundle30_40;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Task;
@@ -57,7 +56,6 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Read
-	@SuppressWarnings("unused")
 	public Task getTaskById(@IdParam @NotNull IdType id) {
 		org.hl7.fhir.r4.model.Task task = fhirTaskService.get(id.getIdPart());
 		if (task == null) {
@@ -68,7 +66,6 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@History
-	@SuppressWarnings("unused")
 	public List<Resource> getTaskHistoryById(@IdParam IdType id) {
 		org.hl7.fhir.r4.model.Task task = fhirTaskService.get(id.getIdPart());
 		if (task == null) {
@@ -91,11 +88,10 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	@SuppressWarnings("unused")
-	public Bundle searchTasks(@OptionalParam(name = Task.SP_BASED_ON) ReferenceParam basedOnReference,
-	        @OptionalParam(name = Task.SP_OWNER) ReferenceParam ownerReference,
+	public IBundleProvider searchTasks(
+	        @OptionalParam(name = Task.SP_BASED_ON, chainWhitelist = { "" }) ReferenceAndListParam basedOnReference,
+	        @OptionalParam(name = Task.SP_OWNER, chainWhitelist = { "" }) ReferenceAndListParam ownerReference,
 	        @OptionalParam(name = Task.SP_STATUS) TokenAndListParam status, @Sort SortSpec sort) {
-		return Bundle30_40.convertBundle(FhirProviderUtils.convertSearchResultsToBundle(
-		    fhirTaskService.searchForTasks(basedOnReference, ownerReference, status, sort)));
+		return fhirTaskService.searchForTasks(basedOnReference, ownerReference, status, sort);
 	}
 }

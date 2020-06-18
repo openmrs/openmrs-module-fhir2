@@ -9,15 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import java.util.Collection;
-
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.module.fhir2.FhirTask;
 
 public interface FhirTaskDao extends FhirDao<FhirTask> {
 	
-	Collection<FhirTask> searchForTasks(ReferenceParam basedOnReference, ReferenceParam ownerReference,
-	        TokenAndListParam status, SortSpec sort);
 }
