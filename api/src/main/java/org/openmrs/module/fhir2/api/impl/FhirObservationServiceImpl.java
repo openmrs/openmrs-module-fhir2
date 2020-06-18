@@ -64,7 +64,7 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
-		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, "category", category)
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, category)
 		        .addParameter(FhirConstants.VALUE_CODED_SEARCH_HANDLER, valueConcept)
 		        .addParameter(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, hasMemberReference)
 		        .addParameter(FhirConstants.VALUE_STRING_SEARCH_HANDLER, "valueText", valueStringParam)
