@@ -9,10 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.eq;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,12 @@ public class FhirUserDaoImpl implements FhirUserDao {
 	
 	@Override
 	public User getUserByUuid(String uuid) {
-		return (User) this.sessionFactory.getCurrentSession().createCriteria(User.class).add(Restrictions.eq("uuid", uuid))
+		return (User) sessionFactory.getCurrentSession().createCriteria(User.class).add(eq("uuid", uuid)).uniqueResult();
+	}
+	
+	@Override
+	public User getUserByUserName(String username) {
+		return (User) sessionFactory.getCurrentSession().createCriteria(User.class).add(eq("username", username))
 		        .uniqueResult();
 	}
 }

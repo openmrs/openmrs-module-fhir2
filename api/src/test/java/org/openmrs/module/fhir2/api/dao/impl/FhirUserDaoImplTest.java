@@ -29,6 +29,8 @@ public class FhirUserDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String USER_UUID = "2eadf946-e53c-11de-8404-001e378eb67e";
 	
+	private static final String USER_NAME = "firstaccount";
+	
 	private static final String WRONG_USER_UUID = "5f07c6ff-c483-4e77-815e-44dd650470e7";
 	
 	private static final String USER_INITIAL_DATA_XML = "org/openmrs/api/include/UserServiceTest.xml";
@@ -49,14 +51,21 @@ public class FhirUserDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void shouldGetUserByUuid() {
 		User user = fhirUserDao.getUserByUuid(USER_UUID);
+		
 		assertThat(user, notNullValue());
-		assertThat(user.getUuid(), notNullValue());
 		assertThat(user.getUuid(), equalTo(USER_UUID));
+	}
+	
+	@Test
+	public void shouldGetUserByUserName() {
+		User user = fhirUserDao.getUserByUserName(USER_NAME);
+		
+		assertThat(user, notNullValue());
+		assertThat(user.getUsername(), equalTo(USER_NAME));
 	}
 	
 	@Test
 	public void shouldReturnNullWhenGetByWrongUuid() {
 		assertThat(fhirUserDao.getUserByUuid(WRONG_USER_UUID), nullValue());
 	}
-	
 }
