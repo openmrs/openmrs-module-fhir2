@@ -43,6 +43,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
+import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -326,7 +327,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR4Resource
 		RelatedPerson relatedPerson = new RelatedPerson();
 		relatedPerson.setId(RELATED_PERSON_UUID);
 		when(relatedPersonService.searchForRelatedPeople(any(), any(), any(), any(), any(), any(), any(), any()))
-		        .thenReturn(Collections.singletonList(relatedPerson));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
