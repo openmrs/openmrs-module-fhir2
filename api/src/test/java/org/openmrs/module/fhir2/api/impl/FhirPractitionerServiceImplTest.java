@@ -141,11 +141,6 @@ public class FhirPractitionerServiceImplTest {
 		practitionerService.setSearchQuery(searchQuery);
 		practitionerService.setUserService(userService);
 		
-		/* userService = new FhirUserServiceImpl();
-		userService.setDao(userDao);
-		userService.setTranslator(userTranslator);
-		userService.setSearchQuery(userSearchQuery); */
-		
 		provider = new Provider();
 		provider.setUuid(UUID);
 		provider.setRetired(false);
@@ -229,7 +224,7 @@ public class FhirPractitionerServiceImplTest {
 		
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
-				
+		
 		when(userService.searchForUsers(any(), any())).thenReturn(new SimpleBundleProvider(practitioner2));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(name, null);

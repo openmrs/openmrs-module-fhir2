@@ -44,22 +44,13 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	
 	@Autowired
 	private PractitionerTranslator<Provider> translator;
-	/* 
-	@Autowired
-	private PractitionerTranslator<User> userTranslator; */
 	
 	@Autowired
 	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>> searchQuery;
 	
 	@Autowired
 	private FhirUserService userService;
-	/* 
-	@Autowired
-	private FhirUserDao userDao; */
 	
-	/* @Autowired
-	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>> userSearchQuery;
-	 */
 	@Override
 	public Practitioner get(String uuid) {
 		Practitioner practitioner = translator.toFhirResource(getDao().get(uuid));

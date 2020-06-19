@@ -65,12 +65,6 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	@Autowired
 	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>> searchQuery;
 	
-	/* @Before
-	public void setUp() throws Exception {
-		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
-	}
-	 */
-	
 	private IBundleProvider search(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
@@ -122,7 +116,7 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(USER_UUID));
-
+		
 	}
 	
 	@Test
