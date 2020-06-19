@@ -11,9 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import lombok.AccessLevel;
-import lombok.Setter;
-import org.hibernate.SessionFactory;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -21,7 +18,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
@@ -34,12 +30,12 @@ public class FhirUserDaoImpl extends BaseFhirDao<User> implements FhirUserDao {
 	
 	@Override
 	public User getUserByUuid(String uuid) {
-		return (User) sessionFactory.getCurrentSession().createCriteria(User.class).add(eq("uuid", uuid)).uniqueResult();
+		return (User) getSessionFactory().getCurrentSession().createCriteria(User.class).add(eq("uuid", uuid)).uniqueResult();
 	}
 	
 	@Override
 	public User getUserByUserName(String username) {
-		return (User) sessionFactory.getCurrentSession().createCriteria(User.class).add(eq("username", username))
+		return (User) getSessionFactory().getCurrentSession().createCriteria(User.class).add(eq("username", username))
 		        .uniqueResult();
 	}
 	
