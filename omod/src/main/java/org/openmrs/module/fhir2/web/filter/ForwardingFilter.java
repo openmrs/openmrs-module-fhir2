@@ -55,7 +55,10 @@ public class ForwardingFilter implements Filter {
 					return;
 			}
 			
-			String newURI = requestURI.replace(prefix.toString(), replacement);
+			if (requestURI.contains("/.well-known")) {
+				replacement = "/ms/smartConfig";
+			}
+			String newURI = requestURI.replace(prefix, replacement);
 			req.getRequestDispatcher(newURI).forward(req, res);
 			return;
 		}
