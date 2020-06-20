@@ -66,6 +66,8 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	private static final String JSON_UPDATE_WITH_WRONG_ID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UpdateWithWrongId.json";
 	
+	private static final String STATUS = "active";
+	
 	@Mock
 	private FhirMedicationService fhirMedicationService;
 	
@@ -75,14 +77,14 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
-	private org.hl7.fhir.r4.model.Medication medication;
+	private Medication medication;
 	
 	@Before
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new MedicationFhirResourceProvider();
 		resourceProvider.setMedicationService(fhirMedicationService);
-		medication = new org.hl7.fhir.r4.model.Medication();
+		medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		super.setup();
 	}
@@ -102,7 +104,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	@Test
 	public void searchForMedications_shouldSearchForMedicationsByCode() throws Exception {
-		verifyUri("/Medication?code=5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		verifyUri(String.format("/Medication?code=%s", CODE));
 		
 		verify(fhirMedicationService).searchForMedications(tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
 		    isNull());
@@ -116,7 +118,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	@Test
 	public void searchForMedications_shouldSearchForMedicationsByDosageForm() throws Exception {
-		verifyUri("/Medication?form=5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		verifyUri(String.format("/Medication?form=%s", CODE));
 		
 		verify(fhirMedicationService).searchForMedications(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
 		    isNull());
@@ -129,15 +131,29 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	}
 	
 	@Test
+	public void searchForMedications_shouldSearchForMedicationsByIngredientCode() throws Exception {
+		verifyUri(String.format("/Medication?ingredient-code=%s", CODE));
+		
+		verify(fhirMedicationService).searchForMedications(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(),
+		    isNull());
+		
+		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
+		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenParam.getValue(), equalTo(CODE));
+	}
+	
+	@Test
 	public void searchForMedications_shouldSearchForMedicationsByStatus() throws Exception {
-		verifyUri("/Medication?status=active");
+		verifyUri(String.format("/Medication?status=%s", STATUS));
 		
 		verify(fhirMedicationService).searchForMedications(isNull(), isNull(), isNull(),
 		    tokenAndListParamArgumentCaptor.capture());
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    equalTo("active"));
+		    equalTo(STATUS));
 	}
 	
 	@Test
@@ -151,7 +167,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	private void verifyUri(String uri) throws Exception {
 		when(fhirMedicationService.searchForMedications(any(), any(), any(), any()))
-		        .thenReturn(Collections.singletonList(medication));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medication), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		

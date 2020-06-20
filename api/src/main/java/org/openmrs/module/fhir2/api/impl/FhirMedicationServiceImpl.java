@@ -9,17 +9,18 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Medication;
 import org.openmrs.Drug;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,13 +38,20 @@ public class FhirMedicationServiceImpl extends BaseFhirService<Medication, Drug>
 	@Autowired
 	private FhirMedicationDao dao;
 	
+	@Autowired
+	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator> searchQuery;
+	
 	@Override
 	@Transactional(readOnly = true)
-	public Collection<Medication> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
+	public IBundleProvider searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
 	        TokenAndListParam ingredientCode, TokenAndListParam status) {
 		
-		return dao.searchForMedications(code, dosageForm, ingredientCode, status).stream().map(translator::toFhirResource)
-		        .collect(Collectors.toList());
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.DOSAGE_FORM_SEARCH_HANDLER, dosageForm)
+		        .addParameter(FhirConstants.INGREDIENT_SEARCH_HANDLER, ingredientCode)
+		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, status);
+		
+		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
 }

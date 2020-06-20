@@ -13,14 +13,13 @@ import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.convertors.conv30_40.Bundle30_40;
 import org.hl7.fhir.convertors.conv30_40.Medication30_40;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -57,11 +56,11 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	@SuppressWarnings("unused")
-	public Bundle searchForMedication(@OptionalParam(name = Medication.SP_CODE) TokenAndListParam code,
+	public IBundleProvider searchForMedication(@OptionalParam(name = Medication.SP_CODE) TokenAndListParam code,
 	        @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,
-	        @OptionalParam(name = Medication.SP_STATUS) TokenAndListParam status) {
-		return Bundle30_40.convertBundle(FhirProviderUtils
-		        .convertSearchResultsToBundle(medicationService.searchForMedications(code, dosageForm, null, status)));
+	        @OptionalParam(name = Medication.SP_STATUS) TokenAndListParam status,
+	        @OptionalParam(name = Medication.SP_INGREDIENT_CODE) TokenAndListParam ingredientCode) {
+		return medicationService.searchForMedications(code, dosageForm, ingredientCode, status);
 	}
 	
 	@Create
