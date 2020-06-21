@@ -9,13 +9,25 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,8 +35,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.TestOrder;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,6 +62,9 @@ public class FhirServiceRequestServiceImplTest {
 	
 	private FhirServiceRequestServiceImpl serviceRequestService;
 	
+	@Mock
+	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>> searchQuery;
+	
 	private ServiceRequest fhirServiceRequest;
 	
 	private TestOrder order;
@@ -55,6 +74,8 @@ public class FhirServiceRequestServiceImplTest {
 		serviceRequestService = new FhirServiceRequestServiceImpl();
 		serviceRequestService.setDao(dao);
 		serviceRequestService.setTranslator(translator);
+		serviceRequestService.setSearchQuery(searchQuery);
+
 		
 		order = new TestOrder();
 		order.setUuid(SERVICE_REQUEST_UUID);
@@ -79,6 +100,35 @@ public class FhirServiceRequestServiceImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(SERVICE_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldReturnServiceRequestsByParameters() {
+		
+		ReferenceAndListParam patientReference = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue("Meantex");
+		patient.setChain(Patient.SP_GIVEN);
+		
+		patientReference.addValue(new ReferenceOrListParam().add(patient));
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		
+		when(dao.getPreferredPageSize()).thenReturn(10);
+		when(dao.getResultCounts(any())).thenReturn(1L);
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(order));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(patientReference, null, null, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		assertThat(results.preferredPageSize(), equalTo(10));
+		
+		assertThat(results.getResources(1, 10), not(empty()));
+		assertThat(results.getResources(1, 10), hasSize(equalTo(1)));
 	}
 	
 }

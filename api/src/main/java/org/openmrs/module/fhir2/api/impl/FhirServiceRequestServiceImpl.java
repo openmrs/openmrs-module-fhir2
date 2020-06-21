@@ -10,11 +10,15 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.TestOrder;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -40,9 +44,16 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>> searchQuery;
 	
 	@Override
-	public IBundleProvider searchForServiceRequests() {
-		SearchParameterMap theParams = new SearchParameterMap();
+	@Transactional(readOnly = true)
+	public IBundleProvider searchForServiceRequests(ReferenceAndListParam patientReference, TokenAndListParam code,
+	        ReferenceAndListParam encounterReference, ReferenceAndListParam participantReference, DateRangeParam occurence) {
 		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "scheduledDate,dateActivated,dateStopped,autoExpireDate", occurence);
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
