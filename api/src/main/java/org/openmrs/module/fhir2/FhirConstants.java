@@ -67,6 +67,8 @@ public class FhirConstants {
 	
 	public static final String OBSERVATION_CATEGORY_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/observation-category";
 	
+	public static final String ENCOUNTER_CLASS_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v3-ActCode";
+	
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	

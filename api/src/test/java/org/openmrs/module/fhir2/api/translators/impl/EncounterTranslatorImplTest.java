@@ -345,4 +345,32 @@ public class EncounterTranslatorImplTest {
 		assertThat(resources.stream().findAny().get().isResource(), is(true));
 		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
 	}
+	
+	@Test
+	public void shouldTranslateLocationToEncounterClassFhirType() {
+		Location inPatient = new Location();
+		inPatient.setUuid(LOCACTION_UUID);
+		inPatient.setName("Inpatient Ward");
+		omrsEncounter.setLocation(inPatient);
+		
+		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getClass_(), notNullValue());
+		assertThat(result.getClass_().getSystem(), is(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI));
+		assertThat(result.getClass_().getCode(), is("IMB"));
+	}
+	
+	@Test
+	public void shouldTranslateLocationToEncounterDefaultClassFhirType() {
+		omrsEncounter.setLocation(location);
+		
+		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getClass_(), notNullValue());
+		assertThat(result.getClass_().getSystem(), is(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI));
+		assertThat(result.getClass_().getCode(), is("AMB"));
+	}
+	
 }
