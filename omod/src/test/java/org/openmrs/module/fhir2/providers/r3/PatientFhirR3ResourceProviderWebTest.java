@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -17,26 +18,27 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.servlet.ServletException;
-
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Getter;
+import javax.servlet.ServletException;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -54,6 +56,12 @@ import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import lombok.AccessLevel;
+import lombok.Getter;
+
 @RunWith(MockitoJUnitRunner.class)
 public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<PatientFhirResourceProvider, Patient> {
 	
@@ -66,6 +74,14 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 	private static final String AUT = "AUT";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
+
+	private static final String JSON_CREATE_PATIENT_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_create.json";
+
+	private static final String JSON_UPDATE_PATIENT_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_update.json";
+
+	private static final String JSON_UPDATE_PATIENT_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_UpdateWithoutId.json";
+
+	private static final String JSON_UPDATE_PATIENT_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_UpdateWithWrongId.json";
 	
 	@Getter(AccessLevel.PUBLIC)
 	private PatientFhirResourceProvider resourceProvider;
@@ -82,6 +98,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;
 	
+	@Override
 	@Before
 	public void setup() throws ServletException {
 		resourceProvider = new PatientFhirResourceProvider();
@@ -550,4 +567,93 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(PATIENT_UUID));
 	}
+	
+	@Test
+	public void createPatient_shouldCreatePatient() throws Exception {
+		String jsonPatient;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PATIENT_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
+		patient.setId(PATIENT_UUID);
+
+		when(patientService.create(any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
+
+		MockHttpServletResponse response = post("/Patient").jsonContent(jsonPatient)
+		        .accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isCreated());
+	}
+
+	@Test
+	public void updatePatient_shouldUpdateExistingPatient() throws Exception {
+		String jsonPatient;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PATIENT_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
+		patient.setId(PATIENT_UUID);
+
+		when(patientService.update(anyString(), any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
+
+		MockHttpServletResponse response = put("/Patient/" + PATIENT_UUID).jsonContent(jsonPatient)
+				.accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isOk());
+	}
+
+	@Test
+	public void updatePatient_shouldErrorForNoId() throws Exception {
+		String jsonPatient;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PATIENT_NO_ID_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		MockHttpServletResponse response = put("/Patient/" + PATIENT_UUID).jsonContent(jsonPatient)
+				.accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+				containsStringIgnoringCase("body must contain an ID element for update"));
+	}
+
+	@Test
+	public void updatePatient_shouldErrorForIdMissMatch() throws Exception {
+		String jsonPatient;
+		try (InputStream is = this.getClass().getClassLoader()
+				.getResourceAsStream(JSON_UPDATE_PATIENT_WRONG_ID_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		MockHttpServletResponse response = put("/Patient/" + BAD_PATIENT_UUID).jsonContent(jsonPatient)
+				.accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+				containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+	}
+
+	@Test
+	public void deletePatient_shouldDeletePatient() throws Exception {
+		OperationOutcome retVal = new OperationOutcome();
+		retVal.setId(PATIENT_UUID);
+		retVal.getText().setDivAsString("Deleted successfully");
+
+		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
+		patient.setId(PATIENT_UUID);
+
+		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
+
+		MockHttpServletResponse response = delete("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
 }
