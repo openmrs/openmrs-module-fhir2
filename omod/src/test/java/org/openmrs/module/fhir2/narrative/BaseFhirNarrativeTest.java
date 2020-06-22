@@ -9,11 +9,14 @@
  */
 package org.openmrs.module.fhir2.narrative;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.TimeZone;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParser;
+import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -38,6 +41,10 @@ public class BaseFhirNarrativeTest {
 		ctx.setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE,
 		        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
 		parser = ctx.newJsonParser();
+	}
+	
+	protected String readNarrativeFile(String resource) throws IOException {
+		return IOUtils.resourceToString(resource, StandardCharsets.UTF_8, getClass().getClassLoader()).trim();
 	}
 	
 	@AfterClass

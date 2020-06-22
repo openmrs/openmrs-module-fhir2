@@ -14,9 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Condition;
 import org.junit.Test;
 
@@ -36,8 +34,6 @@ public class ConditionNarrativeTest extends BaseFhirNarrativeTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getText(), notNullValue());
 		assertThat(result.getText().getStatusAsString(), equalTo("generated"));
-		assertThat(result.getText().getDivAsString(),
-		    equalTo(IOUtils.resourceToString(EXPECTED_NARRATIVE_PATH, StandardCharsets.UTF_8, getClass().getClassLoader())
-		            .split("\n")[0]));
+		assertThat(result.getText().getDivAsString(), equalTo(readNarrativeFile(EXPECTED_NARRATIVE_PATH)));
 	}
 }
