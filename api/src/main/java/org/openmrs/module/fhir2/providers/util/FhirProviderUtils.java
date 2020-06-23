@@ -11,12 +11,16 @@ package org.openmrs.module.fhir2.providers.util;
 
 import java.util.Collection;
 
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ServiceRequest;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FhirProviderUtils {
@@ -44,7 +48,13 @@ public class FhirProviderUtils {
 		
 		return methodOutcome;
 	}
-	
+	@Delete
+	public MethodOutcome deleteResource(@IdParam IdType id ,DomainResource resource) {
+		MethodOutcome methodOutcome = new MethodOutcome();
+		methodOutcome.setId(resource.getIdElement());
+		return FhirProviderUtils.buildDelete(resource.getIdElement());
+	}
+
 	public static <T extends Resource> Bundle convertSearchResultsToBundle(Collection<T> resources) {
 		Bundle bundle = FhirProviderUtils.convertIterableToBundle(resources);
 		bundle.setType(Bundle.BundleType.SEARCHSET);
@@ -60,6 +70,11 @@ public class FhirProviderUtils {
 		}
 		
 		return bundle;
+	}
+	
+	private static MethodOutcome buildDelete(IdType idElement ) {
+		
+		return FhirProviderUtils.buildDelete(null);
 	}
 	
 }
