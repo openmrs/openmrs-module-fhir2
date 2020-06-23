@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -17,6 +18,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,18 +26,24 @@ import static org.mockito.Mockito.when;
 import javax.servlet.ServletException;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.MatcherAssert;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -74,6 +82,14 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	private static final String AUT = "AUT";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
+
+	private static final String JSON_CREATE_PERSON_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_create.json";
+
+	private static final String JSON_UPDATE_PERSON_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_update.json";
+
+	private static final String JSON_UPDATE_PERSON_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_UpdateWithoutId.json";
+
+	private static final String JSON_UPDATE_PERSON_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_UpdateWithWrongId.json";
 	
 	@Mock
 	private FhirPersonService personService;
@@ -441,4 +457,88 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		return get("/Person/" + PERSON_UUID + "/_history").accept(FhirMediaTypes.JSON).go();
 	}
 	
+	@Test
+	public void createPerson_shouldCreatePerson() throws Exception {
+		String jsonPerson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PERSON_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
+		person.setId(PERSON_UUID);
+
+		when(personService.create(any(org.hl7.fhir.r4.model.Person.class))).thenReturn(person);
+
+		MockHttpServletResponse response = post("/Person").jsonContent(jsonPerson).accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isCreated());
+	}
+
+	@Test
+	public void updatePerson_shouldUpdateExistingPerson() throws Exception {
+		String jsonPerson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PERSON_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
+		person.setId(PERSON_UUID);
+
+		when(personService.update(anyString(), any(org.hl7.fhir.r4.model.Person.class))).thenReturn(person);
+
+		MockHttpServletResponse response = put("/Person/" + PERSON_UUID).jsonContent(jsonPerson).accept(FhirMediaTypes.JSON)
+		        .go();
+		assertThat(response, isOk());
+	}
+
+	@Test
+	public void updatePerson_shouldErrorForNoId() throws Exception {
+		String jsonPerson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PERSON_NO_ID_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		MockHttpServletResponse response = put("/Person/" + PERSON_UUID).jsonContent(jsonPerson).accept(FhirMediaTypes.JSON)
+		        .go();
+
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+				containsStringIgnoringCase("body must contain an ID element for update"));
+	}
+
+	@Test
+	public void updatePerson_shouldErrorForIdMissMatch() throws Exception {
+		String jsonPerson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PERSON_WRONG_ID_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		MockHttpServletResponse response = put("/Person/" + WRONG_PERSON_UUID).jsonContent(jsonPerson)
+				.accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+				containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+	}
+
+	@Test
+	public void deletePerson_shouldDeletePerson() throws Exception {
+		OperationOutcome retVal = new OperationOutcome();
+		retVal.setId(PERSON_UUID);
+		retVal.getText().setDivAsString("Deleted successfully");
+
+		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
+		person.setId(PERSON_UUID);
+
+		when(personService.delete(PERSON_UUID)).thenReturn(person);
+
+		MockHttpServletResponse response = delete("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
 }

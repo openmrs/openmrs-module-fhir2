@@ -9,34 +9,43 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import javax.validation.constraints.NotNull;
-
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
+import org.hl7.fhir.convertors.conv30_40.Person30_40;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Person;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.openmrs.module.fhir2.api.FhirPersonService;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.convertors.conv30_40.Person30_40;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Person;
-import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.openmrs.module.fhir2.api.FhirPersonService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 @Component("personFhirR3ResourceProvider")
 @Qualifier("fhirR3Resources")
@@ -61,6 +70,34 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 		
 		return Person30_40.convertPerson(person);
 	}
+	
+	@Create
+	public MethodOutcome createPerson(@ResourceParam Person person) {
+		return FhirProviderUtils.buildCreate(personService.create(Person30_40.convertPerson(person)));
+	} 
+
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updatePerson(@IdParam IdType id, @ResourceParam Person person) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+
+		person.setId(id.getIdPart());
+
+		return FhirProviderUtils.buildUpdate(personService.update(id.getIdPart(), Person30_40.convertPerson(person)));
+	}
+
+	@Delete
+	@SuppressWarnings("unused")
+	public OperationOutcome deletePerson(@IdParam @NotNull IdType id) {
+		org.hl7.fhir.r4.model.Person person = personService.delete(id.getIdPart());
+		if (person == null) {
+			throw new ResourceNotFoundException("Could not find person to delete with id " + id.getIdPart());
+		}
+		return FhirProviderUtils.buildDelete(Person30_40.convertPerson(person));
+	}
+
 	
 	@History
 	@SuppressWarnings("unused")
