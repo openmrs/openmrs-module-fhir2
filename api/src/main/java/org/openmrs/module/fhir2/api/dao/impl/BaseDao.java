@@ -807,7 +807,7 @@ public abstract class BaseDao {
 			return Optional.empty();
 		}
 		
-		return Optional.of(or(toCriteriaArray(criterionList.stream())));
+		return Optional.of(and(toCriteriaArray(criterionList.stream())));
 	}
 	
 	protected Optional<Criterion> handleMedicationReference(@NotNull String medicationAlias,

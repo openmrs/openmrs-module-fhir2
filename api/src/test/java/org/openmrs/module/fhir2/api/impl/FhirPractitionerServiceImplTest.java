@@ -51,7 +51,35 @@ public class FhirPractitionerServiceImplTest {
 	
 	private static final String NAME = "John";
 	
+	private static final String WRONG_NAME = "Wrong name";
+	
 	private static final String IDENTIFIER = "3r34g346-tk";
+	
+	private static final String WRONG_IDENTIFIER = "Wrong identifier";
+	
+	private static final String PRACTITIONER_GIVEN_NAME = "John";
+	
+	private static final String WRONG_GIVEN_NAME = "Wrong given name";
+	
+	private static final String PRACTITIONER_FAMILY_NAME = "Doe";
+	
+	private static final String WRONG_FAMILY_NAME = "Wrong family name";
+	
+	private static final String CITY = "Indianapolis";
+	
+	private static final String WRONG_CITY = "Wrong city";
+	
+	private static final String STATE = "IN";
+	
+	private static final String WRONG_STATE = "Wrong state";
+	
+	private static final String POSTAL_CODE = "46202";
+	
+	private static final String WRONG_POSTAL_CODE = "Wrong postal code";
+	
+	private static final String COUNTRY = "USA";
+	
+	private static final String WRONG_COUNTRY = "Wrong country";
 	
 	private static final int START_INDEX = 0;
 	
@@ -109,20 +137,39 @@ public class FhirPractitionerServiceImplTest {
 	@Test
 	public void shouldSearchForPractitionersByName() {
 		StringAndListParam name = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(NAME)));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER,
+		    name);
 		
 		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(provider));
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(name, null);
+		IBundleProvider results = practitionerService.searchForPractitioners(name, null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionByWrongName() {
+		StringAndListParam name = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(WRONG_NAME)));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER,
+		    name);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(name, null, null, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -136,7 +183,8 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, identifier);
+		IBundleProvider results = practitionerService.searchForPractitioners(null, identifier, null, null, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -144,4 +192,262 @@ public class FhirPractitionerServiceImplTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionByWrongIdentifier() {
+		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(WRONG_IDENTIFIER));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER,
+		    identifier);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, identifier, null, null, null, null, null,
+		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void shouldSearchForPractitionersByGivenName() {
+		StringAndListParam givenName = new StringAndListParam().addAnd(new StringParam(PRACTITIONER_GIVEN_NAME));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.GIVEN_PROPERTY, givenName);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(provider));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, givenName, null, null, null, null,
+		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionByWrongGivenName() {
+		StringAndListParam givenName = new StringAndListParam().addAnd(new StringParam(WRONG_GIVEN_NAME));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.GIVEN_PROPERTY, givenName);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, givenName, null, null, null, null,
+		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void shouldSearchForPractitionersByFamilyName() {
+		StringAndListParam familyName = new StringAndListParam().addAnd(new StringParam(PRACTITIONER_FAMILY_NAME));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.FAMILY_PROPERTY, familyName);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(provider));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, familyName, null, null, null,
+		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionByWrongFamilyName() {
+		StringAndListParam familyName = new StringAndListParam().addAnd(new StringParam(WRONG_FAMILY_NAME));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.FAMILY_PROPERTY, familyName);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, familyName, null, null, null,
+		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void shouldSearchForPractitionersByAddressCity() {
+		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(CITY));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.CITY_PROPERTY, city);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(provider));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, city, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionByWrongAddressCity() {
+		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(WRONG_CITY));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.CITY_PROPERTY, city);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, city, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void shouldSearchForPractitionersByAddressState() {
+		StringAndListParam state = new StringAndListParam().addAnd(new StringParam(STATE));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.STATE_PROPERTY, state);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(provider));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, state, null,
+		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionByWrongAddressState() {
+		StringAndListParam state = new StringAndListParam().addAnd(new StringParam(WRONG_STATE));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.STATE_PROPERTY, state);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, state, null,
+		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void shouldSearchForPractitionersByAddressPostalCode() {
+		StringAndListParam postalCode = new StringAndListParam().addAnd(new StringParam(POSTAL_CODE));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.POSTAL_CODE_PROPERTY, postalCode);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(provider));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, postalCode,
+		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionByWrongAddressPostalCode() {
+		StringAndListParam postalCode = new StringAndListParam().addAnd(new StringParam(WRONG_POSTAL_CODE));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.POSTAL_CODE_PROPERTY, postalCode);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, postalCode,
+		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void shouldSearchForPractitionersByAddressCountry() {
+		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(COUNTRY));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.COUNTRY_PROPERTY, country);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(provider));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null,
+		    country);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionByWrongAddressCountry() {
+		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(WRONG_COUNTRY));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.COUNTRY_PROPERTY, country);
+		
+		when(practitionerDao.search(any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null,
+		    country);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
 }

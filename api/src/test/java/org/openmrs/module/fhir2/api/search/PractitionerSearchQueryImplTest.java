@@ -12,13 +12,15 @@ package org.openmrs.module.fhir2.api.search;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -49,11 +51,35 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 	
 	private static final String PRACTITIONER_NAME = "ricky";
 	
+	private static final String PRACTITIONER_GIVEN_NAME = "John";
+	
+	private static final String WRONG_GIVEN_NAME = "Wrong given name";
+	
+	private static final String PRACTITIONER_FAMILY_NAME = "Doe";
+	
+	private static final String WRONG_FAMILY_NAME = "Wrong family name";
+	
 	private static final String PRACTITIONER_IDENTIFIER = "347834-gf";
 	
 	private static final String NOT_FOUND_PRACTITIONER_NAME = "waf";
 	
 	private static final String NOT_FOUND_PRACTITIONER_IDENTIFIER = "38934-t";
+	
+	private static final String CITY = "Indianapolis";
+	
+	private static final String WRONG_CITY = "Wrong city";
+	
+	private static final String STATE = "IN";
+	
+	private static final String WRONG_STATE = "Wrong state";
+	
+	private static final String POSTAL_CODE = "46202";
+	
+	private static final String WRONG_POSTAL_CODE = "Wrong postal code";
+	
+	private static final String COUNTRY = "USA";
+	
+	private static final String WRONG_COUNTRY = "Wrong country";
 	
 	private static final int START_INDEX = 0;
 	
@@ -85,7 +111,8 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 	public void searchForPractitioners_shouldReturnPractitionersByName() {
 		StringAndListParam name = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(PRACTITIONER_NAME)));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER,
+		    name);
 		
 		IBundleProvider results = search(theParams);
 		
@@ -101,7 +128,8 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 	public void searchForPractitioners_shouldReturnEmptyCollectionWhenNameNotMatched() {
 		StringAndListParam name = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NOT_FOUND_PRACTITIONER_NAME)));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER,
+		    name);
 		
 		IBundleProvider results = search(theParams);
 		
@@ -137,10 +165,276 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		IBundleProvider results = search(theParams);
 		
-		List<Practitioner> resultList = get(results).stream().map(p -> (Practitioner) p).collect(Collectors.toList());
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, is(empty()));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByGivenName() {
+		StringAndListParam givenName = new StringAndListParam().addAnd(new StringParam(PRACTITIONER_GIVEN_NAME));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.GIVEN_PROPERTY, givenName);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, everyItem(hasProperty("name",
+		    hasItem(hasProperty("given", hasItem(hasProperty("value", equalTo(PRACTITIONER_GIVEN_NAME))))))));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyCollectionForWrongGivenName() {
+		StringAndListParam givenName = new StringAndListParam().addAnd(new StringParam(WRONG_GIVEN_NAME));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.GIVEN_PROPERTY, givenName);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByFamilyName() {
+		StringAndListParam familyName = new StringAndListParam().addAnd(new StringParam(PRACTITIONER_FAMILY_NAME));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.FAMILY_PROPERTY, familyName);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList,
+		    everyItem(hasProperty("name", hasItem(hasProperty("family", equalTo(PRACTITIONER_FAMILY_NAME))))));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyCollectionForWrongFamilyName() {
+		StringAndListParam familyName = new StringAndListParam().addAnd(new StringParam(WRONG_FAMILY_NAME));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.FAMILY_PROPERTY, familyName);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByMatchingGivenAndFamilyName() {
+		StringAndListParam givenName = new StringAndListParam().addAnd(new StringParam(PRACTITIONER_GIVEN_NAME));
+		StringAndListParam familyName = new StringAndListParam().addAnd(new StringParam(PRACTITIONER_FAMILY_NAME));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY, givenName)
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY, familyName);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, everyItem(hasProperty("name",
+		    hasItem(hasProperty("given", hasItem(hasProperty("value", equalTo(PRACTITIONER_GIVEN_NAME))))))));
+		assertThat(resultList,
+		    everyItem(hasProperty("name", hasItem(hasProperty("family", equalTo(PRACTITIONER_FAMILY_NAME))))));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyCollectionForMismatchingGivenAndFamilyName() {
+		StringAndListParam givenName = new StringAndListParam().addAnd(new StringParam(WRONG_GIVEN_NAME));
+		StringAndListParam familyName = new StringAndListParam().addAnd(new StringParam(PRACTITIONER_FAMILY_NAME));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY, givenName)
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY, familyName);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByCity() {
+		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(CITY));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.CITY_PROPERTY, city);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCity(), equalTo(CITY));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyCollectionByWrongCity() {
+		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(WRONG_CITY));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.CITY_PROPERTY, city);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByState() {
+		StringAndListParam state = new StringAndListParam().addAnd(new StringParam(STATE));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.STATE_PROPERTY, state);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getState(), equalTo(STATE));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyCollectionByWrongState() {
+		StringAndListParam state = new StringAndListParam().addAnd(new StringParam(WRONG_STATE));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.STATE_PROPERTY, state);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByPostalCode() {
+		StringAndListParam postalCode = new StringAndListParam().addAnd(new StringParam(POSTAL_CODE));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.POSTAL_CODE_PROPERTY, postalCode);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getPostalCode(), equalTo(POSTAL_CODE));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyCollectionByWrongPostalCode() {
+		StringAndListParam postalCode = new StringAndListParam().addAnd(new StringParam(WRONG_POSTAL_CODE));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.POSTAL_CODE_PROPERTY, postalCode);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByCountry() {
+		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(COUNTRY));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.COUNTRY_PROPERTY, country);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyCollectionByWrongCountry() {
+		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(WRONG_COUNTRY));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.COUNTRY_PROPERTY, country);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnPractitionersByMatchingCityAndCountry() {
+		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(CITY));
+		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(COUNTRY));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCity(), equalTo(CITY));
+		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyCollectionByMismatchingCityAndCountry() {
+		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(WRONG_CITY));
+		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(COUNTRY));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -149,7 +443,8 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		        .addAnd(new StringOrListParam().add(new StringParam(PRACTITIONER_NAME)));
 		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(PRACTITIONER_IDENTIFIER));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name)
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER, name)
 		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier);
 		
 		IBundleProvider results = search(theParams);
