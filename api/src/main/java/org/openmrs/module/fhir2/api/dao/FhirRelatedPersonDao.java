@@ -9,22 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
-
-import java.util.Collection;
-
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Relationship;
 
 public interface FhirRelatedPersonDao extends FhirDao<Relationship> {
 	
-	@Override
-	Relationship get(@NotNull String uuid);
-	
-	Collection<Relationship> searchRelationships(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
-	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
-	        SortSpec sort);
 }
