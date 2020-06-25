@@ -67,8 +67,14 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	public IBundleProvider searchForPractitioners(@OptionalParam(name = Practitioner.SP_NAME) StringAndListParam name,
-	        @OptionalParam(name = Practitioner.SP_IDENTIFIER) TokenAndListParam identifier) {
-		return practitionerService.searchForPractitioners(name, identifier);
+	        @OptionalParam(name = Practitioner.SP_IDENTIFIER) TokenAndListParam identifier,
+	        @OptionalParam(name = Practitioner.SP_GIVEN) StringAndListParam given,
+	        @OptionalParam(name = Practitioner.SP_FAMILY) StringAndListParam family,
+	        @OptionalParam(name = Practitioner.SP_ADDRESS_CITY) StringAndListParam city,
+	        @OptionalParam(name = Practitioner.SP_ADDRESS_STATE) StringAndListParam state,
+	        @OptionalParam(name = Practitioner.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
+	        @OptionalParam(name = Practitioner.SP_ADDRESS_COUNTRY) StringAndListParam country) {
+		return practitionerService.searchForPractitioners(name, identifier, given, family, city, state, postalCode, country);
 	}
 	
 }

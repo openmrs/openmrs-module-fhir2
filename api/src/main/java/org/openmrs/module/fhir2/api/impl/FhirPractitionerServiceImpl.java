@@ -43,9 +43,18 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>> searchQuery;
 	
 	@Override
-	public IBundleProvider searchForPractitioners(StringAndListParam name, TokenAndListParam identifier) {
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name)
-		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier);
+	public IBundleProvider searchForPractitioners(StringAndListParam name, TokenAndListParam identifier,
+	        StringAndListParam given, StringAndListParam family, StringAndListParam city, StringAndListParam state,
+	        StringAndListParam postalCode, StringAndListParam country) {
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER, name)
+		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier)
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY, given)
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY, family)
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, state)
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, postalCode)
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}

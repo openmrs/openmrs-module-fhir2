@@ -62,6 +62,18 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	
 	private static final String PRACTITIONER_IDENTIFIER = "eu984ot-k";
 	
+	private static final String PRACTITIONER_GIVEN_NAME = "John";
+	
+	private static final String PRACTITIONER_FAMILY_NAME = "Doe";
+	
+	private static final String CITY = "Indianapolis";
+	
+	private static final String STATE = "IN";
+	
+	private static final String POSTAL_CODE = "46202";
+	
+	private static final String COUNTRY = "USA";
+	
 	@Getter(AccessLevel.PUBLIC)
 	private PractitionerFhirResourceProvider resourceProvider;
 	
@@ -106,7 +118,8 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	public void findPractitionersByName_shouldReturnBundleOfPractitioners() throws Exception {
 		verifyUri(String.format("/Practitioner?name=%s", NAME));
 		
-		verify(practitionerService).searchForPractitioners(stringAndListParamArgumentCaptor.capture(), any());
+		verify(practitionerService).searchForPractitioners(stringAndListParamArgumentCaptor.capture(), any(), any(), any(),
+		    any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -119,7 +132,8 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	public void findPractitionersByIdentifier_shouldReturnBundleOfPractitioners() throws Exception {
 		verifyUri(String.format("/Practitioner?identifier=%s", PRACTITIONER_IDENTIFIER));
 		
-		verify(practitionerService).searchForPractitioners(any(), tokenAndListParamArgumentCaptor.capture());
+		verify(practitionerService).searchForPractitioners(any(), tokenAndListParamArgumentCaptor.capture(), any(), any(),
+		    any(), any(), any(), any());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -129,11 +143,95 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	}
 	
 	@Test
+	public void findPractitionersByGivenName_shouldReturnBundleOfPractitioners() throws Exception {
+		verifyUri(String.format("/Practitioner?given=%s", PRACTITIONER_GIVEN_NAME));
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), stringAndListParamArgumentCaptor.capture(), any(),
+		    any(), any(), any(), any());
+		
+		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		        .get(0).getValue(),
+		    equalTo(PRACTITIONER_GIVEN_NAME));
+	}
+	
+	@Test
+	public void findPractitionersByFamilyName_shouldReturnBundleOfPractitioners() throws Exception {
+		verifyUri(String.format("/Practitioner?family=%s", PRACTITIONER_FAMILY_NAME));
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), any(), stringAndListParamArgumentCaptor.capture(),
+		    any(), any(), any(), any());
+		
+		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		        .get(0).getValue(),
+		    equalTo(PRACTITIONER_FAMILY_NAME));
+	}
+	
+	@Test
+	public void findPractitionersByAddressCity_shouldReturnBundleOfPractitioners() throws Exception {
+		verifyUri(String.format("/Practitioner?address-city=%s", CITY));
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(),
+		    stringAndListParamArgumentCaptor.capture(), any(), any(), any());
+		
+		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		        .get(0).getValue(),
+		    equalTo(CITY));
+	}
+	
+	@Test
+	public void findPractitionersByAddressState_shouldReturnBundleOfPractitioners() throws Exception {
+		verifyUri(String.format("/Practitioner?address-state=%s", STATE));
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(),
+		    stringAndListParamArgumentCaptor.capture(), any(), any());
+		
+		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		        .get(0).getValue(),
+		    equalTo(STATE));
+	}
+	
+	@Test
+	public void findPractitionersByAddressPostalCode_shouldReturnBundleOfPractitioners() throws Exception {
+		verifyUri(String.format("/Practitioner?address-postalcode=%s", POSTAL_CODE));
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(),
+		    stringAndListParamArgumentCaptor.capture(), any());
+		
+		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		        .get(0).getValue(),
+		    equalTo(POSTAL_CODE));
+	}
+	
+	@Test
+	public void findPractitionersByAddressCountry_shouldReturnBundleOfPractitioners() throws Exception {
+		verifyUri(String.format("/Practitioner?address-country=%s", COUNTRY));
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(), any(),
+		    stringAndListParamArgumentCaptor.capture());
+		
+		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		        .get(0).getValue(),
+		    equalTo(COUNTRY));
+	}
+	
+	@Test
 	public void findPractitioners_shouldHandleComplexQuery() throws Exception {
 		verifyUri(String.format("/Practitioner?identifier=%s&name=%s", PRACTITIONER_IDENTIFIER, NAME));
 		
 		verify(practitionerService).searchForPractitioners(stringAndListParamArgumentCaptor.capture(),
-		    tokenAndListParamArgumentCaptor.capture());
+		    tokenAndListParamArgumentCaptor.capture(), any(), any(), any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -217,7 +315,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	private void verifyUri(String uri) throws Exception {
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
-		when(practitionerService.searchForPractitioners(any(), any()))
+		when(practitionerService.searchForPractitioners(any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(practitioner), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
