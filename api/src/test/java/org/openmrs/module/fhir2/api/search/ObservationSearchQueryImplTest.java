@@ -14,11 +14,13 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,19 +76,35 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 	
 	private static final String OBS_VALUE_CONCEPT_UUID = "785li1f8-bdbc-4950-833b-002244e9fa2b";
 	
-	private static final String VALUE_DATE = "1976-08-25";
+	private static final String VALUE_DATE = "2008-08-18";
 	
 	private static final String VALUE_STRING = "AFH56";
 	
-	private static final String VALUE_DATE_AND_TIME = "1976-08-25T13:44:57.0";
+	private static final String VALUE_DATE_AND_TIME = "2008-08-18T14:09:35.0";
+	
+	private static final String EXPECTED_VALUE_DATE_AND_TIME = "2008-08-18 14:09:35.0";
+	
+	private static final String OBS_DATE = "2008-07-01";
+	
+	private static final String OBS_DATE_AND_TIME = "2008-07-01T00:00:00.0";
+	
+	private static final String EXPECTED_OBS_DATE_AND_TIME = "2008-07-01 00:00:00.0";
 	
 	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
 	
+	private static final String PATIENT_WRONG_UUID = "c2299800-cca9-11e0-9572-abcdef0c9a66";
+	
 	private static final String PATIENT_GIVEN_NAME = "Collet";
+	
+	private static final String PATIENT_WRONG_GIVEN_NAME = "Wrong given name";
 	
 	private static final String PATIENT_FAMILY_NAME = "Chebaskwony";
 	
+	private static final String PATIENT_WRONG_FAMILY_NAME = "Wrong family name";
+	
 	private static final String PATIENT_IDENTIFIER = "6TS-4";
+	
+	private static final String PATIENT_WRONG_IDENTIFIER = "Wrong identifier";
 	
 	private static final String ENCOUNTER_UUID = "6519d653-393b-4118-9c83-a3715b82d4ac";
 	
@@ -137,8 +155,10 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(3));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasItem(hasProperty("id", equalTo(OBS_UUID))));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_UUID))));
 	}
 	
 	@Test
@@ -155,9 +175,11 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(3));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(1)));
-		assertThat(get(results), hasItem(hasProperty("id", equalTo(OBS_UUID))));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(greaterThan(1)));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_UUID))));
 	}
 	
 	@Test
@@ -175,9 +197,11 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(3));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(1)));
-		assertThat(get(results), hasItem(hasProperty("id", equalTo(OBS_UUID))));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(greaterThan(1)));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_UUID))));
 	}
 	
 	@Test
@@ -265,6 +289,54 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 	}
 	
 	@Test
+	public void searchForObs_shouldSearchForObsByMultiplePatientUuidOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnEmptyListOfObsByMultiplePatientUuidAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForObs_shouldReturnObsByPatientGivenName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
@@ -280,6 +352,57 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, hasItem(hasProperty("id", equalTo(OBS_UUID))));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchForObsByMultiplePatientGivenNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnEmptyListOfObsByMultiplePatientGivenNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -301,6 +424,57 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 	}
 	
 	@Test
+	public void searchForObs_shouldSearchForObsByMultiplePatientFamilyNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnEmptyListOfObsByMultiplePatientFamilyNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForObs_shouldReturnObsByPatientName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(
 		    new ReferenceParam().setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME).setChain(Patient.SP_NAME)));
@@ -316,6 +490,57 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, hasItem(hasProperty("id", equalTo(OBS_UUID))));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchForObsByMultiplePatientNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME + " " + PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnEmptyListOfObsByMultiplePatientNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME + " " + PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_GIVEN_NAME + " " + PATIENT_WRONG_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -337,6 +562,60 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		// obs.getSubject().getIdentifier().getValue() == PATIENT_IDENTIFIER
 		assertThat(resources,
 		    everyItem(hasProperty("subject", hasProperty("identifier", hasProperty("value", equalTo(PATIENT_IDENTIFIER))))));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchForObsByMultiplePatientIdentifierOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList,
+		    everyItem(hasProperty("subject", hasProperty("identifier", hasProperty("value", equalTo(PATIENT_IDENTIFIER))))));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnEmptyListOfObsByMultiplePatientIdentifierAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(PATIENT_WRONG_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -367,10 +646,12 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(17));
 		
 		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, not(empty()));
+		assertThat(resources.size(), equalTo(10));
 		assertThat(resources, hasItem(hasProperty("id", equalTo(OBS_UUID))));
 		
 		// obs.getCategoryFirstRep().getCodingFirstRep().getCode() == "laboratory"
@@ -389,17 +670,21 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		
 		IBundleProvider results = search(theParams);
 		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(1)));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		theParams.setSortSpec(sort);
 		results = search(theParams);
 		
+		resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(1)));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(greaterThan(1)));
 	}
 	
 	@Test
@@ -437,9 +722,10 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 	
 	@Test
 	public void searchForObs_shouldReturnObsByPatientUuidAndPatientGivenName() {
-		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
-		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_FAMILY_NAME).setChain(Patient.SP_FAMILY))
-		            .add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
+		ReferenceAndListParam patientReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_UUID).setChain(null)))
+		        .addAnd(new ReferenceOrListParam()
+		                .add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
@@ -515,9 +801,11 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(equalTo(1)));
-		assertThat(get(results).iterator().next().getIdElement().getIdPart(), equalTo(OBS_GROUP_UUID));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(OBS_GROUP_UUID));
 	}
 	
 	@Test
@@ -534,56 +822,83 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results).iterator().next().getIdElement().getIdPart(), equalTo(OBS_GROUP_UUID));
-	}
-	
-	@Test
-	public void searchForObs_shouldSearchForObsByValueConceptId() {
-		TokenAndListParam code = new TokenAndListParam();
-		TokenParam codingToken = new TokenParam();
-		codingToken.setValue(VALUE_CONCEPT_ID);
-		code.addAnd(codingToken);
+		List<IBaseResource> resultList = get(results);
 		
-		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
-		IBundleProvider results = search(theParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
-		
-		List<IBaseResource> resources = get(results);
-		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(greaterThan(1)));
-		assertThat(resources, hasItem(hasProperty("id", equalTo(OBS_VALUE_CONCEPT_UUID))));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(OBS_GROUP_UUID));
 	}
 	
 	@Test
 	public void searchForObs_shouldSearchForObsByValueDate() {
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, new DateRangeParam(new DateParam(VALUE_DATE)));
+		theParams.addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "valueDatetime",
+		    new DateRangeParam(new DateParam(VALUE_DATE)));
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasItem(hasProperty("id", equalTo(OBS_UUID))));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_VALUE_CONCEPT_UUID))));
+		assertThat(((Observation) resultList.iterator().next()).getIssued().toString(), startsWith(VALUE_DATE));
 	}
 	
 	@Test
 	public void searchForObs_shouldSearchForObsByValueDateAndTime() {
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		theParams.addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "valueDatetime",
 		    new DateRangeParam(new DateParam(VALUE_DATE_AND_TIME)));
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasItem(hasProperty("id", equalTo(OBS_UUID))));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_VALUE_CONCEPT_UUID))));
+		assertThat(((Observation) resultList.iterator().next()).getIssued().toString(),
+		    equalTo(EXPECTED_VALUE_DATE_AND_TIME));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchByObsDate() {
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime",
+		    new DateRangeParam(new DateParam(OBS_DATE)));
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(13));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(10));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_VALUE_CONCEPT_UUID))));
+		assertThat(((Observation) resultList.iterator().next()).getEffectiveDateTimeType().getValue().toString(),
+		    startsWith(OBS_DATE));
+	}
+	
+	@Test
+	public void searchForObs_shouldSearchByObsDateAndTime() {
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime",
+		    new DateRangeParam(new DateParam(OBS_DATE_AND_TIME)));
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(12));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(10));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_VALUE_CONCEPT_UUID))));
+		assertThat(((Observation) resultList.iterator().next()).getEffectiveDateTimeType().getValue().toString(),
+		    equalTo(EXPECTED_OBS_DATE_AND_TIME));
 	}
 	
 	@Test
@@ -597,14 +912,16 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(2));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(equalTo(10)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(2)));
 	}
 	
 	@Test
@@ -618,14 +935,16 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(3));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(1)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(3)));
 	}
 	
 	@Test
@@ -639,14 +958,16 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(1)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -660,14 +981,16 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		quantityAndListParam.addAnd(quantityOrListParam.add(quantityParam));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(2));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(1)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(2)));
 	}
 	
 	@Test
@@ -676,16 +999,17 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		        .addAnd(new QuantityOrListParam().add(new QuantityParam().setValue("100").setPrefix(ParamPrefixEnum.EQUAL)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(equalTo(10)));
-		assertThat(get(results), hasSize(greaterThan(1)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -694,15 +1018,17 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		    new QuantityOrListParam().add(new QuantityParam().setValue("100").setPrefix(ParamPrefixEnum.NOT_EQUAL)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(16));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(equalTo(10)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -711,15 +1037,17 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		        .add(new QuantityParam().setValue("100").setPrefix(ParamPrefixEnum.LESSTHAN_OR_EQUALS)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(11));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(equalTo(10)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -728,15 +1056,17 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		    new QuantityOrListParam().add(new QuantityParam().setValue("100").setPrefix(ParamPrefixEnum.LESSTHAN)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(10));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(equalTo(10)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -745,15 +1075,17 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		        .add(new QuantityParam().setValue("100").setPrefix(ParamPrefixEnum.GREATERTHAN_OR_EQUALS)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(7));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(equalTo(10)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(7)));
 	}
 	
 	@Test
@@ -762,15 +1094,17 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		    new QuantityOrListParam().add(new QuantityParam().setValue("100").setPrefix(ParamPrefixEnum.GREATERTHAN)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(6));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(equalTo(10)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(6)));
 	}
 	
 	@Test
@@ -779,15 +1113,17 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		    new QuantityOrListParam().add(new QuantityParam().setValue("36").setPrefix(ParamPrefixEnum.APPROXIMATE)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, quantityAndListParam);
+		theParams.addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", quantityAndListParam);
 		
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(1)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -795,15 +1131,18 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam().setValue(VALUE_STRING));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.VALUE_STRING_SEARCH_HANDLER, stringAndListParam);
+		theParams.addParameter(FhirConstants.VALUE_STRING_SEARCH_HANDLER, "valueText", stringAndListParam);
 		
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(21));
+		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(1)));
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_VALUE_CONCEPT_UUID))));
 	}
 	
 	@Test

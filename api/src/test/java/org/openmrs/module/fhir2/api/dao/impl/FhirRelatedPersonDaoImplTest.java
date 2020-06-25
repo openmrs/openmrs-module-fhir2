@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class RelatedPersonDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirRelatedPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String RELATIONSHIP_UUID = "c3c91630-8563-481b-8efa-48e10c139a3d";
 	

@@ -10,17 +10,20 @@
 package org.openmrs.module.fhir2.providers.util;
 
 import java.util.Collection;
-
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.Task;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FhirProviderUtils {
@@ -37,6 +40,22 @@ public class FhirProviderUtils {
 		return buildWithResource(methodOutcome, resource);
 	}
 	
+	public static OperationOutcome buildDelete(DomainResource resource) {
+		
+		final CodeableConcept MSG_DELETED = new CodeableConcept();
+		{
+			MSG_DELETED.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/operation-outcome")
+			        .setCode("MSG_DELETED").setDisplay("This resource has been deleted");
+			MSG_DELETED.setText("This resource has been deleted");
+		}
+		
+		OperationOutcome outcome = new OperationOutcome();
+		outcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.INFORMATION)
+		        .setCode(OperationOutcome.IssueType.INFORMATIONAL).setDetails(MSG_DELETED);
+		return outcome;
+		
+	}
+	
 	private static MethodOutcome buildWithResource(MethodOutcome methodOutcome, DomainResource resource) {
 		if (resource != null) {
 			if (resource.getId() != null) {
@@ -48,11 +67,13 @@ public class FhirProviderUtils {
 		
 		return methodOutcome;
 	}
-	@Delete
-	public MethodOutcome deleteResource(@IdParam IdType id ,DomainResource resource) {
-		MethodOutcome methodOutcome = new MethodOutcome();
-		methodOutcome.setId(resource.getIdElement());
-		return FhirProviderUtils.buildDelete(resource.getIdElement());
+  @Delete
+	public OperationOutcome deleteTask(@IdParam IdType id) {
+	    Task task = taskService.delete(id.getIdPart());
+		if (task == null){
+		    throw new ResourceNotFoundException("Could not find task resource with id " + id.getIdPart() + "to delete");	
+		}
+		return FhirProviderUtils.buildDelete(task);
 	}
 
 	public static <T extends Resource> Bundle convertSearchResultsToBundle(Collection<T> resources) {

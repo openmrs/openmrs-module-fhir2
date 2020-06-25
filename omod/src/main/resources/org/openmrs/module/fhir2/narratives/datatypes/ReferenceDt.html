@@ -1,0 +1,8 @@
+<th:block th:if="${resource.display}">
+    <a th:text="${resource.display}"
+       th:href="'http://localhost:8080/openmrs/ws/fhir2/R4/' + ${resource.reference}"></a>
+</th:block>
+<th:block th:unless="${resource.display}">
+    <a th:text="${resource.reference}"
+       th:href="'http://localhost:8080/openmrs/ws/fhir2/R4/' + ${resource.reference}"></a>
+</th:block>

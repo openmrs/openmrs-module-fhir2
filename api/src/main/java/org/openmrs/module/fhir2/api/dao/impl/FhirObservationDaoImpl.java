@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -63,7 +64,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(dateRangeParam -> handleDateRange(dateRangeParam.getPropertyName(),
-					    (DateRangeParam) dateRangeParam.getParam()));
+					    (DateRangeParam) dateRangeParam.getParam()).ifPresent(criteria::add));
 					break;
 				case FhirConstants.HAS_MEMBER_SEARCH_HANDLER:
 					entry.getValue().forEach(hasMemberReference -> handleHasMemberReference(criteria,
@@ -71,11 +72,13 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 					break;
 				case FhirConstants.QUANTITY_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    quantity -> handleQuantity(quantity.getPropertyName(), (QuantityAndListParam) quantity.getParam()));
+					    quantity -> handleQuantity(quantity.getPropertyName(), (QuantityAndListParam) quantity.getParam())
+					            .ifPresent(criteria::add));
 					break;
 				case FhirConstants.VALUE_STRING_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    string -> handleValueStringParam(string.getPropertyName(), (StringAndListParam) string.getParam()));
+					    string -> handleValueStringParam(string.getPropertyName(), (StringAndListParam) string.getParam())
+					            .ifPresent(criteria::add));
 					break;
 			}
 		});
@@ -99,10 +102,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		}
 	}
 	
-	private void handleValueStringParam(@NotNull String propertyName, StringAndListParam valueStringParam) {
-		if (valueStringParam != null) {
-			handleAndListParam(valueStringParam, v -> propertyLike(propertyName, v.getValue()));
-		}
+	private Optional<Criterion> handleValueStringParam(@NotNull String propertyName, StringAndListParam valueStringParam) {
+		return handleAndListParam(valueStringParam, v -> propertyLike(propertyName, v.getValue()));
 	}
 	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {

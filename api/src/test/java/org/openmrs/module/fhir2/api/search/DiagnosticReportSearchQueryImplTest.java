@@ -180,6 +180,54 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	}
 	
 	@Test
+	public void searchForDiagnosticReports_shouldSearchForDiagnosticReportsByMultiplePatientUuidOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyListOfDiagnosticReportsByMultiplePatientUuidAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientIdentifier() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue(PATIENT_IDENTIFIER).setChain(Patient.SP_IDENTIFIER)));
@@ -211,6 +259,60 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		assertThat(diagnosticReports, notNullValue());
 		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldSearchForDiagnosticReportsByMultiplePatientIdentifierOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_PATIENT_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
+		    equalTo(PATIENT_IDENTIFIER));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyListOfDiagnosticReportsByMultiplePatientIdentifierAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_IDENTIFIER);
+		patient.setChain(Patient.SP_IDENTIFIER);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_PATIENT_IDENTIFIER);
+		badPatient.setChain(Patient.SP_IDENTIFIER);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -248,6 +350,59 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	}
 	
 	@Test
+	public void searchForDiagnosticReports_shouldSearchForDiagnosticReportsByMultiplePatientNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_PATIENT_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(DIAGNOSTIC_REPORT_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyListOfDiagnosticReportsByMultiplePatientNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_NAME);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_PATIENT_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_NAME);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientGivenName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
@@ -282,6 +437,57 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	}
 	
 	@Test
+	public void searchForDiagnosticReports_shouldSearchForDiagnosticReportsByMultiplePatientGivenNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_PATIENT_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyListOfDiagnosticReportsByMultiplePatientGivenNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_GIVEN_NAME);
+		patient.setChain(Patient.SP_GIVEN);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_PATIENT_GIVEN_NAME);
+		badPatient.setChain(Patient.SP_GIVEN);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientFamilyName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_FAMILY_NAME).setChain(Patient.SP_FAMILY)));
@@ -313,6 +519,57 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		assertThat(diagnosticReports, notNullValue());
 		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldSearchForDiagnosticReportsByMultiplePatientFamilyNameOr() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_PATIENT_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient).add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyListOfDiagnosticReportsByMultiplePatientFamilyNameAnd() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_FAMILY_NAME);
+		patient.setChain(Patient.SP_FAMILY);
+		
+		ReferenceParam badPatient = new ReferenceParam();
+		
+		badPatient.setValue(WRONG_PATIENT_FAMILY_NAME);
+		badPatient.setChain(Patient.SP_FAMILY);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient)).addAnd(new ReferenceOrListParam().add(badPatient));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    referenceParam);
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test

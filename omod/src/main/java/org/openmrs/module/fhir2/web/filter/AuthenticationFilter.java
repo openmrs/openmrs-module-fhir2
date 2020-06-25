@@ -54,6 +54,7 @@ public class AuthenticationFilter implements Filter {
 					catch (Exception e) {
 						HttpServletResponse httpResponse = (HttpServletResponse) response;
 						httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+						return;
 					}
 				} else {
 					// This sends 401 error if not authenticated

@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -24,6 +25,7 @@ import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
+import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
@@ -34,16 +36,68 @@ public class FhirPractitionerDaoImpl extends BaseFhirDao<Provider> implements Fh
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		handleBooleanProperty("retired", false).ifPresent(criteria::add);
+		criteria.createAlias("person", "p"); // inner join with person table
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
-				case FhirConstants.NAME_SEARCH_HANDLER:
+				case FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleName(criteria, (StringAndListParam) param.getParam()));
 					break;
 				case FhirConstants.IDENTIFIER_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleIdentifier(criteria, (TokenAndListParam) param.getParam()));
 					break;
+				case FhirConstants.NAME_SEARCH_HANDLER:
+					handleGivenAndFamilyNames(criteria, entry);
+					break;
+				case FhirConstants.ADDRESS_SEARCH_HANDLER:
+					handleAddresses(criteria, entry);
+					break;
 			}
 		});
+	}
+	
+	private void handleAddresses(Criteria criteria, Map.Entry<String, List<PropParam<?>>> entry) {
+		StringAndListParam city = null;
+		StringAndListParam country = null;
+		StringAndListParam postalCode = null;
+		StringAndListParam state = null;
+		for (PropParam<?> param : entry.getValue()) {
+			switch (param.getPropertyName()) {
+				case FhirConstants.CITY_PROPERTY:
+					city = ((StringAndListParam) param.getParam());
+					break;
+				case FhirConstants.STATE_PROPERTY:
+					state = ((StringAndListParam) param.getParam());
+					break;
+				case FhirConstants.POSTAL_CODE_PROPERTY:
+					postalCode = ((StringAndListParam) param.getParam());
+					break;
+				case FhirConstants.COUNTRY_PROPERTY:
+					country = ((StringAndListParam) param.getParam());
+					break;
+			}
+		}
+		
+		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
+			criteria.createAlias("p.addresses", "pad");
+			criteria.add(c);
+		});
+	}
+	
+	private void handleGivenAndFamilyNames(Criteria criteria, Map.Entry<String, List<PropParam<?>>> entry) {
+		StringAndListParam given = null;
+		StringAndListParam family = null;
+		for (PropParam<?> param : entry.getValue()) {
+			switch (param.getPropertyName()) {
+				case FhirConstants.GIVEN_PROPERTY:
+					given = (StringAndListParam) param.getParam();
+					break;
+				case FhirConstants.FAMILY_PROPERTY:
+					family = (StringAndListParam) param.getParam();
+					break;
+			}
+		}
+		
+		handleNames(criteria, null, given, family, "p");
 	}
 	
 	private void handleName(Criteria criteria, StringAndListParam name) {

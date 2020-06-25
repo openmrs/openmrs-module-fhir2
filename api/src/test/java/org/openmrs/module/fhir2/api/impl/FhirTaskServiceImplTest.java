@@ -17,13 +17,17 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +36,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,8 +47,6 @@ public class FhirTaskServiceImplTest {
 	private static final String TASK_UUID = "dc9ce8be-3155-4adf-b28f-29436ec30a30";
 	
 	private static final String WRONG_TASK_UUID = "df34a1c1-f57b-4c33-bee5-e601b56b9d5b";
-	
-	private static final String SERVICE_REQUEST_UUID = "9bf48663-be75-49d1-91a8-16b71287db1a";
 	
 	private static final org.hl7.fhir.r4.model.Task.TaskStatus FHIR_TASK_STATUS = org.hl7.fhir.r4.model.Task.TaskStatus.REQUESTED;
 	
@@ -55,11 +60,18 @@ public class FhirTaskServiceImplTest {
 	
 	private static final FhirTask.TaskIntent OPENMRS_TASK_INTENT = FhirTask.TaskIntent.ORDER;
 	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
+	
 	@Mock
 	FhirTaskDao dao;
 	
 	@Mock
 	TaskTranslator translator;
+	
+	@Mock
+	SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator> searchQuery;
 	
 	private FhirTaskServiceImpl fhirTaskService;
 	
@@ -68,6 +80,11 @@ public class FhirTaskServiceImplTest {
 		fhirTaskService = new FhirTaskServiceImpl();
 		fhirTaskService.setDao(dao);
 		fhirTaskService.setTranslator(translator);
+		fhirTaskService.setSearchQuery(searchQuery);
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	@Test
@@ -174,13 +191,19 @@ public class FhirTaskServiceImplTest {
 		Task task = new Task();
 		task.setId(TASK_UUID);
 		
-		when(dao.searchForTasks(any(), any(), any(), any())).thenReturn(openmrsTasks);
+		SearchParameterMap theParams = new SearchParameterMap();
+		
+		when(dao.search(any(), anyInt(), anyInt())).thenReturn(openmrsTasks);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
 		when(translator.toFhirResource(openmrsTask)).thenReturn(task);
 		
-		Collection<Task> results = fhirTaskService.searchForTasks(null, null, null, null);
+		IBundleProvider results = fhirTaskService.searchForTasks(null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results, not(empty()));
-		assertThat(results, hasItem(hasProperty("id", equalTo(TASK_UUID))));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(TASK_UUID))));
 	}
 }

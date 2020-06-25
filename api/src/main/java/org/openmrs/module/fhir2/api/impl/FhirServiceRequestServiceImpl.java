@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,8 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,4 +35,15 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 	
 	@Autowired
 	private FhirServiceRequestDao<TestOrder> dao;
+	
+	@Autowired
+	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>> searchQuery;
+	
+	@Override
+	public IBundleProvider searchForServiceRequests() {
+		SearchParameterMap theParams = new SearchParameterMap();
+		
+		return searchQuery.getQueryResults(theParams, dao, translator);
+	}
+	
 }
