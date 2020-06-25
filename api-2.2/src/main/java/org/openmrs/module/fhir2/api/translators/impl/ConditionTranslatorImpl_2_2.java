@@ -9,13 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.CodedOrFreeText;
-import org.openmrs.Concept;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
 import org.openmrs.ConditionVerificationStatus;
@@ -67,13 +69,13 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		fhirCondition.setClinicalStatus(clinicalStatusTranslator.toFhirResource(condition.getClinicalStatus()));
 		fhirCondition.setVerificationStatus(verificationStatusTranslator.toFhirResource(condition.getVerificationStatus()));
 		
-		if (condition.getCondition().getCoded() != null) {
-			fhirCondition.setCode(conceptTranslator.toFhirResource(condition.getCondition().getCoded()));
-		} else {
-			CodeableConcept codeableConcept = new CodeableConcept();
-			codeableConcept.addCoding(
-			    new Coding().setCode(condition.getCondition().getNonCoded()).setSystem(FhirConstants.OPENMRS_URI));
-			fhirCondition.setCode(codeableConcept);
+		CodedOrFreeText codedOrFreeTextCondition = condition.getCondition();
+		fhirCondition.setCode(conceptTranslator.toFhirResource(codedOrFreeTextCondition.getCoded()));
+		if (codedOrFreeTextCondition.getNonCoded() != null) {
+			Extension extension = new Extension();
+			extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NON_CODED_CONDITION);
+			extension.setValue(new StringType(codedOrFreeTextCondition.getNonCoded()));
+			fhirCondition.addExtension(extension);
 		}
 		
 		fhirCondition.setOnset(new DateTimeType().setValue(condition.getOnsetDate()));
@@ -100,20 +102,17 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		existingCondition.setUuid(condition.getId());
 		existingCondition.setPatient(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));
 		existingCondition.setClinicalStatus(clinicalStatusTranslator.toOpenmrsType(condition.getClinicalStatus()));
-		
 		existingCondition
 		        .setVerificationStatus(verificationStatusTranslator.toOpenmrsType(condition.getVerificationStatus()));
 		
-		if (!condition.getCode().getCoding().isEmpty()) {
-			Concept concept = conceptTranslator.toOpenmrsType(condition.getCode());
-			CodedOrFreeText conditionCodedOrText = new CodedOrFreeText();
-			if (concept == null) {
-				conditionCodedOrText.setNonCoded(condition.getCode().getCoding().get(0).getCode());
-			} else {
-				conditionCodedOrText.setCoded(concept);
-			}
-			existingCondition.setCondition(conditionCodedOrText);
-		}
+		CodeableConcept codeableConcept = condition.getCode();
+		CodedOrFreeText conditionCodedOrText = new CodedOrFreeText();
+		Optional<Extension> extension = Optional
+		        .ofNullable(condition.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NON_CODED_CONDITION));
+		extension.ifPresent(value -> conditionCodedOrText.setNonCoded(String.valueOf(value.getValue())));
+		conditionCodedOrText.setCoded(conceptTranslator.toOpenmrsType(codeableConcept));
+		existingCondition.setCondition(conditionCodedOrText);
+		
 		existingCondition.setOnsetDate(condition.getOnsetDateTimeType().getValue());
 		existingCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));
 		
