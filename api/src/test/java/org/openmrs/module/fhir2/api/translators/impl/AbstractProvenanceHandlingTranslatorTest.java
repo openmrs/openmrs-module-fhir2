@@ -50,9 +50,10 @@ public class AbstractProvenanceHandlingTranslatorTest {
 	@Mock
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
-	private BaseProvenanceHandlingTranslator provenanceHandlingTranslator;
+	private BaseProvenanceHandlingTranslator<?> provenanceHandlingTranslator;
 	
 	@Before
+	@SuppressWarnings("rawtypes")
 	public void setup() {
 		provenanceHandlingTranslator = new BaseProvenanceHandlingTranslator() {
 			

@@ -85,10 +85,10 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 		}
 		
 		Criteria criteria = sortState.getCriteria();
-		if (param.startsWith("address") && !containsAlias(criteria, "pad")) {
+		if (param.startsWith("address") && lacksAlias(criteria, "pad")) {
 			criteria.createAlias("m.addresses", "pad", JoinType.LEFT_OUTER_JOIN);
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (!containsAlias(criteria, "pn")) {
+			if (lacksAlias(criteria, "pn")) {
 				criteria.createAlias("m.names", "pn", JoinType.LEFT_OUTER_JOIN);
 			}
 			

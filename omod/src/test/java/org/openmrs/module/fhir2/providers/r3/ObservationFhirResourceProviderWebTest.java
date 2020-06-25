@@ -50,7 +50,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirObservationService;
-import org.openmrs.module.fhir2.providers.MockIBundleProvider;
+import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -549,7 +549,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1975, 1, 2);
+		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(valueDateCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
@@ -590,7 +590,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		    isNull(), dateCaptor.capture(), isNull(), isNull(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1975, 1, 2);
+		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(dateCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));

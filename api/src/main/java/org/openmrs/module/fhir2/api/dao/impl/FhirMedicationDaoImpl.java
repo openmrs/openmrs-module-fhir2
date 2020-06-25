@@ -36,6 +36,7 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public Collection<Drug> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
 	        TokenAndListParam ingredientCode, TokenAndListParam status) {
 		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Drug.class);

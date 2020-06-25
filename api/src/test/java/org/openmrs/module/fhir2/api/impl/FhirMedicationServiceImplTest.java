@@ -169,7 +169,7 @@ public class FhirMedicationServiceImplTest {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		
-		Medication result = fhirMedicationService.update(null, medication);
+		fhirMedicationService.update(null, medication);
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -177,7 +177,7 @@ public class FhirMedicationServiceImplTest {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		
-		Medication result = fhirMedicationService.update(WRONG_MEDICATION_UUID, medication);
+		fhirMedicationService.update(WRONG_MEDICATION_UUID, medication);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -185,7 +185,7 @@ public class FhirMedicationServiceImplTest {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		
-		Medication result = fhirMedicationService.update(MEDICATION_UUID, medication);
+		fhirMedicationService.update(MEDICATION_UUID, medication);
 	}
 	
 	@Test

@@ -40,7 +40,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
-import org.openmrs.module.fhir2.providers.r3.BaseFhirIBundleResourceProviderTest;
+import org.openmrs.module.fhir2.providers.r3.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestFhirResourceProviderTest {
@@ -99,7 +99,7 @@ public class MedicationRequestFhirResourceProviderTest {
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestUsingCode() {
 		
 		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any()))
-		        .thenReturn(new BaseFhirIBundleResourceProviderTest<>(Collections.singletonList(medicationRequest), 10, 1));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
@@ -121,7 +121,7 @@ public class MedicationRequestFhirResourceProviderTest {
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenPatientParamIsSpecified() {
 		
 		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any()))
-		        .thenReturn(new BaseFhirIBundleResourceProviderTest<>(Collections.singletonList(medicationRequest), 10, 1));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
@@ -141,7 +141,7 @@ public class MedicationRequestFhirResourceProviderTest {
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenMedicationParamIsSpecified() {
 		
 		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any()))
-		        .thenReturn(new BaseFhirIBundleResourceProviderTest<>(Collections.singletonList(medicationRequest), 10, 1));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		ReferenceAndListParam medicationParam = new ReferenceAndListParam();
 		medicationParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Medication.SP_IDENTIFIER)));
@@ -162,7 +162,7 @@ public class MedicationRequestFhirResourceProviderTest {
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenParticipantParamIsSpecified() {
 		
 		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any()))
-		        .thenReturn(new BaseFhirIBundleResourceProviderTest<>(Collections.singletonList(medicationRequest), 10, 1));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		ReferenceAndListParam participantParam = new ReferenceAndListParam();
 		participantParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Practitioner.SP_NAME)));
@@ -183,7 +183,7 @@ public class MedicationRequestFhirResourceProviderTest {
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenEncounterParamIsSpecified() {
 		
 		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any()))
-		        .thenReturn(new BaseFhirIBundleResourceProviderTest<>(Collections.singletonList(medicationRequest), 10, 1));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		ReferenceAndListParam encounterParam = new ReferenceAndListParam();
 		encounterParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Encounter.SP_IDENTIFIER)));

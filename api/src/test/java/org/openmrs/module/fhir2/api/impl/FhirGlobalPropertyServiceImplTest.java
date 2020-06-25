@@ -36,8 +36,6 @@ public class FhirGlobalPropertyServiceImplTest {
 	
 	private static final String PERSON_ATTRIBUTE_TYPE_VALUE = "fhir2.personAttributeTypeUuid";
 	
-	private static final String PERSON_ATTRIBUTE_TYPE_VALUE_NOT_FOUND = "fhir2.non-existing property";
-	
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "12323h324-32423n30-32n23-23j23";
 	
 	private static final String GLOBAL_PROPERTY_MODERATE = "1499AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";

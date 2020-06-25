@@ -26,7 +26,7 @@ public class BaseFhirNarrativeTest {
 	
 	protected static TimeZone defaultTimeZone;
 	
-	protected FhirContext ctx = FhirContext.forR4();
+	protected final FhirContext ctx = FhirContext.forR4();
 	
 	protected IParser parser;
 	

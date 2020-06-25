@@ -25,8 +25,10 @@ import static org.mockito.Mockito.when;
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -60,18 +62,15 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	private static final String JSON_UPDATE_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_update.json";
 	
-	private static final String JSON_UPDATE_WITHOUTID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UdateWithoutId.json";
+	private static final String JSON_UPDATE_WITHOUT_ID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UpdateWithoutId.json";
 	
-	private static final String JSON_UPDATE_WITHWRONGID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UdateWithWrongId.json";
+	private static final String JSON_UPDATE_WITH_WRONG_ID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UpdateWithWrongId.json";
 	
 	@Mock
 	private FhirMedicationService fhirMedicationService;
 	
 	@Getter
 	private MedicationFhirResourceProvider resourceProvider;
-	
-	@Captor
-	private ArgumentCaptor<TokenOrListParam> tokenOrListParamArgumentCaptor;
 	
 	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
@@ -172,8 +171,8 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		medication.setId(MEDICATION_UUID);
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_MEDICATION_PATH)) {
-			assert is != null;
-			medicationJson = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(fhirMedicationService.create(any(org.hl7.fhir.r4.model.Medication.class))).thenReturn(medication);
@@ -191,8 +190,8 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		medication.setStatus(org.hl7.fhir.r4.model.Medication.MedicationStatus.INACTIVE);
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
-			assert is != null;
-			medicationJson = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(fhirMedicationService.update(any(String.class), any(org.hl7.fhir.r4.model.Medication.class)))
@@ -208,7 +207,8 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	public void updateMedicationShouldErrorForIdMismatch() throws Exception {
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
-			medicationJson = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(medicationJson)
@@ -222,8 +222,9 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	@Test
 	public void updateMedicationShouldErrorForNoId() throws Exception {
 		String medicationJson;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITHOUTID_MEDICATION_PATH)) {
-			medicationJson = IOUtils.toString(is);
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITHOUT_ID_MEDICATION_PATH)) {
+			Objects.requireNonNull(is);
+			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Medication/" + MEDICATION_UUID).jsonContent(medicationJson)
@@ -237,8 +238,9 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	public void updateMedicationShouldErrorForNonexistentMedication() throws Exception {
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader()
-		        .getResourceAsStream(JSON_UPDATE_WITHWRONGID_MEDICATION_PATH)) {
-			medicationJson = IOUtils.toString(is);
+		        .getResourceAsStream(JSON_UPDATE_WITH_WRONG_ID_MEDICATION_PATH)) {
+			Objects.requireNonNull(is);
+			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(fhirMedicationService.update(eq(WRONG_MEDICATION_UUID), any(org.hl7.fhir.r4.model.Medication.class)))

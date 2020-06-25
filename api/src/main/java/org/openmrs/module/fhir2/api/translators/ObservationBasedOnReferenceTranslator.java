@@ -18,7 +18,7 @@ public interface ObservationBasedOnReferenceTranslator extends OpenmrsFhirTransl
 	 * Maps an {@link Order} to an {@link org.hl7.fhir.r4.model.Reference}
 	 *
 	 * @param order the OpenMRS order element to translate
-	 * @return
+	 * @return a FHIR reference to the order which prompted this observation
 	 */
 	@Override
 	Reference toFhirResource(Order order);
@@ -27,7 +27,7 @@ public interface ObservationBasedOnReferenceTranslator extends OpenmrsFhirTransl
 	 * Maps an {@link org.hl7.fhir.r4.model.Reference} to an {@link Order}
 	 *
 	 * @param reference the resource to map
-	 * @return
+	 * @return the OpenMRS order matched by this reference
 	 */
 	@Override
 	Order toOpenmrsType(Reference reference);

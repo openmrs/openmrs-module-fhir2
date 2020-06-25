@@ -59,12 +59,14 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Create
+	@SuppressWarnings("unused")
 	public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport diagnosticReport) {
 		return FhirProviderUtils.buildCreate(
 		    diagnosticReportService.create(DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport)));
 	}
 	
 	@Update
+	@SuppressWarnings("unused")
 	public MethodOutcome updateDiagnosticReport(@IdParam IdType id, @ResourceParam DiagnosticReport diagnosticReport) {
 		String idPart = null;
 		

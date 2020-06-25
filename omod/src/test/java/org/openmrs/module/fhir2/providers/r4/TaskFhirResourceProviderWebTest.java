@@ -30,9 +30,11 @@ import javax.servlet.ServletException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -57,7 +59,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
-import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -179,7 +180,8 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	public void createTask_shouldCreateNewTask() throws Exception {
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_PATH)) {
-			jsonTask = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(service.create(any(Task.class))).thenReturn(task);
@@ -193,7 +195,8 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	public void updateTask_shouldUpdateExistingTask() throws Exception {
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_PATH)) {
-			jsonTask = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(service.update(anyString(), any(Task.class))).thenReturn(task);
@@ -207,7 +210,8 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	public void updateTask_shouldErrorForIdMismatch() throws Exception {
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_WRONG_ID_PATH)) {
-			jsonTask = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Task/" + TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON).go();
@@ -221,7 +225,8 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	public void updateTask_shouldErrorForNoId() throws Exception {
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_NO_ID_PATH)) {
-			jsonTask = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Task/" + TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON).go();
@@ -234,7 +239,8 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	public void updateTask_shouldErrorForNonexistentTask() throws Exception {
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_WRONG_ID_PATH)) {
-			jsonTask = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(service.update(eq(WRONG_TASK_UUID), any(Task.class)))

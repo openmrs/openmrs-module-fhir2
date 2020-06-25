@@ -77,8 +77,8 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 			medication.setId(id.getIdPart());
 		}
 		
-		return FhirProviderUtils
-		        .buildUpdate(medicationService.update(id.getIdPart(), Medication30_40.convertMedication(medication)));
+		return FhirProviderUtils.buildUpdate(
+		    medicationService.update(id == null ? null : id.getIdPart(), Medication30_40.convertMedication(medication)));
 	}
 	
 	@Delete

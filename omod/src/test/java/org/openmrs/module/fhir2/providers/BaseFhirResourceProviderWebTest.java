@@ -151,6 +151,7 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		return new FhirRequestBuilder(RequestTypeEnum.DELETE, "http://localhost:8080/" + getServletName() + uri);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public U readResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		return (U) parser.parseResource(response.getContentAsString());
 	}
@@ -212,7 +213,7 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 	
 	private class StatusEqualsMatcher extends HttpResponseMatcher {
 		
-		private int status;
+		private final int status;
 		
 		private StatusEqualsMatcher(int status) {
 			this.status = status;

@@ -120,10 +120,7 @@ public class CohortListEntryTranslatorImpl_2_1Test {
 	
 	@Test
 	public void toOpenmrsType_shouldReturnCohortAsIsIfCalledWithEmptyList() {
-		Cohort cohort = new Cohort();
-		cohort.setId(1);
-		
-		List<ListResource.ListEntryComponent> list = new ArrayList<>();
+		Cohort cohort = new Cohort(1);
 		
 		Cohort result = listEntryTranslatorImpl_2_1.toOpenmrsType(cohort, null);
 		

@@ -97,7 +97,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	private void handleReference(Criteria criteria, ReferenceAndListParam reference, String property, String alias) {
 		handleAndListParam(reference, param -> {
 			if (validReferenceParam(param)) {
-				if (!containsAlias(criteria, alias)) {
+				if (lacksAlias(criteria, alias)) {
 					criteria.createAlias(property, alias);
 				}
 				

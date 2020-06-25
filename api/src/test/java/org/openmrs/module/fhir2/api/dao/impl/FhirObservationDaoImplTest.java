@@ -38,8 +38,6 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String BAD_OBS_UUID = "121b73a6-e1a4-4424-8610-d5765bf2fdf7";
 	
-	private static final String OBS_CONCEPT_UUID = "c607c80f-1ea9-4da3-bb88-6276ce8868dd";
-	
 	private static final String OBS_CONCEPT_ID = "5089";
 	
 	@Autowired

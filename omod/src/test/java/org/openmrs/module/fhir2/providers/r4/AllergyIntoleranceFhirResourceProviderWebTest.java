@@ -26,10 +26,12 @@ import javax.servlet.ServletException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -57,7 +59,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.BaseFhirResourceProviderWebTest;
-import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -269,6 +270,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 		assertThat(tokenParam.getValue(), equalTo("d1b98543-10ff-4911-83a2-b7f5fafe2751"));
 	}
 	
+	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByAllergenCodeAndSystem() throws Exception {
 		verifyUri("/AllergyIntolerance?code=d1b98543-10ff-4911-83a2-b7f5fafe2751");
 		
@@ -419,8 +421,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 		allergy.setId(ALLERGY_UUID);
 		String createAllergyJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREAT_ALLERGY_PATH)) {
-			assert is != null;
-			createAllergyJson = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			createAllergyJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(allergyService.create(any(AllergyIntolerance.class))).thenReturn(allergy);

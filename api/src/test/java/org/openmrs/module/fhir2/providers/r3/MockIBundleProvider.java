@@ -21,19 +21,19 @@ import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-public class BaseFhirIBundleResourceProviderTest<U extends IBaseResource> implements IBundleProvider {
+public class MockIBundleProvider<U extends IBaseResource> implements IBundleProvider {
 	
 	private final Date datePublished;
 	
-	private List<U> mockResultList;
+	private final List<U> mockResultList;
 	
 	private final UUID uuid;
 	
-	private Integer count;
+	private final int count;
 	
-	private Integer preferredPageSize;
+	private final int preferredPageSize;
 	
-	public BaseFhirIBundleResourceProviderTest(List<U> mockResultList, Integer preferredPageSize, Integer count) {
+	public MockIBundleProvider(List<U> mockResultList, int preferredPageSize, int count) {
 		this.count = count;
 		this.uuid = UUID.randomUUID();
 		this.datePublished = new Date();
@@ -48,6 +48,7 @@ public class BaseFhirIBundleResourceProviderTest<U extends IBaseResource> implem
 	
 	@Nonnull
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<IBaseResource> getResources(int i, int i1) {
 		return (List<IBaseResource>) this.mockResultList;
 	}

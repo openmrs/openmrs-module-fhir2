@@ -108,7 +108,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
-			if (!containsAlias(criteria, "c")) {
+			if (lacksAlias(criteria, "c")) {
 				criteria.createAlias("concept", "c");
 			}
 			
@@ -118,11 +118,11 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	private void handleConceptClass(Criteria criteria, TokenAndListParam category) {
 		if (category != null) {
-			if (!containsAlias(criteria, "c")) {
+			if (lacksAlias(criteria, "c")) {
 				criteria.createAlias("concept", "c");
 			}
 			
-			if (!containsAlias(criteria, "cc")) {
+			if (lacksAlias(criteria, "cc")) {
 				criteria.createAlias("c.conceptClass", "cc");
 			}
 		}
@@ -144,7 +144,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	private void handleValueCodedConcept(Criteria criteria, TokenAndListParam valueConcept) {
 		if (valueConcept != null) {
-			if (!containsAlias(criteria, "vc")) {
+			if (lacksAlias(criteria, "vc")) {
 				criteria.createAlias("valueCoded", "vc");
 			}
 			handleCodeableConcept(criteria, valueConcept, "vc", "vcm", "vcrt").ifPresent(criteria::add);

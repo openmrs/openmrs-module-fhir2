@@ -66,6 +66,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(Location location,
 	        String locationAttributeTypeUuid) {
 		return (List<LocationAttribute>) getSessionFactory().getCurrentSession().createCriteria(LocationAttribute.class)
