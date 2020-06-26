@@ -9,15 +9,19 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Subqueries;
+import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugIngredient;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -36,15 +40,36 @@ public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedi
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public Collection<Drug> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
-	        TokenAndListParam ingredientCode, TokenAndListParam status) {
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Drug.class);
-		handleMedicationCode(criteria, code);
-		handleMedicationDosageForm(criteria, dosageForm);
-		handleBoolean("retired", convertStringStatusToBoolean(status)).ifPresent(criteria::add);
-		
-		return criteria.list();
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case FhirConstants.CODED_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleMedicationCode(criteria, (TokenAndListParam) param.getParam()));
+					break;
+				case FhirConstants.DOSAGE_FORM_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handleMedicationDosageForm(criteria, (TokenAndListParam) param.getParam()));
+					break;
+				case FhirConstants.INGREDIENT_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleIngredientCode(criteria, (TokenAndListParam) param.getParam()));
+					break;
+				case FhirConstants.BOOLEAN_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    param -> handleBoolean("retired", convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
+					            .ifPresent(criteria::add));
+					break;
+			}
+		});
+	}
+	
+	private void handleIngredientCode(Criteria criteria, TokenAndListParam ingredientCode) {
+		if (ingredientCode != null) {
+			criteria.createAlias("ingredients", "i");
+			DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Concept.class, "ic");
+			handleCodeableConcept(criteria, ingredientCode, "ic", "icm", "icrt").ifPresent(detachedCriteria::add);
+			detachedCriteria.setProjection(Projections.property("conceptId"));
+			criteria.add(Subqueries.propertyIn("i.ingredient", detachedCriteria));
+		}
 	}
 	
 	private void handleMedicationCode(Criteria criteria, TokenAndListParam code) {

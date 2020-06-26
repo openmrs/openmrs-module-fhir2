@@ -20,21 +20,24 @@ import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Collections;
+import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.CoreMatchers;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,6 +48,14 @@ public class MedicationFhirResourceProviderTest {
 	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
 	
 	private static final String CODE = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final int PREFERRED_PAGE_SIZE = 10;
+	
+	private static final int COUNT = 1;
+	
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
 	
 	@Mock
 	private FhirMedicationService fhirMedicationService;
@@ -60,6 +71,10 @@ public class MedicationFhirResourceProviderTest {
 		
 		medication = new org.hl7.fhir.r4.model.Medication();
 		medication.setId(MEDICATION_UUID);
+	}
+	
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	@Test
@@ -94,12 +109,15 @@ public class MedicationFhirResourceProviderTest {
 		code.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
 		
 		when(fhirMedicationService.searchForMedications(argThat(is(code)), isNull(), isNull(), isNull()))
-		        .thenReturn(Collections.singletonList(medication));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchForMedication(code, null, null);
+		IBundleProvider results = resourceProvider.searchForMedication(code, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.MEDICATION));
 	}
 	
 	@Test
@@ -108,12 +126,15 @@ public class MedicationFhirResourceProviderTest {
 		dosageFormCode.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
 		
 		when(fhirMedicationService.searchForMedications(isNull(), argThat(is(dosageFormCode)), isNull(), isNull()))
-		        .thenReturn(Collections.singletonList(medication));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchForMedication(null, dosageFormCode, null);
+		IBundleProvider results = resourceProvider.searchForMedication(null, dosageFormCode, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.MEDICATION));
 	}
 	
 	@Test
@@ -122,12 +143,32 @@ public class MedicationFhirResourceProviderTest {
 		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("active")));
 		
 		when(fhirMedicationService.searchForMedications(isNull(), isNull(), isNull(), argThat(is(status))))
-		        .thenReturn(Collections.singletonList(medication));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
 		
-		Bundle results = resourceProvider.searchForMedication(null, null, status);
+		IBundleProvider results = resourceProvider.searchForMedication(null, null, status, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.isResource(), is(true));
-		assertThat(results.getEntry().size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.MEDICATION));
+	}
+	
+	@Test
+	public void searchForMedication_shouldReturnMatchingBundleOfMedicationByIngredientCode() {
+		TokenAndListParam ingredientCode = new TokenAndListParam();
+		ingredientCode.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
+		
+		when(fhirMedicationService.searchForMedications(isNull(), isNull(), argThat(is(ingredientCode)), isNull()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchForMedication(null, null, null, ingredientCode);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.MEDICATION));
 	}
 	
 	//	@Test
