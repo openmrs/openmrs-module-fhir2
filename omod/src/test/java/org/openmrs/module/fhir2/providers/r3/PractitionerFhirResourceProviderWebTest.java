@@ -10,34 +10,42 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.AUT;
 import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
 
-import javax.servlet.ServletException;
-
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
+
+import javax.servlet.ServletException;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -80,6 +88,14 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
 	
+	private static final String JSON_CREATE_PRACTITIONER_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_create.json";
+
+	private static final String JSON_UPDATE_PRACTITIONER_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_update.json";
+
+	private static final String JSON_UPDATE_PRACTITIONER_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_UpdateWithoutId.json";
+
+	private static final String JSON_UPDATE_PRACTITIONER_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_UpdateWithWrongId.json";
+
 	@Getter(AccessLevel.PUBLIC)
 	private PractitionerFhirResourceProvider resourceProvider;
 	
@@ -371,4 +387,98 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
 	}
+	
+	@Test
+	public void createPractitioner_shouldCreatePractitioner() throws Exception {
+		String jsonPractitioner;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PRACTITIONER_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
+		practitioner.setId(PRACTITIONER_UUID);
+
+		when(practitionerService.create(any(org.hl7.fhir.r4.model.Practitioner.class))).thenReturn(practitioner);
+
+		MockHttpServletResponse response = post("/Practitioner").jsonContent(jsonPractitioner)
+		        .accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isCreated());
+	}
+	
+	@Test
+	public void updatePractitioner_shouldUpdateExistingPractitioner() throws Exception {
+		String jsonPractitioner;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_PATH )) {
+			Objects.requireNonNull(is);
+			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
+		practitioner.setId(PRACTITIONER_UUID);
+
+		when(practitionerService.update(anyString(), any(org.hl7.fhir.r4.model.Practitioner.class))).thenReturn(practitioner);
+
+		MockHttpServletResponse response = put("/Practitioner/" + PRACTITIONER_UUID).jsonContent(jsonPractitioner)
+				.accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isOk());
+	}
+	
+	@Test
+	public void updatePractitioner_shouldErrorForNoId() throws Exception {
+		String jsonPractitioner;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_NO_ID_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		MockHttpServletResponse response = put("/Practitioner/" + PRACTITIONER_UUID).jsonContent(jsonPractitioner)
+				.accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+				containsStringIgnoringCase("body must contain an ID element for update"));
+	}
+	
+	@Test
+	public void updatePractitioner_shouldErrorForIdMissMatch() throws Exception {
+		String jsonPractitioner;
+		try (InputStream is = this.getClass().getClassLoader()
+				.getResourceAsStream(JSON_UPDATE_PRACTITIONER_WRONG_ID_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+
+		MockHttpServletResponse response = put("/Practitioner/" + WRONG_PRACTITIONER_UUID).jsonContent(jsonPractitioner)
+				.accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+				containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+	}
+	
+	@Test
+	public void deletePractitioner_shouldDeletePractitioner() throws Exception {
+		OperationOutcome retVal = new OperationOutcome();
+		retVal.setId(PRACTITIONER_UUID);
+		retVal.getText().setDivAsString("Deleted successfully");
+
+		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
+		practitioner.setId(PRACTITIONER_UUID);
+
+		when(practitionerService.delete(PRACTITIONER_UUID)).thenReturn(practitioner);
+
+		MockHttpServletResponse response = delete("/Practitioner/" + PRACTITIONER_UUID).accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+
+
+	
+	
+	
+	
+	
 }

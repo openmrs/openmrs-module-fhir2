@@ -13,24 +13,32 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -56,6 +64,33 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
 		}
 		return practitioner;
+	}
+	
+	@Create
+	public MethodOutcome createPractitioner(@ResourceParam Practitioner practitioner) {
+		return FhirProviderUtils.buildCreate(practitionerService.create(practitioner));
+	} 
+
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updatePractitioner(@IdParam IdType id, @ResourceParam Practitioner practitioner) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+
+		practitioner.setId(id.getIdPart());
+
+		return FhirProviderUtils.buildUpdate(practitionerService.update(id.getIdPart(),practitioner));
+	}
+
+	@Delete
+	@SuppressWarnings("unused")
+	public OperationOutcome deletePractitioner(@IdParam @NotNull IdType id) {
+		org.hl7.fhir.r4.model.Practitioner practitioner = practitionerService.delete(id.getIdPart());
+		if (practitioner == null) {
+			throw new ResourceNotFoundException("Could not find practitioner to delete with id " + id.getIdPart());
+		}
+		return FhirProviderUtils.buildDelete(practitioner);
 	}
 	
 	@History

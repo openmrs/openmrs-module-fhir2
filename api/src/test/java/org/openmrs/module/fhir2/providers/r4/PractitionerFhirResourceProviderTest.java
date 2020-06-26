@@ -24,6 +24,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -32,8 +33,13 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
@@ -529,4 +535,66 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		assertThat(resourceProvider.getPractitionerHistoryById(idType).isEmpty(), Matchers.is(true));
 		assertThat(resourceProvider.getPractitionerHistoryById(idType).size(), Matchers.equalTo(0));
 	}
+	
+	@Test
+	public void updatePractitioner_shouldUpdatePractitioner() {
+		Practitioner newPractitioner = practitioner;
+
+		when(practitionerService.update(PRACTITIONER_UUID, practitioner)).thenReturn(newPractitioner);
+
+		MethodOutcome result = resourceProvider.updatePractitioner(new IdType().setValue(PRACTITIONER_UUID), practitioner);
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(newPractitioner));
+	}
+
+
+	@Test(expected = InvalidRequestException.class)
+	public void updatePractitioner_shouldThrowInvalidRequestExceptionForWrongPractitionerUuid() {
+		when(practitionerService.update(WRONG_PRACTITIONER_UUID, practitioner)).thenThrow(InvalidRequestException.class);
+
+		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID), practitioner);
+	}
+
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateAllergyShouldThrowMethodNotAllowedIfDoesNotExist() {
+		Practitioner wrongPractitioner = new Practitioner();
+
+		wrongPractitioner.setId(WRONG_PRACTITIONER_UUID);
+
+		when(practitionerService.update(WRONG_PRACTITIONER_UUID, wrongPractitioner)).thenThrow(MethodNotAllowedException.class);
+
+		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID), wrongPractitioner);
+	}
+
+	@Test
+	public void deletePractitioner_shouldDeletePractitioner() {
+		when(practitionerService.delete(PRACTITIONER_UUID)).thenReturn(practitioner);
+
+		OperationOutcome result = resourceProvider.deletePractitioner(new IdType().setValue(PRACTITIONER_UUID));
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void deletePractitioner_shouldThrowResourceNotFoundException() {
+		IdType id = new IdType();
+		id.setValue(WRONG_PRACTITIONER_UUID);
+		org.hl7.fhir.r4.model.OperationOutcome practitioner = resourceProvider.deletePractitioner(id);
+		assertThat(practitioner, nullValue());
+	}
+
+	@Test
+	public void createPractitioner_shouldCreateNewPractitioner() {
+		when(practitionerService.create(practitioner)).thenReturn(practitioner);
+
+		MethodOutcome result = resourceProvider.createPractitioner(practitioner);
+
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(practitioner));
+	}
+
 }
