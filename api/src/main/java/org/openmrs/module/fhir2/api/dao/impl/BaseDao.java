@@ -388,20 +388,6 @@ public abstract class BaseDao {
 		    handleDate(propertyName, dateRangeParam.getUpperBound())))));
 	}
 	
-	//method for dateRanges that dont rely on a single property like TestOrders
-	protected Optional<Criterion> handleDateRange(String scheduledDate, String dateActivated, String dateStopped,
-	        String autoExpireDate, DateRangeParam dateRangeParam) {
-		if (dateRangeParam == null) {
-			return Optional.empty();
-		}
-		
-		return Optional.of(and(toCriteriaArray(Stream.of(
-		    Optional.of(or(toCriteriaArray(Stream.of(handleDate(scheduledDate, dateRangeParam.getLowerBound()),
-		        handleDate(dateActivated, dateRangeParam.getLowerBound()))))),
-		    Optional.of(or(toCriteriaArray(Stream.of(handleDate(dateStopped, dateRangeParam.getUpperBound()),
-		        handleDate(autoExpireDate, dateRangeParam.getUpperBound())))))))));
-	}
-	
 	/**
 	 * A handler for a {@link DateParam}, which represents a day and an comparator
 	 *

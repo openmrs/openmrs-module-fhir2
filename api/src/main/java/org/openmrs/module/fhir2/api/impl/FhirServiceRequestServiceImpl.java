@@ -53,7 +53,7 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference)
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "scheduledDate,dateActivated,dateStopped,autoExpireDate", occurence);
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, occurence);
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
