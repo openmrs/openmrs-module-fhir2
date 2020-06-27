@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -193,7 +194,8 @@ public class FhirTaskServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		
-		when(dao.search(any(), anyInt(), anyInt())).thenReturn(openmrsTasks);
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(TASK_UUID));
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(openmrsTasks);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
 		when(translator.toFhirResource(openmrsTask)).thenReturn(task);

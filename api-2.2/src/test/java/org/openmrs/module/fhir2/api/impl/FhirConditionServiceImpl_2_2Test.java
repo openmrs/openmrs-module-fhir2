@@ -156,7 +156,8 @@ public class FhirConditionServiceImpl_2_2Test {
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate", onsetDate)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordDate).setSortSpec(sort);
 		
-		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openmrsCondition));
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(CONDITION_UUID));
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openmrsCondition));
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, conditionTranslator));
 		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);

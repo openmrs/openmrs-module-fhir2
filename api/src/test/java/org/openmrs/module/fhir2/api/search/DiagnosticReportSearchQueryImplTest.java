@@ -17,7 +17,9 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -334,6 +336,24 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	}
 	
 	@Test
+	public void searchForDiagnosticReports_shouldSearchForUniqueObsByPatientName() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_NAME, "Horatio Hornblower");
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
+	}
+	
+	@Test
 	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue(WRONG_PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
@@ -421,6 +441,24 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	}
 	
 	@Test
+	public void searchForDiagnosticReports_shouldSearchForUniqueObsByPatientGivenName() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_GIVEN, "Horatio");
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(1)); // 2 with repetitions
+	}
+	
+	@Test
 	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientGivenName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue(WRONG_PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
@@ -503,6 +541,24 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
 		    equalTo(DIAGNOSTIC_REPORT_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldSearchForUniqueObsByPatientFamilyName() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_FAMILY, "Hornblower");
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
 	}
 	
 	@Test
@@ -684,8 +740,9 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		IBundleProvider diagnosticReports = search(theParams);
 		
 		// collect only those obs which are an obs group
-		List<DiagnosticReport> results = dao.search(theParams, START_INDEX, END_INDEX).stream().filter(Obs::isObsGrouping)
-		        .map(translator::toFhirResource).collect(Collectors.toList());
+		List<String> matchingResourceUuids = dao.getResultUuids(theParams);
+		List<DiagnosticReport> results = dao.search(theParams, matchingResourceUuids, START_INDEX, END_INDEX).stream()
+		        .filter(Obs::isObsGrouping).map(translator::toFhirResource).collect(Collectors.toList());
 		
 		assertThat(diagnosticReports, notNullValue());
 		assertThat(results, not(empty()));

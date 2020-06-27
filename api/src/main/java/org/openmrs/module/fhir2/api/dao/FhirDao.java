@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
@@ -29,13 +30,13 @@ public interface FhirDao<T extends OpenmrsObject & Auditable> extends Serializab
 	
 	T delete(@NotNull String uuid);
 	
-	Long getResultCounts(SearchParameterMap theParams);
+	List<String> getResultUuids(SearchParameterMap theParams);
 	
 	Integer getPreferredPageSize();
 	
-	default Collection<T> search(SearchParameterMap theParams) {
-		return search(theParams, 0, -1);
+	default Collection<T> search(SearchParameterMap theParams, List<String> matchingResourceUuids) {
+		return search(theParams, matchingResourceUuids, 0, matchingResourceUuids.size());
 	}
 	
-	Collection<T> search(SearchParameterMap theParams, int firstResult, int maxResults);
+	Collection<T> search(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult, int lastResult);
 }

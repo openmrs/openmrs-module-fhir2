@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -118,7 +119,8 @@ public class FhirMedicationServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		when(medicationDao.search(any(), anyInt(), anyInt())).thenReturn(medications);
+		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(medications);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
@@ -143,7 +145,8 @@ public class FhirMedicationServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DOSAGE_FORM_SEARCH_HANDLER,
 		    dosageForm);
 		
-		when(medicationDao.search(any(), anyInt(), anyInt())).thenReturn(medications);
+		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(medications);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
@@ -168,7 +171,8 @@ public class FhirMedicationServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INGREDIENT_SEARCH_HANDLER,
 		    ingredientCode);
 		
-		when(medicationDao.search(any(), anyInt(), anyInt())).thenReturn(medications);
+		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(medications);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
@@ -192,7 +196,8 @@ public class FhirMedicationServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, status);
 		
-		when(medicationDao.search(any(), anyInt(), anyInt())).thenReturn(medications);
+		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(medications);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);

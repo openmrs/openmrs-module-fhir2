@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -184,7 +185,8 @@ public class FhirDiagnosticReportServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		
-		when(dao.search(any(), anyInt(), anyInt())).thenReturn(obsList);
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(obsList);
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(UUID));
 		when(translator.toFhirResource(obs)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));

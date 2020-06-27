@@ -19,7 +19,9 @@ import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -305,6 +307,24 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	@Test
+	public void searchForConditions_shouldReturnUniqueConditionsByPatientGivenName() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_GIVEN, "Horatio");
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(3));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(3)); // 6 with repetitions
+	}
+	
+	@Test
 	public void searchForConditions_shouldSearchForConditionsByMultiplePatientGivenNameOr() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
@@ -394,6 +414,24 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	@Test
+	public void searchForConditions_shouldReturnUniqueConditionsByPatientFamilyName() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_FAMILY, "Hornblower");
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(3));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(3)); // 9 with repetitions
+	}
+	
+	@Test
 	public void searchForConditions_shouldSearchForConditionsByMultiplePatientFamilyNameOr() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
@@ -463,6 +501,24 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnUniqueConditionsByPatientName() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_NAME, "Horatio Hornblower");
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(3));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(3)); // 9 with repetitions
 	}
 	
 	@Test
