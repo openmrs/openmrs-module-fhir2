@@ -64,7 +64,7 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
-			if (!containsAlias(criteria, "c")) {
+			if (lacksAlias(criteria, "c")) {
 				criteria.createAlias("concept", "c");
 			}
 
