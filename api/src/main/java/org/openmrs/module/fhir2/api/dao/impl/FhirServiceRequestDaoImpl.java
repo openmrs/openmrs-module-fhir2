@@ -25,6 +25,7 @@ import org.hibernate.criterion.Criterion;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
