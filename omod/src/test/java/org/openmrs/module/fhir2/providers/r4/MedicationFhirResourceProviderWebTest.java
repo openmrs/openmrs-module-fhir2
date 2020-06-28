@@ -38,7 +38,6 @@ import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -182,7 +181,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	}
 	
 	@Test
-	public void shouldCreateNewMedication() throws Exception {
+	public void createeMedication_shouldCreateNewMedication() throws Exception {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		String medicationJson;
@@ -200,7 +199,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	}
 	
 	@Test
-	public void shouldUpdateMedication() throws Exception {
+	public void updateMedication_shouldUpdateMRequestededication() throws Exception {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		medication.setStatus(Medication.MedicationStatus.INACTIVE);
@@ -220,7 +219,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	}
 	
 	@Test
-	public void updateMedicationShouldErrorForIdMismatch() throws Exception {
+	public void updateMedication_shouldErrorForIdMismatch() throws Exception {
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
@@ -236,7 +235,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	}
 	
 	@Test
-	public void updateMedicationShouldErrorForNoId() throws Exception {
+	public void updateMedication_shouldErrorForNoId() throws Exception {
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITHOUT_ID_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
@@ -251,7 +250,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	}
 	
 	@Test
-	public void updateMedicationShouldErrorForNonexistentMedication() throws Exception {
+	public void updateMedication_shouldErrorForNonexistentMedication() throws Exception {
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader()
 		        .getResourceAsStream(JSON_UPDATE_WITH_WRONG_ID_MEDICATION_PATH)) {
@@ -269,15 +268,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	}
 	
 	@Test
-	public void shouldDeleteMedication() throws Exception {
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(MEDICATION_UUID);
-		retVal.getText().setDivAsString("Deleted successfully");
-		
-		Medication medication = new Medication();
-		medication.setId(MEDICATION_UUID);
-		medication.setStatus(Medication.MedicationStatus.INACTIVE);
-		
+	public void deleteMedication_shouldDeleteRequestedMedication() throws Exception {
 		when(fhirMedicationService.delete(any(String.class))).thenReturn(medication);
 		
 		MockHttpServletResponse response = delete("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
@@ -285,5 +276,4 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
-	
 }

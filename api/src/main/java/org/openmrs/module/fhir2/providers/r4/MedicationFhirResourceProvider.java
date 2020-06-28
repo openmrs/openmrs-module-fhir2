@@ -94,9 +94,6 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 		if (medication == null) {
 			throw new ResourceNotFoundException("Could not find medication to update with id " + id.getIdPart());
 		}
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(id.getIdPart());
-		retVal.getText().setDivAsString("Deleted successfully");
-		return retVal;
+		return FhirProviderUtils.buildDelete(medication);
 	}
 }
