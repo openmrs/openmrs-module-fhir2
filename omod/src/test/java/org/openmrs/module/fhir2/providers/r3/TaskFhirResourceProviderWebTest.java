@@ -253,6 +253,21 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	}
 	
 	@Test
+	public void deleteTask_shouldDeleteTask() throws Exception {
+		String jsonTask;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_PATH)) {
+			Objects.requireNonNull(is);
+			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		when(service.delete(anyString())).thenReturn(task)
+		        .thenThrow(new MethodNotAllowedException("Task successfuly  deleted"));
+		MockHttpServletResponse response = put("/Task/" + TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isMethodNotAllowed());
+		
+	}
+	
+	@Test
 	public void searchForTasks_shouldReturnBundleWithMatchingBasedOnResourceUUID() throws Exception {
 		verifyURI(String.format("/Task?based-on:%s=%s", FhirConstants.SERVICE_REQUEST, BASED_ON_UUID));
 		

@@ -31,4 +31,5 @@ public interface FhirTaskService extends FhirService<Task> {
 	 */
 	IBundleProvider searchForTasks(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,
 	        TokenAndListParam status, SortSpec sort);
+	
 }
