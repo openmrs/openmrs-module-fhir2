@@ -59,6 +59,7 @@ public class FhirProviderUtils {
 	
 	private static MethodOutcome buildWithResource(MethodOutcome methodOutcome, IAnyResource resource) {
 		if (resource != null) {
+			methodOutcome.setId(resource.getIdElement());
 			methodOutcome.setResource(resource);
 		}
 		
