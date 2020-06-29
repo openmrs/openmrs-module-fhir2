@@ -9,15 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.util;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class CalendarFactory {
+public class LocalDateTimeFactory {
 	
-	public Calendar getCalendar() {
-		return Calendar.getInstance();
+	public LocalDateTime now() {
+		return LocalDateTime.now();
 	}
 	
 }
