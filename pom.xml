@@ -202,6 +202,12 @@
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-converter</artifactId>
 				<version>${hapifhirVersion}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>net.sf.saxon</groupId>
+						<artifactId>Saxon-HE</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
