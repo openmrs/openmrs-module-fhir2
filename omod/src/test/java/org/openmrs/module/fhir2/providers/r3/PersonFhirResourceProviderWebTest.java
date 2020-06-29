@@ -51,7 +51,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPersonService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
-import org.openmrs.module.fhir2.providers.MockIBundleProvider;
+import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -155,7 +155,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1975, 1, 2);
+		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
@@ -172,7 +172,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1975, 1, 2);
+		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
@@ -188,7 +188,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1975, 1, 2);
+		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
@@ -204,7 +204,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1975, 1, 2);
+		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound(), nullValue());
 		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
@@ -220,7 +220,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1975, 1, 2);
+		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound(), nullValue());
 		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
@@ -235,9 +235,9 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		    isNull(), isNull());
 		
 		Calendar lowerBound = Calendar.getInstance();
-		lowerBound.set(1975, 1, 2);
+		lowerBound.set(1975, Calendar.FEBRUARY, 2);
 		Calendar upperBound = Calendar.getInstance();
-		upperBound.set(1980, 1, 2);
+		upperBound.set(1980, Calendar.FEBRUARY, 2);
 		
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
@@ -318,7 +318,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1975, 1, 2);
+		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));

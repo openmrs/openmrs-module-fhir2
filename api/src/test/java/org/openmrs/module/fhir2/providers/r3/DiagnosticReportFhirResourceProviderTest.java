@@ -16,20 +16,27 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hamcrest.CoreMatchers;
+import org.hl7.fhir.convertors.conv30_40.DiagnosticReport30_40;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
@@ -39,7 +46,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
-import org.openmrs.module.fhir2.providers.MockIBundleProvider;
+import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.DiagnosticReport> {
@@ -110,65 +117,62 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		assertThat(resourceProvider.getDiagnosticReportById(idType), nullValue());
 	}
 	
-	//	@Test
-	//	public void createDiagnosticReport_shouldCreateNewDiagnosticReport() {
-	//		when(service.saveDiagnosticReport(diagnosticReport)).thenReturn(diagnosticReport);
-	//
-	//		MethodOutcome result = resourceProvider
-	//		        .createDiagnosticReport(VersionConvertor_30_40.convertDiagnosticReport(diagnosticReport));
-	//
-	//		assertThat(result, notNullValue());
-	//		assertThat(result.getResource(), equalTo(VersionConvertor_30_40.convertDiagnosticReport(diagnosticReport)));
-	//	}
-	//
-	//	@Test
-	//	public void updateDiagnosticReport_shouldUpdateExistingDiagnosticReport() {
-	//		DiagnosticReport diagnosticReport = new DiagnosticReport();
-	//
-	//		diagnosticReport.setId(WRONG_UUID);
-	//		when(service.updateDiagnosticReport(UUID, VersionConvertor_30_40.convertDiagnosticReport(diagnosticReport)))
-	//		        .thenReturn(VersionConvertor_30_40.convertDiagnosticReport(diagnosticReport));
-	//
-	//		MethodOutcome result = resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), diagnosticReport);
-	//
-	//		assertThat(result, notNullValue());
-	//		assertThat(result.getResource(), equalTo(diagnosticReport));
-	//	}
-	//
-	//	@Test(expected = InvalidRequestException.class)
-	//	public void updateDiagnosticReport_shouldThrowInvalidRequestForUuidMismatch() {
-	//		DiagnosticReport wrongDiagnosticReport = new DiagnosticReport();
-	//
-	//		wrongDiagnosticReport.setId(WRONG_UUID);
-	//
-	//		when(service.updateDiagnosticReport(WRONG_UUID,
-	//		    VersionConvertor_30_40.convertDiagnosticReport(wrongDiagnosticReport))).thenThrow(InvalidRequestException.class);
-	//
-	//		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport);
-	//	}
-	//
-	//	@Test(expected = InvalidRequestException.class)
-	//	public void updateDiagnosticReport_shouldThrowInvalidRequestForMissingId() {
-	//		DiagnosticReport noIdDiagnostiReport = new DiagnosticReport();
-	//
-	//		when(service.updateDiagnosticReport(UUID, VersionConvertor_30_40.convertDiagnosticReport(noIdDiagnostiReport)))
-	//		        .thenThrow(InvalidRequestException.class);
-	//
-	//		resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), noIdDiagnostiReport);
-	//	}
-	//
-	//	@Test(expected = MethodNotAllowedException.class)
-	//	public void updateDiagnosticReport_shouldThrowMethodNotAllowedIfDoesNotExist() {
-	//		DiagnosticReport wrongDiagnosticReport = new DiagnosticReport();
-	//
-	//		wrongDiagnosticReport.setId(WRONG_UUID);
-	//
-	//		when(service.updateDiagnosticReport(WRONG_UUID,
-	//		    VersionConvertor_30_40.convertDiagnosticReport(wrongDiagnosticReport)))
-	//		            .thenThrow(MethodNotAllowedException.class);
-	//
-	//		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport);
-	//	}
+	@Test
+	public void createDiagnosticReport_shouldCreateNewDiagnosticReport() {
+		when(service.create(any(org.hl7.fhir.r4.model.DiagnosticReport.class))).thenReturn(diagnosticReport);
+		
+		MethodOutcome result = resourceProvider
+		        .createDiagnosticReport(DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(diagnosticReport.getId()));
+	}
+	
+	@Test
+	public void updateDiagnosticReport_shouldUpdateExistingDiagnosticReport() {
+		when(service.update(eq(UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class))).thenReturn(diagnosticReport);
+		
+		MethodOutcome result = resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID),
+		    DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(UUID));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateDiagnosticReport_shouldThrowInvalidRequestForUuidMismatch() {
+		DiagnosticReport wrongDiagnosticReport = new DiagnosticReport();
+		wrongDiagnosticReport.setId(WRONG_UUID);
+		
+		when(service.update(eq(WRONG_UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateDiagnosticReport_shouldThrowInvalidRequestForMissingId() {
+		DiagnosticReport noIdDiagnostiReport = new DiagnosticReport();
+		
+		when(service.update(eq(UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), noIdDiagnostiReport);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateDiagnosticReport_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		DiagnosticReport wrongDiagnosticReport = new DiagnosticReport();
+		
+		wrongDiagnosticReport.setId(WRONG_UUID);
+		
+		when(service.update(eq(WRONG_UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class)))
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateDiagnosticReport(new IdType().setValue(WRONG_UUID), wrongDiagnosticReport);
+	}
 	
 	@Test
 	public void findDiagnosticReports_shouldReturnMatchingBundleOfDiagnosticReports() {
@@ -202,5 +206,23 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 		assertThat(((org.hl7.fhir.r4.model.DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
+	}
+	
+	@Test
+	public void deleteDiagnosticReport_shouldDeleteRequestedDiagnosticReport() {
+		
+		when(service.delete(UUID)).thenReturn(diagnosticReport);
+		
+		OperationOutcome result = resourceProvider.deleteDiagnosticReport(new IdType().setValue(UUID));
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteDiagnosticReport_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantDiagnosticReport() {
+		when(service.delete(WRONG_UUID)).thenReturn(null);
+		resourceProvider.deleteDiagnosticReport(new IdType().setValue(WRONG_UUID));
 	}
 }

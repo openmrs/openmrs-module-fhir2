@@ -29,10 +29,12 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -60,7 +62,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
-import org.openmrs.module.fhir2.providers.MockIBundleProvider;
+import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -213,8 +215,8 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		condition.setId(CONDITION_UUID);
 		String conditionJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_CONDITION_PATH)) {
-			assert is != null;
-			conditionJson = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(conditionService.saveCondition(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
@@ -346,7 +348,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		    dateRangeParamArgumentCaptor.capture(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1978, 1, 2);
+		calendar.set(1978, Calendar.FEBRUARY, 2);
 		
 		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
@@ -362,7 +364,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		    isNull(), isNull(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1975, 1, 2);
+		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));

@@ -17,8 +17,8 @@ import javax.servlet.ServletException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -39,6 +39,7 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	@Mock
 	private FhirServiceRequestService service;
 	
+	@Before
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new ServiceRequestFhirResourceProvider();
@@ -55,9 +56,9 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 		
 		MockHttpServletResponse response = get("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
 		
-		MatcherAssert.assertThat(response, isOk());
-		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-		MatcherAssert.assertThat(readResponse(response).getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(readResponse(response).getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
 	}
 	
 	@Test
@@ -65,6 +66,6 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 		MockHttpServletResponse response = get("/ServiceRequest/" + WRONG_SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
 		
-		MatcherAssert.assertThat(response, isNotFound());
+		assertThat(response, isNotFound());
 	}
 }

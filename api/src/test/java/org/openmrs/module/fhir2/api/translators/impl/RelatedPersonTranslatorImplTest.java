@@ -92,10 +92,6 @@ public class RelatedPersonTranslatorImplTest {
 	
 	private Person personA;
 	
-	private Person personB;
-	
-	private User user;
-	
 	@Before
 	public void setup() {
 		relatedPersonTranslator = new RelatedPersonTranslatorImpl();
@@ -105,7 +101,7 @@ public class RelatedPersonTranslatorImplTest {
 		relatedPersonTranslator.setPatientDao(patientDao);
 		relatedPersonTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		
-		user = new User();
+		User user = new User();
 		user.setUuid(USER_UUID);
 		
 		personA = new Person();
@@ -116,7 +112,7 @@ public class RelatedPersonTranslatorImplTest {
 		personA.setChangedBy(user);
 		personA.setDateChanged(new Date());
 		
-		personB = new Person();
+		Person personB = new Person();
 		personB.setUuid(PERSON_A_UUID);
 		personB.setPersonId(2);
 		personB.setGender("F");
@@ -205,7 +201,6 @@ public class RelatedPersonTranslatorImplTest {
 		when(nameTranslator.toFhirResource(argThat(allOf(hasProperty("givenName", equalTo(PERSON_GIVEN_NAME)),
 		    hasProperty("familyName", equalTo(PERSON_FAMILY_NAME)))))).thenReturn(humanName);
 		
-		Person person = new Person();
 		PersonName name = new PersonName();
 		name.setGivenName(PERSON_GIVEN_NAME);
 		name.setFamilyName(PERSON_FAMILY_NAME);

@@ -26,8 +26,9 @@ public interface AllergyIntoleranceTranslator extends ToFhirTranslator<Allergy, 
 	/**
 	 * Maps {@link org.hl7.fhir.r4.model.AllergyIntolerance} to {@link org.openmrs.Allergy}
 	 *
-	 * @param allergy
-	 * @param allergyIntolerance the resource to map
+	 * @param allergy the existing OpenMRS allergy to update
+	 * @param allergyIntolerance the FHIR AllergyIntolerance resource to update the existing Allergy
+	 *            with
 	 * @return the updated OpenMrs Allergy object
 	 */
 	@Override

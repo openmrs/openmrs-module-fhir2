@@ -32,6 +32,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public T update(String uuid, T updatedResource) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");

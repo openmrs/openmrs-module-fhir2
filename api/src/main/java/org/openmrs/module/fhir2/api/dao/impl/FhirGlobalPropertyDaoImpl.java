@@ -46,6 +46,7 @@ public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map<String, String> getGlobalProperties(String... properties) {
 		Map<String, String> globalPropertiesMap = new HashMap<>();
 		

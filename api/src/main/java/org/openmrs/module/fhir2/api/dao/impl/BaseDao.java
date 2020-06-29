@@ -165,6 +165,7 @@ public abstract class BaseDao {
 	 * @param <T> any type
 	 * @return a stream containing the same objects as the iterable
 	 */
+	@SuppressWarnings("unused")
 	protected static <T> Stream<T> stream(Iterable<T> iterable) {
 		return stream(iterable.iterator());
 	}
@@ -187,6 +188,7 @@ public abstract class BaseDao {
 	 * @param <T> any type
 	 * @return a stream containing the same objects as the iterable
 	 */
+	@SuppressWarnings("unused")
 	protected static <T> Stream<T> parallelStream(Iterable<T> iterable) {
 		return parallelStream(iterable.iterator());
 	}
@@ -210,7 +212,7 @@ public abstract class BaseDao {
 	 * @param alias the alias to look for
 	 * @return true if the alias exists in this criteria object, false otherwise
 	 */
-	protected boolean containsAlias(@NotNull Criteria criteria, @NotNull String alias) {
+	protected boolean lacksAlias(@NotNull Criteria criteria, @NotNull String alias) {
 		Optional<Iterator<CriteriaImpl.Subcriteria>> subcriteria = asImpl(criteria).map(CriteriaImpl::iterateSubcriteria);
 		
 		return subcriteria.filter(subcriteriaIterator -> containsAlias(subcriteriaIterator, alias)).isPresent();
@@ -226,7 +228,7 @@ public abstract class BaseDao {
 	 * @return true if any of the given subcriteria use the specified alias, false otherwise
 	 */
 	protected boolean containsAlias(Iterator<CriteriaImpl.Subcriteria> subcriteriaIterator, @NotNull String alias) {
-		return stream(subcriteriaIterator).anyMatch(sc -> sc.getAlias().equals(alias));
+		return stream(subcriteriaIterator).noneMatch(sc -> sc.getAlias().equals(alias));
 	}
 	
 	/**
@@ -250,6 +252,7 @@ public abstract class BaseDao {
 		    toCriteriaArray(handleAndListParam(andListParam).map(orListParam -> handleOrListParam(orListParam, handler)))));
 	}
 	
+	@SuppressWarnings("unused")
 	protected <T extends IQueryParameterOr<U>, U extends IQueryParameterType> Optional<Criterion> handleAndListParamBy(
 	        IQueryParameterAnd<T> andListParam, Function<IQueryParameterOr<U>, Optional<Criterion>> handler) {
 		if (andListParam == null) {
@@ -547,34 +550,34 @@ public abstract class BaseDao {
 	}
 	
 	protected void handleParticipantReference(Criteria criteria, ReferenceAndListParam participantReference) {
-		if (participantReference != null && !containsAlias(criteria, "ep")) {
+		if (participantReference != null && lacksAlias(criteria, "ep")) {
 			criteria.createAlias("encounterProviders", "ep");
 			
 			handleAndListParam(participantReference, participantToken -> {
 				if (participantToken.getChain() != null) {
 					switch (participantToken.getChain()) {
 						case Practitioner.SP_IDENTIFIER:
-							if (!containsAlias(criteria, "p")) {
+							if (lacksAlias(criteria, "p")) {
 								criteria.createAlias("ep.provider", "p");
 							}
 							return Optional.of(ilike("p.identifier", participantToken.getValue()));
 						case Practitioner.SP_GIVEN:
-							if ((!containsAlias(criteria, "pro")
-							        && (!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn"))))) {
+							if ((lacksAlias(criteria, "pro")
+							        && (lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn"))))) {
 								criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
 								        .createAlias("ps.names", "pn");
 							}
 							return Optional.of(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
 						case Practitioner.SP_FAMILY:
-							if ((!containsAlias(criteria, "pro")
-							        && (!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn"))))) {
+							if ((lacksAlias(criteria, "pro")
+							        && (lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn"))))) {
 								criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
 								        .createAlias("ps.names", "pn");
 							}
 							return Optional.of(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
 						case Practitioner.SP_NAME:
-							if ((!containsAlias(criteria, "pro")
-							        && (!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn"))))) {
+							if ((lacksAlias(criteria, "pro")
+							        && (lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn"))))) {
 								criteria.createAlias("ep.provider", "pro").createAlias("pro.person", "ps")
 								        .createAlias("ps.names", "pn");
 							}
@@ -590,7 +593,7 @@ public abstract class BaseDao {
 							return Optional.of(or(toCriteriaArray(criterionList)));
 					}
 				} else {
-					if (!containsAlias(criteria, "pro")) {
+					if (lacksAlias(criteria, "pro")) {
 						criteria.createAlias("ep.provider", "pro");
 					}
 					return Optional.of(eq("pro.uuid", participantToken.getValue()));
@@ -613,17 +616,17 @@ public abstract class BaseDao {
 						case Practitioner.SP_IDENTIFIER:
 							return Optional.of(ilike("or.identifier", participantToken.getValue()));
 						case Practitioner.SP_GIVEN:
-							if ((!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))) {
+							if ((lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn")))) {
 								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
 							}
 							return Optional.of(ilike("pn.givenName", participantToken.getValue(), MatchMode.START));
 						case Practitioner.SP_FAMILY:
-							if ((!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))) {
+							if ((lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn")))) {
 								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
 							}
 							return Optional.of(ilike("pn.familyName", participantToken.getValue(), MatchMode.START));
 						case Practitioner.SP_NAME:
-							if ((!containsAlias(criteria, "ps") && (!containsAlias(criteria, "pn")))) {
+							if ((lacksAlias(criteria, "ps") && (lacksAlias(criteria, "pn")))) {
 								criteria.createAlias("or.person", "ps").createAlias("ps.names", "pn");
 							}
 							
@@ -659,7 +662,7 @@ public abstract class BaseDao {
 				        tokensToParams(tokens).map(NumberUtils::toInt).collect(Collectors.toList())),
 				    in(String.format("%s.uuid", conceptAlias), tokensToList(tokens))));
 			} else {
-				if (!containsAlias(criteria, conceptMapAlias)) {
+				if (lacksAlias(criteria, conceptMapAlias)) {
 					criteria.createAlias(String.format("%s.conceptMappings", conceptAlias), conceptMapAlias).createAlias(
 					    String.format("%s.conceptReferenceTerm", conceptMapAlias), conceptReferenceTermAlias);
 				}
@@ -680,7 +683,7 @@ public abstract class BaseDao {
 			if (system.isEmpty()) {
 				return Optional.of(in("pi.identifier", tokensToList(tokens)));
 			} else {
-				if (!containsAlias(criteria, "pit")) {
+				if (lacksAlias(criteria, "pit")) {
 					criteria.createAlias("pi.identifierType", "pit");
 				}
 				
@@ -738,22 +741,22 @@ public abstract class BaseDao {
 				if (patientToken.getChain() != null) {
 					switch (patientToken.getChain()) {
 						case Patient.SP_IDENTIFIER:
-							if (!containsAlias(criteria, "pi")) {
+							if (lacksAlias(criteria, "pi")) {
 								criteria.createAlias("p.identifiers", "pi");
 							}
 							return Optional.of(ilike("pi.identifier", patientToken.getValue()));
 						case Patient.SP_GIVEN:
-							if (!containsAlias(criteria, "pn")) {
+							if (lacksAlias(criteria, "pn")) {
 								criteria.createAlias("p.names", "pn");
 							}
 							return Optional.of(ilike("pn.givenName", patientToken.getValue(), MatchMode.START));
 						case Patient.SP_FAMILY:
-							if (!containsAlias(criteria, "pn")) {
+							if (lacksAlias(criteria, "pn")) {
 								criteria.createAlias("p.names", "pn");
 							}
 							return Optional.of(ilike("pn.familyName", patientToken.getValue(), MatchMode.START));
 						case Patient.SP_NAME:
-							if (!containsAlias(criteria, "pn")) {
+							if (lacksAlias(criteria, "pn")) {
 								criteria.createAlias("p.names", "pn");
 							}
 							List<Optional<Criterion>> criterionList = new ArrayList<>();

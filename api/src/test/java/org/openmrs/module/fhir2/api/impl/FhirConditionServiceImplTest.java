@@ -24,11 +24,12 @@ public class FhirConditionServiceImplTest {
 	
 	private static final String BAD_CONDITION_UUID = "90378769-f1a4-46af-b08b-d9fe8a09034j";
 	
-	private FhirConditionServiceImpl conditionService;
+	private FhirConditionServiceImpl<?> conditionService;
 	
 	private Condition condition;
 	
 	@Before
+	@SuppressWarnings("rawtypes")
 	public void setup() {
 		conditionService = new FhirConditionServiceImpl();
 		

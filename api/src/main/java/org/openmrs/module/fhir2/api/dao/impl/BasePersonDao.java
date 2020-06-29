@@ -47,7 +47,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	/**
 	 * Returns the sqlAlias of the Person class for queries from this class
 	 *
-	 * @return
+	 * @return the sqlAlias for the Person class for queries from this class
 	 */
 	protected abstract String getSqlAlias();
 	
@@ -60,10 +60,10 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 		
 		Criteria criteria = sortState.getCriteria();
-		if (param.startsWith("address") && !containsAlias(criteria, "pad")) {
+		if (param.startsWith("address") && lacksAlias(criteria, "pad")) {
 			criteria.createAlias("addresses", "pad", JoinType.LEFT_OUTER_JOIN);
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
-			if (!containsAlias(criteria, "pn")) {
+			if (lacksAlias(criteria, "pn")) {
 				criteria.createAlias("names", "pn", JoinType.LEFT_OUTER_JOIN);
 			}
 			

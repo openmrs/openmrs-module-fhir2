@@ -97,10 +97,6 @@
 		<finalName>${project.parent.artifactId}-${project.parent.version}</finalName>
 		<plugins>
 			<plugin>
-				<groupId>org.projectlombok</groupId>
-				<artifactId>lombok-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>

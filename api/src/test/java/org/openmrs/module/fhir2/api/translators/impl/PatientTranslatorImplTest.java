@@ -84,16 +84,6 @@ public class PatientTranslatorImplTest {
 	
 	private static final Date PATIENT_DEATH_DATE = Date.from(Instant.ofEpochSecond(872986980L));
 	
-	private static final String USER_UUID = "ddc25312-9798-4e6c-b8f8-269f2dd07cfd";
-	
-	private static final String UPDATE = "UPDATE";
-	
-	private static final String REVISE = "revise";
-	
-	private static final String CREATE = "CREATE";
-	
-	private static final String AGENT_ROLE_CODE = "AUT";
-	
 	@Mock
 	private PatientIdentifierTranslator identifierTranslator;
 	

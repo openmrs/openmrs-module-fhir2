@@ -155,10 +155,8 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 					allergy.setSeverity(severityTranslator.toOpenmrsType(reaction.getSeverity()));
 				}
 				if (reaction.hasManifestation()) {
-					reaction.getManifestation().forEach(manifestation -> {
-						reactions.add(new AllergyReaction(allergy, conceptTranslator.toOpenmrsType(manifestation),
-						        manifestation.getText()));
-					});
+					reaction.getManifestation().forEach(manifestation -> reactions.add(new AllergyReaction(allergy,
+					        conceptTranslator.toOpenmrsType(manifestation), manifestation.getText())));
 				}
 			}
 		}

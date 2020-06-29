@@ -9,13 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import java.util.Collection;
-
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.openmrs.Drug;
 
 public interface FhirMedicationDao extends FhirDao<Drug> {
 	
-	Collection<Drug> searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
-	        TokenAndListParam ingredientCode, TokenAndListParam status);
 }

@@ -42,7 +42,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
-import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Encounter> {

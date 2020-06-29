@@ -15,12 +15,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 
-import java.util.Collection;
 import java.util.Collections;
 
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,10 +36,6 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String MEDICATION_UUID = "1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String WRONG_MEDICATION_UUID = "9085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
-	private static final String CONCEPT_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
-	private static final String DOSAGE_FORM_UUID = "5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String INGREDIENT_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -81,50 +73,6 @@ public class FhirMedicationDaoImplTest extends BaseModuleContextSensitiveTest {
 	public void getMedicationByUuid_shouldReturnNullWhenCalledWithUnknownUuid() {
 		Drug medication = medicationDao.get(WRONG_MEDICATION_UUID);
 		assertThat(medication, nullValue());
-	}
-	
-	@Test
-	public void searchForMedications_shouldSearchMedicationsByCode() {
-		TokenAndListParam code = new TokenAndListParam();
-		code.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CONCEPT_UUID)));
-		
-		Collection<Drug> result = medicationDao.searchForMedications(code, null, null, null);
-		assertThat(result, notNullValue());
-		assertThat(result.size(), greaterThanOrEqualTo(1));
-		assertThat(result.iterator().next().getConcept().getUuid(), equalTo(CONCEPT_UUID));
-	}
-	
-	@Test
-	public void searchForMedications_shouldSearchMedicationsByDosageForm() {
-		TokenAndListParam dosageForm = new TokenAndListParam();
-		dosageForm.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(DOSAGE_FORM_UUID)));
-		
-		Collection<Drug> result = medicationDao.searchForMedications(null, dosageForm, null, null);
-		assertThat(result, notNullValue());
-		assertThat(result.size(), greaterThanOrEqualTo(1));
-		assertThat(result.iterator().next().getDosageForm().getUuid(), equalTo(DOSAGE_FORM_UUID));
-	}
-	
-	@Test
-	public void searchForMedications_shouldSearchMedicationsByClinicalStatusActive() {
-		TokenAndListParam status = new TokenAndListParam();
-		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("active")));
-		
-		Collection<Drug> result = medicationDao.searchForMedications(null, null, null, status);
-		assertThat(result, notNullValue());
-		assertThat(result.size(), greaterThanOrEqualTo(1));
-		assertThat(result.iterator().next().getRetired(), equalTo(false));
-	}
-	
-	@Test
-	public void searchForMedications_shouldSearchMedicationsByClinicalStatusInactive() {
-		TokenAndListParam status = new TokenAndListParam();
-		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("inactive")));
-		
-		Collection<Drug> result = medicationDao.searchForMedications(null, null, null, status);
-		assertThat(result, notNullValue());
-		assertThat(result.size(), greaterThanOrEqualTo(1));
-		assertThat(result.iterator().next().getRetired(), equalTo(true));
 	}
 	
 	@Test

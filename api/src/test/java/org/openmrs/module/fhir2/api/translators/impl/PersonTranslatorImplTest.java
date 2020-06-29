@@ -108,8 +108,6 @@ public class PersonTranslatorImplTest {
 	
 	private Person personMock;
 	
-	private User user;
-	
 	@Before
 	public void setup() {
 		personTranslator = new PersonTranslatorImpl();
@@ -124,7 +122,7 @@ public class PersonTranslatorImplTest {
 	
 	@Before
 	public void initPersonMock() {
-		user = new User();
+		User user = new User();
 		user.setUuid(USER_UUID);
 		
 		personMock = new Person();

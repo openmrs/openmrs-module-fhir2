@@ -15,11 +15,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -44,7 +48,7 @@ import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
-import org.openmrs.module.fhir2.api.util.CalendarFactory;
+import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -122,7 +126,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>> searchQuery;
 	
 	@Autowired
-	private CalendarFactory calendarFactory;
+	private LocalDateTimeFactory localDateTimeFactory;
 	
 	@Before
 	public void setup() {
@@ -305,6 +309,24 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	@Test
+	public void searchForConditions_shouldReturnUniqueConditionsByPatientGivenName() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_GIVEN, "Horatio");
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(3));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(3)); // 6 with repetitions
+	}
+	
+	@Test
 	public void searchForConditions_shouldSearchForConditionsByMultiplePatientGivenNameOr() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
@@ -394,6 +416,24 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	@Test
+	public void searchForConditions_shouldReturnUniqueConditionsByPatientFamilyName() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_FAMILY, "Hornblower");
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(3));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(3)); // 9 with repetitions
+	}
+	
+	@Test
 	public void searchForConditions_shouldSearchForConditionsByMultiplePatientFamilyNameOr() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
@@ -463,6 +503,24 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnUniqueConditionsByPatientName() {
+		ReferenceParam patientReference = new ReferenceParam(Patient.SP_NAME, "Horatio Hornblower");
+		ReferenceAndListParam patientList = new ReferenceAndListParam();
+		patientList.addValue(new ReferenceOrListParam().add(patientReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    patientList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(3));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(3)); // 9 with repetitions
 	}
 	
 	@Test
@@ -576,9 +634,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 1.5, "", "h"));
 		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
 		
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(2020, Calendar.MARCH, 13, 19, 10, 0);
-		when(calendarFactory.getCalendar()).thenReturn(calendar);
+		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 19, 10, 0));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
@@ -599,9 +655,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 3, "", "h"));
 		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
 		
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(2020, Calendar.MARCH, 13, 22, 0, 0);
-		when(calendarFactory.getCalendar()).thenReturn(calendar);
+		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 22, 0, 0));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
@@ -624,9 +678,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		orListUpper.addOr(new QuantityParam(ParamPrefixEnum.GREATERTHAN, 8, "", "d"));
 		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orListLower).addAnd(orListUpper);
 		
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(2020, Calendar.MARCH, 22, 22, 0, 0);
-		when(calendarFactory.getCalendar()).thenReturn((Calendar) calendar.clone()).thenReturn((Calendar) calendar.clone());
+		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 22, 22, 0, 0));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
@@ -634,9 +686,8 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(1));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
 		    equalTo(CONDITION_UUID));
 	}
@@ -649,9 +700,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 2, "", "wk"));
 		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
 		
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(2020, Calendar.MARCH, 20, 22, 0, 0);
-		when(calendarFactory.getCalendar()).thenReturn((Calendar) calendar.clone()).thenReturn((Calendar) calendar.clone());
+		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 22, 0, 0));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
@@ -670,9 +719,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		orList.addOr(new QuantityParam(ParamPrefixEnum.LESSTHAN, 1.5, "", "WRONG_UNIT"));
 		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
 		
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(2020, Calendar.MARCH, 13, 19, 10, 0);
-		when(calendarFactory.getCalendar()).thenReturn(calendar);
+		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2020, Month.MARCH, 13, 19, 10, 0));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
 		    onsetAgeParam);
