@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import java.util.stream.Collectors;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Identifier;
@@ -46,7 +44,7 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 		
 		Identifier userIdentifier = new Identifier();
 		userIdentifier.setSystem(FhirConstants.OPENMRS_FHIR_EXT_USER_IDENTIFIER);
-		userIdentifier.setValue(user.getUserId().toString());
+		userIdentifier.setValue(user.getSystemId());
 		practitioner.addIdentifier(userIdentifier);
 		
 		if (user.getPerson() != null) {
@@ -70,7 +68,7 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 			return user;
 		}
 		user.setUuid(practitioner.getId());
-		user.setUserId(getUserId(practitioner));
+		setSystemId(practitioner, user);
 		user.setDateChanged(practitioner.getMeta().getLastUpdated());
 		
 		return user;
@@ -81,14 +79,13 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 		return this.toOpenmrsType(new User(), practitioner);
 	}
 	
-	private Integer getUserId(Practitioner practitioner) {
-		return Integer.parseInt(
-		    practitioner.getIdentifier().stream().map(this::isEquals).collect(Collectors.toList()).get(0).getValue());
-	}
-	
-	private Identifier isEquals(Identifier identifier) {
-		if (identifier.getSystem().equals(FhirConstants.OPENMRS_FHIR_EXT_USER_IDENTIFIER))
-			return identifier;
-		return null;
+	private void setSystemId(Practitioner thePractitioner, User user) {
+		thePractitioner.getIdentifier().forEach(practitioner -> {
+			if (practitioner.hasSystem()) {
+				if (practitioner.getSystem().equals(FhirConstants.OPENMRS_FHIR_EXT_USER_IDENTIFIER)) {
+					user.setSystemId(practitioner.getValue());
+				}
+			}
+		});
 	}
 }
