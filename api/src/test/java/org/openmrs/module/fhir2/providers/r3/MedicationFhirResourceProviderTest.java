@@ -213,22 +213,20 @@ public class MedicationFhirResourceProviderTest {
 	//	}
 	
 	@Test
-	public void shouldDeleteMedication() {
-		org.hl7.fhir.r4.model.Medication med = medication;
-		med.setStatus(org.hl7.fhir.r4.model.Medication.MedicationStatus.INACTIVE);
-		
-		when(fhirMedicationService.delete(MEDICATION_UUID)).thenReturn(med);
+	public void deleteMedication_shouldDeleteRequestedMedication() {
+		when(fhirMedicationService.delete(MEDICATION_UUID)).thenReturn(medication);
 		
 		OperationOutcome result = resourceProvider.deleteMedication(new IdType().setValue(MEDICATION_UUID));
 		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getId(), equalTo(MEDICATION_UUID));
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
-	public void deleteMedicationShouldThrowResourceNotFoundException() {
-		IdType id = new IdType();
-		id.setValue(WRONG_MEDICATION_UUID);
-		OperationOutcome medication = resourceProvider.deleteMedication(id);
-		assertThat(medication, nullValue());
+	public void deleteMedication_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantMedication() {
+		when(fhirMedicationService.delete(WRONG_MEDICATION_UUID)).thenReturn(null);
+		
+		resourceProvider.deleteMedication(new IdType().setValue(WRONG_MEDICATION_UUID));
 	}
 }

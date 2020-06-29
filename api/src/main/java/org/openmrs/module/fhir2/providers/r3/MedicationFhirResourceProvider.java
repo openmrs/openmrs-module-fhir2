@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.convertors.conv30_40.Medication30_40;
+import org.hl7.fhir.convertors.conv30_40.OperationOutcome30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -66,6 +67,8 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createMedication(@ResourceParam Medication medication) {
+		org.hl7.fhir.r4.model.Medication med = Medication30_40.convertMedication(medication);
+		med = medicationService.create(Medication30_40.convertMedication(medication));
 		return FhirProviderUtils.buildCreate(medicationService.create(Medication30_40.convertMedication(medication)));
 	}
 	
@@ -87,9 +90,7 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 		if (medication == null) {
 			throw new ResourceNotFoundException("Could not find medication to update with id " + id.getIdPart());
 		}
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(id.getIdPart());
-		retVal.getText().setDivAsString("Deleted successfully");
-		return retVal;
+		
+		return OperationOutcome30_40.convertOperationOutcome(FhirProviderUtils.buildDelete(medication));
 	}
 }
