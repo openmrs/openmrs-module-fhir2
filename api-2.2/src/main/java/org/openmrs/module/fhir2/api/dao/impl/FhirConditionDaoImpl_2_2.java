@@ -108,8 +108,10 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 			        "Invalid unit " + unit + " in age " + age + " should be one of 'min', 'h', 'd', 'wk', 'mo', 'a'");
 		}
 		Calendar cal = calendarFactory.getCalendar();
+		int timeFromActualInSeconds = 0;
 		int offsetSeconds = value.multiply(new BigDecimal(-1 * unitSeconds)).intValue();
 		cal.add(Calendar.SECOND, offsetSeconds);
+		timeFromActualInSeconds += offsetSeconds;
 		ParamPrefixEnum prefix = age.getPrefix();
 		if (prefix == null) {
 			prefix = ParamPrefixEnum.EQUAL;
@@ -121,20 +123,24 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 			Date lowerBound = cal.getTime();
 			cal.add(Calendar.SECOND, unitSeconds);
 			Date upperBound = cal.getTime();
+			timeFromActualInSeconds += unitSeconds / 2;
+			cal.add(Calendar.SECOND, -timeFromActualInSeconds); // reset the calendar to the original time
 			if (prefix == ParamPrefixEnum.EQUAL) {
 				return Optional.of(and(ge(datePropertyName, lowerBound), le(datePropertyName, upperBound)));
 			} else {
 				return Optional.of(not(and(ge(datePropertyName, lowerBound), le(datePropertyName, upperBound))));
 			}
 		}
+		Date currentTime = cal.getTime();
+		cal.add(Calendar.SECOND, -timeFromActualInSeconds); // reset the calendar to the original time
 		switch (prefix) {
 			case LESSTHAN_OR_EQUALS:
 			case LESSTHAN:
 			case STARTS_AFTER:
-				return Optional.of(ge(datePropertyName, cal.getTime()));
+				return Optional.of(ge(datePropertyName, currentTime));
 			case GREATERTHAN_OR_EQUALS:
 			case GREATERTHAN:
-				return Optional.of(le(datePropertyName, cal.getTime()));
+				return Optional.of(le(datePropertyName, currentTime));
 			// Ignoring ENDS_BEFORE as it is not meaningful for age.
 		}
 		return Optional.empty();

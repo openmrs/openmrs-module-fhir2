@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -131,10 +132,11 @@ public class FhirLocationServiceImplTest {
 		locations.add(location);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
+		when(locationDao.getResultUuids(any())).thenReturn(Collections.singletonList(LOCATION_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, locationDao, locationTranslator));
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-		when(locationDao.search(any(), anyInt(), anyInt())).thenReturn(locations);
+		when(locationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(locations);
 		
 		IBundleProvider results = fhirLocationService.searchForLocations(null, null, null, null, null, null, null, null);
 		

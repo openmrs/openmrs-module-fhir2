@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Collection;
+import java.util.List;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -77,7 +78,9 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
-		Collection<DrugOrder> drugOrder = medicationRequestDao.search(theParams);
+		
+		List<String> matchingResourceUuids = medicationRequestDao.getResultUuids(theParams);
+		Collection<DrugOrder> drugOrder = medicationRequestDao.search(theParams, matchingResourceUuids);
 		
 		assertThat(drugOrder, notNullValue());
 	}

@@ -20,11 +20,13 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -86,6 +88,9 @@ public class FhirObservationServiceImplTest {
 		Obs obs = new Obs();
 		obs.setUuid(OBS_UUID);
 		
+		Observation observation = new Observation();
+		observation.setId(OBS_UUID);
+		
 		ReferenceAndListParam patientReference = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
 		
@@ -97,10 +102,11 @@ public class FhirObservationServiceImplTest {
 		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		
 		when(dao.getPreferredPageSize()).thenReturn(10);
-		when(dao.getResultCounts(any())).thenReturn(1L);
-		when(dao.search(any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(obs));
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
 		IBundleProvider results = fhirObservationService.searchForObservations(null, patientReference, null, null, null,
 		    null, null, null, null, null, null);
@@ -109,7 +115,9 @@ public class FhirObservationServiceImplTest {
 		assertThat(results.size(), equalTo(1));
 		assertThat(results.preferredPageSize(), equalTo(10));
 		
-		assertThat(results.getResources(1, 10), not(empty()));
-		assertThat(results.getResources(1, 10), hasSize(equalTo(1)));
+		List<IBaseResource> resultList = results.getResources(1, 10);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 }

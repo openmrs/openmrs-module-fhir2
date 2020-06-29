@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -118,7 +119,8 @@ public class FhirEncounterServiceImplTest {
 		    dateRangeParam);
 		
 		fhirEncounter.setId(ENCOUNTER_UUID);
-		when(dao.search(any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
@@ -146,7 +148,8 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER,
 		    location);
 		
-		when(dao.search(any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
@@ -175,7 +178,8 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
 		
-		when(dao.search(any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
@@ -204,7 +208,8 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    subject);
 		
-		when(dao.search(any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));

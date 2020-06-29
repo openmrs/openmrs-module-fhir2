@@ -44,6 +44,8 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	
 	private transient Integer count;
 	
+	private transient List<String> matchingResourceUuids;
+	
 	public SearchQueryBundleProvider(SearchParameterMap theParams, FhirDao<T> dao, ToFhirTranslator<T, U> translator) {
 		this.dao = dao;
 		this.datePublished = new Date();
@@ -60,18 +62,21 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int fromIndex, int toIndex) {
+		if (this.matchingResourceUuids == null) {
+			this.matchingResourceUuids = dao.getResultUuids(theParams);
+		}
+		
 		int firstResult = 0;
 		if (fromIndex >= 0) {
 			firstResult = fromIndex;
 		}
 		
-		int maxResults = -1;
-		if (toIndex - fromIndex > 0) {
-			maxResults = toIndex - fromIndex;
+		int lastResult = this.size();
+		if (toIndex - firstResult > 0) {
+			lastResult = Math.min(lastResult, toIndex);
 		}
-		
-		return dao.search(theParams, firstResult, maxResults).stream().map(translator::toFhirResource)
-		        .collect(Collectors.toList());
+		return dao.search(this.theParams, this.matchingResourceUuids, firstResult, lastResult).stream()
+		        .map(translator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Nullable
@@ -88,8 +93,12 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	@Nullable
 	@Override
 	public Integer size() {
+		if (this.matchingResourceUuids == null) {
+			this.matchingResourceUuids = dao.getResultUuids(theParams);
+		}
+		
 		if (count == null) {
-			count = dao.getResultCounts(theParams).intValue();
+			count = this.matchingResourceUuids.size();
 		}
 		
 		return count;
