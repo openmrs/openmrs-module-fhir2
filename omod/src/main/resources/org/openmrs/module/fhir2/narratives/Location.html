@@ -1,0 +1,27 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <h2 th:if="${resource.name}" th:text="${resource.name}"></h2>
+    <h2 th:if="${not resource.address.empty}" th:narrative="${resource.address}"></h2>
+    <h2 th:if="${not resource.telecom.empty}" th:each="telecom: ${resource.telecom}">
+        <th:block th:narrative="${telecom}"></th:block>
+    </h2>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->
