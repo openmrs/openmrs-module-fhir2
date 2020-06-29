@@ -1,0 +1,177 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <table class="hapiPropertyTable">
+        <tbody>
+        <tr th:if="${resource.id}">
+            <td>Id:</td>
+            <td th:text="${resource.id}"></td>
+        </tr>
+        <tr th:if="${not resource.identifier.empty}">
+            <td>Identifier:</td>
+            <td>
+                <th:block th:each="identifier: ${resource.identifier}">
+                    <div th:narrative="${identifier}"></div>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${resource.active}">
+            <td>Active:</td>
+            <td th:text="${resource.active}"></td>
+        </tr>
+        <tr th:if="${not resource.period.empty}">
+            <td>Period:</td>
+            <td th:narrative="${resource.period}"></td>
+        </tr>
+        <tr th:if="${not resource.practitioner.empty}">
+            <td>Practitioner:</td>
+            <td th:narrative="${resource.practitioner}"></td>
+        </tr>
+        <tr th:if="${not resource.organization.empty}">
+            <td>Organization:</td>
+            <td th:narrative="${resource.organization}"></td>
+        </tr>
+        <tr th:if="${not resource.code.empty}">
+            <td>Code:</td>
+            <td>
+                <th:block th:each="code, codeItr: ${resource.code}">
+                    <th:block th:if="${codeItr.index}">,</th:block>
+                    <th:block th:narrative="${code}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.specialty.empty}">
+            <td>Specialty:</td>
+            <td>
+                <th:block th:each="specialty, specialtyItr: ${resource.specialty}">
+                    <th:block th:if="${specialtyItr.index}">,</th:block>
+                    <th:block th:narrative="${specialty}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.location.empty}">
+            <td>Location:</td>
+            <td>
+                <th:block th:each="location, locationItr: ${resource.location}">
+                    <th:block th:if="${locationItr.index}">,</th:block>
+                    <th:block th:narrative="${location}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.healthcareService.empty}">
+            <td>Healthcare Service:</td>
+            <td>
+                <th:block th:each="healthcareService, healthcareServiceItr: ${resource.healthcareService}">
+                    <th:block th:if="${healthcareServiceItr.index}">,</th:block>
+                    <th:block th:narrative="${healthcareService}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.telecom.empty}">
+            <td>Telecom:</td>
+            <td>
+                <th:block th:each="telecom, telecomItr: ${resource.telecom}">
+                    <th:block th:if="${telecomItr.index}">,</th:block>
+                    <th:block th:narrative="${telecom}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <th:block th:if="${not resource.availableTime.empty}">
+        <br/>
+        <h2>Available Time</h2>
+        <table class="subPropertyTable">
+            <tbody>
+            <tr>
+                <th>-</th>
+                <th>Days of Week</th>
+                <th>All Day</th>
+                <th>Available Start Time</th>
+                <th>Available End Time</th>
+            </tr>
+            <tr th:each="availableTime, availableTimeItr: ${resource.availableTime}">
+                <td th:text="${availableTimeItr.count}"></td>
+                <td>
+                    <th:block th:each="daysOfWeek, daysOfWeekItr: ${availableTime.daysOfWeek}">
+                        <th:block th:if="${daysOfWeekItr.index}">,</th:block>
+                        <th:block th:text="${daysOfWeek}"></th:block>
+                    </th:block>
+                </td>
+                <td>
+                    <th:block th:if="${availableTime.allDay}" th:text="${availableTime.allDay}"></th:block>
+                </td>
+                <td>
+                    <th:block th:if="${availableTime.availableStartTime}"
+                              th:text="${availableTime.availableStartTime}"></th:block>
+                </td>
+                <td>
+                    <th:block th:if="${availableTime.availableEndTime}"
+                              th:text="${availableTime.availableEndTime}"></th:block>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </th:block>
+
+    <th:block th:if="${not resource.notAvailable.empty}">
+        <br/>
+        <h2>Not Available</h2>
+        <table class="subPropertyTable">
+            <tbody>
+            <tr>
+                <th>-</th>
+                <th>Description</th>
+                <th>During</th>
+            </tr>
+            <tr th:each="notAvailable, notAvailableItr: ${resource.notAvailable}">
+                <td th:text="${notAvailableItr.count}"></td>
+                <td>
+                    <th:block th:if="${notAvailable.description}" th:text="${notAvailable.description}"></th:block>
+                </td>
+                <td>
+                    <th:block th:if="${notAvailable.during}"
+                              th:narrative="${notAvailable.during}"></th:block>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </th:block>
+
+    <table class="hapiPropertyTable">
+        <tbody>
+        <tr th:if="${resource.availabilityExceptions}">
+            <td>Availability Exceptions:</td>
+            <td th:text="${resource.availabilityExceptions}"></td>
+        </tr>
+        <tr th:if="${not resource.endpoint.empty}">
+            <td>Endpoint:</td>
+            <td>
+                <th:block th:each="endpoint, endpointItr: ${resource.endpoint}">
+                    <th:block th:if="${endpointItr.index}">,</th:block>
+                    <th:block th:narrative="${endpoint}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->

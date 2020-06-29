@@ -1,0 +1,53 @@
+{
+  "resourceType": "PractitionerRole",
+  "id": "example-0",
+  "identifier": [
+    {
+      "system": "http://example.org/role-identifier",
+      "value": "52"
+    }
+  ],
+  "period": {
+    "start": "2012-01-01",
+    "end": "2012-03-31"
+  },
+  "practitioner": {
+    "reference": "Practitioner/example",
+    "display": "Adam Careful"
+  },
+  "organization": {
+    "reference": "Organization/f001"
+  },
+  "code": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0286",
+          "code": "RP"
+        }
+      ]
+    }
+  ],
+  "location": [
+    {
+      "reference": "Location/1",
+      "display": "South Wing, second floor"
+    }
+  ],
+  "healthcareService": [
+    {
+      "reference": "HealthcareService/example"
+    }
+  ],
+  "telecom": [
+    {
+      "system": "email",
+      "value": "dr.adam.careful@example.org"
+    }
+  ],
+  "endpoint": [
+    {
+      "reference": "Endpoint/example"
+    }
+  ]
+}

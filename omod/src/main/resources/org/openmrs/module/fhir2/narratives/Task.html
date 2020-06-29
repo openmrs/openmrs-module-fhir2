@@ -1,0 +1,210 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <table class="hapiPropertyTable">
+        <tbody>
+        <tr th:if="${resource.id}">
+            <td>Id:</td>
+            <td th:text="${resource.id}"></td>
+        </tr>
+        <tr th:if="${not resource.identifier.empty}">
+            <td>Identifier:</td>
+            <td>
+                <th:block th:each="identifier: ${resource.identifier}">
+                    <div th:narrative="${identifier}"></div>
+                </th:block>
+            </td>
+        </tr>
+        <th:block th:if="${fhirVersion} eq 'R4'">
+            <tr th:if="${resource.instantiatesCanonical}">
+                <td>Instantiates Canonical:</td>
+                <td th:text="${resource.instantiatesCanonical}"></td>
+            </tr>
+            <tr th:if="${resource.instantiatesUri}">
+                <td>Instantiates Uri:</td>
+                <td th:text="${resource.instantiatesUri}"></td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.basedOn.empty}">
+            <td>Based On:</td>
+            <td>
+                <th:block th:each="basedOn, basedOnItr: ${resource.basedOn}">
+                    <th:block th:if="${basedOnItr.index}">,</th:block>
+                    <th:block th:narrative="${basedOn}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.groupIdentifier.empty}">
+            <td>Group Identifier:</td>
+            <td th:narrative="${resource.groupIdentifier}"></td>
+        </tr>
+        <tr th:if="${not resource.partOf.empty}">
+            <td>Part Of:</td>
+            <td>
+                <th:block th:each="partOf, partOfItr: ${resource.partOf}">
+                    <th:block th:if="${partOfItr.index}">,</th:block>
+                    <th:block th:narrative="${partOf}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${resource.status}">
+            <td>Status:</td>
+            <td th:text="${resource.status}"></td>
+        </tr>
+        <tr th:if="${not resource.statusReason.empty}">
+            <td>Status Reason:</td>
+            <td th:narrative="${resource.statusReason}"></td>
+        </tr>
+        <tr th:if="${not resource.businessStatus.empty}">
+            <td>Business Status:</td>
+            <td th:narrative="${resource.businessStatus}"></td>
+        </tr>
+        <tr th:if="${resource.intent}">
+            <td>Intent:</td>
+            <td th:text="${resource.intent}"></td>
+        </tr>
+        <tr th:if="${resource.priority}">
+            <td>Priority:</td>
+            <td th:text="${resource.priority}"></td>
+        </tr>
+        <tr th:if="${not resource.code.empty}">
+            <td>Code:</td>
+            <td th:narrative="${resource.code}"></td>
+        </tr>
+        <tr th:if="${resource.description}">
+            <td>Description:</td>
+            <td th:text="${resource.description}"></td>
+        </tr>
+        <tr th:if="${not resource.focus.empty}">
+            <td>Focus:</td>
+            <td th:narrative="${resource.focus}"></td>
+        </tr>
+        <tr th:if="${not resource.for.empty}">
+            <td>For:</td>
+            <td th:narrative="${resource.for}"></td>
+        </tr>
+        <th:block th:if="${fhirVersion} eq 'R4'">
+            <tr th:if="${not resource.encounter.empty}">
+                <td>Encounter:</td>
+                <td th:narrative="${resource.encounter}"></td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.executionPeriod.empty}">
+            <td>Execution Period:</td>
+            <td th:narrative="${resource.executionPeriod}"></td>
+        </tr>
+        <tr th:if="${resource.authoredOn}">
+            <td>Authored On:</td>
+            <td th:text="${#dates.format(resource.authoredOn,'dd/MM/yyyy')}"></td>
+        </tr>
+        <tr th:if="${resource.lastModified}">
+            <td>Last Modified:</td>
+            <td th:text="${#dates.format(resource.lastModified,'dd/MM/yyyy')}"></td>
+        </tr>
+        <tr th:if="${not resource.requester.empty}">
+            <td>Requester:</td>
+            <td th:narrative="${resource.requester}"></td>
+        </tr>
+        <tr th:if="${not resource.performerType.empty}">
+            <td>Performer Type:</td>
+            <td>
+                <th:block th:each="performerType, performerTypeItr: ${resource.performerType}">
+                    <th:block th:if="${performerTypeItr.index}">,</th:block>
+                    <th:block th:narrative="${performerType}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.owner.empty}">
+            <td>Owner:</td>
+            <td th:narrative="${resource.owner}"></td>
+        </tr>
+        <th:block th:if="${fhirVersion} eq 'R4'">
+            <tr th:if="${not resource.location.empty}">
+                <td>Location:</td>
+                <td th:narrative="${resource.location}"></td>
+            </tr>
+            <tr th:if="${not resource.reasonCode.empty}">
+                <td>Reason Code:</td>
+                <td th:narrative="${resource.reasonCode}"></td>
+            </tr>
+            <tr th:if="${not resource.reasonReference.empty}">
+                <td>Reason Reference:</td>
+                <td th:narrative="${resource.reasonReference}"></td>
+            </tr>
+            <tr th:if="${not resource.insurance.empty}">
+                <td>Insurance:</td>
+                <td>
+                    <th:block th:each="insurance, insuranceItr: ${resource.insurance}">
+                        <th:block th:if="${insuranceItr.index}">,</th:block>
+                        <th:block th:narrative="${insurance}"></th:block>
+                    </th:block>
+                </td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.note.empty}">
+            <td>Note:</td>
+            <td>
+                <div th:each="note: ${resource.note}" th:text="${note.text}"></div>
+            </td>
+        </tr>
+        <tr th:if="${not resource.relevantHistory.empty}">
+            <td>Relevant History:</td>
+            <td>
+                <th:block th:each="relevantHistory, relevantHistoryItr: ${resource.relevantHistory}">
+                    <th:block th:if="${relevantHistoryItr.index}">,</th:block>
+                    <th:block th:narrative="${relevantHistory}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <th:block th:if="${not resource.restriction.empty}">
+        <h2>Restriction</h2>
+        <table class="subPropertyTable">
+            <tbody>
+            <tr>
+                <th>-</th>
+                <th>Repetitions</th>
+                <th>Period</th>
+                <th>Recipient</th>
+            </tr>
+            <tr>
+                <td>*</td>
+                <td>
+                    <th:block th:if="${resource.restriction.repetitions}"
+                              th:text="${resource.restriction.repetitions}"></th:block>
+                </td>
+                <td>
+                    <th:block th:if="${resource.restriction.period}"
+                              th:narrative="${resource.restriction.period}"></th:block>
+                </td>
+                <td>
+                    <th:block th:each="recipient, recipientItr: ${resource.restriction.recipient}">
+                        <th:block th:if="${recipientItr.index}">,</th:block>
+                        <th:block th:narrative="${recipient}"></th:block>
+                    </th:block>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </th:block>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->

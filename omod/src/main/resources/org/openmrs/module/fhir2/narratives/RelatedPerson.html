@@ -1,0 +1,107 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <table class="hapiPropertyTable">
+        <tbody>
+        <tr th:if="${resource.id}">
+            <td>Id:</td>
+            <td th:text="${resource.id}"></td>
+        </tr>
+        <tr th:if="${not resource.identifier.empty}">
+            <td>Identifier:</td>
+            <td>
+                <th:block th:each="identifier: ${resource.identifier}">
+                    <div th:narrative="${identifier}"></div>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${resource.active}">
+            <td>Active:</td>
+            <td th:text="${resource.active}"></td>
+        </tr>
+        <tr th:if="${not resource.patient.empty}">
+            <td>Patient:</td>
+            <td th:narrative="${resource.patient}"></td>
+        </tr>
+        <tr th:if="${not resource.relationship.empty}">
+            <td>Relationship:</td>
+            <td>
+                <th:block th:each="relationship, relationshipItr: ${resource.relationship}">
+                    <th:block th:if="${relationshipItr.index}">,</th:block>
+                    <th:block th:narrative="${relationship}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.name.empty}">
+            <td>Name:</td>
+            <td>
+                <th:block th:each="name, nameItr: ${resource.name}">
+                    <th:block th:if="${nameItr.index}">,</th:block>
+                    <th:block th:narrative="${name}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.telecom.empty}">
+            <td>Telecom:</td>
+            <td>
+                <th:block th:each="telecom, telecomItr: ${resource.telecom}">
+                    <th:block th:if="${telecomItr.index}">,</th:block>
+                    <th:block th:narrative="${telecom}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${resource.gender}">
+            <td>Gender:</td>
+            <td th:text="${resource.gender}"></td>
+        </tr>
+        <tr th:if="${resource.birthDate}">
+            <td>Birth Date:</td>
+            <td th:text="${#dates.format(resource.birthDate,'dd/MM/yyyy')}"></td>
+        </tr>
+        <tr th:if="${not resource.addressFirstRep.empty}">
+            <td>Address:</td>
+            <td th:narrative="${resource.addressFirstRep}"></td>
+        </tr>
+        <th:block th:if="resource.photoFirstRep">
+            <tr th:if="${resource.photoFirstRep.url}">
+                <td>Photo:</td>
+                <td><img src="${resource.photoFirstRep.url}"/></td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.period.empty}">
+            <td>Period:</td>
+            <td th:narrative="${resource.period}"></td>
+        </tr>
+        <th:block th:if="${fhirVersion} eq 'R4'">
+            <tr th:if="${not resource.communication.empty}">
+                <td>Communication:</td>
+                <td>
+                    <th:block th:each="communication, communicationItr: ${resource.communication}">
+                        <th:block th:if="${communicationItr.index}">,</th:block>
+                        <th:block th:narrative="${communication.language}"></th:block>
+                        <th:block th:if="${communication.preferred}">(PREFERRED)</th:block>
+                    </th:block>
+                </td>
+            </tr>
+        </th:block>
+        </tbody>
+    </table>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->
