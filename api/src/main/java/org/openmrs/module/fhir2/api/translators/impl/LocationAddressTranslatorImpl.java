@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.Location;
@@ -19,8 +17,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LocationAddressTranslatorImpl extends BaseAddressTranslatorImpl implements LocationAddressTranslator {
-	
-	private static Log log = LogFactory.getLog(LocationAddressTranslatorImpl.class);
 	
 	@Override
 	public Address toFhirResource(Location omrsLocation) {

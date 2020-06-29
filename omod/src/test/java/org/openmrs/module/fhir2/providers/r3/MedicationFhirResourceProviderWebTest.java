@@ -25,8 +25,10 @@ import static org.mockito.Mockito.when;
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -36,7 +38,6 @@ import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Medication;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,9 +61,11 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	private static final String JSON_UPDATE_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_update.json";
 	
-	private static final String JSON_UPDATE_WITHOUTID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UdateWithoutId.json";
+	private static final String JSON_UPDATE_WITHOUT_ID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UpdateWithoutId.json";
 	
-	private static final String JSON_UPDATE_WITHWRONGID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UdateWithWrongId.json";
+	private static final String JSON_UPDATE_WITH_WRONG_ID_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_UpdateWithWrongId.json";
+	
+	private static final String STATUS = "active";
 	
 	@Mock
 	private FhirMedicationService fhirMedicationService;
@@ -71,19 +74,16 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	private MedicationFhirResourceProvider resourceProvider;
 	
 	@Captor
-	private ArgumentCaptor<TokenOrListParam> tokenOrListParamArgumentCaptor;
-	
-	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
-	private org.hl7.fhir.r4.model.Medication medication;
+	private Medication medication;
 	
 	@Before
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new MedicationFhirResourceProvider();
 		resourceProvider.setMedicationService(fhirMedicationService);
-		medication = new org.hl7.fhir.r4.model.Medication();
+		medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		super.setup();
 	}
@@ -103,7 +103,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	@Test
 	public void searchForMedications_shouldSearchForMedicationsByCode() throws Exception {
-		verifyUri("/Medication?code=5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		verifyUri(String.format("/Medication?code=%s", CODE));
 		
 		verify(fhirMedicationService).searchForMedications(tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
 		    isNull());
@@ -117,7 +117,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	@Test
 	public void searchForMedications_shouldSearchForMedicationsByDosageForm() throws Exception {
-		verifyUri("/Medication?form=5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		verifyUri(String.format("/Medication?form=%s", CODE));
 		
 		verify(fhirMedicationService).searchForMedications(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
 		    isNull());
@@ -130,15 +130,29 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	}
 	
 	@Test
+	public void searchForMedications_shouldSearchForMedicationsByIngredientCode() throws Exception {
+		verifyUri(String.format("/Medication?ingredient-code=%s", CODE));
+		
+		verify(fhirMedicationService).searchForMedications(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(),
+		    isNull());
+		
+		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
+		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenParam.getValue(), equalTo(CODE));
+	}
+	
+	@Test
 	public void searchForMedications_shouldSearchForMedicationsByStatus() throws Exception {
-		verifyUri("/Medication?status=active");
+		verifyUri(String.format("/Medication?status=%s", STATUS));
 		
 		verify(fhirMedicationService).searchForMedications(isNull(), isNull(), isNull(),
 		    tokenAndListParamArgumentCaptor.capture());
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
-		    equalTo("active"));
+		    equalTo(STATUS));
 	}
 	
 	@Test
@@ -152,7 +166,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	private void verifyUri(String uri) throws Exception {
 		when(fhirMedicationService.searchForMedications(any(), any(), any(), any()))
-		        .thenReturn(Collections.singletonList(medication));
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medication), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
@@ -167,13 +181,13 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	}
 	
 	@Test
-	public void shouldCreateNewMedication() throws Exception {
+	public void createMedication_shouldCreateNewMedication() throws Exception {
 		org.hl7.fhir.r4.model.Medication medication = new org.hl7.fhir.r4.model.Medication();
 		medication.setId(MEDICATION_UUID);
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_MEDICATION_PATH)) {
-			assert is != null;
-			medicationJson = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(fhirMedicationService.create(any(org.hl7.fhir.r4.model.Medication.class))).thenReturn(medication);
@@ -185,14 +199,14 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	}
 	
 	@Test
-	public void shouldUpdateMedication() throws Exception {
+	public void updateMedication_shouldUpdateRequestedMedication() throws Exception {
 		org.hl7.fhir.r4.model.Medication medication = new org.hl7.fhir.r4.model.Medication();
 		medication.setId(MEDICATION_UUID);
 		medication.setStatus(org.hl7.fhir.r4.model.Medication.MedicationStatus.INACTIVE);
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
-			assert is != null;
-			medicationJson = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(fhirMedicationService.update(any(String.class), any(org.hl7.fhir.r4.model.Medication.class)))
@@ -205,10 +219,11 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	}
 	
 	@Test
-	public void updateMedicationShouldErrorForIdMismatch() throws Exception {
+	public void updateMedication_shouldErrorForIdMismatch() throws Exception {
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
-			medicationJson = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(medicationJson)
@@ -220,10 +235,11 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	}
 	
 	@Test
-	public void updateMedicationShouldErrorForNoId() throws Exception {
+	public void updateMedication_shouldErrorForNoId() throws Exception {
 		String medicationJson;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITHOUTID_MEDICATION_PATH)) {
-			medicationJson = IOUtils.toString(is);
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITHOUT_ID_MEDICATION_PATH)) {
+			Objects.requireNonNull(is);
+			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Medication/" + MEDICATION_UUID).jsonContent(medicationJson)
@@ -234,11 +250,12 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	}
 	
 	@Test
-	public void updateMedicationShouldErrorForNonexistentMedication() throws Exception {
+	public void updateMedication_shouldErrorForNonexistentMedication() throws Exception {
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader()
-		        .getResourceAsStream(JSON_UPDATE_WITHWRONGID_MEDICATION_PATH)) {
-			medicationJson = IOUtils.toString(is);
+		        .getResourceAsStream(JSON_UPDATE_WITH_WRONG_ID_MEDICATION_PATH)) {
+			Objects.requireNonNull(is);
+			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(fhirMedicationService.update(eq(WRONG_MEDICATION_UUID), any(org.hl7.fhir.r4.model.Medication.class)))
@@ -251,11 +268,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	}
 	
 	@Test
-	public void shouldDeleteMedication() throws Exception {
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(MEDICATION_UUID);
-		retVal.getText().setDivAsString("Deleted successfully");
-		
+	public void deleteMedication_shouldDeleteRequestedMedication() throws Exception {
 		org.hl7.fhir.r4.model.Medication medication = new org.hl7.fhir.r4.model.Medication();
 		medication.setId(MEDICATION_UUID);
 		medication.setStatus(org.hl7.fhir.r4.model.Medication.MedicationStatus.INACTIVE);
@@ -267,5 +280,4 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
-	
 }

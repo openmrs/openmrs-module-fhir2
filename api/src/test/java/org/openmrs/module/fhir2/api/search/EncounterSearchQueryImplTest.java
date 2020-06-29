@@ -17,7 +17,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -149,6 +151,24 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void searchForEncounters_shouldSearchForUniqueEncountersBySubjectName() {
+		ReferenceParam subjectReference = new ReferenceParam(Patient.SP_NAME, "Horatio Hornblower");
+		ReferenceAndListParam subjectList = new ReferenceAndListParam();
+		subjectList.addValue(new ReferenceOrListParam().add(subjectReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    subjectList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
+	}
+	
+	@Test
 	public void searchForEncounters_shouldSearchForEncountersByMultipleSubjectNameOr() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
@@ -222,6 +242,24 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void searchForEncounters_shouldSearchForUniqueEncountersBySubjectFamilyName() {
+		ReferenceParam subjectReference = new ReferenceParam(Patient.SP_FAMILY, "Hornblower");
+		ReferenceAndListParam subjectList = new ReferenceAndListParam();
+		subjectList.addValue(new ReferenceOrListParam().add(subjectReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    subjectList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
+	}
+	
+	@Test
 	public void searchForEncounters_shouldSearchForEncountersByMultipleSubjectFamilyNameOr() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
@@ -292,6 +330,24 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForUniqueEncountersBySubjectGivenName() {
+		ReferenceParam subjectReference = new ReferenceParam(Patient.SP_GIVEN, "Horatio");
+		ReferenceAndListParam subjectList = new ReferenceAndListParam();
+		subjectList.addValue(new ReferenceOrListParam().add(subjectReference));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
+		    subjectList);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(1)); // 2 with repetitions
 	}
 	
 	@Test

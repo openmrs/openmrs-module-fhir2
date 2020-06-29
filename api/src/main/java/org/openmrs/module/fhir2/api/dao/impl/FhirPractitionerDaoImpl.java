@@ -110,6 +110,7 @@ public class FhirPractitionerDaoImpl extends BaseFhirDao<Provider> implements Fh
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(Provider provider,
 	        String providerAttributeTypeUuid) {
 		return (List<ProviderAttribute>) getSessionFactory().getCurrentSession().createCriteria(ProviderAttribute.class)

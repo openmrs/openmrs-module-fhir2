@@ -7,7 +7,7 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.providers;
+package org.openmrs.module.fhir2.providers.r4;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,13 +25,13 @@ public class MockIBundleProvider<U extends IBaseResource> implements IBundleProv
 	
 	private final Date datePublished;
 	
-	private List<U> mockResultList;
+	private final List<U> mockResultList;
 	
 	private final UUID uuid;
 	
-	private Integer count;
+	private final Integer count;
 	
-	private Integer preferredPageSize;
+	private final Integer preferredPageSize;
 	
 	public MockIBundleProvider(List<U> mockResultList, Integer preferredPageSize, Integer count) {
 		this.count = count;
@@ -48,6 +48,7 @@ public class MockIBundleProvider<U extends IBaseResource> implements IBundleProv
 	
 	@Nonnull
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<IBaseResource> getResources(int i, int i1) {
 		return (List<IBaseResource>) this.mockResultList;
 	}

@@ -498,6 +498,7 @@ public class FhirTaskTranslatorImplTest {
 		assertThat(result.getInput().iterator().next().getValue().toString(), equalTo(inputVal));
 	}
 	
+	@Test
 	public void toOpenmrsType_shouldTranslateInputTextValue() {
 		Task task = new Task();
 		Task.ParameterComponent input = new Task.ParameterComponent();

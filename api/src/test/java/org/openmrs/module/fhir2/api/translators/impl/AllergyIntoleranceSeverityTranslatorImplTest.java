@@ -47,7 +47,7 @@ public class AllergyIntoleranceSeverityTranslatorImplTest {
 	
 	private AllergyIntoleranceSeverityTranslatorImpl severityTranslator;
 	
-	private Map<String, String> severityConceptUUIDs = new HashMap<>();
+	private final Map<String, String> severityConceptUUIDs = new HashMap<>();
 	
 	private Concept concept;
 	

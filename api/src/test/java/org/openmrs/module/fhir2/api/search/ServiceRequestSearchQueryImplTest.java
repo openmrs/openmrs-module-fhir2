@@ -43,5 +43,4 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 	public void searchForServiceRequests_shouldHandleComplexQuery() {
 		
 	}
-	
 }

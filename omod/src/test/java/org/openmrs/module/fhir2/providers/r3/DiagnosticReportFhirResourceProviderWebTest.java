@@ -25,8 +25,10 @@ import static org.mockito.Mockito.when;
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -47,7 +49,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
-import org.openmrs.module.fhir2.providers.MockIBundleProvider;
+import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -125,7 +127,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 	public void createDiagnosticReport_shouldCreateNewDiagnosticReport() throws Exception {
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_PATH)) {
-			jsonDiagnosticReport = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.DiagnosticReport diagnosticReport = new org.hl7.fhir.r4.model.DiagnosticReport();
@@ -143,7 +146,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 	public void updateDiagnosticReport_shouldUpdateExistingDiagnosticReport() throws Exception {
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_PATH)) {
-			jsonDiagnosticReport = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.DiagnosticReport diagnosticReport = new org.hl7.fhir.r4.model.DiagnosticReport();
@@ -161,7 +165,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 	public void updateDiagnosticReport_shouldErrorForIdMismatch() throws Exception {
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_PATH)) {
-			jsonDiagnosticReport = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/DiagnosticReport/" + WRONG_UUID).jsonContent(jsonDiagnosticReport)
@@ -176,7 +181,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 	public void updateDiagnosticReport_shouldErrorForNoId() throws Exception {
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_NO_ID_PATH)) {
-			jsonDiagnosticReport = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
@@ -190,7 +196,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 	public void updateDiagnosticReport_shouldErrorForNonexistentDiagnosticReport() throws Exception {
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_WRONG_UUID_PATH)) {
-			jsonDiagnosticReport = IOUtils.toString(is);
+			Objects.requireNonNull(is);
+			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(service.update(eq(WRONG_UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class)))
@@ -312,7 +319,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(2008, 7, 18);
+		calendar.set(2008, Calendar.AUGUST, 18);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
@@ -329,7 +336,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(2008, 7, 18);
+		calendar.set(2008, Calendar.AUGUST, 18);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
@@ -344,7 +351,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(2008, 7, 18);
+		calendar.set(2008, Calendar.AUGUST, 18);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
@@ -360,7 +367,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(2008, 7, 18);
+		calendar.set(2008, Calendar.AUGUST, 18);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound(), nullValue());
 		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
@@ -375,7 +382,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(2008, 7, 18);
+		calendar.set(2008, Calendar.AUGUST, 18);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound(), nullValue());
 		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
@@ -390,9 +397,9 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar lowerBound = Calendar.getInstance();
-		lowerBound.set(2008, 7, 18);
+		lowerBound.set(2008, Calendar.AUGUST, 18);
 		Calendar upperBound = Calendar.getInstance();
-		upperBound.set(2009, 6, 21);
+		upperBound.set(2009, Calendar.JULY, 21);
 		
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(lowerBound.getTime(), Calendar.DATE)));
@@ -416,4 +423,29 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
+	
+	@Test
+	public void deleteDiagnosticReport_shouldDeleteDiagnosticReport() throws Exception {
+		org.hl7.fhir.r4.model.DiagnosticReport diagnosticReport = new org.hl7.fhir.r4.model.DiagnosticReport();
+		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
+		diagnosticReport.setStatus(org.hl7.fhir.r4.model.DiagnosticReport.DiagnosticReportStatus.CANCELLED);
+		
+		when(service.delete(any(String.class))).thenReturn(diagnosticReport);
+		
+		MockHttpServletResponse response = delete("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deleteDiagnosticReport_shouldReturn404ForNonExistingDiagnosticReport() throws Exception {
+		when(service.get(WRONG_UUID)).thenReturn(null);
+		
+		MockHttpServletResponse response = get("/DiagnosticReport/" + WRONG_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+	}
+	
 }

@@ -18,7 +18,7 @@ public interface ObservationInterpretationTranslator extends ToFhirTranslator<Ob
 	 * Maps an {@link Obs} to an {@link org.hl7.fhir.r4.model.CodeableConcept}
 	 *
 	 * @param obs the OpenMRS obs element to translate
-	 * @return
+	 * @return a FHIR CodeableConcept representing the interpretation of this Observation if any
 	 */
 	@Override
 	CodeableConcept toFhirResource(Obs obs);
@@ -28,7 +28,7 @@ public interface ObservationInterpretationTranslator extends ToFhirTranslator<Ob
 	 *
 	 * @param existingObs the existingObs to update
 	 * @param resource the resource to map
-	 * @return
+	 * @return the OpenMRS observation with the interpretation updated
 	 */
 	@Override
 	Obs toOpenmrsType(Obs existingObs, CodeableConcept resource);

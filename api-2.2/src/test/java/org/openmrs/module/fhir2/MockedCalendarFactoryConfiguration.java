@@ -10,7 +10,7 @@
 package org.openmrs.module.fhir2;
 
 import org.mockito.Mockito;
-import org.openmrs.module.fhir2.api.util.CalendarFactory;
+import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -20,8 +20,8 @@ public class MockedCalendarFactoryConfiguration {
 	
 	@Bean
 	@Primary
-	public CalendarFactory getCalendarFactory() {
-		return Mockito.mock(CalendarFactory.class);
+	public LocalDateTimeFactory getCalendarFactory() {
+		return Mockito.mock(LocalDateTimeFactory.class);
 	}
 	
 }

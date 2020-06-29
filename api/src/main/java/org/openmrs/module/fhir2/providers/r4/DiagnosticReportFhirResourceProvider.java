@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.providers.r4;
 import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -33,6 +34,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -77,6 +79,16 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 			idPart = id.getIdPart();
 		}
 		return FhirProviderUtils.buildUpdate(service.update(idPart, diagnosticReport));
+	}
+	
+	@Delete
+	@SuppressWarnings("unused")
+	public OperationOutcome deleteDiagnosticReport(@IdParam @NotNull IdType id) {
+		DiagnosticReport diagnosticReport = service.delete(id.getIdPart());
+		if (diagnosticReport == null) {
+			throw new ResourceNotFoundException("Could not find medication to delete with id " + id.getIdPart());
+		}
+		return FhirProviderUtils.buildDelete(diagnosticReport);
 	}
 	
 	@Search

@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -27,7 +28,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -62,11 +62,11 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	@SuppressWarnings("unused")
-	public Bundle searchForMedication(@OptionalParam(name = Medication.SP_CODE) TokenAndListParam code,
+	public IBundleProvider searchForMedication(@OptionalParam(name = Medication.SP_CODE) TokenAndListParam code,
 	        @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,
-	        @OptionalParam(name = Medication.SP_STATUS) TokenAndListParam status) {
-		return FhirProviderUtils
-		        .convertSearchResultsToBundle(fhirMedicationService.searchForMedications(code, dosageForm, null, status));
+	        @OptionalParam(name = Medication.SP_STATUS) TokenAndListParam status,
+	        @OptionalParam(name = Medication.SP_INGREDIENT_CODE) TokenAndListParam ingredientCode) {
+		return fhirMedicationService.searchForMedications(code, dosageForm, ingredientCode, status);
 	}
 	
 	@Create
@@ -94,9 +94,6 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 		if (medication == null) {
 			throw new ResourceNotFoundException("Could not find medication to update with id " + id.getIdPart());
 		}
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(id.getIdPart());
-		retVal.getText().setDivAsString("Deleted successfully");
-		return retVal;
+		return FhirProviderUtils.buildDelete(medication);
 	}
 }

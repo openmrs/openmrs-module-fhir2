@@ -10,8 +10,10 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.in;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
@@ -19,7 +21,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Subqueries;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
@@ -98,10 +102,21 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	public Long getResultCounts(SearchParameterMap theParams) {
+	@SuppressWarnings("unchecked")
+	public List<String> getResultUuids(SearchParameterMap theParams) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
-		setupSearchParams(criteria, theParams);
-		return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(typeToken.getRawType());
+		Criteria detachedExecutableCriteria = detachedCriteria.getExecutableCriteria(sessionFactory.getCurrentSession());
+		
+		setupSearchParams(detachedExecutableCriteria, theParams);
+		handleSort(detachedExecutableCriteria, theParams.getSortSpec());
+		
+		detachedCriteria.setProjection(Projections.property("uuid"));
+		
+		criteria.add(Subqueries.propertyIn("uuid", detachedCriteria));
+		criteria.setProjection(Projections.groupProperty("uuid"));
+		
+		return criteria.list();
 	}
 	
 	@Override
@@ -110,8 +125,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Collection<T> search(SearchParameterMap theParams, int firstResult, int maxResults) {
-		return createCriteria(theParams).setFirstResult(firstResult).setMaxResults(maxResults).list();
+	public Collection<T> search(SearchParameterMap theParams, List matchingResourceUuids, int firstResult, int lastResult) {
+		return createCriteria(theParams).add(in("uuid", matchingResourceUuids.subList(firstResult, lastResult))).list();
 	}
 	
 	protected Criteria createCriteria(SearchParameterMap theParams) {

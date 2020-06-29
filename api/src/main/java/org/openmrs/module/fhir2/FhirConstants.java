@@ -76,6 +76,8 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_ADDRESS = OPENMRS_FHIR_EXT_PREFIX + "/address";
 	
+	public static final String OPENMRS_FHIR_EXT_NON_CODED_CONDITION = OPENMRS_FHIR_EXT_PREFIX + "/non-coded-condition";
+	
 	public static final String OPENMRS_FHIR_EXT_MEDICINE = OPENMRS_FHIR_EXT_PREFIX + "/medicine";
 	
 	public static final String FHIR_STRUCTURE_DEF_PREFIX = "http://hl7.org/fhir/StructureDefinition";
@@ -146,10 +148,6 @@ public class FhirConstants {
 	
 	public static final String AUT = "AUT";
 	
-	public static final String AND_LIST_PARAMS_SEARCH_HANDLER = "and.list.params.search.handler";
-	
-	public static final String OR_LIST_PARAMS_SEARCH_HANDLER = "or.list.params.search.handler";
-	
 	public static final String ENCOUNTER_REFERENCE_SEARCH_HANDLER = "encounter.reference.search.handler";
 	
 	public static final String PATIENT_REFERENCE_SEARCH_HANDLER = "patient.reference.search.handler";
@@ -205,6 +203,10 @@ public class FhirConstants {
 	public static final String POSTALCODE_SEARCH_HANDLER = "postalcode.search.handler";
 	
 	public static final String LOCATION_REFERENCE_SEARCH_HANDLER = "location.reference.search.handler";
+	
+	public static final String DOSAGE_FORM_SEARCH_HANDLER = "dosage.form.search.handler";
+	
+	public static final String INGREDIENT_SEARCH_HANDLER = "ingredient.search.handler";
 	
 	public static final String TAG_SEARCH_HANDLER = "tag.search.handler";
 	

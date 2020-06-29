@@ -46,7 +46,6 @@ import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
-import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
@@ -83,9 +82,6 @@ public class EncounterTranslatorImplTest {
 	
 	@Mock
 	private EncounterLocationTranslator encounterLocationTranslator;
-	
-	@Mock
-	private PatientIdentifierTranslator patientIdentifierTranslator;
 	
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;

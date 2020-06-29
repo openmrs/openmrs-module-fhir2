@@ -9,17 +9,15 @@
  */
 package org.openmrs.module.fhir2;
 
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.module.BaseModuleActivator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class contains the logic that is run every time this module is either started or shutdown
  */
 @SuppressWarnings("unused")
+@Slf4j
 public class FhirActivator extends BaseModuleActivator {
-	
-	private static final Logger log = LoggerFactory.getLogger(FhirActivator.class);
 	
 	@Override
 	public void started() {

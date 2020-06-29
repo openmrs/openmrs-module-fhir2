@@ -52,7 +52,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
-import org.openmrs.module.fhir2.providers.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Location> {

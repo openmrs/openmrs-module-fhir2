@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPersonDao {
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(Person person,
 	        String personAttributeTypeUuid) {
 		return (List<PersonAttribute>) getSessionFactory().getCurrentSession().createCriteria(PersonAttribute.class)
