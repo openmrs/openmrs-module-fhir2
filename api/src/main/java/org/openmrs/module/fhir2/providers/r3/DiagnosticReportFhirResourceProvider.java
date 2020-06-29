@@ -23,7 +23,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.convertors.conv30_40.DiagnosticReport30_40;
-import org.hl7.fhir.convertors.conv30_40.OperationOutcome30_40;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -63,8 +62,8 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport diagnosticReport) {
-		return FhirProviderUtils.buildCreate(
-		    diagnosticReportService.create(DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport)));
+		return FhirProviderUtils.buildCreate(DiagnosticReport30_40.convertDiagnosticReport(
+		    diagnosticReportService.create(DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport))));
 	}
 	
 	@Update
@@ -76,8 +75,8 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 			idPart = id.getIdPart();
 		}
 		
-		return FhirProviderUtils.buildUpdate(
-		    diagnosticReportService.update(idPart, DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport)));
+		return FhirProviderUtils.buildUpdate(DiagnosticReport30_40.convertDiagnosticReport(
+		    diagnosticReportService.update(idPart, DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport))));
 	}
 	
 	@Delete
@@ -88,7 +87,7 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find medication to delete with id " + id.getIdPart());
 		}
 		
-		return OperationOutcome30_40.convertOperationOutcome(FhirProviderUtils.buildDelete(diagnosticReport));
+		return FhirProviderUtils.buildDelete(DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport));
 	}
 	
 	@Search
@@ -105,6 +104,7 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
+		
 		return diagnosticReportService.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code,
 		    sort);
 	}

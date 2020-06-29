@@ -9,75 +9,59 @@
  */
 package org.openmrs.module.fhir2.providers.util;
 
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FhirProviderUtils {
 	
-	public static MethodOutcome buildUpdate(DomainResource resource) {
-		MethodOutcome methodOutcome = new MethodOutcome();
-		methodOutcome.setCreated(false);
-		return buildWithResource(methodOutcome, resource);
+	private final static org.hl7.fhir.r4.model.CodeableConcept MSG_DELETED_R4 = new org.hl7.fhir.r4.model.CodeableConcept();
+	static {
+		MSG_DELETED_R4.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/operation-outcome")
+		        .setCode("MSG_DELETED").setDisplay("This resource has been deleted");
+		MSG_DELETED_R4.setText("This resource has been deleted");
 	}
 	
-	public static MethodOutcome buildCreate(DomainResource resource) {
+	private final static org.hl7.fhir.dstu3.model.CodeableConcept MSG_DELETED_R3 = new org.hl7.fhir.dstu3.model.CodeableConcept();
+	static {
+		MSG_DELETED_R3.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/operation-outcome")
+		        .setCode("MSG_DELETED").setDisplay("This resource has been deleted");
+		MSG_DELETED_R3.setText("This resource has been deleted");
+	}
+	
+	public static MethodOutcome buildCreate(IAnyResource resource) {
 		MethodOutcome methodOutcome = new MethodOutcome();
 		methodOutcome.setCreated(true);
 		return buildWithResource(methodOutcome, resource);
 	}
 	
-	public static OperationOutcome buildDelete(DomainResource resource) {
-		
-		final CodeableConcept MSG_DELETED = new CodeableConcept();
-		{
-			MSG_DELETED.addCoding().setSystem("http://terminology.hl7.org/CodeSystem/operation-outcome")
-			        .setCode("MSG_DELETED").setDisplay("This resource has been deleted");
-			MSG_DELETED.setText("This resource has been deleted");
-		}
-		
-		OperationOutcome outcome = new OperationOutcome();
-		outcome.addIssue().setSeverity(OperationOutcome.IssueSeverity.INFORMATION)
-		        .setCode(OperationOutcome.IssueType.INFORMATIONAL).setDetails(MSG_DELETED);
-		return outcome;
-		
+	public static MethodOutcome buildUpdate(IAnyResource resource) {
+		MethodOutcome methodOutcome = new MethodOutcome();
+		methodOutcome.setCreated(false);
+		return buildWithResource(methodOutcome, resource);
 	}
 	
-	private static MethodOutcome buildWithResource(MethodOutcome methodOutcome, DomainResource resource) {
+	public static org.hl7.fhir.r4.model.OperationOutcome buildDelete(org.hl7.fhir.r4.model.Resource resource) {
+		org.hl7.fhir.r4.model.OperationOutcome outcome = new org.hl7.fhir.r4.model.OperationOutcome();
+		outcome.addIssue().setSeverity(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.INFORMATION)
+		        .setCode(org.hl7.fhir.r4.model.OperationOutcome.IssueType.INFORMATIONAL).setDetails(MSG_DELETED_R4);
+		return outcome;
+	}
+	
+	public static org.hl7.fhir.dstu3.model.OperationOutcome buildDelete(org.hl7.fhir.dstu3.model.Resource resource) {
+		org.hl7.fhir.dstu3.model.OperationOutcome outcome = new org.hl7.fhir.dstu3.model.OperationOutcome();
+		outcome.addIssue().setSeverity(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.INFORMATION)
+		        .setCode(org.hl7.fhir.dstu3.model.OperationOutcome.IssueType.INFORMATIONAL).setDetails(MSG_DELETED_R3);
+		return outcome;
+	}
+	
+	private static MethodOutcome buildWithResource(MethodOutcome methodOutcome, IAnyResource resource) {
 		if (resource != null) {
-			if (resource.getId() != null) {
-				methodOutcome.setId(resource.getIdElement());
-			}
-			
 			methodOutcome.setResource(resource);
 		}
 		
 		return methodOutcome;
 	}
-	
-	public static <T extends Resource> Bundle convertSearchResultsToBundle(Collection<T> resources) {
-		Bundle bundle = FhirProviderUtils.convertIterableToBundle(resources);
-		bundle.setType(Bundle.BundleType.SEARCHSET);
-		bundle.setTotal(resources.size());
-		return bundle;
-	}
-	
-	public static <T extends Resource> Bundle convertIterableToBundle(Iterable<T> resources) {
-		Bundle bundle = new Bundle();
-		for (T resource : resources) {
-			Bundle.BundleEntryComponent entry = bundle.addEntry();
-			entry.setResource(resource);
-		}
-		
-		return bundle;
-	}
-	
 }

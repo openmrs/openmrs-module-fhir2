@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
@@ -22,12 +24,16 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.CoreMatchers;
+import org.hl7.fhir.convertors.conv30_40.Medication30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -171,52 +177,60 @@ public class MedicationFhirResourceProviderTest {
 		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.MEDICATION));
 	}
 	
-	//	@Test
-	//	public void shouldCreateNewMedication() {
-	//		when(fhirMedicationService.create(medication)).thenReturn(medication);
-	//
-	//		MethodOutcome result = resourceProvider.createMedication(VersionConvertor_30_40.convertMedication(medication));
-	//		assertThat(result, CoreMatchers.notNullValue());
-	//		assertThat(result.getCreated(), is(true));
-	//		assertThat(result.getResource(), CoreMatchers.equalTo(VersionConvertor_30_40.convertMedication(medication)));
-	//	}
-	//
-	//	@Test
-	//	public void shouldUpdateMedication() {
-	//		org.hl7.fhir.r4.model.Medication med = medication;
-	//		med.setStatus(org.hl7.fhir.r4.model.Medication.MedicationStatus.INACTIVE);
-	//
-	//		when(fhirMedicationService.update(MEDICATION_UUID, medication)).thenReturn(med);
-	//
-	//		MethodOutcome result = resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID), VersionConvertor_30_40.convertMedication(medication));
-	//		assertThat(result, CoreMatchers.notNullValue());
-	//		assertThat(result.getResource(), CoreMatchers.equalTo(med));
-	//	}
-	//
-	//	@Test(expected = InvalidRequestException.class)
-	//	public void updateMedicationShouldThrowInvalidRequestForUuidMismatch() {
-	//		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, medication)).thenThrow(InvalidRequestException.class);
-	//
-	//		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID), VersionConvertor_30_40.convertMedication(medication));
-	//	}
-	//
-	//	@Test(expected = MethodNotAllowedException.class)
-	//	public void updateMedicationShouldThrowMethodNotAllowedIfDoesNotExist() {
-	//		org.hl7.fhir.r4.model.Medication wrongMedication = new org.hl7.fhir.r4.model.Medication();
-	//
-	//		wrongMedication.setId(WRONG_MEDICATION_UUID);
-	//
-	//		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, wrongMedication))
-	//		        .thenThrow(MethodNotAllowedException.class);
-	//
-	//		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID), VersionConvertor_30_40.convertMedication(wrongMedication));
-	//	}
+	@Test
+	public void createMedication_shouldCreateNewMedication() {
+		when(fhirMedicationService.create(any(org.hl7.fhir.r4.model.Medication.class))).thenReturn(medication);
+		
+		MethodOutcome result = resourceProvider.createMedication(Medication30_40.convertMedication(medication));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medication.getId()));
+	}
+	
+	@Test
+	public void updateMedication_shouldUpdateMedication() {
+		medication.setStatus(org.hl7.fhir.r4.model.Medication.MedicationStatus.INACTIVE);
+		
+		when(fhirMedicationService.update(eq(MEDICATION_UUID), any(org.hl7.fhir.r4.model.Medication.class)))
+		        .thenReturn(medication);
+		
+		MethodOutcome result = resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID),
+		    Medication30_40.convertMedication(medication));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medication.getId()));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateMedicationShouldThrowInvalidRequestForUuidMismatch() {
+		when(fhirMedicationService.update(eq(WRONG_MEDICATION_UUID), any(org.hl7.fhir.r4.model.Medication.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID),
+		    Medication30_40.convertMedication(medication));
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateMedicationShouldThrowMethodNotAllowedIfDoesNotExist() {
+		org.hl7.fhir.r4.model.Medication wrongMedication = new org.hl7.fhir.r4.model.Medication();
+		wrongMedication.setId(WRONG_MEDICATION_UUID);
+		
+		when(fhirMedicationService.update(eq(WRONG_MEDICATION_UUID), any(org.hl7.fhir.r4.model.Medication.class)))
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID),
+		    Medication30_40.convertMedication(wrongMedication));
+	}
 	
 	@Test
 	public void deleteMedication_shouldDeleteRequestedMedication() {
 		when(fhirMedicationService.delete(MEDICATION_UUID)).thenReturn(medication);
 		
 		OperationOutcome result = resourceProvider.deleteMedication(new IdType().setValue(MEDICATION_UUID));
+		
 		assertThat(result, CoreMatchers.notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
