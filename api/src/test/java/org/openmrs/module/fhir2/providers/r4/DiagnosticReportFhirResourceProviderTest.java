@@ -31,9 +31,11 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
@@ -191,5 +193,22 @@ public class DiagnosticReportFhirResourceProviderTest {
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
+	}
+	
+	@Test
+	public void deleteDiagnosticReport_shouldDeleteRequestedDiagnosticReport() {
+		when(service.delete(UUID)).thenReturn(diagnosticReport);
+		
+		OperationOutcome result = resourceProvider.deleteDiagnosticReport(new IdType().setValue(UUID));
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteDiagnosticReport_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantDiagnosticReport() {
+		when(service.delete(WRONG_UUID)).thenReturn(null);
+		resourceProvider.deleteDiagnosticReport(new IdType().setValue(WRONG_UUID));
 	}
 }

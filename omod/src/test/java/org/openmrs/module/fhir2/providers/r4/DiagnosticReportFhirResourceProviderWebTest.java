@@ -423,4 +423,28 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
+	
+	@Test
+	public void shouldDeleteDiagnosticReport() throws Exception {
+		DiagnosticReport diagnosticReport = new DiagnosticReport();
+		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
+		diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.CANCELLED);
+		
+		when(service.delete(any(String.class))).thenReturn(diagnosticReport);
+		
+		MockHttpServletResponse response = delete("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deleteDiagnosticReport_shouldReturn404ForNonExistingDiagnosticReport() throws Exception {
+		when(service.get(WRONG_UUID)).thenReturn(null);
+		
+		MockHttpServletResponse response = get("/DiagnosticReport/" + WRONG_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+	}
 }

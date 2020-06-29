@@ -23,9 +23,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.convertors.conv30_40.DiagnosticReport30_40;
+import org.hl7.fhir.convertors.conv30_40.OperationOutcome30_40;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
@@ -76,6 +78,17 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 		
 		return FhirProviderUtils.buildUpdate(
 		    diagnosticReportService.update(idPart, DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport)));
+	}
+	
+	@Delete
+	@SuppressWarnings("unused")
+	public OperationOutcome deleteDiagnosticReport(@IdParam @NotNull IdType id) {
+		org.hl7.fhir.r4.model.DiagnosticReport diagnosticReport = diagnosticReportService.delete(id.getIdPart());
+		if (diagnosticReport == null) {
+			throw new ResourceNotFoundException("Could not find medication to delete with id " + id.getIdPart());
+		}
+		
+		return OperationOutcome30_40.convertOperationOutcome(FhirProviderUtils.buildDelete(diagnosticReport));
 	}
 	
 	@Search
