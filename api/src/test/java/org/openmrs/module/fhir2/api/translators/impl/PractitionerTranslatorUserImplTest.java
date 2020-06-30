@@ -43,7 +43,7 @@ public class PractitionerTranslatorUserImplTest {
 	
 	private static final String USER_UUID = "5b598dd8-42f8-4d7d-9041-098e4ee8ad30";
 	
-	private static final int USER_ID = 1002;
+	private static final String SYSTEM_ID = "1002";
 	
 	private static final String GENDER = "M";
 	
@@ -79,10 +79,10 @@ public class PractitionerTranslatorUserImplTest {
 		
 		user = new User();
 		user.setUuid(USER_UUID);
-		user.setUserId(USER_ID);
+		user.setSystemId(SYSTEM_ID);
 		
 		Identifier identifier = new Identifier();
-		identifier.setValue(String.valueOf(USER_ID));
+		identifier.setValue((SYSTEM_ID));
 		identifier.setSystem(FhirConstants.OPENMRS_FHIR_EXT_USER_IDENTIFIER);
 		
 		practitioner = new Practitioner();
@@ -119,7 +119,7 @@ public class PractitionerTranslatorUserImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getIdentifier(), not(empty()));
 		assertThat(result.getIdentifier().size(), equalTo(1));
-		assertThat(result.getIdentifier().get(0).getValue(), equalTo(String.valueOf(USER_ID)));
+		assertThat(result.getIdentifier().get(0).getValue(), equalTo((SYSTEM_ID)));
 		
 	}
 	
@@ -127,8 +127,8 @@ public class PractitionerTranslatorUserImplTest {
 	public void shouldTranslateFhirPractitionerIdentifierToOpenMrsUserId() {
 		User result = practitionerTranslatorUser.toOpenmrsType(practitioner);
 		assertThat(result, notNullValue());
-		assertThat(result.getUserId(), notNullValue());
-		assertThat(result.getUserId(), equalTo(USER_ID));
+		assertThat(result.getSystemId(), notNullValue());
+		assertThat(result.getSystemId(), equalTo(SYSTEM_ID));
 	}
 	
 	@Test
