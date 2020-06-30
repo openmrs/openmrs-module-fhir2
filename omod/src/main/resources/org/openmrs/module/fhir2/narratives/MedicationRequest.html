@@ -163,95 +163,97 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        </tbody>
-    </table>
-
-    <th:block th:if="${not resource.dispenseRequest.empty}">
-        <h2>Dispense Requests</h2>
-        <table class="subPropertyTable">
-            <tr>
-                <th>-</th>
-                <th:block th:if="${fhirVersion} eq 'R4'">
-                    <th>Initial Fill</th>
-                </th:block>
-                <th:block th:if="${fhirVersion} eq 'R4'">
-                    <th>Dispense Interval</th>
-                </th:block>
-                <th>Validity Period</th>
-                <th>Number of Repeats Allowed</th>
-                <th>Quantity</th>
-                <th>Expected Supply Duration</th>
-                <th>Performer</th>
-            </tr>
-            <tr>
-                <td>*</td>
-                <td>
-                    <th:block th:if="${fhirVersion} eq 'R4'">
-                        <th:block th:if="${resource.dispenseRequest.initialFill}">
-                            <div th:if="${resource.dispenseRequest.initialFill.quantity}">
-                                Quantity:
-                                <th:block th:narrative="${resource.dispenseRequest.initialFill.quantity}"></th:block>
-                            </div>
-                            <div th:if="${resource.dispenseRequest.initialFill.duration}">
-                                Duration:
-                                <th:block th:narrative="${resource.dispenseRequest.initialFill.duration}"></th:block>
-                            </div>
+        <tr th:if="${not resource.dispenseRequest.empty}">
+            <td>Dispense Requests:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th:block th:if="${fhirVersion} eq 'R4'">
+                            <th>Initial Fill</th>
                         </th:block>
-                    </th:block>
-                </td>
-                <td>
-                    <th:block th:if="${resource.dispenseRequest.dispenseInterval}"
-                              th:narrative="${resource.dispenseRequest.dispenseInterval}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${resource.dispenseRequest.validityPeriod}"
-                              th:narrative="${resource.dispenseRequest.validityPeriod}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${resource.dispenseRequest.numberOfRepeatsAllowed.toString}"
-                              th:text="${resource.dispenseRequest.numberOfRepeatsAllowed}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${resource.dispenseRequest.quantity}"
-                              th:narrative="${resource.dispenseRequest.quantity}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${resource.dispenseRequest.expectedSupplyDuration}"
-                              th:narrative="${resource.dispenseRequest.expectedSupplyDuration}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${resource.dispenseRequest.performer}"
-                              th:narrative="${resource.dispenseRequest.performer}"></th:block>
-                </td>
-            </tr>
-        </table>
-    </th:block>
-
-    <th:block th:if="${not resource.substitution.empty}">
-        <h2>Substitutions</h2>
-        <table class="subPropertyTable">
-            <tr>
-                <th>-</th>
-                <th>Allowed</th>
-                <th>Reason</th>
-            </tr>
-            <tr>
-                <td>*</td>
-                <td>
-                    <th:block th:if="${resource.substitution.allowed}"
-                              th:narrative="${resource.substitution.allowed}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${resource.substitution.reason}"
-                              th:narrative="${resource.substitution.reason}"></th:block>
-                </td>
-            </tr>
-        </table>
-    </th:block>
-
-    <br/>
-    <table class="hapiPropertyTable">
-        <tbody>
+                        <th:block th:if="${fhirVersion} eq 'R4'">
+                            <th>Dispense Interval</th>
+                        </th:block>
+                        <th>Validity Period</th>
+                        <th>Number of Repeats Allowed</th>
+                        <th>Quantity</th>
+                        <th>Expected Supply Duration</th>
+                        <th>Performer</th>
+                    </tr>
+                    <tr>
+                        <td>*</td>
+                        <td>
+                            <th:block th:if="${fhirVersion} eq 'R4'">
+                                <th:block th:if="${resource.dispenseRequest.initialFill}">
+                                    <div th:if="${resource.dispenseRequest.initialFill.quantity}">
+                                        Quantity:
+                                        <th:block
+                                                th:narrative="${resource.dispenseRequest.initialFill.quantity}"></th:block>
+                                    </div>
+                                    <div th:if="${resource.dispenseRequest.initialFill.duration}">
+                                        Duration:
+                                        <th:block
+                                                th:narrative="${resource.dispenseRequest.initialFill.duration}"></th:block>
+                                    </div>
+                                </th:block>
+                            </th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${resource.dispenseRequest.dispenseInterval}"
+                                      th:narrative="${resource.dispenseRequest.dispenseInterval}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${resource.dispenseRequest.validityPeriod}"
+                                      th:narrative="${resource.dispenseRequest.validityPeriod}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${resource.dispenseRequest.numberOfRepeatsAllowed.toString}"
+                                      th:text="${resource.dispenseRequest.numberOfRepeatsAllowed}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${resource.dispenseRequest.quantity}"
+                                      th:narrative="${resource.dispenseRequest.quantity}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${resource.dispenseRequest.expectedSupplyDuration}"
+                                      th:narrative="${resource.dispenseRequest.expectedSupplyDuration}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${resource.dispenseRequest.performer}"
+                                      th:narrative="${resource.dispenseRequest.performer}"></th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr th:if="${not resource.substitution.empty}">
+            <td>Substitutions:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Allowed</th>
+                        <th>Reason</th>
+                    </tr>
+                    <tr>
+                        <td>*</td>
+                        <td>
+                            <th:block th:if="${resource.substitution.allowed}"
+                                      th:narrative="${resource.substitution.allowed}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${resource.substitution.reason}"
+                                      th:narrative="${resource.substitution.reason}"></th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         <tr th:if="${not resource.priorPrescription.empty}">
             <td>Prior Prescription:</td>
             <td th:narrative="${resource.priorPrescription}"></td>

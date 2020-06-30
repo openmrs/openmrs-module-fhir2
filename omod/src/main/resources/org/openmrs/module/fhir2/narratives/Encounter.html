@@ -31,56 +31,48 @@ a browser.
             <td>Status:</td>
             <td th:text="${resource.status}"></td>
         </tr>
-        </tbody>
-    </table>
-
-    <th:block th:if="${not resource.statusHistory.empty}">
-        <h2>Status History</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Status</th>
-                <th>Period</th>
-            </tr>
-            <tr th:each="statusHistory, statusHistoryItr: ${resource.statusHistory}">
-                <td th:text="${statusHistoryItr.count}"></td>
-                <td th:narrative="${statusHistory.status}"></td>
-                <td th:narrative="${statusHistory.period}"></td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <table class="hapiPropertyTable">
-        <tbody>
+        <tr th:if="${not resource.statusHistory.empty}">
+            <td>Status History:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Status</th>
+                        <th>Period</th>
+                    </tr>
+                    <tr th:each="statusHistory, statusHistoryItr: ${resource.statusHistory}">
+                        <td th:text="${statusHistoryItr.count}"></td>
+                        <td th:narrative="${statusHistory.status}"></td>
+                        <td th:narrative="${statusHistory.period}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         <tr th:if="${not resource.class_.empty}">
             <td>Class:</td>
             <td th:narrative="${resource.class_}"></td>
         </tr>
-        </tbody>
-    </table>
-
-    <th:block th:if="${not resource.classHistory.empty}">
-        <h2>Class History</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Class</th>
-                <th>Period</th>
-            </tr>
-            <tr th:each="classHistory, classHistoryItr: ${resource.classHistory}">
-                <td th:text="${classHistoryItr.count}"></td>
-                <td th:narrative="${classHistory.class}"></td>
-                <td th:narrative="${classHistory.period}"></td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <table class="hapiPropertyTable">
-        <tbody>
+        <tr th:if="${not resource.classHistory.empty}">
+            <td>Class History:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Class</th>
+                        <th>Period</th>
+                    </tr>
+                    <tr th:each="classHistory, classHistoryItr: ${resource.classHistory}">
+                        <td th:text="${classHistoryItr.count}"></td>
+                        <td th:narrative="${classHistory.class}"></td>
+                        <td th:narrative="${classHistory.period}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         <tr th:if="${not resource.type.empty}">
             <td>Type:</td>
             <td>
@@ -134,44 +126,40 @@ a browser.
                 </td>
             </tr>
         </th:block>
-        </tbody>
-    </table>
-
-    <th:block th:if="${not resource.participant.empty}">
-        <h2>Participants</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Type</th>
-                <th>Period</th>
-                <th>Individual</th>
-            </tr>
-            <tr th:each="participant, participantItr: ${resource.participant}">
-                <td th:text="${participantItr.count}"></td>
-                <td>
-                    <th:block th:each="participantType, participantTypeItr: ${participant.type}">
-                        <th:block th:if="${participantTypeItr.index}">,</th:block>
-                        <th:block th:narrative="${participantType}"></th:block>
-                    </th:block>
-                </td>
-                <td>
-                    <th:block th:if="${participant.period}">
-                        <th:block th:narrative="${participant.period}"></th:block>
-                    </th:block>
-                </td>
-                <td>
-                    <th:block th:if="${participant.individual}">
-                        <th:block th:narrative="${participant.individual}"></th:block>
-                    </th:block>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <table class="hapiPropertyTable">
-        <tbody>
+        <tr th:if="${not resource.participant.empty}">
+            <td>Participants:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Type</th>
+                        <th>Period</th>
+                        <th>Individual</th>
+                    </tr>
+                    <tr th:each="participant, participantItr: ${resource.participant}">
+                        <td th:text="${participantItr.count}"></td>
+                        <td>
+                            <th:block th:each="participantType, participantTypeItr: ${participant.type}">
+                                <th:block th:if="${participantTypeItr.index}">,</th:block>
+                                <th:block th:narrative="${participantType}"></th:block>
+                            </th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${participant.period}">
+                                <th:block th:narrative="${participant.period}"></th:block>
+                            </th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${participant.individual}">
+                                <th:block th:narrative="${participant.individual}"></th:block>
+                            </th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         <tr th:if="${not resource.appointment.empty}">
             <td>Appointment:</td>
             <td>
@@ -209,39 +197,35 @@ a browser.
                 </td>
             </tr>
         </th:block>
-        </tbody>
-    </table>
-
-    <th:block th:if="${not resource.diagnosis.empty}">
-        <h2>Diagnosis</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Condition</th>
-                <th:block th:if="${fhirVersion} eq 'R4'">
-                    <th>Use</th>
-                </th:block>
-                <th>Rank</th>
-            </tr>
-            <tr th:each="diagnosis, diagnosisItr: ${resource.diagnosis}">
-                <td th:text="${diagnosisItr.count}"></td>
-                <td th:narrative="${diagnosis.condition}"></td>
-                <th:block th:if="${fhirVersion} eq 'R4'">
-                    <td>
-                        <th:block th:if="${diagnosis.use}" th:narrative="${diagnosis.use}"></th:block>
-                    </td>
-                </th:block>
-                <td>
-                    <th:block th:if="${diagnosis.rank}" th:text="${diagnosis.rank}"></th:block>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <table class="hapiPropertyTable">
-        <tbody>
+        <tr th:if="${not resource.diagnosis.empty}">
+            <td>Diagnosis:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Condition</th>
+                        <th:block th:if="${fhirVersion} eq 'R4'">
+                            <th>Use</th>
+                        </th:block>
+                        <th>Rank</th>
+                    </tr>
+                    <tr th:each="diagnosis, diagnosisItr: ${resource.diagnosis}">
+                        <td th:text="${diagnosisItr.count}"></td>
+                        <td th:narrative="${diagnosis.condition}"></td>
+                        <th:block th:if="${fhirVersion} eq 'R4'">
+                            <td>
+                                <th:block th:if="${diagnosis.use}" th:narrative="${diagnosis.use}"></th:block>
+                            </td>
+                        </th:block>
+                        <td>
+                            <th:block th:if="${diagnosis.rank}" th:text="${diagnosis.rank}"></th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         <tr th:if="${not resource.account.empty}">
             <td>Account:</td>
             <td>
@@ -251,13 +235,7 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        </tbody>
-    </table>
-
-    <th:block th:if="${not resource.hospitalization.empty}">
-        <br/>
-        <table class="hapiPropertyTable">
-            <tbody>
+        <th:block th:if="${not resource.hospitalization.empty}">
             <tr>
                 <td><h3>Hospitalization:</h3></td>
                 <td></td>
@@ -281,7 +259,8 @@ a browser.
             <tr th:if="${resource.hospitalization.dietPreference}">
                 <td>Diet Preference:</td>
                 <td>
-                    <th:block th:each="dietPreference, dietPreferenceItr: ${resource.hospitalization.dietPreference}">
+                    <th:block
+                            th:each="dietPreference, dietPreferenceItr: ${resource.hospitalization.dietPreference}">
                         <th:block th:if="${dietPreferenceItr.index}">,</th:block>
                         <th:block th:narrative="${dietPreference}"></th:block>
                     </th:block>
@@ -315,45 +294,41 @@ a browser.
                 <td>Discharge Disposition:</td>
                 <td th:narrative="${resource.hospitalization.dischargeDisposition}"></td>
             </tr>
-            </tbody>
-        </table>
-        <br/>
-    </th:block>
-
-    <th:block th:if="${not resource.location.empty}">
-        <h2>Location</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th:block th:if="${fhirVersion} eq 'R4'">
-                    <th>Physical Type</th>
-                </th:block>
-                <th>Period</th>
-            </tr>
-            <tr th:each="location, locationItr: ${resource.location}">
-                <td th:text="${locationItr.count}"></td>
-                <td th:narrative="${location.location}"></td>
-                <td>
-                    <th:block th:if="${location.status}" th:narrative="${location.status}"></th:block>
-                </td>
-                <th:block th:if="${fhirVersion} eq 'R4'">
-                    <td>
-                        <th:block th:if="${location.physicalType}" th:narrative="${location.physicalType}"></th:block>
-                    </td>
-                </th:block>
-                <td>
-                    <th:block th:if="${location.period}" th:narrative="${location.period}"></th:block>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <table class="hapiPropertyTable">
-        <tbody>
+        </th:block>
+        <tr th:if="${not resource.location.empty}">
+            <td>Location:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th:block th:if="${fhirVersion} eq 'R4'">
+                            <th>Physical Type</th>
+                        </th:block>
+                        <th>Period</th>
+                    </tr>
+                    <tr th:each="location, locationItr: ${resource.location}">
+                        <td th:text="${locationItr.count}"></td>
+                        <td th:narrative="${location.location}"></td>
+                        <td>
+                            <th:block th:if="${location.status}" th:narrative="${location.status}"></th:block>
+                        </td>
+                        <th:block th:if="${fhirVersion} eq 'R4'">
+                            <td>
+                                <th:block th:if="${location.physicalType}"
+                                          th:narrative="${location.physicalType}"></th:block>
+                            </td>
+                        </th:block>
+                        <td>
+                            <th:block th:if="${location.period}" th:narrative="${location.period}"></th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         <tr th:if="${not resource.serviceProvider.empty}">
             <td>Service Provider:</td>
             <td th:narrative="${resource.serviceProvider}"></td>

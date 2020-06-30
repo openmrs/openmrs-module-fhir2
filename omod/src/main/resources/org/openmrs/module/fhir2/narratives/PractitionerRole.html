@@ -88,71 +88,67 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        </tbody>
-    </table>
-
-    <th:block th:if="${not resource.availableTime.empty}">
-        <br/>
-        <h2>Available Time</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Days of Week</th>
-                <th>All Day</th>
-                <th>Available Start Time</th>
-                <th>Available End Time</th>
-            </tr>
-            <tr th:each="availableTime, availableTimeItr: ${resource.availableTime}">
-                <td th:text="${availableTimeItr.count}"></td>
-                <td>
-                    <th:block th:each="daysOfWeek, daysOfWeekItr: ${availableTime.daysOfWeek}">
-                        <th:block th:if="${daysOfWeekItr.index}">,</th:block>
-                        <th:block th:text="${daysOfWeek}"></th:block>
-                    </th:block>
-                </td>
-                <td>
-                    <th:block th:if="${availableTime.allDay}" th:text="${availableTime.allDay}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${availableTime.availableStartTime}"
-                              th:text="${availableTime.availableStartTime}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${availableTime.availableEndTime}"
-                              th:text="${availableTime.availableEndTime}"></th:block>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <th:block th:if="${not resource.notAvailable.empty}">
-        <br/>
-        <h2>Not Available</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Description</th>
-                <th>During</th>
-            </tr>
-            <tr th:each="notAvailable, notAvailableItr: ${resource.notAvailable}">
-                <td th:text="${notAvailableItr.count}"></td>
-                <td>
-                    <th:block th:if="${notAvailable.description}" th:text="${notAvailable.description}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${notAvailable.during}"
-                              th:narrative="${notAvailable.during}"></th:block>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <table class="hapiPropertyTable">
-        <tbody>
+        <tr th:if="${not resource.availableTime.empty}">
+            <td>Available Time:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Days of Week</th>
+                        <th>All Day</th>
+                        <th>Available Start Time</th>
+                        <th>Available End Time</th>
+                    </tr>
+                    <tr th:each="availableTime, availableTimeItr: ${resource.availableTime}">
+                        <td th:text="${availableTimeItr.count}"></td>
+                        <td>
+                            <th:block th:each="daysOfWeek, daysOfWeekItr: ${availableTime.daysOfWeek}">
+                                <th:block th:if="${daysOfWeekItr.index}">,</th:block>
+                                <th:block th:text="${daysOfWeek}"></th:block>
+                            </th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${availableTime.allDay}" th:text="${availableTime.allDay}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${availableTime.availableStartTime}"
+                                      th:text="${availableTime.availableStartTime}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${availableTime.availableEndTime}"
+                                      th:text="${availableTime.availableEndTime}"></th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr th:if="${not resource.notAvailable.empty}">
+            <td>Not Available:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Description</th>
+                        <th>During</th>
+                    </tr>
+                    <tr th:each="notAvailable, notAvailableItr: ${resource.notAvailable}">
+                        <td th:text="${notAvailableItr.count}"></td>
+                        <td>
+                            <th:block th:if="${notAvailable.description}"
+                                      th:text="${notAvailable.description}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${notAvailable.during}"
+                                      th:narrative="${notAvailable.during}"></th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         <tr th:if="${resource.availabilityExceptions}">
             <td>Availability Exceptions:</td>
             <td th:text="${resource.availabilityExceptions}"></td>

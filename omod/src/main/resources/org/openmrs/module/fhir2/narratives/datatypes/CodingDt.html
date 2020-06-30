@@ -1,2 +1,17 @@
-<th:block th:if="${resource.display}" th:text="${resource.display}"></th:block>
-<th:block th:unless="${resource.display}" th:text="${resource.code}"></th:block>
+<th:block th:if="${resource.display}">
+    <th:block th:text="${resource.display}"></th:block>
+    <th:block th:if="${resource.system}">
+        (Details:
+        <th:block th:text="${resource.system}"></th:block>
+        <th:block th:if="${resource.code}"
+                  th:text="' code ' + ${resource.code} + ' = \'' + ${resource.display} + '\''"></th:block>
+        )
+    </th:block>
+</th:block>
+<th:block th:unless="${resource.display}">
+    <th:block th:if="${resource.system}">
+        (Details:
+        <th:block th:text="${resource.system}"></th:block>
+        )
+    </th:block>
+</th:block>

@@ -99,70 +99,66 @@ a browser.
             <td>Asserter:</td>
             <td th:narrative="${resource.asserter}"></td>
         </tr>
-        </tbody>
-    </table>
-
-    <th:block th:if="${not resource.stage.empty}">
-        <h2>Stages</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Summary</th>
-                <th>Assessment</th>
-                <th:block th:if="${fhirVersion} eq 'R4'">
-                    <th>Type</th>
-                </th:block>
-            </tr>
-            <tr th:each="stage, stageItr: ${resource.stage}">
-                <td th:text="${stageItr.count}"></td>
-                <td>
-                    <th:block th:if="${stage.summary}" th:narrative="${stage.summary}"></th:block>
-                </td>
-                <td>
-                    <th:block th:each="assessment: ${stage.assessment}">
-                        <div th:narrative="${assessment}"></div>
-                    </th:block>
-                </td>
-                <th:block th:if="${fhirVersion} eq 'R4'">
-                    <td>
-                        <th:block th:if="${stage.type}" th:narrative="${stage.type}"></th:block>
-                    </td>
-                </th:block>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <th:block th:if="${not resource.evidence.empty}">
-        <h2>Evidences</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Code</th>
-                <th>Detail</th>
-            </tr>
-            <tr th:each="evidence, evidenceItr: ${resource.evidence}">
-                <td th:text="${evidenceItr.count}"></td>
-                <td>
-                    <th:block th:each="code: ${evidence.code}">
-                        <div th:narrative="${code}"></div>
-                    </th:block>
-                </td>
-                <td>
-                    <th:block th:each="detail: ${evidence.detail}">
-                        <div th:narrative="${detail}"></div>
-                    </th:block>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <br/>
-    <table class="hapiPropertyTable">
-        <tbody>
+        <tr th:if="${not resource.stage.empty}">
+            <td>Stages:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Summary</th>
+                        <th>Assessment</th>
+                        <th:block th:if="${fhirVersion} eq 'R4'">
+                            <th>Type</th>
+                        </th:block>
+                    </tr>
+                    <tr th:each="stage, stageItr: ${resource.stage}">
+                        <td th:text="${stageItr.count}"></td>
+                        <td>
+                            <th:block th:if="${stage.summary}" th:narrative="${stage.summary}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:each="assessment: ${stage.assessment}">
+                                <div th:narrative="${assessment}"></div>
+                            </th:block>
+                        </td>
+                        <th:block th:if="${fhirVersion} eq 'R4'">
+                            <td>
+                                <th:block th:if="${stage.type}" th:narrative="${stage.type}"></th:block>
+                            </td>
+                        </th:block>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr th:if="${not resource.evidence.empty}">
+            <td>Evidences:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Code</th>
+                        <th>Detail</th>
+                    </tr>
+                    <tr th:each="evidence, evidenceItr: ${resource.evidence}">
+                        <td th:text="${evidenceItr.count}"></td>
+                        <td>
+                            <th:block th:each="code: ${evidence.code}">
+                                <div th:narrative="${code}"></div>
+                            </th:block>
+                        </td>
+                        <td>
+                            <th:block th:each="detail: ${evidence.detail}">
+                                <div th:narrative="${detail}"></div>
+                            </th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         <tr th:if="${not resource.note.empty}">
             <td>Note:</td>
             <td>
