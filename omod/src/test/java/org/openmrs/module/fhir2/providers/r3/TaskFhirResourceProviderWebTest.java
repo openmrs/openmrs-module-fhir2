@@ -59,6 +59,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
+import org.openmrs.module.fhir2.providers.util.TaskVersionConverter;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -341,5 +342,27 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
+	}
+	@Test
+	public void deleteTask_shouldDeleteTask() throws Exception {
+		Task task = new Task();
+		task.setId(TASK_UUID);
+		task.setStatus(Task.TaskStatus.ACCEPTED);
+		
+		when(service.delete(any(String.class))).thenReturn(TaskVersionConverter.convertTask(task));
+		
+		MockHttpServletResponse response = delete("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deleteTask_shouldReturn404ForNonExistingTask() throws Exception {
+		when(service.get(WRONG_TASK_UUID)).thenReturn(null);
+		
+		MockHttpServletResponse response = get("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
 	}
 }

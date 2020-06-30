@@ -36,6 +36,7 @@ import lombok.Getter;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
@@ -210,5 +211,21 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.TASK));
+	}
+	
+	@Test
+	public void deleteTask_shouldDeleteRequestedTask() {
+		when(taskService.delete(TASK_UUID)).thenReturn(task);
+		OperationOutcome result = resourceProvider.deleteTask(new IdType().setValue(TASK_UUID));
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteTask_shouldThrowResourceNotFoundException() {
+		when(taskService.delete(WRONG_TASK_UUID)).thenReturn(null);
+		resourceProvider.deleteTask(new IdType().setValue(WRONG_TASK_UUID));
 	}
 }

@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -85,6 +87,15 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@SuppressWarnings("unused")
 	public MethodOutcome updateTask(@IdParam IdType id, @ResourceParam Task task) {
 		return FhirProviderUtils.buildUpdate(fhirTaskService.update(id.getIdPart(), TaskVersionConverter.convertTask(task)));
+	}
+	
+	@Delete
+	public OperationOutcome deleteTask(@IdParam IdType id) {
+		org.hl7.fhir.r4.model.Task task = fhirTaskService.delete(id.getIdPart());
+		if (task == null) {
+			throw new ResourceNotFoundException("Could not find task resource with id " + id.getIdPart() + "to delete");
+		}
+		return FhirProviderUtils.buildDelete(TaskVersionConverter.convertTask(task));
 	}
 	
 	@Search
