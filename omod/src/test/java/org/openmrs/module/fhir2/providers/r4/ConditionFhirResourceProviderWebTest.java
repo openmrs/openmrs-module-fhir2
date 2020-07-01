@@ -61,7 +61,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -405,4 +404,16 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
-}
+	@Test
+	public void deleteCondition_shouldDeleteCondition() throws Exception {
+		Condition condition = new Condition();
+		condition.setId(CONDITION_UUID);
+		when(conditionService.delete(any(String.class))).thenReturn(condition);
+
+		MockHttpServletResponse response = delete("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	}
+

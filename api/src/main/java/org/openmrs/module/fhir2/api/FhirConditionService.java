@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Condition;
 
 public interface FhirConditionService extends FhirService<Condition> {
@@ -27,4 +28,7 @@ public interface FhirConditionService extends FhirService<Condition> {
 	        DateRangeParam recordedDate, @Sort SortSpec sort);
 	
 	Condition saveCondition(@NotNull Condition condition);
+	
+	IAnyResource updateCondition(String idPart , IAnyResource resource);
+	
 }

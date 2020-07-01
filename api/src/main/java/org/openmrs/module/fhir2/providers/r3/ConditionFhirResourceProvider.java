@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -21,6 +22,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -33,10 +35,13 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.convertors.conv30_40.Condition30_40;
+import org.hl7.fhir.convertors.conv30_40.OperationOutcome30_40;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -82,6 +87,12 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildCreate(conditionService.saveCondition(Condition30_40.convertCondition(newCondition)));
 	}
 	
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updateCondition(@IdParam IdType id, @ResourceParam IAnyResource resource) {
+		return FhirProviderUtils.buildUpdate(conditionService.updateCondition(id.getIdPart(), resource));
+	}
+	
 	@Search
 	public IBundleProvider searchConditions(
 	        @OptionalParam(name = Condition.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_NAME,
@@ -99,5 +110,15 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		
 		return conditionService.searchConditions(patientParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate,
 		    sort);
+	}
+	
+	@Delete
+	public OperationOutcome deleteCondition(@IdParam IdType id) {
+		org.hl7.fhir.r4.model.Condition condition = conditionService.delete(id.getIdPart());
+		
+		if (condition == null) {
+			throw new ResourceNotFoundException("Could not find condition resource with id " + id.getIdPart() + "to delete");
+		}
+		return OperationOutcome30_40.convertOperationOutcome(FhirProviderUtils.buildDelete(condition));
 	}
 }
