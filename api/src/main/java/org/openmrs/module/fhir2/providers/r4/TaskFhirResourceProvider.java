@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.providers.r4;
 import java.util.List;
 
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -31,6 +32,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
@@ -78,6 +80,15 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@Update
 	public MethodOutcome updateTask(@IdParam IdType id, @ResourceParam Task task) {
 		return FhirProviderUtils.buildUpdate(service.update(id.getIdPart(), task));
+	}
+	
+	@Delete
+	public OperationOutcome deleteTask(@IdParam IdType id) {
+		Task task = service.delete(id.getIdPart());
+		if (task == null) {
+			throw new ResourceNotFoundException("Could not find task resource with id " + id.getIdPart() + "to delete");
+		}
+		return FhirProviderUtils.buildDelete(task);
 	}
 	
 	@Search
