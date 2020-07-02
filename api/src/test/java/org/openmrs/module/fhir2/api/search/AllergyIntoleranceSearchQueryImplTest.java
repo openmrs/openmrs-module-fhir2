@@ -13,6 +13,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -24,13 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Patient;
@@ -46,6 +40,16 @@ import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 
 @ContextConfiguration(classes = { TestFhirSpringConfiguration.class }, inheritLocations = false)
 public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSensitiveTest {
@@ -758,6 +762,93 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		    equalTo(AllergyIntolerance.AllergyIntoleranceCategory.ENVIRONMENT));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfAllergiesSortedBySeveritySevere() {
+		
+		SortSpec sort = new SortSpec();
+		sort.setParamName(AllergyIntolerance.SP_SEVERITY);
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		IBundleProvider results = search(
+		 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_SEVERE))).setSortSpec(sort));
+		
+		List<AllergyIntolerance> fullResults = get(results).stream().map(p -> (AllergyIntolerance)p).collect(Collectors.toList());
+		for (int i = 1; i < fullResults.size(); i++) {
+			
+			assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
+				    lessThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		 results = search(
+				 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_SEVERE))).setSortSpec(sort));
+				
+		 for (int i = 1; i < get(results).size(); i++) {
+				
+				assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
+					    greaterThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
+			}
+	}
+	
+
+	@Test
+	public void shouldReturnCollectionOfAllergiesSortedBySeverityMild() {
+		
+		SortSpec sort = new SortSpec();
+		sort.setParamName(AllergyIntolerance.SP_SEVERITY);
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		IBundleProvider results = search(
+		 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MILD))).setSortSpec(sort));
+		List<AllergyIntolerance> fullResults = get(results).stream().map(p -> (AllergyIntolerance)p).collect(Collectors.toList());
+		
+		for (int i = 1; i < fullResults.size(); i++) {
+			
+			assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
+				    lessThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		 results = search(
+				 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MILD))).setSortSpec(sort));
+				
+		 for (int i = 1; i < get(results).size(); i++) {
+				
+				assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
+					    greaterThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
+			}
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfAllergiesSortedBySeverityModerate() {
+		
+		SortSpec sort = new SortSpec();
+		sort.setParamName(AllergyIntolerance.SP_SEVERITY);
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		IBundleProvider results = search(
+		 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MODERATE))).setSortSpec(sort));
+		List<AllergyIntolerance> fullResults = get(results).stream().map(p -> (AllergyIntolerance)p).collect(Collectors.toList());
+		
+		
+		for (int i = 1; i < fullResults.size(); i++) {
+			
+			assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
+				    lessThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
+		}
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		 results = search(
+				 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MODERATE))).setSortSpec(sort));
+				
+		 for (int i = 1; i < get(results).size(); i++) {
+				
+				assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
+					    greaterThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
+			}
 	}
 	
 }

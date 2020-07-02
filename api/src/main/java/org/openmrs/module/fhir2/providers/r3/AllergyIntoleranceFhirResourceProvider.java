@@ -19,6 +19,8 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -89,11 +91,11 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	        @OptionalParam(name = AllergyIntolerance.SP_CODE) TokenAndListParam allergen,
 	        @OptionalParam(name = AllergyIntolerance.SP_SEVERITY) TokenAndListParam severity,
 	        @OptionalParam(name = AllergyIntolerance.SP_MANIFESTATION) TokenAndListParam manifestationCode,
-	        @OptionalParam(name = AllergyIntolerance.SP_CLINICAL_STATUS) TokenAndListParam clinicalStatus) {
+	        @OptionalParam(name = AllergyIntolerance.SP_CLINICAL_STATUS) TokenAndListParam clinicalStatus, @Sort SortSpec sort) {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
 		return allergyIntoleranceService.searchForAllergies(patientReference, category, allergen, severity,
-		    manifestationCode, clinicalStatus);
+		    manifestationCode, clinicalStatus, sort);
 	}
 }

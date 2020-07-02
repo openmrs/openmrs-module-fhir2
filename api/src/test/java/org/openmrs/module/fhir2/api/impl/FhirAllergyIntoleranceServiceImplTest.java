@@ -136,7 +136,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -166,7 +166,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -196,7 +196,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -226,7 +226,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -252,7 +252,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(null, category, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(null, category, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -278,7 +278,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(null, null, allergen, null, null, null);
+		IBundleProvider results = service.searchForAllergies(null, null, allergen, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -304,7 +304,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(null, null, null, severity, null, null);
+		IBundleProvider results = service.searchForAllergies(null, null, null, severity, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -330,7 +330,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(null, null, null, null, manifestation, null);
+		IBundleProvider results = service.searchForAllergies(null, null, null, null, manifestation, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -355,7 +355,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(null, null, null, null, null, status);
+		IBundleProvider results = service.searchForAllergies(null, null, null, null, null, status, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
