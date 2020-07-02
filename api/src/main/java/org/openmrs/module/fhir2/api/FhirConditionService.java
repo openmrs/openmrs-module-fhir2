@@ -29,6 +29,6 @@ public interface FhirConditionService extends FhirService<Condition> {
 	
 	Condition saveCondition(@NotNull Condition condition);
 	
-	IAnyResource updateCondition(String idPart , IAnyResource resource);
+	IAnyResource updateCondition(String idPart, IAnyResource resource);
 	
 }

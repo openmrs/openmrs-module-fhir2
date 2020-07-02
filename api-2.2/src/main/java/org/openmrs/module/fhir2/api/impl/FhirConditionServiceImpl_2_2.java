@@ -19,14 +19,17 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
+import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -68,5 +71,23 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 	@Override
 	public Condition saveCondition(Condition condition) {
 		return translator.toFhirResource(dao.saveCondition(translator.toOpenmrsType(condition)));
+	}
+	
+	@Override
+	public IAnyResource updateCondition(String idPart, IAnyResource resource) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	protected FhirDao<org.openmrs.Condition> getDao() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	protected OpenmrsFhirTranslator<org.openmrs.Condition, Condition> getTranslator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

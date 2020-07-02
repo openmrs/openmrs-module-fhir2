@@ -405,7 +405,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
 	@Test
-	public void deleteCondition_shouldDeleteCondition() throws Exception {
+	public void deleteCondition_shouldDeleteConditionByConditionUUID() throws Exception {
 		Condition condition = new Condition();
 		condition.setId(CONDITION_UUID);
 		when(conditionService.delete(any(String.class))).thenReturn(condition);

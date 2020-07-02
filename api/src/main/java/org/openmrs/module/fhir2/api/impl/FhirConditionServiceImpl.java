@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
@@ -57,5 +58,11 @@ public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> exten
 	@Override
 	public Condition saveCondition(Condition condition) {
 		throw new FhirNotImplementedException(MESSAGE);
+	}
+	
+	@Override
+	public Condition updateCondition(String idPart, IAnyResource resource) {
+		throw new FhirNotImplementedException(MESSAGE);
+		
 	}
 }

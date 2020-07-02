@@ -11,10 +11,10 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
+import javax.validation.constraints.NotNull;
+
 import java.util.Map;
 import java.util.Optional;
-
-import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -24,7 +24,6 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
 import org.openmrs.AllergyReaction;
@@ -161,7 +160,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	protected String paramToProp(@NotNull String paramName) {
 		switch (paramName) {
 			case AllergyIntolerance.SP_SEVERITY:
-				return "severity";	
+				return "severity";
 			default:
 				return null;
 		}
