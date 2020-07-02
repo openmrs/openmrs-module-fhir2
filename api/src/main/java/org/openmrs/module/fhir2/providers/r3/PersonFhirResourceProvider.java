@@ -80,8 +80,11 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Person.SP_ADDRESS_CITY) StringAndListParam city,
 	        @OptionalParam(name = Person.SP_ADDRESS_STATE) StringAndListParam state,
 	        @OptionalParam(name = Person.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
-	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringAndListParam country, @Sort SortSpec sort) {
-		return personService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, sort);
+	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringAndListParam country,
+	        @OptionalParam(name = Person.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
+		return personService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, id, lastUpdated,
+		    sort);
 	}
 	
 }

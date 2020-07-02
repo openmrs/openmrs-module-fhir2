@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.RelatedPerson;
@@ -92,6 +93,14 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 	private static final String POSTAL_CODE = "37601";
 	
 	private static final String COUNTRY = "FakeB";
+	
+	private static final String DATE_CREATED = "2020-06-11";
+	
+	private static final String DATE_CHANGED = "2020-07-31";
+	
+	private static final String DATE_VOIDED = "2020-09-03";
+	
+	private static final String RELATIONSHIP_UUID = "f8f5b6bd-9e4d-4f1c-be5d-4232cbe72752";
 	
 	private static final int START_INDEX = 0;
 	
@@ -210,7 +219,7 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		assertThat(relationships, notNullValue());
 		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(1));
+		assertThat(relationList.size(), equalTo(3));
 		assertThat(relationList, everyItem(hasProperty("gender", equalTo(null))));
 		
 		gender = new TokenAndListParam().addAnd(new TokenOrListParam().add(NULL_GENDER));
@@ -224,7 +233,7 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		assertThat(relationships, notNullValue());
 		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(1));
+		assertThat(relationList.size(), equalTo(3));
 		assertThat(relationList, everyItem(hasProperty("gender", equalTo(null))));
 		
 		gender = new TokenAndListParam().addAnd(new TokenOrListParam().add(UNKNOWN_GENDER));
@@ -238,7 +247,7 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		assertThat(relationships, notNullValue());
 		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(1));
+		assertThat(relationList.size(), equalTo(3));
 		assertThat(relationList, everyItem(hasProperty("gender", equalTo(null))));
 	}
 	
@@ -361,6 +370,107 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		assertThat(relationList, not(empty()));
 		assertThat(relationList.size(), equalTo(1));
 		assertThat(((RelatedPerson) relationList.iterator().next()).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfRelatedPeopleByUuid() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(RELATIONSHIP_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((RelatedPerson) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(RELATIONSHIP_UUID));
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfRelatedPeopleByLastUpdatedDateCreated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2));
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfRelatedPeopleByLastUpdatedDateChanged() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CHANGED).setLowerBound(DATE_CHANGED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfRelatedPeopleByLastUpdatedDateVoided() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfRelatedPeopleByMatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(RELATIONSHIP_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((RelatedPerson) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(RELATIONSHIP_UUID));
+	}
+	
+	@Test
+	public void shouldReturnEmptyListByMismatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(RELATIONSHIP_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test

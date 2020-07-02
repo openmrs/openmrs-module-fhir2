@@ -112,6 +112,10 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	
 	private static final String CONCEPT_ID_2 = "c607c80f-1ea9-4da3-bb88-6276ce8868dd";
 	
+	private static final String DATE_CREATED = "2020-03-14";
+	
+	private static final String DATE_VOIDED = "2017-01-12";
+	
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
@@ -162,7 +166,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	@Test
-	public void searchForAllergies_shouldSearchForAllergiesByMultiplePatientIdentifierOr() {
+	public void searchForConditions_shouldSearchForConditionsByMultiplePatientIdentifierOr() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
 		
@@ -191,7 +195,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	@Test
-	public void searchForAllergies_shouldReturnEmptyListOfAllergiesByMultiplePatientIdentifierAnd() {
+	public void searchForConditions_shouldReturnEmptyListOfConditionsByMultiplePatientIdentifierAnd() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
 		
@@ -891,6 +895,90 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForConditions_shouldSearchForConditionsByUuid() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldSearchForConditionsByLastUpdatedDateCreated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForConditions_shouldSearchForConditionsByLastUpdatedDateVoided() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForConditions_shouldSearchForConditionsByMatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnEmptyListByMismatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 }

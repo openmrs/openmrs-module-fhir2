@@ -59,6 +59,8 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	
 	private static final String WRONG_CONDITION_UUID = "ca0dfd38-ee20-41a6-909e-7d84247ca192";
 	
+	private static final String LAST_UPDATED_DATE = "2020-09-03";
+	
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
@@ -165,13 +167,17 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
 		        .setUpperBound("upper record date");
 		
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
+		
+		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
+		
 		SortSpec sort = new SortSpec("sort param");
 		
 		when(conditionService.searchConditions(patientReference, codeList, clinicalList, onsetDate, onsetAge, recordDate,
-		    sort)).thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		    uuid, lastUpdated, sort)).thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		IBundleProvider result = resourceProvider.searchConditions(patientReference, subjectReference, codeList,
-		    clinicalList, onsetDate, onsetAge, recordDate, sort);
+		    clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort);
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -199,13 +205,17 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
 		        .setUpperBound("upper record date");
 		
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
+		
+		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
+		
 		SortSpec sort = new SortSpec("sort param");
 		
 		when(conditionService.searchConditions(subjectReference, codeList, clinicalList, onsetDate, onsetAge, recordDate,
-		    sort)).thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
+		    uuid, lastUpdated, sort)).thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
-		IBundleProvider result = resourceProvider.searchConditions(null, subjectReference, codeList, clinicalList, onsetDate,
-		    onsetAge, recordDate, sort);
+		IBundleProvider result = resourceProvider.searchConditions(subjectReference, subjectReference, codeList,
+		    clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort);
 		
 		List<IBaseResource> resultList = get(result);
 		

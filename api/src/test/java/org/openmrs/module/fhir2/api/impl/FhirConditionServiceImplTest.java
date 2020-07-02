@@ -44,7 +44,7 @@ public class FhirConditionServiceImplTest {
 	
 	@Test(expected = FhirNotImplementedException.class)
 	public void searchConditions_shouldThrowFhirException() {
-		assertThat(conditionService.searchConditions(null, null, null, null, null, null, null), nullValue());
+		assertThat(conditionService.searchConditions(null, null, null, null, null, null, null, null, null), nullValue());
 	}
 	
 	@Test(expected = FhirNotImplementedException.class)

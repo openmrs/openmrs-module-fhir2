@@ -58,7 +58,8 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 	public IBundleProvider searchForObservations(ReferenceAndListParam encounterReference,
 	        ReferenceAndListParam patientReference, ReferenceParam hasMemberReference, TokenAndListParam valueConcept,
 	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
-	        DateRangeParam date, TokenAndListParam code, TokenAndListParam category, SortSpec sort) {
+	        DateRangeParam date, TokenAndListParam code, TokenAndListParam category, TokenAndListParam id,
+	        DateRangeParam lastUpdated, SortSpec sort) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
@@ -70,7 +71,10 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		        .addParameter(FhirConstants.VALUE_STRING_SEARCH_HANDLER, "valueText", valueStringParam)
 		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", valueQuantityParam)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime", date)
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "valueDatetime", valueDateParam).setSortSpec(sort);
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "valueDatetime", valueDateParam)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
+		        .setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}

@@ -10,18 +10,33 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 
+import java.util.Calendar;
+import java.util.Collections;
+
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.lang.time.DateUtils;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
@@ -34,17 +49,29 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 	
 	private static final String WRONG_SERVICE_REQUEST_UUID = "92b04062-e57d-43aa-8c38-90a1ad70080c";
 	
+	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
+	
 	@Getter(AccessLevel.PUBLIC)
 	private ProcedureRequestFhirResourceProvider resourceProvider;
 	
 	@Mock
 	private FhirServiceRequestService service;
 	
+	@Captor
+	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
+	
+	private ProcedureRequest procedureRequest;
+	
 	@Before
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new ProcedureRequestFhirResourceProvider();
 		resourceProvider.setServiceRequestService(service);
+		procedureRequest = new ProcedureRequest();
+		procedureRequest.setId(SERVICE_REQUEST_UUID);
 		super.setup();
 	}
 	
@@ -68,5 +95,51 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 		        .go();
 		
 		assertThat(response, isNotFound());
+	}
+	
+	@Test
+	public void searchForProcedureRequests_shouldSearchForProcedureRequestsByUUID() throws Exception {
+		verifyUri(String.format("/ProcedureRequest?_id=%s", SERVICE_REQUEST_UUID));
+		
+		verify(service).searchForServiceRequests(tokenAndListParamArgumentCaptor.capture(), isNull());
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo(SERVICE_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchForProcedureRequests_shouldSearchForProcedureRequestsByLastUpdatedDate() throws Exception {
+		verifyUri(String.format("/ProcedureRequest?_lastUpdated=%s", LAST_UPDATED_DATE));
+		
+		verify(service).searchForServiceRequests(isNull(), dateRangeParamArgumentCaptor.capture());
+		
+		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.SEPTEMBER, 3);
+		
+		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+	}
+	
+	private void verifyUri(String uri) throws Exception {
+		when(service.searchForServiceRequests(any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(procedureRequest), 10, 1));
+		
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		
+		Bundle results = readBundleResponse(response);
+		assertThat(results.getEntry(), notNullValue());
+		assertThat(results.getEntry(), not(empty()));
+		assertThat(results.getEntry().get(0).getResource(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
 	}
 }

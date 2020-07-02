@@ -24,7 +24,7 @@ public interface FhirConditionService extends FhirService<Condition> {
 	
 	IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
 	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
-	        DateRangeParam recordedDate, @Sort SortSpec sort);
+	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, @Sort SortSpec sort);
 	
 	Condition saveCondition(@NotNull Condition condition);
 }

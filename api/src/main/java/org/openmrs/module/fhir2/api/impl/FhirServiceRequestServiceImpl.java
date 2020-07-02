@@ -10,11 +10,14 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.TestOrder;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -40,8 +43,10 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>> searchQuery;
 	
 	@Override
-	public IBundleProvider searchForServiceRequests() {
-		SearchParameterMap theParams = new SearchParameterMap();
+	public IBundleProvider searchForServiceRequests(TokenAndListParam uuid, DateRangeParam lastUpdated) {
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}

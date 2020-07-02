@@ -94,6 +94,8 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	
 	private static final String ONSET_AGE = "lt2||h";
 	
+	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
+	
 	@Mock
 	private FhirConditionService conditionService;
 	
@@ -232,7 +234,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?patient=%s", PATIENT_UUID));
 		
 		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -249,7 +251,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?patient.name=%s", PATIENT_NAME));
 		
 		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -266,7 +268,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?patient.given=%s", PATIENT_GIVEN_NAME));
 		
 		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -283,7 +285,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?patient.family=%s", PATIENT_FAMILY_NAME));
 		
 		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -300,7 +302,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?patient.identifier=%s", PATIENT_IDENTIFIER));
 		
 		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -317,7 +319,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?code=%s", CONDITION_CODE));
 		
 		verify(conditionService).searchConditions(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -331,7 +333,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?clinical-status=%s", CLINICAL_STATUS));
 		
 		verify(conditionService).searchConditions(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -345,7 +347,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?asserted-date=%s", RECORDED_DATE));
 		
 		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeParamArgumentCaptor.capture(), isNull());
+		    dateRangeParamArgumentCaptor.capture(), isNull(), isNull(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1978, Calendar.FEBRUARY, 2);
@@ -361,7 +363,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?onset-date=%s", ONSET_DATE));
 		
 		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), dateRangeParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
@@ -372,11 +374,41 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	}
 	
 	@Test
+	public void searchForConditions_shouldReturnBundleWithMatchingUUID() throws Exception {
+		verifyURI(String.format("/Condition?_id=%s", CONDITION_UUID));
+		
+		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull());
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnBundleWithLastUpdatedDateEqualTo() throws Exception {
+		verifyURI(String.format("/Condition?_lastUpdated=%s", LAST_UPDATED_DATE));
+		
+		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    dateRangeParamArgumentCaptor.capture(), isNull());
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.SEPTEMBER, 3);
+		
+		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+	}
+	
+	@Test
 	public void searchForConditions_shouldReturnBundleWithOnsetAgeLessThanHour() throws Exception {
 		verifyURI(String.format("/Condition?onset-age=%s", ONSET_AGE));
 		
 		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(),
-		    quantityAndListParamArgumentCaptor.capture(), isNull(), isNull());
+		    quantityAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(quantityAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(quantityAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -397,7 +429,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	private void verifyURI(String uri) throws Exception {
 		Condition condition = new Condition();
 		condition.setId(CONDITION_UUID);
-		when(conditionService.searchConditions(any(), any(), any(), any(), any(), any(), any()))
+		when(conditionService.searchConditions(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

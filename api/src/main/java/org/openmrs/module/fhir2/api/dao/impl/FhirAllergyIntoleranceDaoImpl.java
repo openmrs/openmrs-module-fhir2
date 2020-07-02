@@ -9,13 +9,20 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
-
-import java.util.Map;
-import java.util.Optional;
+import static org.hibernate.criterion.Restrictions.isNull;
+import static org.hibernate.criterion.Restrictions.or;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
@@ -24,7 +31,6 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
 import org.openmrs.AllergyReaction;
@@ -80,8 +86,26 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 					    param -> handleBoolean("voided", convertStringStatusToBoolean((TokenAndListParam) param.getParam()))
 					            .ifPresent(criteria::add));
 					break;
+				case FhirConstants.COMMON_SEARCH_HANDLER:
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					break;
 			}
 		});
+	}
+	
+	@Override
+	protected Optional<Criterion> getCriteriaForLastUpdated(DateRangeParam param) {
+		List<Optional<Criterion>> criterionList = new ArrayList<>();
+		
+		criterionList.add(handleDateRange("dateVoided", param));
+		
+		criterionList.add(Optional.of(
+		    and(toCriteriaArray(Stream.of(Optional.of(isNull("dateVoided")), handleDateRange("dateChanged", param))))));
+		
+		criterionList.add(Optional.of(and(toCriteriaArray(Stream.of(Optional.of(isNull("dateVoided")),
+		    Optional.of(isNull("dateChanged")), handleDateRange("dateCreated", param))))));
+		
+		return Optional.of(or(toCriteriaArray(criterionList)));
 	}
 	
 	private void handleManifestation(Criteria criteria, TokenAndListParam code) {
@@ -161,7 +185,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	protected String paramToProp(@NotNull String paramName) {
 		switch (paramName) {
 			case AllergyIntolerance.SP_SEVERITY:
-				return "severity";	
+				return "severity";
 			default:
 				return null;
 		}

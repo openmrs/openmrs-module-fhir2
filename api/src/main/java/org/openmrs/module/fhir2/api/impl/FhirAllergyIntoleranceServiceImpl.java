@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.impl;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
@@ -47,7 +48,7 @@ public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIn
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForAllergies(ReferenceAndListParam patientReference, TokenAndListParam category,
 	        TokenAndListParam allergen, TokenAndListParam severity, TokenAndListParam manifestationCode,
-	        TokenAndListParam clinicalStatus, SortSpec sort) {
+	        TokenAndListParam clinicalStatus, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
@@ -55,7 +56,10 @@ public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIn
 		        .addParameter(FhirConstants.ALLERGEN_SEARCH_HANDLER, allergen)
 		        .addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, severity)
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, manifestationCode)
-		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, clinicalStatus).setSortSpec(sort);
+		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, clinicalStatus)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
+		        .setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}

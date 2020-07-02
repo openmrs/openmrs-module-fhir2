@@ -11,8 +11,10 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,6 +77,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	private static final String DIAGNOSTIC_REPORT_CODE = "5497";
 	
 	private static final String PATIENT_IDENTIFIER = "6TS-4";
+	
+	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
 	
 	@Mock
 	private FhirDiagnosticReportService service;
@@ -214,7 +218,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		verifyUri(String.format("/DiagnosticReport?encounter=%s", ENCOUNTER_UUID));
 		
 		verify(service).searchForDiagnosticReports(referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -229,7 +233,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		verifyUri(String.format("/DiagnosticReport?patient=%s", PATIENT_UUID));
 		
 		verify(service).searchForDiagnosticReports(isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -244,7 +248,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		verifyUri(String.format("/DiagnosticReport?patient.identifier=%s", PATIENT_IDENTIFIER));
 		
 		verify(service).searchForDiagnosticReports(isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -259,7 +263,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		verifyUri(String.format("/DiagnosticReport?patient.name=%s", PATIENT_GIVEN_NAME));
 		
 		verify(service).searchForDiagnosticReports(isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -274,7 +278,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		verifyUri(String.format("/DiagnosticReport?patient.given=%s", PATIENT_GIVEN_NAME));
 		
 		verify(service).searchForDiagnosticReports(isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -289,7 +293,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		verifyUri(String.format("/DiagnosticReport?patient.family=%s", PATIENT_FAMILY_NAME));
 		
 		verify(service).searchForDiagnosticReports(isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -303,8 +307,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	public void findDiagnosticReports_shouldReturnBundleOfDiagnosticReportsWithMatchingCode() throws Exception {
 		verifyUri(String.format("/DiagnosticReport?code=%s", DIAGNOSTIC_REPORT_CODE));
 		
-		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), tokenAndListParamCaptor.capture(),
-		    isNull());
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), tokenAndListParamCaptor.capture(), isNull(),
+		    isNull(), isNull());
 		assertThat(tokenAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    tokenAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -315,7 +319,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	public void findDiagnosticReports_shouldReturnBundleOfDiagnosticReportsWithMatchingIssueDate() throws Exception {
 		verifyUri("/DiagnosticReport?issued=eq2008-08-18");
 		
-		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull());
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
+		    isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -332,7 +337,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	        throws Exception {
 		verifyUri("/DiagnosticReport?issued=ge2008-08-18");
 		
-		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull());
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
+		    isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -347,7 +353,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	public void findDiagnosticReports_shouldReturnBundleOfDiagnosticReportsWithIssueDateGreaterThan() throws Exception {
 		verifyUri("/DiagnosticReport?issued=gt2008-08-18");
 		
-		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull());
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
+		    isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -363,7 +370,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	        throws Exception {
 		verifyUri("/DiagnosticReport?issued=le2008-08-18");
 		
-		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull());
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
+		    isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -378,7 +386,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	public void findDiagnosticReports_shouldReturnBundleOfDiagnosticReportsWithIssueDateLessThan() throws Exception {
 		verifyUri("/DiagnosticReport?issued=lt2008-08-18");
 		
-		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull());
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
+		    isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -393,7 +402,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	public void findDiagnosticReports_shouldReturnBundleWithIssueDateBetween() throws Exception {
 		verifyUri("/DiagnosticReport?issued=ge2008-08-18&issued=le2009-07-21");
 		
-		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull());
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
+		    isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar lowerBound = Calendar.getInstance();
@@ -407,10 +417,41 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		    equalTo(DateUtils.truncate(upperBound.getTime(), Calendar.DATE)));
 	}
 	
+	@Test
+	public void findDiagnosticReports_shouldReturnBundleOfDiagnosticReportsWithMatchingUUID() throws Exception {
+		verifyUri(String.format("/DiagnosticReport?_id=%s", DIAGNOSTIC_REPORT_UUID));
+		
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), tokenAndListParamCaptor.capture(),
+		    isNull(), isNull());
+		
+		assertThat(tokenAndListParamCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(
+		    tokenAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(DIAGNOSTIC_REPORT_UUID));
+	}
+	
+	@Test
+	public void findDiagnosticReports_shouldReturnBundleOfDiagnosticReportsWithMatchingLastUpdatedDate() throws Exception {
+		verifyUri(String.format("/DiagnosticReport?_lastUpdated=%s", LAST_UPDATED_DATE));
+		
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(),
+		    dateRangeCaptor.capture(), isNull());
+		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.SEPTEMBER, 3);
+		
+		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+	}
+	
 	private void verifyUri(String uri) throws Exception {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
-		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any()))
+		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

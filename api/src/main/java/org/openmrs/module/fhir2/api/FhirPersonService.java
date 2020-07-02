@@ -20,6 +20,6 @@ public interface FhirPersonService extends FhirService<Person> {
 	
 	IBundleProvider searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
 	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
-	        SortSpec sort);
+	        TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort);
 	
 }

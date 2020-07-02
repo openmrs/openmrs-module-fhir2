@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -82,7 +83,9 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Location.SP_PARTOF, chainWhitelist = { "", Location.SP_NAME, Location.SP_ADDRESS_CITY,
 	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
 	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam parent,
-	        @Sort SortSpec sort) {
-		return locationService.searchForLocations(name, city, country, postalCode, state, tag, parent, sort);
+	        @OptionalParam(name = Location.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
+		return locationService.searchForLocations(name, city, country, postalCode, state, tag, parent, id, lastUpdated,
+		    sort);
 	}
 }

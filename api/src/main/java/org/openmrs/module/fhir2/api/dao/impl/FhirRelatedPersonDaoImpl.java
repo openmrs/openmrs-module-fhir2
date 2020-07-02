@@ -23,11 +23,14 @@ import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_STATE;
 import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -35,6 +38,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
@@ -72,8 +76,26 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 				case FhirConstants.ADDRESS_SEARCH_HANDLER:
 					handleAddresses(criteria, entry);
 					break;
+				case FhirConstants.COMMON_SEARCH_HANDLER:
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					break;
 			}
 		});
+	}
+	
+	@Override
+	protected Optional<Criterion> getCriteriaForLastUpdated(DateRangeParam param) {
+		List<Optional<Criterion>> criterionList = new ArrayList<>();
+		
+		criterionList.add(handleDateRange("dateVoided", param));
+		
+		criterionList.add(Optional.of(
+		    and(toCriteriaArray(Stream.of(Optional.of(isNull("dateVoided")), handleDateRange("dateChanged", param))))));
+		
+		criterionList.add(Optional.of(and(toCriteriaArray(Stream.of(Optional.of(isNull("dateVoided")),
+		    Optional.of(isNull("dateChanged")), handleDateRange("dateCreated", param))))));
+		
+		return Optional.of(or(toCriteriaArray(criterionList)));
 	}
 	
 	@Override

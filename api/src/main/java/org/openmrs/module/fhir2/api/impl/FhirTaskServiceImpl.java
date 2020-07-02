@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.impl;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
@@ -55,12 +56,15 @@ public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> impleme
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForTasks(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,
-	        TokenAndListParam status, SortSpec sort) {
+	        TokenAndListParam status, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER, basedOnReference)
 		        .addParameter(FhirConstants.OWNER_REFERENCE_SEARCH_HANDLER, ownerReference)
-		        .addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status).setSortSpec(sort);
+		        .addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
+		        .setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}

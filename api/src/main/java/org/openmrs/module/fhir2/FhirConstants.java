@@ -122,6 +122,8 @@ public class FhirConstants {
 	
 	public static final String SERVICE_REQUEST = "ServiceRequest";
 	
+	public static final String MEDICATION_REQUEST = "MedicationRequest";
+	
 	public static final String TASK = "Task";
 	
 	public static final String MEDICATION = "Medication";
@@ -227,4 +229,10 @@ public class FhirConstants {
 	public static final String BASED_ON_REFERENCE_SEARCH_HANDLER = "based.on.reference.search.handler";
 	
 	public static final String OWNER_REFERENCE_SEARCH_HANDLER = "owner.reference.search.handler";
+	
+	public static final String COMMON_SEARCH_HANDLER = "common.search.handler";
+	
+	public static final String ID_PROPERTY = "_id.property";
+	
+	public static final String LAST_UPDATED_PROPERTY = "_lastUpdated.property";
 }

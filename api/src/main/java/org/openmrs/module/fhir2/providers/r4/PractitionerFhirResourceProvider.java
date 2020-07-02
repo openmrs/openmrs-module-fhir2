@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -75,7 +76,10 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Practitioner.SP_ADDRESS_CITY) StringAndListParam city,
 	        @OptionalParam(name = Practitioner.SP_ADDRESS_STATE) StringAndListParam state,
 	        @OptionalParam(name = Practitioner.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
-	        @OptionalParam(name = Practitioner.SP_ADDRESS_COUNTRY) StringAndListParam country) {
-		return practitionerService.searchForPractitioners(name, identifier, given, family, city, state, postalCode, country);
+	        @OptionalParam(name = Practitioner.SP_ADDRESS_COUNTRY) StringAndListParam country,
+	        @OptionalParam(name = Practitioner.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
+		return practitionerService.searchForPractitioners(name, identifier, given, family, city, state, postalCode, country,
+		    id, lastUpdated);
 	}
 }

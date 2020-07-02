@@ -13,10 +13,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +25,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Patient;
@@ -40,16 +50,6 @@ import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 
 @ContextConfiguration(classes = { TestFhirSpringConfiguration.class }, inheritLocations = false)
 public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSensitiveTest {
@@ -103,6 +103,12 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 	private static final String SEVERITY_SEVERE = "severe";
 	
 	private static final String STATUS = "active";
+	
+	private static final String DATE_CREATED = "2005-01-01";
+	
+	private static final String DATE_CHANGED = "2010-03-31";
+	
+	private static final String DATE_VOIDED = "2010-09-03";
 	
 	private static final int START_INDEX = 0;
 	
@@ -732,6 +738,107 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 	}
 	
 	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByUuid() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(ALLERGY_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((AllergyIntolerance) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByLastUpdatedDateCreated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(5));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByLastUpdatedDateChanged() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CHANGED).setLowerBound(DATE_CHANGED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByLastUpdatedDateVoided() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByMatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(ALLERGY_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((AllergyIntolerance) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldReturnEmptyListByMismatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(ALLERGY_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void searchForAllergies_shouldHandleComplexQuery() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam allergyParam = new ReferenceParam();
@@ -771,28 +878,28 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		sort.setParamName(AllergyIntolerance.SP_SEVERITY);
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		IBundleProvider results = search(
-		 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_SEVERE))).setSortSpec(sort));
+		IBundleProvider results = search(new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(SEVERITY_SEVERE))).setSortSpec(sort));
 		
-		List<AllergyIntolerance> fullResults = get(results).stream().map(p -> (AllergyIntolerance)p).collect(Collectors.toList());
+		List<AllergyIntolerance> fullResults = get(results).stream().map(p -> (AllergyIntolerance) p)
+		        .collect(Collectors.toList());
 		for (int i = 1; i < fullResults.size(); i++) {
 			
 			assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
-				    lessThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
+			    lessThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
-		 results = search(
-				 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_SEVERE))).setSortSpec(sort));
-				
-		 for (int i = 1; i < get(results).size(); i++) {
-				
-				assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
-					    greaterThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
-			}
+		results = search(new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(SEVERITY_SEVERE))).setSortSpec(sort));
+		
+		for (int i = 1; i < get(results).size(); i++) {
+			
+			assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
+			    greaterThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));
+		}
 	}
 	
-
 	@Test
 	public void shouldReturnCollectionOfAllergiesSortedBySeverityMild() {
 		
@@ -800,26 +907,27 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		sort.setParamName(AllergyIntolerance.SP_SEVERITY);
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		IBundleProvider results = search(
-		 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MILD))).setSortSpec(sort));
-		List<AllergyIntolerance> fullResults = get(results).stream().map(p -> (AllergyIntolerance)p).collect(Collectors.toList());
+		IBundleProvider results = search(new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MILD))).setSortSpec(sort));
+		List<AllergyIntolerance> fullResults = get(results).stream().map(p -> (AllergyIntolerance) p)
+		        .collect(Collectors.toList());
 		
 		for (int i = 1; i < fullResults.size(); i++) {
 			
 			assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
-				    lessThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
+			    lessThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		 results = search(
-				 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MILD))).setSortSpec(sort));
-				
-		 for (int i = 1; i < get(results).size(); i++) {
-				
-				assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
-					    greaterThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
-			}
+		results = search(new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MILD))).setSortSpec(sort));
+		
+		for (int i = 1; i < get(results).size(); i++) {
+			
+			assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
+			    greaterThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));
+		}
 	}
 	
 	@Test
@@ -829,26 +937,26 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		sort.setParamName(AllergyIntolerance.SP_SEVERITY);
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		IBundleProvider results = search(
-		 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MODERATE))).setSortSpec(sort));
-		List<AllergyIntolerance> fullResults = get(results).stream().map(p -> (AllergyIntolerance)p).collect(Collectors.toList());
-		
+		IBundleProvider results = search(new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MODERATE))).setSortSpec(sort));
+		List<AllergyIntolerance> fullResults = get(results).stream().map(p -> (AllergyIntolerance) p)
+		        .collect(Collectors.toList());
 		
 		for (int i = 1; i < fullResults.size(); i++) {
 			
 			assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
-				    lessThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
+			    lessThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));
 		}
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		 results = search(
-				 new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER, new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MODERATE))).setSortSpec(sort));
-				
-		 for (int i = 1; i < get(results).size(); i++) {
-				
-				assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
-					    greaterThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));	
-			}
+		results = search(new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER,
+		    new TokenAndListParam().addAnd(new TokenParam(SEVERITY_MODERATE))).setSortSpec(sort));
+		
+		for (int i = 1; i < get(results).size(); i++) {
+			
+			assertThat((fullResults.get(i - 1)).getReactionFirstRep().getSeverity(),
+			    greaterThanOrEqualTo((fullResults.get(i)).getReactionFirstRep().getSeverity()));
+		}
 	}
 	
 }

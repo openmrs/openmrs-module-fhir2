@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -18,6 +19,6 @@ public interface FhirPractitionerService extends FhirService<Practitioner> {
 	
 	IBundleProvider searchForPractitioners(StringAndListParam name, TokenAndListParam identifier, StringAndListParam given,
 	        StringAndListParam family, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
-	        StringAndListParam country);
+	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated);
 	
 }

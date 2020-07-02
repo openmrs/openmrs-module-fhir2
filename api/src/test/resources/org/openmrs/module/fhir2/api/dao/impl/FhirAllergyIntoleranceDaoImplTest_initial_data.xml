@@ -46,4 +46,7 @@
     <concept_name concept_id="5090" name="DIED" locale="en_GB" creator="1" date_created="2008-08-15 16:59:19.0" concept_name_id="1465" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="f3ba002f-801f-45fc-8cfe-5437e15a9b3b"/>
     <concept_name concept_id="5091" name="WAITING FOR RESULTS" locale="en_GB" creator="1" date_created="2008-08-15 16:59:56.0" concept_name_id="1466" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="2f7ds3e4-2a57-49b5-aef0-af9a259aac65"/>
 
+    <allergy allergy_id="1015" patient_id="2" severity_concept_id="21" allergen_type="ENVIRONMENT" coded_allergen="23" creator="1" date_voided="2010-09-03 11:12:00.0" date_changed="2010-03-31 00:12:00.0" date_created="2005-01-01 00:00:00.0" voided="true" uuid="1090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <allergy allergy_id="1016" patient_id="2" severity_concept_id="21" allergen_type="ENVIRONMENT" coded_allergen="23" creator="1" date_changed="2010-03-31 00:12:00.0" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1091AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
 </dataset>

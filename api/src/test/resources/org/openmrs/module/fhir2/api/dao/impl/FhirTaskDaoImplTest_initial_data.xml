@@ -17,7 +17,7 @@
 
 	<!-- Task.owner -->
 	<fhir_task task_id="3" name="Requested Task" status="REQUESTED" intent="ORDER" creator="1" date_created="2012-03-01 00:00:00.0" date_changed="2012-05-01 00:00:00.0" retired="false" uuid="c0a3af38-c0a9-4c2e-9cc0-8e0440e357e5" />
-	<fhir_task task_id="4" name="Accepted Task" status="ACCEPTED" intent="ORDER" creator="1" date_created="2012-03-01 00:00:00.0" date_changed="2012-02-01 00:00:00.0" retired="false" uuid="c0a3af35-c0a9-4c2e-9cc0-8e0440e357e5" />
+	<fhir_task task_id="4" name="Accepted Task" status="ACCEPTED" intent="ORDER" creator="1" date_created="2012-03-01 00:00:00.0" date_changed="2012-05-01 00:00:00.0" retired="false" uuid="c0a3af35-c0a9-4c2e-9cc0-8e0440e357e5" />
 	<fhir_task task_id="5" name="Rejected Task" status="REJECTED" intent="ORDER" creator="1" date_created="2012-03-01 00:00:00.0" date_changed="2012-06-01 00:00:00.0" retired="false" uuid="c0a3af32-c0a9-4c2e-9cc0-8e0440e357e5" />
 
 	<!-- Task.basedOn -->
@@ -27,6 +27,6 @@
 	<test_order order_id="101"  />
 	<fhir_task task_id="2" name="basedOn Task" status="REQUESTED" intent="ORDER" creator="1" date_created="2012-02-01 00:00:00.0" date_changed="2012-07-01 00:00:00.0" retired="false" uuid="3dc9f4a7-44dc-4b29-adfd-a8b297a41f33"/>
 	<fhir_task_based_on_reference task_id="2" reference_id="1" />
-
-
+	<fhir_task task_id="6" name="Rejected Task" status="REJECTED" intent="ORDER" creator="1" date_created="2012-03-01 00:00:00.0" date_changed="2012-06-01 00:00:00.0" date_retired="2015-09-03 00:00:00.0" retired="true" uuid="c0a3af32-c0a9-4c2e-9cc0-8e04dhsjd7e5"/>
+	<fhir_task task_id="7" name="Rejected Task" status="REJECTED" intent="ORDER" creator="1" date_created="2012-03-01 00:00:00.0" retired="false" uuid="c0a3af32-c0a9-4c2e-9cc0-sa04dhsjd7e5"/>
 </dataset>

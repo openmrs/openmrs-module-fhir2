@@ -46,13 +46,17 @@ public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticR
 	
 	@Override
 	public IBundleProvider searchForDiagnosticReports(ReferenceAndListParam encounterReference,
-	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code, SortSpec sort) {
+	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code, TokenAndListParam id,
+	        DateRangeParam lastUpdated, SortSpec sort) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, issueDate)
-		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code).setSortSpec(sort);
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
+		        .setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}

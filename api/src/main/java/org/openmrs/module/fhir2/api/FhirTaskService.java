@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Task;
@@ -30,5 +31,5 @@ public interface FhirTaskService extends FhirService<Task> {
 	 * @return the collection of Tasks that match the search parameters
 	 */
 	IBundleProvider searchForTasks(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,
-	        TokenAndListParam status, SortSpec sort);
+	        TokenAndListParam status, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort);
 }

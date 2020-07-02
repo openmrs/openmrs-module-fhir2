@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.comparator.ComparatorMatcherBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -85,7 +86,11 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String COUNTRY = "USA";
 	
-	private static final String PERSON_ADDRESS_PERSON_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
+	private static final String PERSON_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
+	
+	private static final String DATE_CREATED = "2006-01-18";
+	
+	private static final String MATCHING_DATE_CREATED = "2005-09-22";
 	
 	private static final int START_INDEX = 0;
 	
@@ -324,6 +329,78 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void shouldReturnCollectionOfPeopleForMatchOnUUID() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PERSON_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(PERSON_UUID));
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPeopleForMatchOnLastUpdatedDateCreated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(4));
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfPeopleForMatchOnUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PERSON_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(MATCHING_DATE_CREATED)
+		        .setLowerBound(MATCHING_DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(PERSON_UUID));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionForMismatchOnUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PERSON_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
 	public void shouldReturnCollectionOfPeopleSortedByGivenName() {
 		SortSpec sort = new SortSpec();
 		sort.setParamName("name");
@@ -495,8 +572,7 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		    equalTo(POSTAL_CODE));
 		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getAddressFirstRep().getCountry(),
 		    equalTo(COUNTRY));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getId(),
-		    equalTo(PERSON_ADDRESS_PERSON_UUID));
+		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getId(), equalTo(PERSON_UUID));
 	}
 	
 	private List<org.hl7.fhir.r4.model.Person> getPersonListForSorting(SortSpec sortSpec) {

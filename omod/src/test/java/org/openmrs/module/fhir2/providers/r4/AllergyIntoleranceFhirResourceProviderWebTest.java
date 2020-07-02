@@ -28,11 +28,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -42,6 +44,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -72,6 +75,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	
 	private static final String JSON_CREAT_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_create.json";
 	
+	private static final String LAST_UPDATED_DATE = "2020-09-03";
+	
 	@Mock
 	private FhirAllergyIntoleranceService allergyService;
 	
@@ -83,6 +88,9 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	
 	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
 	
 	AllergyIntolerance allergyIntolerance;
 	
@@ -118,7 +126,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByPatientUUID() throws Exception {
 		verifyUri(String.format("/AllergyIntolerance?patient=%s", PATIENT_UUID));
 		
-		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -132,7 +141,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByPatientIdentifier() throws Exception {
 		verifyUri("/AllergyIntolerance?patient.identifier=M4001-1");
 		
-		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -146,7 +156,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByPatientIdentifierWithOr() throws Exception {
 		verifyUri("/AllergyIntolerance?patient.identifier=M4001-1,MK89I");
 		
-		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -161,7 +172,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByPatientIdentifierWithAnd() throws Exception {
 		verifyUri("/AllergyIntolerance?patient.identifier=M4001-1&patient.identifier=MK89I");
 		
-		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()); 
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -176,7 +188,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByPatientGivenName() throws Exception {
 		verifyUri("/AllergyIntolerance?patient.given=John");
 		
-		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -190,7 +203,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyName() throws Exception {
 		verifyUri("/AllergyIntolerance?patient.family=John");
 		
-		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -204,7 +218,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyNameWithOr() throws Exception {
 		verifyUri("/AllergyIntolerance?patient.family=John,Tim,Him");
 		
-		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -219,7 +234,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyNameWithAnd() throws Exception {
 		verifyUri("/AllergyIntolerance?patient.family=John&patient.family=Tim&patient.family=Him");
 		
-		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -234,7 +250,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByPatientName() throws Exception {
 		verifyUri("/AllergyIntolerance?patient.name=John");
 		
-		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(allergyService).searchForAllergies(patientCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -248,8 +265,9 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByCategory() throws Exception {
 		verifyUri("/AllergyIntolerance?category=food");
 		
-		verify(allergyService).searchForAllergies(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull());
+		verify(allergyService).searchForAllergies(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull());
+		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -260,8 +278,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByAllergenCode() throws Exception {
 		verifyUri("/AllergyIntolerance?code=d1b98543-10ff-4911-83a2-b7f5fafe2751");
 		
-		verify(allergyService).searchForAllergies(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull());
+		verify(allergyService).searchForAllergies(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
 		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
@@ -274,8 +292,9 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	public void searchForAllergies_shouldSearchForAllergiesByAllergenCodeAndSystem() throws Exception {
 		verifyUri("/AllergyIntolerance?code=d1b98543-10ff-4911-83a2-b7f5fafe2751");
 		
-		verify(allergyService).searchForAllergies(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull());
+		verify(allergyService).searchForAllergies(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull());
+		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -287,7 +306,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 		verifyUri("/AllergyIntolerance?severity=severe");
 		
 		verify(allergyService).searchForAllergies(isNull(), isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull());
+		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -299,7 +319,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 		verifyUri("/AllergyIntolerance?manifestation=c0b1f314-1691-11df-97a5-7038c432aabd");
 		
 		verify(allergyService).searchForAllergies(isNull(), isNull(), isNull(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull());
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull());
 		
 		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
 		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
@@ -313,11 +333,41 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 		verifyUri("/AllergyIntolerance?clinical-status=active");
 		
 		verify(allergyService).searchForAllergies(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull());
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull());
+		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
 		    equalTo("active"));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByUUID() throws Exception {
+		verifyUri(String.format("/AllergyIntolerance?_id=%s", ALLERGY_UUID));
+		
+		verify(allergyService).searchForAllergies(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull());
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo(ALLERGY_UUID));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByLastUpdated() throws Exception {
+		verifyUri(String.format("/AllergyIntolerance?_lastUpdated=eq%s", LAST_UPDATED_DATE));
+		
+		verify(allergyService).searchForAllergies(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    dateRangeParamArgumentCaptor.capture(), isNull());
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.SEPTEMBER, 3);
+		
+		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
@@ -400,7 +450,8 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	private void verifyUri(String uri) throws Exception {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.setId(ALLERGY_UUID);
-		when(allergyService.searchForAllergies(any(), any(), any(), any(), any(), any(), any()))
+		
+		when(allergyService.searchForAllergies(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(allergyIntolerance), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

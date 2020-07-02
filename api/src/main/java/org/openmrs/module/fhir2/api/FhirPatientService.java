@@ -29,5 +29,5 @@ public interface FhirPatientService extends FhirService<Patient> {
 	IBundleProvider searchForPatients(StringAndListParam name, StringAndListParam given, StringAndListParam family,
 	        TokenAndListParam identifier, TokenAndListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
 	        TokenAndListParam deceased, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
-	        StringAndListParam country, SortSpec sort);
+	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort);
 }

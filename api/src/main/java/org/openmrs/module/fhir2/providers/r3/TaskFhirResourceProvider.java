@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -102,7 +103,9 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	public IBundleProvider searchTasks(
 	        @OptionalParam(name = Task.SP_BASED_ON, chainWhitelist = { "" }) ReferenceAndListParam basedOnReference,
 	        @OptionalParam(name = Task.SP_OWNER, chainWhitelist = { "" }) ReferenceAndListParam ownerReference,
-	        @OptionalParam(name = Task.SP_STATUS) TokenAndListParam status, @Sort SortSpec sort) {
-		return fhirTaskService.searchForTasks(basedOnReference, ownerReference, status, sort);
+	        @OptionalParam(name = Task.SP_STATUS) TokenAndListParam status,
+	        @OptionalParam(name = Task.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
+		return fhirTaskService.searchForTasks(basedOnReference, ownerReference, status, id, lastUpdated, sort);
 	}
 }

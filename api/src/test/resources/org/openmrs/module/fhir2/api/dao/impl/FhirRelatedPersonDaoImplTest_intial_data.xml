@@ -33,4 +33,8 @@
     <relationship relationship_id="1002" relationship="1" person_a="12" person_b="43" creator="1" date_created="2020-06-11 00:00:00.0" voided="0" uuid="0eb5b9d7-d280-4efc-9a2f-b5798e13c1b1"/>
 
     <relationship relationship_id="1003" relationship="1" person_a="13" person_b="45" creator="1" date_created="2020-06-11 00:00:00.0" voided="0" uuid="f8f5b6bd-9e4d-4f1c-be5d-4232cbe72752"/>
+
+    <relationship relationship_id="1004" relationship="1" person_a="13" person_b="45" creator="1" date_changed="2020-07-31 00:00:00.0" date_created="2020-06-11 00:00:00.0" voided="0" uuid="f8ffjdid-9e4d-4f1c-be5d-4232cbe72752"/>
+
+    <relationship relationship_id="1005" relationship="1" person_a="13" person_b="45" creator="1" date_voided="2020-09-03 00:00:00.0" date_changed="2020-07-31 00:00:00.0" date_created="2020-06-11 00:00:00.0" voided="1" uuid="ffhdi6bd-9e4d-4f1c-be5d-4232cbe72752"/>
 </dataset>

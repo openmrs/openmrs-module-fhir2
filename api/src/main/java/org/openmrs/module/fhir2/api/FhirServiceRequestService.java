@@ -10,10 +10,12 @@
 package org.openmrs.module.fhir2.api;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.ServiceRequest;
 
 public interface FhirServiceRequestService extends FhirService<ServiceRequest> {
 	
-	IBundleProvider searchForServiceRequests();
+	IBundleProvider searchForServiceRequests(TokenAndListParam uuid, DateRangeParam lastUpdated);
 	
 }

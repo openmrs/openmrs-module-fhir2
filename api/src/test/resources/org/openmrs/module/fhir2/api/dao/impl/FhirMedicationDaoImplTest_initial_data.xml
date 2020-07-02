@@ -18,7 +18,9 @@
 
     <drug_ingredient drug_id="1010" ingredient_id="5088" uuid="5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  strength="200" units="5087"/>
 
-    <drug drug_id="1011" name="ALPENDAZOLE"  combination="1" strength="300mg" concept_id="23" dosage_form="22" creator="1" date_created="2005-01-01 00:00:00.0" retired="true" uuid="1086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" maximum_daily_dose="23.08" minimum_daily_dose="10.00" />
+    <drug drug_id="1011" name="ALPENDAZOLE"  combination="1" strength="300mg" concept_id="23" dosage_form="22" creator="1" date_created="2005-01-01 00:00:00.0" date_retired="2010-09-03 00:00:00.0" retired="true" uuid="1086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" maximum_daily_dose="23.08" minimum_daily_dose="10.00" />
     <drug_ingredient drug_id="1011" ingredient_id="26" uuid="5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  strength="300" units="5089"/>
 
+    <drug drug_id="1012" name="ALPENDAZILE" combination="1" strength="400mg" concept_id="24" dosage_form="21" creator="1" date_created="2005-01-01 00:00:00.0" date_changed="2010-03-31 00:00:00.0" retired="false" uuid="1087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" maximum_daily_dose="23.08" minimum_daily_dose="10.00" />
+    <drug_ingredient drug_id="1012" ingredient_id="21" uuid="5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  strength="400" units="5089"/>
 </dataset>

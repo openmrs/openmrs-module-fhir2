@@ -51,6 +51,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -115,7 +116,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		observation.setId(OBSERVATION_UUID);
 		
 		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		    any(), any(), any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
@@ -123,11 +124,11 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		code.addAnd(codingToken);
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
-		    code, null, null);
+		    code, null, null, null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
 		assertThat(results.getResources(1, 5).get(0), notNullValue());
-		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo("Observation"));
+		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
 		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
 	
@@ -138,17 +139,17 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		observation.setId(OBSERVATION_UUID);
 		
 		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		    any(), any(), any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, patientParam, null, null, null, null, null, null,
-		    null, null, null, null);
+		    null, null, null, null, null, null);
 		assertThat(results, notNullValue());
 		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
 		assertThat(results.getResources(1, 5).get(0), notNullValue());
-		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo("Observation"));
+		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
 		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
 	

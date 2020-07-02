@@ -108,12 +108,13 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = DiagnosticReport.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_NAME,
 	                Patient.SP_GIVEN, Patient.SP_FAMILY }) ReferenceAndListParam subjectReference,
 	        @OptionalParam(name = DiagnosticReport.SP_ISSUED) DateRangeParam issueDate,
-	        @OptionalParam(name = DiagnosticReport.SP_CODE) TokenAndListParam code, @Sort SortSpec sort) {
+	        @OptionalParam(name = DiagnosticReport.SP_CODE) TokenAndListParam code,
+	        @OptionalParam(name = DiagnosticReport.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
-		
-		return diagnosticReportService.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code,
-		    sort);
+		return diagnosticReportService.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code, id,
+		    lastUpdated, sort);
 	}
 }

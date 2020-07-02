@@ -197,14 +197,15 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(task);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any())).thenReturn(new MockIBundleProvider<>(tasks, 10, 1));
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(tasks, 10, 1));
 		
 		TokenAndListParam status = new TokenAndListParam();
 		TokenParam statusToken = new TokenParam();
 		statusToken.setValue("ACCEPTED");
 		status.addAnd(new TokenOrListParam().add(statusToken));
 		
-		IBundleProvider results = resourceProvider.searchTasks(null, null, status, null);
+		IBundleProvider results = resourceProvider.searchTasks(null, null, status, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		

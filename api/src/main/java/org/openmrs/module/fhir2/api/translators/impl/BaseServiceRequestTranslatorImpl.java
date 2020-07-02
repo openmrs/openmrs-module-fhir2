@@ -35,8 +35,10 @@ public class BaseServiceRequestTranslatorImpl {
 	private FhirTaskService taskService;
 	
 	protected ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(String orderUuid) {
-		IBundleProvider results = taskService.searchForTasks(new ReferenceAndListParam().addAnd(
-		    new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))), null, null, null);
+		IBundleProvider results = taskService.searchForTasks(
+		    new ReferenceAndListParam()
+		            .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
+		    null, null, null, null, null);
 		
 		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
 		        .collect(Collectors.toList());
@@ -67,8 +69,10 @@ public class BaseServiceRequestTranslatorImpl {
 	}
 	
 	protected Reference determineServiceRequestPerformer(String orderUuid) {
-		IBundleProvider results = taskService.searchForTasks(new ReferenceAndListParam().addAnd(
-		    new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))), null, null, null);
+		IBundleProvider results = taskService.searchForTasks(
+		    new ReferenceAndListParam()
+		            .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
+		    null, null, null, null, null);
 		
 		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
 		        .collect(Collectors.toList());

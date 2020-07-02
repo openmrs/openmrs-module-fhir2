@@ -80,6 +80,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
 import org.openmrs.module.fhir2.FhirConceptSource;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.search.param.PropParam;
 
 /**
  * <p>
@@ -776,6 +778,35 @@ public abstract class BaseDao {
 				return Optional.empty();
 			}).ifPresent(criteria::add);
 		}
+	}
+	
+	protected Optional<Criterion> handleCommonSearchParameters(List<PropParam<?>> theCommonParams) {
+		List<Optional<Criterion>> criterionList = new ArrayList<>();
+		
+		for (PropParam<?> commonSearchParam : theCommonParams) {
+			switch (commonSearchParam.getPropertyName()) {
+				case FhirConstants.ID_PROPERTY:
+					criterionList.add(handleAndListParam((TokenAndListParam) commonSearchParam.getParam(),
+					    param -> Optional.of(eq("uuid", param.getValue()))));
+					break;
+				case FhirConstants.LAST_UPDATED_PROPERTY:
+					criterionList.add(getCriteriaForLastUpdated((DateRangeParam) commonSearchParam.getParam()));
+					break;
+			}
+		}
+		
+		return Optional.of(and(toCriteriaArray(criterionList.stream())));
+	}
+	
+	/**
+	 * This function should be overridden by implementations. It is used to return a criterion for
+	 * _lastUpdated from resources where there are multiple properties to be considered.
+	 *
+	 * @param param the DateRangeParam used to query for _lastUpdated
+	 * @return an optional criterion for the query
+	 */
+	protected Optional<Criterion> getCriteriaForLastUpdated(DateRangeParam param) {
+		return null;
 	}
 	
 	protected Optional<Criterion> handlePersonAddress(String aliasPrefix, StringAndListParam city, StringAndListParam state,
