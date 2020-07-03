@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
@@ -68,6 +69,25 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 		MockHttpServletResponse response = get("/MedicationRequest/" + WRONG_MEDICATION_REQUEST_UUID)
 		        .accept(FhirMediaTypes.JSON).go();
 		
+		assertThat(response, isNotFound());
+	}
+
+	@Test
+	public void deleteMedicationRequest_shouldDeleteTask() throws Exception{
+		MedicationRequest medicationRequest = new MedicationRequest();
+		medicationRequest.setId(MEDICATION_REQUEST_UUID);
+		medicationRequest.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
+
+		when(fhirMedicationRequestService.delete(any(String.class))).thenReturn(medicationRequest);
+	}
+
+	@Test
+	public void deleteMedicationRequest_shouldReturn404ForNonExistingTaks() throws Exception{
+		when(fhirMedicationRequestService.delete(WRONG_MEDICATION_REQUEST_UUID)).thenReturn(null);
+
+		MockHttpServletResponse response = get("/MedicationRequest/" + WRONG_MEDICATION_REQUEST_UUID)
+		.accept(FhirMediaTypes.JSON).go();
+
 		assertThat(response, isNotFound());
 	}
 }
