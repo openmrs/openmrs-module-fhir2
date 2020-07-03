@@ -1,0 +1,41 @@
+{
+  "resourceType": "List",
+  "id": "c0b1f314-1691-11df-97a5-7038c432aab88",
+  "identifier": [
+    {
+      "value": "23974652"
+    }
+  ],
+  "status": "current",
+  "mode": "changes",
+  "subject": {
+    "reference": "Patient/f201",
+    "display": "Roel"
+  },
+  "encounter": {
+    "reference": "Encounter/f201"
+  },
+  "date": "2012-11-25T22:17:00+11:00",
+  "source": {
+    "reference": "Patient/example"
+  },
+  "entry": [
+    {
+      "flag": {
+        "text": "Deleted due to error"
+      },
+      "deleted": true,
+      "item": {
+        "reference": "Condition/example"
+      }
+    },
+    {
+      "flag": {
+        "text": "Added"
+      },
+      "item": {
+        "reference": "Condition/example2"
+      }
+    }
+  ]
+}
