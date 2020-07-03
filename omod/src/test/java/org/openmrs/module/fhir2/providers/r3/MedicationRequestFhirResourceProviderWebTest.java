@@ -70,4 +70,5 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR3Reso
 		
 		assertThat(response, isNotFound());
 	}
+	
 }

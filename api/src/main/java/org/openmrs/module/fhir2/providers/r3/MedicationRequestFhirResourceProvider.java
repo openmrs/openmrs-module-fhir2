@@ -11,10 +11,15 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import javax.validation.constraints.NotNull;
 
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -27,10 +32,12 @@ import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.MedicationRequest;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -83,4 +90,30 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		    participantReference, medicationReference);
 	}
 	
+	@Create
+	public MethodOutcome createMedicationRequest(@ResourceParam MedicationRequest mRequest) {
+		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestService
+		        .create(MedicationRequest30_40.convertMedicationRequest(mRequest));
+		
+		return FhirProviderUtils.buildCreate(medicationRequest);
+	}
+	
+	@Update
+	public MethodOutcome updateMedicationRequest(@IdParam IdType id, @ResourceParam MedicationRequest mRequest) {
+		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestService.update(id.getIdPart(),
+		    MedicationRequest30_40.convertMedicationRequest(mRequest));
+		
+		return FhirProviderUtils.buildUpdate(medicationRequest);
+	}
+	
+	@Delete
+	public OperationOutcome deleteMedicationRequest(@IdParam IdType id) {
+		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestService.delete(id.getIdPart());
+		if (medicationRequest == null) {
+			throw new ResourceNotFoundException(
+			        "Could not find medication request resource with id " + id.getIdPart() + " to delete");
+		}
+		
+		return FhirProviderUtils.buildDelete(MedicationRequest30_40.convertMedicationRequest(medicationRequest));
+	}
 }
