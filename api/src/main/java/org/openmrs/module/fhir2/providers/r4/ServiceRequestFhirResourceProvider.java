@@ -11,21 +11,29 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import javax.validation.constraints.NotNull;
 
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -53,6 +61,33 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return serviceRequest;
+	}
+	
+	@Create
+	public MethodOutcome createServiceRequest(@ResourceParam ServiceRequest serviceRequest) {
+		return FhirProviderUtils.buildCreate(serviceRequestService.create(serviceRequest));
+	} 
+
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updateServiceRequest(@IdParam IdType id, @ResourceParam ServiceRequest serviceRequest) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+
+		serviceRequest.setId(id.getIdPart());
+
+		return FhirProviderUtils.buildUpdate(serviceRequestService.update(id.getIdPart(), serviceRequest));
+	}
+
+	@Delete
+	@SuppressWarnings("unused")
+	public OperationOutcome deleteServiceRequest(@IdParam @NotNull IdType id) {
+		org.hl7.fhir.r4.model.ServiceRequest serviceRequest = serviceRequestService.delete(id.getIdPart());
+		if (serviceRequest == null) {
+			throw new ResourceNotFoundException("Could not find serviceRequest to delete with id " + id.getIdPart());
+		}
+		return FhirProviderUtils.buildDelete(serviceRequest);
 	}
 	
 	@Search
