@@ -12,8 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -22,9 +20,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.CoreMatchers;
@@ -45,13 +41,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Allergen;
 import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
-import org.openmrs.AllergyReaction;
 import org.openmrs.Concept;
 import org.openmrs.Patient;
 import org.openmrs.User;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
+import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceCategoryTranslator;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceCriticalityTranslator;
+import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceReactionComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceSeverityTranslator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -64,8 +60,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 	
 	private static final String ALLERGY_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
 	
-	private static final String ALLERGY_REACTION_UUID = "c0938432-1691-11df-97a5-7038c432r679";
-	
 	private static final String ALLERGY_INTOLERANCE_CLINICAL_STATUC_ACTIVE = "active";
 	
 	private static final String ALLERGY_INTOLERANCE_CLINICAL_STATUC_INACTIVE = "inactive";
@@ -76,13 +70,9 @@ public class AllergyIntoleranceTranslatorImplTest {
 	
 	private static final String CONCEPT_UUID = "162553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String NON_CODED_REACTION = "Test Reaction";
-	
 	private static final String GLOBAL_PROPERTY_MILD_VALUE = "102553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String GLOBAL_PROPERTY_SEVERE_VALUE = "202553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
-	private static final String GLOBAL_PROPERTY_MODERATE_VALUE = "302553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String GLOBAL_PROPERTY_OTHER_VALUE = "402553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -104,11 +94,15 @@ public class AllergyIntoleranceTranslatorImplTest {
 	@Mock
 	private AllergyIntoleranceCriticalityTranslator criticalityTranslator;
 	
+	@Mock
+	private AllergyIntoleranceCategoryTranslator categoryTranslator;
+	
+	@Mock
+	private AllergyIntoleranceReactionComponentTranslator reactionComponentTranslator;
+	
 	private AllergyIntoleranceTranslatorImpl allergyIntoleranceTranslator;
 	
 	private Allergy omrsAllergy;
-	
-	private Map<String, String> severityConceptUuids = new HashMap<>();
 	
 	@Before
 	public void setUp() {
@@ -119,18 +113,12 @@ public class AllergyIntoleranceTranslatorImplTest {
 		allergyIntoleranceTranslator.setConceptTranslator(conceptTranslator);
 		allergyIntoleranceTranslator.setSeverityTranslator(severityTranslator);
 		allergyIntoleranceTranslator.setCriticalityTranslator(criticalityTranslator);
+		allergyIntoleranceTranslator.setCategoryTranslator(categoryTranslator);
+		allergyIntoleranceTranslator.setReactionComponentTranslator(reactionComponentTranslator);
 		
 		omrsAllergy = new Allergy();
 		Allergen allergen = new Allergen(AllergenType.FOOD, null, "Test allergen");
 		omrsAllergy.setAllergen(allergen);
-		initSeverityData();
-	}
-	
-	public void initSeverityData() {
-		severityConceptUuids.put(FhirConstants.GLOBAL_PROPERTY_MILD, GLOBAL_PROPERTY_MILD_VALUE);
-		severityConceptUuids.put(FhirConstants.GLOBAL_PROPERTY_MODERATE, GLOBAL_PROPERTY_MODERATE_VALUE);
-		severityConceptUuids.put(FhirConstants.GLOBAL_PROPERTY_SEVERE, GLOBAL_PROPERTY_SEVERE_VALUE);
-		severityConceptUuids.put(FhirConstants.GLOBAL_PROPERTY_OTHER, GLOBAL_PROPERTY_OTHER_VALUE);
 	}
 	
 	@Test
@@ -169,6 +157,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		Allergen allergen = new Allergen();
 		allergen.setAllergenType(AllergenType.FOOD);
 		omrsAllergy.setAllergen(allergen);
+		when(categoryTranslator.toFhirResource(omrsAllergy.getAllergen().getAllergenType()))
+		        .thenReturn(AllergyIntolerance.AllergyIntoleranceCategory.FOOD);
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getCategory().get(0).getValue(),
@@ -180,6 +170,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		Allergen allergen = new Allergen();
 		allergen.setAllergenType(AllergenType.DRUG);
 		omrsAllergy.setAllergen(allergen);
+		when(categoryTranslator.toFhirResource(omrsAllergy.getAllergen().getAllergenType()))
+		        .thenReturn(AllergyIntolerance.AllergyIntoleranceCategory.MEDICATION);
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getCategory().get(0).getValue(),
@@ -191,6 +183,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		Allergen allergen = new Allergen();
 		allergen.setAllergenType(AllergenType.ENVIRONMENT);
 		omrsAllergy.setAllergen(allergen);
+		when(categoryTranslator.toFhirResource(omrsAllergy.getAllergen().getAllergenType()))
+		        .thenReturn(AllergyIntolerance.AllergyIntoleranceCategory.ENVIRONMENT);
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance, notNullValue());
 		assertThat(allergyIntolerance.getCategory().get(0).getValue(),
@@ -202,6 +196,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		Allergen allergen = new Allergen();
 		allergen.setAllergenType(AllergenType.OTHER);
 		omrsAllergy.setAllergen(allergen);
+		when(categoryTranslator.toFhirResource(omrsAllergy.getAllergen().getAllergenType())).thenReturn(null);
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance.getCategory().get(0).getValue(), nullValue());
 	}
@@ -281,130 +276,11 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateAllergenToAllergySubstance() {
-		Concept concept = new Concept();
-		concept.setUuid(CONCEPT_UUID);
-		
-		Allergen allergen = new Allergen();
-		allergen.setCodedAllergen(concept);
-		allergen.setAllergenType(AllergenType.FOOD);
-		omrsAllergy.setAllergen(allergen);
-		
-		when(conceptTranslator.toFhirResource(concept))
-		        .thenReturn(new CodeableConcept().addCoding(new Coding("", CONCEPT_UUID, "")));
-		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
-		assertThat(allergyIntolerance, notNullValue());
-		assertThat(allergyIntolerance.getCode().getCoding().get(0).getCode(), equalTo(CONCEPT_UUID));
-	}
-	
-	@Test
-	public void toFhirResource_shouldTranslateReactionToManifestation() {
-		Concept concept = new Concept();
-		concept.setUuid(CONCEPT_UUID);
-		
-		AllergyReaction reaction = new AllergyReaction();
-		reaction.setUuid(ALLERGY_REACTION_UUID);
-		reaction.setReaction(concept);
-		reaction.setAllergy(omrsAllergy);
-		reaction.setReactionNonCoded(NON_CODED_REACTION);
-		omrsAllergy.setReactions(Collections.singletonList(reaction));
-		
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode(CONCEPT_UUID));
-		codeableConcept.setText(NON_CODED_REACTION);
-		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
-		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
-		assertThat(allergyIntolerance, notNullValue());
-		assertThat(allergyIntolerance.getReaction(), hasSize(greaterThanOrEqualTo(1)));
-		assertThat(allergyIntolerance.getReaction().get(0).getManifestation(), hasSize(greaterThanOrEqualTo(1)));
-		assertThat(allergyIntolerance.getReaction().get(0).getManifestation().get(0).getCoding(),
-		    hasSize(greaterThanOrEqualTo(1)));
-		assertThat(allergyIntolerance.getReaction().get(0).getManifestation().size(), greaterThanOrEqualTo(1));
-		assertThat(allergyIntolerance.getReaction().get(0).getManifestation().get(0).getCoding().get(0).getCode(),
-		    equalTo(CONCEPT_UUID));
-		assertThat(allergyIntolerance.getReaction().get(0).getManifestation().get(0).getText(), equalTo(NON_CODED_REACTION));
-	}
-	
-	@Test
 	public void toFhirResource_shouldReturnNullSeverityIfSeverityConceptIsNull() {
 		omrsAllergy.setSeverity(null);
 		
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(), nullValue());
-	}
-	
-	@Test
-	public void toFhirResource_shouldReturnNullSeverityIfGlobalPropertyValueIsNull() {
-		severityConceptUuids = null;
-		
-		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
-		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(), nullValue());
-	}
-	
-	@Test
-	public void toFhirResource_shouldReturnNullSeverityIfGlobalPropertyUuidsContainerIsEmpty() {
-		severityConceptUuids = new HashMap<>();
-		
-		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
-		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(), nullValue());
-	}
-	
-	@Test
-	public void toFhirResource_shouldTranslateReactionMildCorrectly() {
-		Concept mildConcept = new Concept();
-		mildConcept.setUuid(GLOBAL_PROPERTY_MILD_VALUE);
-		omrsAllergy.setSeverity(mildConcept);
-		
-		when(severityTranslator.toFhirResource(mildConcept)).thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.MILD);
-		
-		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
-		assertThat(allergyIntolerance, notNullValue());
-		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(),
-		    equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.MILD));
-	}
-	
-	@Test
-	public void toFhirResource_shouldTranslateReactionModerateCorrectly() {
-		Concept moderateConcept = new Concept();
-		moderateConcept.setUuid(GLOBAL_PROPERTY_MODERATE_VALUE);
-		omrsAllergy.setSeverity(moderateConcept);
-		
-		when(severityTranslator.toFhirResource(moderateConcept))
-		        .thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE);
-		
-		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
-		assertThat(allergyIntolerance, notNullValue());
-		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(),
-		    equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE));
-	}
-	
-	@Test
-	public void toFhirResource_shouldTranslateReactionSevereCorrectly() {
-		Concept severeConcept = new Concept();
-		severeConcept.setUuid(GLOBAL_PROPERTY_SEVERE_VALUE);
-		omrsAllergy.setSeverity(severeConcept);
-		
-		when(severityTranslator.toFhirResource(severeConcept))
-		        .thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE);
-		
-		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
-		assertThat(allergyIntolerance, notNullValue());
-		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(),
-		    equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE));
-	}
-	
-	@Test
-	public void toFhirResource_shouldTranslateReactionOtherToNull() {
-		Concept otherConcept = new Concept();
-		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
-		omrsAllergy.setSeverity(otherConcept);
-		
-		when(severityTranslator.toFhirResource(otherConcept)).thenReturn(AllergyIntolerance.AllergyIntoleranceSeverity.NULL);
-		
-		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
-		assertThat(allergyIntolerance, notNullValue());
-		assertThat(allergyIntolerance.getReaction().get(0).getSeverity(),
-		    equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.NULL));
 	}
 	
 	@Test
@@ -469,6 +345,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 	public void toOpenmrsType_shouldTranslateAllergenTypeFoodCorrectly() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.addCategory(AllergyIntolerance.AllergyIntoleranceCategory.FOOD);
+		when(categoryTranslator.toOpenmrsType(allergy.getCategory().get(0).getValue())).thenReturn(AllergenType.FOOD);
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
 		assertThat(omrsAllergy.getAllergen().getAllergenType(), equalTo(AllergenType.FOOD));
@@ -478,6 +355,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 	public void toOpenmrsType_shouldTranslateAllergenTypeDrugCorrectly() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.addCategory(AllergyIntolerance.AllergyIntoleranceCategory.MEDICATION);
+		when(categoryTranslator.toOpenmrsType(allergy.getCategory().get(0).getValue())).thenReturn(AllergenType.DRUG);
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
 		assertThat(omrsAllergy.getAllergen().getAllergenType(), equalTo(AllergenType.DRUG));
@@ -487,6 +365,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 	public void toOpenmrsType_shouldTranslateAllergenTypeEnvironmentCorrectly() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.addCategory(AllergyIntolerance.AllergyIntoleranceCategory.ENVIRONMENT);
+		when(categoryTranslator.toOpenmrsType(allergy.getCategory().get(0).getValue())).thenReturn(AllergenType.ENVIRONMENT);
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
 		assertThat(omrsAllergy.getAllergen().getAllergenType(), equalTo(AllergenType.ENVIRONMENT));
@@ -496,6 +375,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 	public void toOpenmrsType_shouldReturnNullWhenCalledWithFhirBiologicCategory() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.addCategory(AllergyIntolerance.AllergyIntoleranceCategory.BIOLOGIC);
+		when(categoryTranslator.toOpenmrsType(allergy.getCategory().get(0).getValue())).thenReturn(null);
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
 		assertThat(omrsAllergy.getAllergen().getAllergenType(), nullValue());
@@ -505,6 +385,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 	public void toOpenmrsType_shouldReturnNullCategoryWhenCalledWithFhirNullCategory() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.addCategory(AllergyIntolerance.AllergyIntoleranceCategory.NULL);
+		when(categoryTranslator.toOpenmrsType(allergy.getCategory().get(0).getValue())).thenReturn(null);
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
 		assertThat(omrsAllergy, notNullValue());
 		assertThat(omrsAllergy.getAllergen().getAllergenType(), nullValue());
@@ -643,116 +524,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateSeverityMildCorrectly() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
-		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.MILD);
-		allergy.setReaction(Collections.singletonList(reactionComponent));
-		
-		Concept mildConcept = new Concept();
-		mildConcept.setUuid(GLOBAL_PROPERTY_MILD_VALUE);
-		
-		when(severityTranslator.toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity.MILD)).thenReturn(mildConcept);
-		
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getSeverity(), notNullValue());
-		assertThat(omrsAllergy.getSeverity(), equalTo(mildConcept));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldReturnNullIfSeverityIsNull() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getSeverity(), nullValue());
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldReturnNullIfSeverityConceptUuidsIsNull() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		severityConceptUuids = null;
-		
-		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
-		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE);
-		allergy.setReaction(Collections.singletonList(reactionComponent));
-		
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getSeverity(), nullValue());
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldReturnNullIfSeverityConceptUuidsContainerIsEmpty() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		severityConceptUuids = new HashMap<>();
-		
-		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
-		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE);
-		allergy.setReaction(Collections.singletonList(reactionComponent));
-		
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getSeverity(), nullValue());
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldTranslateSeverityModerateCorrectly() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
-		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE);
-		allergy.setReaction(Collections.singletonList(reactionComponent));
-		
-		Concept moderateConcept = new Concept();
-		moderateConcept.setUuid(GLOBAL_PROPERTY_MODERATE_VALUE);
-		
-		when(severityTranslator.toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE))
-		        .thenReturn(moderateConcept);
-		
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getSeverity(), notNullValue());
-		assertThat(omrsAllergy.getSeverity(), equalTo(moderateConcept));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldTranslateSeveritySevereCorrectly() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
-		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE);
-		allergy.setReaction(Collections.singletonList(reactionComponent));
-		
-		Concept severeConcept = new Concept();
-		severeConcept.setUuid(GLOBAL_PROPERTY_SEVERE_VALUE);
-		when(severityTranslator.toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE))
-		        .thenReturn(severeConcept);
-		
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getSeverity(), notNullValue());
-		assertThat(omrsAllergy.getSeverity(), equalTo(severeConcept));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldTranslateSeverityOtherCorrectly() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
-		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.NULL);
-		allergy.setReaction(Collections.singletonList(reactionComponent));
-		
-		Concept otherConcept = new Concept();
-		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
-		
-		when(severityTranslator.toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity.NULL)).thenReturn(otherConcept);
-		
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getSeverity(), notNullValue());
-		assertThat(omrsAllergy.getSeverity(), equalTo(otherConcept));
-	}
-	
-	@Test
 	public void toOpenmrsType_shouldReturnNullReactionIfFhirReactionIsNull() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.setReaction(null);
@@ -763,36 +534,22 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldReturnNullReactionIfManifestationIsNull() {
+	public void toOpenmrsType_shouldTranslateFhirReaction() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
-		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE);
-		reactionComponent.setManifestation(null);
-		allergy.addReaction(reactionComponent);
+		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.MILD);
+		allergy.setReaction(Collections.singletonList(reactionComponent));
 		
+		Allergy updatedAllergy = omrsAllergy;
+		Concept mildConcept = new Concept();
+		mildConcept.setUuid(GLOBAL_PROPERTY_MILD_VALUE);
+		updatedAllergy.setSeverity(mildConcept);
+		
+		when(reactionComponentTranslator.toOpenmrsType(omrsAllergy, reactionComponent)).thenReturn(updatedAllergy);
 		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
+		
 		assertThat(omrsAllergy.getReactions().size(), equalTo(0));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldTransLateManifestationToReaction() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
-		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE);
-		
-		CodeableConcept manifestation = new CodeableConcept()
-		        .addCoding(new Coding(FhirConstants.CLINICAL_FINDINGS_VALUE_SET_URI, CONCEPT_UUID, "Test Reaction"));
-		reactionComponent.addManifestation(manifestation);
-		allergy.addReaction(reactionComponent);
-		
-		Concept codedReaction = new Concept();
-		codedReaction.setUuid(CONCEPT_UUID);
-		
-		when(conceptTranslator.toOpenmrsType(manifestation)).thenReturn(codedReaction);
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getReactions().size(), greaterThanOrEqualTo(1));
-		assertThat(omrsAllergy.getReactions().get(0).getReaction().getUuid(), equalTo(CONCEPT_UUID));
+		assertThat(omrsAllergy.getSeverity().getUuid(), equalTo(GLOBAL_PROPERTY_MILD_VALUE));
 	}
 	
 	@Test
