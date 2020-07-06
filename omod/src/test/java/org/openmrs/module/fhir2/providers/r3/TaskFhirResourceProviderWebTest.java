@@ -343,6 +343,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
+	
 	@Test
 	public void deleteTask_shouldDeleteTask() throws Exception {
 		Task task = new Task();
@@ -359,9 +360,9 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	
 	@Test
 	public void deleteTask_shouldReturn404ForNonExistingTask() throws Exception {
-		when(service.get(WRONG_TASK_UUID)).thenReturn(null);
+		when(service.delete(WRONG_TASK_UUID)).thenReturn(null);
 		
-		MockHttpServletResponse response = get("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = delete("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 	}
