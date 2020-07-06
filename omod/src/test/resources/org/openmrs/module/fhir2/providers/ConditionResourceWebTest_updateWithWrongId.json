@@ -1,6 +1,6 @@
 {
   "resourceType": "Condition",
-  "id": "a6867095-e2b1-4a68-9aaa-0d161a37ce9c",
+  "id": "48784964-c109-4d91-921b-1cf6bf87f01a",
   "clinicalStatus": {
     "coding": [
       {
@@ -15,7 +15,6 @@
       {
         "code": "116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
       },
-      
       {
         "system": "urn:oid:2.16.840.1.113883.3.7201",
         "code": "116128"
@@ -39,4 +38,3 @@
     "type": "Practitioner",
     "display": "JJ Dick"
   }
-}

@@ -50,6 +50,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
@@ -62,6 +63,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.providers.BaseFhirResourceProviderWebTest.FhirMediaTypes;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -72,6 +74,10 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	private static final String WRONG_CONDITION_UUID = "9bf0d1ac-62a8-4440-a5a1-eb1015a7cc65";
 	
 	private static final String JSON_CREATE_CONDITION_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_create.json";
+	
+	private static final String JSON_UPDATE_CONDITION_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_Update.json";
+	
+	private static final String JSON_UPDATE_CONDITION_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_updateWithoutId.json";
 	
 	private static final String PATIENT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
 	
@@ -154,7 +160,6 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
-	
 	@Test
 	public void shouldGetConditionHistoryById() throws IOException, ServletException {
 		Provenance provenance = new Provenance();
@@ -225,7 +230,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		assertThat(response, isCreated());
 		assertThat(response.getStatus(), is(201));
 	}
-	
+
 	@Test
 	public void searchForConditions_shouldReturnBundleWithMatchingPatientUUID() throws Exception {
 		verifyURI(String.format("/Condition?patient=%s", PATIENT_UUID));
@@ -405,4 +410,30 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
+	@Test
+	public void deleteCondition_shouldDeleteCondition() throws Exception {
+		OperationOutcome outcome = new OperationOutcome();
+		outcome.setId(CONDITION_UUID);
+		outcome.getText().setDivAsString("Deleted successfully");
+
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		condition.setId(CONDITION_UUID);
+
+		when(conditionService.delete(CONDITION_UUID)).thenReturn(condition);
+
+		MockHttpServletResponse response = delete("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
+
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deleteCondition_shouldReturn404ForNonExistingCondition() throws Exception {
+		when(conditionService.get(WRONG_CONDITION_UUID)).thenReturn(null);
+		
+		MockHttpServletResponse response = get("/Condition/" + WRONG_CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+	}
+	
 }

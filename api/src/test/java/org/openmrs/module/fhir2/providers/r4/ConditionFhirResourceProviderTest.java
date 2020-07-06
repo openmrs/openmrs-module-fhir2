@@ -35,11 +35,14 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
@@ -144,6 +147,35 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	}
 	
 	@Test
+	public void updateCondition_shouldUpdateCondition() {
+		when(conditionService.update(CONDITION_UUID, condition)).thenReturn(condition);
+		
+		MethodOutcome result = resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID), condition);
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(condition.getId()));
+		
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateCondition_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		Condition wrongCondition = new Condition();
+		wrongCondition.setId(WRONG_CONDITION_UUID);
+		
+		when(conditionService.update(WRONG_CONDITION_UUID, wrongCondition)).thenThrow(MethodNotAllowedException.class);
+		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID), wrongCondition);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateCondition_shouldThrowInvalidRequestExceptionForWrongConditionUuid() {
+		Condition wrongCondition = new Condition();
+		wrongCondition.setId(WRONG_CONDITION_UUID);
+		when(conditionService.update(WRONG_CONDITION_UUID, wrongCondition)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID), wrongCondition);
+	}
+	
+	@Test
 	public void searchConditions_shouldReturnConditionReturnedByService() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam();
 		patientReference.addValue(new ReferenceOrListParam().add(new ReferenceParam(Patient.SP_GIVEN, "patient name")));
@@ -213,4 +245,19 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.CONDITION));
 	}
+	
+	@Test
+	public void deleteCondtion_shouldDeletecondition() {
+		
+		when(conditionService.delete(CONDITION_UUID)).thenReturn(condition);
+		OperationOutcome result = resourceProvider.deleteCondition(new IdType().setValue(CONDITION_UUID));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+	
 }
