@@ -10,24 +10,29 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
@@ -37,8 +42,10 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -67,6 +74,14 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 	private static final String CIEL_URN = "urn:oid:2.16.840.1.113883.3.7201";
 	
 	private static final String URL_ENCODED_CIEL_URN;
+	
+	private static final String JSON_CREATE_OBSERVATION_PATH = "org/openmrs/module/fhir2/providers/ObservationResourceWebTest_create.json";
+	
+	private static final String JSON_UPDATE_OBSERVATION_PATH = "org/openmrs/module/fhir2/providers/ObservationResourceWebTest_update.json";
+	
+	private static final String JSON_UPDATE_OBSERVATION_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ObservationResourceWebTest_updateWithoutId.json";
+	
+	private static final String JSON_UPDATE_OBSERVATION_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ObservationResourceWebTest_updateWithWrongId.json";
 	
 	static {
 		try {
@@ -110,18 +125,20 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 	@Captor
 	private ArgumentCaptor<DateRangeParam> valueDateCaptor;
 	
+	private org.hl7.fhir.r4.model.Observation observation;
+	
 	@Before
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new ObservationFhirResourceProvider();
 		resourceProvider.setObservationService(observationService);
+		observation = new org.hl7.fhir.r4.model.Observation();
+		observation.setId(OBS_UUID);
 		super.setup();
 	}
 	
 	@Test
 	public void shouldGetObservationByUuid() throws Exception {
-		org.hl7.fhir.r4.model.Observation observation = new org.hl7.fhir.r4.model.Observation();
-		observation.setId(OBS_UUID);
 		when(observationService.get(OBS_UUID)).thenReturn(observation);
 		
 		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
@@ -138,6 +155,106 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		MockHttpServletResponse response = get("/Observation/" + BAD_OBS_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
+	}
+	
+	@Test
+	public void createObservation_shouldCreateNewObservation() throws Exception {
+		String observationJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_OBSERVATION_PATH)) {
+			Objects.requireNonNull(is);
+			observationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		when(observationService.create(any(org.hl7.fhir.r4.model.Observation.class))).thenReturn(observation);
+		
+		MockHttpServletResponse response = post("/Observation").jsonContent(observationJson).accept(FhirMediaTypes.JSON)
+		        .go();
+		
+		assertThat(response, isCreated());
+	}
+	
+	@Test
+	public void updateObservation_shouldUpdateExistingObservation() throws Exception {
+		String observationJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_OBSERVATION_PATH)) {
+			Objects.requireNonNull(is);
+			observationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		when(observationService.update(anyString(), any(org.hl7.fhir.r4.model.Observation.class))).thenReturn(observation);
+		
+		MockHttpServletResponse response = put("/Observation/" + OBS_UUID).jsonContent(observationJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+	}
+	
+	@Test
+	public void updateObservation_shouldThrowErrorForIdMismatch() throws Exception {
+		String observationJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_OBSERVATION_PATH)) {
+			Objects.requireNonNull(is);
+			observationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		MockHttpServletResponse response = put("/Observation/" + BAD_OBS_UUID).jsonContent(observationJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+	}
+	
+	@Test
+	public void updateObservation_shouldThrowErrorForNoId() throws Exception {
+		String observationJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_OBSERVATION_NO_ID_PATH)) {
+			Objects.requireNonNull(is);
+			observationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		MockHttpServletResponse response = put("/Observation/" + OBS_UUID).jsonContent(observationJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
+	}
+	
+	@Test
+	public void updateObservation_shouldThrowErrorForNonExistentObservation() throws Exception {
+		String observationJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_OBSERVATION_WRONG_ID_PATH)) {
+			Objects.requireNonNull(is);
+			observationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		when(observationService.update(anyString(), any(org.hl7.fhir.r4.model.Observation.class)))
+		        .thenThrow(new MethodNotAllowedException("Observation " + BAD_OBS_UUID + " does not exist"));
+		
+		MockHttpServletResponse response = put("/Observation/" + BAD_OBS_UUID).jsonContent(observationJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isMethodNotAllowed());
+	}
+	
+	@Test
+	public void deleteObservation_shouldDeleteObservation() throws Exception {
+		when(observationService.delete(OBS_UUID)).thenReturn(observation);
+		
+		MockHttpServletResponse response = delete("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deleteObservation_shouldReturn404ForNonExistingObservation() throws Exception {
+		when(observationService.delete(BAD_OBS_UUID)).thenReturn(null);
+		
+		MockHttpServletResponse response = delete("/Observation/" + BAD_OBS_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getStatus(), equalTo(404));
 	}
 	
 	@Test

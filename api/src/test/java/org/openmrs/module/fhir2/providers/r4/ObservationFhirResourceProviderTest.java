@@ -22,12 +22,15 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -35,6 +38,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
@@ -176,4 +180,72 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		assertThat(resourceProvider.getObservationHistoryById(idType).isEmpty(), is(true));
 		assertThat(resourceProvider.getObservationHistoryById(idType).size(), Matchers.equalTo(0));
 	}
+	
+	@Test
+	public void createObservation_shouldCreateNewObservation() {
+		when(observationService.create(observation)).thenReturn(observation);
+		
+		MethodOutcome result = resourceProvider.createObservationResource(observation);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), equalTo(observation));
+	}
+	
+	@Test
+	public void updateObservation_shouldUpdateObservation() {
+		when(observationService.update(OBSERVATION_UUID, observation)).thenReturn(observation);
+		
+		MethodOutcome result = resourceProvider.updateObservationResource(new IdType().setValue(OBSERVATION_UUID),
+		    observation);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(observation));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateObservation_shouldThrowInvalidRequestForUuidMismatch() {
+		when(observationService.update(WRONG_OBSERVATION_UUID, observation)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID), observation);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateObservation_shouldThrowInvalidRequestForMissingId() {
+		Observation noIdObservation = new Observation();
+		
+		when(observationService.update(OBSERVATION_UUID, noIdObservation)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateObservationResource(new IdType().setValue(OBSERVATION_UUID), noIdObservation);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateObservation_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		Observation wrongObservation = new Observation();
+		wrongObservation.setId(WRONG_OBSERVATION_UUID);
+		
+		when(observationService.update(WRONG_OBSERVATION_UUID, wrongObservation)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID), wrongObservation);
+	}
+	
+	@Test
+	public void deleteObservation_shouldDeleteObservation() {
+		when(observationService.delete(OBSERVATION_UUID)).thenReturn(observation);
+		
+		OperationOutcome result = resourceProvider.deleteObservationResource(new IdType().setValue(OBSERVATION_UUID));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteObservation_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentObservation() {
+		when(observationService.delete(WRONG_OBSERVATION_UUID)).thenReturn(null);
+		
+		resourceProvider.deleteObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID));
+	}
+	
 }
