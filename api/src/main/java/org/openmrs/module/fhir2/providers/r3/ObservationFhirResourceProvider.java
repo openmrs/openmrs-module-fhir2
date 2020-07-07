@@ -13,12 +13,17 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -28,16 +33,19 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.convertors.conv30_40.Observation30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirObservationService;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -73,6 +81,33 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find Observation with Id " + id.getIdPart());
 		}
 		return Observation30_40.convertObservation(observation).getContained();
+	}
+	
+	@Create
+	public MethodOutcome createObservationResource(@ResourceParam Observation observation) {
+		return FhirProviderUtils.buildCreate(observationService.create(Observation30_40.convertObservation(observation)));
+	}
+	
+	@Update
+	public MethodOutcome updateObservationResource(@IdParam IdType id, @ResourceParam Observation observation) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update resource");
+		}
+		
+		observation.setId(id.getIdPart());
+		
+		return FhirProviderUtils
+		        .buildUpdate(observationService.update(id.getIdPart(), Observation30_40.convertObservation(observation)));
+	}
+	
+	@Delete
+	public OperationOutcome deleteObservationResource(@IdParam @NotNull IdType id) {
+		org.hl7.fhir.r4.model.Observation observation = observationService.delete(id.getIdPart());
+		if (observation == null) {
+			throw new ResourceNotFoundException("Could not find observation to delete with id" + id.getIdPart());
+		}
+		
+		return FhirProviderUtils.buildDelete(Observation30_40.convertObservation(observation));
 	}
 	
 	@Search
