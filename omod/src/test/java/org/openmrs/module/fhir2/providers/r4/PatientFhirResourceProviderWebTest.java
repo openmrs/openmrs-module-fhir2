@@ -65,6 +65,8 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 	
 	private static final String AUT = "AUT";
 	
+	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
+	
 	@Getter(AccessLevel.PUBLIC)
 	private PatientFhirResourceProvider resourceProvider;
 	
@@ -114,7 +116,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?name=Hannibal Lector");
 		
 		verify(patientService).searchForPatients(stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -126,7 +128,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?given=Hannibal");
 		
 		verify(patientService).searchForPatients(isNull(), stringAndListCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -138,7 +140,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?family=Lector");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), stringAndListCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -150,7 +152,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?identifier=M10000");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), tokenAndListCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(tokenAndListCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
 		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -162,7 +164,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?gender=male");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), tokenAndListCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(tokenAndListCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
 		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -174,7 +176,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?birthdate=eq1975-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), dateRangeCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -191,7 +193,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?birthdate=ge1975-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), dateRangeCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -207,7 +209,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?birthdate=gt1975-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), dateRangeCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -223,7 +225,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?birthdate=le1975-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), dateRangeCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -239,7 +241,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?birthdate=lt1975-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), dateRangeCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -255,7 +257,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?birthdate=ge1975-02-02&birthdate=le1980-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), dateRangeCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar lowerBound = Calendar.getInstance();
@@ -275,7 +277,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?death-date=eq1975-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -292,7 +294,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?death-date=ge1975-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -308,7 +310,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?death-date=gt1975-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -324,7 +326,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?death-date=le1975-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -340,7 +342,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?death-date=lt1975-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -356,7 +358,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?death-date=ge1975-02-02&death-date=le1980-02-02");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar lowerBound = Calendar.getInstance();
@@ -376,7 +378,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?deceased=true");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    tokenAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    tokenAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(tokenAndListCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -389,7 +391,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?address-city=Washington");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -402,7 +404,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?address-state=Washington");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), stringAndListCaptor.capture(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -415,7 +417,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?address-country=Washington");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), stringAndListCaptor.capture(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), stringAndListCaptor.capture(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -428,12 +430,43 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		verifyUri("/Patient/?address-postalcode=98136");
 		
 		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), stringAndListCaptor.capture(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo("98136"));
+	}
+	
+	@Test
+	public void shouldGetPatientByUUID() throws Exception {
+		verifyUri(String.format("/Patient?_id=%s", PATIENT_UUID));
+		
+		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull(), tokenAndListCaptor.capture(), isNull(), isNull());
+		
+		assertThat(tokenAndListCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void shouldGetPatientByLastUpdatedDate() throws Exception {
+		verifyUri(String.format("/Patient?_lastUpdated=%s", LAST_UPDATED_DATE));
+		
+		verify(patientService).searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), dateRangeCaptor.capture(), isNull());
+		
+		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.SEPTEMBER, 3);
+		
+		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
@@ -505,7 +538,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
 		when(patientService.searchForPatients(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		    any(), any(), any(), any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		

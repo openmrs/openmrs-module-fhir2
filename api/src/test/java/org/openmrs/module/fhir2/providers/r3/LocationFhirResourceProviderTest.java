@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -73,6 +75,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	private static final String LOGIN_LOCATION_TAG_NAME = "login";
 	
 	private static final String LOGIN_LOCATION_TAG_DESCRIPTION = "Identify login locations";
+	
+	private static final String LAST_UPDATED_DATE = "2020-09-03";
 	
 	private static final int PREFERRED_PAGE_SIZE = 10;
 	
@@ -142,15 +146,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		StringAndListParam nameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_NAME)));
 		when(locationService.searchForLocations(argThat(Matchers.is(nameParam)), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchLocations(nameParam, null, null, null, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchLocations(nameParam, null, null, null, null, null, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((Location) resultList.iterator().next()).getName(), equalTo(LOCATION_NAME));
 	}
@@ -159,15 +164,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	public void findLocationsByCity_shouldReturnMatchingBundleOfLocations() {
 		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
 		when(locationService.searchForLocations(isNull(), argThat(Matchers.is(cityParam)), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchLocations(null, cityParam, null, null, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchLocations(null, cityParam, null, null, null, null, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((Location) resultList.iterator().next()).getAddress().getCity(), equalTo(CITY));
 	}
@@ -177,15 +183,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		StringAndListParam countryParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
 		when(locationService.searchForLocations(isNull(), isNull(), argThat(Matchers.is(countryParam)), isNull(), isNull(),
-		    isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchLocations(null, null, countryParam, null, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchLocations(null, null, countryParam, null, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((Location) resultList.iterator().next()).getAddress().getCountry(), equalTo(COUNTRY));
 	}
@@ -194,15 +201,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	public void findLocationsByState_shouldReturnMatchingBundleOfLocations() {
 		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), argThat(Matchers.is(stateParam)),
-		    isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, stateParam, null, null, null);
+		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, stateParam, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((Location) resultList.iterator().next()).getAddress().getState(), equalTo(STATE));
 	}
@@ -212,16 +220,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		StringAndListParam postalCodeParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), argThat(Matchers.is(postalCodeParam)),
-		    isNull(), isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchLocations(null, null, null, postalCodeParam, null, null, null,
-		    null);
+		IBundleProvider results = resourceProvider.searchLocations(null, null, null, postalCodeParam, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((Location) resultList.iterator().next()).getAddress().getPostalCode(), equalTo(POSTAL_CODE));
 	}
@@ -231,15 +239,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		TokenAndListParam tag = new TokenAndListParam()
 		        .addAnd(new TokenOrListParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME));
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(Matchers.is(tag)),
-		    isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, tag, null, null);
+		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, tag, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((Location) resultList.iterator().next()).getMeta().getTag().iterator().next().getCode(),
 		    equalTo(LOGIN_LOCATION_TAG_NAME));
@@ -252,16 +261,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("chulaimbo").setChain(Location.SP_NAME)));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(Matchers.is(locationParentName)), isNull()))
+		    argThat(Matchers.is(locationParentName)), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentName,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
@@ -272,16 +281,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("kampala").setChain(Location.SP_ADDRESS_CITY)));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(Matchers.is(locationParentCity)), isNull()))
+		    argThat(Matchers.is(locationParentCity)), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentCity,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
@@ -292,16 +301,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("uganda").setChain(Location.SP_ADDRESS_COUNTRY)));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(Matchers.is(locationParentCountry)), isNull()))
+		    argThat(Matchers.is(locationParentCountry)), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentCountry,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
@@ -312,16 +321,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		        .add(new ReferenceParam().setValue("234-30100").setChain(Location.SP_ADDRESS_POSTALCODE)));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(Matchers.is(locationParentPostalCode)), isNull()))
+		    argThat(Matchers.is(locationParentPostalCode)), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null,
-		    locationParentPostalCode, null);
+		    locationParentPostalCode, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
@@ -332,36 +341,74 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		        .add(new ReferenceParam().setValue("najjanankumbi").setChain(Location.SP_ADDRESS_STATE)));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(Matchers.is(locationParentState)), isNull()))
+		    argThat(Matchers.is(locationParentState)), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentState,
+		    null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchLocations_shouldReturnMatchingBundleOfLocationsByUUID() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_UUID));
+		
+		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    argThat(is(uuid)), isNull(), isNull()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, uuid, null,
 		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((Location) resultList.get(0)).getId(), equalTo(LOCATION_UUID));
+	}
+	
+	@Test
+	public void searchLocations_shouldReturnMatchingBundleOfLocationsByLastUpdated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
+		
+		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), argThat(is(lastUpdated)), isNull()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null,
+		    lastUpdated, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(((Location) resultList.get(0)).getId(), equalTo(LOCATION_UUID));
 	}
 	
 	@Test
 	public void searchLocations_shouldReturnMatchingBundleOfLocations() {
 		List<Location> locations = new ArrayList<>();
 		locations.add(location);
-		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(locations, PREFERRED_PAGE_SIZE, COUNT));
 		
 		StringAndListParam location = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_NAME)));
 		
 		IBundleProvider resultLocations = resourceProvider.searchLocations(location, null, null, null, null, null, null,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(resultLocations);
 		
 		assertThat(resultLocations, notNullValue());
-		assertThat(resultList.get(0).fhirType(), is("Location"));
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(((Location) resultList.get(0)).getId(), equalTo(LOCATION_UUID));
 	}

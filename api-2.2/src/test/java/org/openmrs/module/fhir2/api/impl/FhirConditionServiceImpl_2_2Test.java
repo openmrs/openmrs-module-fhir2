@@ -57,6 +57,8 @@ public class FhirConditionServiceImpl_2_2Test {
 	
 	private static final String WRONG_CONDITION_UUID = "90378769-f1a4-46af-b08b-d9fe8a09034j";
 	
+	private static final String LAST_UPDATED_DATE = "2020-09-03";
+	
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
@@ -146,6 +148,10 @@ public class FhirConditionServiceImpl_2_2Test {
 		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
 		        .setUpperBound("upper record date");
 		
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
+		
+		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
+		
 		SortSpec sort = new SortSpec("sort param");
 		
 		SearchParameterMap theParams = new SearchParameterMap()
@@ -154,7 +160,10 @@ public class FhirConditionServiceImpl_2_2Test {
 		        .addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER, clinicalList)
 		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, onsetAge)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate", onsetDate)
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordDate).setSortSpec(sort);
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordDate)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
+		        .setSortSpec(sort);
 		
 		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(CONDITION_UUID));
 		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openmrsCondition));
@@ -163,7 +172,7 @@ public class FhirConditionServiceImpl_2_2Test {
 		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
 		
 		IBundleProvider result = conditionService.searchConditions(patientReference, codeList, clinicalList, onsetDate,
-		    onsetAge, recordDate, sort);
+		    onsetAge, recordDate, uuid, lastUpdated, sort);
 		
 		List<IBaseResource> resultList = get(result);
 		

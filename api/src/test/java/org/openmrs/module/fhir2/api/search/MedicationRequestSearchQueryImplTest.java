@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -96,6 +97,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 	private static final String LOINC_BENDAQUILINE = "2343253";
 	
 	private static final String RIFAMPICIN_CONCEPT_ID = "4022";
+	
+	private static final String DATE_CREATED = "2016-08-19";
+	
+	private static final String DATE_VOIDED = "2008-11-20";
 	
 	@Autowired
 	private MedicationRequestTranslator translator;
@@ -483,7 +488,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
+		assertThat(results.size(), equalTo(14));
 		
 		List<IBaseResource> resources = get(results);
 		
@@ -511,7 +516,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
+		assertThat(results.size(), equalTo(14));
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
 	}
@@ -551,7 +556,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
+		assertThat(results.size(), equalTo(14));
 		
 		List<IBaseResource> resources = get(results);
 		
@@ -581,7 +586,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
+		assertThat(results.size(), equalTo(14));
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
 	}
@@ -623,7 +628,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
+		assertThat(results.size(), equalTo(14));
 		
 		List<IBaseResource> resources = get(results);
 		
@@ -653,7 +658,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
+		assertThat(results.size(), equalTo(14));
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
 	}
@@ -696,7 +701,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
+		assertThat(results.size(), equalTo(14));
 		
 		List<IBaseResource> resources = get(results);
 		
@@ -726,7 +731,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
+		assertThat(results.size(), equalTo(14));
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
 	}
@@ -767,7 +772,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
+		assertThat(results.size(), equalTo(14));
 		
 		List<IBaseResource> resources = get(results);
 		
@@ -797,7 +802,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
+		assertThat(results.size(), equalTo(14));
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
 		assertThat(((MedicationRequest) resultList.iterator().next()).getRequester().getIdentifier().getValue(),
@@ -969,6 +974,93 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(resources, notNullValue());
 		assertThat(results.size(), equalTo(2));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByUuid() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((MedicationRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(MEDICATION_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByLastUpdatedDateCreated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(3));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByLastUpdatedDateVoided() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByMatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((MedicationRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(MEDICATION_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldReturnEmptyListByMismatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {

@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -54,6 +55,8 @@ public class FhirMedicationServiceImplTest {
 	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97aa-7038c432aaba";
 	
 	private static final String CODE = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String LAST_UPDATED_DATE = "2020-09-03";
 	
 	private static final int START_INDEX = 0;
 	
@@ -125,7 +128,7 @@ public class FhirMedicationServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(code, null, null, null);
+		IBundleProvider result = fhirMedicationService.searchForMedications(code, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -151,7 +154,7 @@ public class FhirMedicationServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, dosageForm, null, null);
+		IBundleProvider result = fhirMedicationService.searchForMedications(null, dosageForm, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -177,7 +180,7 @@ public class FhirMedicationServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, ingredientCode, null);
+		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, ingredientCode, null, null, null);
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -202,7 +205,51 @@ public class FhirMedicationServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, status);
+		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, status, null, null);
+		
+		List<IBaseResource> resultList = get(result);
+		
+		assertThat(result, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForMedications_shouldSearchMedicationsByUUID() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(drug));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
+		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		
+		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, null, uuid, null);
+		
+		List<IBaseResource> resultList = get(result);
+		
+		assertThat(result, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForMedications_shouldSearchMedicationsByLastUpdated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(drug));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
+		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		
+		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, null, null, lastUpdated);
 		
 		List<IBaseResource> resultList = get(result);
 		

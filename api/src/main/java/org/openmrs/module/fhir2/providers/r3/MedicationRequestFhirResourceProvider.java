@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -82,12 +83,14 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
 	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
 	        @OptionalParam(name = MedicationRequest.SP_MEDICATION, chainWhitelist = {
-	                "" }, targetTypes = Medication.class) ReferenceAndListParam medicationReference) {
+	                "" }, targetTypes = Medication.class) ReferenceAndListParam medicationReference,
+	        @OptionalParam(name = MedicationRequest.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
 		return medicationRequestService.searchForMedicationRequests(patientReference, encounterReference, code,
-		    participantReference, medicationReference);
+		    participantReference, medicationReference, id, lastUpdated);
 	}
 	
 	@Create

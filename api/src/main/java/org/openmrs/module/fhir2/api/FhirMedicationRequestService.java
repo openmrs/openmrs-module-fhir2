@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api;
 import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.MedicationRequest;
@@ -23,5 +24,5 @@ public interface FhirMedicationRequestService extends FhirService<MedicationRequ
 	
 	IBundleProvider searchForMedicationRequests(ReferenceAndListParam patientReference,
 	        ReferenceAndListParam encounterReference, TokenAndListParam code, ReferenceAndListParam participantReference,
-	        ReferenceAndListParam medicationReference);
+	        ReferenceAndListParam medicationReference, TokenAndListParam id, DateRangeParam lastUpdated);
 }

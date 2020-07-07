@@ -32,16 +32,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Objects;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -78,6 +81,8 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	
 	private static final String OWNER_UUID = "8a849d5e-6011-4279-a124-40ada5a687de";
 	
+	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
+	
 	private Task task;
 	
 	@Mock
@@ -91,6 +96,9 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	
 	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
 	
 	@Before
 	public void setup() throws ServletException {
@@ -256,7 +264,8 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	public void searchForTasks_shouldReturnBundleWithMatchingBasedOnResourceUUID() throws Exception {
 		verifyURI(String.format("/Task?based-on:%s=%s", FhirConstants.SERVICE_REQUEST, BASED_ON_UUID));
 		
-		verify(service).searchForTasks(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull());
+		verify(service).searchForTasks(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
+		    isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -275,7 +284,8 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	public void searchForTasks_shouldReturnBundleWithMatchingOwnerResourceUUID() throws Exception {
 		verifyURI(String.format("/Task?owner:%s=%s", FhirConstants.PRACTITIONER, OWNER_UUID));
 		
-		verify(service).searchForTasks(isNull(), referenceAndListParamArgumentCaptor.capture(), isNull(), isNull());
+		verify(service).searchForTasks(isNull(), referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
+		    isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -294,7 +304,8 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	public void searchForTasks_shouldReturnBundleWithMatchingStatus() throws Exception {
 		verifyURI(String.format("/Task?status=%s", Task.TaskStatus.ACCEPTED.toString()));
 		
-		verify(service).searchForTasks(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull());
+		verify(service).searchForTasks(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
+		    isNull());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -309,7 +320,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		    Task.TaskStatus.ACCEPTED.toString()));
 		
 		verify(service).searchForTasks(referenceAndListParamArgumentCaptor.capture(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull());
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -330,10 +341,42 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		    equalTo(Task.TaskStatus.ACCEPTED.toString()));
 	}
 	
+	@Test
+	public void searchForTasks_shouldReturnBundleWithMatchingUUID() throws Exception {
+		verifyURI(String.format("/Task?_id=%s", TASK_UUID));
+		
+		verify(service).searchForTasks(isNull(), isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
+		    isNull());
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo(TASK_UUID));
+	}
+	
+	@Test
+	public void searchForTasks_shouldReturnBundleWithMatchingLastUpdatedDate() throws Exception {
+		verifyURI(String.format("/Task?_lastUpdated=%s", LAST_UPDATED_DATE));
+		
+		verify(service).searchForTasks(isNull(), isNull(), isNull(), isNull(), dateRangeParamArgumentCaptor.capture(),
+		    isNull());
+		
+		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.SEPTEMBER, 3);
+		
+		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+	}
+	
 	private void verifyURI(String uri) throws Exception {
 		Task condition = new Task();
 		condition.setId(TASK_UUID);
-		when(service.searchForTasks(any(), any(), any(), any()))
+		when(service.searchForTasks(any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
@@ -342,6 +385,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
+	
 	@Test
 	public void deleteTask_shouldDeleteTask() throws Exception {
 		Task task = new Task();

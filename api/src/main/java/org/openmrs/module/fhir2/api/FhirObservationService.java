@@ -28,5 +28,6 @@ public interface FhirObservationService extends FhirService<Observation> {
 	IBundleProvider searchForObservations(ReferenceAndListParam encounterReference, ReferenceAndListParam patientReference,
 	        ReferenceParam hasMemberReference, TokenAndListParam valueConcept, DateRangeParam valueDateParam,
 	        QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam, DateRangeParam date,
-	        TokenAndListParam code, TokenAndListParam category, SortSpec sort);
+	        TokenAndListParam code, TokenAndListParam category, TokenAndListParam id, DateRangeParam lastUpdated,
+	        SortSpec sort);
 }

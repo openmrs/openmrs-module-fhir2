@@ -30,6 +30,8 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Location;
@@ -60,6 +62,8 @@ public class FhirEncounterServiceImplTest {
 	private static final String ENCOUNTER_ADDRESS_STATE = "MA";
 	
 	private static final String PARTICIPANT_IDENTIFIER = "1";
+	
+	private static final String LAST_UPDATED_DATE = "2020-09-03";
 	
 	private static final int START_INDEX = 0;
 	
@@ -125,7 +129,7 @@ public class FhirEncounterServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
 		
-		IBundleProvider results = encounterService.searchForEncounters(dateRangeParam, null, null, null);
+		IBundleProvider results = encounterService.searchForEncounters(dateRangeParam, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -154,7 +158,7 @@ public class FhirEncounterServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, location, null, null);
+		IBundleProvider results = encounterService.searchForEncounters(null, location, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -184,7 +188,7 @@ public class FhirEncounterServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, null, participant, null);
+		IBundleProvider results = encounterService.searchForEncounters(null, null, participant, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -214,7 +218,7 @@ public class FhirEncounterServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, null, null, subject);
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, subject, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -222,4 +226,49 @@ public class FhirEncounterServiceImplTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
+	
+	@Test
+	public void searchForEncounter_shouldReturnCollectionOfEncounterByUUID() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(ENCOUNTER_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
+		
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, uuid, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForEncounter_shouldReturnCollectionOfEncounterByLastUpdated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator));
+		
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, lastUpdated);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
 }

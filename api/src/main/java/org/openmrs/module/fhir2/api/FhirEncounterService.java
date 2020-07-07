@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Encounter;
 
 public interface FhirEncounterService extends FhirService<Encounter> {
@@ -21,5 +22,6 @@ public interface FhirEncounterService extends FhirService<Encounter> {
 	Encounter get(@NotNull String uuid);
 	
 	IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
-	        ReferenceAndListParam participant, ReferenceAndListParam subject);
+	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam id,
+	        DateRangeParam lastUpdated);
 }

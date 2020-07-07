@@ -89,4 +89,6 @@
    <drug_order order_id="1007" drug_inventory_id="2003" duration="6" duration_units="27" dispense_as_written="true"
                 as_needed="false"
                 frequency="2"/>
+    <drug_order order_id="8" drug_inventory_id="2003" duration="8" duration_units="29" dispense_as_written="true"
+                as_needed="false" frequency="3"/>
 </dataset>

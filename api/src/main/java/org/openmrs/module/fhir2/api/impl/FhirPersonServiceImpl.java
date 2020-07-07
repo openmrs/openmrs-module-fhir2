@@ -46,7 +46,7 @@ public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.P
 	@Override
 	public IBundleProvider searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
 	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
-	        SortSpec sort) {
+	        TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort) {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name)
 		        .addParameter(FhirConstants.GENDER_SEARCH_HANDLER, gender)
@@ -55,6 +55,8 @@ public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.P
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, state)
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, postalCode)
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);

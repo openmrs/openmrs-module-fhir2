@@ -19,5 +19,6 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 public interface FhirDiagnosticReportService extends FhirService<DiagnosticReport> {
 	
 	IBundleProvider searchForDiagnosticReports(ReferenceAndListParam encounterReference,
-	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code, SortSpec sort);
+	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code, TokenAndListParam id,
+	        DateRangeParam lastUpdated, SortSpec sort);
 }

@@ -23,11 +23,13 @@ import static org.hamcrest.Matchers.notNullValue;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
@@ -80,6 +82,12 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 	private static final String COUNTRY = "USA";
 	
 	private static final String WRONG_COUNTRY = "Wrong country";
+	
+	private static final String DATE_CREATED = "2005-01-01";
+	
+	private static final String DATE_CHANGED = "2010-03-31";
+	
+	private static final String DATE_RETIRED = "2010-09-03";
 	
 	private static final int START_INDEX = 0;
 	
@@ -457,6 +465,91 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		assertThat(((Practitioner) resultList.iterator().next()).getIdentifierFirstRep().getValue(),
 		    equalTo(PRACTITIONER_IDENTIFIER));
 		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldSearchForPractitionersByUuid() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((Practitioner) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldSearchForPractitionersByLastUpdatedDateCreated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldSearchForPractitionersByLastUpdatedDateChanged() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CHANGED).setLowerBound(DATE_CHANGED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldSearchForPractitionersByMatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((Practitioner) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldReturnEmptyListByMismatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_RETIRED).setLowerBound(DATE_RETIRED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 }

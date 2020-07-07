@@ -20,5 +20,5 @@ public interface FhirRelatedPersonService extends FhirService<RelatedPerson> {
 	
 	IBundleProvider searchForRelatedPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
 	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
-	        SortSpec sort);
+	        TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort);
 }

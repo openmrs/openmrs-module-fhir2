@@ -23,11 +23,13 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -48,6 +50,8 @@ import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 public class FhirPractitionerServiceImplTest {
 	
 	private static final String UUID = "28923n23-nmkn23-23923-23sd";
+	
+	private static final String WRONG_UUID = "Wrong uuid";
 	
 	private static final String NAME = "John";
 	
@@ -80,6 +84,10 @@ public class FhirPractitionerServiceImplTest {
 	private static final String COUNTRY = "USA";
 	
 	private static final String WRONG_COUNTRY = "Wrong country";
+	
+	private static final String LAST_UPDATED_DATE = "2020-09-03";
+	
+	private static final String WRONG_LAST_UPDATED_DATE = "2020-09-09";
 	
 	private static final int START_INDEX = 0;
 	
@@ -145,7 +153,8 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(name, null, null, null, null, null, null, null);
+		IBundleProvider results = practitionerService.searchForPractitioners(name, null, null, null, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -165,7 +174,8 @@ public class FhirPractitionerServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(name, null, null, null, null, null, null, null);
+		IBundleProvider results = practitionerService.searchForPractitioners(name, null, null, null, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -186,7 +196,7 @@ public class FhirPractitionerServiceImplTest {
 		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(null, identifier, null, null, null, null, null,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -207,7 +217,7 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(null, identifier, null, null, null, null, null,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -228,7 +238,7 @@ public class FhirPractitionerServiceImplTest {
 		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(null, null, givenName, null, null, null, null,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -249,7 +259,7 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(null, null, givenName, null, null, null, null,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -270,7 +280,7 @@ public class FhirPractitionerServiceImplTest {
 		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, familyName, null, null, null,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -291,7 +301,7 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, familyName, null, null, null,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -311,7 +321,8 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, city, null, null, null);
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, city, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -331,7 +342,8 @@ public class FhirPractitionerServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, city, null, null, null);
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, city, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -351,8 +363,8 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, state, null,
-		    null);
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, state, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -372,8 +384,8 @@ public class FhirPractitionerServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, state, null,
-		    null);
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, state, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -394,7 +406,7 @@ public class FhirPractitionerServiceImplTest {
 		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, postalCode,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -415,7 +427,7 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, postalCode,
-		    null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -436,7 +448,7 @@ public class FhirPractitionerServiceImplTest {
 		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null,
-		    country);
+		    country, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -457,7 +469,96 @@ public class FhirPractitionerServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
 		
 		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null,
-		    country);
+		    country, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void shouldSearchForPractitionersByUUID() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		when(practitionerDao.getResultUuids(any())).thenReturn(Collections.singletonList(UUID));
+		when(practitionerDao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(provider));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null, null,
+		    uuid, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionByWrongUUID() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(WRONG_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		when(practitionerDao.getResultUuids(any())).thenReturn(Collections.emptyList());
+		when(practitionerDao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null, null,
+		    uuid, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void shouldSearchForPractitionersByLastUpdated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		when(practitionerDao.getResultUuids(any())).thenReturn(Collections.singletonList(UUID));
+		when(practitionerDao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(provider));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null, null,
+		    null, lastUpdated);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnEmptyCollectionByWrongLastUpdated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(WRONG_LAST_UPDATED_DATE)
+		        .setLowerBound(WRONG_LAST_UPDATED_DATE);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, lastUpdated);
+		
+		when(practitionerDao.getResultUuids(any())).thenReturn(Collections.emptyList());
+		when(practitionerDao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, practitionerDao, practitionerTranslator));
+		
+		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null, null,
+		    null, lastUpdated);
 		
 		List<IBaseResource> resultList = get(results);
 		

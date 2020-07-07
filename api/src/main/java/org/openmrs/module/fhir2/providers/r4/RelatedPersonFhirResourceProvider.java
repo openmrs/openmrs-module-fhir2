@@ -63,7 +63,10 @@ public class RelatedPersonFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_CITY) StringAndListParam city,
 	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_STATE) StringAndListParam state,
 	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
-	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_COUNTRY) StringAndListParam country, @Sort SortSpec sort) {
-		return relatedPersonService.searchForRelatedPeople(name, gender, birthDate, city, state, postalCode, country, sort);
+	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_COUNTRY) StringAndListParam country,
+	        @OptionalParam(name = RelatedPerson.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
+		return relatedPersonService.searchForRelatedPeople(name, gender, birthDate, city, state, postalCode, country, id,
+		    lastUpdated, sort);
 	}
 }

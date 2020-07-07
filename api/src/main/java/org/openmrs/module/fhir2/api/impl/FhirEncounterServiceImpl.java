@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.impl;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,11 +45,14 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
-	        ReferenceAndListParam participant, ReferenceAndListParam subject) {
+	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam id,
+	        DateRangeParam lastUpdated) {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, date)
 		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, location)
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant)
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, subject);
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, subject)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 }

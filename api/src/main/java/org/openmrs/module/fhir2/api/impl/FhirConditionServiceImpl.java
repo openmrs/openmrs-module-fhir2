@@ -50,7 +50,7 @@ public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> exten
 	@Override
 	public IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
 	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
-	        DateRangeParam recordedDate, SortSpec sort) {
+	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort) {
 		throw new FhirNotImplementedException(MESSAGE);
 	}
 	

@@ -52,7 +52,7 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 	@Override
 	public IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
 	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
-	        DateRangeParam recordedDate, @Sort SortSpec sort) {
+	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, @Sort SortSpec sort) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientParam)
@@ -60,7 +60,10 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 		        .addParameter(FhirConstants.CONDITION_CLINICAL_STATUS_HANDLER, clinicalStatus)
 		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, onsetAge)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate", onsetDate)
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordedDate).setSortSpec(sort);
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordedDate)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
+		        .setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}

@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
@@ -66,6 +67,8 @@ public class FhirPersonServiceImplTest {
 	
 	private static final String PERSON_UUID = "1223-2323-2323-nd23";
 	
+	private static final String WRONG_PERSON_UUID = "Wrong uuid";
+	
 	private static final String PERSON_NAME_UUID = "test-uuid-1223-2312";
 	
 	private static final String PERSON_BIRTH_DATE = "1996-12-12";
@@ -81,6 +84,10 @@ public class FhirPersonServiceImplTest {
 	private static final String COUNTRY = "Washington";
 	
 	private static final String NOT_ADDRESS_FIELD = "not an address field";
+	
+	private static final String LAST_UPDATED_DATE = "2020-09-03";
+	
+	private static final String WRONG_LAST_UPDATED_DATE = "2020-09-09";
 	
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	
@@ -154,8 +161,8 @@ public class FhirPersonServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
 		
-		IBundleProvider results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
-		    null);
+		IBundleProvider results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -178,8 +185,8 @@ public class FhirPersonServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
 		
-		IBundleProvider results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
-		    null);
+		IBundleProvider results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -201,8 +208,8 @@ public class FhirPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		
-		IBundleProvider results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null,
-		    null);
+		IBundleProvider results = personService.searchForPeople(stringAndListParam, null, null, null, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -223,7 +230,8 @@ public class FhirPersonServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
 		
-		IBundleProvider results = personService.searchForPeople(null, tokenAndListParam, null, null, null, null, null, null);
+		IBundleProvider results = personService.searchForPeople(null, tokenAndListParam, null, null, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -244,7 +252,8 @@ public class FhirPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		
-		IBundleProvider results = personService.searchForPeople(null, tokenAndListParam, null, null, null, null, null, null);
+		IBundleProvider results = personService.searchForPeople(null, tokenAndListParam, null, null, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -269,7 +278,8 @@ public class FhirPersonServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
 		
-		IBundleProvider results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
+		IBundleProvider results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -291,7 +301,8 @@ public class FhirPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		
-		IBundleProvider results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null);
+		IBundleProvider results = personService.searchForPeople(null, null, dateRangeParam, null, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -313,8 +324,8 @@ public class FhirPersonServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
 		
-		IBundleProvider results = personService.searchForPeople(null, null, null, stringAndListParam, null, null, null,
-		    null);
+		IBundleProvider results = personService.searchForPeople(null, null, null, stringAndListParam, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -336,8 +347,8 @@ public class FhirPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		
-		IBundleProvider results = personService.searchForPeople(null, null, null, stringAndListParam, null, null, null,
-		    null);
+		IBundleProvider results = personService.searchForPeople(null, null, null, stringAndListParam, null, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -359,8 +370,8 @@ public class FhirPersonServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
 		
-		IBundleProvider results = personService.searchForPeople(null, null, null, null, stringAndListParam, null, null,
-		    null);
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, stringAndListParam, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -382,8 +393,8 @@ public class FhirPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		
-		IBundleProvider results = personService.searchForPeople(null, null, null, null, stringAndListParam, null, null,
-		    null);
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, stringAndListParam, null, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -405,8 +416,8 @@ public class FhirPersonServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
 		
-		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, stringAndListParam, null,
-		    null);
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, stringAndListParam, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -428,8 +439,8 @@ public class FhirPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		
-		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, stringAndListParam, null,
-		    null);
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, stringAndListParam, null, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -451,8 +462,8 @@ public class FhirPersonServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
 		
-		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, null, stringAndListParam,
-		    null);
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, null, stringAndListParam, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -474,13 +485,92 @@ public class FhirPersonServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
 		
-		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, null, stringAndListParam,
-		    null);
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, null, stringAndListParam, null,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnCollectionOfPeopleWhenUUIDMatched() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PERSON_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(PERSON_UUID));
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(person));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, null, null, uuid, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(get(results), not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnEmptyCollectionWhenUUIDNotMatched() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(WRONG_PERSON_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		when(dao.getResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, null, null, uuid, null, null);
+		
+		assertThat(results, notNullValue());
+		assertThat(get(results), empty());
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnCollectionOfPeopleWhenLastUpdatedMatched() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(PERSON_UUID));
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(person));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		when(personTranslator.toFhirResource(person)).thenReturn(fhirPerson);
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, null, null, null, lastUpdated,
+		    null);
+		
+		assertThat(results, notNullValue());
+		assertThat(get(results), not(empty()));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForPeople_shouldReturnEmptyCollectionWhenLastUpdatedNotMatched() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(WRONG_LAST_UPDATED_DATE)
+		        .setLowerBound(WRONG_LAST_UPDATED_DATE);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		when(dao.getResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.emptyList());
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, personTranslator));
+		
+		IBundleProvider results = personService.searchForPeople(null, null, null, null, null, null, null, null, lastUpdated,
+		    null);
+		
+		assertThat(results, notNullValue());
+		assertThat(get(results), empty());
 	}
 	
 }

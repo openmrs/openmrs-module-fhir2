@@ -10,9 +10,11 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -25,14 +27,17 @@ import javax.servlet.ServletException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -87,6 +92,8 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	
 	private static final String PARENT_LOCATION_POSTAL_CODE = "Test parent postal code";
 	
+	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
+	
 	@Mock
 	private FhirLocationService locationService;
 	
@@ -94,13 +101,16 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	private LocationFhirResourceProvider locationProvider;
 	
 	@Captor
-	ArgumentCaptor<TokenAndListParam> tagCaptor;
+	ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
 	@Captor
 	ArgumentCaptor<StringAndListParam> stringAndListParamCaptor;
 	
 	@Captor
 	ArgumentCaptor<ReferenceAndListParam> referenceAndListParamCaptor;
+	
+	@Captor
+	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
 	
 	@Before
 	@Override
@@ -135,7 +145,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?name=%s", LOCATION_NAME));
 		
 		verify(locationService).searchForLocations(stringAndListParamCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -147,7 +157,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?address-city=%s", CITY));
 		
 		verify(locationService).searchForLocations(isNull(), stringAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -159,7 +169,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?address-country=%s", COUNTRY));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), stringAndListParamCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -171,7 +181,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?address-postalcode=%s", POSTAL_CODE));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), stringAndListParamCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -183,7 +193,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?address-state=%s", STATE));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(),
-		    stringAndListParamCaptor.capture(), isNull(), isNull(), isNull());
+		    stringAndListParamCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -194,10 +204,11 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	public void findLocationsByTag_shouldReturnBundleOfLocationsWithMatchingTag() throws Exception {
 		verifyURI(String.format("/Location?_tag=%s", LOGIN_LOCATION_TAG_NAME));
 		
-		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), tagCaptor.capture(),
-		    isNull(), isNull());
-		assertThat(tagCaptor.getValue(), notNullValue());
-		assertThat(tagCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(),
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
 		    equalTo(LOGIN_LOCATION_TAG_NAME));
 	}
 	
@@ -206,7 +217,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?partof=%s", PARENT_LOCATION_ID));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    referenceAndListParamCaptor.capture(), isNull());
+		    referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -221,7 +232,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?partof.name=%s", PARENT_LOCATION_NAME));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    referenceAndListParamCaptor.capture(), isNull());
+		    referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -236,7 +247,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?partof.address-city=%s", PARENT_LOCATION_CITY));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    referenceAndListParamCaptor.capture(), isNull());
+		    referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -251,7 +262,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?partof.address-country=%s", PARENT_LOCATION_COUNTRY));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    referenceAndListParamCaptor.capture(), isNull());
+		    referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -266,7 +277,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?partof.address-postalcode=%s", PARENT_LOCATION_POSTAL_CODE));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    referenceAndListParamCaptor.capture(), isNull());
+		    referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -281,7 +292,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		verifyURI(String.format("/Location?partof.address-state=%s", PARENT_LOCATION_STATE));
 		
 		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    referenceAndListParamCaptor.capture(), isNull());
+		    referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -292,11 +303,43 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	}
 	
 	@Test
+	public void findLocationsByUUID_shouldReturnBundleOfLocationsWithMatchingUUID() throws Exception {
+		verifyURI(String.format("/Location?_id=%s", LOCATION_UUID));
+		
+		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull());
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo(LOCATION_UUID));
+	}
+	
+	@Test
+	public void findLocationsByLastUpdatedDate_shouldReturnBundleOfLocationsWithMatchingLastUpdatedDate() throws Exception {
+		verifyURI(String.format("/Location?_lastUpdated=%s", LAST_UPDATED_DATE));
+		
+		verify(locationService).searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), dateRangeParamArgumentCaptor.capture(), isNull());
+		
+		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2020, Calendar.SEPTEMBER, 3);
+		
+		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+	}
+	
+	@Test
 	public void shouldGetLocationByComplexQuery() throws Exception {
 		verifyURI(String.format("/Location?name=%s&partof.address-city=%s", LOCATION_NAME, PARENT_LOCATION_CITY));
 		
 		verify(locationService).searchForLocations(stringAndListParamCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), referenceAndListParamCaptor.capture(), isNull());
+		    isNull(), isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
@@ -389,7 +432,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	private void verifyURI(String uri) throws Exception {
 		Location location = new Location();
 		location.setId(LOCATION_UUID);
-		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

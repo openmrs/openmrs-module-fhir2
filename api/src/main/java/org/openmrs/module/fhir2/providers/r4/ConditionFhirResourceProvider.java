@@ -89,13 +89,15 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Condition.SP_CLINICAL_STATUS) TokenAndListParam clinicalStatus,
 	        @OptionalParam(name = Condition.SP_ONSET_DATE) DateRangeParam onsetDate,
 	        @OptionalParam(name = Condition.SP_ONSET_AGE) QuantityAndListParam onsetAge,
-	        @OptionalParam(name = Condition.SP_RECORDED_DATE) DateRangeParam recordedDate, @Sort SortSpec sort) {
+	        @OptionalParam(name = Condition.SP_RECORDED_DATE) DateRangeParam recordedDate,
+	        @OptionalParam(name = Condition.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
 		if (patientParam == null) {
 			patientParam = subjectParam;
 		}
 		
-		return conditionService.searchConditions(patientParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate,
-		    sort);
+		return conditionService.searchConditions(patientParam, code, clinicalStatus, onsetDate, onsetAge, recordedDate, id,
+		    lastUpdated, sort);
 	}
 	
 }

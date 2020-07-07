@@ -83,8 +83,10 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Patient.SP_ADDRESS_CITY) StringAndListParam city,
 	        @OptionalParam(name = Patient.SP_ADDRESS_STATE) StringAndListParam state,
 	        @OptionalParam(name = Patient.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
-	        @OptionalParam(name = Patient.SP_ADDRESS_COUNTRY) StringAndListParam country, @Sort SortSpec sort) {
+	        @OptionalParam(name = Patient.SP_ADDRESS_COUNTRY) StringAndListParam country,
+	        @OptionalParam(name = Patient.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
 		return patientService.searchForPatients(name, given, family, identifier, gender, birthDate, deathDate, deceased,
-		    city, state, postalCode, country, sort);
+		    city, state, postalCode, country, id, lastUpdated, sort);
 	}
 }

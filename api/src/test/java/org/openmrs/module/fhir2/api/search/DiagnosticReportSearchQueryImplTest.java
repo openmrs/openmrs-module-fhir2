@@ -85,6 +85,10 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	
 	private static final String WRONG_PATIENT_IDENTIFIER = "6TS-3";
 	
+	private static final String DATE_CREATED = "2018-08-18";
+	
+	private static final String WRONG_DATE_CREATED = "2008-08-18";
+	
 	private static final String DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirDiagnosticReportDaoImplTest_initial_data.xml";
 	
 	private static final int START_INDEX = 0;
@@ -690,6 +694,78 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		assertThat(diagnosticReports, notNullValue());
 		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldSearchForObsByUuid() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(DIAGNOSTIC_REPORT_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(DIAGNOSTIC_REPORT_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldSearchForObsByLastUpdatedDateCreated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldSearchForObsByMatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(DIAGNOSTIC_REPORT_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(DIAGNOSTIC_REPORT_UUID));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyListByMismatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(DIAGNOSTIC_REPORT_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(WRONG_DATE_CREATED)
+		        .setLowerBound(WRONG_DATE_CREATED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, empty());
 	}
 	
 	@Test

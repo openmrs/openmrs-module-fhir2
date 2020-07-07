@@ -12,9 +12,12 @@ package org.openmrs.module.fhir2.providers.r3;
 import javax.validation.constraints.NotNull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -52,7 +55,9 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	public IBundleProvider searchForProcedureRequests() {
-		return serviceRequestService.searchForServiceRequests();
+	public IBundleProvider searchForProcedureRequests(
+	        @OptionalParam(name = ProcedureRequest.SP_RES_ID) TokenAndListParam uuid,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
+		return serviceRequestService.searchForServiceRequests(uuid, lastUpdated);
 	}
 }

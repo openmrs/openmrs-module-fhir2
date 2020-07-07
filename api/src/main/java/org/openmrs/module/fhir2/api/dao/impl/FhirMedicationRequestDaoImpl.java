@@ -9,11 +9,22 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.isNull;
+import static org.hibernate.criterion.Restrictions.or;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
@@ -47,8 +58,23 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					entry.getValue().forEach(d -> handleMedicationReference("d", (ReferenceAndListParam) d.getParam())
 					        .ifPresent(c -> criteria.createAlias("drug", "d").add(c)));
 					break;
+				case FhirConstants.COMMON_SEARCH_HANDLER:
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
+					break;
 			}
 		});
+	}
+	
+	@Override
+	protected Optional<Criterion> getCriteriaForLastUpdated(DateRangeParam param) {
+		List<Optional<Criterion>> criterionList = new ArrayList<>();
+		
+		criterionList.add(handleDateRange("dateVoided", param));
+		
+		criterionList.add(Optional.of(
+		    and(toCriteriaArray(Stream.of(Optional.of(isNull("dateVoided")), handleDateRange("dateCreated", param))))));
+		
+		return Optional.of(or(toCriteriaArray(criterionList)));
 	}
 	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {

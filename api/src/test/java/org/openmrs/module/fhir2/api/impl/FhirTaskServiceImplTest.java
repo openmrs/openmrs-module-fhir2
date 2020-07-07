@@ -200,7 +200,7 @@ public class FhirTaskServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
 		when(translator.toFhirResource(openmrsTask)).thenReturn(task);
 		
-		IBundleProvider results = fhirTaskService.searchForTasks(null, null, null, null);
+		IBundleProvider results = fhirTaskService.searchForTasks(null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		

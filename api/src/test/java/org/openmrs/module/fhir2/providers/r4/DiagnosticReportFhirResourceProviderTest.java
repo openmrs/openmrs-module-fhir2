@@ -163,10 +163,11 @@ public class DiagnosticReportFhirResourceProviderTest {
 	
 	@Test
 	public void findDiagnosticReports_shouldReturnMatchingBundleOfDiagnosticReports() {
-		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any())).thenReturn(
+		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any())).thenReturn(
 		    new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -182,10 +183,11 @@ public class DiagnosticReportFhirResourceProviderTest {
 		ReferenceAndListParam subject = new ReferenceAndListParam();
 		subject.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
-		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any())).thenReturn(
+		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any())).thenReturn(
 		    new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, subject, null, null, null);
+		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, subject, null, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		

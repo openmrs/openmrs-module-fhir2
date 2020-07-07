@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -60,6 +61,8 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	private static final String SEVERITY_CONCEPT_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String CODED_REACTION_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String LAST_UPDATED_DATE = "2020-09-03";
 	
 	private static final int START_INDEX = 0;
 	
@@ -136,7 +139,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -166,7 +169,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -196,7 +199,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -226,7 +229,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -252,7 +255,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(null, category, null, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(null, category, null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -278,7 +281,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(null, null, allergen, null, null, null, null);
+		IBundleProvider results = service.searchForAllergies(null, null, allergen, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -304,7 +307,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(null, null, null, severity, null, null, null);
+		IBundleProvider results = service.searchForAllergies(null, null, null, severity, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -330,7 +333,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(null, null, null, null, manifestation, null, null);
+		IBundleProvider results = service.searchForAllergies(null, null, null, null, manifestation, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -355,7 +358,53 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
-		IBundleProvider results = service.searchForAllergies(null, null, null, null, null, status, null);
+		IBundleProvider results = service.searchForAllergies(null, null, null, null, null, status, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByUUID() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(ALLERGY_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.ID_PROPERTY, uuid);
+		
+		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt()))
+		        .thenReturn(Collections.singletonList(omrsAllergy));
+		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		
+		IBundleProvider results = service.searchForAllergies(null, null, null, null, null, null, uuid, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void searchForAllergies_shouldSearchForAllergiesByLastUpdated() {
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
+		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt()))
+		        .thenReturn(Collections.singletonList(omrsAllergy));
+		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		
+		IBundleProvider results = service.searchForAllergies(null, null, null, null, null, null, null, lastUpdated, null);
 		
 		List<IBaseResource> resultList = get(results);
 		

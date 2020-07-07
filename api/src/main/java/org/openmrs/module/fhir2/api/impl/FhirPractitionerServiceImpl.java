@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
@@ -45,7 +46,7 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	@Override
 	public IBundleProvider searchForPractitioners(StringAndListParam name, TokenAndListParam identifier,
 	        StringAndListParam given, StringAndListParam family, StringAndListParam city, StringAndListParam state,
-	        StringAndListParam postalCode, StringAndListParam country) {
+	        StringAndListParam postalCode, StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated) {
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER, name)
 		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier)
@@ -54,7 +55,9 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, state)
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, postalCode)
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country);
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
