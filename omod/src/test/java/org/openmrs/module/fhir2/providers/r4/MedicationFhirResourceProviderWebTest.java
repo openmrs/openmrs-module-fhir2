@@ -221,7 +221,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	}
 	
 	@Test
-	public void createeMedication_shouldCreateNewMedication() throws Exception {
+	public void createMedication_shouldCreateNewMedication() throws Exception {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		String medicationJson;
@@ -239,7 +239,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	}
 	
 	@Test
-	public void updateMedication_shouldUpdateMRequestededication() throws Exception {
+	public void updateMedication_shouldUpdateRequestedMedication() throws Exception {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		medication.setStatus(Medication.MedicationStatus.INACTIVE);
@@ -315,5 +315,15 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deleteMedication_shouldReturn404ForNonExistingMedication() throws Exception {
+		when(fhirMedicationService.delete(WRONG_MEDICATION_UUID)).thenReturn(null);
+		
+		MockHttpServletResponse response = delete("/Medication/" + WRONG_MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getStatus(), equalTo(404));
 	}
 }

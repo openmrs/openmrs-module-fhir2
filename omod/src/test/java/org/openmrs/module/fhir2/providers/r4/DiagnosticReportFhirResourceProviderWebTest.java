@@ -482,9 +482,9 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	
 	@Test
 	public void deleteDiagnosticReport_shouldReturn404ForNonExistingDiagnosticReport() throws Exception {
-		when(service.get(WRONG_UUID)).thenReturn(null);
+		when(service.delete(WRONG_UUID)).thenReturn(null);
 		
-		MockHttpServletResponse response = get("/DiagnosticReport/" + WRONG_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = delete("/DiagnosticReport/" + WRONG_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 	}
