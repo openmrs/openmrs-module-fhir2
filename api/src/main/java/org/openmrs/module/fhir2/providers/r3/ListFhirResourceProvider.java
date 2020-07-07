@@ -11,18 +11,26 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import javax.validation.constraints.NotNull;
 
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.convertors.conv30_40.List30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ListResource;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.Cohort;
 import org.openmrs.module.fhir2.api.FhirListService;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -49,5 +57,33 @@ public class ListFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return List30_40.convertList(listResource);
+	}
+	
+	@Create
+	@SuppressWarnings("unused")
+	public MethodOutcome creatListResource(@ResourceParam ListResource listResource) {
+		return FhirProviderUtils.buildCreate(listService.create(List30_40.convertList(listResource)));
+	}
+	
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updateListResource(@IdParam IdType id, @ResourceParam ListResource listResource) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+		
+		listResource.setId(id.getIdPart());
+		
+		return FhirProviderUtils.buildUpdate(listService.update(id.getIdPart(), List30_40.convertList(listResource)));
+	}
+	
+	@Delete
+	@SuppressWarnings("unused")
+	public OperationOutcome deleteListResource(@IdParam @NotNull IdType id) {
+		org.hl7.fhir.r4.model.ListResource listResource = listService.delete(id.getIdPart());
+		if (listResource == null) {
+			throw new ResourceNotFoundException("Could not find list to delete with id " + id.getIdPart());
+		}
+		return FhirProviderUtils.buildDelete(List30_40.convertList(listResource));
 	}
 }
