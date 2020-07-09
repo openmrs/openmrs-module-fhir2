@@ -62,8 +62,15 @@ public class FhirRestServlet extends RestfulServer {
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 		registerInterceptor(loggingInterceptor);
 		
-		getFhirContext().setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(
-		        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE, FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
+		String narrativeOverridePropertyFile = globalPropertyService
+		        .getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, "");
+		if (narrativeOverridePropertyFile.isEmpty()) {
+			getFhirContext().setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(
+			        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE, FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
+		} else {
+			getFhirContext().setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(narrativeOverridePropertyFile,
+			        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE, FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
+		}
 	}
 	
 	@Override

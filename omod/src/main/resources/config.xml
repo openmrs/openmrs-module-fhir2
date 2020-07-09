@@ -128,5 +128,10 @@
 		<description>Set provider attribute type uuid</description>
 	</globalProperty>
 
-</module>
+	<globalProperty>
+		<property>${project.parent.artifactId}.narrativesOverridePropertyFile</property>
+		<defaultValue></defaultValue>
+		<description>Absolute path of narrative override properties file (prefixed with "file:")</description>
+	</globalProperty>
 
+</module>
