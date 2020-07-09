@@ -24,6 +24,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.web.util.NarrativeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -62,8 +63,19 @@ public class FhirRestServlet extends RestfulServer {
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 		registerInterceptor(loggingInterceptor);
 		
-		getFhirContext().setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(
-		        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE, FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
+		String narrativesOverridePropertyFile = NarrativeUtils.getValidatedPropertiesFilePath(
+		    globalPropertyService.getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, ""));
+		
+		String[] narrativePropertiesFiles;
+		if (narrativesOverridePropertyFile != null) {
+			narrativePropertiesFiles = new String[] { narrativesOverridePropertyFile,
+			        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE, FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE };
+		} else {
+			narrativePropertiesFiles = new String[] { FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE,
+			        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE };
+		}
+		
+		getFhirContext().setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(narrativePropertiesFiles));
 	}
 	
 	@Override
