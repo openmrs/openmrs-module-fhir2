@@ -97,7 +97,7 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR3Reso
 		
 		assertThat(response, isNotFound());
 	}
-
+	
 	@Test
 	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByUUID() throws Exception {
 		verifyUri(String.format("/MedicationRequest?_id=%s", MEDICATION_REQUEST_UUID));
