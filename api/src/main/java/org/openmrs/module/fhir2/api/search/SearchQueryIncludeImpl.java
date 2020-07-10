@@ -9,22 +9,25 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import lombok.NoArgsConstructor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.openmrs.Auditable;
-import org.openmrs.OpenmrsObject;
-import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.ToFhirTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
 @NoArgsConstructor
-public class SearchQueryImpl<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends ToFhirTranslator<T, U>, W extends SearchQueryInclude<U>> implements SearchQuery<T, U, O, V, W> {
+public class SearchQueryIncludeImpl<U extends IBaseResource> implements SearchQueryInclude<U> {
 	
 	@Override
-	public IBundleProvider getQueryResults(SearchParameterMap theParams, O dao, V translator, W searchQueryInclude) {
-		return new SearchQueryBundleProvider<>(theParams, dao, translator, searchQueryInclude);
+	public Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams) {
+		Set<IBaseResource> includedResourcesSet = new HashSet<>();
+		
+		// TODO -> Add implementation to compute the included resources
+		
+		return includedResourcesSet;
 	}
 }

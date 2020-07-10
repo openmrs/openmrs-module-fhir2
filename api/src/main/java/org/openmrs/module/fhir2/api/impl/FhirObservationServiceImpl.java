@@ -26,6 +26,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,10 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 	private ObservationTranslator translator;
 	
 	@Autowired
-	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
+	private SearchQueryInclude<Observation> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator, SearchQueryInclude<Observation>> searchQuery;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -76,6 +80,6 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

@@ -39,6 +39,7 @@ import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 
@@ -62,7 +63,10 @@ public class FhirDiagnosticReportServiceImplTest {
 	private DiagnosticReportTranslator translator;
 	
 	@Mock
-	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
+	private SearchQueryInclude<DiagnosticReport> searchQueryInclude;
+	
+	@Mock
+	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator, SearchQueryInclude<DiagnosticReport>> searchQuery;
 	
 	private FhirDiagnosticReportServiceImpl service;
 	
@@ -72,6 +76,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		service.setTranslator(translator);
 		service.setDao(dao);
 		service.setSearchQuery(searchQuery);
+		service.setSearchQueryInclude(searchQueryInclude);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {
@@ -186,10 +191,11 @@ public class FhirDiagnosticReportServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		
 		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(obsList);
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(UUID));
 		when(translator.toFhirResource(obs)).thenReturn(diagnosticReport);
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		when(searchQuery.getQueryResults(any(), any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, searchQueryInclude));
 		
 		IBundleProvider results = service.searchForDiagnosticReports(null, null, null, null, null, null, null);
 		

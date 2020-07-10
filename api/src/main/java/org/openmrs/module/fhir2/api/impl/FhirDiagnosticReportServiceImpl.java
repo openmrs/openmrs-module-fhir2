@@ -23,6 +23,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,10 @@ public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticR
 	private DiagnosticReportTranslator translator;
 	
 	@Autowired
-	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
+	private SearchQueryInclude<DiagnosticReport> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator, SearchQueryInclude<DiagnosticReport>> searchQuery;
 	
 	@Override
 	public IBundleProvider searchForDiagnosticReports(ReferenceAndListParam encounterReference,
@@ -58,6 +62,6 @@ public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticR
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

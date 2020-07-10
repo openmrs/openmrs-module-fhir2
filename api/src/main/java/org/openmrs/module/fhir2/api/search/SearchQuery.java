@@ -25,7 +25,7 @@ import org.openmrs.module.fhir2.api.translators.ToFhirTranslator;
  * @param <O> openMrs generic DAO Class Implementation
  * @param <T> FHIR generic translator Class
  */
-public interface SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends ToFhirTranslator<T, U>> {
+public interface SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends ToFhirTranslator<T, U>, W extends SearchQueryInclude<U>> {
 	
 	/**
 	 * Gets query results
@@ -35,5 +35,5 @@ public interface SearchQuery<T extends OpenmrsObject & Auditable, U extends IBas
 	 * @param translator generic translator
 	 * @return IBundleProvider
 	 */
-	IBundleProvider getQueryResults(@NotNull SearchParameterMap theParams, O dao, V translator);
+	IBundleProvider getQueryResults(@NotNull SearchParameterMap theParams, O dao, V translator, W searchQueryInclude);
 }

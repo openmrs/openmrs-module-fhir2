@@ -39,6 +39,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 
@@ -53,7 +54,10 @@ public class FhirObservationServiceImplTest {
 	private FhirObservationDao dao;
 	
 	@Mock
-	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
+	private SearchQueryInclude<Observation> searchQueryInclude;
+	
+	@Mock
+	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator, SearchQueryInclude<Observation>> searchQuery;
 	
 	@Mock
 	private ObservationTranslator translator;
@@ -66,6 +70,7 @@ public class FhirObservationServiceImplTest {
 		fhirObservationService.setDao(dao);
 		fhirObservationService.setSearchQuery(searchQuery);
 		fhirObservationService.setTranslator(translator);
+		fhirObservationService.setSearchQueryInclude(searchQueryInclude);
 	}
 	
 	@Test
@@ -103,9 +108,10 @@ public class FhirObservationServiceImplTest {
 		
 		when(dao.getPreferredPageSize()).thenReturn(10);
 		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(obs));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		when(searchQuery.getQueryResults(any(), any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, searchQueryInclude));
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
 		IBundleProvider results = fhirObservationService.searchForObservations(null, patientReference, null, null, null,

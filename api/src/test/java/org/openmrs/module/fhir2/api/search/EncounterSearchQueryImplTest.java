@@ -110,14 +110,17 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 	private EncounterTranslator translator;
 	
 	@Autowired
-	SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
+	private SearchQueryInclude<Encounter> searchQueryInclude;
+	
+	@Autowired
+	SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator, SearchQueryInclude<Encounter>> searchQuery;
 	
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	@Test

@@ -102,7 +102,10 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	private DiagnosticReportTranslator translator;
 	
 	@Autowired
-	SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
+	private SearchQueryInclude<DiagnosticReport> searchQueryInclude;
+	
+	@Autowired
+	SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator, SearchQueryInclude<DiagnosticReport>> searchQuery;
 	
 	@Before
 	public void setup() throws Exception {
@@ -110,7 +113,7 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {

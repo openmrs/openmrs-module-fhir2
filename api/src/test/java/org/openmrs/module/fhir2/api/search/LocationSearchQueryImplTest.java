@@ -104,7 +104,10 @@ public class LocationSearchQueryImplTest extends BaseModuleContextSensitiveTest 
 	private LocationTranslator translator;
 	
 	@Autowired
-	SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator> searchQuery;
+	private SearchQueryInclude<Location> searchQueryInclude;
+	
+	@Autowired
+	SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator, SearchQueryInclude<Location>> searchQuery;
 	
 	private static final int START_INDEX = 0;
 	
@@ -117,7 +120,7 @@ public class LocationSearchQueryImplTest extends BaseModuleContextSensitiveTest 
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, fhirLocationDao, translator);
+		return searchQuery.getQueryResults(theParams, fhirLocationDao, translator, searchQueryInclude);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {

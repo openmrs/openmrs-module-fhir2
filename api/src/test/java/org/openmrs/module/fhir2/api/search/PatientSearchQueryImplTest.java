@@ -112,7 +112,10 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	private FhirPatientDao dao;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Patient, org.hl7.fhir.r4.model.Patient, FhirPatientDao, PatientTranslator> searchQuery;
+	private SearchQueryInclude<Patient> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator, SearchQueryInclude<Patient>> searchQuery;
 	
 	private static final int START_INDEX = 0;
 	
@@ -126,7 +129,7 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {

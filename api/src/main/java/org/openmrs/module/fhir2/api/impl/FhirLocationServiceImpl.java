@@ -23,6 +23,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,10 @@ public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openm
 	private LocationTranslator translator;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator> searchQuery;
+	private SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator, SearchQueryInclude<Location>> searchQuery;
+	
+	@Autowired
+	private SearchQueryInclude<Location> searchQueryInclude;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -61,6 +65,6 @@ public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openm
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

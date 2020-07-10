@@ -38,12 +38,16 @@ public class SearchQueryBundleProviderTest {
 	@Mock
 	private FhirObservationDao observationDao;
 	
+	@Mock
+	private SearchQueryInclude<Observation> searchQueryInclude;
+	
 	private SearchQueryBundleProvider<Obs, Observation> searchQueryBundleProvider;
 	
 	@Before
 	public void setup() {
 		SearchParameterMap theParams = new SearchParameterMap();
-		searchQueryBundleProvider = new SearchQueryBundleProvider<>(theParams, observationDao, translator);
+		searchQueryBundleProvider = new SearchQueryBundleProvider<>(theParams, observationDao, translator,
+		        searchQueryInclude);
 	}
 	
 	@Test
