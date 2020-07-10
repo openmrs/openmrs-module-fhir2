@@ -23,15 +23,20 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
@@ -169,5 +174,55 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		idType.setValue(WRONG_ENCOUNTER_UUID);
 		assertThat(resourceProvider.getEncounterHistoryById(idType).isEmpty(), is(true));
 		assertThat(resourceProvider.getEncounterHistoryById(idType).size(), Matchers.equalTo(0));
+	}
+	
+	@Test
+	public void createEncounter_shouldCreateNewEncounter() {
+		when(encounterService.create(encounter)).thenReturn(encounter);
+		
+		MethodOutcome result = resourceProvider.creatEncounter(encounter);
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), CoreMatchers.equalTo(encounter));
+	}
+	
+	@Test
+	public void updateEncounter_shouldUpdateEncounter() {
+		when(encounterService.update(ENCOUNTER_UUID, encounter)).thenReturn(encounter);
+		
+		MethodOutcome result = resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID), encounter);
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(encounter));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateEncounter_shouldThrowInvalidRequestForUuidMismatch() {
+		when(encounterService.update(WRONG_ENCOUNTER_UUID, encounter)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), encounter);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateEncounter_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		when(encounterService.update(WRONG_ENCOUNTER_UUID, encounter)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), encounter);
+	}
+	
+	@Test
+	public void deleteEncounter_shouldDeleteRequestedEncounter() {
+		when(encounterService.delete(ENCOUNTER_UUID)).thenReturn(encounter);
+		
+		OperationOutcome result = resourceProvider.deleteEncounter(new IdType().setValue(ENCOUNTER_UUID));
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteEncounter_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantEncounter() {
+		when(encounterService.delete(WRONG_ENCOUNTER_UUID)).thenReturn(null);
+		resourceProvider.deleteEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID));
 	}
 }

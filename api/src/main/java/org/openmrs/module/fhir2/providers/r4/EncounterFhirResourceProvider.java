@@ -13,16 +13,22 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -30,10 +36,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -58,6 +66,34 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());
 		}
 		return encounter;
+	}
+	
+	@Create
+	@SuppressWarnings("unused")
+	public MethodOutcome creatEncounter(@ResourceParam Encounter encounter) {
+		return FhirProviderUtils.buildCreate(encounterService.create(encounter));
+	}
+	
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updateEncounter(@IdParam IdType id, @ResourceParam Encounter encounter) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+		
+		encounter.setId(id.getIdPart());
+		
+		return FhirProviderUtils.buildUpdate(encounterService.update(id.getIdPart(), encounter));
+	}
+	
+	@Delete
+	@SuppressWarnings("unused")
+	public OperationOutcome deleteEncounter(@IdParam @NotNull IdType id) {
+		org.hl7.fhir.r4.model.Encounter encounter = encounterService.delete(id.getIdPart());
+		if (encounter == null) {
+			throw new ResourceNotFoundException("Could not find encounter to delete with id " + id.getIdPart());
+		}
+		return FhirProviderUtils.buildDelete(encounter);
 	}
 	
 	@History
