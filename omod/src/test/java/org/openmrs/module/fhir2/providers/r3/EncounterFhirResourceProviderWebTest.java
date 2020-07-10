@@ -94,15 +94,15 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	private static final String PARTICIPANT_IDENTIFIER = "1000WF";
 	
 	private static final String JSON_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_Create.json";
-
+	
 	private static final String JSON_UPDATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_Update.json";
-
+	
 	private static final String JSON_UPDATE_ENCOUNTER_NO_ID_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_UpdateWithoutId.json";
-
+	
 	private static final String JSON_UPDATE_ENCOUNTER_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_UpdateWithWrongId.json";
-
+	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
-
+	
 	@Mock
 	private FhirEncounterService encounterService;
 	
@@ -123,7 +123,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	
 	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
-
+	
 	@Before
 	@Override
 	public void setup() throws ServletException {
@@ -511,35 +511,35 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	@Test
 	public void shouldGetEncountersByUUID() throws Exception {
 		verifyUri(String.format("/Encounter?_id=%s", ENCOUNTER_UUID));
-
+		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(),
 		    tokenAndListParamArgumentCaptor.capture(), isNull());
-
+		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
 		    equalTo(ENCOUNTER_UUID));
 	}
-
+	
 	@Test
 	public void shouldGetEncountersByLastUpdatedDate() throws Exception {
 		verifyUri(String.format("/Encounter?_lastUpdated=%s", LAST_UPDATED_DATE));
-
+		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(), isNull(),
 		    dateRangeCaptor.capture());
-
+		
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
-
+		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2020, Calendar.SEPTEMBER, 3);
-
+		
 		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
 		    equalTo(org.apache.commons.lang3.time.DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
 		    equalTo(org.apache.commons.lang3.time.DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
-
+	
 	private void verifyUri(String uri) throws Exception {
 		Encounter encounter = new Encounter();
 		encounter.setId(ENCOUNTER_UUID);
@@ -632,15 +632,15 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 			Objects.requireNonNull(is);
 			encounterJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		when(encounterService.create(any(org.hl7.fhir.r4.model.Encounter.class))).thenReturn(encounter);
-
+		
 		MockHttpServletResponse response = post("/Encounter").jsonContent(encounterJson).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isCreated());
 		assertThat(response.getStatus(), is(201));
 	}
-
+	
 	@Test
 	public void updateEncounter_shouldUpdateRequestedEncounter() throws Exception {
 		org.hl7.fhir.r4.model.Encounter encounter = new org.hl7.fhir.r4.model.Encounter();
@@ -650,15 +650,15 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 			Objects.requireNonNull(is);
 			encounterJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		when(encounterService.update(any(String.class), any(org.hl7.fhir.r4.model.Encounter.class))).thenReturn(encounter);
-
+		
 		MockHttpServletResponse response = put("/Encounter/" + ENCOUNTER_UUID).jsonContent(encounterJson)
 		        .accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isOk());
 	}
-
+	
 	@Test
 	public void updateEncounter_shouldErrorForNoId() throws Exception {
 		String encounterJson;
@@ -666,14 +666,14 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 			Objects.requireNonNull(is);
 			encounterJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/Encounter/" + ENCOUNTER_UUID).jsonContent(encounterJson)
 		        .accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
 	}
-
+	
 	@Test
 	public void updateEncounter_shouldErrorForIdMissMatch() throws Exception {
 		String encounterJson;
@@ -681,34 +681,34 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 			Objects.requireNonNull(is);
 			encounterJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/Encounter/" + WRONG_ENCOUNTER_UUID).jsonContent(encounterJson)
 		        .accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentAsString(),
 		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
 	}
-
+	
 	@Test
 	public void deleteEncounter_shouldDeleteEncounter() throws Exception {
 		org.hl7.fhir.r4.model.Encounter encounter = new org.hl7.fhir.r4.model.Encounter();
 		encounter.setId(ENCOUNTER_UUID);
-
+		
 		when(encounterService.delete(ENCOUNTER_UUID)).thenReturn(encounter);
-
+		
 		MockHttpServletResponse response = delete("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
-
+	
 	@Test
 	public void deleteEncounter_shouldReturn404ForNonExistingEncounter() throws Exception {
 		when(encounterService.delete(WRONG_ENCOUNTER_UUID)).thenReturn(null);
-
+		
 		MockHttpServletResponse response = delete("/Encounter/" + WRONG_ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isNotFound());
 	}
 }
