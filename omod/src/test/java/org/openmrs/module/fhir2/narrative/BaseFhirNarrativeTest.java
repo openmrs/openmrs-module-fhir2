@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.TimeZone;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
@@ -38,7 +37,7 @@ public class BaseFhirNarrativeTest {
 	
 	@Before
 	public void setup() {
-		ctx.setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE,
+		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE,
 		        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
 		parser = ctx.newJsonParser();
 	}
