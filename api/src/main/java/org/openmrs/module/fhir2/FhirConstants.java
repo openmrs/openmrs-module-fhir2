@@ -235,4 +235,8 @@ public class FhirConstants {
 	public static final String ID_PROPERTY = "_id.property";
 	
 	public static final String LAST_UPDATED_PROPERTY = "_lastUpdated.property";
+	
+	public static final String SERVLET_PATH_R4 = "/ms/fhir2Servlet";
+	
+	public static final String SERVLET_PATH_R3 = "/ms/fhir2R3Servlet";
 }
