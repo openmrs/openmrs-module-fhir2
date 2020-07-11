@@ -9,7 +9,10 @@
  */
 package org.openmrs.module.fhir2.web.servlet;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
@@ -62,15 +65,12 @@ public class FhirRestServlet extends RestfulServer {
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 		registerInterceptor(loggingInterceptor);
 		
-		String narrativeOverridePropertyFile = globalPropertyService
-		        .getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, "");
-		if (narrativeOverridePropertyFile.isEmpty()) {
-			getFhirContext().setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(
-			        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE, FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
-		} else {
-			getFhirContext().setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(narrativeOverridePropertyFile,
-			        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE, FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
-		}
+		List<String> propertyFiles = new ArrayList<>(
+		        Arrays.asList(globalPropertyService.getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, ""),
+		            FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE, FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
+		propertyFiles.removeAll(Arrays.asList("", null));
+		getFhirContext().setNarrativeGenerator(
+		    new CustomThymeleafNarrativeGenerator(propertyFiles.toArray(new String[propertyFiles.size()])));
 	}
 	
 	@Override
