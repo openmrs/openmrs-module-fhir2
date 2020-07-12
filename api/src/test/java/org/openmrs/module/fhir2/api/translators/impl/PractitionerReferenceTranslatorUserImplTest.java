@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import org.hamcrest.Matchers;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,14 +26,20 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirUserService;
+import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PractitionerReferenceTranslatorUserImplTest {
 	
 	private static final String USER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
 	
+	private static final String PRACTITIONER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
+	
 	@Mock
 	private FhirUserService userService;
+	
+	@Mock
+	private PractitionerTranslator<User> userTranslator;
 	
 	private PractitionerReferenceTranslatorUserImpl practitionerReferenceTranslatorUser;
 	
@@ -40,6 +47,8 @@ public class PractitionerReferenceTranslatorUserImplTest {
 	public void setup() {
 		practitionerReferenceTranslatorUser = new PractitionerReferenceTranslatorUserImpl();
 		practitionerReferenceTranslatorUser.setUserService(userService);
+		practitionerReferenceTranslatorUser.setPractitionerTranslator(userTranslator);
+		
 	}
 	
 	@Test
@@ -64,7 +73,12 @@ public class PractitionerReferenceTranslatorUserImplTest {
 		        .setType(FhirConstants.PRACTITIONER);
 		User user = new User();
 		user.setUuid(USER_UUID);
-		when(userService.getUserByUuid(USER_UUID)).thenReturn(user);
+		
+		Practitioner practitioner = new Practitioner();
+		practitioner.setId(PRACTITIONER_UUID);
+		
+		when(userService.get(USER_UUID)).thenReturn(practitioner);
+		when(userTranslator.toOpenmrsType(practitioner)).thenReturn(user);
 		
 		User result = practitionerReferenceTranslatorUser.toOpenmrsType(creatorReference);
 		

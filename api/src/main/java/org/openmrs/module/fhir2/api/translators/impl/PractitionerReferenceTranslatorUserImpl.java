@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,9 @@ public class PractitionerReferenceTranslatorUserImpl extends BaseReferenceHandli
 	
 	@Autowired
 	private FhirUserService userService;
+	
+	@Autowired
+	private PractitionerTranslator<User> practitionerTranslator;
 	
 	@Override
 	public Reference toFhirResource(User user) {
@@ -46,7 +50,6 @@ public class PractitionerReferenceTranslatorUserImpl extends BaseReferenceHandli
 		if (uuid == null) {
 			return null;
 		}
-		
-		return userService.getUserByUuid(uuid);
+		return practitionerTranslator.toOpenmrsType(userService.get(uuid));
 	}
 }

@@ -78,20 +78,16 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
 		IBundleProvider providerBundle = searchQuery.getQueryResults(theParams, dao, translator);
-		IBundleProvider userBundle = userService.searchForUsers(name, identifier);
+		IBundleProvider userBundle = userService.searchForUsers(name, identifier, given, family, city, state, postalCode,
+		    country, id, lastUpdated);
 		
-		if (providerBundle.isEmpty() && userBundle.isEmpty()) {
+		if (!providerBundle.isEmpty() && !userBundle.isEmpty()) {
 			List<IBaseResource> theResource = providerBundle.getResources(0, providerBundle.size());
 			theResource.addAll(userBundle.getResources(0, userBundle.size()));
-			
 			return new SimpleBundleProvider(theResource);
-			
 		} else if (providerBundle.isEmpty() && !userBundle.isEmpty()) {
-			
-			return providerBundle;
-			
-		}
-		
-		return userBundle;
+			return userBundle;	
+		}	
+		return providerBundle;
 	}
 }
