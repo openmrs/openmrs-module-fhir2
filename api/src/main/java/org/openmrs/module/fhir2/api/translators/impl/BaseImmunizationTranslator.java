@@ -13,7 +13,9 @@ import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslat
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationGroupingConcept;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -61,9 +63,9 @@ public class BaseImmunizationTranslator {
 		return obs;
 	}
 	
-	public void validateImmunizationObsGroup(Obs obs) throws IllegalStateException {
+	public void validateImmunizationObsGroup(Obs obs) throws IllegalArgumentException {
 		if (concept(immunizationGroupingConcept).getUuid() != obs.getConcept().getUuid()) {
-			throw new IllegalStateException("The immunization obs group should be defined by a concept mapped as same as "
+			throw new IllegalArgumentException("The immunization obs group should be defined by a concept mapped as same as "
 			        + immunizationGroupingConcept + ".");
 		}
 		
@@ -77,10 +79,26 @@ public class BaseImmunizationTranslator {
 			if (refConcepts.contains(uuid)) {
 				refConcepts.remove(uuid);
 			} else {
-				throw new IllegalStateException("The immunization obs member defined by concept " + uuid
+				throw new IllegalArgumentException("The immunization obs member defined by concept " + uuid
 				        + " is found multiple times in the immunization obs group.");
 			}
 		});
+	}
+	
+	/**
+	 * @param obs An obs group
+	 * @return A map CIEL reference term to obs of all obs group members
+	 */
+	public Map<String, Obs> getObsMembersMap(Obs obs) {
+		Map<String, Obs> members = new HashMap<String, Obs>();
+		obs.getGroupMembers().stream().forEach(o -> {
+			Arrays.asList(immunizationConcepts).stream().forEach(refTerm -> {
+				if (concept(refTerm) == o.getConcept()) {
+					members.put(refTerm, o);
+				}
+			});
+		});
+		return members;
 	}
 	
 	public String getProviderUuid(ImmunizationPerformerComponent performer) {

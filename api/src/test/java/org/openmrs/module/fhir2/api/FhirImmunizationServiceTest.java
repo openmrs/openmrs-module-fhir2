@@ -14,7 +14,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -120,6 +119,7 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		
 		// replay
 		Immunization savedImmunization = service.saveImmunization(immunization);
+		//		System.out.println(parser.encodeResourceToString(savedImmunization));
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
 		
 		// verify
@@ -128,38 +128,20 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		assertObsCommons(obs, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 		    "f9badd80-ab76-11e2-9e96-0800200c9a66");
 		
-		Map<String, Obs> members = new HashMap<>();
 		obs.getGroupMembers().forEach(o -> {
 			assertObsCommons(o, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 			    "f9badd80-ab76-11e2-9e96-0800200c9a66");
-			members.put(o.getConcept().getUuid(), o);
 		});
 		
-		{
-			Obs o = members.get(tl.concept("CIEL:984").getUuid());
-			assertThat(o.getValueCoded().getUuid(), is("15f83cd6-64e9-4e06-a5f9-364d3b14a43d"));
-		}
-		{
-			Obs o = members.get(tl.concept("CIEL:1410").getUuid());
-			assertThat(o.getValueDatetime(), equalTo(new DateTimeType("2020-07-08T18:30:00.000Z").getValue()));
-		}
-		{
-			Obs o = members.get(tl.concept("CIEL:1418").getUuid());
-			assertThat(o.getValueNumeric(), equalTo(2.0));
-		}
-		{
-			Obs o = members.get(tl.concept("CIEL:1419").getUuid());
-			assertThat(o.getValueText(), is("Acme"));
-		}
-		{
-			Obs o = members.get(tl.concept("CIEL:1420").getUuid());
-			assertThat(o.getValueText(), is("FOO1234"));
-		}
-		{
-			Obs o = members.get(tl.concept("CIEL:165907").getUuid());
-			assertThat(o.getValueDatetime(), equalTo(new DateTimeType("2022-07-31T18:30:00.000Z").getValue()));
-		}
-		
+		Map<String, Obs> members = tl.getObsMembersMap(obs);
+		assertThat(members.get("CIEL:984").getValueCoded().getUuid(), is("15f83cd6-64e9-4e06-a5f9-364d3b14a43d"));
+		assertThat(members.get("CIEL:1410").getValueDatetime(),
+		    equalTo(new DateTimeType("2020-07-08T18:30:00.000Z").getValue()));
+		assertThat(members.get("CIEL:1418").getValueNumeric(), equalTo(2.0));
+		assertThat(members.get("CIEL:1419").getValueText(), is("Acme"));
+		assertThat(members.get("CIEL:1420").getValueText(), is("FOO1234"));
+		assertThat(members.get("CIEL:165907").getValueDatetime(),
+		    equalTo(new DateTimeType("2022-07-31T18:30:00.000Z").getValue()));
 	}
 	
 }
