@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import org.hl7.fhir.r4.model.Immunization;
 import org.openmrs.Obs;
+import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
 import org.openmrs.module.fhir2.api.FhirImmunizationService;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
@@ -30,6 +31,9 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	@Autowired
 	private ObsService obsService;
 	
+	@Autowired
+	private EncounterService encounterService;
+	
 	@Override
 	public Immunization getImmunizationByUuid(String uuid) {
 		Obs obs = obsService.getObsByUuid(uuid);
@@ -39,7 +43,10 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	@Override
 	public Immunization saveImmunization(Immunization immunization) {
 		Obs obs = translator.toOpenmrsType(immunization);
-		obs = obsService.saveObs(obs, "Created/updated through translation of a FHIR immunization.");
+		if (obs.getEncounter().getId() == null) {
+			encounterService.saveEncounter(obs.getEncounter());
+		}
+		obs = obsService.saveObs(obs, "Created/updated when translating a FHIR Immunization resource.");
 		immunization = translator.toFhirResource(obs);
 		return immunization;
 	}

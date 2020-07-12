@@ -44,12 +44,7 @@ public class LocationReferenceTranslatorImpl extends BaseReferenceHandlingTransl
 			throw new IllegalArgumentException("Reference must be to an Location not a " + location.getType());
 		}
 		
-		String uuid = getReferenceId(location);
-		if (uuid == null) {
-			return null;
-		}
-		
-		return locationService.getLocationByUuid(uuid);
+		return getReferenceId(location).map(uuid -> locationService.getLocationByUuid(uuid)).orElse(null);
 	}
 	
 }

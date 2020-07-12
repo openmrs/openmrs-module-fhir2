@@ -103,6 +103,24 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>${project.parent.artifactId}.personAttributeTypeUuid</property>
+		<defaultValue>14d4f066-15f5-102d-96e4-000c29c2a5d7</defaultValue>
+		<description>Set person attribute type uuid</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.immunizationsEncounterTypeUuid</property>
+		<defaultValue>29c02aff-9a93-46c9-bf6f-48b552fcb1fa</defaultValue>
+		<description>Set immunizations encounter type uuid</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.administeringEncounterRoleUuid</property>
+		<defaultValue>546cce2d-6d58-4097-ba92-206c1a2a0462</defaultValue>
+		<description>Set administering encounter role uuid</description>
+	</globalProperty>
+
+	<globalProperty>
 		<property>${project.parent.artifactId}.paging.default</property>
 		<defaultValue>10</defaultValue>
 		<description>Set default page size</description>

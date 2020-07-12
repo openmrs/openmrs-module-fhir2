@@ -102,6 +102,8 @@ public class FhirConstants {
 	
 	public static final String DIAGNOSTIC_REPORT = "DiagnosticReport";
 	
+	public static final String VISIT = "Visit";
+	
 	public static final String ENCOUNTER = "Encounter";
 	
 	public static final String IDENTIFIER = "Identifier";
@@ -137,6 +139,10 @@ public class FhirConstants {
 	public static final String LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE = "fhir2.locationContactPointAttributeTypeUuid";
 	
 	public static final String PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE = "fhir2.providerContactPointAttributeTypeUuid";
+	
+	public static final String IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY = "fhir2.immunizationsEncounterTypeUuid";
+	
+	public static final String ADMINISTERING_ENCOUNTER_ROLE_PROPERTY = "fhir2.administeringEncounterRoleUuid";
 	
 	public static final String GLOBAL_PROPERTY_MILD = "allergy.concept.severity.mild";
 	

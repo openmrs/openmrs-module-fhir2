@@ -53,6 +53,10 @@ public abstract class BaseReferenceHandlingTranslator {
 		        .setType(FhirConstants.ENCOUNTER);
 	}
 	
+	protected Reference createVisitReference(@Nonnull Visit visit) {
+		return new Reference().setReference(FhirConstants.VISIT + "/" + visit.getUuid()).setType(FhirConstants.ENCOUNTER);
+	}
+	
 	protected Reference createMedicationReference(@Nonnull Drug drug) {
 		return new Reference().setReference(FhirConstants.MEDICATION + "/" + drug.getUuid())
 		        .setType(FhirConstants.MEDICATION);

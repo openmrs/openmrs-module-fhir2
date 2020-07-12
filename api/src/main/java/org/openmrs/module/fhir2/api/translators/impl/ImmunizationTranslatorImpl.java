@@ -9,103 +9,185 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
-import org.openmrs.Concept;
+import org.hl7.fhir.r4.model.Immunization.ImmunizationProtocolAppliedComponent;
+import org.openmrs.Encounter;
+import org.openmrs.EncounterRole;
+import org.openmrs.EncounterType;
 import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
+import org.openmrs.api.ProviderService;
+import org.openmrs.module.fhir2.FhirActivator;
+import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
-import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
+public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator implements ImmunizationTranslator {
 	
 	@Autowired
-	private ConceptService conceptService;
+	public ImmunizationTranslatorImpl(ConceptService conceptService) {
+		super(conceptService);
+	}
+	
+	public static final String immunizationGroupingConcept = "CIEL:1421";
+	
+	public static final String[] immunizationConcepts = { "CIEL:984", "CIEL:1410", "CIEL:1418", "CIEL:1419", "CIEL:1420",
+	        "CIEL:165907" };
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	@Autowired
-	private LocationReferenceTranslator locationReferenceTranslator;
+	//	@Autowired
+	//	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
 	@Autowired
-	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
+	private EncounterReferenceTranslator<Visit> visitReferenceTranslator;
 	
-	public Obs newImmunizationObsGroup(ConceptService cs) {
-		Obs obs = new Obs();
+	@Autowired
+	private ProviderService providerService;
+	
+	/**
+	 * Sets the appropriate obs value based on the obs' concept and by looking at the FHIR immunization
+	 * resource.
+	 * 
+	 * @param immunization The FHIR immunization resource
+	 * @param obs The immunization obs group member.
+	 */
+	private void setObsValue(Immunization immunization, Obs obs) {
 		
-		Concept concept = cs.getConceptByMapping("1421", "CIEL"); // immunization history
-		if (concept == null) {
-			throw new IllegalStateException(" ++++ TO DO ++++ PUT SOMETHING USEFUL HERE");
+		if (concept("CIEL:984").getUuid() == obs.getConcept().getUuid()) {
+			// the one system-less coding is the pointer to an OpenMRS concept UUID
+			Coding coding = immunization.getVaccineCode().getCoding().stream()
+			        .filter(code -> StringUtils.isEmpty(code.getSystem())).reduce((code1, code2) -> {
+				        throw new IllegalArgumentException(
+				                "Multiple system-less coding found for the immunization's vaccine: " + code1.getCode()
+				                        + " and " + code2.getCode()
+				                        + ". No unique system concept could be identified as the coded answer.");
+			        }).get();
+			obs.setValueCoded(getConceptService().getConceptByUuid(coding.getCode()));
 		}
-		obs.setConcept(concept);
 		
-		Arrays.asList(new String[] { "CIEL:984", "CIEL:1410", "CIEL:1418", "CIEL:1419", "CIEL:1420" }).stream()
-		        .forEach(refTerm -> {
-			        String[] mapping = refTerm.split(":");
-			        Concept c = cs.getConceptByMapping(mapping[1], mapping[0]);
-			        if (c == null) {
-				        throw new IllegalStateException(" ++++ TO DO ++++ PUT SOMETHING USEFUL HERE");
-			        }
-			        Obs o = new Obs();
-			        o.setConcept(c);
-			        obs.addGroupMember(o);
-		        });
+		if (concept("CIEL:1410").getUuid() == obs.getConcept().getUuid()) {
+			obs.setValueDatetime(immunization.getOccurrenceDateTimeType().getValue());
+		}
 		
-		return obs;
+		if (concept("CIEL:1418").getUuid() == obs.getConcept().getUuid()) {
+			if (CollectionUtils.size(immunization.getProtocolApplied()) != 1) {
+				throw new IllegalArgumentException(
+				        "Either no protocol applied was found or multiple protocols applied were found. Only strictly one protocol is currently supported for each immunization.");
+			}
+			ImmunizationProtocolAppliedComponent protocolApplied = immunization.getProtocolApplied().get(0);
+			obs.setValueNumeric(protocolApplied.getDoseNumberPositiveIntType().getValue().doubleValue());
+		}
+		
+		if (concept("CIEL:1419").getUuid() == obs.getConcept().getUuid()) {
+			obs.setValueText(immunization.getManufacturer().getDisplay());
+		}
+		
+		if (concept("CIEL:1420").getUuid() == obs.getConcept().getUuid()) {
+			obs.setValueText(immunization.getLotNumber());
+		}
+		
+		if (concept("CIEL:165907").getUuid() == obs.getConcept().getUuid()) {
+			obs.setValueDatetime(immunization.getExpirationDate());
+		}
 	}
 	
 	@Override
 	public Obs toOpenmrsType(Immunization fhirImmunization) {
-		return this.toOpenmrsType(newImmunizationObsGroup(conceptService), fhirImmunization);
+		return toOpenmrsType(newImmunizationObsGroup(), fhirImmunization);
 	}
 	
 	@Override
 	public Obs toOpenmrsType(Obs openMrsImmunization, Immunization fhirImmunization) {
 		
+		if (openMrsImmunization.getId() != null) {
+			validateImmunizationObsGroup(openMrsImmunization);
+		}
+		
 		Patient patient = patientReferenceTranslator.toOpenmrsType(fhirImmunization.getPatient());
-		Location location = locationReferenceTranslator.toOpenmrsType(fhirImmunization.getLocation());
 		List<ImmunizationPerformerComponent> performers = fhirImmunization.getPerformer();
 		
-		if (CollectionUtils.isEmpty(performers)) {
-			throw new IllegalArgumentException(" ++++ TO DO ++++ PUT SOMETHING USEFUL HERE");
-		}
-		if (performers.size() != 1) {
-			throw new IllegalArgumentException(" ++++ TO DO ++++ PUT SOMETHING USEFUL HERE");
+		if (CollectionUtils.size(performers) != 1) {
+			throw new IllegalArgumentException(
+			        "Either no performer was found or multiple performers were found. Only strictly one performer is currently supported for each immunization.");
 		}
 		ImmunizationPerformerComponent performer = performers.get(0);
-		Provider provider = practitionerReferenceTranslator.toOpenmrsType(performer.getActor());
+		
+		//		Provider provider = practitionerReferenceTranslator.toOpenmrsType(performer.getActor());
+		Provider provider = providerService.getProviderByUuid(getProviderUuid(performer));
+		
+		Visit visit = visitReferenceTranslator.toOpenmrsType(fhirImmunization.getEncounter());
+		Location location = visit.getLocation();
+		
+		if (!patient.equals(visit.getPatient())) {
+			throw new IllegalArgumentException(
+			        "The visit '" + visit.getUuid() + "' does not belong to patient '" + patient.getUuid() + "'.");
+		}
+		
+		EncounterType encounterType = FhirActivator.getImmunizationsEncounterTypeOrCreateIfMissing();
+		EncounterRole encounterRole = FhirActivator.getAdministeringEncounterRoleOrCreateIfMissing();
+		
+		// taking the visit's most recent immunization encounter
+		Optional<Encounter> encounter = visit.getEncounters().stream()
+		        .filter(e -> encounterType.equals(e.getEncounterType()))
+		        .max(Comparator.comparing(Encounter::getEncounterDatetime));
+		
+		final Encounter newEncounter = new Encounter();
+		newEncounter.setVisit(visit);
+		newEncounter.setLocation(location);
+		newEncounter.setEncounterType(encounterType);
+		newEncounter.setPatient(patient);
+		newEncounter.setProvider(encounterRole, provider);
+		if (visit != null && visit.getStopDatetime() != null) {
+			newEncounter.setEncounterDatetime(visit.getStopDatetime());
+		} else {
+			newEncounter.setEncounterDatetime(new Date());
+		}
 		
 		openMrsImmunization.setPerson(patient);
 		openMrsImmunization.setLocation(location);
-		openMrsImmunization.getGroupMembers().stream().forEach(o -> {
-			o.setPerson(patient);
-			o.setLocation(location);
+		openMrsImmunization.setEncounter(encounter.orElse(newEncounter));
+		openMrsImmunization.setObsDatetime(new Date());
+		openMrsImmunization.getGroupMembers().stream().forEach(obs -> {
+			obs.setPerson(patient);
+			obs.setLocation(location);
+			obs.setEncounter(encounter.orElse(newEncounter));
+			obs.setObsDatetime(openMrsImmunization.getObsDatetime());
+			setObsValue(fhirImmunization, obs);
 		});
 		
-		// TODO Auto-generated method stub
-		return null;
+		return openMrsImmunization;
 	}
 	
 	@Override
 	public Immunization toFhirResource(Obs openMrsImmunization) {
+		Immunization immunization = new Immunization();
+		immunization.setId(openMrsImmunization.getUuid());
+		
+		openMrsImmunization.getGroupMembers().forEach(obs -> {});
+		
 		// TODO Auto-generated method stub
-		return null;
+		return immunization;
 	}
 	
 }
