@@ -86,7 +86,6 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	
 	private static final String COUNTRY = "USA";
 	
-
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
 
 	private static final String JSON_CREATE_PRACTITIONER_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_create.json";
