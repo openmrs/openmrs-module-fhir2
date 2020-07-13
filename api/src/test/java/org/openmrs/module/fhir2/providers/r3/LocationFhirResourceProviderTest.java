@@ -27,6 +27,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.convertors.conv30_40.Location30_40;
@@ -46,22 +61,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
-
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.Location> {
@@ -457,11 +456,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
-
+	
 	@Test
 	public void createLocation_shouldCreateNewLocation() {
 		when(locationService.create(any(org.hl7.fhir.r4.model.Location.class))).thenReturn(location);
-
+		
 		MethodOutcome result = resourceProvider.createLocation(Location30_40.convertLocation(location));
 		assertThat(result, CoreMatchers.notNullValue());
 		assertThat(result.getCreated(), is(true));
@@ -470,9 +469,9 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	
 	@Test
 	public void deleteLocation_shouldDeleteLocation() {
-
+		
 		when(locationService.delete(LOCATION_UUID)).thenReturn(location);
-
+		
 		OperationOutcome result = resourceProvider.deleteLocation(new IdType().setValue(LOCATION_UUID));
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
@@ -489,39 +488,37 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		OperationOutcome location = resourceProvider.deleteLocation(id);
 		assertThat(location, nullValue());
 	}
-
+	
 	@Test(expected = ResourceNotFoundException.class)
 	public void deleteLocation_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantLocation() {
 		when(locationService.delete(WRONG_LOCATION_UUID)).thenReturn(null);
 		resourceProvider.deleteLocation(new IdType().setValue(WRONG_LOCATION_UUID));
 	}
-
+	
 	@Test
 	public void updateLocation_shouldUpdateLocation() {
 		when(locationService.update(eq(LOCATION_UUID), any(org.hl7.fhir.r4.model.Location.class))).thenReturn(location);
-
+		
 		MethodOutcome result = resourceProvider.updateLocation(new IdType().setValue(LOCATION_UUID),
-				Location30_40.convertLocation(location));
+		    Location30_40.convertLocation(location));
 		assertThat(result, CoreMatchers.notNullValue());
 		assertThat(result.getResource(), CoreMatchers.equalTo(location));
 	}
-
+	
 	@Test(expected = InvalidRequestException.class)
 	public void updateLocation_shouldThrowInvalidRequestForUuidMismatch() {
 		when(locationService.update(eq(WRONG_LOCATION_UUID), any(org.hl7.fhir.r4.model.Location.class)))
-				.thenThrow(InvalidRequestException.class);
-
-		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID),
-				Location30_40.convertLocation(location));
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID), Location30_40.convertLocation(location));
 	}
-
+	
 	@Test(expected = MethodNotAllowedException.class)
 	public void updateLocation_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		when(locationService.update(eq(WRONG_LOCATION_UUID), any(org.hl7.fhir.r4.model.Location.class)))
-				.thenThrow(MethodNotAllowedException.class);
-
-		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID),
-				Location30_40.convertLocation(location));
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID), Location30_40.convertLocation(location));
 	}
-
+	
 }
