@@ -10,11 +10,8 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-<<<<<<< HEAD
-import static org.hamcrest.Matchers.empty;
-=======
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
->>>>>>> FM2-217:Add create, update, and delete methods for Location
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
@@ -45,12 +42,8 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
-<<<<<<< HEAD
-import org.apache.commons.lang.time.DateUtils;
-=======
-
 import org.apache.commons.io.IOUtils;
->>>>>>> FM2-217:Add create, update, and delete methods for Location
+import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -106,18 +99,15 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	
 	private static final String PARENT_LOCATION_POSTAL_CODE = "Test parent postal code";
 	
-<<<<<<< HEAD
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
-=======
+	
 	private static final String JSON_CREATE_LOCATION_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_create.json";
-
+	
 	private static final String JSON_UPDATE_LOCATION_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_update.json";
-
+	
 	private static final String JSON_UPDATE_LOCATION_NO_ID_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_UpdateWithoutId.json";
-
+	
 	private static final String JSON_UPDATE_LOCATION_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_UpdateWithWrongId.json";
-
->>>>>>> FM2-217:Add create, update, and delete methods for Location
 	
 	@Mock
 	private FhirLocationService locationService;
@@ -474,37 +464,36 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 			Objects.requireNonNull(is);
 			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
 		location.setId(LOCATION_UUID);
-
+		
 		when(locationService.create(any(org.hl7.fhir.r4.model.Location.class))).thenReturn(location);
-
-		MockHttpServletResponse response = post("/Location").jsonContent(jsonLocation)
-		        .accept(FhirMediaTypes.JSON).go();
-
+		
+		MockHttpServletResponse response = post("/Location").jsonContent(jsonLocation).accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isCreated());
 	}
-
+	
 	@Test
 	public void updateLocation_shouldUpdateExistingLocation() throws Exception {
 		String jsonLocation;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_PATH )) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_PATH)) {
 			Objects.requireNonNull(is);
 			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
 		location.setId(LOCATION_UUID);
-
+		
 		when(locationService.update(anyString(), any(org.hl7.fhir.r4.model.Location.class))).thenReturn(location);
-
+		
 		MockHttpServletResponse response = put("/Location/" + LOCATION_UUID).jsonContent(jsonLocation)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isOk());
 	}
-
+	
 	@Test
 	public void updateLocation_shouldErrorForNoId() throws Exception {
 		String jsonLocation;
@@ -512,47 +501,45 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 			Objects.requireNonNull(is);
 			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/Location/" + LOCATION_UUID).jsonContent(jsonLocation)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentAsString(),
-				containsStringIgnoringCase("body must contain an ID element for update"));
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
 	}
-
+	
 	@Test
 	public void updateLocation_shouldErrorForIdMissMatch() throws Exception {
 		String jsonLocation;
-		try (InputStream is = this.getClass().getClassLoader()
-				.getResourceAsStream(JSON_UPDATE_LOCATION_WRONG_ID_PATH)) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
 			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/Location/" + WRONG_LOCATION_UUID).jsonContent(jsonLocation)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentAsString(),
-				containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
 	}
-
+	
 	@Test
 	public void deleteLocation_shouldDeleteLocation() throws Exception {
 		OperationOutcome retVal = new OperationOutcome();
 		retVal.setId(LOCATION_UUID);
 		retVal.getText().setDivAsString("Deleted successfully");
-
+		
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
 		location.setId(LOCATION_UUID);
-
+		
 		when(locationService.delete(LOCATION_UUID)).thenReturn(location);
-
+		
 		MockHttpServletResponse response = delete("/Location/" + LOCATION_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
-
+	
 }
