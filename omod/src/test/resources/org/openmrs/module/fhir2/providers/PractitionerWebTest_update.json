@@ -1,0 +1,32 @@
+{
+  "resourceType": "Practitioner",
+  "id": "c51d0879-ed58-4655-a450-6527afba831f",
+   "name": {
+    "family": [
+      "Careful"
+    ],
+    "given": [
+      "Adam"
+    ],
+    "prefix": [
+      "Dr"
+    ]
+  },
+  "organization": {
+    "reference": "Organization/1"
+  },
+  "role": [
+    {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/v2/0286",
+          "code": "RP"
+        }
+      ]
+    }
+  ],
+  "period": {
+    "start": "2020-07-13",
+    "end": "2012-07-13"
+  }
+}
