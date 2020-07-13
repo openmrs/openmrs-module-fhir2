@@ -9,12 +9,19 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER;
+import static org.openmrs.module.fhir2.FhirConstants.PATIENT;
+import static org.openmrs.module.fhir2.FhirConstants.PRACTITIONER;
+
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -24,6 +31,7 @@ import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationProtocolAppliedComponent;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationStatus;
+import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterRole;
@@ -35,16 +43,13 @@ import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ProviderService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirActivator;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import lombok.AccessLevel;
-import lombok.Setter;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -63,8 +68,8 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
-	//	@Autowired
-	//	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
+	//  @Autowired
+	//  private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
 	@Autowired
 	private EncounterReferenceTranslator<Visit> visitReferenceTranslator;
@@ -140,7 +145,7 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 		}
 		ImmunizationPerformerComponent performer = performers.get(0);
 		
-		//		Provider provider = practitionerReferenceTranslator.toOpenmrsType(performer.getActor());
+		//      Provider provider = practitionerReferenceTranslator.toOpenmrsType(performer.getActor());
 		Provider provider = providerService.getProviderByUuid(getProviderUuid(performer));
 		
 		Visit visit = visitReferenceTranslator.toOpenmrsType(fhirImmunization.getEncounter());
@@ -193,20 +198,24 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 		Immunization immunization = new Immunization();
 		immunization.setId(openMrsImmunization.getUuid());
 		immunization.setStatus(ImmunizationStatus.COMPLETED);
-		immunization.setPatient(new Reference().setType("Patient")
-		        .setReference(FhirConstants.PATIENT + "/" + openMrsImmunization.getPerson().getUuid()));
-		// TODO set encounter
-		// TODO set performer
+		immunization.setPatient(
+		    new Reference().setType(PATIENT).setReference(PATIENT + "/" + openMrsImmunization.getPerson().getUuid()));
+		immunization.setEncounter(new Reference().setType(ENCOUNTER)
+		        .setReference(ENCOUNTER + "/" + openMrsImmunization.getEncounter().getVisit().getUuid()));
+		immunization.setPerformer(Arrays.asList(new ImmunizationPerformerComponent(new Reference().setType(PRACTITIONER)
+		        .setReference(PRACTITIONER + "/" + getAdministeringProvider(openMrsImmunization).getUuid()))));
 		
 		Map<String, Obs> members = getObsMembersMap(openMrsImmunization);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding coding = new Coding();
 		coding.setCode(members.get("CIEL:984").getValueCoded().getUuid());
+		coding.setDisplay(members.get("CIEL:984").getValueCoded().getFullySpecifiedName(Context.getLocale()).getName());
 		codeableConcept.addCoding(coding);
 		immunization.setVaccineCode(codeableConcept);
 		immunization.setOccurrence(new DateTimeType(members.get("CIEL:1410").getValueDatetime()));
-		// TODO CIEL:1418
+		immunization.addProtocolApplied(new ImmunizationProtocolAppliedComponent(
+		        new PositiveIntType((long) members.get("CIEL:1418").getValueNumeric().doubleValue())));
 		immunization.setManufacturer(new Reference().setDisplay(members.get("CIEL:1419").getValueText()));
 		immunization.setLotNumber(members.get("CIEL:1420").getValueText());
 		immunization.setExpirationDate(members.get("CIEL:165907").getValueDatetime());

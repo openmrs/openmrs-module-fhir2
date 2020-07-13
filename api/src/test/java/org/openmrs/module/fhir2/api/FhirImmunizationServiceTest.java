@@ -100,22 +100,20 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		// setup
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
-		Immunization immunization = parser.parseResource(Immunization.class,
-		    "{\n" + "  \"resourceType\": \"Immunization\",\n" + "  \"status\": \"completed\",\n" + "  \"vaccineCode\": {\n"
-		            + "    \"coding\": [\n" + "      {\n" + "        \"code\": \"15f83cd6-64e9-4e06-a5f9-364d3b14a43d\",\n"
-		            + "        \"display\": \"Aspirin as a vaccine\"\n" + "      }\n" + "    ]\n" + "  },\n"
-		            + "  \"patient\": {\n" + "    \"type\": \"Patient\",\n"
-		            + "    \"reference\": \"Patient/a7e04421-525f-442f-8138-05b619d16def\"\n" + "  },\n"
-		            + "  \"encounter\": {\n" + "    \"type\": \"Encounter\",\n"
-		            + "    \"reference\": \"Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc\"\n" + "  },\n"
-		            + "  \"occurrenceDateTime\": \"2020-07-08T18:30:00.000Z\",\n"
-		            + "  \"expirationDate\": \"2022-07-31T18:30:00.000Z\",\n" + "  \"performer\": [\n" + "    {\n"
-		            + "      \"actor\": {\n" + "        \"type\": \"Practitioner\",\n"
-		            + "        \"reference\": \"Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66\"\n" + "      }\n"
-		            + "    }\n" + "  ],\n" + "  \"manufacturer\": {\n" + "    \"display\": \"Acme\"\n" + "  },\n"
-		            + "  \"lotNumber\": \"FOO1234\",\n" + "  \"protocolApplied\": [\n" + "    {\n"
-		            + "      \"doseNumberPositiveInt\": 2,\n" + "      \"series\": \"Dose 2\"\n" + "    }\n" + "  ]\n"
-		            + "}");
+		Immunization immunization = parser.parseResource(Immunization.class, "{\n"
+		        + "  \"resourceType\": \"Immunization\",\n" + "  \"status\": \"completed\",\n" + "  \"vaccineCode\": {\n"
+		        + "    \"coding\": [\n" + "      {\n" + "        \"code\": \"15f83cd6-64e9-4e06-a5f9-364d3b14a43d\",\n"
+		        + "        \"display\": \"Aspirin as a vaccine\"\n" + "      }\n" + "    ]\n" + "  },\n"
+		        + "  \"patient\": {\n" + "    \"reference\": \"Patient/a7e04421-525f-442f-8138-05b619d16def\",\n"
+		        + "    \"type\": \"Patient\"\n" + "  },\n" + "  \"encounter\": {\n"
+		        + "    \"reference\": \"Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc\",\n"
+		        + "    \"type\": \"Encounter\"\n" + "  },\n" + "  \"occurrenceDateTime\": \"2020-07-08T18:30:00.000Z\",\n"
+		        + "  \"manufacturer\": {\n" + "    \"display\": \"Acme\"\n" + "  },\n" + "  \"lotNumber\": \"FOO1234\",\n"
+		        + "  \"expirationDate\": \"2022-07-31T18:30:00.000Z\",\n" + "  \"performer\": [\n" + "    {\n"
+		        + "      \"actor\": {\n" + "        \"reference\": \"Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66\",\n"
+		        + "        \"type\": \"Practitioner\"\n" + "      }\n" + "    }\n" + "  ],\n" + "  \"protocolApplied\": [\n"
+		        + "    {\n" + "      \"doseNumberPositiveInt\": 2,\n" + "      \"series\": \"Dose 2\"\n" + "    }\n"
+		        + "  ]\n" + "}");
 		
 		// replay
 		Immunization savedImmunization = service.saveImmunization(immunization);

@@ -26,9 +26,12 @@ import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
 import org.openmrs.Concept;
+import org.openmrs.EncounterRole;
 import org.openmrs.Obs;
+import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
+import org.openmrs.module.fhir2.FhirActivator;
 
 @Setter(AccessLevel.PACKAGE)
 public class BaseImmunizationTranslator {
@@ -63,7 +66,16 @@ public class BaseImmunizationTranslator {
 		return obs;
 	}
 	
+	public Provider getAdministeringProvider(Obs obs) throws IllegalArgumentException {
+		EncounterRole role = FhirActivator.getAdministeringEncounterRoleOrCreateIfMissing();
+		return obs.getEncounter().getProvidersByRole(role).stream().findFirst()
+		        .orElseThrow(() -> new IllegalArgumentException(new IllegalArgumentException(
+		                "The immunization obs group should involve a single encounter provider with the role: "
+		                        + role.getName() + ".")));
+	}
+	
 	public void validateImmunizationObsGroup(Obs obs) throws IllegalArgumentException {
+		
 		if (concept(immunizationGroupingConcept).getUuid() != obs.getConcept().getUuid()) {
 			throw new IllegalArgumentException("The immunization obs group should be defined by a concept mapped as same as "
 			        + immunizationGroupingConcept + ".");
