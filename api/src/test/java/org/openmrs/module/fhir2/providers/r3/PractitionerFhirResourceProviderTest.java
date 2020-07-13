@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.convertors.conv30_40.Practitioner30_40;
@@ -542,18 +541,18 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 	@Test
 	public void createPractitioner_shouldCreateNewPractitioner() {
 		when(practitionerService.create(any(org.hl7.fhir.r4.model.Practitioner.class))).thenReturn(practitioner);
-
+		
 		MethodOutcome result = resourceProvider.createPractitioner(Practitioner30_40.convertPractitioner(practitioner));
 		assertThat(result, CoreMatchers.notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), CoreMatchers.equalTo(practitioner));
 	}
-
+	
 	@Test
 	public void deletePractitioner_shouldDeletePractitioner() {
-
+		
 		when(practitionerService.delete(PRACTITIONER_UUID)).thenReturn(practitioner);
-
+		
 		OperationOutcome result = resourceProvider.deletePractitioner(new IdType().setValue(PRACTITIONER_UUID));
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
@@ -562,7 +561,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
 		    equalTo("This resource has been deleted"));
 	}
-
+	
 	@Test(expected = ResourceNotFoundException.class)
 	public void deletePractitioner_shouldThrowResourceNotFoundException() {
 		IdType id = new IdType();
@@ -570,38 +569,39 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		OperationOutcome practitioner = resourceProvider.deletePractitioner(id);
 		assertThat(practitioner, nullValue());
 	}
-
+	
 	@Test(expected = ResourceNotFoundException.class)
 	public void deletePractitioner_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantPractitioner() {
 		when(practitionerService.delete(WRONG_PRACTITIONER_UUID)).thenReturn(null);
 		resourceProvider.deletePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID));
 	}
-
+	
 	@Test
 	public void updatePractitioner_shouldUpdatePractitioner() {
-		when(practitionerService.update(eq(PRACTITIONER_UUID), any(org.hl7.fhir.r4.model.Practitioner.class))).thenReturn(practitioner);
-
+		when(practitionerService.update(eq(PRACTITIONER_UUID), any(org.hl7.fhir.r4.model.Practitioner.class)))
+		        .thenReturn(practitioner);
+		
 		MethodOutcome result = resourceProvider.updatePractitioner(new IdType().setValue(PRACTITIONER_UUID),
-				Practitioner30_40.convertPractitioner(practitioner));
+		    Practitioner30_40.convertPractitioner(practitioner));
 		assertThat(result, CoreMatchers.notNullValue());
 		assertThat(result.getResource(), CoreMatchers.equalTo(practitioner));
 	}
-
+	
 	@Test(expected = InvalidRequestException.class)
 	public void updatePractitioner_shouldThrowInvalidRequestForUuidMismatch() {
 		when(practitionerService.update(eq(WRONG_PRACTITIONER_UUID), any(org.hl7.fhir.r4.model.Practitioner.class)))
-				.thenThrow(InvalidRequestException.class);
-
+		        .thenThrow(InvalidRequestException.class);
+		
 		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID),
-				Practitioner30_40.convertPractitioner(practitioner));
+		    Practitioner30_40.convertPractitioner(practitioner));
 	}
-
+	
 	@Test(expected = MethodNotAllowedException.class)
 	public void updatePractitioner_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		when(practitionerService.update(eq(WRONG_PRACTITIONER_UUID), any(org.hl7.fhir.r4.model.Practitioner.class)))
-				.thenThrow(MethodNotAllowedException.class);
-
+		        .thenThrow(MethodNotAllowedException.class);
+		
 		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID),
-				Practitioner30_40.convertPractitioner(practitioner));
+		    Practitioner30_40.convertPractitioner(practitioner));
 	}
 }

@@ -69,20 +69,20 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	@Create
 	public MethodOutcome createPractitioner(@ResourceParam Practitioner practitioner) {
 		return FhirProviderUtils.buildCreate(practitionerService.create(practitioner));
-	} 
-
+	}
+	
 	@Update
 	@SuppressWarnings("unused")
 	public MethodOutcome updatePractitioner(@IdParam IdType id, @ResourceParam Practitioner practitioner) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
-
+		
 		practitioner.setId(id.getIdPart());
-
-		return FhirProviderUtils.buildUpdate(practitionerService.update(id.getIdPart(),practitioner));
+		
+		return FhirProviderUtils.buildUpdate(practitionerService.update(id.getIdPart(), practitioner));
 	}
-
+	
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deletePractitioner(@IdParam @NotNull IdType id) {

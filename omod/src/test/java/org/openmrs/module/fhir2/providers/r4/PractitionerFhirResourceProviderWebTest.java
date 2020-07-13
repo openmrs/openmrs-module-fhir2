@@ -39,15 +39,14 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.MatcherAssert;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
@@ -87,15 +86,14 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	private static final String COUNTRY = "USA";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
-
+	
 	private static final String JSON_CREATE_PRACTITIONER_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_create.json";
-
+	
 	private static final String JSON_UPDATE_PRACTITIONER_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_update.json";
-
+	
 	private static final String JSON_UPDATE_PRACTITIONER_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_UpdateWithoutId.json";
-
+	
 	private static final String JSON_UPDATE_PRACTITIONER_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_UpdateWithWrongId.json";
-
 	
 	@Getter(AccessLevel.PUBLIC)
 	private PractitionerFhirResourceProvider resourceProvider;
@@ -398,31 +396,32 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		}
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
-
+		
 		when(practitionerService.create(any(org.hl7.fhir.r4.model.Practitioner.class))).thenReturn(practitioner);
-
-		MockHttpServletResponse response = post("/Practitioner").jsonContent(jsonPractitioner)
-		        .accept(FhirMediaTypes.JSON).go();
-
+		
+		MockHttpServletResponse response = post("/Practitioner").jsonContent(jsonPractitioner).accept(FhirMediaTypes.JSON)
+		        .go();
+		
 		assertThat(response, isCreated());
 	}
 	
 	@Test
 	public void updatePractitioner_shouldUpdateExistingPractitioner() throws Exception {
 		String jsonPractitioner;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_PATH )) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_PATH)) {
 			Objects.requireNonNull(is);
 			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
-
-		when(practitionerService.update(anyString(), any(org.hl7.fhir.r4.model.Practitioner.class))).thenReturn(practitioner);
-
+		
+		when(practitionerService.update(anyString(), any(org.hl7.fhir.r4.model.Practitioner.class)))
+		        .thenReturn(practitioner);
+		
 		MockHttpServletResponse response = put("/Practitioner/" + PRACTITIONER_UUID).jsonContent(jsonPractitioner)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isOk());
 	}
 	
@@ -433,30 +432,28 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 			Objects.requireNonNull(is);
 			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/Practitioner/" + PRACTITIONER_UUID).jsonContent(jsonPractitioner)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentAsString(),
-				containsStringIgnoringCase("body must contain an ID element for update"));
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
 	}
 	
 	@Test
 	public void updatePractitioner_shouldErrorForIdMissMatch() throws Exception {
 		String jsonPractitioner;
-		try (InputStream is = this.getClass().getClassLoader()
-				.getResourceAsStream(JSON_UPDATE_PRACTITIONER_WRONG_ID_PATH)) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
 			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/Practitioner/" + WRONG_PRACTITIONER_UUID).jsonContent(jsonPractitioner)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentAsString(),
-				containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
 	}
 	
 	@Test
@@ -464,17 +461,16 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		OperationOutcome retVal = new OperationOutcome();
 		retVal.setId(PRACTITIONER_UUID);
 		retVal.getText().setDivAsString("Deleted successfully");
-
+		
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
-
+		
 		when(practitionerService.delete(PRACTITIONER_UUID)).thenReturn(practitioner);
-
+		
 		MockHttpServletResponse response = delete("/Practitioner/" + PRACTITIONER_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
-
 	
 }

@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
-
 import org.hl7.fhir.convertors.conv30_40.Practitioner30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -71,8 +70,9 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createPractitioner(@ResourceParam Practitioner practitioner) {
-		return FhirProviderUtils.buildCreate(practitionerService.create(Practitioner30_40.convertPractitioner(practitioner)));
-	} 
+		return FhirProviderUtils
+		        .buildCreate(practitionerService.create(Practitioner30_40.convertPractitioner(practitioner)));
+	}
 	
 	@Update
 	@SuppressWarnings("unused")
@@ -80,11 +80,11 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
-
+		
 		practitioner.setId(id.getIdPart());
-
-		return FhirProviderUtils.buildUpdate(practitionerService.update(id.getIdPart(),
-				Practitioner30_40.convertPractitioner(practitioner)));
+		
+		return FhirProviderUtils.buildUpdate(
+		    practitionerService.update(id.getIdPart(), Practitioner30_40.convertPractitioner(practitioner)));
 	}
 	
 	@Delete
@@ -94,10 +94,10 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 		if (practitioner == null) {
 			throw new ResourceNotFoundException("Could not find practitioner to delete with id " + id.getIdPart());
 		}
-
+		
 		return FhirProviderUtils.buildDelete(Practitioner30_40.convertPractitioner(practitioner));
 	}
-
+	
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getPractitionerHistoryById(@IdParam @NotNull IdType id) {
