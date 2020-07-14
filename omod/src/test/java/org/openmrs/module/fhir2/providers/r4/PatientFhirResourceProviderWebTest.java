@@ -607,7 +607,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 	}
 
 	@Test
-	public void updatePatient_shouldErrorForNoId() throws Exception {
+	public void updatePatient_shouldRaiseExceptionForNoId() throws Exception {
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PATIENT_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
@@ -623,7 +623,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 	}
 
 	@Test
-	public void updatePatient_shouldErrorForIdMissMatch() throws Exception {
+	public void updatePatient_shouldRaiseExceptionOnIdMismatch() throws Exception {
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader()
 				.getResourceAsStream(JSON_UPDATE_PATIENT_WRONG_ID_PATH)) {

@@ -89,7 +89,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deletePatient(@IdParam @NotNull IdType id) {
-		org.hl7.fhir.r4.model.Patient patient = patientService.delete(id.getIdPart());
+		Patient patient = patientService.delete(id.getIdPart());
 		if (patient == null) {
 			throw new ResourceNotFoundException("Could not find patient to delete with id " + id.getIdPart());
 		}
