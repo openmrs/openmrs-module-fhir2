@@ -200,7 +200,7 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	}
 
 	@Test
-	public void updateServiceRequest_shouldErrorForNoId() throws Exception {
+	public void updateServiceRequest_shouldRaiseExceptionForNoId() throws Exception {
 		String jsonServiceRequest;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
@@ -216,7 +216,7 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	}
 
 	@Test
-	public void updateServiceRequest_shouldErrorForIdMissMatch() throws Exception {
+	public void updateServiceRequest_shouldrRaiseExceptionForIdMissMatch() throws Exception {
 		String jsonServiceRequest;
 		try (InputStream is = this.getClass().getClassLoader()
 				.getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_WRONG_ID_PATH)) {
