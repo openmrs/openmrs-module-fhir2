@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -100,6 +101,12 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	
 	@Update
 	public MethodOutcome updateMedicationRequest(@IdParam IdType id, @ResourceParam MedicationRequest mRequest) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update resource");
+		}
+		
+		mRequest.setId(id.getIdPart());
+		
 		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = fhirMedicationRequestService.update(id.getIdPart(),
 		    mRequest);
 		
