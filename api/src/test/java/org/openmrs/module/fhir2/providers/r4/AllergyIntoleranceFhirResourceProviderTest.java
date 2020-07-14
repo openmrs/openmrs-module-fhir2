@@ -33,11 +33,14 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
@@ -388,7 +391,7 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	}
 	
 	@Test
-	public void createAllergy_shouldCreateAllergyIntolerance() {
+	public void createAllergyIntolerance_shouldCreateAllergyIntolerance() {
 		when(service.create(allergyIntolerance)).thenReturn(allergyIntolerance);
 		
 		MethodOutcome result = resourceProvider.createAllergy(allergyIntolerance);
@@ -397,4 +400,43 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		assertThat(result.getResource(), CoreMatchers.equalTo(allergyIntolerance));
 	}
 	
+	@Test
+	public void updateAllergyIntolerance_shouldUpdateRequestedAllergyIntolerance() {
+		when(service.update(ALLERGY_UUID, allergyIntolerance)).thenReturn(allergyIntolerance);
+		
+		MethodOutcome result = resourceProvider.updateAllergy(new IdType().setValue(ALLERGY_UUID), allergyIntolerance);
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(allergyIntolerance));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateAllergyIntolerance_shouldThrowInvalidRequestForUuidMismatchException() {
+		when(service.update(WRONG_ALLERGY_UUID, allergyIntolerance)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), allergyIntolerance);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateAllergyIntolerance_shouldthrowMethodNotAllowedIfDoesNotExist() {
+		when(service.update(WRONG_ALLERGY_UUID, allergyIntolerance)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), allergyIntolerance);
+	}
+	
+	@Test
+	public void deleteAllergyIntolerance_shouldDeleteRequestedAllergyIntolerance() {
+		when(service.delete(ALLERGY_UUID)).thenReturn(allergyIntolerance);
+		
+		OperationOutcome result = resourceProvider.deleteAllergy(new IdType().setValue(ALLERGY_UUID));
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteAllergyIntolerance_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantAllergyIntolerance() {
+		when(service.delete(WRONG_ALLERGY_UUID)).thenReturn(null);
+		resourceProvider.deleteAllergy(new IdType().setValue(WRONG_ALLERGY_UUID));
+	}
 }
