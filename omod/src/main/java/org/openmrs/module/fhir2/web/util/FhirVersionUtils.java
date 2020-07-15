@@ -11,6 +11,10 @@ package org.openmrs.module.fhir2.web.util;
 
 import javax.servlet.http.HttpServletRequest;
 
+import lombok.extern.slf4j.Slf4j;
+import org.openmrs.module.fhir2.FhirConstants;
+
+@Slf4j
 public class FhirVersionUtils {
 	
 	public enum FhirVersion {
@@ -34,6 +38,8 @@ public class FhirVersionUtils {
 					String version = requestURI.substring(prefixEnd, pathIdx);
 					
 					if (version.isEmpty()) {
+						log.error(String.format("Could not determine FHIR version for URI %s and path %s.", requestURI,
+						    contextPath));
 						return FhirVersion.UNKNOWN;
 					}
 					
@@ -47,12 +53,22 @@ public class FhirVersionUtils {
 						case "R4":
 							return FhirVersion.R4;
 						default:
+							log.error(String.format("Could not determine FHIR version for URI %s and path %s.", requestURI,
+							    contextPath));
 							return FhirVersion.UNKNOWN;
 					}
 				}
 			}
 		}
 		
+		if (requestURI.startsWith(contextPath + FhirConstants.SERVLET_PATH_R4)) {
+			return FhirVersion.R4;
+		}
+		if (requestURI.startsWith(contextPath + FhirConstants.SERVLET_PATH_R3)) {
+			return FhirVersion.R3;
+		}
+		
+		log.error(String.format("Could not determine FHIR version for URI %s and path %s.", requestURI, contextPath));
 		return FhirVersion.UNKNOWN;
 	}
 }

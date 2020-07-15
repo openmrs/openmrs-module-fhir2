@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.web.util.FhirVersionUtils;
 
 @Slf4j
@@ -44,11 +45,11 @@ public class ForwardingFilter implements Filter {
 			switch (fhirVersion) {
 				case R3:
 					prefix.append(fhirVersion.toString());
-					replacement = "/ms/fhir2R3Servlet";
+					replacement = FhirConstants.SERVLET_PATH_R3;
 					break;
 				case R4:
 					prefix.append(fhirVersion.toString());
-					replacement = "/ms/fhir2Servlet";
+					replacement = FhirConstants.SERVLET_PATH_R4;
 					break;
 				default:
 					((HttpServletResponse) res).sendError(HttpServletResponse.SC_NOT_FOUND);
