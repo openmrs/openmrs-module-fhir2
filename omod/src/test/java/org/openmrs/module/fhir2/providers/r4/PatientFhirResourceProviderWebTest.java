@@ -576,10 +576,10 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 
-		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
+		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
 
-		when(patientService.create(any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
+		when(patientService.create(any(Patient.class))).thenReturn(patient);
 
 		MockHttpServletResponse response = post("/Patient").jsonContent(jsonPatient)
 		        .accept(FhirMediaTypes.JSON).go();
@@ -595,10 +595,10 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 
-		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
+		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
 
-		when(patientService.update(anyString(), any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
+		when(patientService.update(anyString(), any(Patient.class))).thenReturn(patient);
 
 		MockHttpServletResponse response = put("/Patient/" + PATIENT_UUID).jsonContent(jsonPatient)
 				.accept(FhirMediaTypes.JSON).go();
@@ -645,7 +645,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		retVal.setId(PATIENT_UUID);
 		retVal.getText().setDivAsString("Deleted successfully");
 
-		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
+		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
 
 		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);

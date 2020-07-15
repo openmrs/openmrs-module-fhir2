@@ -453,7 +453,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void deletePatient_shouldDeleteRequestedPatient() {
 		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
 
-		org.hl7.fhir.r4.model.OperationOutcome result = resourceProvider.deletePatient(new IdType().setValue(PATIENT_UUID));
+		OperationOutcome result = resourceProvider.deletePatient(new IdType().setValue(PATIENT_UUID));
 		assertThat(result, notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
@@ -463,10 +463,10 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 
 	@Test(expected = ResourceNotFoundException.class)
 	public void deletePatient_shouldThrowResourceNotFoundException() {
-		IdType id = new IdType();
-		id.setValue(WRONG_PATIENT_UUID);
-		org.hl7.fhir.r4.model.OperationOutcome patient = resourceProvider.deletePatient(id);
-		assertThat(patient, nullValue());
+		
+		when(patientService.delete(WRONG_PATIENT_UUID)).thenReturn(null);
+		
+		resourceProvider.deletePatient(new IdType().setValue(WRONG_PATIENT_UUID));
 	}
 
 	@Test

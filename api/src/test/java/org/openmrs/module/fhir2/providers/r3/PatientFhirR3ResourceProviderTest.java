@@ -457,14 +457,6 @@ public class PatientFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResou
 	}
 
 	@Test(expected = ResourceNotFoundException.class)
-	public void deletePatient_shouldThrowResourceNotFoundException() {
-		IdType id = new IdType();
-		id.setValue(WRONG_PATIENT_UUID);
-		
-		OperationOutcome patient = patientFhirResourceProvider.deletePatient(id);
-	}
-
-	@Test(expected = ResourceNotFoundException.class)
 	public void deletePatient_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantPatient() {
 		when(patientService.delete(WRONG_PATIENT_UUID)).thenReturn(null);
 		
