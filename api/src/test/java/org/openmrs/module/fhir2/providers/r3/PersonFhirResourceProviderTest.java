@@ -362,14 +362,6 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 	}
 
 	@Test(expected = ResourceNotFoundException.class)
-	public void deletePerson_shouldThrowResourceNotFoundException() {
-		IdType id = new IdType();
-		id.setValue(WRONG_PERSON_UUID);
-		OperationOutcome person = resourceProvider.deletePerson(id);
-		assertThat(person, nullValue());
-	}
-
-	@Test(expected = ResourceNotFoundException.class)
 	public void deletePerson_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantPerson() {
 		when(fhirPersonService.delete(WRONG_PERSON_UUID)).thenReturn(null);
 		resourceProvider.deletePerson(new IdType().setValue(WRONG_PERSON_UUID));

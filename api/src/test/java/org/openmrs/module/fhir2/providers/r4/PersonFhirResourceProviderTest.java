@@ -351,7 +351,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updatePersonShouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void updatePerson_ShouldThrowMethodNotAllowedIfDoesNotExist() {
 		
 		person.setId(WRONG_PERSON_UUID);
 		
@@ -365,7 +365,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 
 		when(fhirPersonService.delete(PERSON_UUID)).thenReturn(person);
 		
-		org.hl7.fhir.r4.model.OperationOutcome result = resourceProvider.deletePerson(new IdType().setValue(PERSON_UUID));
+		OperationOutcome result = resourceProvider.deletePerson(new IdType().setValue(PERSON_UUID));
 		assertThat(result, notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
@@ -375,10 +375,10 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Test(expected = ResourceNotFoundException.class)
 	public void deletePerson_shouldThrowResourceNotFoundException() {
-		IdType id = new IdType();
-		id.setValue(WRONG_PERSON_UUID);
-		org.hl7.fhir.r4.model.OperationOutcome person = resourceProvider.deletePerson(id);
-		assertThat(person, nullValue());
+		
+		when(fhirPersonService.delete(WRONG_PERSON_UUID)).thenReturn(null);
+		
+		resourceProvider.deletePerson(new IdType().setValue(WRONG_PERSON_UUID));
 	}
 	
 	@Test

@@ -89,7 +89,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deletePerson(@IdParam @NotNull IdType id) {
-		org.hl7.fhir.r4.model.Person person = fhirPersonService.delete(id.getIdPart());
+		Person person = fhirPersonService.delete(id.getIdPart());
 		if (person == null) {
 			throw new ResourceNotFoundException("Could not find person to delete with id " + id.getIdPart());
 		}

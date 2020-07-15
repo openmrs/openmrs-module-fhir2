@@ -465,10 +465,10 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 
-		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
+		Person person = new org.hl7.fhir.r4.model.Person();
 		person.setId(PERSON_UUID);
 
-		when(personService.create(any(org.hl7.fhir.r4.model.Person.class))).thenReturn(person);
+		when(personService.create(any(Person.class))).thenReturn(person);
 
 		MockHttpServletResponse response = post("/Person").jsonContent(jsonPerson).accept(FhirMediaTypes.JSON).go();
 
@@ -483,10 +483,10 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 
-		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
+		Person person = new Person();
 		person.setId(PERSON_UUID);
 
-		when(personService.update(anyString(), any(org.hl7.fhir.r4.model.Person.class))).thenReturn(person);
+		when(personService.update(anyString(), any(Person.class))).thenReturn(person);
 
 		MockHttpServletResponse response = put("/Person/" + PERSON_UUID).jsonContent(jsonPerson).accept(FhirMediaTypes.JSON)
 		        .go();
@@ -494,7 +494,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	}
 
 	@Test
-	public void updatePerson_shouldErrorForNoId() throws Exception {
+	public void updatePerson_shouldThrowErrorForNoId() throws Exception {
 		String jsonPerson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PERSON_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
@@ -510,7 +510,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	}
 
 	@Test
-	public void updatePerson_shouldErrorForIdMissMatch() throws Exception {
+	public void updatePerson_shouldThrowErrorForIdMissMatch() throws Exception {
 		String jsonPerson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PERSON_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
@@ -531,7 +531,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		retVal.setId(PERSON_UUID);
 		retVal.getText().setDivAsString("Deleted successfully");
 
-		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
+		Person person = new Person();
 		person.setId(PERSON_UUID);
 
 		when(personService.delete(PERSON_UUID)).thenReturn(person);
