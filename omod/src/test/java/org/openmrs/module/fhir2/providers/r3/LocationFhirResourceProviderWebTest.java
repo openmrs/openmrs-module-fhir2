@@ -475,7 +475,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	}
 	
 	@Test
-	public void updateLocation_shouldErrorForNoId() throws Exception {
+	public void updateLocation_shouldThrowErrorForNoId() throws Exception {
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
@@ -489,7 +489,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	}
 	
 	@Test
-	public void updateLocation_shouldErrorForIdMissMatch() throws Exception {
+	public void updateLocation_shouldThrowErrorForIdMissMatch() throws Exception {
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);

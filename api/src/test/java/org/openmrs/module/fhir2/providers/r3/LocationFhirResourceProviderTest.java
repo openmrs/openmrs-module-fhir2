@@ -482,16 +482,10 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
-	public void deleteLocation_shouldThrowResourceNotFoundException() {
-		IdType id = new IdType();
-		id.setValue(WRONG_LOCATION_UUID);
-		OperationOutcome location = resourceProvider.deleteLocation(id);
-		assertThat(location, nullValue());
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
 	public void deleteLocation_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantLocation() {
+		
 		when(locationService.delete(WRONG_LOCATION_UUID)).thenReturn(null);
+		
 		resourceProvider.deleteLocation(new IdType().setValue(WRONG_LOCATION_UUID));
 	}
 	

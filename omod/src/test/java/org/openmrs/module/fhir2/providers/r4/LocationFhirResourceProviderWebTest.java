@@ -465,10 +465,10 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
+		Location location = new Location();
 		location.setId(LOCATION_UUID);
 		
-		when(locationService.create(any(org.hl7.fhir.r4.model.Location.class))).thenReturn(location);
+		when(locationService.create(any(Location.class))).thenReturn(location);
 		
 		MockHttpServletResponse response = post("/Location").jsonContent(jsonLocation).accept(FhirMediaTypes.JSON).go();
 		
@@ -483,10 +483,10 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
+		Location location = new Location();
 		location.setId(LOCATION_UUID);
 		
-		when(locationService.update(anyString(), any(org.hl7.fhir.r4.model.Location.class))).thenReturn(location);
+		when(locationService.update(anyString(), any(Location.class))).thenReturn(location);
 		
 		MockHttpServletResponse response = put("/Location/" + LOCATION_UUID).jsonContent(jsonLocation)
 		        .accept(FhirMediaTypes.JSON).go();
@@ -495,7 +495,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	}
 	
 	@Test
-	public void updateLocation_shouldErrorForNoId() throws Exception {
+	public void updateLocation_shouldThrowErrorForNoId() throws Exception {
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
@@ -510,7 +510,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	}
 	
 	@Test
-	public void updateLocation_shouldErrorForIdMissMatch() throws Exception {
+	public void updateLocation_shouldThrowErrorForIdMissMatch() throws Exception {
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
@@ -530,8 +530,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		OperationOutcome retVal = new OperationOutcome();
 		retVal.setId(LOCATION_UUID);
 		retVal.getText().setDivAsString("Deleted successfully");
-		
-		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
+		Location location = new Location();
 		location.setId(LOCATION_UUID);
 		
 		when(locationService.delete(LOCATION_UUID)).thenReturn(location);
