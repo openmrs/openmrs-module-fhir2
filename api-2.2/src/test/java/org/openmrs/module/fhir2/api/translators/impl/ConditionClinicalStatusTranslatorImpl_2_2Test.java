@@ -23,11 +23,9 @@ import org.openmrs.module.fhir2.FhirConstants;
 
 public class ConditionClinicalStatusTranslatorImpl_2_2Test {
 	
-	private static final String ACTIVE = "ACTIVE";
+	private static final String ACTIVE = "active";
 	
-	private static final String INACTIVE = "INACTIVE";
-	
-	private static final String HISTORY_OF = "HISTORY_OF";
+	private static final String INACTIVE = "inactive";
 	
 	private ConditionClinicalStatusTranslatorImpl_2_2 clinicalStatusTranslator;
 	
@@ -37,57 +35,49 @@ public class ConditionClinicalStatusTranslatorImpl_2_2Test {
 	}
 	
 	@Test
-	public void shouldConvertOpenMrsActiveToFhirType() {
+	public void shouldMapOpenMrsActiveToFHIRActive() {
 		CodeableConcept codeableConcept = clinicalStatusTranslator.toFhirResource(ConditionClinicalStatus.ACTIVE);
 		assertThat(codeableConcept, notNullValue());
 		assertThat(codeableConcept.getCodingFirstRep().getCode(), equalTo(ACTIVE));
-		assertThat(codeableConcept.getCodingFirstRep().getSystem(), equalTo(FhirConstants.OPENMRS_URI));
+		assertThat(codeableConcept.getCodingFirstRep().getDisplay(), equalTo("Active"));
+		assertThat(codeableConcept.getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI));
 	}
 	
 	@Test
-	public void shouldConvertOpenMrsInActiveToFhirType() {
+	public void shouldMapOpenMrsInActiveToFHIRInActive() {
 		CodeableConcept codeableConcept = clinicalStatusTranslator.toFhirResource(ConditionClinicalStatus.INACTIVE);
 		assertThat(codeableConcept, notNullValue());
 		assertThat(codeableConcept.getCodingFirstRep().getCode(), equalTo(INACTIVE));
-		assertThat(codeableConcept.getCodingFirstRep().getSystem(), equalTo(FhirConstants.OPENMRS_URI));
+		assertThat(codeableConcept.getCodingFirstRep().getDisplay(), equalTo("Inactive"));
+		assertThat(codeableConcept.getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI));
 	}
 	
 	@Test
-	public void shouldConvertOpenMrsHistoryOfToFhirType() {
+	public void shouldMapOpenMrsHistoryOfToFHIRInActive() {
 		CodeableConcept codeableConcept = clinicalStatusTranslator.toFhirResource(ConditionClinicalStatus.HISTORY_OF);
 		assertThat(codeableConcept, notNullValue());
-		assertThat(codeableConcept.getCodingFirstRep().getCode(), equalTo(HISTORY_OF));
-		assertThat(codeableConcept.getCodingFirstRep().getSystem(), equalTo(FhirConstants.OPENMRS_URI));
+		assertThat(codeableConcept.getCodingFirstRep().getCode(), equalTo(INACTIVE));
+		assertThat(codeableConcept.getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI));
 	}
 	
 	@Test
-	public void shouldConvertFhirActiveToOpenMrsType() {
+	public void shouldMapFHIRActiveToOpenMrsActiveClinicalCondition() {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding coding = new Coding();
 		coding.setCode(ACTIVE);
-		coding.setSystem(FhirConstants.OPENMRS_URI);
+		coding.setSystem(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI);
 		codeableConcept.addCoding(coding);
 		assertThat(clinicalStatusTranslator.toOpenmrsType(codeableConcept), is(ConditionClinicalStatus.ACTIVE));
 	}
 	
 	@Test
-	public void shouldConvertFhirInActiveToOpenMrsType() {
+	public void shouldMapFHIRInActiveToOpenMrsInActive() {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding coding = new Coding();
 		coding.setCode(INACTIVE);
-		coding.setSystem(FhirConstants.OPENMRS_URI);
+		coding.setSystem(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI);
 		codeableConcept.addCoding(coding);
 		assertThat(clinicalStatusTranslator.toOpenmrsType(codeableConcept), is(ConditionClinicalStatus.INACTIVE));
-	}
-	
-	@Test
-	public void shouldConvertFhirHistoryToOpenMrsType() {
-		CodeableConcept codeableConcept = new CodeableConcept();
-		Coding coding = new Coding();
-		coding.setCode(HISTORY_OF);
-		coding.setSystem(FhirConstants.OPENMRS_URI);
-		codeableConcept.addCoding(coding);
-		assertThat(clinicalStatusTranslator.toOpenmrsType(codeableConcept), is(ConditionClinicalStatus.HISTORY_OF));
 	}
 	
 }

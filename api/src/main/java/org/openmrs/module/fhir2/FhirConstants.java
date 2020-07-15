@@ -38,6 +38,8 @@ public class FhirConstants {
 	public static final String CONDITION_VERIFICATION_STATUS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX
 	        + "/condition-ver-status";
 	
+	public static final String CONDITION_CLINICAL_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/condition-clinical ";
+	
 	public static final String ALLERGY_SUBSTANCE_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/substance-code";
 	
 	public static final String CLINICAL_FINDINGS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/clinical-findings";
