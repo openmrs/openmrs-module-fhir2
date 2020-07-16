@@ -40,6 +40,7 @@ import org.openmrs.LocationTag;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 
@@ -75,7 +76,10 @@ public class FhirLocationServiceImplTest {
 	LocationTranslator locationTranslator;
 	
 	@Mock
-	SearchQuery<Location, org.hl7.fhir.r4.model.Location, FhirLocationDao, LocationTranslator> searchQuery;
+	SearchQueryInclude<org.hl7.fhir.r4.model.Location> searchQueryInclude;
+	
+	@Mock
+	SearchQuery<Location, org.hl7.fhir.r4.model.Location, FhirLocationDao, LocationTranslator, SearchQueryInclude<org.hl7.fhir.r4.model.Location>> searchQuery;
 	
 	private FhirLocationServiceImpl fhirLocationService;
 	
@@ -89,6 +93,7 @@ public class FhirLocationServiceImplTest {
 		fhirLocationService.setDao(locationDao);
 		fhirLocationService.setTranslator(locationTranslator);
 		fhirLocationService.setSearchQuery(searchQuery);
+		fhirLocationService.setSearchQueryInclude(searchQueryInclude);
 		
 		location = new Location();
 		location.setUuid(LOCATION_UUID);
@@ -132,9 +137,10 @@ public class FhirLocationServiceImplTest {
 		locations.add(location);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(locationDao.getResultUuids(any())).thenReturn(Collections.singletonList(LOCATION_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, locationDao, locationTranslator));
+		when(searchQuery.getQueryResults(any(), any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, locationDao, locationTranslator, searchQueryInclude));
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 		when(locationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(locations);
 		

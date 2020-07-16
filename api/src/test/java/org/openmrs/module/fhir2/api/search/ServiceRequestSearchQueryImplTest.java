@@ -57,7 +57,10 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 	private ServiceRequestTranslator<TestOrder> translator;
 	
 	@Autowired
-	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>> searchQuery;
+	private SearchQueryInclude<ServiceRequest> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>, SearchQueryInclude<ServiceRequest>> searchQuery;
 	
 	@Before
 	public void setup() throws Exception {
@@ -65,7 +68,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {

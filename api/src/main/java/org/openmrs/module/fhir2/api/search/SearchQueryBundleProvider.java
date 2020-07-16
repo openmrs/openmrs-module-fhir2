@@ -13,8 +13,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -46,12 +48,16 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	
 	private transient List<String> matchingResourceUuids;
 	
-	public SearchQueryBundleProvider(SearchParameterMap theParams, FhirDao<T> dao, ToFhirTranslator<T, U> translator) {
+	private final SearchQueryInclude<U> searchQueryInclude;
+	
+	public SearchQueryBundleProvider(SearchParameterMap theParams, FhirDao<T> dao, ToFhirTranslator<T, U> translator,
+	    SearchQueryInclude<U> searchQueryInclude) {
 		this.dao = dao;
 		this.datePublished = new Date();
 		this.theParams = theParams;
 		this.translator = translator;
 		this.uuid = UUID.randomUUID();
+		this.searchQueryInclude = searchQueryInclude;
 	}
 	
 	@Override
@@ -75,8 +81,16 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 		if (toIndex - firstResult > 0) {
 			lastResult = Math.min(lastResult, toIndex);
 		}
-		return dao.search(this.theParams, this.matchingResourceUuids, firstResult, lastResult).stream()
-		        .map(translator::toFhirResource).collect(Collectors.toList());
+		
+		List<U> returnedResourceList = dao.search(this.theParams, this.matchingResourceUuids, firstResult, lastResult)
+		        .stream().map(translator::toFhirResource).collect(Collectors.toList());
+		
+		Set<IBaseResource> includedResources = searchQueryInclude.getIncludedResources(returnedResourceList, this.theParams);
+		
+		List<IBaseResource> pagedResultList = new ArrayList<>(returnedResourceList);
+		pagedResultList.addAll(includedResources);
+		
+		return pagedResultList;
 	}
 	
 	@Nullable

@@ -50,6 +50,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 
@@ -69,7 +70,10 @@ public class FhirMedicationRequestServiceImplTest {
 	private FhirMedicationRequestDao dao;
 	
 	@Mock
-	private SearchQuery<DrugOrder, MedicationRequest, FhirMedicationRequestDao, MedicationRequestTranslator> searchQuery;
+	private SearchQueryInclude<MedicationRequest> searchQueryInclude;
+	
+	@Mock
+	private SearchQuery<DrugOrder, MedicationRequest, FhirMedicationRequestDao, MedicationRequestTranslator, SearchQueryInclude<MedicationRequest>> searchQuery;
 	
 	private FhirMedicationRequestServiceImpl medicationRequestService;
 	
@@ -83,6 +87,7 @@ public class FhirMedicationRequestServiceImplTest {
 		medicationRequestService.setDao(dao);
 		medicationRequestService.setTranslator(medicationRequestTranslator);
 		medicationRequestService.setSearchQuery(searchQuery);
+		medicationRequestService.setSearchQueryInclude(searchQueryInclude);
 		
 		medicationRequest = new MedicationRequest();
 		medicationRequest.setId(MEDICATION_REQUEST_UUID);
@@ -129,11 +134,12 @@ public class FhirMedicationRequestServiceImplTest {
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
 		
 		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(drugOrders);
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator, searchQueryInclude));
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, participant, null,
 		    null, null);
@@ -161,10 +167,11 @@ public class FhirMedicationRequestServiceImplTest {
 		    subject);
 		
 		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(drugOrders);
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator, searchQueryInclude));
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(subject, null, null, null, null, null,
 		    null);
@@ -193,10 +200,11 @@ public class FhirMedicationRequestServiceImplTest {
 		        .addParameter(FhirConstants.MEDICATION_REFERENCE_SEARCH_HANDLER, medication);
 		
 		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(drugOrders);
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator, searchQueryInclude));
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, null, medication,
 		    null, null);
@@ -221,10 +229,11 @@ public class FhirMedicationRequestServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
 		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(drugOrders);
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator, searchQueryInclude));
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, code, null, null, null,
 		    null);
@@ -253,11 +262,12 @@ public class FhirMedicationRequestServiceImplTest {
 		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounter);
 		
 		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(drugOrders);
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator, searchQueryInclude));
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, encounter, null, null, null,
 		    null, null);
@@ -277,11 +287,12 @@ public class FhirMedicationRequestServiceImplTest {
 		    FhirConstants.ID_PROPERTY, uuid);
 		
 		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(drugOrder));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator, searchQueryInclude));
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, null, null, uuid,
 		    null);
@@ -301,11 +312,12 @@ public class FhirMedicationRequestServiceImplTest {
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
 		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(drugOrder));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, medicationRequestTranslator, searchQueryInclude));
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, null, null, null,
 		    lastUpdated);

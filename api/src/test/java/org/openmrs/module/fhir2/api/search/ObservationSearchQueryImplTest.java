@@ -138,7 +138,10 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 	private FhirObservationDao dao;
 	
 	@Autowired
-	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
+	private SearchQueryInclude<Observation> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator, SearchQueryInclude<Observation>> searchQuery;
 	
 	@Before
 	public void setup() throws Exception {
@@ -1262,7 +1265,7 @@ public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTe
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {

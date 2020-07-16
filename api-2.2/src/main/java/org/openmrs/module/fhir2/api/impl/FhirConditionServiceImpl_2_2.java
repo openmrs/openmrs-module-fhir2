@@ -25,6 +25,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,10 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 	private ConditionTranslator<org.openmrs.Condition> translator;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao<org.openmrs.Condition>, ConditionTranslator<org.openmrs.Condition>> searchQuery;
+	private SearchQueryInclude<Condition> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao<org.openmrs.Condition>, ConditionTranslator<org.openmrs.Condition>, SearchQueryInclude<Condition>> searchQuery;
 	
 	@Override
 	public IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
@@ -65,7 +69,7 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	@Override

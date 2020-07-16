@@ -133,14 +133,17 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	private PersonTranslator translator;
 	
 	@Autowired
-	private SearchQuery<Person, org.hl7.fhir.r4.model.Person, FhirPersonDao, PersonTranslator> searchQuery;
+	private SearchQueryInclude<org.hl7.fhir.r4.model.Person> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Person, org.hl7.fhir.r4.model.Person, FhirPersonDao, PersonTranslator, SearchQueryInclude<org.hl7.fhir.r4.model.Person>> searchQuery;
 	
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	@Test

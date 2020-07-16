@@ -23,6 +23,7 @@ import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,10 @@ public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> impleme
 	private TaskTranslator translator;
 	
 	@Autowired
-	private SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator> searchQuery;
+	private SearchQueryInclude<Task> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator, SearchQueryInclude<Task>> searchQuery;
 	
 	/**
 	 * Get a list of Tasks that match the given search and sort criteria
@@ -66,6 +70,6 @@ public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> impleme
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

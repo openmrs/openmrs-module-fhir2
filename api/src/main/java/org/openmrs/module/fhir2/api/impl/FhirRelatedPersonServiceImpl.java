@@ -23,6 +23,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
 import org.openmrs.module.fhir2.api.dao.FhirRelatedPersonDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,10 @@ public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson,
 	private RelatedPersonTranslator translator;
 	
 	@Autowired
-	private SearchQuery<Relationship, RelatedPerson, FhirRelatedPersonDao, RelatedPersonTranslator> searchQuery;
+	private SearchQueryInclude<RelatedPerson> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Relationship, RelatedPerson, FhirRelatedPersonDao, RelatedPersonTranslator, SearchQueryInclude<RelatedPerson>> searchQuery;
 	
 	@Override
 	public IBundleProvider searchForRelatedPeople(StringAndListParam name, TokenAndListParam gender,
@@ -60,7 +64,7 @@ public class FhirRelatedPersonServiceImpl extends BaseFhirService<RelatedPerson,
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 }

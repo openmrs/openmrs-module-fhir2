@@ -100,7 +100,10 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 	private PractitionerTranslator<Provider> translator;
 	
 	@Autowired
-	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>> searchQuery;
+	private SearchQueryInclude<Practitioner> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>, SearchQueryInclude<Practitioner>> searchQuery;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -108,7 +111,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {

@@ -113,7 +113,10 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 	private RelatedPersonTranslator translator;
 	
 	@Autowired
-	private SearchQuery<Relationship, RelatedPerson, FhirRelatedPersonDao, RelatedPersonTranslator> searchQuery;
+	private SearchQueryInclude<RelatedPerson> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Relationship, RelatedPerson, FhirRelatedPersonDao, RelatedPersonTranslator, SearchQueryInclude<RelatedPerson>> searchQuery;
 	
 	@Before
 	public void setup() throws Exception {
@@ -121,7 +124,7 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {
