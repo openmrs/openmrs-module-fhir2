@@ -33,30 +33,33 @@ public class FhirVersionUtils {
 			if (prefixIdx >= 0) {
 				int prefixEnd = prefixIdx + prefix.length();
 				int pathIdx = requestURI.indexOf('/', prefixEnd + 1);
+				if (pathIdx < 0) {
+					pathIdx = requestURI.indexOf('?', prefixEnd + 1);
+				}
+				if (pathIdx < 0) {
+					pathIdx = requestURI.length();
+				}
 				
-				if (pathIdx >= 0) {
-					String version = requestURI.substring(prefixEnd, pathIdx);
-					
-					if (version.isEmpty()) {
+				String version = requestURI.substring(prefixEnd, pathIdx);
+				if (version.isEmpty()) {
+					log.error(
+					    String.format("Could not determine FHIR version for URI %s and path %s.", requestURI, contextPath));
+					return FhirVersion.UNKNOWN;
+				}
+				
+				if (version.charAt(0) == '/') {
+					version = version.substring(1);
+				}
+				
+				switch (version) {
+					case "R3":
+						return FhirVersion.R3;
+					case "R4":
+						return FhirVersion.R4;
+					default:
 						log.error(String.format("Could not determine FHIR version for URI %s and path %s.", requestURI,
 						    contextPath));
 						return FhirVersion.UNKNOWN;
-					}
-					
-					if (version.charAt(0) == '/') {
-						version = version.substring(1);
-					}
-					
-					switch (version) {
-						case "R3":
-							return FhirVersion.R3;
-						case "R4":
-							return FhirVersion.R4;
-						default:
-							log.error(String.format("Could not determine FHIR version for URI %s and path %s.", requestURI,
-							    contextPath));
-							return FhirVersion.UNKNOWN;
-					}
 				}
 			}
 		}

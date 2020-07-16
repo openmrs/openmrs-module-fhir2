@@ -42,13 +42,29 @@ public class FhirVersionUtilsTest {
 		FhirVersion version = FhirVersionUtils.getFhirVersion(httpServletRequest);
 		assertThat(version, equalTo(FhirVersion.R3));
 	}
-	
+
 	@Test
 	public void shouldReturnUnknowForWs() {
 		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/Patient");
 		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
 		FhirVersion version = FhirVersionUtils.getFhirVersion(httpServletRequest);
 		assertThat(version, equalTo(FhirVersion.UNKNOWN));
+	}
+
+	@Test
+	public void shouldReturnR4NoSlash() {
+		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4");
+		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
+		FhirVersion version = FhirVersionUtils.getFhirVersion(httpServletRequest);
+		assertThat(version, equalTo(FhirVersion.R4));
+	}
+
+	@Test
+	public void shouldReturnR4QuestionMark() {
+		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4?param=12");
+		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
+		FhirVersion version = FhirVersionUtils.getFhirVersion(httpServletRequest);
+		assertThat(version, equalTo(FhirVersion.R4));
 	}
 	
 	@Test
