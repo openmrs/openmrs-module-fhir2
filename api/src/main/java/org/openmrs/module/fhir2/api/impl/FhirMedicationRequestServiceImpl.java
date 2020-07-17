@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -48,7 +51,8 @@ public class FhirMedicationRequestServiceImpl extends BaseFhirService<Medication
 	@Override
 	public IBundleProvider searchForMedicationRequests(ReferenceAndListParam patientReference,
 	        ReferenceAndListParam encounterReference, TokenAndListParam code, ReferenceAndListParam participantReference,
-	        ReferenceAndListParam medicationReference, TokenAndListParam id, DateRangeParam lastUpdated) {
+	        ReferenceAndListParam medicationReference, TokenAndListParam id, DateRangeParam lastUpdated,
+	        HashSet<Include> includes) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
@@ -57,7 +61,8 @@ public class FhirMedicationRequestServiceImpl extends BaseFhirService<Medication
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference)
 		        .addParameter(FhirConstants.MEDICATION_REFERENCE_SEARCH_HANDLER, medicationReference)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}

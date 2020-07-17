@@ -256,6 +256,12 @@ public class FhirConstants {
 	
 	public static final String INCLUDE_ENCOUNTER_PARAM = "encounter";
 	
+	public static final String INCLUDE_CONTEXT_PARAM = "context";
+	
+	public static final String INCLUDE_REQUESTER_PARAM = "requester";
+	
+	public static final String INCLUDE_MEDICATION_PARAM = "medication";
+	
 	public static final String INCLUDE_HAS_MEMBER_PARAM = "has-member";
 	
 	public static final String INCLUDE_RELATED_TYPE_PARAM = "related-type";

@@ -10,18 +10,23 @@
 package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -30,6 +35,9 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -1065,6 +1073,165 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldAddPractitionersForRequesterInclude() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("MedicationRequest:requester"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		assertThat(results, notNullValue());
+		
+		List<IBaseResource> resultList = results.getResources(0, 10);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(((MedicationRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(MEDICATION_REQUEST_UUID));
+		
+		MedicationRequest returnedMedicationRequest = (MedicationRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Practitioner.class)),
+		    hasProperty("id", equalTo(returnedMedicationRequest.getRequester().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldAddMedicationForMedicationInclude() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("MedicationRequest:medication"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		assertThat(results, notNullValue());
+		
+		List<IBaseResource> resultList = results.getResources(0, 10);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(((MedicationRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(MEDICATION_REQUEST_UUID));
+		
+		MedicationRequest returnedMedicationRequest = (MedicationRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Medication.class)), hasProperty("id",
+		    equalTo((returnedMedicationRequest.getMedicationReference().getReferenceElement().getIdPart()))))));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldAddPatientsForPatientInclude() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("MedicationRequest:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		assertThat(results, notNullValue());
+		
+		List<IBaseResource> resultList = results.getResources(0, 10);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(((MedicationRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(MEDICATION_REQUEST_UUID));
+		
+		MedicationRequest returnedMedicationRequest = (MedicationRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo((returnedMedicationRequest.getSubject().getReferenceElement().getIdPart()))))));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldAddEncountersForEncounterInclude() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("MedicationRequest:encounter"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		assertThat(results, notNullValue());
+		
+		List<IBaseResource> resultList = results.getResources(0, 10);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(((MedicationRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(MEDICATION_REQUEST_UUID));
+		
+		MedicationRequest returnedMedicationRequest = (MedicationRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("id", equalTo((returnedMedicationRequest.getEncounter().getReferenceElement().getIdPart()))))));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldAddEncountersForEncounterIncludeR3() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("MedicationRequest:context"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		assertThat(results, notNullValue());
+		
+		List<IBaseResource> resultList = results.getResources(0, 10);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(((MedicationRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(MEDICATION_REQUEST_UUID));
+		
+		MedicationRequest returnedMedicationRequest = (MedicationRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("id", equalTo((returnedMedicationRequest.getEncounter().getReferenceElement().getIdPart()))))));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldHandleMultipleIncludes() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("MedicationRequest:medication"));
+		includes.add(new Include("MedicationRequest:requester"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		assertThat(results, notNullValue());
+		
+		List<IBaseResource> resultList = results.getResources(0, 10);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(3)); // included resources (medication + requester) added as part of the result list
+		assertThat(((MedicationRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(MEDICATION_REQUEST_UUID));
+		
+		MedicationRequest returnedMedicationRequest = (MedicationRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Medication.class)), hasProperty("id",
+		    equalTo((returnedMedicationRequest.getMedicationReference().getReferenceElement().getIdPart()))))));
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Practitioner.class)),
+		    hasProperty("id", equalTo(returnedMedicationRequest.getRequester().getReferenceElement().getIdPart())))));
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {

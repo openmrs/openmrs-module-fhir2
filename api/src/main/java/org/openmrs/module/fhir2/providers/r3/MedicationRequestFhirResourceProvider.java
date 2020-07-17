@@ -11,7 +11,11 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -26,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.MedicationRequest30_40;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -114,11 +119,20 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	        @OptionalParam(name = MedicationRequest.SP_MEDICATION, chainWhitelist = {
 	                "" }, targetTypes = Medication.class) ReferenceAndListParam medicationReference,
 	        @OptionalParam(name = MedicationRequest.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+	        @IncludeParam(allow = { "MedicationRequest:" + MedicationRequest.SP_MEDICATION,
+	                "MedicationRequest:" + MedicationRequest.SP_REQUESTER,
+	                "MedicationRequest:" + MedicationRequest.SP_PATIENT,
+	                "MedicationRequest:" + MedicationRequest.SP_CONTEXT }) HashSet<Include> includes) {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
+		
+		if (CollectionUtils.isEmpty(includes)) {
+			includes = null;
+		}
+		
 		return new SearchQueryBundleProviderR3Wrapper(medicationRequestService.searchForMedicationRequests(patientReference,
-		    encounterReference, code, participantReference, medicationReference, id, lastUpdated));
+		    encounterReference, code, participantReference, medicationReference, id, lastUpdated, includes));
 	}
 }
