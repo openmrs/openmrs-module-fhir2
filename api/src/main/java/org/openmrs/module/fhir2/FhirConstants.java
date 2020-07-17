@@ -248,6 +248,10 @@ public class FhirConstants {
 	
 	public static final String INCLUDE_PART_OF_PARAM = "partof";
 	
+	public static final String INCLUDE_PARTICIPANT_PARAM = "participant";
+	
+	public static final String INCLUDE_LOCATION_PARAM = "location";
+	
 	public static final String INCLUDE_PATIENT_PARAM = "patient";
 	
 	public static final String INCLUDE_ENCOUNTER_PARAM = "encounter";

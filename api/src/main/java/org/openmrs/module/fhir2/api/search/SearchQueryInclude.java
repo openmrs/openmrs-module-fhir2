@@ -22,6 +22,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
@@ -30,6 +31,7 @@ import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.FhirPatientService;
+import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	
 	@Autowired
 	private FhirPatientService patientService;
+	
+	@Autowired
+	private FhirPractitionerService practitionerService;
 	
 	@SuppressWarnings("unchecked")
 	public Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams) {
@@ -78,6 +83,12 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				case FhirConstants.INCLUDE_RELATED_TYPE_PARAM:
 					includedResourcesSet.addAll(handleObsGroupInclude(resourceList, includeParam.getParamType()));
 					break;
+				case FhirConstants.INCLUDE_PARTICIPANT_PARAM:
+					includedResourcesSet.addAll(handleParticipantInclude(resourceList, includeParam.getParamType()));
+					break;
+				case FhirConstants.INCLUDE_LOCATION_PARAM:
+					includedResourcesSet.addAll(handleLocationInclude(resourceList, includeParam.getParamType()));
+					break;
 			}
 		});
 		
@@ -89,6 +100,48 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		        .map(SearchQueryInclude::getIdFromReference).filter(Objects::nonNull).collect(Collectors.toSet());
 		
 		return locationService.get(uniqueParentLocationUUIDs);
+	}
+	
+	private Set<IBaseResource> handleLocationInclude(List<U> resourceList, String paramType) {
+		Set<IBaseResource> includedResources = new HashSet<>();
+		Set<String> uniqueLocationUUIDs = new HashSet<>();
+		
+		switch (paramType) {
+			case FhirConstants.ENCOUNTER:
+				resourceList.forEach(resource -> {
+					List<Reference> locationReferenceList = new ArrayList<>();
+					((Encounter) resource).getLocation()
+					        .forEach(location -> locationReferenceList.add(location.getLocation()));
+					uniqueLocationUUIDs.addAll(getIdsFromReferenceList(locationReferenceList));
+				});
+				break;
+		}
+		
+		uniqueLocationUUIDs.removeIf(Objects::isNull);
+		includedResources.addAll(locationService.get(uniqueLocationUUIDs));
+		
+		return includedResources;
+	}
+	
+	private Set<IBaseResource> handleParticipantInclude(List<U> resourceList, String paramType) {
+		Set<IBaseResource> includedResources = new HashSet<>();
+		Set<String> uniqueParticipantUUIDs = new HashSet<>();
+		
+		switch (paramType) {
+			case FhirConstants.ENCOUNTER:
+				resourceList.forEach(resource -> {
+					List<Reference> participantReferenceList = new ArrayList<>();
+					((Encounter) resource).getParticipant()
+					        .forEach(participant -> participantReferenceList.add(participant.getIndividual()));
+					uniqueParticipantUUIDs.addAll(getIdsFromReferenceList(participantReferenceList));
+				});
+				break;
+		}
+		
+		uniqueParticipantUUIDs.removeIf(Objects::isNull);
+		includedResources.addAll(practitionerService.get(uniqueParticipantUUIDs));
+		
+		return includedResources;
 	}
 	
 	private Set<IBaseResource> handleObsGroupInclude(List<U> resourceList, String paramType) {
@@ -128,6 +181,10 @@ public class SearchQueryInclude<U extends IBaseResource> {
 			case FhirConstants.DIAGNOSTIC_REPORT:
 				resourceList.forEach(
 				    resource -> uniquePatientUUIDs.add(getIdFromReference(((DiagnosticReport) resource).getSubject())));
+				break;
+			case FhirConstants.ENCOUNTER:
+				resourceList.forEach(
+				    resource -> uniquePatientUUIDs.add(getIdFromReference(((Encounter) resource).getSubject())));
 				break;
 		}
 		

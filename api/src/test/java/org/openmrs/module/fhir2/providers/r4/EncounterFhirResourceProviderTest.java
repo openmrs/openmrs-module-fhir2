@@ -19,11 +19,16 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -119,13 +124,14 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	public void searchEncounters_shouldReturnMatchingEncounters() {
 		List<Encounter> encounters = new ArrayList<>();
 		encounters.add(encounter);
-		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any()))
+		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
 		
 		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
 		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
-		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, subjectReference, null, null, null);
+		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, subjectReference, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -139,18 +145,54 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	public void searchEncounters_shouldReturnMatchingEncountersWhenPatientParamIsSpecified() {
 		List<Encounter> encounters = new ArrayList<>();
 		encounters.add(encounter);
-		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any()))
+		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
 		
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
-		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, patientParam, null, null);
+		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, patientParam, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.ENCOUNTER));
+		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void searchEncounters_shouldAddRelatedResourcesForInclude() {
+		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(encounter, new Patient()), PREFERRED_SIZE, COUNT));
+		
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Encounter:patient"));
+		
+		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, null, null, null, includes);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(2));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.ENCOUNTER));
+		assertThat(resultList.get(1).fhirType(), equalTo(FhirConstants.PATIENT));
+		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void searchEncounters_shouldNotAddResourcesForEmptyInclude() {
+		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), isNull()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), PREFERRED_SIZE, COUNT));
+		
+		HashSet<Include> includes = new HashSet<>();
+		
+		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, null, null, null, includes);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(1));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.ENCOUNTER));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
 	}

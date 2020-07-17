@@ -224,23 +224,23 @@ public class FhirDiagnosticReportServiceImplTest {
 	
 	@Test
 	public void searchForDiagnosticReports_shouldAddRelatedResourcesWhenIncluded() {
-		Obs obs = new Obs();
-		obs.setUuid(UUID);
+		FhirDiagnosticReport fhirDiagnosticReport = new FhirDiagnosticReport();
+		fhirDiagnosticReport.setUuid(UUID);
 		
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 		
-		List<Obs> obsList = new ArrayList<>();
-		obsList.add(obs);
+		List<FhirDiagnosticReport> diagnosticReportList = new ArrayList<>();
+		diagnosticReportList.add(fhirDiagnosticReport);
 		
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("DiagnosticReport:patient"));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(obsList);
+		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(diagnosticReportList);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
-		when(translator.toFhirResource(obs)).thenReturn(diagnosticReport);
+		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
@@ -259,22 +259,22 @@ public class FhirDiagnosticReportServiceImplTest {
 	
 	@Test
 	public void searchForDiagnosticReports_shouldNotAddRelatedResourcesForEmptyInclude() {
-		Obs obs = new Obs();
-		obs.setUuid(UUID);
+		FhirDiagnosticReport fhirDiagnosticReport = new FhirDiagnosticReport();
+		fhirDiagnosticReport.setUuid(UUID);
 		
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 		
-		List<Obs> obsList = new ArrayList<>();
-		obsList.add(obs);
+		List<FhirDiagnosticReport> diagnosticReportList = new ArrayList<>();
+		diagnosticReportList.add(fhirDiagnosticReport);
 		
 		HashSet<Include> includes = new HashSet<>();
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(obsList);
+		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(diagnosticReportList);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
-		when(translator.toFhirResource(obs)).thenReturn(diagnosticReport);
+		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

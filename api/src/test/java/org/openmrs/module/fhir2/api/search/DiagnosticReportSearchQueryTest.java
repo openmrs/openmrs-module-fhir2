@@ -859,12 +859,12 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
 		IBundleProvider results = search(theParams);
-		assertThat(results.size(), equalTo(1));
+		assertThat(results.size(), equalTo(2));
 		
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(resultList.size(), equalTo(3)); // included resource added as part of the result list
 		
 		DiagnosticReport returnedDiagnosticReport = (DiagnosticReport) resultList.iterator().next();
 		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
@@ -888,7 +888,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(resultList.size(), equalTo(3)); // included resource added as part of the result list
 		
 		DiagnosticReport returnedDiagnosticReport = (DiagnosticReport) resultList.iterator().next();
 		assertThat(resultList, hasItem(allOf(is(instanceOf(Observation.class)),
@@ -912,7 +912,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), equalTo(3)); // included resources (encounter + result) added as part of the result list
+		assertThat(resultList.size(), equalTo(4)); // included resources (encounter + result) added as part of the result list
 		
 		DiagnosticReport returnedDiagnosticReport = (DiagnosticReport) resultList.iterator().next();
 		assertThat(resultList, hasItem(allOf(is(instanceOf(Observation.class)),

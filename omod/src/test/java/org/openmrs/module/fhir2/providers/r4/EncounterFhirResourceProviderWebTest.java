@@ -10,9 +10,12 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -31,9 +34,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -126,6 +131,9 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
+	@Captor
+	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	
 	private Encounter encounter;
 	
 	@Before
@@ -165,7 +173,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter?subject:Patient=%s", PATIENT_UUID));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		assertThat(subjectCaptor.getValue(), notNullValue());
 		assertThat(subjectCaptor.getAllValues().iterator().next().getValuesAsQueryTokens().iterator().next()
 		        .getValuesAsQueryTokens().iterator().next().getIdPart(),
@@ -180,7 +188,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri("/Encounter/?date=ge1975-02-02");
 		
 		verify(encounterService).searchForEncounters(dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -196,7 +204,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?location=%s", LOCATION_UUID));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -211,7 +219,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?location.address-city=%s", ENCOUNTER_ADDRESS_CITY));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -226,7 +234,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?location.address-state=%s", ENCOUNTER_ADDRESS_STATE));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -241,7 +249,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?location.address-postalcode=%s", ENCOUNTER_POSTALCODE));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -256,7 +264,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?location.address-country=%s", ENCOUNTER_ADDRESS_COUNTRY));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -271,7 +279,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?location.address-country=%s,%s", ENCOUNTER_ADDRESS_COUNTRY, "USA"));
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -287,7 +295,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri("/Encounter/?location.address-country=INDIA&location.address-country=USA");
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = locationCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -303,7 +311,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?participant:Practitioner=%s", PARTICIPANT_UUID));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -318,7 +326,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?participant:Practitioner.given=%s", PARTICIPANT_GIVEN_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -333,7 +341,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?participant:Practitioner.family=%s", PARTICIPANT_FAMILY_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -348,7 +356,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?participant:Practitioner.family=%s,%s", PARTICIPANT_FAMILY_NAME, "Vox"));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -365,7 +373,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		    PARTICIPANT_FAMILY_NAME, "Vox"));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -382,7 +390,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		    "op87yh-34fd-34egs-56h34-34f7"));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), participantCaptor.capture(), isNull(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = participantCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -398,7 +406,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter/?subject.given=%s", PATIENT_GIVEN_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = subjectCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -413,7 +421,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter?subject.family=%s", PATIENT_FAMILY_NAME));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = subjectCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -428,7 +436,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter?subject.identifier=%s", PATIENT_IDENTIFIER));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), subjectCaptor.capture(), isNull(),
-		    isNull());
+		    isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = subjectCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -443,7 +451,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri("/Encounter?subject.given=Hannibal&location.address-postalcode=248001");
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), subjectCaptor.capture(),
-		    isNull(), isNull());
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParamsSubject = subjectCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParamSubject = orListParamsSubject.get(0).getValuesAsQueryTokens().get(0);
@@ -464,7 +472,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri("/Encounter?subject.given=Hannibal&location.address-postalcode=248001,854796");
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), subjectCaptor.capture(),
-		    isNull(), isNull());
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParamsSubject = subjectCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParamSubject = orListParamsSubject.get(0).getValuesAsQueryTokens().get(0);
@@ -486,7 +494,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri("/Encounter?subject.given=Hannibal&location.address-postalcode=248001&location.address-postalcode=854796");
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), isNull(), subjectCaptor.capture(),
-		    isNull(), isNull());
+		    isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParamsSubject = subjectCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParamSubject = orListParamsSubject.get(0).getValuesAsQueryTokens().get(0);
@@ -508,7 +516,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri("/Encounter?participant:Practitioner.identifier=1000WF&location.address-postalcode=248001");
 		
 		verify(encounterService).searchForEncounters(isNull(), locationCaptor.capture(), participantCaptor.capture(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParamsParticipant = participantCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParamParticipant = orListParamsParticipant.get(0).getValuesAsQueryTokens().get(0);
@@ -529,7 +537,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri("/Encounter?participant:Practitioner.identifier=1000WF,670WD&date=ge1975-02-02");
 		
 		verify(encounterService).searchForEncounters(dateRangeCaptor.capture(), isNull(), participantCaptor.capture(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParamsParticipant = participantCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParamParticipant = orListParamsParticipant.get(0).getValuesAsQueryTokens().get(0);
@@ -552,7 +560,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter?_id=%s", ENCOUNTER_UUID));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull());
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -566,7 +574,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		verifyUri(String.format("/Encounter?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeCaptor.capture());
+		    dateRangeCaptor.capture(), isNull());
 		
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
@@ -579,10 +587,70 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
+	@Test
+	public void shouldAddPatientsWithReturnedEncounters() throws Exception {
+		verifyUri("/Encounter?_include=Encounter:patient");
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.ENCOUNTER));
+	}
+	
+	@Test
+	public void shouldAddLocationsWithReturnedEncounters() throws Exception {
+		verifyUri("/Encounter?_include=Encounter:location");
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_LOCATION_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.ENCOUNTER));
+	}
+	
+	@Test
+	public void shouldAddParticipantsWithReturnedEncounters() throws Exception {
+		verifyUri("/Encounter?_include=Encounter:participant");
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_PARTICIPANT_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.ENCOUNTER));
+	}
+	
+	@Test
+	public void shouldHandleMultipleIncludes() throws Exception {
+		verifyUri("/Encounter?_include=Encounter:participant&_include=Encounter:location");
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
+		
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_LOCATION_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.ENCOUNTER)))));
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PARTICIPANT_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.ENCOUNTER)))));
+	}
+	
 	private void verifyUri(String uri) throws Exception {
 		Encounter encounter = new Encounter();
 		encounter.setId(ENCOUNTER_UUID);
-		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any()))
+		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -23,5 +26,5 @@ public interface FhirEncounterService extends FhirService<Encounter> {
 	
 	IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
 	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam id,
-	        DateRangeParam lastUpdated);
+	        DateRangeParam lastUpdated, HashSet<Include> includes);
 }
