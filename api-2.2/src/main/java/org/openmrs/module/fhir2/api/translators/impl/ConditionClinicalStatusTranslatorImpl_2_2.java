@@ -25,12 +25,26 @@ public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClini
 	
 	@Override
 	public CodeableConcept toFhirResource(ConditionClinicalStatus clinicalStatus) {
-		return this.setClinicalStatus(clinicalStatus.toString());
+		CodeableConcept codeableConcept = new CodeableConcept();
+		switch (clinicalStatus) {
+			case ACTIVE:
+				codeableConcept.addCoding().setCode(clinicalStatus.toString().toLowerCase()).setDisplay("Active")
+				        .setSystem(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI);
+			case INACTIVE:
+				codeableConcept.addCoding().setCode(clinicalStatus.toString().toLowerCase()).setDisplay("Inactive")
+				        .setSystem(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI);
+			default:
+				codeableConcept.addCoding().setCode("inactive").setDisplay("Inactive")
+				        .setSystem(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI);
+		}
+		
+		return codeableConcept;
 	}
 	
 	@Override
 	public ConditionClinicalStatus toOpenmrsType(CodeableConcept codeableConcept) {
-		return codeableConcept.getCoding().stream().filter(coding -> coding.getSystem().equals(FhirConstants.OPENMRS_URI))
+		return codeableConcept.getCoding().stream()
+		        .filter(coding -> coding.getSystem().equals(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI))
 		        .map(this::getClinicalStatus).findFirst().orElse(null);
 	}
 	
@@ -38,17 +52,9 @@ public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClini
 		switch (coding.getCode().trim().toLowerCase()) {
 			case "active":
 				return ConditionClinicalStatus.ACTIVE;
-			case "history_of":
-				return ConditionClinicalStatus.HISTORY_OF;
 			case "inactive":
 			default:
 				return ConditionClinicalStatus.INACTIVE;
 		}
-	}
-	
-	private CodeableConcept setClinicalStatus(String text) {
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding().setCode(text).setSystem(FhirConstants.OPENMRS_URI);
-		return codeableConcept;
 	}
 }
