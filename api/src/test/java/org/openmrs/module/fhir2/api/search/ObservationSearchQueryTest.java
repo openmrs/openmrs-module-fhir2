@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.search;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrBefore;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
@@ -21,13 +22,18 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -47,6 +53,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -165,7 +172,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(3));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_UUID))));
@@ -185,7 +192,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(3));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThan(1)));
@@ -207,7 +214,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(3));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThan(1)));
@@ -234,7 +241,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(15));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, hasSize(equalTo(10)));
@@ -254,7 +261,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		List<Observation> resources = get(results);
+		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(2)));
@@ -274,7 +281,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThan(1));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, hasSize(greaterThan(1)));
@@ -293,7 +300,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(10));
@@ -317,7 +324,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
@@ -341,7 +348,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -360,7 +367,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(21));
 		
-		List<Observation> resources = get(results);
+		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources.size(), equalTo(10));
@@ -385,7 +392,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
@@ -411,7 +418,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -430,7 +437,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(21));
 		
-		List<Observation> resources = get(results);
+		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources.size(), equalTo(10));
@@ -455,7 +462,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
@@ -481,7 +488,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -500,7 +507,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(21));
 		
-		List<Observation> resources = get(results);
+		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources.size(), equalTo(10));
@@ -525,7 +532,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
@@ -551,7 +558,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -568,7 +575,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		
-		List<Observation> resources = get(results);
+		List<IBaseResource> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, hasItem(hasProperty("id", equalTo(OBS_UUID))));
@@ -596,7 +603,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
@@ -623,7 +630,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -642,10 +649,10 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(14));
 		
-		List<Observation> resources = get(results);
+		List<IBaseResource> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(10));
+		assertThat(resultList, notNullValue());
+		assertThat(resultList.size(), equalTo(10));
 	}
 	
 	@Test
@@ -660,13 +667,13 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(17));
 		
-		List<Observation> resources = get(results);
+		List<IBaseResource> resultList = get(results);
 		
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(10));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(10));
 		
 		// obs.getCategoryFirstRep().getCodingFirstRep().getCode() == "laboratory"
-		assertThat(resources, everyItem(
+		assertThat(resultList, everyItem(
 		    hasProperty("categoryFirstRep", hasProperty("codingFirstRep", hasProperty("code", equalTo("laboratory"))))));
 	}
 	
@@ -681,15 +688,15 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(resultList.get(i - 1).getEffectiveDateTimeType().getValue(),
-			    sameOrBefore(resultList.get(i).getEffectiveDateTimeType().getValue()));
+			assertThat(((Observation) resultList.get(i - 1)).getEffectiveDateTimeType().getValue(),
+			    sameOrBefore(((Observation) resultList.get(i)).getEffectiveDateTimeType().getValue()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
@@ -703,8 +710,8 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(resultList.get(i - 1).getEffectiveDateTimeType().getValue(),
-			    sameOrAfter(resultList.get(i).getEffectiveDateTimeType().getValue()));
+			assertThat(((Observation) resultList.get(i - 1)).getEffectiveDateTimeType().getValue(),
+			    sameOrAfter(((Observation) resultList.get(i)).getEffectiveDateTimeType().getValue()));
 		}
 	}
 	
@@ -756,10 +763,10 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(21));
 		
-		List<Observation> resources = get(results);
+		List<IBaseResource> resultList = get(results);
 		
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(10));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(10));
 	}
 	
 	@Test
@@ -775,10 +782,10 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(14));
 		
-		List<Observation> resources = get(results);
+		List<IBaseResource> resultList = get(results);
 		
-		assertThat(resources, not(empty()));
-		assertThat(resources, hasSize(equalTo(10)));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -804,10 +811,10 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(15));
 		
-		List<Observation> resources = get(results);
+		List<IBaseResource> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(10)));
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -822,7 +829,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(1)));
@@ -843,7 +850,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(OBS_GROUP_UUID));
@@ -859,11 +866,11 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_VALUE_CONCEPT_UUID))));
-		assertThat(resultList.get(0).getIssued().toString(), startsWith(VALUE_DATE));
+		assertThat(((Observation) resultList.get(0)).getIssued().toString(), startsWith(VALUE_DATE));
 	}
 	
 	@Test
@@ -876,11 +883,11 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_VALUE_CONCEPT_UUID))));
-		assertThat(resultList.get(0).getIssued().toString(), equalTo(EXPECTED_VALUE_DATE_AND_TIME));
+		assertThat(((Observation) resultList.get(0)).getIssued().toString(), equalTo(EXPECTED_VALUE_DATE_AND_TIME));
 	}
 	
 	@Test
@@ -893,12 +900,12 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(13));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(10));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_VALUE_CONCEPT_UUID))));
-		assertThat(resultList.get(0).getEffectiveDateTimeType().getValue().toString(), startsWith(OBS_DATE));
+		assertThat(((Observation) resultList.get(0)).getEffectiveDateTimeType().getValue().toString(), startsWith(OBS_DATE));
 	}
 	
 	@Test
@@ -911,12 +918,13 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(12));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(10));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(OBS_VALUE_CONCEPT_UUID))));
-		assertThat(resultList.get(0).getEffectiveDateTimeType().getValue().toString(), equalTo(EXPECTED_OBS_DATE_AND_TIME));
+		assertThat(((Observation) resultList.get(0)).getEffectiveDateTimeType().getValue().toString(),
+		    equalTo(EXPECTED_OBS_DATE_AND_TIME));
 	}
 	
 	@Test
@@ -936,7 +944,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(2)));
@@ -959,7 +967,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(3));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(3)));
@@ -982,7 +990,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(1)));
@@ -1005,7 +1013,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(2)));
@@ -1024,7 +1032,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(1)));
@@ -1043,7 +1051,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(16));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
@@ -1062,7 +1070,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(11));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
@@ -1081,7 +1089,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(10));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
@@ -1100,7 +1108,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(7));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(7)));
@@ -1119,7 +1127,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(6));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(6)));
@@ -1138,7 +1146,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(1)));
@@ -1156,7 +1164,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(1)));
@@ -1175,7 +1183,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, hasSize(equalTo(1)));
@@ -1191,7 +1199,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
@@ -1210,7 +1218,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results.size(), equalTo(16));
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
@@ -1228,7 +1236,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
@@ -1247,18 +1255,140 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<Observation> resultList = get(results);
+		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForObs_shouldAddNotNullEncounterToReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(OBS_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		Include include = new Include("Observation:encounter");
+		includes.add(include);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		
+		Observation returnedObservation = (Observation) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("id", equalTo(returnedObservation.getEncounter().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForObs_shouldAddNotNullPatientToReturnedResults() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(PATIENT_IDENTIFIER).setChain(Patient.SP_IDENTIFIER)));
+		HashSet<Include> includes = new HashSet<>();
+		Include include = new Include("Observation:patient");
+		includes.add(include);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(21));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(11)); // 10 paging + 1 included patient resource
+		
+		Observation returnedObservation = (Observation) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedObservation.getSubject().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForObs_shouldAddNotNullGroupMembersToReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(OBS_GROUP_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		Include include = new Include("Observation:has-member");
+		includes.add(include);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		
+		Observation returnedObservation = (Observation) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Observation.class)),
+		    hasProperty("id", equalTo(returnedObservation.getHasMemberFirstRep().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForObs_shouldAddNotNullGroupMembersToReturnedResultsR3() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(OBS_GROUP_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		Include include = new Include("Observation:related-type");
+		includes.add(include);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		
+		Observation returnedObservation = (Observation) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Observation.class)),
+		    hasProperty("id", equalTo(returnedObservation.getHasMemberFirstRep().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForObs_shouldHandleMultipleIncludes() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(OBS_GROUP_UUID));
+		Include includeGroupMembers = new Include("Observation:related-type");
+		Include includeEncounter = new Include("Observation:encounter");
+		HashSet<Include> includes = new HashSet<>(Arrays.asList(includeEncounter, includeGroupMembers));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(3)); // included resources (encounter + group members) added as part of the result list
+		
+		Observation returnedObservation = (Observation) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Observation.class)),
+		    hasProperty("id", equalTo(returnedObservation.getHasMemberFirstRep().getReferenceElement().getIdPart())))));
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("id", equalTo(returnedObservation.getEncounter().getReferenceElement().getIdPart())))));
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
-	private List<Observation> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof Observation)
-		        .map(it -> (Observation) it).collect(Collectors.toList());
+	private List<IBaseResource> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 }
