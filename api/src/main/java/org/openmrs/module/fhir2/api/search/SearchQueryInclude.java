@@ -149,7 +149,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return idList;
 	}
 	
-	private static String getIdFromReference(Reference reference) {
+	protected static String getIdFromReference(Reference reference) {
 		return reference != null ? reference.getReferenceElement().getIdPart() : null;
 	}
 }

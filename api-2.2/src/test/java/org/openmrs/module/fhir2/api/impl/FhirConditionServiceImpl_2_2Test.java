@@ -22,8 +22,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -52,6 +54,7 @@ import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude_2_2;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 
@@ -78,7 +81,7 @@ public class FhirConditionServiceImpl_2_2Test {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQueryInclude<org.hl7.fhir.r4.model.Condition> searchQueryInclude;
+	private SearchQueryInclude_2_2 searchQueryInclude;
 	
 	@Mock
 	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
@@ -243,6 +246,8 @@ public class FhirConditionServiceImpl_2_2Test {
 		
 		SortSpec sort = new SortSpec("sort param");
 		
+		HashSet<Include> includes = new HashSet<>();
+		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, codeList)
@@ -262,7 +267,7 @@ public class FhirConditionServiceImpl_2_2Test {
 		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
 		
 		IBundleProvider result = conditionService.searchConditions(patientReference, codeList, clinicalList, onsetDate,
-		    onsetAge, recordDate, uuid, lastUpdated, sort);
+		    onsetAge, recordDate, uuid, lastUpdated, sort, includes);
 		
 		List<IBaseResource> resultList = get(result);
 		

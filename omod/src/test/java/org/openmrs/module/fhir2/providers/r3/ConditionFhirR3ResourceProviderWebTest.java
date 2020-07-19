@@ -32,8 +32,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Objects;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
@@ -111,6 +113,9 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	
 	@Captor
 	private ArgumentCaptor<QuantityAndListParam> quantityAndListParamArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
 	
 	@Before
 	@Override
@@ -233,7 +238,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?patient=%s", PATIENT_UUID));
 		
 		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -250,7 +255,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?patient.name=%s", PATIENT_NAME));
 		
 		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -267,7 +272,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?patient.given=%s", PATIENT_GIVEN_NAME));
 		
 		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -284,7 +289,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?patient.family=%s", PATIENT_FAMILY_NAME));
 		
 		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -301,7 +306,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?patient.identifier=%s", PATIENT_IDENTIFIER));
 		
 		verify(conditionService).searchConditions(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -318,7 +323,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?code=%s", CONDITION_CODE));
 		
 		verify(conditionService).searchConditions(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -332,7 +337,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?clinical-status=%s", CLINICAL_STATUS));
 		
 		verify(conditionService).searchConditions(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -346,7 +351,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?asserted-date=%s", RECORDED_DATE));
 		
 		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeParamArgumentCaptor.capture(), isNull(), isNull(), isNull());
+		    dateRangeParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1978, Calendar.FEBRUARY, 2);
@@ -362,7 +367,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?onset-date=%s", ONSET_DATE));
 		
 		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), dateRangeParamArgumentCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
@@ -377,7 +382,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?_id=%s", CONDITION_UUID));
 		
 		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull());
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -391,7 +396,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
 		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeParamArgumentCaptor.capture(), isNull());
+		    dateRangeParamArgumentCaptor.capture(), isNull(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2020, Calendar.SEPTEMBER, 3);
@@ -407,7 +412,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyURI(String.format("/Condition?onset-age=%s", ONSET_AGE));
 		
 		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(),
-		    quantityAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		    quantityAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(quantityAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(quantityAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -425,10 +430,24 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		    equalTo(null));
 	}
 	
+	@Test
+	public void searchForConditions_shouldReturnBundleOfWithIncludedResources() throws Exception {
+		verifyURI("/Condition?_include=Condition:patient");
+		
+		verify(conditionService).searchConditions(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.CONDITION));
+	}
+	
 	private void verifyURI(String uri) throws Exception {
 		Condition condition = new Condition();
 		condition.setId(CONDITION_UUID);
-		when(conditionService.searchConditions(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+		when(conditionService.searchConditions(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

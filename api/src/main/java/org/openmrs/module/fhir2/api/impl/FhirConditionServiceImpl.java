@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -67,7 +70,8 @@ public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> exten
 	@Override
 	public IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
 	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
-	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort) {
+	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
+	        HashSet<Include> includes) {
 		throw new NotImplementedOperationException(MESSAGE);
 	}
 }

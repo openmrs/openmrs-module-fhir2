@@ -65,6 +65,6 @@ public class FhirConditionServiceImplTest {
 	@Test
 	public void searchConditions_shouldThrowNotImplementedOperationException() {
 		assertThrows(NotImplementedOperationException.class,
-		    () -> conditionService.searchConditions(null, null, null, null, null, null, null, null, null));
+		    () -> conditionService.searchConditions(null, null, null, null, null, null, null, null, null, null));
 	}
 }

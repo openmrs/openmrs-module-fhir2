@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -26,6 +29,7 @@ import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude_2_2;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +52,7 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 	private ConditionTranslator<org.openmrs.Condition> translator;
 	
 	@Autowired
-	private SearchQueryInclude<Condition> searchQueryInclude;
+	private SearchQueryInclude_2_2 searchQueryInclude;
 	
 	@Autowired
 	private SearchQuery<org.openmrs.Condition, Condition, FhirConditionDao<org.openmrs.Condition>, ConditionTranslator<org.openmrs.Condition>, SearchQueryInclude<Condition>> searchQuery;
@@ -56,7 +60,8 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 	@Override
 	public IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
 	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
-	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, @Sort SortSpec sort) {
+	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, @Sort SortSpec sort,
+	        HashSet<Include> includes) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientParam)
@@ -67,7 +72,7 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordedDate)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .setSortSpec(sort);
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}

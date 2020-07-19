@@ -10,12 +10,17 @@
 package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
@@ -26,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -39,6 +45,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -128,7 +135,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	private ConditionTranslator<Condition> translator;
 	
 	@Autowired
-	private SearchQueryInclude<org.hl7.fhir.r4.model.Condition> searchQueryInclude;
+	private SearchQueryInclude_2_2 searchQueryInclude;
 	
 	@Autowired
 	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
@@ -973,4 +980,27 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(resultList, empty());
 	}
 	
+	@Test
+	public void searchForConditions_shouldAddNotNullPatientToReturnedResults() {
+		HashSet<Include> includes = new HashSet<>();
+		Include include = new Include("Condition:patient");
+		includes.add(include);
+		
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), Matchers.equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(resultList.size(), Matchers.equalTo(2)); // included resource added as part of the result list
+		
+		org.hl7.fhir.r4.model.Condition returnedCondition = (org.hl7.fhir.r4.model.Condition) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", Matchers.equalTo(returnedCondition.getSubject().getReferenceElement().getIdPart())))));
+	}
 }
