@@ -24,6 +24,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -32,11 +33,15 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
@@ -326,6 +331,64 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 		idType.setValue(WRONG_PERSON_UUID);
 		assertThat(resourceProvider.getPersonHistoryById(idType).isEmpty(), is(true));
 		assertThat(resourceProvider.getPersonHistoryById(idType).size(), equalTo(0));
+	}
+	
+	@Test
+	public void updatePerson_shouldUpdatePerson() {
+		
+		when(fhirPersonService.update(PERSON_UUID, person)).thenReturn(person);
+		
+		MethodOutcome result = resourceProvider.updatePerson(new IdType().setValue(PERSON_UUID), person);
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(person));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePerson_shouldThrowInvalidRequestExceptionForWrongPersonUuid() {
+		when(fhirPersonService.update(WRONG_PERSON_UUID, person)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID), person);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updatePerson_ShouldThrowMethodNotAllowedIfDoesNotExist() {
+		
+		person.setId(WRONG_PERSON_UUID);
+		
+		when(fhirPersonService.update(WRONG_PERSON_UUID, person)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID), person);
+	}
+	
+	@Test
+	public void deletePerson_shouldDeletePerson() {
+
+		when(fhirPersonService.delete(PERSON_UUID)).thenReturn(person);
+		
+		OperationOutcome result = resourceProvider.deletePerson(new IdType().setValue(PERSON_UUID));
+		assertThat(result, notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deletePerson_shouldThrowResourceNotFoundException() {
+		
+		when(fhirPersonService.delete(WRONG_PERSON_UUID)).thenReturn(null);
+		
+		resourceProvider.deletePerson(new IdType().setValue(WRONG_PERSON_UUID));
+	}
+	
+	@Test
+	public void createPerson_shouldCreateNewPerson() {
+		when(fhirPersonService.create(person)).thenReturn(person);
+		
+		MethodOutcome result = resourceProvider.createPerson(person);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(person));
 	}
 	
 }

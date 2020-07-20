@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -24,6 +26,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -32,8 +35,14 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+
+import org.hamcrest.CoreMatchers;
+import org.hl7.fhir.convertors.conv30_40.Person30_40;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -327,5 +336,64 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		assertThat(resourceProvider.getPersonHistoryById(idType).isEmpty(), is(true));
 		assertThat(resourceProvider.getPersonHistoryById(idType).size(), equalTo(0));
 	}
+	
+	@Test
+	public void createPerson_shouldCreateNewPerson() {
+		when(fhirPersonService.create(any(org.hl7.fhir.r4.model.Person.class))).thenReturn(person);
+
+		MethodOutcome result = resourceProvider.createPerson(Person30_40.convertPerson(person));
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), CoreMatchers.equalTo(person));
+	}
+
+	@Test
+	public void deletePerson_shouldDeletePerson() {
+
+		when(fhirPersonService.delete(PERSON_UUID)).thenReturn(person);
+
+		OperationOutcome result = resourceProvider.deletePerson(new IdType().setValue(PERSON_UUID));
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void deletePerson_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantPerson() {
+		when(fhirPersonService.delete(WRONG_PERSON_UUID)).thenReturn(null);
+		resourceProvider.deletePerson(new IdType().setValue(WRONG_PERSON_UUID));
+	}
+
+	@Test
+	public void updatePerson_shouldUpdatePerson() {
+		when(fhirPersonService.update(eq(PERSON_UUID), any(org.hl7.fhir.r4.model.Person.class))).thenReturn(person);
+
+		MethodOutcome result = resourceProvider.updatePerson(new IdType().setValue(PERSON_UUID),
+				Person30_40.convertPerson(person));
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(person));
+	}
+
+	@Test(expected = InvalidRequestException.class)
+	public void updatePerson_shouldThrowInvalidRequestForUuidMismatch() {
+		when(fhirPersonService.update(eq(WRONG_PERSON_UUID), any(org.hl7.fhir.r4.model.Person.class)))
+				.thenThrow(InvalidRequestException.class);
+
+		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID),
+				Person30_40.convertPerson(person));
+	}
+
+	@Test(expected = MethodNotAllowedException.class)
+	public void updatePerson_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		when(fhirPersonService.update(eq(WRONG_PERSON_UUID), any(org.hl7.fhir.r4.model.Person.class)))
+				.thenThrow(MethodNotAllowedException.class);
+
+		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID),
+				Person30_40.convertPerson(person));
+	}
+
 	
 }
