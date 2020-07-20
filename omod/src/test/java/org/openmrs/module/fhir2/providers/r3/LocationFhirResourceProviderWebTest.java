@@ -505,7 +505,6 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	
 	@Test
 	public void deleteLocation_shouldDeleteLocation() throws Exception {
-		
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
 		location.setId(LOCATION_UUID);
 		
