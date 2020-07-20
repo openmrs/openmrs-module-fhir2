@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -33,11 +34,16 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+
+import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
@@ -415,5 +421,61 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	private List<IBaseResource> getResources(IBundleProvider result) {
 		return result.getResources(0, 10);
+	}
+	
+	@Test
+	public void updatePatient_shouldUpdateRequestedPatient() {
+
+		when(patientService.update(PATIENT_UUID, patient)).thenReturn(patient);
+
+		MethodOutcome result = resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), patient);
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(patient));
+	}
+
+	@Test(expected = InvalidRequestException.class)
+	public void updatePatient_shouldThrowInvalidRequestExceptionForWrongPatientUuid() {
+		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(InvalidRequestException.class);
+
+		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+	}
+
+	@Test(expected = MethodNotAllowedException.class)
+	public void updatePatientShouldThrowMethodNotAllowedIfDoesNotExist() {
+		patient.setId(WRONG_PATIENT_UUID);
+
+		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(MethodNotAllowedException.class);
+
+		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+	}
+
+	@Test
+	public void deletePatient_shouldDeleteRequestedPatient() {
+		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
+
+		OperationOutcome result = resourceProvider.deletePatient(new IdType().setValue(PATIENT_UUID));
+		assertThat(result, notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void deletePatient_shouldThrowResourceNotFoundException() {
+		
+		when(patientService.delete(WRONG_PATIENT_UUID)).thenReturn(null);
+		
+		resourceProvider.deletePatient(new IdType().setValue(WRONG_PATIENT_UUID));
+	}
+
+	@Test
+	public void createPatient_shouldCreateNewPatient() {
+		when(patientService.create(patient)).thenReturn(patient);
+
+		MethodOutcome result = resourceProvider.createPatient(patient);
+
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(patient));
 	}
 }

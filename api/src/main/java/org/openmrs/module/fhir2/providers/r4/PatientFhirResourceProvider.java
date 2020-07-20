@@ -13,26 +13,35 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
+
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirPatientService;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -59,6 +68,34 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		}
 		return patient;
 	}
+	
+	@Create
+	public MethodOutcome createPatient(@ResourceParam Patient patient) {
+		return FhirProviderUtils.buildCreate(patientService.create(patient));
+	} 
+	
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updatePatient(@IdParam IdType id, @ResourceParam Patient patient) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+
+		patient.setId(id.getIdPart());
+
+		return FhirProviderUtils.buildUpdate(patientService.update(id.getIdPart(),patient));
+	}
+	
+	@Delete
+	@SuppressWarnings("unused")
+	public OperationOutcome deletePatient(@IdParam @NotNull IdType id) {
+		Patient patient = patientService.delete(id.getIdPart());
+		if (patient == null) {
+			throw new ResourceNotFoundException("Could not find patient to delete with id " + id.getIdPart());
+		}
+		return FhirProviderUtils.buildDelete(patient);
+	}
+	
 	
 	@History
 	@SuppressWarnings("unused")

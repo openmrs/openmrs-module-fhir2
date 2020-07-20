@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -25,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -33,8 +36,14 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+
+import org.hamcrest.CoreMatchers;
+import org.hl7.fhir.convertors.conv30_40.Patient30_40;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -388,9 +397,11 @@ public class PatientFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResou
 	public void getPatientResourceHistory_shouldReturnListOfResource() {
 		IdType id = new IdType();
 		id.setValue(PATIENT_UUID);
+		
 		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
 		
 		List<Resource> resources = patientFhirResourceProvider.getPatientHistoryById(id);
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, not(empty()));
 		assertThat(resources.size(), equalTo(2));
@@ -400,9 +411,11 @@ public class PatientFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResou
 	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
 		IdType id = new IdType();
 		id.setValue(PATIENT_UUID);
+		
 		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
 		
 		List<Resource> resources = patientFhirResourceProvider.getPatientHistoryById(id);
+		
 		assertThat(resources, not(empty()));
 		assertThat(resources.stream().findAny().isPresent(), is(true));
 		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
@@ -412,7 +425,70 @@ public class PatientFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResou
 	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
 		IdType idType = new IdType();
 		idType.setValue(WRONG_PATIENT_UUID);
+		
 		assertThat(patientFhirResourceProvider.getPatientHistoryById(idType).isEmpty(), is(true));
 		assertThat(patientFhirResourceProvider.getPatientHistoryById(idType).size(), equalTo(0));
+	}
+	
+	@Test
+	public void createPatient_shouldCreateNewPatient() {
+		when(patientService.create(any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
+
+		MethodOutcome result = patientFhirResourceProvider.createPatient(Patient30_40.convertPatient(patient));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), CoreMatchers.equalTo(patient));
+	}
+
+	@Test
+	public void deletePatient_shouldDeleteRequestedPatient() {
+
+		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
+
+		OperationOutcome result = patientFhirResourceProvider.deletePatient(new IdType().setValue(PATIENT_UUID));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void deletePatient_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantPatient() {
+		when(patientService.delete(WRONG_PATIENT_UUID)).thenReturn(null);
+		
+		patientFhirResourceProvider.deletePatient(new IdType().setValue(WRONG_PATIENT_UUID));
+	}
+
+	@Test
+	public void updatePatient_shouldUpdateRequestedPatient() {
+		when(patientService.update(eq(PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
+
+		MethodOutcome result = patientFhirResourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID),
+				Patient30_40.convertPatient(patient));
+		
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(patient));
+	}
+
+	@Test(expected = InvalidRequestException.class)
+	public void updatePatient_shouldThrowInvalidRequestForUuidMismatch() {
+		when(patientService.update(eq(WRONG_PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class)))
+				.thenThrow(InvalidRequestException.class);
+
+		patientFhirResourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID),
+				Patient30_40.convertPatient(patient));
+	}
+
+	@Test(expected = MethodNotAllowedException.class)
+	public void updatePatient_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		when(patientService.update(eq(WRONG_PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class)))
+				.thenThrow(MethodNotAllowedException.class);
+
+		patientFhirResourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID),
+				Patient30_40.convertPatient(patient));
 	}
 }

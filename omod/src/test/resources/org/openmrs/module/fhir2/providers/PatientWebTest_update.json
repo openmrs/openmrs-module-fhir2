@@ -1,0 +1,13 @@
+{
+  "resourceType": "Patient",
+  "id": "0b42f99b-776e-4388-8f6f-84357ae2a8fb",
+  "given": "adam",
+  "family": "john",
+  "gender": "male",
+  "birthdate": "2004-08-12 00:00:00.0",
+  "deathdate": "null",
+  "deceased": "false",
+  "state": "mukono",
+  "city": "kampala",
+  "country": "uganda"
+}  
