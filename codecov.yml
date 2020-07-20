@@ -13,11 +13,11 @@ coverage:
     changes: no
 
 ignore:
-  - "/api/src/main/java/org/openmrs/module/fhir2/FhirActivator.java"
-  - "/api/src/main/java/org/openmrs/module/fhir2/FhirConstants.java"
-  - "/api/src/main/java/org/openmrs/module/fhir2/FhirConceptSource.java"
-  - "/api/src/main/java/org/openmrs/module/fhir2/FhirException.java"
-  - "/api/src/main/java/org/openmrs/module/fhir2/FhirTask.java"
-  - "/api/src/main/java/org/openmrs/module/fhir2/providers/util/TaskVersionConverter.java"
-  - "/omod/src/main/java/org/openmrs/module/fhir2/web/filter/AuthenticationFilter.java"
-  - "/omod/src/main/java/org/openmrs/module/fhir2/web/filter/ForwardingFilter.java"
+  - "api/src/main/java/org/openmrs/module/fhir2/FhirActivator.java"
+  - "api/src/main/java/org/openmrs/module/fhir2/FhirConstants.java"
+  - "api/src/main/java/org/openmrs/module/fhir2/FhirConceptSource.java"
+  - "api/src/main/java/org/openmrs/module/fhir2/FhirException.java"
+  - "api/src/main/java/org/openmrs/module/fhir2/FhirTask.java"
+  - "api/src/main/java/org/openmrs/module/fhir2/providers/util/TaskVersionConverter.java"
+  - "omod/src/main/java/org/openmrs/module/fhir2/web/filter/AuthenticationFilter.java"
+  - "omod/src/main/java/org/openmrs/module/fhir2/web/filter/ForwardingFilter.java"
