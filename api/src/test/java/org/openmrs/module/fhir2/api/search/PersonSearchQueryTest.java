@@ -13,12 +13,16 @@ import static org.exparity.hamcrest.date.DateMatchers.sameDay;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrBefore;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
@@ -34,9 +38,11 @@ import static org.openmrs.util.OpenmrsUtil.compareWithNullAsGreatest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -48,8 +54,10 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hamcrest.comparator.ComparatorMatcherBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Test;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -415,6 +423,58 @@ public class PersonSearchQueryTest extends BaseModuleContextSensitiveTest {
 		List<Person> resultList = get(results);
 		
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void shouldAddPatientsToResultListWhenIncluded() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PERSON_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Person:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(PERSON_UUID));
+		
+		org.hl7.fhir.r4.model.Person returnedPerson = (org.hl7.fhir.r4.model.Person) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedPerson.getLinkFirstRep().getTarget().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void shouldAddPersonLinksToResultListWhenIncluded() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PERSON_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Person:link:Patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(PERSON_UUID));
+		
+		org.hl7.fhir.r4.model.Person returnedPerson = (org.hl7.fhir.r4.model.Person) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedPerson.getLinkFirstRep().getTarget().getReferenceElement().getIdPart())))));
 	}
 	
 	@Test

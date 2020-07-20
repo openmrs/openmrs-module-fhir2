@@ -11,12 +11,15 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -34,6 +37,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -115,9 +119,14 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Person.SP_ADDRESS_POSTALCODE) StringAndListParam postalCode,
 	        @OptionalParam(name = Person.SP_ADDRESS_COUNTRY) StringAndListParam country,
 	        @OptionalParam(name = Person.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort, @IncludeParam(allow = {
+	                "Person:" + Person.SP_LINK + ":Patient", "Person:" + Person.SP_PATIENT }) HashSet<Include> includes) {
+		if (CollectionUtils.isEmpty(includes)) {
+			includes = null;
+		}
+		
 		return fhirPersonService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, id, lastUpdated,
-		    sort);
+		    sort, includes);
 	}
 	
 }

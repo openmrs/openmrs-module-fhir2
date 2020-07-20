@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
@@ -99,6 +100,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				case FhirConstants.INCLUDE_MEDICATION_PARAM:
 					includedResourcesSet.addAll(handleMedicationInclude(resourceList, includeParam.getParamType()));
 					break;
+				case FhirConstants.INCLUDE_LINK_PARAM:
+					includedResourcesSet.addAll(handlePersonLinkInclude(resourceList, includeParam.getParamTargetType()));
+					break;
 			}
 		});
 		
@@ -110,6 +114,26 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		        .map(SearchQueryInclude::getIdFromReference).filter(Objects::nonNull).collect(Collectors.toSet());
 		
 		return locationService.get(uniqueParentLocationUUIDs);
+	}
+	
+	private Set<IBaseResource> handlePersonLinkInclude(List<U> resourceList, String targetType) {
+		Set<IBaseResource> includedResources = new HashSet<>();
+		
+		switch (targetType) {
+			case FhirConstants.PATIENT:
+				resourceList.forEach(resource -> {
+					List<Reference> patientReferenceList = new ArrayList<>();
+					((Person) resource).getLink().stream()
+					        .filter(res -> res.getTarget().getType().equals(FhirConstants.PATIENT))
+					        .forEach(patient -> patientReferenceList.add(patient.getTarget()));
+					
+					includedResources
+					        .addAll(patientService.get(new HashSet<>(getIdsFromReferenceList(patientReferenceList))));
+				});
+				break;
+		}
+		
+		return includedResources;
 	}
 	
 	private Set<IBaseResource> handleMedicationInclude(List<U> resourceList, String paramType) {
@@ -220,6 +244,13 @@ public class SearchQueryInclude<U extends IBaseResource> {
 			case FhirConstants.MEDICATION_REQUEST:
 				resourceList.forEach(
 				    resource -> uniquePatientUUIDs.add(getIdFromReference(((MedicationRequest) resource).getSubject())));
+				break;
+			case FhirConstants.PERSON:
+				resourceList.forEach(resource -> {
+					List<Reference> patientReferenceList = new ArrayList<>();
+					((Person) resource).getLink().forEach(patient -> patientReferenceList.add(patient.getTarget()));
+					uniquePatientUUIDs.addAll(getIdsFromReferenceList(patientReferenceList));
+				});
 				break;
 		}
 		
