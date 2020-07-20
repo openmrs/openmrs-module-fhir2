@@ -155,42 +155,37 @@ a browser.
             <td>Device:</td>
             <td th:narrative="${resource.device}"></td>
         </tr>
-        </tbody>
-    </table>
-
-    <th:block th:if="${not resource.referenceRange.empty}">
-        <h2>Reference Ranges</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Low</th>
-                <th>High</th>
-                <th>Type</th>
-                <th>Applies To</th>
-                <th>Age</th>
-            </tr>
-            <tr th:each="refRange, refRangeItr: ${resource.referenceRange}">
-                <td th:text="${refRangeItr.count}"></td>
-                <td th:narrative="${refRange.low}"></td>
-                <td th:narrative="${refRange.high}"></td>
-                <td th:narrative="${refRange.type}"></td>
-                <td>
-                    <th:block th:each="appliesTo, appliesToItr: ${refRange.appliesTo}">
-                        <th:block th:if="${appliesToItr.index}">,</th:block>
-                        <th:block th:narrative="${appliesTo}"></th:block>
-                    </th:block>
-                </td>
-                <td th:narrative="${refRange.age}"></td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <th:block th:if="${fhirVersion} eq 'R4'">
-        <br/>
-        <table class="hapiPropertyTable">
-            <tbody>
+        <tr th:if="${not resource.referenceRange.empty}">
+            <td>Reference Ranges:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Low</th>
+                        <th>High</th>
+                        <th>Type</th>
+                        <th>Applies To</th>
+                        <th>Age</th>
+                    </tr>
+                    <tr th:each="refRange, refRangeItr: ${resource.referenceRange}">
+                        <td th:text="${refRangeItr.count}"></td>
+                        <td th:narrative="${refRange.low}"></td>
+                        <td th:narrative="${refRange.high}"></td>
+                        <td th:narrative="${refRange.type}"></td>
+                        <td>
+                            <th:block th:each="appliesTo, appliesToItr: ${refRange.appliesTo}">
+                                <th:block th:if="${appliesToItr.index}">,</th:block>
+                                <th:block th:narrative="${appliesTo}"></th:block>
+                            </th:block>
+                        </td>
+                        <td th:narrative="${refRange.age}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <th:block th:if="${fhirVersion} eq 'R4'">
             <tr th:if="${not resource.hasMember.empty}">
                 <td>Has Member:</td>
                 <td>
@@ -207,36 +202,37 @@ a browser.
                     </th:block>
                 </td>
             </tr>
-            </tbody>
-        </table>
-    </th:block>
-
-    <th:block th:if="${not resource.component.empty}">
-        <h2>Components</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Code</th>
-                <th>Value</th>
-                <th>Data Absent Reason</th>
-                <th>Interpretation</th>
-            </tr>
-            <tr th:each="component, componentItr: ${resource.component}">
-                <td th:text="${componentItr.count}"></td>
-                <td th:narrative="${component.code}"></td>
-                <td th:narrative="${component.value}"></td>
-                <td th:narrative="${component.dataAbsentReason}"></td>
-                <td>
-                    <th:block th:each="interpretation, interpretationItr: ${component.interpretation}">
-                        <th:block th:if="${interpretationItr.index}">,</th:block>
-                        <th:block th:narrative="${interpretation}"></th:block>
-                    </th:block>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
+        </th:block>
+        <tr th:if="${not resource.component.empty}">
+            <td>Components:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Code</th>
+                        <th>Value</th>
+                        <th>Data Absent Reason</th>
+                        <th>Interpretation</th>
+                    </tr>
+                    <tr th:each="component, componentItr: ${resource.component}">
+                        <td th:text="${componentItr.count}"></td>
+                        <td th:narrative="${component.code}"></td>
+                        <td th:narrative="${component.value}"></td>
+                        <td th:narrative="${component.dataAbsentReason}"></td>
+                        <td>
+                            <th:block th:each="interpretation, interpretationItr: ${component.interpretation}">
+                                <th:block th:if="${interpretationItr.index}">,</th:block>
+                                <th:block th:narrative="${interpretation}"></th:block>
+                            </th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 
 <!--/*-->

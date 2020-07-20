@@ -1,10 +1,20 @@
-<th:block th:if="${resource.system}">
-    <th:block th:if="${resource.system.toString} eq 'EMAIL'">
+<th:block th:if="${resource.system}" th:switch="${resource.system.toString}">
+    <th:block th:case="'EMAIL'">
         <th:block th:if="${resource.system}" th:text="${resource.system}+':'"></th:block>
         <a th:if="${resource.value}" th:href="'mailto:' + ${resource.value}" th:text="${resource.value}"></a>
         <th:block th:if="${resource.use}" th:text="'('+${resource.use}+')'"></th:block>
     </th:block>
-    <th:block th:unless="${resource.system.toString} eq 'EMAIL'">
+    <th:block th:case="'PHONE'">
+        <th:block th:if="${resource.system}" th:text="${resource.system}+':'"></th:block>
+        <a th:if="${resource.value}" th:href="'tel:' + ${resource.value}" th:text="${resource.value}"></a>
+        <th:block th:if="${resource.use}" th:text="'('+${resource.use}+')'"></th:block>
+    </th:block>
+    <th:block th:case="'URL'">
+        <th:block th:if="${resource.system}" th:text="${resource.system}+':'"></th:block>
+        <a th:if="${resource.value}" th:href="${resource.value}" th:text="${resource.value}"></a>
+        <th:block th:if="${resource.use}" th:text="'('+${resource.use}+')'"></th:block>
+    </th:block>
+    <th:block th:case="*">
         <th:block th:if="${resource.system}" th:text="${resource.system}+':'"></th:block>
         <th:block th:if="${resource.value}" th:text="${resource.value}"></th:block>
         <th:block th:if="${resource.use}" th:text="'('+${resource.use}+')'"></th:block>

@@ -76,40 +76,40 @@ a browser.
                 </th:block>
             </td>
         </tr>
+        <tr th:if="${not resource.qualification.empty}">
+            <td>Qualification:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Identifier</th>
+                        <th>Code</th>
+                        <th>Period</th>
+                        <th>Issuer</th>
+                    </tr>
+                    <tr th:each="qualification, qualificationItr: ${resource.qualification}">
+                        <td th:text="${qualificationItr.count}"></td>
+                        <td>
+                            <th:block th:each="identifier, identifierItr: ${qualification.identifier}">
+                                <th:block th:if="${identifierItr.index}">,</th:block>
+                                <th:block th:narrative="${identifier}"></th:block>
+                            </th:block>
+                        </td>
+                        <td th:narrative="${qualification.code}"></td>
+                        <td>
+                            <th:block th:if="${qualification.period}" th:narrative="${qualification.period}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${qualification.issuer}" th:narrative="${qualification.issuer}"></th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         </tbody>
     </table>
-
-    <th:block th:if="${not resource.qualification.empty}">
-        <br/>
-        <h2>Qualification</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Identifier</th>
-                <th>Code</th>
-                <th>Period</th>
-                <th>Issuer</th>
-            </tr>
-            <tr th:each="qualification, qualificationItr: ${resource.qualification}">
-                <td th:text="${qualificationItr.count}"></td>
-                <td>
-                    <th:block th:each="identifier, identifierItr: ${qualification.identifier}">
-                        <th:block th:if="${identifierItr.index}">,</th:block>
-                        <th:block th:narrative="${identifier}"></th:block>
-                    </th:block>
-                </td>
-                <td th:narrative="${qualification.code}"></td>
-                <td>
-                    <th:block th:if="${qualification.period}" th:narrative="${qualification.period}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${qualification.issuer}" th:narrative="${qualification.issuer}"></th:block>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
 </div>
 
 <!--/*-->

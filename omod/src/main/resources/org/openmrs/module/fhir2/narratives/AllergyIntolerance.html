@@ -99,12 +99,7 @@ a browser.
                 <div th:each="note: ${resource.note}" th:text="${note.text}"></div>
             </td>
         </tr>
-        </tbody>
-    </table>
-    <th:block th:each="reaction: ${resource.reaction}">
-        <br/>
-        <table class="hapiPropertyTable">
-            <tbody>
+        <th:block th:each="reaction: ${resource.reaction}">
             <tr>
                 <td>Reaction:</td>
                 <td></td>
@@ -141,9 +136,9 @@ a browser.
                 <td>Note:</td>
                 <td th:text="${reaction.noteFirstRep.text}"></td>
             </tr>
-            </tbody>
-        </table>
-    </th:block>
+        </th:block>
+        </tbody>
+    </table>
 </div>
 
 <!--/*-->

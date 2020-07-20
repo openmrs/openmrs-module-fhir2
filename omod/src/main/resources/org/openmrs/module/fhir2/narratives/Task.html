@@ -168,39 +168,40 @@ a browser.
                 </th:block>
             </td>
         </tr>
+        <tr th:if="${not resource.restriction.empty}">
+            <td>Restriction:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Repetitions</th>
+                        <th>Period</th>
+                        <th>Recipient</th>
+                    </tr>
+                    <tr>
+                        <td>*</td>
+                        <td>
+                            <th:block th:if="${resource.restriction.repetitions}"
+                                      th:text="${resource.restriction.repetitions}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:if="${resource.restriction.period}"
+                                      th:narrative="${resource.restriction.period}"></th:block>
+                        </td>
+                        <td>
+                            <th:block th:each="recipient, recipientItr: ${resource.restriction.recipient}">
+                                <th:block th:if="${recipientItr.index}">,</th:block>
+                                <th:block th:narrative="${recipient}"></th:block>
+                            </th:block>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
         </tbody>
     </table>
-
-    <th:block th:if="${not resource.restriction.empty}">
-        <h2>Restriction</h2>
-        <table class="subPropertyTable">
-            <tbody>
-            <tr>
-                <th>-</th>
-                <th>Repetitions</th>
-                <th>Period</th>
-                <th>Recipient</th>
-            </tr>
-            <tr>
-                <td>*</td>
-                <td>
-                    <th:block th:if="${resource.restriction.repetitions}"
-                              th:text="${resource.restriction.repetitions}"></th:block>
-                </td>
-                <td>
-                    <th:block th:if="${resource.restriction.period}"
-                              th:narrative="${resource.restriction.period}"></th:block>
-                </td>
-                <td>
-                    <th:block th:each="recipient, recipientItr: ${resource.restriction.recipient}">
-                        <th:block th:if="${recipientItr.index}">,</th:block>
-                        <th:block th:narrative="${recipient}"></th:block>
-                    </th:block>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </th:block>
 </div>
 
 <!--/*-->
