@@ -505,9 +505,6 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	
 	@Test
 	public void deleteLocation_shouldDeleteLocation() throws Exception {
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(LOCATION_UUID);
-		retVal.getText().setDivAsString("Deleted successfully");
 		
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
 		location.setId(LOCATION_UUID);
