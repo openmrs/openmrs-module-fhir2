@@ -38,14 +38,20 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 		}
 		
 		Identifier patientIdentifier = new Identifier();
-		if (identifier.getPreferred()) {
-			patientIdentifier.setUse(Identifier.IdentifierUse.OFFICIAL);
-		} else {
-			patientIdentifier.setUse(Identifier.IdentifierUse.USUAL);
+		
+		if (identifier.getPreferred() != null) {
+			if (identifier.getPreferred()) {
+				patientIdentifier.setUse(Identifier.IdentifierUse.OFFICIAL);
+			} else {
+				patientIdentifier.setUse(Identifier.IdentifierUse.USUAL);
+			}
 		}
 		
-		patientIdentifier.setSystem(identifier.getIdentifierType().getName()).setValue(identifier.getIdentifier())
-		        .setId(identifier.getUuid());
+		if (identifier.getIdentifierType() != null) {
+			patientIdentifier.setSystem(identifier.getIdentifierType().getName());
+		}
+		
+		patientIdentifier.setValue(identifier.getIdentifier()).setId(identifier.getUuid());
 		
 		return patientIdentifier;
 	}

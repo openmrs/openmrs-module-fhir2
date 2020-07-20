@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.lang.math.NumberUtils;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Location;
@@ -65,11 +66,14 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 			fhirLocation.setDescription(openmrsLocation.getDescription());
 			fhirLocation.setAddress(locationAddressTranslator.toFhirResource(openmrsLocation));
 			
-			if (openmrsLocation.getLatitude() != null) {
-				position.setLatitude(Double.parseDouble(openmrsLocation.getLatitude()));
+			double latitude = NumberUtils.toDouble(openmrsLocation.getLatitude(), -1.0d);
+			if (latitude >= 0.0d) {
+				position.setLatitude(latitude);
 			}
-			if (openmrsLocation.getLongitude() != null) {
-				position.setLongitude(Double.parseDouble(openmrsLocation.getLongitude()));
+			
+			double longitude = NumberUtils.toDouble(openmrsLocation.getLongitude(), -1.0d);
+			if (longitude >= 0.0d) {
+				position.setLongitude(longitude);
 			}
 			
 			fhirLocation.setPosition(position);
@@ -119,10 +123,13 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 			openmrsLocation.setUuid(fhirLocation.getId());
 			openmrsLocation.setName(fhirLocation.getName());
 			openmrsLocation.setDescription(fhirLocation.getDescription());
-			openmrsLocation.setCityVillage(fhirLocation.getAddress().getCity());
-			openmrsLocation.setStateProvince(fhirLocation.getAddress().getState());
-			openmrsLocation.setCountry(fhirLocation.getAddress().getCountry());
-			openmrsLocation.setPostalCode(fhirLocation.getAddress().getPostalCode());
+			
+			if (fhirLocation.getAddress() != null) {
+				openmrsLocation.setCityVillage(fhirLocation.getAddress().getCity());
+				openmrsLocation.setStateProvince(fhirLocation.getAddress().getState());
+				openmrsLocation.setCountry(fhirLocation.getAddress().getCountry());
+				openmrsLocation.setPostalCode(fhirLocation.getAddress().getPostalCode());
+			}
 			
 			if (fhirLocation.hasStatus() && fhirLocation.getStatus().equals(Location.LocationStatus.INACTIVE)) {
 				openmrsLocation.setRetired(true);

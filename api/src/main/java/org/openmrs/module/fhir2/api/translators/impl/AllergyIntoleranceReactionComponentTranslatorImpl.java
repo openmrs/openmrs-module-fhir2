@@ -83,9 +83,16 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 	
 	private List<CodeableConcept> getManifestation(List<AllergyReaction> reactions) {
 		List<CodeableConcept> manifestations = new ArrayList<>();
-		for (AllergyReaction reaction : reactions) {
-			manifestations
-			        .add(conceptTranslator.toFhirResource(reaction.getReaction()).setText(reaction.getReactionNonCoded()));
+		
+		if (reactions != null) {
+			for (AllergyReaction reaction : reactions) {
+				
+				if (reaction.getReaction() != null) {
+					manifestations.add(
+					    conceptTranslator.toFhirResource(reaction.getReaction()).setText(reaction.getReactionNonCoded()));
+				}
+				
+			}
 		}
 		
 		return manifestations;

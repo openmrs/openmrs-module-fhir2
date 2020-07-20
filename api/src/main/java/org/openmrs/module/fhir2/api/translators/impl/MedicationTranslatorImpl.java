@@ -46,22 +46,34 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		medication.setCode(conceptTranslator.toFhirResource(drug.getConcept()));
 		medication.setForm(conceptTranslator.toFhirResource(drug.getDosageForm()));
 		
-		for (DrugIngredient val : drug.getIngredients()) {
-			Medication.MedicationIngredientComponent ingredient = new Medication.MedicationIngredientComponent();
-			medication.addIngredient(ingredient.setItem(conceptTranslator.toFhirResource(val.getIngredient())));
+		if (drug.getIngredients() != null) {
+			for (DrugIngredient val : drug.getIngredients()) {
+				Medication.MedicationIngredientComponent ingredient = new Medication.MedicationIngredientComponent();
+				medication.addIngredient(ingredient.setItem(conceptTranslator.toFhirResource(val.getIngredient())));
+			}
 		}
 		
 		medication.getMeta().setLastUpdated(drug.getDateChanged());
 		
-		if (drug.getRetired()) {
-			medication.setStatus(Medication.MedicationStatus.INACTIVE);
-		} else {
-			medication.setStatus(Medication.MedicationStatus.ACTIVE);
+		if (drug.getRetired() != null) {
+			if (drug.getRetired()) {
+				medication.setStatus(Medication.MedicationStatus.INACTIVE);
+			} else {
+				medication.setStatus(Medication.MedicationStatus.ACTIVE);
+			}
 		}
 		
-		addMedicineExtension(medication, "maximumDailyDose", drug.getMaximumDailyDose().toString());
-		addMedicineExtension(medication, "minimumDailyDose", drug.getMinimumDailyDose().toString());
-		addMedicineExtension(medication, "strength", drug.getStrength());
+		if (drug.getMaximumDailyDose() != null) {
+			addMedicineExtension(medication, "maximumDailyDose", drug.getMaximumDailyDose().toString());
+		}
+		
+		if (drug.getMinimumDailyDose() != null) {
+			addMedicineExtension(medication, "minimumDailyDose", drug.getMinimumDailyDose().toString());
+		}
+		
+		if (drug.getStrength() != null) {
+			addMedicineExtension(medication, "strength", drug.getStrength());
+		}
 		
 		return medication;
 	}
@@ -100,10 +112,12 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 			existingDrug.setIngredients(ingredients);
 		}
 		
-		if (med.getStatus() == Medication.MedicationStatus.ACTIVE) {
-			existingDrug.setRetired(false);
-		} else if (med.getStatus() == Medication.MedicationStatus.INACTIVE) {
-			existingDrug.setRetired(true);
+		if (med.hasStatus()) {
+			if (med.getStatus() == Medication.MedicationStatus.ACTIVE) {
+				existingDrug.setRetired(false);
+			} else if (med.getStatus() == Medication.MedicationStatus.INACTIVE) {
+				existingDrug.setRetired(true);
+			}
 		}
 		
 		getOpenmrsMedicineExtension(med).ifPresent(ext -> ext.getExtension()

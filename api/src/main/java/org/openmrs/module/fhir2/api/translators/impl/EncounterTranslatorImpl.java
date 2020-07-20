@@ -54,8 +54,12 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		encounter.setSubject(patientReferenceTranslator.toFhirResource(openMrsEncounter.getPatient()));
 		encounter.setParticipant(openMrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource)
 		        .collect(Collectors.toList()));
-		encounter.setLocation(
-		    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
+		
+		if (openMrsEncounter.getLocation() != null) {
+			encounter.setLocation(
+			    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
+		}
+		
 		encounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());
 		encounter.addContained(provenanceTranslator.getCreateProvenance(openMrsEncounter));
 		encounter.addContained(provenanceTranslator.getUpdateProvenance(openMrsEncounter));

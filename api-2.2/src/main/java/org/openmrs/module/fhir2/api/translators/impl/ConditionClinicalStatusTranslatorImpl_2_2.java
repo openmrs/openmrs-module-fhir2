@@ -49,6 +49,10 @@ public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClini
 	}
 	
 	private ConditionClinicalStatus getClinicalStatus(Coding coding) {
+		if (coding.getCode() == null) {
+			return ConditionClinicalStatus.INACTIVE;
+		}
+		
 		switch (coding.getCode().trim().toLowerCase()) {
 			case "active":
 				return ConditionClinicalStatus.ACTIVE;

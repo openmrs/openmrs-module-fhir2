@@ -47,10 +47,12 @@ public class ListTranslatorImpl implements ListTranslator<Cohort> {
 		
 		list.setNote(Collections.singletonList(new Annotation().setText(cohort.getDescription())));
 		
-		if (!cohort.getVoided()) {
-			list.setStatus(ListResource.ListStatus.CURRENT);
-		} else {
-			list.setStatus(ListResource.ListStatus.RETIRED);
+		if (cohort.getVoided() != null) {
+			if (!cohort.getVoided()) {
+				list.setStatus(ListResource.ListStatus.CURRENT);
+			} else {
+				list.setStatus(ListResource.ListStatus.RETIRED);
+			}
 		}
 		
 		list.setEntry(listEntryTranslator.toFhirResource(cohort));

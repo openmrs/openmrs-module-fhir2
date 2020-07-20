@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -112,7 +113,7 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 				allergy.setAllergen(allergen);
 			}
 		}
-		if (fhirAllergy.hasCategory()) {
+		if (fhirAllergy.hasCategory() && allergy.getAllergen() != null) {
 			allergy.getAllergen()
 			        .setAllergenType(categoryTranslator.toOpenmrsType(fhirAllergy.getCategory().get(0).getValue()));
 		}
@@ -125,7 +126,7 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 				reactionComponentTranslator.toOpenmrsType(allergy, reaction);
 			}
 		}
-		if (!fhirAllergy.getNote().isEmpty()) {
+		if (!CollectionUtils.isEmpty(fhirAllergy.getNote())) {
 			allergy.setComment(fhirAllergy.getNote().get(0).getText());
 		}
 		
@@ -147,6 +148,10 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 	}
 	
 	private boolean isAllergyInactive(CodeableConcept status) {
+		if (status == null || CollectionUtils.isEmpty(status.getCoding())) {
+			return false;
+		}
+		
 		return status.getCoding().stream()
 		        .filter(c -> FhirConstants.ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET.equals(c.getSystem()))
 		        .anyMatch(c -> "inactive".equals(c.getCode()));

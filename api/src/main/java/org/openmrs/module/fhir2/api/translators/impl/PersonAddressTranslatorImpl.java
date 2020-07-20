@@ -23,6 +23,10 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslatorImpl imple
 	@Override
 	public Address toFhirResource(PersonAddress address) {
 		Address fhirAddress = new Address();
+		if (address == null) {
+			return fhirAddress;
+		}
+		
 		fhirAddress.setId(address.getUuid());
 		fhirAddress.setCity(address.getCityVillage());
 		fhirAddress.setState(address.getStateProvince());
@@ -30,10 +34,12 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslatorImpl imple
 		fhirAddress.setPostalCode(address.getPostalCode());
 		
 		// TODO is this the right mapping?
-		if (address.getPreferred()) {
-			fhirAddress.setUse(Address.AddressUse.HOME);
-		} else {
-			fhirAddress.setUse(Address.AddressUse.OLD);
+		if (address.getPreferred() != null) {
+			if (address.getPreferred()) {
+				fhirAddress.setUse(Address.AddressUse.HOME);
+			} else {
+				fhirAddress.setUse(Address.AddressUse.OLD);
+			}
 		}
 		
 		addAddressExtensions(fhirAddress, address);

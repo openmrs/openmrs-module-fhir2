@@ -77,7 +77,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		
 		for (Coding coding : concept.getCoding()) {
 			if (!coding.hasSystem()) {
-				concept_ = conceptService.get(coding.getCode());
+				concept_ = coding.getCode() != null ? conceptService.get(coding.getCode()) : null;
 				continue;
 			}
 			
@@ -86,7 +86,9 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 				continue;
 			}
 			
-			Concept codedConcept = conceptService.getConceptBySourceNameAndCode(codingSource, coding.getCode()).orElse(null);
+			Concept codedConcept = coding.getCode() != null
+			        ? conceptService.getConceptBySourceNameAndCode(codingSource, coding.getCode()).orElse(null)
+			        : null;
 			if (codedConcept != null) {
 				if (concept_ == null) {
 					concept_ = codedConcept;
@@ -103,11 +105,11 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		coding.setSystem(system);
 		coding.setCode(code);
 		ConceptName conceptName = concept.getName(userDefaultProperties.getDefaultLocale());
-		if (conceptName.getName() == null) {
+		if (conceptName == null || conceptName.getName() == null) {
 			conceptName = concept.getName();
 		}
 		
-		String display = conceptName.getName() == null ? "" : conceptName.getName();
+		String display = (conceptName == null || conceptName.getName() == null) ? "" : conceptName.getName();
 		coding.setDisplay(display);
 		
 		for (ConceptName name : concept.getNames()) {
