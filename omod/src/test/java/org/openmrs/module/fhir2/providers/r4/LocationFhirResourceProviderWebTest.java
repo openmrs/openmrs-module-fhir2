@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -17,6 +18,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,10 +28,13 @@ import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
 import javax.servlet.ServletException;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -37,6 +42,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
@@ -44,6 +50,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,6 +100,14 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	private static final String PARENT_LOCATION_POSTAL_CODE = "Test parent postal code";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
+	
+	private static final String JSON_CREATE_LOCATION_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_create.json";
+	
+	private static final String JSON_UPDATE_LOCATION_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_update.json";
+	
+	private static final String JSON_UPDATE_LOCATION_NO_ID_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_UpdateWithoutId.json";
+	
+	private static final String JSON_UPDATE_LOCATION_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_UpdateWithWrongId.json";
 	
 	@Mock
 	private FhirLocationService locationService;
@@ -441,4 +456,86 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
+	
+	@Test
+	public void createLocation_shouldCreateLocation() throws Exception {
+		String jsonLocation;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_LOCATION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		Location location = new Location();
+		location.setId(LOCATION_UUID);
+		
+		when(locationService.create(any(Location.class))).thenReturn(location);
+		
+		MockHttpServletResponse response = post("/Location").jsonContent(jsonLocation).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isCreated());
+	}
+	
+	@Test
+	public void updateLocation_shouldUpdateExistingLocation() throws Exception {
+		String jsonLocation;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		Location location = new Location();
+		location.setId(LOCATION_UUID);
+		
+		when(locationService.update(anyString(), any(Location.class))).thenReturn(location);
+		
+		MockHttpServletResponse response = put("/Location/" + LOCATION_UUID).jsonContent(jsonLocation)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+	}
+	
+	@Test
+	public void updateLocation_shouldThrowErrorForNoId() throws Exception {
+		String jsonLocation;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_NO_ID_PATH)) {
+			Objects.requireNonNull(is);
+			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		MockHttpServletResponse response = put("/Location/" + LOCATION_UUID).jsonContent(jsonLocation)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
+	}
+	
+	@Test
+	public void updateLocation_shouldThrowErrorForIdMissMatch() throws Exception {
+		String jsonLocation;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_WRONG_ID_PATH)) {
+			Objects.requireNonNull(is);
+			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		MockHttpServletResponse response = put("/Location/" + WRONG_LOCATION_UUID).jsonContent(jsonLocation)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+	}
+	
+	@Test
+	public void deleteLocation_shouldDeleteLocation() throws Exception {
+		Location location = new Location();
+		location.setId(LOCATION_UUID);
+		
+		when(locationService.delete(LOCATION_UUID)).thenReturn(location);
+		
+		MockHttpServletResponse response = delete("/Location/" + LOCATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
 }
