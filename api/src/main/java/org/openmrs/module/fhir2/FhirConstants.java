@@ -220,6 +220,8 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_NARRATIVES_PROPERTY_FILE = "classpath:org/openmrs/module/fhir2/narratives.properties";
 	
+	public static final String NARRATIVES_OVERRIDE_PROPERTY_FILE = "fhir2.narrativesOverridePropertyFile";
+	
 	public static final String ALLERGEN_SEARCH_HANDLER = "allergen.search.handler";
 	
 	public static final String SEVERITY_SEARCH_HANDLER = "severity.search.handler";
