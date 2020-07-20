@@ -86,12 +86,10 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 		
 		if (reactions != null) {
 			for (AllergyReaction reaction : reactions) {
-				
 				if (reaction.getReaction() != null) {
 					manifestations.add(
 					    conceptTranslator.toFhirResource(reaction.getReaction()).setText(reaction.getReactionNonCoded()));
 				}
-				
 			}
 		}
 		
