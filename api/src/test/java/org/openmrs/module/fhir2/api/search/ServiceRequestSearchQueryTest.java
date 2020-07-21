@@ -20,13 +20,17 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -34,6 +38,8 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -1075,5 +1081,219 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldAddPatientsToResultListWhenIncluded() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ServiceRequest:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((ServiceRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(SERVICE_REQUEST_UUID));
+		
+		ServiceRequest returnedServiceRequest = (ServiceRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getSubject().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldAddPatientsToResultListWhenIncludedR3() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ProcedureRequest:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((ServiceRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(SERVICE_REQUEST_UUID));
+		
+		ServiceRequest returnedServiceRequest = (ServiceRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getSubject().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldAddRequesterToResultListWhenIncluded() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ServiceRequest:requester"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((ServiceRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(SERVICE_REQUEST_UUID));
+		
+		ServiceRequest returnedServiceRequest = (ServiceRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Practitioner.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getRequester().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldAddRequesterToResultListWhenIncludedR3() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ProcedureRequest:requester"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((ServiceRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(SERVICE_REQUEST_UUID));
+		
+		ServiceRequest returnedServiceRequest = (ServiceRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Practitioner.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getRequester().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldAddEncounterToResultListWhenIncluded() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ServiceRequest:encounter"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((ServiceRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(SERVICE_REQUEST_UUID));
+		
+		ServiceRequest returnedServiceRequest = (ServiceRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getEncounter().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldAddEncounterToResultListWhenIncludedR3() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ProcedureRequest:encounter"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((ServiceRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(SERVICE_REQUEST_UUID));
+		
+		ServiceRequest returnedServiceRequest = (ServiceRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getEncounter().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldHandleMultipleIncludes() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ServiceRequest:requester"));
+		includes.add(new Include("ServiceRequest:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(3)); // included resources (patient + requester) added as part of result list
+		assertThat(((ServiceRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(SERVICE_REQUEST_UUID));
+		
+		ServiceRequest returnedServiceRequest = (ServiceRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Practitioner.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getRequester().getReferenceElement().getIdPart())))));
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getSubject().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldHandleMultipleIncludesR3() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ProcedureRequest:requester"));
+		includes.add(new Include("ProcedureRequest:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(3)); // included resources (patient + requester) added as part of result list
+		assertThat(((ServiceRequest) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(SERVICE_REQUEST_UUID));
+		
+		ServiceRequest returnedServiceRequest = (ServiceRequest) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Practitioner.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getRequester().getReferenceElement().getIdPart())))));
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedServiceRequest.getSubject().getReferenceElement().getIdPart())))));
 	}
 }

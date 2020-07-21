@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -19,6 +22,5 @@ public interface FhirServiceRequestService extends FhirService<ServiceRequest> {
 	
 	IBundleProvider searchForServiceRequests(ReferenceAndListParam patientReference, TokenAndListParam code,
 	        ReferenceAndListParam encounterReference, ReferenceAndListParam participantReference, DateRangeParam occurrence,
-	        TokenAndListParam uuid, DateRangeParam lastUpdated);
-	
+	        TokenAndListParam uuid, DateRangeParam lastUpdated, HashSet<Include> includes);
 }

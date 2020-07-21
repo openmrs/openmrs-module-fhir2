@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.FhirLocationService;
@@ -192,6 +193,11 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				resourceList.forEach(resource -> uniqueParticipantUUIDs
 				        .add(getIdFromReference(((MedicationRequest) resource).getRequester())));
 				break;
+			case FhirConstants.PROCEDURE_REQUEST:
+			case FhirConstants.SERVICE_REQUEST:
+				resourceList.forEach(
+				    resource -> uniqueParticipantUUIDs.add(getIdFromReference(((ServiceRequest) resource).getRequester())));
+				break;
 		}
 		
 		uniqueParticipantUUIDs.removeIf(Objects::isNull);
@@ -257,6 +263,11 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				resourceList.forEach(
 				    resource -> uniquePatientUUIDs.add(getIdFromReference(((RelatedPerson) resource).getPatient())));
 				break;
+			case FhirConstants.PROCEDURE_REQUEST:
+			case FhirConstants.SERVICE_REQUEST:
+				resourceList.forEach(
+				    resource -> uniquePatientUUIDs.add(getIdFromReference(((ServiceRequest) resource).getSubject())));
+				break;
 		}
 		
 		uniquePatientUUIDs.removeIf(Objects::isNull);
@@ -281,6 +292,11 @@ public class SearchQueryInclude<U extends IBaseResource> {
 			case FhirConstants.MEDICATION_REQUEST:
 				resourceList.forEach(
 				    resource -> uniqueEncounterUUIDs.add(getIdFromReference(((MedicationRequest) resource).getEncounter())));
+				break;
+			case FhirConstants.PROCEDURE_REQUEST:
+			case FhirConstants.SERVICE_REQUEST:
+				resourceList.forEach(
+				    resource -> uniqueEncounterUUIDs.add(getIdFromReference(((ServiceRequest) resource).getEncounter())));
 				break;
 		}
 		

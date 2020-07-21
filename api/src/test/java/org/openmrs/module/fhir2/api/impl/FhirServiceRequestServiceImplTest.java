@@ -14,7 +14,10 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
 import static org.hl7.fhir.r4.model.Practitioner.SP_IDENTIFIER;
@@ -28,8 +31,10 @@ import static org.openmrs.module.fhir2.FhirConstants.PARTICIPANT_REFERENCE_SEARC
 import static org.openmrs.module.fhir2.FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -39,6 +44,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -151,7 +157,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(patientReference, null, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -174,7 +180,8 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, code, null, null, null, null, null);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, code, null, null, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -199,7 +206,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, encounterReference, null, null,
-		    null, null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -224,7 +231,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, participantReference,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -248,7 +255,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, occurrence, null,
-		    null);
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -271,7 +278,8 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, uuid, null);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, uuid, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -295,13 +303,86 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null,
-		    lastUpdated);
+		    lastUpdated, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, Matchers.notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+	}
+	
+	@Test
+	public void searchForPeople_shouldAddRelatedResourcesWhenIncluded() {
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ServiceRequest:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(order));
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(SERVICE_REQUEST_UUID));
+		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
+		
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null,
+		    includes);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList, hasItem(is(instanceOf(Patient.class))));
+	}
+	
+	@Test
+	public void searchForPeople_shouldAddRelatedResourcesWhenIncludedR3() {
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("ProcedureRequest:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(order));
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(SERVICE_REQUEST_UUID));
+		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
+		
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null,
+		    includes);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList, hasItem(is(instanceOf(Patient.class))));
+	}
+	
+	@Test
+	public void searchForPeople_shouldNotAddRelatedResourcesForEmptyInclude() {
+		HashSet<Include> includes = new HashSet<>();
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(order));
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(SERVICE_REQUEST_UUID));
+		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
+		
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null,
+		    includes);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
 	}
 	
 }

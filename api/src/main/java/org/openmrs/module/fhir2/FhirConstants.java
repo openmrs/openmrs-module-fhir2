@@ -122,6 +122,8 @@ public class FhirConstants {
 	
 	public static final String PRACTITIONER = "Practitioner";
 	
+	public static final String PROCEDURE_REQUEST = "ProcedureRequest";
+	
 	public static final String RELATED_PERSON = "RelatedPerson";
 	
 	public static final String SERVICE_REQUEST = "ServiceRequest";
