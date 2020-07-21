@@ -169,10 +169,10 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 
-		org.hl7.fhir.r4.model.ServiceRequest serviceRequest = new org.hl7.fhir.r4.model.ServiceRequest();
+		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setId(SERVICE_REQUEST_UUID);
 
-		when(service.create(any(org.hl7.fhir.r4.model.ServiceRequest.class))).thenReturn(serviceRequest);
+		when(service.create(any(ServiceRequest.class))).thenReturn(serviceRequest);
 
 		MockHttpServletResponse response = post("/ServiceRequest").jsonContent(jsonServiceRequest)
 		        .accept(FhirMediaTypes.JSON).go();
@@ -188,10 +188,10 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 
-		org.hl7.fhir.r4.model.ServiceRequest serviceRequest = new org.hl7.fhir.r4.model.ServiceRequest();
+		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setId(SERVICE_REQUEST_UUID);
 
-		when(service.update(anyString(), any(org.hl7.fhir.r4.model.ServiceRequest.class))).thenReturn(serviceRequest);
+		when(service.update(anyString(), any(ServiceRequest.class))).thenReturn(serviceRequest);
 
 		MockHttpServletResponse response = put("/ServiceRequest/" + SERVICE_REQUEST_UUID).jsonContent(jsonServiceRequest)
 				.accept(FhirMediaTypes.JSON).go();
@@ -216,7 +216,7 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	}
 
 	@Test
-	public void updateServiceRequest_shouldrRaiseExceptionForIdMissMatch() throws Exception {
+	public void updateServiceRequest_shouldRaiseExceptionForIdMissMatch() throws Exception {
 		String jsonServiceRequest;
 		try (InputStream is = this.getClass().getClassLoader()
 				.getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_WRONG_ID_PATH)) {
@@ -238,7 +238,7 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 		retVal.setId(SERVICE_REQUEST_UUID);
 		retVal.getText().setDivAsString("Deleted successfully");
 
-		org.hl7.fhir.r4.model.ServiceRequest serviceRequest = new org.hl7.fhir.r4.model.ServiceRequest();
+		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setId(SERVICE_REQUEST_UUID);
 
 		when(service.delete(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);

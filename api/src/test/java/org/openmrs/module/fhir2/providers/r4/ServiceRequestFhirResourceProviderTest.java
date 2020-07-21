@@ -112,7 +112,6 @@ public class ServiceRequestFhirResourceProviderTest {
 	}
 	
 	@Test
-
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestWhenUUIDIsSpecified() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
 		
@@ -147,6 +146,8 @@ public class ServiceRequestFhirResourceProviderTest {
 		assertThat(resources.get(0).fhirType(), Matchers.equalTo(FhirConstants.SERVICE_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), Matchers.equalTo(SERVICE_REQUEST_UUID));
 	}
+	
+	@Test
 	public void updateServiceRequest_shouldUpdateServiceRequest() {
 
 		when(serviceRequestService.update(SERVICE_REQUEST_UUID, serviceRequest)).thenReturn(serviceRequest);
