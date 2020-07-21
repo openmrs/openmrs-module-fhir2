@@ -41,6 +41,10 @@ public class LocationAddressTranslatorImpl extends BaseAddressTranslatorImpl imp
 	
 	@Override
 	public Location toOpenmrsType(Location omrsLocation, Address address) {
+		if (address == null) {
+			return omrsLocation;
+		}
+		
 		omrsLocation.setCityVillage(address.getCity());
 		omrsLocation.setStateProvince(address.getState());
 		omrsLocation.setCountry(address.getCountry());

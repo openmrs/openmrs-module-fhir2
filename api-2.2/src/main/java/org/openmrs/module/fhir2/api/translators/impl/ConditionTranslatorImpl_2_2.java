@@ -70,12 +70,14 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		fhirCondition.setVerificationStatus(verificationStatusTranslator.toFhirResource(condition.getVerificationStatus()));
 		
 		CodedOrFreeText codedOrFreeTextCondition = condition.getCondition();
-		fhirCondition.setCode(conceptTranslator.toFhirResource(codedOrFreeTextCondition.getCoded()));
-		if (codedOrFreeTextCondition.getNonCoded() != null) {
-			Extension extension = new Extension();
-			extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NON_CODED_CONDITION);
-			extension.setValue(new StringType(codedOrFreeTextCondition.getNonCoded()));
-			fhirCondition.addExtension(extension);
+		if (codedOrFreeTextCondition != null) {
+			fhirCondition.setCode(conceptTranslator.toFhirResource(codedOrFreeTextCondition.getCoded()));
+			if (codedOrFreeTextCondition.getNonCoded() != null) {
+				Extension extension = new Extension();
+				extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_NON_CODED_CONDITION);
+				extension.setValue(new StringType(codedOrFreeTextCondition.getNonCoded()));
+				fhirCondition.addExtension(extension);
+			}
 		}
 		
 		fhirCondition.setOnset(new DateTimeType().setValue(condition.getOnsetDate()));

@@ -64,9 +64,11 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		relatedPerson.setId(relationship.getUuid());
 		relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
 		
-		if (relationship.getPersonB().getIsPatient()) {
-			relatedPerson.setPatient(
-			    patientReferenceTranslator.toFhirResource(patientDao.get(relationship.getPersonB().getUuid())));
+		if (relationship.getPersonB() != null) {
+			if (relationship.getPersonB().getIsPatient()) {
+				relatedPerson.setPatient(
+				    patientReferenceTranslator.toFhirResource(patientDao.get(relationship.getPersonB().getUuid())));
+			}
 		}
 		
 		if (omrsRelatedPerson.getGender() != null) {
