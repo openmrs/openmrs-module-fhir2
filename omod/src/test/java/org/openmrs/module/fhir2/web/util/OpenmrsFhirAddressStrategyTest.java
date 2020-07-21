@@ -133,7 +133,7 @@ public class OpenmrsFhirAddressStrategyTest {
 		
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
 		
-		assertThat(serverBase, not(containsString(":80/")));
+		assertThat(serverBase, not(containsString(":443/")));
 	}
 	
 	@Test
