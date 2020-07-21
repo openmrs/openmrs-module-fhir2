@@ -11,11 +11,16 @@ package org.openmrs.module.fhir2.api;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface FhirService<T extends IAnyResource> {
 	
 	T get(@NotNull String uuid);
+	
+	List<T> get(@NotNull Collection<String> distinctUUIDs);
 	
 	T create(T newResource);
 	

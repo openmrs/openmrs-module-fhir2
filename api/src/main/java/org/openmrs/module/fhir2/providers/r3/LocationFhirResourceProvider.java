@@ -11,10 +11,13 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -38,6 +41,7 @@ import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component("locationFhirR3ResourceProvider")
 @Qualifier("fhirR3Resources")
@@ -84,8 +88,13 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
 	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam parent,
 	        @OptionalParam(name = Location.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+	        @IncludeParam(allow = { "Location:" + Location.SP_PARTOF }) HashSet<Include> includes, @Sort SortSpec sort) {
+		if (CollectionUtils.isEmpty(includes)) {
+			includes = null;
+		}
+		
 		return locationService.searchForLocations(name, city, country, postalCode, state, tag, parent, id, lastUpdated,
-		    sort);
+		    includes, sort);
 	}
 }

@@ -74,6 +74,14 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
+	@SuppressWarnings("unchecked")
+	public List<T> get(Collection<String> distinctUUIDs) {
+		return sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType()).add(in("uuid", distinctUUIDs))
+		        .list();
+	}
+	
+	@Override
 	public T createOrUpdate(T newEntry) {
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
 		return newEntry;

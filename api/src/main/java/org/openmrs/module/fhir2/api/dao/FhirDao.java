@@ -26,6 +26,8 @@ public interface FhirDao<T extends OpenmrsObject & Auditable> extends Serializab
 	
 	T get(@NotNull String uuid);
 	
+	List<T> get(Collection<String> distinctUUIDs);
+	
 	T createOrUpdate(T newEntry);
 	
 	T delete(@NotNull String uuid);

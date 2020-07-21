@@ -10,18 +10,25 @@
 package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -390,6 +397,50 @@ public class LocationSearchQueryImplTest extends BaseModuleContextSensitiveTest 
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(7));
+	}
+	
+	@Test
+	public void searchForLocations_shouldAddNotNullParentLocationToReturnedResults() {
+		HashSet<Include> includes = new HashSet<>();
+		Include include = new Include("Location:partof");
+		includes.add(include);
+		
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		
+		Location returnedLocation = (Location) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Location.class)),
+		    hasProperty("id", equalTo(returnedLocation.getPartOf().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForLocations_shouldNotAddNullParentLocationToReturnedResults() {
+		HashSet<Include> includes = new HashSet<>();
+		Include include = new Include("Location:partof");
+		includes.add(include);
+		
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_PARENT_ID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(1)); // no parent resource included with the result list
 	}
 	
 	@Test

@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -52,7 +55,7 @@ public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openm
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForLocations(StringAndListParam name, StringAndListParam city, StringAndListParam country,
 	        StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,
-	        TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort) {
+	        TokenAndListParam id, DateRangeParam lastUpdated, HashSet<Include> includes, SortSpec sort) {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name)
 		        .addParameter(FhirConstants.CITY_SEARCH_HANDLER, city)
@@ -63,7 +66,7 @@ public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openm
 		        .addParameter(FhirConstants.TAG_SEARCH_HANDLER, tag)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .setSortSpec(sort);
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
