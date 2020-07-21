@@ -44,6 +44,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -75,6 +76,8 @@ public class EncounterTranslatorImplTest {
 	
 	private static final String TEST_LOCATION_NAME = "test location name";
 	
+	private static final String TEST_FHIR_CLASS = "test fhir class";
+	
 	private static final String LOCATION_URI = FhirConstants.LOCATION + "" + LOCACTION_UUID;
 	
 	@Mock
@@ -88,6 +91,9 @@ public class EncounterTranslatorImplTest {
 	
 	@Mock
 	private ProvenanceTranslator<org.openmrs.Encounter> provenanceTranslator;
+	
+	@Mock
+	private EncounterClassMap encounterClassMap;
 	
 	private Patient patient;
 	
@@ -110,6 +116,7 @@ public class EncounterTranslatorImplTest {
 		encounterTranslator.setParticipantTranslator(participantTranslator);
 		encounterTranslator.setEncounterLocationTranslator(encounterLocationTranslator);
 		encounterTranslator.setProvenanceTranslator(provenanceTranslator);
+		encounterTranslator.setEncounterClassMap(encounterClassMap);
 		
 		PatientIdentifier identifier = new PatientIdentifier();
 		identifier.setIdentifier(PATIENT_IDENTIFIER);
@@ -348,17 +355,15 @@ public class EncounterTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateLocationToEncounterClassFhirType() {
-		Location inPatient = new Location();
-		inPatient.setUuid(LOCACTION_UUID);
-		inPatient.setName("Inpatient Ward");
-		omrsEncounter.setLocation(inPatient);
+		when(encounterClassMap.getFhirClass(TEST_LOCATION_NAME)).thenReturn(TEST_FHIR_CLASS);
+		omrsEncounter.setLocation(location);
 		
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getClass_(), notNullValue());
 		assertThat(result.getClass_().getSystem(), is(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI));
-		assertThat(result.getClass_().getCode(), is("IMB"));
+		assertThat(result.getClass_().getCode(), is(TEST_FHIR_CLASS));
 	}
 	
 	@Test

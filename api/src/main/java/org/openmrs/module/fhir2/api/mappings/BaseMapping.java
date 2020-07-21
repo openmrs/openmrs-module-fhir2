@@ -11,12 +11,15 @@ package org.openmrs.module.fhir2.api.mappings;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -28,29 +31,29 @@ public abstract class BaseMapping {
 	
 	private final String resourceLocator;
 	
-	private volatile Map<String, String> fhirToOpenmrs = null;
+	private volatile Map<String, String> map = null;
 	
-	private volatile Map<String, String> openmrsToFhir = null;
+	private volatile Multimap<String, String> inverseMap = null;
 	
 	protected BaseMapping(String resourceLocator) {
 		Objects.requireNonNull(resourceLocator);
 		this.resourceLocator = resourceLocator;
 	}
 	
-	protected Optional<String> getOpenmrs(String fhirCode) {
+	protected Optional<String> getValue(String key) {
 		setupDelegates();
-		return Optional.ofNullable(fhirToOpenmrs.getOrDefault(fhirCode, null));
+		return Optional.ofNullable(map.getOrDefault(key, null));
 	}
 	
-	protected Optional<String> getFhir(String openmrsCode) {
+	protected Collection<String> getKey(String value) {
 		setupDelegates();
-		return Optional.ofNullable(openmrsToFhir.getOrDefault(openmrsCode, null));
+		return inverseMap.get(value);
 	}
 	
 	private void setupDelegates() {
-		if (fhirToOpenmrs == null) {
+		if (map == null) {
 			synchronized (this) {
-				if (fhirToOpenmrs == null) {
+				if (map == null) {
 					Resource resource = resourceLoader.getResource("classpath:" + resourceLocator);
 					Properties properties = new Properties();
 					
@@ -59,17 +62,17 @@ public abstract class BaseMapping {
 					}
 					catch (IOException ignored) {}
 					
-					ImmutableMap.Builder<String, String> fhirToOpenmrsBuilder = ImmutableMap
-					        .builderWithExpectedSize(properties.size()),
-					        openmrsToFhirBuilder = ImmutableMap.builderWithExpectedSize(properties.size());
+					ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap
+					        .builderWithExpectedSize(properties.size());
+					ImmutableMultimap.Builder<String, String> inverseMapBuilder = ImmutableMultimap.builder();
 					for (Map.Entry<Object, Object> entry : properties.entrySet()) {
 						String entryValue = entry.getValue().toString().trim();
-						openmrsToFhirBuilder.put(entryValue, entry.getKey().toString());
-						fhirToOpenmrsBuilder.put(entry.getKey().toString(), entryValue);
+						inverseMapBuilder.put(entryValue, entry.getKey().toString());
+						mapBuilder.put(entry.getKey().toString(), entryValue);
 					}
 					
-					fhirToOpenmrs = fhirToOpenmrsBuilder.build();
-					openmrsToFhir = openmrsToFhirBuilder.build();
+					map = mapBuilder.build();
+					inverseMap = inverseMapBuilder.build();
 				}
 			}
 		}

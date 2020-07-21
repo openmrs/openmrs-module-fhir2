@@ -11,9 +11,13 @@ package org.openmrs.module.fhir2.api.mappings;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Collection;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class ObservationCategoryMap extends BaseMapping {
 	
 	public ObservationCategoryMap() {
@@ -21,10 +25,17 @@ public class ObservationCategoryMap extends BaseMapping {
 	}
 	
 	public String getCategory(@NotNull String conceptClassUuid) {
-		return getFhir(conceptClassUuid).orElse(null);
+		Collection<String> categories = getKey(conceptClassUuid);
+		if (categories.isEmpty()) {
+			return null;
+		}
+		if (categories.size() > 1) {
+			log.warn("Multiple categories found for concept " + conceptClassUuid);
+		}
+		return categories.iterator().next();
 	}
 	
 	public String getConceptClassUuid(@NotNull String category) {
-		return getOpenmrs(category).orElse(null);
+		return getValue(category).orElse(null);
 	}
 }

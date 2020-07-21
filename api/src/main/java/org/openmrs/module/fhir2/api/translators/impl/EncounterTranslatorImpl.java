@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
 import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
@@ -45,6 +46,9 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 	@Autowired
 	private ProvenanceTranslator<org.openmrs.Encounter> provenanceTranslator;
 	
+	@Autowired
+	private EncounterClassMap encounterClassMap;
+	
 	private Coding mapLocationToClass(Location location) {
 		Coding coding = new Coding();
 		coding.setSystem(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI);
@@ -53,15 +57,9 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		if (location == null) {
 			return coding;
 		}
-		// TODO: These are a subset of locations in the Ref. App.; figure out a more generic way for
-		// this mapping, possibly by including encounter type too.
-		switch (location.getName()) {
-			case "Inpatient Ward":
-				coding.setCode("IMB");
-				break;
-			case "Outpatient Clinic":
-				coding.setCode("AMB");
-				break;
+		String classCode = encounterClassMap.getFhirClass(location.getName());
+		if (classCode != null) {
+			coding.setCode(classCode);
 		}
 		return coding;
 	}
