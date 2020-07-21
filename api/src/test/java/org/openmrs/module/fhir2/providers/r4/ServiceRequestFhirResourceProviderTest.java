@@ -21,14 +21,20 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -139,5 +145,61 @@ public class ServiceRequestFhirResourceProviderTest {
 		assertThat(resources.get(0), Matchers.notNullValue());
 		assertThat(resources.get(0).fhirType(), Matchers.equalTo(FhirConstants.SERVICE_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), Matchers.equalTo(SERVICE_REQUEST_UUID));
+	}
+	
+	@Test
+	public void updateServiceRequest_shouldUpdateServiceRequest() {
+
+		when(serviceRequestService.update(SERVICE_REQUEST_UUID, serviceRequest)).thenReturn(serviceRequest);
+
+		MethodOutcome result = resourceProvider.updateServiceRequest(new IdType().setValue(SERVICE_REQUEST_UUID), serviceRequest);
+		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result.getResource(), CoreMatchers.equalTo(serviceRequest));
+	}
+
+	@Test(expected = InvalidRequestException.class)
+	public void updateServiceRequest_shouldThrowInvalidRequestExceptionForWrongServiceRequestUuid() {
+		when(serviceRequestService.update(WRONG_SERVICE_REQUEST_UUID, serviceRequest)).thenThrow(InvalidRequestException.class);
+
+		resourceProvider.updateServiceRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID), serviceRequest);
+	}
+
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateServiceRequest_ShouldThrowMethodNotAllowedIfDoesNotExist() {
+		
+		serviceRequest.setId(WRONG_SERVICE_REQUEST_UUID);
+
+		when(serviceRequestService.update(WRONG_SERVICE_REQUEST_UUID, serviceRequest)).thenThrow(MethodNotAllowedException.class);
+
+		resourceProvider.updateServiceRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID), serviceRequest);
+	}
+
+	@Test
+	public void deleteserviceRequest_shouldDeleteserviceRequest() {
+		when(serviceRequestService.delete(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);
+
+		OperationOutcome result = resourceProvider.deleteServiceRequest(new IdType().setValue(SERVICE_REQUEST_UUID));
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteServiceRequest_shouldThrowResourceNotFoundException() {
+		when(serviceRequestService.delete(WRONG_SERVICE_REQUEST_UUID)).thenReturn(null);
+		resourceProvider.deleteServiceRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID));
+	}
+
+	@Test
+	public void createServiceRequest_shouldCreateNewserviceRequest() {
+		when(serviceRequestService.create(serviceRequest)).thenReturn(serviceRequest);
+
+		MethodOutcome result = resourceProvider.createServiceRequest(serviceRequest);
+
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(serviceRequest));
 	}
 }
