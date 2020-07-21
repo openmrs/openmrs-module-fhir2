@@ -11,12 +11,15 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -35,6 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
@@ -115,8 +119,13 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
 	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam parent,
 	        @OptionalParam(name = Location.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+	        @IncludeParam(allow = { "Location:" + Location.SP_PARTOF }) HashSet<Include> includes, @Sort SortSpec sort) {
+		if (CollectionUtils.isEmpty(includes)) {
+			includes = null;
+		}
+		
 		return fhirLocationService.searchForLocations(name, city, country, postalCode, state, tag, parent, id, lastUpdated,
-		    sort);
+		    includes, sort);
 	}
 }

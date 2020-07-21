@@ -243,4 +243,8 @@ public class FhirConstants {
 	public static final String SERVLET_PATH_R4 = "/ms/fhir2Servlet";
 	
 	public static final String SERVLET_PATH_R3 = "/ms/fhir2R3Servlet";
+	
+	public static final String INCLUDE_SEARCH_HANDLER = "_include.search.handler";
+	
+	public static final String INCLUDE_PART_OF_PARAM = "partof";
 }

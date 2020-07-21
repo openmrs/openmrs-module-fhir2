@@ -18,11 +18,7 @@ import static org.hibernate.criterion.Subqueries.propertyIn;
 
 import javax.annotation.Nonnull;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -103,6 +99,24 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		}
 		
 		return deproxyObject(result);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	@SuppressWarnings("unchecked")
+	public List<T> get(Collection<String> uuids) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
+		criteria.add(in("uuid", uuids));
+		
+		if (isVoidable) {
+			handleVoidable(criteria);
+		} else if (isRetireable) {
+			handleRetireable(criteria);
+		}
+		
+		List<T> results = criteria.list();
+		
+		return results.stream().filter(Objects::nonNull).map(this::deproxyObject).collect(Collectors.toList());
 	}
 	
 	@Override

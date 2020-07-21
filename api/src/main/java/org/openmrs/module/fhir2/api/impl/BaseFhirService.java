@@ -11,6 +11,10 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -57,6 +61,12 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		}
 		
 		return getTranslator().toFhirResource(openmrsObj);
+	}
+	
+	@Override
+	public List<T> get(Collection<String> uuids) {
+		OpenmrsFhirTranslator<U, T> translator = getTranslator();
+		return getDao().get(uuids).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
 	
 	@Override

@@ -24,10 +24,13 @@ import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -151,11 +154,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		StringAndListParam nameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_NAME)));
 		when(locationService.searchForLocations(argThat(Matchers.is(nameParam)), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(nameParam, null, null, null, null, null, null, null, null,
-		    null);
+		    null, null);
 		
 		List<Location> resultList = get(results);
 		
@@ -169,11 +172,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	public void findLocationsByCity_shouldReturnMatchingBundleOfLocations() {
 		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
 		when(locationService.searchForLocations(isNull(), argThat(Matchers.is(cityParam)), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, cityParam, null, null, null, null, null, null, null,
-		    null);
+		    null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -189,11 +192,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		StringAndListParam countryParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
 		when(locationService.searchForLocations(isNull(), isNull(), argThat(Matchers.is(countryParam)), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, countryParam, null, null, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -208,11 +211,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	public void findLocationsByState_shouldReturnMatchingBundleOfLocations() {
 		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), argThat(Matchers.is(stateParam)),
-		    isNull(), isNull(), isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, stateParam, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -228,11 +231,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		StringAndListParam postalCodeParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), argThat(Matchers.is(postalCodeParam)),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, postalCodeParam, null, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -248,10 +251,10 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		TokenAndListParam tag = new TokenAndListParam()
 		        .addAnd(new TokenOrListParam(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, LOGIN_LOCATION_TAG_NAME));
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(Matchers.is(tag)),
-		    isNull(), isNull(), isNull(), isNull()))
+		    isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, tag, null, null, null,
+		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, tag, null, null, null, null,
 		    null);
 		
 		assertThat(results, notNullValue());
@@ -270,11 +273,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("chulaimbo").setChain(Location.SP_NAME)));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(Matchers.is(locationParentName)), isNull(), isNull(), isNull()))
+		    argThat(Matchers.is(locationParentName)), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentName,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -291,11 +294,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("kampala").setChain(Location.SP_ADDRESS_CITY)));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(Matchers.is(locationParentCity)), isNull(), isNull(), isNull()))
+		    argThat(Matchers.is(locationParentCity)), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentCity,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -312,11 +315,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue("uganda").setChain(Location.SP_ADDRESS_COUNTRY)));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(Matchers.is(locationParentCountry)), isNull(), isNull(), isNull()))
+		    argThat(Matchers.is(locationParentCountry)), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentCountry,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -333,11 +336,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		        .add(new ReferenceParam().setValue("234-30100").setChain(Location.SP_ADDRESS_POSTALCODE)));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(Matchers.is(locationParentPostalCode)), isNull(), isNull(), isNull()))
+		    argThat(Matchers.is(locationParentPostalCode)), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null,
-		    locationParentPostalCode, null, null, null);
+		    locationParentPostalCode, null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -354,11 +357,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		        .add(new ReferenceParam().setValue("najjanankumbi").setChain(Location.SP_ADDRESS_STATE)));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(Matchers.is(locationParentState)), isNull(), isNull(), isNull()))
+		    argThat(Matchers.is(locationParentState)), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, locationParentState,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -373,11 +376,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_UUID));
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(uuid)), isNull(), isNull()))
+		    argThat(is(uuid)), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, uuid, null,
-		    null);
+		    null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -393,11 +396,11 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
 		
 		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), argThat(is(lastUpdated)), isNull()))
+		    isNull(), argThat(is(lastUpdated)), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null,
-		    lastUpdated, null);
+		    lastUpdated, null, null);
 		
 		assertThat(results, notNullValue());
 		
@@ -409,17 +412,57 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	}
 	
 	@Test
+	public void searchLocations_shouldAddRelatedResourcesWhenIncluded() {
+		HashSet<Include> includeSet = new HashSet<>();
+		includeSet.add(new Include("Location:partof"));
+		
+		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), argThat(is(includeSet)), isNull())).thenReturn(
+		        new MockIBundleProvider<>(Arrays.asList(location, new Location()), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null, null,
+		    includeSet, null);
+		
+		List<Location> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
+		assertThat(resultList.get(1).fhirType(), is(FhirConstants.LOCATION));
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList.get(0).getId(), equalTo(LOCATION_UUID));
+	}
+	
+	@Test
+	public void searchLocations_shouldNotAddRelatedResourcesForEmptyInclude() {
+		HashSet<Include> includeSet = new HashSet<>();
+		
+		when(locationService.searchForLocations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchLocations(null, null, null, null, null, null, null, null, null,
+		    includeSet, null);
+		
+		List<Location> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.get(0).fhirType(), is(FhirConstants.LOCATION));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList.get(0).getId(), equalTo(LOCATION_UUID));
+	}
+	
+	@Test
 	public void searchLocations_shouldReturnMatchingBundleOfLocations() {
 		List<Location> locations = new ArrayList<>();
 		locations.add(location);
-		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+		when(locationService.searchForLocations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(locations, PREFERRED_PAGE_SIZE, COUNT));
 		
 		StringAndListParam location = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_NAME)));
 		
 		IBundleProvider resultLocations = resourceProvider.searchLocations(location, null, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		assertThat(resultLocations, notNullValue());
 		

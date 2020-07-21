@@ -11,11 +11,16 @@ package org.openmrs.module.fhir2.api;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface FhirService<T extends IAnyResource> {
 	
 	T get(@Nonnull String uuid);
+	
+	List<T> get(@Nonnull Collection<String> uuids);
 	
 	T create(@Nonnull T newResource);
 	
