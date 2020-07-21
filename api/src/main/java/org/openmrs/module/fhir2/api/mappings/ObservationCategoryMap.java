@@ -11,9 +11,20 @@ package org.openmrs.module.fhir2.api.mappings;
 
 import javax.validation.constraints.NotNull;
 
-public interface ObservationCategoryMap {
+import org.springframework.stereotype.Component;
+
+@Component
+public class ObservationCategoryMap extends BaseMapping {
 	
-	String getCategory(@NotNull String conceptClassUuid);
+	public ObservationCategoryMap() {
+		super("observationCategoryMap.properties");
+	}
 	
-	String getConceptClassUuid(@NotNull String category);
+	public String getCategory(@NotNull String conceptClassUuid) {
+		return getFhir(conceptClassUuid).orElse(null);
+	}
+	
+	public String getConceptClassUuid(@NotNull String category) {
+		return getOpenmrs(category).orElse(null);
+	}
 }
