@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,10 +42,12 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -78,6 +81,8 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	private static final String JSON_UPDATE_CONDITION_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_Update.json";
 	
 	private static final String JSON_UPDATE_CONDITION_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_updateWithoutId.json";
+	
+	private static final String JSON_CONDITION_WRONG_UUID_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_updateWithWrongId.json";
 	
 	private static final String PATIENT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
 	
@@ -160,6 +165,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
+	
 	@Test
 	public void shouldGetConditionHistoryById() throws IOException, ServletException {
 		Provenance provenance = new Provenance();
@@ -230,7 +236,69 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		assertThat(response, isCreated());
 		assertThat(response.getStatus(), is(201));
 	}
-
+	
+	@Test
+	public void updateCondition_shouldUpdateConditionWithPath() throws Exception {
+		String conditionJson;
+		Condition condition = new Condition();
+		condition.setId(CONDITION_UUID);
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_CONDITION_PATH)) {
+			Objects.requireNonNull(is);
+			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		when(conditionService.update(conditionJson, any(Condition.class))).thenReturn(condition);
+		
+		MockHttpServletResponse response = put("/Condition/" + CONDITION_UUID).jsonContent(conditionJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+	}
+	
+	@Test
+	public void updateCondition_shouldThrowExceptionForNoId() throws Exception {
+		String conditionJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_CONDITION_NO_ID_PATH)) {
+			Objects.requireNonNull(is);
+			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		MockHttpServletResponse response = put("/Condition/" + CONDITION_UUID).jsonContent(conditionJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+		    Matchers.containsStringIgnoringCase("Condition body must contain an ID element for update"));
+	}
+	
+	@Test
+	public void updateCondition_shouldThrowExceptionForIdMisMatch() throws Exception {
+		String conditionJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_CONDITION_PATH)) {
+			Objects.requireNonNull(is);
+			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		MockHttpServletResponse response = put("/Condition/" + WRONG_CONDITION_UUID).jsonContent(conditionJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+		    Matchers.containsStringIgnoringCase("Condition body must contain an ID element which matches the request URL"));
+	}
+	
+	@Test
+	public void updateCondition_shouldThrowErrorForNonExistentCondition() throws Exception {
+		String conditionJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CONDITION_WRONG_UUID_PATH)) {
+			Objects.requireNonNull(is);
+			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		when(conditionService.update(eq(WRONG_CONDITION_UUID), any(Condition.class)))
+		        .thenThrow(new MethodNotAllowedException("Condition " + WRONG_CONDITION_UUID + " does not exist"));
+		
+		MockHttpServletResponse response = put("/Condition/" + WRONG_CONDITION_UUID).jsonContent(conditionJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isMethodNotAllowed());
+	}
+	
 	@Test
 	public void searchForConditions_shouldReturnBundleWithMatchingPatientUUID() throws Exception {
 		verifyURI(String.format("/Condition?patient=%s", PATIENT_UUID));
@@ -410,19 +478,20 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
+	
 	@Test
 	public void deleteCondition_shouldDeleteCondition() throws Exception {
 		OperationOutcome outcome = new OperationOutcome();
 		outcome.setId(CONDITION_UUID);
 		outcome.getText().setDivAsString("Deleted successfully");
-
+		
 		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
 		condition.setId(CONDITION_UUID);
-
+		
 		when(conditionService.delete(CONDITION_UUID)).thenReturn(condition);
-
+		
 		MockHttpServletResponse response = delete("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
@@ -431,7 +500,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	public void deleteCondition_shouldReturn404ForNonExistingCondition() throws Exception {
 		when(conditionService.get(WRONG_CONDITION_UUID)).thenReturn(null);
 		
-		MockHttpServletResponse response = get("/Condition/" + WRONG_CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = delete("/Condition/" + WRONG_CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 	}

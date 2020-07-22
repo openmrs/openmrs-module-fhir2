@@ -154,7 +154,6 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(condition.getId()));
-		
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -167,12 +166,20 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateCondition_shouldThrowInvalidRequestExceptionForWrongConditionUuid() {
+	public void updateCondition_shouldThrowInvalidRequestExceptionForUuidMismatch() {
 		Condition wrongCondition = new Condition();
 		wrongCondition.setId(WRONG_CONDITION_UUID);
 		when(conditionService.update(WRONG_CONDITION_UUID, wrongCondition)).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID), wrongCondition);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateCondition_shouldThrowInvalidRequestExceptionForMissingId() {
+		Condition noIdCondition = new Condition();
+		when(conditionService.update(CONDITION_UUID, noIdCondition)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID), noIdCondition);
 	}
 	
 	@Test

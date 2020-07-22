@@ -87,11 +87,11 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	
 	@Update
 	@SuppressWarnings("unused")
-	public MethodOutcome updateCondtion(@IdParam IdType id, @ResourceParam Condition newCondition) {
+	public MethodOutcome updateCondition(@IdParam IdType id, @ResourceParam Condition newCondition) {
 		org.hl7.fhir.r4.model.Condition condition = conditionService.update(id.getIdPart(),
 		    Condition30_40.convertCondition(newCondition));
 		
-		return FhirProviderUtils.buildUpdate(newCondition);
+		return FhirProviderUtils.buildUpdate(condition);
 	}
 	
 	@Search
@@ -114,13 +114,13 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Delete
-	public OperationOutcome deleteCondition(@IdParam IdType id, @ResourceParam Condition newCondition) {
+	public org.hl7.fhir.r4.model.OperationOutcome deleteCondition(@IdParam IdType id) {
 		org.hl7.fhir.r4.model.Condition condition = conditionService.delete(id.getIdPart());
 		if (condition == null) {
 			throw new ResourceNotFoundException(
 			        "Could not find condition request resource with id " + id.getIdPart() + " to delete");
 		}
-		return FhirProviderUtils.buildDelete(newCondition);
+		return FhirProviderUtils.buildDelete(condition);
 		
 	}
 }

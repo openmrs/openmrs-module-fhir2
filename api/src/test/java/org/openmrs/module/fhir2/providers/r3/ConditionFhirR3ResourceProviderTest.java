@@ -21,13 +21,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import javax.validation.constraints.NotNull;
-
 import java.util.Collections;
 import java.util.List;
 
-import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -42,6 +38,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.convertors.conv30_40.Condition30_40;
@@ -56,12 +53,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.exceptions.base.MockitoException;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 
 //Added @RunWith(MockitoJUnitRunner.Silent.class) for unneccessary mockito stubbings
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -157,7 +152,7 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 	@Test
 	public void updateCondition_shouldUpdateExistingCondition() {
 		when(conditionService.update(eq(CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
-		MethodOutcome result = resourceProvider.updateCondtion(new IdType().setValue(CONDITION_UUID),
+		MethodOutcome result = resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID),
 		    Condition30_40.convertCondition(condition));
 		
 		assertThat(result, notNullValue());
@@ -166,13 +161,34 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 	}
 	
 	@Test(expected = InvalidRequestException.class)
+	public void updateCondition_shouldThrowInvalidRequestForMissingId() {
+		Condition noIdCondition = new Condition();
+		
+		when(conditionService.update(eq(CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID), noIdCondition);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
 	public void updateCondition_shouldThrowInvalidRequestForUuidMismatch() {
-		Condition wrongCondition = new Condition();
-		wrongCondition.setId(WRONG_CONDITION_UUID);
+		
 		when(conditionService.update(eq(WRONG_CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
 		        .thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateCondtion(new IdType().setValue(WRONG_CONDITION_UUID), wrongCondition);
+		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID),
+		    Condition30_40.convertCondition(condition));
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateCondition_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		Condition wrongCondition = new Condition();
+		wrongCondition.setId(WRONG_CONDITION_UUID);
+		
+		when(conditionService.update(eq(WRONG_CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID), wrongCondition);
 	}
 	
 	@Test
@@ -246,20 +262,16 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.CONDITION));
 	}
 	
-	@Delete
-	public OperationOutcome deleteObservationResource(@IdParam @NotNull IdType id) {
-		org.hl7.fhir.r4.model.Condition condition = conditionService.delete(id.getIdPart());
-		if (condition == null) {
-			throw new ResourceNotFoundException("Could not find observation to delete with id" + id.getIdPart());
-		}
+	@Test
+	public void deleteCondition_shouldDeleteCondition() {
+		when(conditionService.delete(CONDITION_UUID)).thenReturn(condition);
 		
-		return FhirProviderUtils.buildDelete(condition);
-	}
-	
-	public class UnnecessaryStubbingException extends MockitoException {
+		OperationOutcome result = resourceProvider.deleteCondition(new IdType().setValue(CONDITION_UUID));
 		
-		public UnnecessaryStubbingException(String message) {
-			super(message);
-		}
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		
 	}
 }

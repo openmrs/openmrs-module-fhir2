@@ -84,7 +84,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	
 	@Update
 	public MethodOutcome updateCondition(@IdParam IdType id, @ResourceParam Condition newCondition) {
-		org.hl7.fhir.r4.model.Condition condition = conditionService.update(id.getIdPart(), newCondition);
+		Condition condition = conditionService.update(id.getIdPart(), newCondition);
 		
 		return FhirProviderUtils.buildUpdate(newCondition);
 	}
