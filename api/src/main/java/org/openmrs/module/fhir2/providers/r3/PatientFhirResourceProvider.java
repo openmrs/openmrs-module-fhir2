@@ -34,7 +34,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
-
 import org.hl7.fhir.convertors.conv30_40.Patient30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -74,7 +73,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	@Create
 	public MethodOutcome createPatient(@ResourceParam Patient patient) {
 		return FhirProviderUtils.buildCreate(patientService.create(Patient30_40.convertPatient(patient)));
-	} 
+	}
 	
 	@Update
 	@SuppressWarnings("unused")
@@ -82,11 +81,10 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
-
+		
 		patient.setId(id.getIdPart());
-
-		return FhirProviderUtils.buildUpdate(patientService.update(id.getIdPart(),
-		    Patient30_40.convertPatient(patient)));
+		
+		return FhirProviderUtils.buildUpdate(patientService.update(id.getIdPart(), Patient30_40.convertPatient(patient)));
 	}
 	
 	@Delete

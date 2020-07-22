@@ -487,7 +487,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	@Test
 	public void deleteLocation_shouldDeleteLocation() {
 		when(locationService.delete(LOCATION_UUID)).thenReturn(location);
-
+		
 		OperationOutcome result = resourceProvider.deleteLocation(new IdType().setValue(LOCATION_UUID));
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());

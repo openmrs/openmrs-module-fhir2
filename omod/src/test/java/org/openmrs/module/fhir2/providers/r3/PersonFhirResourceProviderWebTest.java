@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -82,13 +81,13 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 	private static final String AUT = "AUT";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
-
+	
 	private static final String JSON_CREATE_PERSON_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_create.json";
-
+	
 	private static final String JSON_UPDATE_PERSON_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_update.json";
-
+	
 	private static final String JSON_UPDATE_PERSON_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_UpdateWithoutId.json";
-
+	
 	private static final String JSON_UPDATE_PERSON_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_UpdateWithWrongId.json";
 	
 	@Mock
@@ -464,17 +463,17 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 			Objects.requireNonNull(is);
 			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
 		person.setId(PERSON_UUID);
-
+		
 		when(personService.create(any(org.hl7.fhir.r4.model.Person.class))).thenReturn(person);
 		
 		MockHttpServletResponse response = post("/Person").jsonContent(jsonPerson).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isCreated());
 	}
-
+	
 	@Test
 	public void updatePerson_shouldUpdateExistingPerson() throws Exception {
 		String jsonPerson;
@@ -482,18 +481,18 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 			Objects.requireNonNull(is);
 			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
 		person.setId(PERSON_UUID);
-
+		
 		when(personService.update(anyString(), any(org.hl7.fhir.r4.model.Person.class))).thenReturn(person);
-
+		
 		MockHttpServletResponse response = put("/Person/" + PERSON_UUID).jsonContent(jsonPerson).accept(FhirMediaTypes.JSON)
 		        .go();
-
+		
 		assertThat(response, isOk());
 	}
-
+	
 	@Test
 	public void updatePerson_shouldThrowErrorForNoId() throws Exception {
 		String jsonPerson;
@@ -501,15 +500,14 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 			Objects.requireNonNull(is);
 			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/Person/" + PERSON_UUID).jsonContent(jsonPerson).accept(FhirMediaTypes.JSON)
 		        .go();
-
+		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentAsString(),
-				containsStringIgnoringCase("body must contain an ID element for update"));
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
 	}
-
+	
 	@Test
 	public void updatePerson_shouldThrowErrorForIdMissMatch() throws Exception {
 		String jsonPerson;
@@ -517,28 +515,28 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 			Objects.requireNonNull(is);
 			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/Person/" + WRONG_PERSON_UUID).jsonContent(jsonPerson)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentAsString(),
-				containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
 	}
-
+	
 	@Test
 	public void deletePerson_shouldDeletePerson() throws Exception {
 		OperationOutcome retVal = new OperationOutcome();
 		retVal.setId(PERSON_UUID);
 		retVal.getText().setDivAsString("Deleted successfully");
-
+		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
 		person.setId(PERSON_UUID);
-
+		
 		when(personService.delete(PERSON_UUID)).thenReturn(person);
-
+		
 		MockHttpServletResponse response = delete("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}

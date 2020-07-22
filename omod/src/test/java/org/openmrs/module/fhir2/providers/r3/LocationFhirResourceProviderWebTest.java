@@ -47,7 +47,6 @@ import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Location;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;

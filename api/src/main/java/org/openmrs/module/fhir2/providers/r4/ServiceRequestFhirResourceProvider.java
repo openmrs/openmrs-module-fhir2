@@ -66,20 +66,20 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	@Create
 	public MethodOutcome createServiceRequest(@ResourceParam ServiceRequest serviceRequest) {
 		return FhirProviderUtils.buildCreate(serviceRequestService.create(serviceRequest));
-	} 
-
+	}
+	
 	@Update
 	@SuppressWarnings("unused")
 	public MethodOutcome updateServiceRequest(@IdParam IdType id, @ResourceParam ServiceRequest serviceRequest) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
-
+		
 		serviceRequest.setId(id.getIdPart());
-
+		
 		return FhirProviderUtils.buildUpdate(serviceRequestService.update(id.getIdPart(), serviceRequest));
 	}
-
+	
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteServiceRequest(@IdParam @NotNull IdType id) {

@@ -39,14 +39,13 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
@@ -74,15 +73,14 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 	private static final String AUT = "AUT";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
-
+	
 	private static final String JSON_CREATE_PATIENT_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_create.json";
-
+	
 	private static final String JSON_UPDATE_PATIENT_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_update.json";
-
+	
 	private static final String JSON_UPDATE_PATIENT_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_UpdateWithoutId.json";
-
+	
 	private static final String JSON_UPDATE_PATIENT_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_UpdateWithWrongId.json";
-
 	
 	@Getter(AccessLevel.PUBLIC)
 	private PatientFhirResourceProvider resourceProvider;
@@ -575,18 +573,17 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 			Objects.requireNonNull(is);
 			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
-
+		
 		when(patientService.create(any(Patient.class))).thenReturn(patient);
-
-		MockHttpServletResponse response = post("/Patient").jsonContent(jsonPatient)
-		        .accept(FhirMediaTypes.JSON).go();
-
+		
+		MockHttpServletResponse response = post("/Patient").jsonContent(jsonPatient).accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isCreated());
 	}
-
+	
 	@Test
 	public void updatePatient_shouldUpdateExistingPatient() throws Exception {
 		String jsonPatient;
@@ -594,18 +591,18 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 			Objects.requireNonNull(is);
 			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
-
+		
 		when(patientService.update(anyString(), any(Patient.class))).thenReturn(patient);
-
+		
 		MockHttpServletResponse response = put("/Patient/" + PATIENT_UUID).jsonContent(jsonPatient)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isOk());
 	}
-
+	
 	@Test
 	public void updatePatient_shouldRaiseExceptionForNoId() throws Exception {
 		String jsonPatient;
@@ -613,48 +610,45 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 			Objects.requireNonNull(is);
 			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/Patient/" + PATIENT_UUID).jsonContent(jsonPatient)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentAsString(),
-				containsStringIgnoringCase("body must contain an ID element for update"));
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
 	}
-
+	
 	@Test
 	public void updatePatient_shouldRaiseExceptionOnIdMismatch() throws Exception {
 		String jsonPatient;
-		try (InputStream is = this.getClass().getClassLoader()
-				.getResourceAsStream(JSON_UPDATE_PATIENT_WRONG_ID_PATH)) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PATIENT_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
 			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/Patient/" + BAD_PATIENT_UUID).jsonContent(jsonPatient)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentAsString(),
-				containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
 	}
-
+	
 	@Test
 	public void deletePatient_shouldDeletePatient() throws Exception {
 		OperationOutcome retVal = new OperationOutcome();
 		retVal.setId(PATIENT_UUID);
 		retVal.getText().setDivAsString("Deleted successfully");
-
+		
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
-
+		
 		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
-
+		
 		MockHttpServletResponse response = delete("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
-
 	
 }

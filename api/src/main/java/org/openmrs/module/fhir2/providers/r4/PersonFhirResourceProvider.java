@@ -34,10 +34,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
-
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirPersonService;
@@ -72,20 +71,20 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	@Create
 	public MethodOutcome createPerson(@ResourceParam Person person) {
 		return FhirProviderUtils.buildCreate(fhirPersonService.create(person));
-	} 
-
+	}
+	
 	@Update
 	@SuppressWarnings("unused")
 	public MethodOutcome updatePerson(@IdParam IdType id, @ResourceParam Person person) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
-
+		
 		person.setId(id.getIdPart());
-
+		
 		return FhirProviderUtils.buildUpdate(fhirPersonService.update(id.getIdPart(), person));
 	}
-
+	
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deletePerson(@IdParam @NotNull IdType id) {

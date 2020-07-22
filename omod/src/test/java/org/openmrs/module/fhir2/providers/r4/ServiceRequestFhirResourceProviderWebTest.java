@@ -11,30 +11,28 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
-
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
-
 import javax.servlet.ServletException;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
@@ -47,8 +45,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -74,13 +70,13 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
 	
 	private ServiceRequest serviceRequest;
-
+	
 	private static final String JSON_CREATE_SERVICE_REQUEST_PATH = "org/openmrs/module/fhir2/providers/ServiceRequestWebTest_create.json";
-
+	
 	private static final String JSON_UPDATE_SERVICE_REQUEST_PATH = "org/openmrs/module/fhir2/providers/ServiceRequestWebTest_update.json";
-
+	
 	private static final String JSON_UPDATE_SERVICE_REQUEST_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ServiceRequestWebTest_UpdateWithoutId.json";
-
+	
 	private static final String JSON_UPDATE_SERVICE_REQUEST_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ServiceRequestWebTest_UpdateWithWrongId.json";
 	
 	@Before
@@ -160,7 +156,7 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
 	}
-
+	
 	@Test
 	public void createServiceRequest_shouldCreateServiceRequest() throws Exception {
 		String jsonServiceRequest;
@@ -168,37 +164,37 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 			Objects.requireNonNull(is);
 			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setId(SERVICE_REQUEST_UUID);
-
+		
 		when(service.create(any(ServiceRequest.class))).thenReturn(serviceRequest);
-
+		
 		MockHttpServletResponse response = post("/ServiceRequest").jsonContent(jsonServiceRequest)
 		        .accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isCreated());
 	}
-
+	
 	@Test
 	public void updateServiceRequest_shouldUpdateExistingServiceRequest() throws Exception {
 		String jsonServiceRequest;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_PATH )) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_PATH)) {
 			Objects.requireNonNull(is);
 			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setId(SERVICE_REQUEST_UUID);
-
+		
 		when(service.update(anyString(), any(ServiceRequest.class))).thenReturn(serviceRequest);
-
+		
 		MockHttpServletResponse response = put("/ServiceRequest/" + SERVICE_REQUEST_UUID).jsonContent(jsonServiceRequest)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isOk());
 	}
-
+	
 	@Test
 	public void updateServiceRequest_shouldRaiseExceptionForNoId() throws Exception {
 		String jsonServiceRequest;
@@ -206,45 +202,45 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 			Objects.requireNonNull(is);
 			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
+		
 		MockHttpServletResponse response = put("/ServiceRequest/" + SERVICE_REQUEST_UUID).jsonContent(jsonServiceRequest)
-				.accept(FhirMediaTypes.JSON).go();
-
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentAsString(),
-				containsStringIgnoringCase("body must contain an ID element for update"));
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
 	}
-
+	
 	@Test
 	public void updateServiceRequest_shouldRaiseExceptionForIdMissMatch() throws Exception {
 		String jsonServiceRequest;
 		try (InputStream is = this.getClass().getClassLoader()
-				.getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_WRONG_ID_PATH)) {
+		        .getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
 			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-
-		MockHttpServletResponse response = put("/ServiceRequest/" + WRONG_SERVICE_REQUEST_UUID).jsonContent(jsonServiceRequest)
-				.accept(FhirMediaTypes.JSON).go();
-
+		
+		MockHttpServletResponse response = put("/ServiceRequest/" + WRONG_SERVICE_REQUEST_UUID)
+		        .jsonContent(jsonServiceRequest).accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentAsString(),
-				containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
 	}
-
+	
 	@Test
 	public void deleteServiceRequest_shouldDeleteServiceRequest() throws Exception {
 		OperationOutcome retVal = new OperationOutcome();
 		retVal.setId(SERVICE_REQUEST_UUID);
 		retVal.getText().setDivAsString("Deleted successfully");
-
+		
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setId(SERVICE_REQUEST_UUID);
-
+		
 		when(service.delete(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);
-
-		MockHttpServletResponse response = delete("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
+		MockHttpServletResponse response = delete("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}

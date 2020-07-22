@@ -362,7 +362,7 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Test
 	public void deletePerson_shouldDeletePerson() {
-
+		
 		when(fhirPersonService.delete(PERSON_UUID)).thenReturn(person);
 		
 		OperationOutcome result = resourceProvider.deletePerson(new IdType().setValue(PERSON_UUID));

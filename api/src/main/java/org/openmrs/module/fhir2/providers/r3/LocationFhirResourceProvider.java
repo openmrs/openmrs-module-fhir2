@@ -73,23 +73,22 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createLocation(@ResourceParam Location location) {
-		return FhirProviderUtils.buildCreate(
-			    locationService.create(Location30_40.convertLocation(location)));
-	} 
-
+		return FhirProviderUtils.buildCreate(locationService.create(Location30_40.convertLocation(location)));
+	}
+	
 	@Update
 	@SuppressWarnings("unused")
 	public MethodOutcome updateLocation(@IdParam IdType id, @ResourceParam Location location) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update");
 		}
-
+		
 		location.setId(id.getIdPart());
-
-		return FhirProviderUtils.buildUpdate(locationService.update(id.getIdPart(),
-		    Location30_40.convertLocation(location)));
+		
+		return FhirProviderUtils
+		        .buildUpdate(locationService.update(id.getIdPart(), Location30_40.convertLocation(location)));
 	}
-
+	
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteLocation(@IdParam @NotNull IdType id) {
