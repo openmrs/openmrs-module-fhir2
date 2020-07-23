@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RelatedPerson;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.FhirLocationService;
@@ -251,6 +252,10 @@ public class SearchQueryInclude<U extends IBaseResource> {
 					((Person) resource).getLink().forEach(patient -> patientReferenceList.add(patient.getTarget()));
 					uniquePatientUUIDs.addAll(getIdsFromReferenceList(patientReferenceList));
 				});
+				break;
+			case FhirConstants.RELATED_PERSON:
+				resourceList.forEach(
+				    resource -> uniquePatientUUIDs.add(getIdFromReference(((RelatedPerson) resource).getPatient())));
 				break;
 		}
 		

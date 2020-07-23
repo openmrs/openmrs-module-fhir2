@@ -12,23 +12,28 @@ package org.openmrs.module.fhir2.api.search;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrBefore;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -39,7 +44,9 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.junit.Before;
 import org.junit.Test;
@@ -95,6 +102,8 @@ public class RelatedPersonSearchQueryTest extends BaseModuleContextSensitiveTest
 	private static final String DATE_VOIDED = "2020-09-03";
 	
 	private static final String RELATIONSHIP_UUID = "f8f5b6bd-9e4d-4f1c-be5d-4232cbe72752";
+	
+	private static final String RELATIONSHIP_WITH_PATIENT_UUID = "c3c91630-8563-48ds-8efa-48e10c1saa3d";
 	
 	private static final int START_INDEX = 0;
 	
@@ -203,11 +212,11 @@ public class RelatedPersonSearchQueryTest extends BaseModuleContextSensitiveTest
 		relationships = search(femaleGenderParams);
 		
 		assertThat(relationships, notNullValue());
-		assertThat(relationships.size(), equalTo(1));
+		assertThat(relationships.size(), equalTo(2));
 		
 		relationList = get(relationships);
 		
-		assertThat(relationList, hasSize(equalTo(1)));
+		assertThat(relationList, hasSize(equalTo(2)));
 		assertThat(relationList, everyItem(hasProperty("gender", equalTo(Enumerations.AdministrativeGender.FEMALE))));
 		
 		gender = new TokenAndListParam().addAnd(new TokenOrListParam().add(OTHER_GENDER));
@@ -473,6 +482,32 @@ public class RelatedPersonSearchQueryTest extends BaseModuleContextSensitiveTest
 		List<RelatedPerson> resultList = get(results);
 		
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void shouldAddRelatedPatientsToResultListWhenIncluded() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(RELATIONSHIP_WITH_PATIENT_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("RelatedPerson:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(0, 10);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((RelatedPerson) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(RELATIONSHIP_WITH_PATIENT_UUID));
+		
+		RelatedPerson returnedRelatedPerson = (RelatedPerson) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedRelatedPerson.getPatient().getReferenceElement().getIdPart())))));
 	}
 	
 	@Test

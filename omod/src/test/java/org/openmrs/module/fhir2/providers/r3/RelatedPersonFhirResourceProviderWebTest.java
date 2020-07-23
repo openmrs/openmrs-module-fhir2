@@ -25,7 +25,9 @@ import javax.servlet.ServletException;
 
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashSet;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -41,6 +43,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -76,6 +79,9 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 	
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;
+	
+	@Captor
+	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
 	
 	@Before
 	@Override
@@ -115,7 +121,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri(String.format("/RelatedPerson/?name=%s", PERSON_NAME));
 		
 		verify(relatedPersonService).searchForRelatedPeople(stringAndListCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -128,7 +134,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri(String.format("/RelatedPerson/?gender=%s", PERSON_GENDER));
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), tokenAndListCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(tokenAndListCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -141,7 +147,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri("/RelatedPerson/?birthdate=eq1975-02-02");
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -158,7 +164,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri("/RelatedPerson/?birthdate=ge1975-02-02");
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -174,7 +180,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri("/RelatedPerson/?birthdate=gt1975-02-02");
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -190,7 +196,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri("/RelatedPerson/?birthdate=le1975-02-02");
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -206,7 +212,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri("/RelatedPerson/?birthdate=lt1975-02-02");
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -222,7 +228,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri("/RelatedPerson/?birthdate=ge1975-02-02&birthdate=le1980-02-02");
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		Calendar lowerBound = Calendar.getInstance();
 		lowerBound.set(1975, Calendar.FEBRUARY, 2);
@@ -241,7 +247,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri(String.format("/RelatedPerson/?address-city=%s", ADDRESS_FIELD));
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), stringAndListCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -254,7 +260,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri(String.format("/RelatedPerson/?address-state=%s", ADDRESS_FIELD));
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(),
-		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -267,7 +273,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri(String.format("/RelatedPerson/?address-postalcode=%s", POSTAL_CODE));
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -280,7 +286,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri(String.format("/RelatedPerson/?address-country=%s", ADDRESS_FIELD));
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    stringAndListCaptor.capture(), isNull(), isNull(), isNull());
+		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -293,7 +299,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri(String.format("/RelatedPerson?_id=%s", RELATED_PERSON_UUID));
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), tokenAndListCaptor.capture(), isNull(), isNull());
+		    isNull(), tokenAndListCaptor.capture(), isNull(), isNull(), isNull());
 		
 		assertThat(tokenAndListCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -306,7 +312,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri(String.format("/RelatedPerson?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
 		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), dateRangeCaptor.capture(), isNull());
+		    isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull());
 		
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
@@ -324,7 +330,7 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		verifyUri(String.format("/RelatedPerson/?name=%s&gender=%s&birthdate=eq1975-02-02", PERSON_NAME, PERSON_GENDER));
 		
 		verify(relatedPersonService).searchForRelatedPeople(stringAndListCaptor.capture(), tokenAndListCaptor.capture(),
-		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -347,11 +353,25 @@ public class RelatedPersonFhirResourceProviderWebTest extends BaseFhirR3Resource
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
+	@Test
+	public void shouldAddPatientsToResultListWhenIncluded() throws Exception {
+		verifyUri("/RelatedPerson?_include=RelatedPerson:patient");
+		
+		verify(relatedPersonService).searchForRelatedPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.RELATED_PERSON));
+	}
+	
 	private void verifyUri(String uri) throws Exception {
 		RelatedPerson relatedPerson = new RelatedPerson();
 		relatedPerson.setId(RELATED_PERSON_UUID);
 		when(relatedPersonService.searchForRelatedPeople(any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), 10, 1));
+		    any(), any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(relatedPerson), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		

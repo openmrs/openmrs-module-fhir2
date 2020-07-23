@@ -41,4 +41,6 @@
     <relationship relationship_id="1004" relationship="1" person_a="13" person_b="45" creator="1" date_changed="2020-07-31 00:00:00.0" date_created="2020-06-11 00:00:00.0" voided="0" uuid="f8ffjdid-9e4d-4f1c-be5d-4232cbe72752"/>
 
     <relationship relationship_id="1005" relationship="1" person_a="13" person_b="45" creator="1" date_voided="2020-09-03 00:00:00.0" date_changed="2020-07-31 00:00:00.0" date_created="2020-06-11 00:00:00.0" voided="1" uuid="ffhdi6bd-9e4d-4f1c-be5d-4232cbe72752"/>
+
+    <relationship relationship_id="1006" relationship="1" person_a="12" person_b="7" creator="1" date_created="2020-01-01 00:00:00.0" voided="0" uuid="c3c91630-8563-48ds-8efa-48e10c1saa3d"/>
 </dataset>
