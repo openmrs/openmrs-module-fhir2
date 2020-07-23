@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
@@ -73,6 +74,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 					includedResourcesSet.addAll(handlePatientInclude(resourceList, includeParam.getParamType()));
 					break;
 				case FhirConstants.INCLUDE_HAS_MEMBER_PARAM:
+				case FhirConstants.INCLUDE_RESULT_PARAM:
 				case FhirConstants.INCLUDE_RELATED_TYPE_PARAM:
 					includedResourcesSet.addAll(handleObsGroupInclude(resourceList, includeParam.getParamType()));
 					break;
@@ -98,6 +100,10 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				resourceList.forEach(resource -> uniqueObservationUUIDs
 				        .addAll(getIdsFromReferenceList(((Observation) resource).getHasMember())));
 				break;
+			case FhirConstants.DIAGNOSTIC_REPORT:
+				resourceList.forEach(resource -> uniqueObservationUUIDs
+				        .addAll(getIdsFromReferenceList(((DiagnosticReport) resource).getResult())));
+				break;
 		}
 		
 		uniqueObservationUUIDs.removeIf(Objects::isNull);
@@ -119,6 +125,10 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				resourceList.forEach(
 				    resource -> uniquePatientUUIDs.add(getIdFromReference(((AllergyIntolerance) resource).getPatient())));
 				break;
+			case FhirConstants.DIAGNOSTIC_REPORT:
+				resourceList.forEach(
+				    resource -> uniquePatientUUIDs.add(getIdFromReference(((DiagnosticReport) resource).getSubject())));
+				break;
 		}
 		
 		uniquePatientUUIDs.removeIf(Objects::isNull);
@@ -135,6 +145,10 @@ public class SearchQueryInclude<U extends IBaseResource> {
 			case FhirConstants.OBSERVATION:
 				resourceList.forEach(
 				    resource -> uniqueEncounterUUIDs.add(getIdFromReference(((Observation) resource).getEncounter())));
+				break;
+			case FhirConstants.DIAGNOSTIC_REPORT:
+				resourceList.forEach(
+				    resource -> uniqueEncounterUUIDs.add(getIdFromReference(((DiagnosticReport) resource).getEncounter())));
 				break;
 		}
 		

@@ -14,6 +14,8 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,19 +25,23 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Obs;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -207,7 +213,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = service.searchForDiagnosticReports(null, null, null, null, null, null, null, null);
+		IBundleProvider results = service.searchForDiagnosticReports(null, null, null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -215,4 +221,73 @@ public class FhirDiagnosticReportServiceImplTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(UUID))));
 	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldAddRelatedResourcesWhenIncluded() {
+		Obs obs = new Obs();
+		obs.setUuid(UUID);
+		
+		DiagnosticReport diagnosticReport = new DiagnosticReport();
+		diagnosticReport.setId(UUID);
+		
+		List<Obs> obsList = new ArrayList<>();
+		obsList.add(obs);
+		
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("DiagnosticReport:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(obsList);
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
+		when(translator.toFhirResource(obs)).thenReturn(diagnosticReport);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
+		
+		IBundleProvider results = service.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
+		    includes);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList, hasItem(is(instanceOf(Patient.class))));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(UUID))));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldNotAddRelatedResourcesForEmptyInclude() {
+		Obs obs = new Obs();
+		obs.setUuid(UUID);
+		
+		DiagnosticReport diagnosticReport = new DiagnosticReport();
+		diagnosticReport.setId(UUID);
+		
+		List<Obs> obsList = new ArrayList<>();
+		obsList.add(obs);
+		
+		HashSet<Include> includes = new HashSet<>();
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(obsList);
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
+		when(translator.toFhirResource(obs)).thenReturn(diagnosticReport);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
+		
+		IBundleProvider results = service.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
+		    includes);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(UUID))));
+	}
+	
 }

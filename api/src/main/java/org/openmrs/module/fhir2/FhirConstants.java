@@ -255,4 +255,6 @@ public class FhirConstants {
 	public static final String INCLUDE_HAS_MEMBER_PARAM = "has-member";
 	
 	public static final String INCLUDE_RELATED_TYPE_PARAM = "related-type";
+	
+	public static final String INCLUDE_RESULT_PARAM = "result";
 }

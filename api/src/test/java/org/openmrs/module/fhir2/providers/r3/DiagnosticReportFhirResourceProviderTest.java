@@ -17,12 +17,17 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -38,6 +43,7 @@ import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -172,11 +178,11 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 	
 	@Test
 	public void findDiagnosticReports_shouldReturnMatchingBundleOfDiagnosticReports() {
-		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(
+		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(
 		    new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
-		    null);
+		    null, null);
 		
 		List<DiagnosticReport> resultList = get(results);
 		
@@ -192,11 +198,11 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		ReferenceAndListParam subject = new ReferenceAndListParam();
 		subject.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
-		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(
+		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(
 		    new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, subject, null, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		List<DiagnosticReport> resultList = get(results);
 		
@@ -204,6 +210,46 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 		assertThat(resultList.get(0).getId(), equalTo(UUID));
+	}
+	
+	@Test
+	public void findDiagnosticReports_shouldReturnRelatedResourcesIfIncludeIsSpecified() {
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("DiagnosticReport:patient"));
+		
+		when(service.searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), argThat(is(includes)))).thenReturn(
+		        new MockIBundleProvider<>(Arrays.asList(diagnosticReport, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
+		    null, includes);
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), greaterThanOrEqualTo(2));
+		assertThat(resultList.get(1).fhirType(), is(FhirConstants.PATIENT));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
+	}
+	
+	@Test
+	public void findDiagnosticReports_shouldNotReturnRelatedResourcesIfIncludeIsEmpty() {
+		HashSet<Include> includes = new HashSet<>();
+		
+		when(service.searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull())).thenReturn(
+		        new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
+		    null, includes);
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
 	}
 	
 	@Test

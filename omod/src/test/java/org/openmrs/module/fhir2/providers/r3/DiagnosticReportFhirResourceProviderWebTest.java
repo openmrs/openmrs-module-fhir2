@@ -10,9 +10,12 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -30,8 +33,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -50,6 +55,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -91,6 +97,9 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 	
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;
+	
+	@Captor
+	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
 	
 	@Mock
 	private FhirDiagnosticReportService service;
@@ -220,7 +229,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri(String.format("/DiagnosticReport?result=%s", OBS_RESULT_UUID));
 		
 		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(),
-		    referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull());
+		    referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
@@ -236,7 +245,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri(String.format("/DiagnosticReport?encounter=%s", ENCOUNTER_UUID));
 		
 		verify(service).searchForDiagnosticReports(referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -251,7 +260,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri(String.format("/DiagnosticReport?patient=%s", PATIENT_UUID));
 		
 		verify(service).searchForDiagnosticReports(isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -266,7 +275,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri(String.format("/DiagnosticReport?patient.identifier=%s", PATIENT_IDENTIFIER));
 		
 		verify(service).searchForDiagnosticReports(isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -281,7 +290,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri(String.format("/DiagnosticReport?patient.name=%s", PATIENT_GIVEN_NAME));
 		
 		verify(service).searchForDiagnosticReports(isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -296,7 +305,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri(String.format("/DiagnosticReport?patient.given=%s", PATIENT_GIVEN_NAME));
 		
 		verify(service).searchForDiagnosticReports(isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -311,7 +320,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri(String.format("/DiagnosticReport?patient.family=%s", PATIENT_FAMILY_NAME));
 		
 		verify(service).searchForDiagnosticReports(isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
 		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
@@ -326,7 +335,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri(String.format("/DiagnosticReport?code=%s", DIAGNOSTIC_REPORT_CODE));
 		
 		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), tokenAndListParamCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull());
 		assertThat(tokenAndListParamCaptor.getValue(), notNullValue());
 		assertThat(
 		    tokenAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
@@ -338,7 +347,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri("/DiagnosticReport?issued=eq2008-08-18");
 		
 		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -356,7 +365,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri("/DiagnosticReport?issued=ge2008-08-18");
 		
 		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -372,7 +381,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri("/DiagnosticReport?issued=gt2008-08-18");
 		
 		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -389,7 +398,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri("/DiagnosticReport?issued=le2008-08-18");
 		
 		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -405,7 +414,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri("/DiagnosticReport?issued=lt2008-08-18");
 		
 		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -421,7 +430,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri("/DiagnosticReport?issued=ge2008-08-18&issued=le2009-07-21");
 		
 		verify(service).searchForDiagnosticReports(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull());
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar lowerBound = Calendar.getInstance();
@@ -440,7 +449,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri(String.format("/DiagnosticReport?_id=%s", DIAGNOSTIC_REPORT_UUID));
 		
 		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    tokenAndListParamCaptor.capture(), isNull(), isNull());
+		    tokenAndListParamCaptor.capture(), isNull(), isNull(), isNull());
 		
 		assertThat(tokenAndListParamCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -454,7 +463,8 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		verifyUri(String.format("/DiagnosticReport?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
 		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeCaptor.capture(), isNull());
+		    dateRangeCaptor.capture(), isNull(), isNull());
+		
 		assertThat(dateRangeCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
@@ -466,10 +476,73 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
+	@Test
+	public void findDiagnosticReports_shouldIncludeEncounterWithReturnedDiagnosticReports() throws Exception {
+		verifyUri("/DiagnosticReport?_include=DiagnosticReport:encounter");
+		
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		    equalTo(FhirConstants.DIAGNOSTIC_REPORT));
+	}
+	
+	@Test
+	public void findDiagnosticReports_shouldIncludePatientWithReturnedDiagnosticReports() throws Exception {
+		verifyUri("/DiagnosticReport?_include=DiagnosticReport:patient");
+		
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		    equalTo(FhirConstants.DIAGNOSTIC_REPORT));
+	}
+	
+	@Test
+	public void findDiagnosticReports_shouldIncludeObservationGroupMembersWithReturnedDiagnosticReports() throws Exception {
+		verifyUri("/DiagnosticReport?_include=DiagnosticReport:result");
+		
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_RESULT_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		    equalTo(FhirConstants.DIAGNOSTIC_REPORT));
+	}
+	
+	@Test
+	public void findDiagnosticReports_shouldHandleMultipleIncludes() throws Exception {
+		verifyUri("/DiagnosticReport?_include=DiagnosticReport:result&_include=DiagnosticReport:encounter");
+		
+		verify(service).searchForDiagnosticReports(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
+		
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_RESULT_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.DIAGNOSTIC_REPORT)))));
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.DIAGNOSTIC_REPORT)))));
+	}
+	
 	private void verifyUri(String uri) throws Exception {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
-		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(service.searchForDiagnosticReports(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(diagnosticReport), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -20,5 +23,6 @@ public interface FhirDiagnosticReportService extends FhirService<DiagnosticRepor
 	
 	IBundleProvider searchForDiagnosticReports(ReferenceAndListParam encounterReference,
 	        ReferenceAndListParam patientReference, DateRangeParam issueDate, TokenAndListParam code,
-	        ReferenceAndListParam result, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort);
+	        ReferenceAndListParam result, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
+	        HashSet<Include> includes);
 }

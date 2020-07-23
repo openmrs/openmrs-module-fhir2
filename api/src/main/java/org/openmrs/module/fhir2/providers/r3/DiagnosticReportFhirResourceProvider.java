@@ -11,9 +11,13 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -30,6 +34,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.DiagnosticReport30_40;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
@@ -112,11 +117,19 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = DiagnosticReport.SP_CODE) TokenAndListParam code,
 	        @OptionalParam(name = DiagnosticReport.SP_RESULT) ReferenceAndListParam result,
 	        @OptionalParam(name = DiagnosticReport.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
+	        @IncludeParam(allow = { "DiagnosticReport:" + DiagnosticReport.SP_ENCOUNTER,
+	                "DiagnosticReport:" + DiagnosticReport.SP_PATIENT,
+	                "DiagnosticReport:" + DiagnosticReport.SP_RESULT }) HashSet<Include> includes) {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
+		
+		if (CollectionUtils.isEmpty(includes)) {
+			includes = null;
+		}
+		
 		return new SearchQueryBundleProviderR3Wrapper(diagnosticReportService.searchForDiagnosticReports(encounterReference,
-		    patientReference, issueDate, code, result, id, lastUpdated, sort));
+		    patientReference, issueDate, code, result, id, lastUpdated, sort, includes));
 	}
 }
