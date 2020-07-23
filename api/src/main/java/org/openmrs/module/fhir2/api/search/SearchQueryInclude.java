@@ -20,6 +20,7 @@ import ca.uhn.fhir.model.api.Include;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
@@ -113,6 +114,10 @@ public class SearchQueryInclude<U extends IBaseResource> {
 			case FhirConstants.OBSERVATION:
 				resourceList.forEach(
 				    resource -> uniquePatientUUIDs.add(getIdFromReference(((Observation) resource).getSubject())));
+				break;
+			case FhirConstants.ALLERGY_INTOLERANCE:
+				resourceList.forEach(
+				    resource -> uniquePatientUUIDs.add(getIdFromReference(((AllergyIntolerance) resource).getPatient())));
 				break;
 		}
 		

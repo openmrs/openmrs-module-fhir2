@@ -11,12 +11,15 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -34,6 +37,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.IdType;
@@ -95,12 +99,18 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	        @OptionalParam(name = AllergyIntolerance.SP_MANIFESTATION) TokenAndListParam manifestationCode,
 	        @OptionalParam(name = AllergyIntolerance.SP_CLINICAL_STATUS) TokenAndListParam clinicalStatus,
 	        @OptionalParam(name = AllergyIntolerance.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
+	        @IncludeParam(allow = { "AllergyIntolerance:" + AllergyIntolerance.SP_PATIENT }) HashSet<Include> includes) {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
+		
+		if (CollectionUtils.isEmpty(includes)) {
+			includes = null;
+		}
+		
 		return fhirAllergyIntoleranceService.searchForAllergies(patientReference, category, allergen, severity,
-		    manifestationCode, clinicalStatus, id, lastUpdated, sort);
+		    manifestationCode, clinicalStatus, id, lastUpdated, sort, includes);
 	}
 	
 	@Create

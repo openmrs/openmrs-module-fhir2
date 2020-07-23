@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -52,7 +55,8 @@ public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIn
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForAllergies(ReferenceAndListParam patientReference, TokenAndListParam category,
 	        TokenAndListParam allergen, TokenAndListParam severity, TokenAndListParam manifestationCode,
-	        TokenAndListParam clinicalStatus, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort) {
+	        TokenAndListParam clinicalStatus, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
+	        HashSet<Include> includes) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
@@ -63,7 +67,7 @@ public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIn
 		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, clinicalStatus)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .setSortSpec(sort);
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}

@@ -12,21 +12,26 @@ package org.openmrs.module.fhir2.api.search;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -823,6 +828,30 @@ public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiv
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForAllergies_shouldAddNotNullPatientToReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(ALLERGY_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("AllergyIntolerance:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		
+		AllergyIntolerance returnedAllergy = (AllergyIntolerance) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedAllergy.getPatient().getReferenceElement().getIdPart())))));
 	}
 	
 	@Test
