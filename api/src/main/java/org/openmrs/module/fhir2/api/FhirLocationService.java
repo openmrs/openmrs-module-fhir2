@@ -24,5 +24,6 @@ public interface FhirLocationService extends FhirService<Location> {
 	
 	IBundleProvider searchForLocations(StringAndListParam name, StringAndListParam city, StringAndListParam country,
 	        StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,
-	        TokenAndListParam id, DateRangeParam lastUpdated, HashSet<Include> includes, SortSpec sort);
+	        TokenAndListParam id, DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes,
+	        SortSpec sort);
 }

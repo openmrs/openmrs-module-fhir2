@@ -55,7 +55,8 @@ public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openm
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForLocations(StringAndListParam name, StringAndListParam city, StringAndListParam country,
 	        StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,
-	        TokenAndListParam id, DateRangeParam lastUpdated, HashSet<Include> includes, SortSpec sort) {
+	        TokenAndListParam id, DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes,
+	        SortSpec sort) {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name)
 		        .addParameter(FhirConstants.CITY_SEARCH_HANDLER, city)
@@ -66,7 +67,8 @@ public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openm
 		        .addParameter(FhirConstants.TAG_SEARCH_HANDLER, tag)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sort);
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes).setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}

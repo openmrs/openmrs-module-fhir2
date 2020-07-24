@@ -40,6 +40,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.Location30_40;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -127,12 +128,20 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam parent,
 	        @OptionalParam(name = Location.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
-	        @IncludeParam(allow = { "Location:" + Location.SP_PARTOF }) HashSet<Include> includes, @Sort SortSpec sort) {
+	        @IncludeParam(allow = { "Location:" + Location.SP_PARTOF }) HashSet<Include> includes,
+	        @IncludeParam(reverse = true, allow = { "Location:" + Location.SP_PARTOF,
+	                "Encounter:" + Encounter.SP_LOCATION }) HashSet<Include> revIncludes,
+	        @Sort SortSpec sort) {
+		
 		if (CollectionUtils.isEmpty(includes)) {
 			includes = null;
 		}
 		
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
+		}
+		
 		return new SearchQueryBundleProviderR3Wrapper(locationService.searchForLocations(name, city, country, postalCode,
-		    state, tag, parent, id, lastUpdated, includes, sort));
+		    state, tag, parent, id, lastUpdated, includes, revIncludes, sort));
 	}
 }

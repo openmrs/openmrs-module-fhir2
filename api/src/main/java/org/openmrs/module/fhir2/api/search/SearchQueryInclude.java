@@ -17,6 +17,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -64,11 +68,54 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	@Autowired
 	private FhirMedicationService medicationService;
 	
-	@SuppressWarnings("unchecked")
 	public Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams) {
-		Set<IBaseResource> includedResourcesSet = new HashSet<>();
-		
 		List<PropParam<?>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);
+		Set<IBaseResource> _includeResources = handleInclude(resourceList, includeParamList);
+		
+		List<PropParam<?>> revIncludeParamList = theParams.getParameters(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER);
+		Set<IBaseResource> _revIncludeResources = handleRevInclude(resourceList, revIncludeParamList);
+		
+		Set<IBaseResource> resourcesToBeReturned = new HashSet<>();
+		resourcesToBeReturned.addAll(_includeResources);
+		resourcesToBeReturned.addAll(_revIncludeResources);
+		
+		return resourcesToBeReturned;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Set<IBaseResource> handleRevInclude(List<U> resourceList, List<PropParam<?>> revIncludeParamList) {
+		Set<IBaseResource> revIncludedResourcesSet = new HashSet<>();
+		
+		if (CollectionUtils.isEmpty(revIncludeParamList)) {
+			return revIncludedResourcesSet;
+		}
+		
+		ReferenceAndListParam referenceParams = new ReferenceAndListParam();
+		ReferenceOrListParam params = new ReferenceOrListParam();
+		resourceList.forEach(resource -> params.addOr(new ReferenceParam(resource.getIdElement().getIdPart())));
+		referenceParams.addAnd(params);
+		
+		Set<Include> revIncludeSet = (HashSet<Include>) revIncludeParamList.get(0).getParam();
+		revIncludeSet.forEach(revIncludeParam -> {
+			IBundleProvider bundleProvider = null;
+			switch (revIncludeParam.getParamName()) {
+				case FhirConstants.INCLUDE_PART_OF_PARAM:
+				case FhirConstants.INCLUDE_LOCATION_PARAM:
+					bundleProvider = handleLocationReverseInclude(referenceParams, revIncludeParam.getParamType());
+					break;
+			}
+			
+			if (bundleProvider != null) {
+				revIncludedResourcesSet.addAll(bundleProvider.getResources(0, -1));
+			}
+		});
+		
+		return revIncludedResourcesSet;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Set<IBaseResource> handleInclude(List<U> resourceList, List<PropParam<?>> includeParamList) {
+		Set<IBaseResource> includedResourcesSet = new HashSet<>();
 		
 		if (CollectionUtils.isEmpty(includeParamList)) {
 			return includedResourcesSet;
@@ -109,6 +156,18 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		});
 		
 		return includedResourcesSet;
+	}
+	
+	private IBundleProvider handleLocationReverseInclude(ReferenceAndListParam params, String targetType) {
+		switch (targetType) {
+			case FhirConstants.LOCATION:
+				return locationService.searchForLocations(null, null, null, null, null, null, params, null, null, null, null,
+				    null);
+			case FhirConstants.ENCOUNTER:
+				return encounterService.searchForEncounters(null, params, null, null, null, null, null);
+		}
+		
+		return null;
 	}
 	
 	private List<Location> handleParentLocationInclude(List<Location> resourceList) {

@@ -40,6 +40,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -120,12 +121,20 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam parent,
 	        @OptionalParam(name = Location.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
-	        @IncludeParam(allow = { "Location:" + Location.SP_PARTOF }) HashSet<Include> includes, @Sort SortSpec sort) {
+	        @IncludeParam(allow = { "Location:" + Location.SP_PARTOF }) HashSet<Include> includes,
+	        @IncludeParam(reverse = true, allow = { "Location:" + Location.SP_PARTOF,
+	                "Encounter:" + Encounter.SP_LOCATION }) HashSet<Include> revIncludes,
+	        @Sort SortSpec sort) {
+		
 		if (CollectionUtils.isEmpty(includes)) {
 			includes = null;
 		}
 		
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
+		}
+		
 		return fhirLocationService.searchForLocations(name, city, country, postalCode, state, tag, parent, id, lastUpdated,
-		    includes, sort);
+		    includes, revIncludes, sort);
 	}
 }

@@ -43,6 +43,8 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Location;
 import org.junit.Before;
 import org.junit.Test;
@@ -485,6 +487,85 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), equalTo(1)); // no parent resource included with the result list
+	}
+	
+	@Test
+	public void searchForLocations_shouldAddReverseIncludedLocationToReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_PARENT_ID));
+		
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("Location:partof"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		
+		Location returnedLocation = (Location) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Location.class)), hasProperty("partOf",
+		    hasProperty("referenceElement", hasProperty("idPart", equalTo(returnedLocation.getIdElement().getIdPart())))))));
+	}
+	
+	@Test
+	public void searchForLocations_shouldAddReverseIncludedEncounterToReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_PARENT_ID));
+		
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("Encounter:location"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		
+		Location returnedLocation = (Location) resultList.iterator().next();
+		assertThat(resultList,
+		    hasItem(allOf(is(instanceOf(Encounter.class)),
+		        hasProperty("locationFirstRep", hasProperty("location", hasProperty("referenceElement",
+		            hasProperty("idPart", equalTo(returnedLocation.getIdElement().getIdPart()))))))));
+	}
+	
+	@Test
+	public void searchForLocations_shouldHandleMultipleReverseIncludes() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_PARENT_ID));
+		
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("Location:partof"));
+		revIncludes.add(new Include("Encounter:location"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList.size(), equalTo(3)); // included resources (location + encounter) added as part of the result list
+		
+		Location returnedLocation = (Location) resultList.iterator().next();
+		assertThat(resultList,
+		    hasItem(allOf(is(instanceOf(Encounter.class)),
+		        hasProperty("locationFirstRep", hasProperty("location", hasProperty("referenceElement",
+		            hasProperty("idPart", equalTo(returnedLocation.getIdElement().getIdPart()))))))));
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Location.class)), hasProperty("partOf",
+		    hasProperty("referenceElement", hasProperty("idPart", equalTo(returnedLocation.getIdElement().getIdPart())))))));
 	}
 	
 	@Test

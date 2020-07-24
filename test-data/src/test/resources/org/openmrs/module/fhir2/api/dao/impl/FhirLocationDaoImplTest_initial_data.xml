@@ -23,5 +23,12 @@
     <location_tag_map location_id="2" location_tag_id="7"/>
     <location_tag_map location_id="3" location_tag_id="7"/>
 
+    <patient_identifier_type patient_identifier_type_id="1" name="Test Identifier Type" description="Test description" creator="1" date_created="2005-01-01 00:00:00.0" required="false" retired="false"  uuid="1d64befb-3b2e-48e5-85f5-353d43e23e45"/>
+    <person person_id="2" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" gender="M"  uuid="a194be38-271a-44cb-ba3f-f2dbf4831fe9"/>
+    <person_name person_id="2" person_name_id="2" preferred="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" given_name="John" middle_name=" " family_name="Doe"  uuid="765b882e-db79-498b-aff7-b5b53f12caf1"/>
+    <patient patient_id="2" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+    <patient_identifier patient_identifier_id="1" patient_id="2" creator="1" date_created="2005-01-01 00:00:00.0" identifier="1000WF" identifier_type="1" preferred="1" voided="false" location_id="1"  uuid="b2c299e7-2679-44b8-a7a3-c69159a20ac0"/>
+    <encounter_type encounter_type_id="2" name="Emergency" description="Emergency visit" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="07000be2-26b6-4cce-8b40-866d8435b613"/>
+    <encounter encounter_id="3" encounter_type="2" patient_id="2" location_id="5" encounter_datetime="2008-08-01 00:00:00.0" creator="1" date_created="2008-08-18 14:09:05.0" voided="false" uuid="6519d653-393b-4118-9c83-a3715b82d4ac"/>
 </dataset>
 

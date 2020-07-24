@@ -271,4 +271,6 @@ public class FhirConstants {
 	public static final String INCLUDE_LINK_PARAM = "link";
 	
 	public static final String INCLUDE_RESULT_PARAM = "result";
+	
+	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
 }
