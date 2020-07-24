@@ -18,6 +18,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -37,6 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
@@ -90,7 +93,7 @@ public class LocationTranslatorImplTest {
 	private LocationAddressTranslator locationAddressTranslator;
 	
 	@Mock
-	private TelecomTranslator<Object> telecomTranslator;
+	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Mock
 	private FhirLocationDao fhirLocationDao;
@@ -257,7 +260,6 @@ public class LocationTranslatorImplTest {
 		org.hl7.fhir.r4.model.Location location = locationTranslator.toFhirResource(new Location());
 		assertThat(location, notNullValue());
 		assertThat(location.getTelecom(), notNullValue());
-		
 	}
 	
 	@Test
@@ -272,14 +274,16 @@ public class LocationTranslatorImplTest {
 		locationAttribute.setAttributeType(attributeType);
 		
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
-		ContactPoint contactPoint = location.getTelecomFirstRep();
+		ContactPoint contactPoint = location.addTelecom();
 		contactPoint.setId(LOCATION_ATTRIBUTE_UUID);
 		contactPoint.setValue(LOCATION_ATTRIBUTE_VALUE);
+		
+		when(telecomTranslator.toOpenmrsType(any(LocationAttribute.class), eq(contactPoint))).thenReturn(locationAttribute);
 		
 		Location omrsLocation = locationTranslator.toOpenmrsType(location);
 		assertThat(omrsLocation, notNullValue());
 		assertThat(omrsLocation.getAttributes(), notNullValue());
-		assertThat(omrsLocation.getAttributes().size(), greaterThanOrEqualTo(1));
+		assertThat(omrsLocation.getAttributes(), hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test

@@ -15,10 +15,33 @@ import java.util.List;
 
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
+import org.openmrs.annotation.Authorized;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirPractitionerDao extends FhirDao<Provider> {
 	
+	@Override
+	Provider get(String uuid);
+	
+	@Authorized(PrivilegeConstants.GET_PROVIDERS)
 	List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(@NotNull Provider provider,
 	        @NotNull String providerAttributeTypeUuid);
 	
+	@Override
+	@Authorized({ PrivilegeConstants.MANAGE_PROVIDERS })
+	Provider createOrUpdate(Provider newEntry);
+	
+	@Override
+	@Authorized(PrivilegeConstants.MANAGE_PROVIDERS)
+	Provider delete(String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PROVIDERS)
+	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PROVIDERS)
+	List<Provider> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
+	        int lastResult);
 }

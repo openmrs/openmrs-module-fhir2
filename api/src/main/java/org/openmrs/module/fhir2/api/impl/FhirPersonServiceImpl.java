@@ -48,7 +48,8 @@ public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.P
 	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
 	        TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort) {
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name)
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.NAME_PROPERTY, name)
 		        .addParameter(FhirConstants.GENDER_SEARCH_HANDLER, gender)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, birthDate)
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)

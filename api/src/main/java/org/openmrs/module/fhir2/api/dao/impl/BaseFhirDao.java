@@ -9,27 +9,33 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.in;
+import static org.hibernate.criterion.Restrictions.isNull;
+import static org.hibernate.criterion.Restrictions.or;
+import static org.hibernate.criterion.Subqueries.propertyIn;
 
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Subqueries;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
-import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +54,11 @@ import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("UnstableApiUsage")
 public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao implements FhirDao<T> {
 	
-	private final TypeToken<T> typeToken;
+	protected final TypeToken<T> typeToken;
+	
+	private final boolean isRetireable;
+	
+	private final boolean isVoidable;
 	
 	@Autowired
 	@Getter(AccessLevel.PROTECTED)
@@ -56,21 +66,37 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
-	@Autowired
-	private FhirGlobalPropertyService globalPropertyService;
-	
 	protected BaseFhirDao() {
 		typeToken = new TypeToken<T>(getClass()) {
 			
 		};
+		
+		this.isRetireable = Retireable.class.isAssignableFrom(typeToken.getRawType());
+		this.isVoidable = Voidable.class.isAssignableFrom(typeToken.getRawType());
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
 	public T get(String uuid) {
-		return (T) sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType()).add(eq("uuid", uuid))
+		T result = (T) sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType()).add(eq("uuid", uuid))
 		        .uniqueResult();
+		
+		if (result == null) {
+			return null;
+		}
+		
+		if (isVoidable) {
+			if (isVoided(result)) {
+				throw new ResourceGoneException(uuid);
+			}
+		} else if (isRetireable) {
+			if (isRetired(result)) {
+				throw new ResourceGoneException(uuid);
+			}
+		}
+		
+		return result;
 	}
 	
 	@Override
@@ -86,54 +112,132 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			return null;
 		}
 		
-		if (existing instanceof Voidable) {
-			Voidable existingVoidable = (Voidable) existing;
-			existingVoidable.setVoided(true);
-			existingVoidable.setVoidReason("Voided via FHIR API");
-		} else if (existing instanceof Retireable) {
-			Retireable existingRetireable = (Retireable) existing;
-			existingRetireable.setRetired(true);
-			existingRetireable.setRetireReason("Retired via FHIR API");
+		if (isVoidable) {
+			existing = voidObject(existing);
+		} else if (isRetireable) {
+			existing = retireObject(existing);
 		}
 		
-		sessionFactory.getCurrentSession().save(existing);
+		sessionFactory.getCurrentSession().saveOrUpdate(existing);
 		
 		return existing;
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<String> getResultUuids(SearchParameterMap theParams) {
+	public List<String> getSearchResultUuids(SearchParameterMap theParams) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
+		
 		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(typeToken.getRawType());
 		Criteria detachedExecutableCriteria = detachedCriteria.getExecutableCriteria(sessionFactory.getCurrentSession());
+		
+		if (isVoidable) {
+			handleVoidable(detachedExecutableCriteria);
+		} else if (isRetireable) {
+			handleRetireable(detachedExecutableCriteria);
+		}
 		
 		setupSearchParams(detachedExecutableCriteria, theParams);
 		handleSort(detachedExecutableCriteria, theParams.getSortSpec());
 		
 		detachedCriteria.setProjection(Projections.property("uuid"));
 		
-		criteria.add(Subqueries.propertyIn("uuid", detachedCriteria));
+		criteria.add(propertyIn("uuid", detachedCriteria));
 		criteria.setProjection(Projections.groupProperty("uuid"));
-		
 		return criteria.list();
 	}
 	
 	@Override
-	public Integer getPreferredPageSize() {
-		return globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE, 10);
-	}
-	
 	@SuppressWarnings("unchecked")
-	public Collection<T> search(SearchParameterMap theParams, List matchingResourceUuids, int firstResult, int lastResult) {
-		return createCriteria(theParams).add(in("uuid", matchingResourceUuids.subList(firstResult, lastResult))).list();
+	public List<T> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
+	        int lastResult) {
+		List<String> selectedResources = matchingResourceUuids.subList(firstResult, lastResult);
+		
+		List<T> results = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType())
+		        .add(in("uuid", selectedResources)).list();
+		
+		results.sort(Comparator.comparingInt(r -> selectedResources.indexOf(r.getUuid())));
+		
+		return results;
 	}
 	
-	protected Criteria createCriteria(SearchParameterMap theParams) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
-		setupSearchParams(criteria, theParams);
-		handleSort(criteria, theParams.getSortSpec());
-		return criteria;
+	@Override
+	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
+		// @formatter:off
+		return Optional.of(or(toCriteriaArray(handleDateRange("dateChanged", param), Optional.of(
+		    and(toCriteriaArray(Stream.of(Optional.of(isNull("dateChanged")), handleDateRange("dateCreated", param))))))));
+		// @formatter:on
+	}
+	
+	// Implementation of handleLastUpdated for "immutable" types, that is, those that cannot be changed
+	protected Optional<Criterion> handleLastUpdatedImmutable(DateRangeParam param) {
+		return handleDateRange("dateCreated", param);
+	}
+	
+	/**
+	 * This provides a default implementation for dealing with voidable objects. By default, voided
+	 * objects are excluded from searches, but not from get
+	 *
+	 * @param criteria the criteria object representing the current search
+	 */
+	protected void handleVoidable(Criteria criteria) {
+		criteria.add(eq("voided", false));
+	}
+	
+	/**
+	 * This provides a default implementation for dealing with retireable objects. By default, retired
+	 * objects are excluded from searches, but not from get
+	 *
+	 * @param criteria the criteria object representing the current search
+	 */
+	protected void handleRetireable(Criteria criteria) {
+		criteria.add(eq("retired", false));
+	}
+	
+	/**
+	 * Determines whether the object is voided
+	 *
+	 * @param object an object implementing the Voidable interface
+	 * @return true if the object is voided, false otherwise
+	 */
+	protected boolean isVoided(T object) {
+		return ((Voidable) object).getVoided();
+	}
+	
+	/**
+	 * Determines whether the object is retired
+	 *
+	 * @param object an object implementing the Retireable interface
+	 * @return true if the object is retired, false otherwise
+	 */
+	protected boolean isRetired(T object) {
+		return ((Retireable) object).getRetired();
+	}
+	
+	/**
+	 * Voids the given object
+	 *
+	 * @param object the object implementing the Voidable interface
+	 * @return the same object voided
+	 */
+	protected T voidObject(T object) {
+		Voidable v = (Voidable) object;
+		v.setVoided(true);
+		v.setVoidReason("Voided via FHIR API");
+		return object;
+	}
+	
+	/**
+	 * Retires the given object
+	 *
+	 * @param object the object implementing the Retireable interface
+	 * @return the same object retired
+	 */
+	protected T retireObject(T object) {
+		Retireable r = (Retireable) object;
+		r.setRetired(true);
+		r.setRetireReason("Retired via FHIR API");
+		return object;
 	}
 	
 	/**

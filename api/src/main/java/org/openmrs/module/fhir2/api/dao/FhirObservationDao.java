@@ -9,8 +9,33 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import java.util.List;
+
 import org.openmrs.Obs;
+import org.openmrs.annotation.Authorized;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirObservationDao extends FhirDao<Obs> {
 	
+	@Override
+	@Authorized(PrivilegeConstants.GET_OBS)
+	Obs get(String uuid);
+	
+	@Override
+	@Authorized({ PrivilegeConstants.ADD_OBS, PrivilegeConstants.EDIT_OBS })
+	Obs createOrUpdate(Obs newEntry);
+	
+	@Override
+	@Authorized(PrivilegeConstants.EDIT_OBS)
+	Obs delete(String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_OBS)
+	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_OBS)
+	List<Obs> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
+	        int lastResult);
 }

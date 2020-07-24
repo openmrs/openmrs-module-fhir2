@@ -39,6 +39,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -66,32 +67,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		}
 		
 		return MedicationRequest30_40.convertMedicationRequest(medicationRequest);
-	}
-	
-	@Search
-	@SuppressWarnings("unused")
-	public IBundleProvider searchForMedicationRequests(
-	        @OptionalParam(name = MedicationRequest.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
-	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
-	        @OptionalParam(name = MedicationRequest.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
-	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
-	        @OptionalParam(name = MedicationRequest.SP_CONTEXT, chainWhitelist = {
-	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
-	        @OptionalParam(name = MedicationRequest.SP_CODE) TokenAndListParam code,
-	        @OptionalParam(name = MedicationRequest.SP_REQUESTER, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
-	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
-	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
-	        @OptionalParam(name = MedicationRequest.SP_MEDICATION, chainWhitelist = {
-	                "" }, targetTypes = Medication.class) ReferenceAndListParam medicationReference,
-	        @OptionalParam(name = MedicationRequest.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
-		if (patientReference == null) {
-			patientReference = subjectReference;
-		}
-		return medicationRequestService.searchForMedicationRequests(patientReference, encounterReference, code,
-		    participantReference, medicationReference, id, lastUpdated);
 	}
 	
 	@Create
@@ -125,5 +100,31 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		}
 		
 		return FhirProviderUtils.buildDelete(MedicationRequest30_40.convertMedicationRequest(medicationRequest));
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public IBundleProvider searchForMedicationRequests(
+	        @OptionalParam(name = MedicationRequest.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
+	                Patient.SP_GIVEN, Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
+	        @OptionalParam(name = MedicationRequest.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
+	                Patient.SP_GIVEN, Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
+	        @OptionalParam(name = MedicationRequest.SP_CONTEXT, chainWhitelist = {
+	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
+	        @OptionalParam(name = MedicationRequest.SP_CODE) TokenAndListParam code,
+	        @OptionalParam(name = MedicationRequest.SP_REQUESTER, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
+	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
+	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
+	        @OptionalParam(name = MedicationRequest.SP_MEDICATION, chainWhitelist = {
+	                "" }, targetTypes = Medication.class) ReferenceAndListParam medicationReference,
+	        @OptionalParam(name = MedicationRequest.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
+		if (patientReference == null) {
+			patientReference = subjectReference;
+		}
+		return new SearchQueryBundleProviderR3Wrapper(medicationRequestService.searchForMedicationRequests(patientReference,
+		    encounterReference, code, participantReference, medicationReference, id, lastUpdated));
 	}
 }

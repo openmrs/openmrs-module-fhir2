@@ -41,6 +41,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirPatientService;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -126,8 +127,8 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Patient.SP_ADDRESS_COUNTRY) StringAndListParam country,
 	        @OptionalParam(name = Patient.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
-		return patientService.searchForPatients(name, given, family, identifier, gender, birthDate, deathDate, deceased,
-		    city, state, postalCode, country, id, lastUpdated, sort);
+		return new SearchQueryBundleProviderR3Wrapper(patientService.searchForPatients(name, given, family, identifier,
+		    gender, birthDate, deathDate, deceased, city, state, postalCode, country, id, lastUpdated, sort));
 	}
 	
 }

@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -53,8 +52,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleNames(criteria, (StringAndListParam) param.getParam(), null, null));
+					entry.getValue().forEach(param -> handleNames(criteria, entry.getValue()));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -75,7 +73,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected Optional<Criterion> getCriteriaForLastUpdated(DateRangeParam param) {
+	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
 		List<Optional<Criterion>> criterionList = new ArrayList<>();
 		
 		criterionList.add(handleDateRange("personDateVoided", param));
@@ -92,5 +90,22 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	@Override
 	protected String getSqlAlias() {
 		return "this_";
+	}
+	
+	@Override
+	protected void handleVoidable(Criteria criteria) {
+		criteria.add(eq("personVoided", false));
+	}
+	
+	@Override
+	protected boolean isVoided(Person object) {
+		return object.getPersonVoided();
+	}
+	
+	@Override
+	protected Person voidObject(Person object) {
+		object.setPersonVoided(true);
+		object.setPersonVoidReason("Voided via FHIR API");
+		return object;
 	}
 }

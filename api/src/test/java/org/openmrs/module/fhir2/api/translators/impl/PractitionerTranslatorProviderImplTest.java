@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.exparity.hamcrest.date.DateMatchers.sameDay;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -17,12 +18,11 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
-import org.exparity.hamcrest.date.DateMatchers;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -36,6 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
@@ -56,15 +57,11 @@ public class PractitionerTranslatorProviderImplTest {
 	
 	private static final String PROVIDER_UUID = "328934-34ni23-23j34-23923";
 	
-	private static final String RETIRE_REASON = "Retired By FHIR module";
-	
 	private static final String GENDER = "M";
 	
 	private static final String GIVEN_NAME = "kipchumba";
 	
 	private static final String FAMILY_NAME = "vannessa";
-	
-	private static final String ADDRESS_1 = "address1";
 	
 	private static final String CITY_VILLAGE = "chemasta";
 	
@@ -92,7 +89,7 @@ public class PractitionerTranslatorProviderImplTest {
 	private PersonAddressTranslator addressTranslator;
 	
 	@Mock
-	private TelecomTranslator<Object> telecomTranslator;
+	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Mock
 	private FhirPractitionerDao fhirPractitionerDao;
@@ -220,17 +217,14 @@ public class PractitionerTranslatorProviderImplTest {
 	
 	@Test
 	public void shouldReturnUpdatedProvider() {
-		provider.setRetired(true);
-		provider.setRetireReason(RETIRE_REASON);
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId(PROVIDER_UUID);
 		practitioner.addIdentifier(new Identifier().setValue("349023n23b-t"));
-		practitioner.setActive(false);
+		
 		Provider result = practitionerTranslator.toOpenmrsType(provider, practitioner);
+		
 		assertThat(result, notNullValue());
-		assertThat(result.getRetired(), is(false));
-		assertThat(result.getRetireReason(), notNullValue());
-		assertThat(result.getRetireReason(), equalTo(RETIRE_REASON));
+		assertThat(result.getIdentifier(), equalTo("349023n23b-t"));
 	}
 	
 	@Test
@@ -238,6 +232,7 @@ public class PractitionerTranslatorProviderImplTest {
 		ProviderAttributeType attributeType = new ProviderAttributeType();
 		attributeType.setName(PERSON_ATTRIBUTE_TYPE_NAME);
 		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
+		
 		ProviderAttribute providerAttribute = new ProviderAttribute();
 		providerAttribute.setUuid(PERSON_ATTRIBUTE_UUID);
 		providerAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
@@ -248,10 +243,12 @@ public class PractitionerTranslatorProviderImplTest {
 		contactPoint.setValue(PERSON_ATTRIBUTE_VALUE);
 		practitioner.addTelecom(contactPoint);
 		
+		when(telecomTranslator.toOpenmrsType(any(), any())).thenReturn(providerAttribute);
+		
 		Provider provider = practitionerTranslator.toOpenmrsType(practitioner);
-		assertThat(provider, Matchers.notNullValue());
-		assertThat(provider.getAttributes(), Matchers.notNullValue());
-		assertThat(provider.getAttributes().isEmpty(), Matchers.is(false));
+		
+		assertThat(provider, notNullValue());
+		assertThat(provider.getAttributes(), notNullValue());
 		assertThat(provider.getAttributes().size(), greaterThanOrEqualTo(1));
 	}
 	
@@ -262,27 +259,22 @@ public class PractitionerTranslatorProviderImplTest {
 		
 		Practitioner result = practitionerTranslator.toFhirResource(provider);
 		assertThat(result, notNullValue());
-		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
-	public void shouldTranslateLastUpdatedDateToDateChanged() {
-		practitioner.getMeta().setLastUpdated(new Date());
-		
-		Provider result = practitionerTranslator.toOpenmrsType(practitioner);
-		assertThat(result, notNullValue());
-		assertThat(result.getDateChanged(), DateMatchers.sameDay(new Date()));
+		assertThat(result.getMeta().getLastUpdated(), sameDay(new Date()));
 	}
 	
 	@Test
 	public void toFhirResource_shouldAddProvenanceResources() {
 		Provider provider = new Provider();
 		provider.setUuid(PRACTITIONER_UUID);
+		
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		
 		when(provenanceTranslator.getCreateProvenance(provider)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(provider)).thenReturn(provenance);
+		
 		org.hl7.fhir.r4.model.Practitioner result = practitionerTranslator.toFhirResource(provider);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getContained(), not(empty()));
 		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));

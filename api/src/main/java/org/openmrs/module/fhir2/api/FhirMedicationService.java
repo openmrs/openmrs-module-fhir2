@@ -17,6 +17,6 @@ import org.hl7.fhir.r4.model.Medication;
 public interface FhirMedicationService extends FhirService<Medication> {
 	
 	IBundleProvider searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
-	        TokenAndListParam ingredientCode, TokenAndListParam status, TokenAndListParam id, DateRangeParam lastUpdated);
+	        TokenAndListParam ingredientCode, TokenAndListParam id, DateRangeParam lastUpdated);
 	
 }

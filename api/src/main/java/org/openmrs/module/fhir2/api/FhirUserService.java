@@ -17,7 +17,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 
 public interface FhirUserService extends FhirService<Practitioner> {
 	
-	IBundleProvider searchForUsers(StringAndListParam name, TokenAndListParam identifier, StringAndListParam given,
+	IBundleProvider searchForUsers(TokenAndListParam identifier, StringAndListParam name, StringAndListParam given,
 	        StringAndListParam family, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
 	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated);
 	

@@ -26,11 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirUserDaoImplTest extends BaseModuleContextSensitiveTest {
 	
-	private static final String USER_UUID = "2eadf946-e53c-11de-8404-001e378eb67e";
-	
 	private static final String USER_NAME = "firstaccount";
-	
-	private static final String WRONG_USER_UUID = "5f07c6ff-c483-4e77-815e-44dd650470e7";
 	
 	private static final String USER_INITIAL_DATA_XML = "org/openmrs/api/include/UserServiceTest.xml";
 	

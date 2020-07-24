@@ -114,7 +114,7 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Practitioner.SP_ADDRESS_COUNTRY) StringAndListParam country,
 	        @OptionalParam(name = Practitioner.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
-		return practitionerService.searchForPractitioners(name, identifier, given, family, city, state, postalCode, country,
+		return practitionerService.searchForPractitioners(identifier, name, given, family, city, state, postalCode, country,
 		    id, lastUpdated);
 	}
 }

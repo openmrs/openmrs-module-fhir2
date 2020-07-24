@@ -12,13 +12,18 @@ package org.openmrs.module.fhir2.api.dao;
 import java.util.Map;
 
 import org.openmrs.GlobalProperty;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
+import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirGlobalPropertyDao {
 	
+	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
 	String getGlobalProperty(String property) throws APIException;
 	
+	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
 	GlobalProperty getGlobalPropertyObject(String property);
 	
+	@Authorized(PrivilegeConstants.GET_GLOBAL_PROPERTIES)
 	Map<String, String> getGlobalProperties(String... properties);
 }

@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -36,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
@@ -51,6 +53,9 @@ public class FhirObservationServiceImplTest {
 	
 	@Mock
 	private FhirObservationDao dao;
+	
+	@Mock
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
 	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
@@ -101,11 +106,11 @@ public class FhirObservationServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		
-		when(dao.getPreferredPageSize()).thenReturn(10);
-		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
-		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(obs));
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
 		IBundleProvider results = fhirObservationService.searchForObservations(null, patientReference, null, null, null,

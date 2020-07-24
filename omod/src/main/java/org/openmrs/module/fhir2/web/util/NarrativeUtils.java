@@ -16,39 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NarrativeUtils {
 	
-	private static boolean validatePropertiesFilePath(@NotNull String path) {
-		
-		if (path.startsWith("file:")) {
-			String filepath = path.substring("file:".length());
-			
-			if (filepath == null || filepath.trim().isEmpty()) {
-				log.error("Properties File path must not be empty");
-				return false;
-			}
-			
-			if (!filepath.endsWith(".properties")) {
-				log.error("Properties File must have extension '.properties'");
-				return false;
-			}
-		} else if (path.startsWith("classpath:")) {
-			String classpath = path.substring("classpath:".length());
-			
-			if (classpath == null || classpath.trim().isEmpty()) {
-				log.error("Properties File classpath must not be empty");
-				return false;
-			}
-		} else if (path.startsWith("openmrs:")) {
-			String openmrsRelativePath = path.substring("openmrs:".length());
-			
-			if (openmrsRelativePath == null || openmrsRelativePath.trim().isEmpty()) {
-				log.error("Properties File OpenMRS relative path must not be empty");
-				return false;
-			}
-		}
-		
-		return true;
-	}
-	
 	public static String getValidatedPropertiesFilePath(String path) {
 		if (path == null || path.isEmpty()) {
 			return null;
@@ -67,4 +34,37 @@ public class NarrativeUtils {
 		return null;
 	}
 	
+	private static boolean validatePropertiesFilePath(@NotNull String path) {
+		if (path.startsWith("file:")) {
+			String filepath = path.substring("file:".length());
+			
+			if (filepath.trim().isEmpty()) {
+				log.error("Properties File path must not be empty");
+				return false;
+			}
+			
+			if (!filepath.endsWith(".properties")) {
+				log.error("Properties File must have extension '.properties'");
+				return false;
+			}
+		} else if (path.startsWith("classpath:")) {
+			String classpath = path.substring("classpath:".length());
+			
+			if (classpath.trim().isEmpty()) {
+				log.error("Properties File classpath must not be empty");
+				return false;
+			}
+		} else if (path.startsWith("openmrs:")) {
+			String openmrsRelativePath = path.substring("openmrs:".length());
+			
+			if (openmrsRelativePath.trim().isEmpty()) {
+				log.error("Properties File OpenMRS relative path must not be empty");
+				return false;
+			}
+		} else {
+			return false;
+		}
+		
+		return true;
+	}
 }

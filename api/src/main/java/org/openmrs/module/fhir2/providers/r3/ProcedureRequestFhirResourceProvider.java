@@ -39,6 +39,7 @@ import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -118,7 +119,7 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 			patientReference = subjectReference;
 		}
 		
-		return serviceRequestService.searchForServiceRequests(patientReference, code, encounterReference,
-		    participantReference, occurrence, uuid, lastUpdated);
+		return new SearchQueryBundleProviderR3Wrapper(serviceRequestService.searchForServiceRequests(patientReference, code,
+		    encounterReference, participantReference, occurrence, uuid, lastUpdated));
 	}
 }

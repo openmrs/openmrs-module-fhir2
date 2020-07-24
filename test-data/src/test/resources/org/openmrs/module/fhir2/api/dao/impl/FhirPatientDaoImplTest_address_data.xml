@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+  <person person_id="60" gender="F" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="f363b024-7ff2-4882-9f5b-d9bce5d10a9e"/>
+  <person person_id="61" gender="M" dead="true" death_date="2001-01-01" creator="1" date_created="2005-01-01 00:00:00.0" date_voided="2010-09-03 00:00:00.0" voided="true" uuid="7caaae73-6533-4f93-9e0d-b2fa1cc2d4b6"/>
+  <person person_id="62" gender="F" dead="true" death_date="2003-01-01" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="19b89959-ff58-4b10-b013-b3b4a6607df4"/>
+  <person person_id="63" gender="M" dead="true" death_date="2001-08-01" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="2406f56e-99f6-4520-a57b-9a26c4ca165d"/>
+  <person_name person_name_id="1000" preferred="true" person_id="60" given_name="Azalaïs" middle_name="" family_name="Aygul" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="9fdb167d-2ae9-4a03-be1c-d92e221f292b"/>
+  <person_name person_name_id="1001" preferred="true" person_id="61" given_name="Rahmi" middle_name="" family_name="Valeriu" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="de58be3f-b5c5-4144-9bfb-2c0ef67fca4e"/>
+  <person_name person_name_id="1002" preferred="true" person_id="62" given_name="Thandi" middle_name="" family_name="Yu" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="8728fcb4-a2ce-4f7b-b865-0869ee4398f3"/>
+  <person_name person_name_id="1003" preferred="true" person_id="63" given_name="Waldo" middle_name="" family_name="Jafet" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="726bd94e-b788-42b4-90e6-672b5700eef3"/>
+  <patient patient_id="60" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+  <patient patient_id="61" creator="1" date_created="2005-01-01 00:00:00.0" voided="true" />
+  <patient patient_id="62" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+  <patient patient_id="63" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+  <person_address person_address_id="60" preferred="true" person_id="60" city_village="City A" state_province="MA" postal_code="00001" country="FakeB" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="da5931e4-67b7-11ea-bc55-0242ac130003"/>
+  <person_address person_address_id="61" preferred="true" person_id="61" city_village="City Q" state_province="MB" postal_code="00010" country="FakeC" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="da5932f2-67b7-11ea-bc55-0242ac130003"/>
+  <person_address person_address_id="62" preferred="true" person_id="62" city_village="City C" state_province="MZ" postal_code="01000" country="FakeD" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="da5933ce-67b7-11ea-bc55-0242ac130003"/>
+  <person_address person_address_id="63" preferred="true" person_id="63" city_village="City D" state_province="MF" postal_code="00200" country="FakeAB" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="da593572-67b7-11ea-bc55-0242ac130003"/>
+</dataset>

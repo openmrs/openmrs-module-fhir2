@@ -14,16 +14,16 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.hasSize;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Medication;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,13 +40,15 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
-	private static final String MEDICATION_UUID = "1086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String MEDICATION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationDaoImplTest_initial_data.xml";
 	
-	private static final String CONCEPT_UUID = "0f97e14e-cdc2-49ac-9255-b5126f8a5147";
+	private static final String MEDICATION_UUID = "1087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String CONCEPT_UUID = "11716f9c-1434-4f8d-b9fc-9aa14c4d6129";
 	
 	private static final String WRONG_CONCEPT_UUID = "0f97e14e-gdsh-49ac-9255-b5126f8a5147";
 	
-	private static final String DOSAGE_FORM_UUID = "e10ffe54-5184-4efe-8960-cd565ec1cdf8";
+	private static final String DOSAGE_FORM_UUID = "95312123-e0c2-466d-b6b1-cb6e990d0d65";
 	
 	private static final String WRONG_DOSAGE_FORM_UUID = "e10ffe54-5184-4efe-8960-cd565ds1cdf8";
 	
@@ -54,13 +56,11 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 	
 	private static final String WRONG_INGREDIENT_CODE_UUID = "d198bec0-d9c5-11e3-9c1a-dsh0200c9a66";
 	
-	private static final String MEDICATION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationDaoImplTest_initial_data.xml";
-	
 	private static final String DATE_CREATED = "2005-01-01";
 	
 	private static final String DATE_CHANGED = "2010-03-31";
 	
-	private static final String DATE_RETIRED = "2010-09-03";
+	private static final String WRONG_DATE_CHANGED = "2012-05-01";
 	
 	private static final int START_INDEX = 0;
 	
@@ -84,8 +84,9 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private List<Medication> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof Medication)
+		        .map(it -> (Medication) it).collect(Collectors.toList());
 	}
 	
 	@Test
@@ -97,12 +98,11 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 		
 		IBundleProvider result = search(theParams);
 		
-		List<IBaseResource> resultList = get(result);
+		List<Medication> resultList = get(result);
 		
 		assertThat(result, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((Medication) resultList.iterator().next()).getCode().getCodingFirstRep().getCode(),
-		    equalTo(CONCEPT_UUID));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getCode().getCodingFirstRep().getCode(), equalTo(CONCEPT_UUID));
 	}
 	
 	@Test
@@ -114,10 +114,10 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 		
 		IBundleProvider result = search(theParams);
 		
-		List<IBaseResource> resultList = get(result);
+		List<Medication> resultList = get(result);
 		
 		assertThat(result, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -130,12 +130,12 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 		
 		IBundleProvider result = search(theParams);
 		
-		List<IBaseResource> resultList = get(result);
-		
 		assertThat(result, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((Medication) resultList.iterator().next()).getForm().getCodingFirstRep().getCode(),
-		    equalTo(DOSAGE_FORM_UUID));
+		
+		List<Medication> resultList = get(result);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getForm().getCodingFirstRep().getCode(), equalTo(DOSAGE_FORM_UUID));
 	}
 	
 	@Test
@@ -148,10 +148,10 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 		
 		IBundleProvider result = search(theParams);
 		
-		List<IBaseResource> resultList = get(result);
+		List<Medication> resultList = get(result);
 		
 		assertThat(result, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -164,12 +164,11 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 		
 		IBundleProvider result = search(theParams);
 		
-		List<IBaseResource> resultList = get(result);
+		List<Medication> resultList = get(result);
 		
 		assertThat(result, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((Medication) resultList.iterator().next()).getIngredientFirstRep().getItemCodeableConcept()
-		        .getCodingFirstRep().getCode(),
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(),
 		    equalTo(INGREDIENT_CODE_UUID));
 	}
 	
@@ -183,34 +182,12 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 		
 		IBundleProvider result = search(theParams);
 		
-		List<IBaseResource> resultList = get(result);
-		
 		assertThat(result, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
-	}
-	
-	@Test
-	public void searchForMedications_shouldSearchMedicationsByActiveStatus() {
-		TokenAndListParam status = new TokenAndListParam().addAnd(new TokenParam("active"));
+		assertThat(result.size(), equalTo(0));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, status);
+		List<Medication> resultList = get(result);
 		
-		IBundleProvider result = search(theParams);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.size(), equalTo(4));
-	}
-	
-	@Test
-	public void searchForMedications_shouldSearchMedicationsByInactiveStatus() {
-		TokenAndListParam status = new TokenAndListParam().addAnd(new TokenParam("inactive"));
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, status);
-		
-		IBundleProvider result = search(theParams);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.size(), equalTo(3));
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -220,14 +197,14 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
 		
-		IBundleProvider results = search(theParams);
+		IBundleProvider result = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		assertThat(result, notNullValue());
 		
-		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((Medication) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
+		List<Medication> resultList = get(result);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
 	}
 	
 	@Test
@@ -257,42 +234,7 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 	}
 	
 	@Test
-	public void searchForMedications_shouldSearchForMedicationsByLastUpdatedDateRetired() {
-		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_RETIRED).setLowerBound(DATE_RETIRED);
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		
-		IBundleProvider results = search(theParams);
-		
-		List<IBaseResource> resultList = get(results);
-		
-		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-	}
-	
-	@Test
 	public void searchForMedications_shouldSearchForMedicationsByMatchingUuidAndLastUpdated() {
-		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_UUID));
-		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_RETIRED).setLowerBound(DATE_RETIRED);
-		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		
-		IBundleProvider results = search(theParams);
-		
-		List<IBaseResource> resultList = get(results);
-		
-		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((Medication) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
-	}
-	
-	@Test
-	public void searchForMedications_shouldReturnEmptyListByMismatchingUuidAndLastUpdated() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_UUID));
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CHANGED).setLowerBound(DATE_CHANGED);
 		
@@ -300,11 +242,34 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
+		IBundleProvider result = search(theParams);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.size(), equalTo(1));
+		
+		List<Medication> resultList = get(result);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
+	}
+	
+	@Test
+	public void searchForMedications_shouldReturnEmptyListByMismatchingUuidAndLastUpdated() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_UUID));
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(WRONG_DATE_CHANGED)
+		        .setLowerBound(WRONG_DATE_CHANGED);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Medication> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -321,14 +286,14 @@ public class MedicationSearchQueryImplTest extends BaseModuleContextSensitiveTes
 		
 		IBundleProvider result = search(theParams);
 		
-		List<IBaseResource> resultList = get(result);
-		
 		assertThat(result, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((Medication) resultList.iterator().next()).getCode().getCodingFirstRep().getCode(),
-		    equalTo(CONCEPT_UUID));
-		assertThat(((Medication) resultList.iterator().next()).getForm().getCodingFirstRep().getCode(),
-		    equalTo(DOSAGE_FORM_UUID));
+		assertThat(result.size(), greaterThanOrEqualTo(1));
+		
+		List<Medication> resultList = get(result);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getCode().getCodingFirstRep().getCode(), equalTo(CONCEPT_UUID));
+		assertThat(resultList.get(0).getForm().getCodingFirstRep().getCode(), equalTo(DOSAGE_FORM_UUID));
 	}
 	
 }

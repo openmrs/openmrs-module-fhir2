@@ -160,7 +160,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
 	}
@@ -189,7 +189,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
 	}
@@ -234,7 +234,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
@@ -262,7 +262,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
@@ -306,7 +306,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
@@ -324,10 +324,10 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(3));
+		assertThat(results.size(), equalTo(2));
 		
-		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
-		assertThat(resultSet.size(), equalTo(3)); // 6 with repetitions
+		Set<String> resultSet = new HashSet<>(dao.getSearchResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(2)); // 6 with repetitions
 	}
 	
 	@Test
@@ -353,7 +353,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -413,7 +413,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
@@ -431,10 +431,10 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(3));
+		assertThat(results.size(), equalTo(2));
 		
-		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
-		assertThat(resultSet.size(), equalTo(3)); // 9 with repetitions
+		Set<String> resultSet = new HashSet<>(dao.getSearchResultUuids(theParams));
+		assertThat(resultSet.size(), equalTo(2)); // 9 with repetitions
 	}
 	
 	@Test
@@ -460,7 +460,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -503,7 +503,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
@@ -521,10 +521,11 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(3));
+		assertThat(results.size(), equalTo(2));
 		
-		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
-		assertThat(resultSet.size(), equalTo(3)); // 9 with repetitions
+		List<String> resultSet = dao.getSearchResultUuids(theParams);
+		
+		assertThat(resultSet.size(), equalTo(2));
 	}
 	
 	@Test
@@ -550,7 +551,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -591,7 +592,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getOnsetDateTimeType().getValue().toString(),
 		    containsString(ONSET_DATE));
@@ -610,7 +611,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(
 		    ((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getOnsetDateTimeType().getValue().toString(),
 		    containsString(ONSET_DATE));
@@ -629,7 +630,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -648,7 +649,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
 		    equalTo(CONDITION_UUID));
 	}
@@ -669,7 +670,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
 		    equalTo(CONDITION_UUID));
 	}
@@ -714,7 +715,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
@@ -745,7 +746,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getRecordedDate().toString(),
 		    containsString(RECORDED_DATE));
 	}
@@ -763,7 +764,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getRecordedDate().toString(),
 		    containsString(RECORDED_DATE));
 	}
@@ -781,7 +782,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -823,7 +824,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(5));
 	}
 	
 	@Test
@@ -839,7 +840,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getCode().getCodingFirstRep().getCode(),
 		    equalTo(CONCEPT_ID_1));
 	}
@@ -860,7 +861,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -876,7 +877,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getCode().getCodingFirstRep().getCode(),
 		    equalTo(CONCEPT_ID_1));
 	}
@@ -894,7 +895,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -910,7 +911,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
 		    equalTo(CONDITION_UUID));
 	}
@@ -928,20 +929,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-	}
-	
-	@Test
-	public void searchForConditions_shouldSearchForConditionsByLastUpdatedDateVoided() {
-		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		
-		IBundleProvider results = search(theParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -959,7 +947,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
 		    equalTo(CONDITION_UUID));
 	}

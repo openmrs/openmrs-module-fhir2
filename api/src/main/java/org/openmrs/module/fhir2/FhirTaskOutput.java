@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
  */
 @Data(staticConstructor = "of")
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "fhir_task_output")
 public class FhirTaskOutput extends FhirTaskParam {

@@ -144,14 +144,6 @@ public class MedicationTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldSetFhirMedicationToInActiveIfDrugIsRetired() {
-		drug.setRetired(true);
-		org.hl7.fhir.r4.model.Medication medication = medicationTranslator.toFhirResource(drug);
-		assertThat(medication, notNullValue());
-		assertThat(medication.getStatus(), equalTo(Medication.MedicationStatus.INACTIVE));
-	}
-	
-	@Test
 	public void toOpenmrsType_shouldReturnDrugAsItIsIfCalledWithNull() {
 		medicationTranslator.toOpenmrsType(drug, null);
 		assertThat(drug, equalTo(drug));
@@ -236,16 +228,6 @@ public class MedicationTranslatorImplTest {
 		assertThat(drug, notNullValue());
 		assertThat(drug.getIngredients().size(), greaterThanOrEqualTo(1));
 		assertThat(drug.getIngredients().iterator().next().getIngredient().getUuid(), equalTo(INGREDIENT_CONCEPT_UUID));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldRetireDrugIfMedicationInInactive() {
-		Medication medication = new Medication();
-		medication.setStatus(Medication.MedicationStatus.INACTIVE);
-		
-		medicationTranslator.toOpenmrsType(drug, medication);
-		assertThat(drug, notNullValue());
-		assertThat(drug.getRetired(), equalTo(true));
 	}
 	
 	@Test

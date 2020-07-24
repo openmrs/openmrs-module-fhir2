@@ -33,6 +33,7 @@ import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -62,17 +63,6 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 		return Medication30_40.convertMedication(medication);
 	}
 	
-	@Search
-	@SuppressWarnings("unused")
-	public IBundleProvider searchForMedication(@OptionalParam(name = Medication.SP_CODE) TokenAndListParam code,
-	        @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,
-	        @OptionalParam(name = Medication.SP_STATUS) TokenAndListParam status,
-	        @OptionalParam(name = Medication.SP_INGREDIENT_CODE) TokenAndListParam ingredientCode,
-	        @OptionalParam(name = Medication.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
-		return medicationService.searchForMedications(code, dosageForm, ingredientCode, status, id, lastUpdated);
-	}
-	
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createMedication(@ResourceParam Medication medication) {
@@ -100,5 +90,16 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return FhirProviderUtils.buildDelete(Medication30_40.convertMedication(medication));
+	}
+	
+	@Search
+	@SuppressWarnings("unused")
+	public IBundleProvider searchForMedication(@OptionalParam(name = Medication.SP_CODE) TokenAndListParam code,
+	        @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,
+	        @OptionalParam(name = Medication.SP_INGREDIENT_CODE) TokenAndListParam ingredientCode,
+	        @OptionalParam(name = Medication.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
+		return new SearchQueryBundleProviderR3Wrapper(
+		        medicationService.searchForMedications(code, dosageForm, ingredientCode, id, lastUpdated));
 	}
 }

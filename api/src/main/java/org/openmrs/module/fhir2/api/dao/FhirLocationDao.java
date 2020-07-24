@@ -15,9 +15,34 @@ import java.util.List;
 
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
+import org.openmrs.annotation.Authorized;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirLocationDao extends FhirDao<Location> {
 	
+	@Override
+	@Authorized(PrivilegeConstants.GET_LOCATIONS)
+	Location get(String uuid);
+	
+	@Authorized(PrivilegeConstants.GET_LOCATIONS)
 	List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@NotNull Location location,
 	        @NotNull String locationAttributeTypeUuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.MANAGE_LOCATIONS)
+	Location createOrUpdate(Location newEntry);
+	
+	@Override
+	@Authorized(PrivilegeConstants.MANAGE_LOCATIONS)
+	Location delete(String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_LOCATIONS)
+	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_LOCATIONS)
+	List<Location> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
+	        int lastResult);
 }

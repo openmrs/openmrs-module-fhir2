@@ -54,14 +54,7 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		}
 		
 		medication.getMeta().setLastUpdated(drug.getDateChanged());
-		
-		if (drug.getRetired() != null) {
-			if (drug.getRetired()) {
-				medication.setStatus(Medication.MedicationStatus.INACTIVE);
-			} else {
-				medication.setStatus(Medication.MedicationStatus.ACTIVE);
-			}
-		}
+		medication.setStatus(Medication.MedicationStatus.ACTIVE);
 		
 		if (drug.getMaximumDailyDose() != null) {
 			addMedicineExtension(medication, "maximumDailyDose", drug.getMaximumDailyDose().toString());
@@ -110,14 +103,6 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 				ingredients.add(omrsIngredient);
 			}
 			existingDrug.setIngredients(ingredients);
-		}
-		
-		if (med.hasStatus()) {
-			if (med.getStatus() == Medication.MedicationStatus.ACTIVE) {
-				existingDrug.setRetired(false);
-			} else if (med.getStatus() == Medication.MedicationStatus.INACTIVE) {
-				existingDrug.setRetired(true);
-			}
 		}
 		
 		getOpenmrsMedicineExtension(med).ifPresent(ext -> ext.getExtension()

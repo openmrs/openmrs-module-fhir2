@@ -1,9 +1,7 @@
 {
   "resourceType": "Practitioner",
-   "name": {
-    "family": [
-      "Careful"
-    ],
+  "name": {
+    "family": "Careful",
     "given": [
       "Adam"
     ],

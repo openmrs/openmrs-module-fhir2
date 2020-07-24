@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -32,7 +33,6 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -134,8 +134,9 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private List<ServiceRequest> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof ServiceRequest)
+		        .map(it -> (ServiceRequest) it).collect(Collectors.toList());
 	}
 	
 	@Test
@@ -147,13 +148,13 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
 		// TODO -> to be removed
 		List<ServiceRequest> resultList = get(results).stream().map(p -> (ServiceRequest) p).collect(Collectors.toList());
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(5));
+		assertThat(resultList.size(), equalTo(4));
 		assertThat(resultList, everyItem(
 		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("code", equalTo(TEST_ORDER_CONCEPT_UUID)))))));
 	}
@@ -167,12 +168,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(5));
+		assertThat(resultList, hasSize(equalTo(4)));
 		assertThat(resultList, everyItem(
 		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("code", equalTo(TEST_ORDER_CONCEPT_UUID)))))));
 	}
@@ -187,12 +188,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(5));
+		assertThat(resultList, hasSize(equalTo(4)));
 		assertThat(resultList,
 		    everyItem(
 		        hasProperty("code", hasProperty("coding", hasItem(allOf(hasProperty("code", equalTo(TEST_ORDER_LOINC_CODE)),
@@ -210,12 +211,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(5));
+		assertThat(resultList, hasSize(equalTo(4)));
 		assertThat(resultList, everyItem(allOf(
 		    hasProperty("code",
 		        hasProperty("coding",
@@ -235,12 +236,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(6));
+		assertThat(resultList, hasSize(equalTo(4)));
 		assertThat(resultList,
 		    everyItem(anyOf(
 		        hasProperty("code",
@@ -262,12 +263,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(5));
+		assertThat(resultList, hasSize(equalTo(4)));
 		assertThat(resultList, everyItem(
 		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_UUID))))));
 	}
@@ -283,12 +284,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(5));
+		assertThat(resultList, hasSize(equalTo(4)));
 		assertThat(resultList, everyItem(
 		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_UUID))))));
 	}
@@ -307,7 +308,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, empty());
@@ -324,9 +325,9 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, everyItem(
@@ -344,9 +345,9 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, everyItem(
@@ -365,9 +366,9 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, everyItem(
@@ -390,7 +391,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, empty());
@@ -408,9 +409,9 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, everyItem(
@@ -433,7 +434,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, empty());
@@ -450,9 +451,9 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, everyItem(
@@ -472,9 +473,9 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, everyItem(
@@ -497,7 +498,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, empty());
@@ -513,12 +514,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(5));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources,
 		    everyItem(hasProperty("subject", hasProperty("identifier", hasProperty("value", equalTo(PATIENT_IDENTIFIER))))));
 	}
@@ -535,12 +536,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(5));
+		assertThat(resultList, hasSize(equalTo(4)));
 		assertThat(resultList,
 		    everyItem(hasProperty("subject", hasProperty("identifier", hasProperty("value", equalTo(PATIENT_IDENTIFIER))))));
 	}
@@ -561,7 +562,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, empty());
@@ -578,12 +579,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(5));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID))))));
 	}
@@ -601,9 +602,9 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, everyItem(
@@ -621,12 +622,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(anyOf(
 		    hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID)))),
 		    hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID_TWO)))))));
@@ -642,7 +643,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(2));
@@ -664,7 +665,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(2));
@@ -687,12 +688,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -709,12 +710,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -733,7 +734,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, empty());
@@ -750,12 +751,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -772,12 +773,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -798,7 +799,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, empty());
@@ -815,12 +816,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -837,12 +838,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -863,7 +864,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, empty());
@@ -881,12 +882,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -906,12 +907,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARTICIPANT_UUID))))));
 	}
@@ -933,7 +934,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, empty());
@@ -950,12 +951,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("identifier", hasProperty("value", equalTo(PARTICIPANT_IDENTIFIER))))));
 	}
@@ -972,12 +973,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(6));
+		assertThat(results.size(), equalTo(4));
 		
-		List<IBaseResource> resources = get(results);
+		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, notNullValue());
-		assertThat(resources.size(), equalTo(6));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("requester", hasProperty("identifier", hasProperty("value", equalTo(PARTICIPANT_IDENTIFIER))))));
 	}
@@ -998,7 +999,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, empty());
@@ -1013,13 +1014,13 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((ServiceRequest) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(SERVICE_REQUEST_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<ServiceRequest> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
 	}
 	
 	@Test
@@ -1031,27 +1032,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-	}
-	
-	@Test
-	public void searchForServiceRequests_shouldSearchForServiceRequestsByLastUpdatedDateVoided() {
-		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		assertThat(results.size(), equalTo(1));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		List<ServiceRequest> resultList = get(results);
 		
-		IBundleProvider results = search(theParams);
-		
-		List<IBaseResource> resultList = get(results);
-		
-		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -1065,13 +1051,12 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((ServiceRequest) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(SERVICE_REQUEST_UUID));
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
 	}
 	
 	@Test
@@ -1085,7 +1070,7 @@ public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiv
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());

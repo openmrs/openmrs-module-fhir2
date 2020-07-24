@@ -16,11 +16,25 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.openmrs.module.fhir2.FhirConstants.ADDRESS_SEARCH_HANDLER;
+import static org.openmrs.module.fhir2.FhirConstants.CITY_PROPERTY;
+import static org.openmrs.module.fhir2.FhirConstants.COMMON_SEARCH_HANDLER;
+import static org.openmrs.module.fhir2.FhirConstants.COUNTRY_PROPERTY;
+import static org.openmrs.module.fhir2.FhirConstants.FAMILY_PROPERTY;
+import static org.openmrs.module.fhir2.FhirConstants.GIVEN_PROPERTY;
+import static org.openmrs.module.fhir2.FhirConstants.IDENTIFIER_SEARCH_HANDLER;
+import static org.openmrs.module.fhir2.FhirConstants.ID_PROPERTY;
+import static org.openmrs.module.fhir2.FhirConstants.LAST_UPDATED_PROPERTY;
+import static org.openmrs.module.fhir2.FhirConstants.NAME_PROPERTY;
+import static org.openmrs.module.fhir2.FhirConstants.NAME_SEARCH_HANDLER;
+import static org.openmrs.module.fhir2.FhirConstants.POSTAL_CODE_PROPERTY;
+import static org.openmrs.module.fhir2.FhirConstants.STATE_PROPERTY;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -30,7 +44,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,8 +65,6 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	private static final String USER_UUID = "1010d442-e134-11de-babe-001e378eb67e";
 	
 	private static final String USER_NAME = "admin";
-	
-	private static final String USER_IDENTIFIER = "1-8";
 	
 	private static final String NOT_FOUND_USER_NAME = "waf";
 	
@@ -106,8 +117,9 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private List<Practitioner> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof Practitioner)
+		        .map(it -> (Practitioner) it).collect(Collectors.toList());
 	}
 	
 	@Before
@@ -117,47 +129,52 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForUsers_shouldReturnUsersByName() {
-		StringAndListParam name = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(USER_NAME)));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.USER_NAME_SEARCH_HANDLER, name);
+		StringAndListParam name = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(USER_GIVEN_NAME)));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(NAME_SEARCH_HANDLER, NAME_PROPERTY, name);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(USER_UUID));
+		assertThat(results.size(), equalTo(2));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(2)));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(USER_UUID))));
 	}
 	
 	@Test
 	public void searchForUsers_shouldReturnEmptyCollectionWhenNameNotMatched() {
 		StringAndListParam name = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NOT_FOUND_USER_NAME)));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.USER_NAME_SEARCH_HANDLER, name);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.NAME_PROPERTY, name);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, is(empty()));
 	}
 	
 	@Test
 	public void searchForUsers_shouldReturnUsersByIdentifier() {
-		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(USER_IDENTIFIER));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER,
-		    identifier);
+		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(USER_NAME));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(IDENTIFIER_SEARCH_HANDLER, identifier);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(USER_UUID));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(USER_UUID));
 		
 	}
 	
@@ -169,25 +186,27 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, is(empty()));
 	}
 	
 	@Test
 	public void searchForUsers_shouldReturnUsersByGivenName() {
 		StringAndListParam givenName = new StringAndListParam().addAnd(new StringParam(USER_GIVEN_NAME));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
-		    FhirConstants.GIVEN_PROPERTY, givenName);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(NAME_SEARCH_HANDLER, GIVEN_PROPERTY, givenName);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList, everyItem(
 		    hasProperty("name", hasItem(hasProperty("given", hasItem(hasProperty("value", equalTo(USER_GIVEN_NAME))))))));
 	}
@@ -200,25 +219,28 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
 	@Test
 	public void searchForUsers_shouldReturnUsersByFamilyName() {
 		StringAndListParam familyName = new StringAndListParam().addAnd(new StringParam(USER_FAMILY_NAME));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
-		    FhirConstants.FAMILY_PROPERTY, familyName);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(NAME_SEARCH_HANDLER, FAMILY_PROPERTY,
+		    familyName);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList, everyItem(hasProperty("name", hasItem(hasProperty("family", equalTo(USER_FAMILY_NAME))))));
 	}
 	
@@ -230,9 +252,11 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -241,17 +265,17 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		StringAndListParam givenName = new StringAndListParam().addAnd(new StringParam(USER_GIVEN_NAME));
 		StringAndListParam familyName = new StringAndListParam().addAnd(new StringParam(USER_FAMILY_NAME));
 		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY, givenName)
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY, familyName);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(NAME_SEARCH_HANDLER, GIVEN_PROPERTY, givenName)
+		        .addParameter(NAME_SEARCH_HANDLER, FAMILY_PROPERTY, familyName);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList, everyItem(
 		    hasProperty("name", hasItem(hasProperty("given", hasItem(hasProperty("value", equalTo(USER_GIVEN_NAME))))))));
 		assertThat(resultList, everyItem(hasProperty("name", hasItem(hasProperty("family", equalTo(USER_FAMILY_NAME))))));
@@ -268,9 +292,11 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -278,17 +304,17 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForUsers_shouldReturnUsersByCity() {
 		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(CITY));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
-		    FhirConstants.CITY_PROPERTY, city);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(ADDRESS_SEARCH_HANDLER, CITY_PROPERTY, city);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCity(), equalTo(CITY));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getAddressFirstRep().getCity(), equalTo(CITY));
 	}
 	
 	@Test
@@ -300,9 +326,11 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -310,17 +338,17 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForUsers_shouldReturnUsersByState() {
 		StringAndListParam state = new StringAndListParam().addAnd(new StringParam(STATE));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
-		    FhirConstants.STATE_PROPERTY, state);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(ADDRESS_SEARCH_HANDLER, STATE_PROPERTY, state);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getState(), equalTo(STATE));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getAddressFirstRep().getState(), equalTo(STATE));
 	}
 	
 	@Test
@@ -332,9 +360,11 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -342,17 +372,18 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForUsers_shouldReturnUsersByPostalCode() {
 		StringAndListParam postalCode = new StringAndListParam().addAnd(new StringParam(POSTAL_CODE));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
-		    FhirConstants.POSTAL_CODE_PROPERTY, postalCode);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(ADDRESS_SEARCH_HANDLER, POSTAL_CODE_PROPERTY,
+		    postalCode);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getPostalCode(), equalTo(POSTAL_CODE));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getAddressFirstRep().getPostalCode(), equalTo(POSTAL_CODE));
 	}
 	
 	@Test
@@ -364,9 +395,11 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -374,17 +407,18 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForUsers_shouldReturnUsersByCountry() {
 		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(COUNTRY));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
-		    FhirConstants.COUNTRY_PROPERTY, country);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(ADDRESS_SEARCH_HANDLER, COUNTRY_PROPERTY,
+		    country);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
 	}
 	
 	@Test
@@ -396,9 +430,11 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -407,19 +443,19 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(CITY));
 		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(COUNTRY));
 		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(ADDRESS_SEARCH_HANDLER, CITY_PROPERTY, city)
+		        .addParameter(ADDRESS_SEARCH_HANDLER, COUNTRY_PROPERTY, country);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCity(), equalTo(CITY));
-		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getAddressFirstRep().getCity(), equalTo(CITY));
+		assertThat(resultList.get(0).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
 	}
 	
 	@Test
@@ -433,77 +469,83 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
 	@Test
 	public void searchForUsers_shouldHandleComplexQuery() {
-		StringAndListParam name = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(USER_NAME)));
-		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(USER_IDENTIFIER));
+		StringAndListParam name = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(USER_GIVEN_NAME)));
+		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(USER_NAME));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.USER_NAME_SEARCH_HANDLER, name)
-		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(NAME_SEARCH_HANDLER, NAME_PROPERTY, name)
+		        .addParameter(IDENTIFIER_SEARCH_HANDLER, identifier);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(USER_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(USER_UUID));
 	}
 	
 	@Test
 	public void searchForUsers_shouldSearchForUsersByUuid() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(USER_UUID));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.ID_PROPERTY, uuid);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(COMMON_SEARCH_HANDLER, ID_PROPERTY, uuid);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((Practitioner) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(USER_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(USER_UUID));
 	}
 	
 	@Test
 	public void searchForUsers_shouldSearchForUsersByLastUpdatedDateCreated() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(COMMON_SEARCH_HANDLER, LAST_UPDATED_PROPERTY,
+		    lastUpdated);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(results.size(), equalTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
 	public void searchForUsers_shouldSearchForUsersByLastUpdatedDateChanged() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CHANGED).setLowerBound(DATE_CHANGED);
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(COMMON_SEARCH_HANDLER, LAST_UPDATED_PROPERTY,
+		    lastUpdated);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(results.size(), equalTo(1));
+		
+		List<Practitioner> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -517,9 +559,11 @@ public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Practitioner> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	

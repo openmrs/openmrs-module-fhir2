@@ -12,6 +12,8 @@ package org.openmrs.module.fhir2.api.search;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -25,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Obs;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
@@ -38,17 +41,22 @@ public class SearchQueryBundleProviderTest {
 	@Mock
 	private FhirObservationDao observationDao;
 	
+	@Mock
+	private FhirGlobalPropertyService globalPropertyService;
+	
 	private SearchQueryBundleProvider<Obs, Observation> searchQueryBundleProvider;
 	
 	@Before
 	public void setup() {
 		SearchParameterMap theParams = new SearchParameterMap();
-		searchQueryBundleProvider = new SearchQueryBundleProvider<>(theParams, observationDao, translator);
+		searchQueryBundleProvider = new SearchQueryBundleProvider<>(theParams, observationDao, translator,
+		        globalPropertyService);
 	}
 	
 	@Test
 	public void shouldReturnPreferredPageSize() {
-		when(observationDao.getPreferredPageSize()).thenReturn(10);
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		
 		assertThat(searchQueryBundleProvider.preferredPageSize(), notNullValue());
 		assertThat(searchQueryBundleProvider.preferredPageSize(), equalTo(10));
 	}

@@ -8,7 +8,7 @@
  * graphic logo is a trademark of OpenMRS Inc.
  */
 /*
-* This Source Code Form is subject to the terms of the Mozilla Public License,
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
  * v. 2.0. If a copy of the MPL was not distributed with this file, You can
  * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
  * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -89,6 +90,11 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		setProvenanceResources(observation);
 	}
 	
+	private List<Observation> get(IBundleProvider results, int from, int to) {
+		return results.getResources(from, to).stream().filter(it -> it instanceof Observation).map(it -> (Observation) it)
+		        .collect(Collectors.toList());
+	}
+	
 	@Test
 	public void getResourceType_shouldReturnResourceType() {
 		assertThat(resourceProvider.getResourceType(), equalTo(Observation.class));
@@ -131,11 +137,14 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
 		    code, null, null, null, null);
+		
+		List<Observation> resultList = get(results, 1, 5);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
-		assertThat(results.getResources(1, 5).get(0), notNullValue());
-		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
-		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
 	
 	@Test
@@ -152,11 +161,14 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, patientParam, null, null, null, null, null, null,
 		    null, null, null, null, null, null);
+		
+		List<Observation> resultList = get(results, 1, 5);
+		
 		assertThat(results, notNullValue());
-		assertThat(results.getResources(1, 5), hasSize(equalTo(1)));
-		assertThat(results.getResources(1, 5).get(0), notNullValue());
-		assertThat(results.getResources(1, 5).get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
-		assertThat(results.getResources(1, 5).get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
 	
 	@Test
@@ -166,6 +178,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		when(observationService.get(OBSERVATION_UUID)).thenReturn(observation);
 		
 		List<Resource> resources = resourceProvider.getObservationHistoryById(id);
+		
 		assertThat(resources, Matchers.notNullValue());
 		assertThat(resources, not(empty()));
 		assertThat(resources.size(), Matchers.equalTo(2));
@@ -267,5 +280,4 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		
 		resourceProvider.deleteObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID));
 	}
-	
 }

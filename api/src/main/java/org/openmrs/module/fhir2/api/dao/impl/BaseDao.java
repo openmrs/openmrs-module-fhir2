@@ -73,7 +73,6 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.internal.CriteriaImpl;
-import org.hibernate.sql.JoinType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
@@ -674,26 +673,6 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected void handleIdentifier(Criteria criteria, TokenAndListParam identifier) {
-		if (identifier == null) {
-			return;
-		}
-		
-		criteria.createAlias("identifiers", "pi", JoinType.INNER_JOIN, eq("pi.voided", false));
-		
-		handleAndListParamBySystem(identifier, (system, tokens) -> {
-			if (system.isEmpty()) {
-				return Optional.of(in("pi.identifier", tokensToList(tokens)));
-			} else {
-				if (lacksAlias(criteria, "pit")) {
-					criteria.createAlias("pi.identifierType", "pit");
-				}
-				
-				return Optional.of(and(eq("pit.name", system), in("pi.identifier", tokensToList(tokens))));
-			}
-		}).ifPresent(criteria::add);
-	}
-	
 	protected void handleNames(Criteria criteria, StringAndListParam name, StringAndListParam given,
 	        StringAndListParam family) {
 		handleNames(criteria, name, given, family, null);
@@ -705,10 +684,12 @@ public abstract class BaseDao {
 			return;
 		}
 		
-		if (StringUtils.isNotBlank(personAlias)) {
-			criteria.createAlias(String.format("%s.names", personAlias), "pn");
-		} else {
-			criteria.createAlias("names", "pn");
+		if (lacksAlias(criteria, "pn")) {
+			if (StringUtils.isNotBlank(personAlias)) {
+				criteria.createAlias(String.format("%s.names", personAlias), "pn");
+			} else {
+				criteria.createAlias("names", "pn");
+			}
 		}
 		
 		if (name != null) {
@@ -790,7 +771,7 @@ public abstract class BaseDao {
 					    param -> Optional.of(eq("uuid", param.getValue()))));
 					break;
 				case FhirConstants.LAST_UPDATED_PROPERTY:
-					criterionList.add(getCriteriaForLastUpdated((DateRangeParam) commonSearchParam.getParam()));
+					criterionList.add(handleLastUpdated((DateRangeParam) commonSearchParam.getParam()));
 					break;
 			}
 		}
@@ -805,9 +786,7 @@ public abstract class BaseDao {
 	 * @param param the DateRangeParam used to query for _lastUpdated
 	 * @return an optional criterion for the query
 	 */
-	protected Optional<Criterion> getCriteriaForLastUpdated(DateRangeParam param) {
-		return null;
-	}
+	protected abstract Optional<Criterion> handleLastUpdated(DateRangeParam param);
 	
 	protected Optional<Criterion> handlePersonAddress(String aliasPrefix, StringAndListParam city, StringAndListParam state,
 	        StringAndListParam postalCode, StringAndListParam country) {
@@ -818,23 +797,21 @@ public abstract class BaseDao {
 		List<Optional<Criterion>> criterionList = new ArrayList<>();
 		
 		if (city != null) {
-			criterionList.add(
-			    handleAndListParam(city, c -> Optional.of(eq(String.format("%s.cityVillage", aliasPrefix), c.getValue()))));
+			criterionList.add(handleAndListParam(city, c -> propertyLike(String.format("%s.cityVillage", aliasPrefix), c)));
 		}
 		
 		if (state != null) {
-			criterionList.add(handleAndListParam(state,
-			    c -> Optional.of(eq(String.format("%s.stateProvince", aliasPrefix), c.getValue()))));
+			criterionList
+			        .add(handleAndListParam(state, c -> propertyLike(String.format("%s.stateProvince", aliasPrefix), c)));
 		}
 		
 		if (postalCode != null) {
-			criterionList.add(handleAndListParam(postalCode,
-			    c -> Optional.of(eq(String.format("%s.postalCode", aliasPrefix), c.getValue()))));
+			criterionList
+			        .add(handleAndListParam(postalCode, c -> propertyLike(String.format("%s.postalCode", aliasPrefix), c)));
 		}
 		
 		if (country != null) {
-			criterionList.add(
-			    handleAndListParam(country, c -> Optional.of(eq(String.format("%s.country", aliasPrefix), c.getValue()))));
+			criterionList.add(handleAndListParam(country, c -> propertyLike(String.format("%s.country", aliasPrefix), c)));
 		}
 		
 		if (criterionList.size() == 0) {
@@ -1030,6 +1007,12 @@ public abstract class BaseDao {
 	
 	protected <T extends IQueryParameterType> Stream<T> handleOrListParam(IQueryParameterOr<T> orListParameter) {
 		return orListParameter.getValuesAsQueryTokens().stream();
+	}
+	
+	@SafeVarargs
+	@SuppressWarnings("unused")
+	protected final Criterion[] toCriteriaArray(Optional<Criterion>... criteria) {
+		return toCriteriaArray(Arrays.stream(criteria));
 	}
 	
 	protected Criterion[] toCriteriaArray(Collection<Optional<Criterion>> collection) {

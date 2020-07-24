@@ -26,7 +26,7 @@ import org.openmrs.BaseOpenmrsMetadata;
  */
 @Data(staticConstructor = "of")
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "fhir_reference")
 public class FhirReference extends BaseOpenmrsMetadata {

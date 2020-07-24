@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.apache.commons.lang.Validate.notNull;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -105,11 +106,10 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		existingEncounter.setUuid(encounter.getId());
 		
 		existingEncounter.setPatient(patientReferenceTranslator.toOpenmrsType(encounter.getSubject()));
-		existingEncounter
-		        .setEncounterProviders(encounter
-		                .getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
-		                        .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
-		                .collect(Collectors.toSet()));
+		existingEncounter.setEncounterProviders(encounter
+		        .getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
+		                .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
+		        .collect(Collectors.toCollection(LinkedHashSet::new)));
 		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
 		
 		return existingEncounter;

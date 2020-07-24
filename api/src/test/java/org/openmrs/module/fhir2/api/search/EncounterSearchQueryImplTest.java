@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -130,7 +131,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENC_UUID));
 	}
 	
@@ -152,7 +153,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
@@ -170,7 +171,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		Set<String> resultSet = new HashSet<>(dao.getSearchResultUuids(theParams));
 		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
 	}
 	
@@ -197,7 +198,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -243,7 +244,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
@@ -261,7 +262,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		Set<String> resultSet = new HashSet<>(dao.getSearchResultUuids(theParams));
 		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
 	}
 	
@@ -288,7 +289,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -334,7 +335,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
@@ -352,7 +353,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		Set<String> resultSet = new HashSet<>(dao.getSearchResultUuids(theParams));
 		assertThat(resultSet.size(), equalTo(1)); // 2 with repetitions
 	}
 	
@@ -379,7 +380,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -424,7 +425,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
 	}
@@ -451,7 +452,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
 	}
@@ -497,7 +498,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
 	}
@@ -546,7 +547,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
 	}
@@ -594,7 +595,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(
 		    ((Encounter) resultList.iterator().next()).getParticipantFirstRep().getIndividual().getIdentifier().getValue(),
 		    equalTo(PARTICIPANT_IDENTIFIER));
@@ -623,7 +624,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(
 		    ((Encounter) resultList.iterator().next()).getParticipantFirstRep().getIndividual().getIdentifier().getValue(),
 		    equalTo(PARTICIPANT_IDENTIFIER));
@@ -673,7 +674,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -699,7 +700,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -746,7 +747,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -772,7 +773,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -819,7 +820,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -845,7 +846,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -891,7 +892,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getParticipantFirstRep().getIndividual().getReferenceElement()
 		        .getIdPart(),
 		    equalTo(PARTICIPANT_UUID));
@@ -918,7 +919,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -963,7 +964,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -984,7 +985,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -1005,7 +1006,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -1026,7 +1027,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -1046,7 +1047,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(
 		    ((Encounter) resultList.iterator().next()).getLocationFirstRep().getLocation().getReferenceElement().getIdPart(),
 		    equalTo(ENCOUNTER_LOCATION_UUID));
@@ -1075,7 +1076,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
 		assertThat(((Encounter) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
@@ -1109,7 +1110,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -1140,7 +1141,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -1156,7 +1157,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
 	}
 	
@@ -1191,7 +1192,7 @@ public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
 	}
 	

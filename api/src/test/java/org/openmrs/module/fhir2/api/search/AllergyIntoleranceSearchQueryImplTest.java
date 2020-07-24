@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
@@ -175,7 +176,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getIdentifier().getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
 	}
@@ -204,7 +205,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getIdentifier().getValue(),
 		    equalTo(PATIENT_IDENTIFIER));
 	}
@@ -252,7 +253,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
 	}
@@ -279,7 +280,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getReferenceElement().getIdPart(),
 		    equalTo(PATIENT_UUID));
 	}
@@ -325,7 +326,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
 	}
 	
@@ -352,7 +353,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -398,7 +399,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
 	}
 	
@@ -425,7 +426,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -471,7 +472,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
 	}
 	
@@ -498,7 +499,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -549,7 +550,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
 	}
 	
@@ -566,7 +567,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getCategory().get(0).getValue(),
 		    equalTo(AllergyIntolerance.AllergyIntoleranceCategory.FOOD));
 	}
@@ -584,7 +585,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getCategory().get(0).getValue(),
 		    equalTo(AllergyIntolerance.AllergyIntoleranceCategory.MEDICATION));
 		
@@ -603,7 +604,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getCategory().get(0).getValue(),
 		    equalTo(AllergyIntolerance.AllergyIntoleranceCategory.ENVIRONMENT));
 		
@@ -643,7 +644,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getCode().getCodingFirstRep().getCode(),
 		    equalTo(CODED_ALLERGEN_UUID));
 	}
@@ -661,7 +662,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getReactionFirstRep().getSeverity(),
 		    equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.MILD));
 	}
@@ -679,7 +680,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getReactionFirstRep().getSeverity(),
 		    equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE));
 	}
@@ -697,7 +698,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getReactionFirstRep().getSeverity(),
 		    equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE));
 	}
@@ -715,7 +716,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getReactionFirstRep().getManifestation(),
 		    hasItem(hasProperty("coding", hasItem(hasProperty("code", equalTo(CODED_REACTION_UUID))))));
 	}
@@ -732,7 +733,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getClinicalStatus().getCodingFirstRep().getCode(),
 		    equalTo(STATUS));
 	}
@@ -750,7 +751,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
 	}
 	
@@ -783,23 +784,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-	}
-	
-	@Test
-	public void searchForAllergies_shouldSearchForAllergiesByLastUpdatedDateVoided() {
-		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		
-		IBundleProvider results = search(theParams);
-		
-		List<IBaseResource> resultList = get(results);
-		
-		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -817,7 +802,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
 	}
 	
@@ -862,7 +847,7 @@ public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSens
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getClinicalStatus().getCodingFirstRep().getCode(),
 		    equalTo(STATUS));
 		assertThat(((AllergyIntolerance) resultList.iterator().next()).getCategory().get(0).getValue(),

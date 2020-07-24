@@ -39,6 +39,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirTaskService;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.openmrs.module.fhir2.providers.util.TaskVersionConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +109,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Task.SP_STATUS) TokenAndListParam status,
 	        @OptionalParam(name = Task.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
-		return fhirTaskService.searchForTasks(basedOnReference, ownerReference, status, id, lastUpdated, sort);
+		return new SearchQueryBundleProviderR3Wrapper(
+		        fhirTaskService.searchForTasks(basedOnReference, ownerReference, status, id, lastUpdated, sort));
 	}
 }

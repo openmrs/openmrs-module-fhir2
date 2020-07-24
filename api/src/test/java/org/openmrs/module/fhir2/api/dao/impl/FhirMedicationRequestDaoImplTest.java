@@ -79,8 +79,8 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<String> matchingResourceUuids = medicationRequestDao.getResultUuids(theParams);
-		Collection<DrugOrder> drugOrder = medicationRequestDao.search(theParams, matchingResourceUuids);
+		List<String> matchingResourceUuids = medicationRequestDao.getSearchResultUuids(theParams);
+		Collection<DrugOrder> drugOrder = medicationRequestDao.getSearchResults(theParams, matchingResourceUuids);
 		
 		assertThat(drugOrder, notNullValue());
 	}

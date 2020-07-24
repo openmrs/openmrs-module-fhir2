@@ -12,20 +12,22 @@ package org.openmrs.module.fhir2.api.search;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.hl7.fhir.r4.model.Patient.SP_FAMILY;
 import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -36,7 +38,6 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -59,7 +60,7 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PATIENT_GIVEN_NAME = "Jeannette";
 	
-	private static final String PATIENT_UUID = "54569b76-6862-11ea-bc55-0242ac130003";
+	private static final String PATIENT_UUID = "f363b024-7ff2-4882-9f5b-d9bce5d10a9e";
 	
 	private static final String PATIENT_PARTIAL_GIVEN_NAME = "Jean";
 	
@@ -103,7 +104,9 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String DATE_CHANGED = "2008-08-18";
 	
-	private static final String DATE_VOIDED = "2010-09-03";
+	private static final int START_INDEX = 0;
+	
+	private static final int END_INDEX = 10;
 	
 	@Autowired
 	private PatientTranslator translator;
@@ -113,10 +116,6 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Autowired
 	private SearchQuery<org.openmrs.Patient, org.hl7.fhir.r4.model.Patient, FhirPatientDao, PatientTranslator> searchQuery;
-	
-	private static final int START_INDEX = 0;
-	
-	private static final int END_INDEX = 10;
 	
 	@Before
 	public void setup() throws Exception {
@@ -129,19 +128,23 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private List<Patient> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof Patient)
+		        .map(it -> (Patient) it).collect(Collectors.toList());
 	}
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByName() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, "name",
 		    new StringAndListParam().addAnd(new StringParam(PATIENT_GIVEN_NAME)));
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThan(1)));
 	}
@@ -150,11 +153,14 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForPatients_shouldReturnMultiplePatientsForPartialMatch() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, "name",
 		    new StringAndListParam().addAnd(new StringParam(PATIENT_PARTIAL_GIVEN_NAME)));
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(results.size(), greaterThan(1));
 	}
@@ -163,11 +169,14 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientNameNotMatched() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    FhirConstants.NAME_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_NOT_FOUND_NAME)));
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -175,37 +184,46 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForPatients_shouldSearchForPatientsByGivenName() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    FhirConstants.GIVEN_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_GIVEN_NAME)));
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasItems());
+		assertThat(resultList.get(0).getNameFirstRep().getGiven().get(0).toString(), startsWith(PATIENT_GIVEN_NAME));
 	}
 	
 	@Test
 	public void searchForPatients_shouldReturnMultiplePatientsForPartialMatchOnGivenName() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    FhirConstants.GIVEN_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_PARTIAL_GIVEN_NAME)));
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
 		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		assertThat(resultList.get(0).getNameFirstRep().getGiven().get(0).toString(), startsWith(PATIENT_PARTIAL_GIVEN_NAME));
 	}
 	
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientGivenNameNotMatched() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    FhirConstants.GIVEN_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_NOT_FOUND_NAME)));
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, is(empty()));
 	}
 	
@@ -215,11 +233,13 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		    FhirConstants.FAMILY_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_FAMILY_NAME)));
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getNameFirstRep().getFamily(), startsWith(PATIENT_FAMILY_NAME));
 	}
 	
 	@Test
@@ -228,7 +248,7 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		    FhirConstants.FAMILY_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_PARTIAL_FAMILY_NAME)));
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<Patient> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
@@ -241,7 +261,7 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		    FhirConstants.FAMILY_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_NOT_FOUND_NAME)));
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<Patient> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -251,26 +271,31 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	public void searchForPatients_shouldSearchForPatientsByIdentifier() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER,
 		    new TokenAndListParam().addAnd(new TokenParam(null, PATIENT_IDENTIFIER)));
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(results.size(), equalTo(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdentifierFirstRep().getValue(), equalTo(PATIENT_IDENTIFIER));
 	}
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByIdentifierWithType() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER,
 		    new TokenAndListParam().addAnd(new TokenParam(PATIENT_IDENTIFIER_TYPE, PATIENT_IDENTIFIER)));
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(results.size(), equalTo(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -279,10 +304,12 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		    new TokenAndListParam().addAnd(new TokenParam(BAD_PATIENT_IDENTIFIER_TYPE, BAD_PATIENT_IDENTIFIER)));
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, is(empty()));
+		assertThat(results.size(), equalTo(0));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -291,10 +318,12 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		    new TokenAndListParam().addAnd(new TokenParam(BAD_PATIENT_IDENTIFIER_TYPE, PATIENT_IDENTIFIER)));
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, is(empty()));
+		assertThat(results.size(), equalTo(0));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -305,65 +334,83 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasItems(hasProperty(GENDER_PROPERTY, equalTo(Enumerations.AdministrativeGender.MALE))));
+		assertThat(resultList, everyItem(hasProperty(GENDER_PROPERTY, equalTo(Enumerations.AdministrativeGender.MALE))));
 		
 		results = search(new SearchParameterMap().addParameter(FhirConstants.GENDER_SEARCH_HANDLER, "gender",
 		    new TokenAndListParam().addAnd(new TokenParam(PATIENT_FEMALE_GENDER))));
 		
+		assertThat(results, notNullValue());
+		
 		resultList = get(results);
 		
-		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasItems(hasProperty(GENDER_PROPERTY, equalTo(Enumerations.AdministrativeGender.FEMALE))));
+		assertThat(resultList, everyItem(hasProperty(GENDER_PROPERTY, equalTo(Enumerations.AdministrativeGender.FEMALE))));
 	}
 	
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenGenderNotMatched() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.GENDER_SEARCH_HANDLER, "gender",
 		    new TokenAndListParam().addAnd(new TokenParam(null, PATIENT_WRONG_GENDER)));
+		
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.isEmpty(), is(true));
+		assertThat(results.size(), equalTo(0));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, empty());
 	}
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByBirthDate() {
-		IBundleProvider results = search(new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
-		    "birthdate", new DateRangeParam(new DateParam(PATIENT_BIRTHDATE))));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    "birthdate", new DateRangeParam(new DateParam(PATIENT_BIRTHDATE)));
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(PATIENT_BIRTHDATE_PATIENT_UUID))));
 	}
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByBirthDateWithLowerBound() {
-		IBundleProvider results = search(new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
-		    "birthdate", new DateRangeParam().setLowerBound(PATIENT_BIRTHDATE)));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    "birthdate", new DateRangeParam().setLowerBound(PATIENT_BIRTHDATE));
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(greaterThan(1)));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(PATIENT_BIRTHDATE_PATIENT_UUID))));
 	}
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByBirthDateWithUpperBound() {
-		IBundleProvider results = search(new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
-		    "birthdate", new DateRangeParam().setUpperBound(PATIENT_BIRTHDATE)));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    "birthdate", new DateRangeParam().setUpperBound(PATIENT_BIRTHDATE));
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThan(1)));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(PATIENT_BIRTHDATE_PATIENT_UUID))));
@@ -371,13 +418,16 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByBirthDateWithinBoundaries() {
-		IBundleProvider results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "birthdate",
-		        new DateRangeParam().setLowerBound(PATIENT_BIRTHDATE_LOWER_BOUND).setUpperBound(PATIENT_BIRTHDATE)));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    "birthdate", new DateRangeParam().setLowerBound(PATIENT_BIRTHDATE_LOWER_BOUND).setUpperBound(PATIENT_BIRTHDATE));
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThan(1)));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(PATIENT_BIRTHDATE_PATIENT_UUID))));
@@ -385,51 +435,67 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByCity() {
-		IBundleProvider results = search(new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
-		    FhirConstants.CITY_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_CITY))));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.CITY_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_CITY)));
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PATIENT_ADDRESS_PATIENT_UUID));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(PATIENT_ADDRESS_PATIENT_UUID));
 	}
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByState() {
-		IBundleProvider results = search(new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
-		    FhirConstants.STATE_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_STATE))));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.STATE_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_STATE)));
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PATIENT_ADDRESS_PATIENT_UUID));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(PATIENT_ADDRESS_PATIENT_UUID));
 	}
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByCountry() {
-		IBundleProvider results = search(new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
-		    FhirConstants.COUNTRY_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_COUNTRY))));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.COUNTRY_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_COUNTRY)));
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PATIENT_ADDRESS_PATIENT_UUID));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(PATIENT_ADDRESS_PATIENT_UUID));
 	}
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByPostalCode() {
-		IBundleProvider results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_POSTAL_CODE))));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.POSTAL_CODE_PROPERTY,
+		    new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_POSTAL_CODE)));
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PATIENT_ADDRESS_PATIENT_UUID));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(PATIENT_ADDRESS_PATIENT_UUID));
 	}
 	
 	@Test
@@ -441,12 +507,13 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((Patient) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(PATIENT_UUID));
 	}
 	
 	@Test
@@ -458,9 +525,11 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(5));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(5));
 	}
@@ -474,33 +543,18 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(6));
-	}
-	
-	@Test
-	public void searchForPatients_shouldSearchForPatientsByLastUpdatedDateVoided() {
-		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		assertThat(results.size(), equalTo(4));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		List<Patient> resultList = get(results);
 		
-		IBundleProvider results = search(theParams);
-		
-		List<IBaseResource> resultList = get(results);
-		
-		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(4)));
 	}
 	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByMatchingUuidAndLastUpdated() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_UUID));
-		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
+		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
@@ -508,12 +562,13 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((Patient) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(PATIENT_UUID));
 	}
 	
 	@Test
@@ -527,9 +582,11 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Patient> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -539,31 +596,40 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		sort.setParamName("name");
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		IBundleProvider results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_PARTIAL_FAMILY_NAME))).setSortSpec(sort));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.FAMILY_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_PARTIAL_FAMILY_NAME)))
+		        .setSortSpec(sort);
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getName().get(0).getNameAsSingleString(),
-			    lessThanOrEqualTo(((Patient) resultList.get(i)).getName().get(0).getNameAsSingleString()));
+			assertThat(resultList.get(i - 1).getName().get(0).getNameAsSingleString(),
+			    lessThanOrEqualTo(resultList.get(i).getName().get(0).getNameAsSingleString()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_PARTIAL_FAMILY_NAME))).setSortSpec(sort));
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
 		
 		resultList = get(results);
 		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getName().get(0).getNameAsSingleString(),
-			    greaterThanOrEqualTo(((Patient) resultList.get(i)).getName().get(0).getNameAsSingleString()));
+			assertThat(resultList.get(i - 1).getName().get(0).getNameAsSingleString(),
+			    greaterThanOrEqualTo(resultList.get(i).getName().get(0).getNameAsSingleString()));
 		}
 	}
 	
@@ -579,24 +645,34 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getName().get(0).getGivenAsSingleString(),
-			    lessThanOrEqualTo(((Patient) resultList.get(i)).getName().get(0).getGivenAsSingleString()));
+			assertThat(resultList.get(i - 1).getName().get(0).getGivenAsSingleString(),
+			    lessThanOrEqualTo(resultList.get(i).getName().get(0).getGivenAsSingleString()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_PARTIAL_GIVEN_NAME))).setSortSpec(sort));
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
 		
 		resultList = get(results);
 		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getName().get(0).getGivenAsSingleString(),
-			    greaterThanOrEqualTo(((Patient) resultList.get(i)).getName().get(0).getGivenAsSingleString()));
+			assertThat(resultList.get(i - 1).getName().get(0).getGivenAsSingleString(),
+			    greaterThanOrEqualTo(resultList.get(i).getName().get(0).getGivenAsSingleString()));
 		}
 	}
 	
@@ -607,29 +683,39 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		sort.setOrder(SortOrderEnum.ASC);
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
-		    FhirConstants.FAMILY_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_FAMILY_NAME)))
+		    FhirConstants.FAMILY_PROPERTY, new StringAndListParam().addAnd(new StringParam(PATIENT_PARTIAL_FAMILY_NAME)))
 		        .setSortSpec(sort);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getName().get(0).getFamily(),
-			    lessThanOrEqualTo(((Patient) resultList.get(i)).getName().get(0).getFamily()));
+			assertThat(resultList.get(i - 1).getName().get(0).getFamily(),
+			    lessThanOrEqualTo(resultList.get(i).getName().get(0).getFamily()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_FAMILY_NAME))).setSortSpec(sort));
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
 		
 		resultList = get(results);
 		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getName().get(0).getFamily(),
-			    greaterThanOrEqualTo(((Patient) resultList.get(i)).getName().get(0).getFamily()));
+			assertThat(resultList.get(i - 1).getName().get(0).getFamily(),
+			    greaterThanOrEqualTo(resultList.get(i).getName().get(0).getFamily()));
 		}
 	}
 	
@@ -638,28 +724,38 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		SortSpec sort = new SortSpec();
 		sort.setParamName("birthdate");
 		sort.setOrder(SortOrderEnum.ASC);
+		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
 		    "birthdate", new DateRangeParam().setLowerBound(PATIENT_BIRTHDATE_LOWER_BOUND)).setSortSpec(sort);
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getBirthDate(),
-			    lessThanOrEqualTo(((Patient) resultList.get(i)).getBirthDate()));
+			assertThat(resultList.get(i - 1).getBirthDate(), lessThanOrEqualTo(resultList.get(i).getBirthDate()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		results = search(new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "birthdate",
-		    new DateRangeParam().setLowerBound(PATIENT_BIRTHDATE_LOWER_BOUND)).setSortSpec(sort));
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
 		
 		resultList = get(results);
 		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getBirthDate(),
-			    greaterThanOrEqualTo(((Patient) resultList.get(i)).getBirthDate()));
+			assertThat(resultList.get(i - 1).getBirthDate(), greaterThanOrEqualTo(resultList.get(i).getBirthDate()));
 		}
 	}
 	
@@ -669,28 +765,39 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		sort.setParamName("address-city");
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		IBundleProvider results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_CITY))).setSortSpec(sort));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.CITY_PROPERTY, new StringAndListParam().addAnd(new StringParam("City"))).setSortSpec(sort);
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getAddressFirstRep().getCity(),
-			    lessThanOrEqualTo(((Patient) resultList.get(i)).getAddressFirstRep().getCity()));
+			assertThat(resultList.get(i - 1).getAddressFirstRep().getCity(),
+			    lessThanOrEqualTo(resultList.get(i).getAddressFirstRep().getCity()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_CITY))).setSortSpec(sort));
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
 		
 		resultList = get(results);
 		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getAddressFirstRep().getCity(),
-			    greaterThanOrEqualTo(((Patient) resultList.get(i)).getAddressFirstRep().getCity()));
+			assertThat(resultList.get(i - 1).getAddressFirstRep().getCity(),
+			    greaterThanOrEqualTo(resultList.get(i).getAddressFirstRep().getCity()));
 		}
 	}
 	
@@ -700,28 +807,39 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		sort.setParamName("address-state");
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		IBundleProvider results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_STATE))).setSortSpec(sort));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.STATE_PROPERTY, new StringAndListParam().addAnd(new StringParam("M"))).setSortSpec(sort);
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getAddressFirstRep().getState(),
-			    lessThanOrEqualTo(((Patient) resultList.get(i)).getAddressFirstRep().getState()));
+			assertThat(resultList.get(i - 1).getAddressFirstRep().getState(),
+			    lessThanOrEqualTo(resultList.get(i).getAddressFirstRep().getState()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_STATE))).setSortSpec(sort));
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
 		
 		resultList = get(results);
 		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getAddressFirstRep().getState(),
-			    greaterThanOrEqualTo(((Patient) resultList.get(i)).getAddressFirstRep().getState()));
+			assertThat(resultList.get(i - 1).getAddressFirstRep().getState(),
+			    greaterThanOrEqualTo(resultList.get(i).getAddressFirstRep().getState()));
 		}
 	}
 	
@@ -731,28 +849,39 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		sort.setParamName("address-postalcode");
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		IBundleProvider results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_POSTAL_CODE))).setSortSpec(sort));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.POSTAL_CODE_PROPERTY, new StringAndListParam().addAnd(new StringParam("0"))).setSortSpec(sort);
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getAddressFirstRep().getPostalCode(),
-			    lessThanOrEqualTo(((Patient) resultList.get(i)).getAddressFirstRep().getPostalCode()));
+			assertThat(resultList.get(i - 1).getAddressFirstRep().getPostalCode(),
+			    lessThanOrEqualTo(resultList.get(i).getAddressFirstRep().getPostalCode()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_POSTAL_CODE))).setSortSpec(sort));
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
 		
 		resultList = get(results);
 		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getAddressFirstRep().getPostalCode(),
-			    greaterThanOrEqualTo(((Patient) resultList.get(i)).getAddressFirstRep().getPostalCode()));
+			assertThat(resultList.get(i - 1).getAddressFirstRep().getPostalCode(),
+			    greaterThanOrEqualTo(resultList.get(i).getAddressFirstRep().getPostalCode()));
 		}
 	}
 	
@@ -762,28 +891,39 @@ public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		sort.setParamName("address-country");
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		IBundleProvider results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_COUNTRY))).setSortSpec(sort));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.COUNTRY_PROPERTY, new StringAndListParam().addAnd(new StringParam("Fake"))).setSortSpec(sort);
 		
-		List<IBaseResource> resultList = get(results);
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Patient> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getAddressFirstRep().getCountry(),
-			    lessThanOrEqualTo(((Patient) resultList.get(i)).getAddressFirstRep().getCountry()));
+			assertThat(resultList.get(i - 1).getAddressFirstRep().getCountry(),
+			    lessThanOrEqualTo(resultList.get(i).getAddressFirstRep().getCountry()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		results = search(
-		    new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY,
-		        new StringAndListParam().addAnd(new StringParam(PATIENT_ADDRESS_COUNTRY))).setSortSpec(sort));
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
 		
 		resultList = get(results);
 		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		
 		for (int i = 1; i < resultList.size(); i++) {
-			assertThat(((Patient) resultList.get(i - 1)).getAddressFirstRep().getCountry(),
-			    greaterThanOrEqualTo(((Patient) resultList.get(i)).getAddressFirstRep().getCountry()));
+			assertThat(resultList.get(i - 1).getAddressFirstRep().getCountry(),
+			    greaterThanOrEqualTo(resultList.get(i).getAddressFirstRep().getCountry()));
 		}
 	}
 	

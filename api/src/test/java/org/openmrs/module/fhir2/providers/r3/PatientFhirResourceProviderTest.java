@@ -57,7 +57,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PatientFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.Patient> {
+public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.Patient> {
 	
 	private static final String PATIENT_UUID = "017312a1-cf56-43ab-ae87-44070b801d1c";
 	

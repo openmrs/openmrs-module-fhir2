@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.dao;
 import javax.validation.constraints.NotNull;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
 
 import org.openmrs.Auditable;
@@ -30,13 +29,12 @@ public interface FhirDao<T extends OpenmrsObject & Auditable> extends Serializab
 	
 	T delete(@NotNull String uuid);
 	
-	List<String> getResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(SearchParameterMap theParams);
 	
-	Integer getPreferredPageSize();
-	
-	default Collection<T> search(SearchParameterMap theParams, List<String> matchingResourceUuids) {
-		return search(theParams, matchingResourceUuids, 0, matchingResourceUuids.size());
+	default List<T> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids) {
+		return getSearchResults(theParams, matchingResourceUuids, 0, matchingResourceUuids.size());
 	}
 	
-	Collection<T> search(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult, int lastResult);
+	List<T> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
+	        int lastResult);
 }
