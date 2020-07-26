@@ -147,6 +147,8 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		MethodOutcome result = resourceProvider.createCondition(Condition30_40.convertCondition(condition));
 		
 		assertThat(result, notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), equalTo(condition));
 	}
 	
 	@Test
