@@ -10,8 +10,10 @@
 package org.openmrs.module.fhir2;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
+import org.openmrs.GlobalProperty;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.BaseModuleActivator;
@@ -34,8 +36,14 @@ public class FhirActivator extends BaseModuleActivator {
 		if (encounterType == null) {
 			encounterType = new EncounterType("Immunizations Encounter",
 			        "An encounter to which immunizations obs groups are attached.");
-			encounterType.setUuid(uuid);
+			if (!StringUtils.isEmpty(uuid)) {
+				encounterType.setUuid(uuid);
+			}
 			encounterType = es.saveEncounterType(encounterType);
+			if (StringUtils.isEmpty(uuid)) {
+				Context.getAdministrationService().saveGlobalProperty(
+				    new GlobalProperty(FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY, encounterType.getUuid()));
+			}
 		}
 		return encounterType;
 	}
@@ -53,8 +61,14 @@ public class FhirActivator extends BaseModuleActivator {
 			encounterRole.setName("Administering Encounter Role");
 			encounterRole
 			        .setDescription("An encounter role to use when administering medications/vaccines during encounters.");
-			encounterRole.setUuid(uuid);
+			if (!StringUtils.isEmpty(uuid)) {
+				encounterRole.setUuid(uuid);
+			}
 			encounterRole = es.saveEncounterRole(encounterRole);
+			if (StringUtils.isEmpty(uuid)) {
+				Context.getAdministrationService().saveGlobalProperty(
+				    new GlobalProperty(FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY, encounterRole.getUuid()));
+			}
 		}
 		return encounterRole;
 	}
