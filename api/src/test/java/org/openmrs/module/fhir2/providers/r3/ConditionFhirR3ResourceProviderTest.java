@@ -17,11 +17,13 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -36,8 +38,10 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.convertors.conv30_40.Condition30_40;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -51,7 +55,11 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
-@RunWith(MockitoJUnitRunner.class)
+/* replaced MockitoJunitRunner.class with MockitoJunitRunner.Silent.class
+ *  to resolve unnecesary mockito stubbings
+ *   
+ */
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.Condition> {
 	
 	private static final String CONDITION_UUID = "23f620c3-2ecb-4d80-aea8-44fa1c5ff978";
@@ -134,14 +142,48 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(resourceProvider.getConditionHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 	
-	//	@Test
-	//	public void shouldCreateNewCondition() {
-	//		when(conditionService.saveCondition(condition)).thenReturn(condition);
-	//
-	//		MethodOutcome result = resourceProvider.createCondition(condition);
-	//		assertThat(result, notNullValue());
-	//		assertThat(result.getCreated(), is(true));
-	//		assertThat(result.getResource(), equalTo(condition));
+	@Test
+	public void createCondition_shouldCreateNewCondition() {
+		when(conditionService.create(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
+		
+		MethodOutcome result = resourceProvider.createCondition(Condition30_40.convertCondition(condition));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCreated(), is(true));
+		//		assertThat(result.getResource(), equalTo(condition));
+	}
+	
+	//	@Test(expected = InvalidRequestException.class)
+	//	public void updateCondition_shouldThrowInvalidRequestForUuidMismatch() {
+	//		when(conditionService.update(eq(WRONG_CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
+	//		        .thenThrow(InvalidRequestException.class);
+	//		
+	//		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID),
+	//		    Condition30_40.convertCondition(condition));
+	//	}
+	//	
+	//	@Test(expected = InvalidRequestException.class)
+	//	public void updateCondition_shouldThrowInvalidRequestForMissingId() {
+	//		org.hl7.fhir.r4.model.Condition noIdCondition = new org.hl7.fhir.r4.model.Condition();
+	//		
+	//		when(conditionService.update(eq(CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
+	//		        .thenThrow(InvalidRequestException.class);
+	//		
+	//		resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID),
+	//		    Condition30_40.convertCondition(noIdCondition));
+	//	}
+	//	
+	//	@Test(expected = MethodNotAllowedException.class)
+	//	public void updateCondition_shouldThrowMethodNotAllowedIfDoesNotExist() {
+	//		
+	//		org.hl7.fhir.r4.model.Condition wrongCondition = new org.hl7.fhir.r4.model.Condition();
+	//		
+	//		wrongCondition.setId(WRONG_CONDITION_UUID);
+	//		when(conditionService.update(eq(WRONG_CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
+	//		        .thenThrow(MethodNotAllowedException.class);
+	//		
+	//		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID),
+	//		    Condition30_40.convertCondition(wrongCondition));
 	//	}
 	
 	@Test
@@ -222,4 +264,25 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.CONDITION));
 	}
+	
+	@Test
+	public void deleteCondition_shouldDeleteCondition() {
+		
+		when(conditionService.delete(CONDITION_UUID)).thenReturn(condition);
+		
+		OperationOutcome result = resourceProvider.deleteCondition(new IdType().setValue(CONDITION_UUID));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteCondition_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentCondition() {
+		when(conditionService.delete(WRONG_CONDITION_UUID)).thenReturn(null);
+		
+		resourceProvider.deleteCondition(new IdType().setValue(WRONG_CONDITION_UUID));
+	}
+	
 }

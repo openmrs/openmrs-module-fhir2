@@ -1,0 +1,41 @@
+{
+  "resourceType": "Condition",
+"id": "121b73a6-e1a4-4424-8610-d5765bf2fdf7",
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://openmrs.org",
+        "code": "ACTIVE",
+        "display": "ACTIVE"
+      }
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "code": "116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      {
+        "system": "urn:oid:2.16.840.1.113883.3.7201",
+        "code": "116128"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/90f7f0b4-06a8-4a97-9678-e7a977f4b518",
+    "type": "Patient",
+    "identifier": {
+      "id": "21bb350c-799b-4837-9496-2ad213e058a4",
+      "use": "official",
+      "system": "OpenMRS ID",
+      "value": "10010W"
+    },
+    "display": "John Taylor(OpenMRS ID:10010W)"
+  },
+  "recordedDate": "2019-06-18T06:37:26+03:00",
+  "recorder": {
+    "reference": "Practitioner/cf635fe4-35e6-4b9b-b3de-dc24da584150",
+    "type": "Practitioner",
+    "display": "JJ Dick"
+  }
+}

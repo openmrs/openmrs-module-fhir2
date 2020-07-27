@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -18,6 +19,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,6 +43,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
@@ -74,6 +77,12 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	
 	private static final String JSON_CREATE_CONDITION_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_create.json";
 	
+	private static final String JSON_UPDATE_CONDITION_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_Update.json";
+	
+	private static final String JSON_UPDATE_CONDITION_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_UpdateWithoutId.json";
+	
+	private static final String JSON_UPDATE_CONDITION_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ConditionResourceWebTest_UpdateWithWrongId.json";
+	
 	private static final String PATIENT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
 	
 	private static final String PATIENT_GIVEN_NAME = "Horatio";
@@ -98,6 +107,8 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	
 	@Mock
 	private FhirConditionService conditionService;
+	
+	private org.hl7.fhir.r4.model.Condition condition;
 	
 	@Getter(AccessLevel.PUBLIC)
 	private ConditionFhirResourceProvider resourceProvider;
@@ -227,6 +238,67 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		
 		assertThat(response, isCreated());
 		assertThat(response.getStatus(), is(201));
+	}
+	
+	@Test
+	public void updateCondition_shouldUpdateExistingCondition() throws Exception {
+		String conditionJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_CONDITION_PATH)) {
+			Objects.requireNonNull(is);
+			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		when(conditionService.update(conditionJson, any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
+		
+		MockHttpServletResponse response = put("/Condition/" + CONDITION_UUID).jsonContent(conditionJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+	}
+	
+	@Test
+	public void updateCondition_shouldThrowErrorForIdMismatch() throws Exception {
+		String conditionJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_CONDITION_PATH)) {
+			Objects.requireNonNull(is);
+			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		MockHttpServletResponse response = put("/Condition/" + WRONG_CONDITION_UUID).jsonContent(conditionJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+	}
+	
+	@Test
+	public void updateCondition_shouldThrowErrorForNoId() throws Exception {
+		String conditionJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_CONDITION_NO_ID_PATH)) {
+			Objects.requireNonNull(is);
+			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		MockHttpServletResponse response = put("/Condition/" + CONDITION_UUID).jsonContent(conditionJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
+	}
+	
+	@Test
+	public void updateCondition_shouldThrowErrorForNonExistentCondition() throws Exception {
+		String conditionJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_CONDITION_WRONG_ID_PATH)) {
+			Objects.requireNonNull(is);
+			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		when(conditionService.update(anyString(), any(org.hl7.fhir.r4.model.Condition.class)))
+		        .thenThrow(new MethodNotAllowedException("Observation " + WRONG_CONDITION_UUID + " does not exist"));
+		
+		MockHttpServletResponse response = put("/Condition/" + WRONG_CONDITION_UUID).jsonContent(conditionJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isMethodNotAllowed());
 	}
 	
 	@Test
@@ -438,4 +510,25 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
+	
+	@Test
+	public void deleteCondition_shouldDeleteCondition() throws Exception {
+		when(conditionService.delete(CONDITION_UUID)).thenReturn(condition);
+		
+		MockHttpServletResponse response = delete("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deleteObservation_shouldReturn404ForNonExistingObservation() throws Exception {
+		when(conditionService.delete(WRONG_CONDITION_UUID)).thenReturn(null);
+		
+		MockHttpServletResponse response = delete("/Observation/" + WRONG_CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getStatus(), equalTo(404));
+	}
+	
 }
