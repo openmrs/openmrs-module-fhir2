@@ -79,7 +79,7 @@ public class BaseImmunizationTranslator {
 	
 	public void validateImmunizationObsGroup(Obs obs) throws IllegalArgumentException {
 		
-		if (concept(immunizationGroupingConcept).getUuid() != obs.getConcept().getUuid()) {
+		if (!concept(immunizationGroupingConcept).equals(obs.getConcept())) {
 			throw new IllegalArgumentException("The immunization obs group should be defined by a concept mapped as same as "
 			        + immunizationGroupingConcept + ".");
 		}

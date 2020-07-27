@@ -196,17 +196,4 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		assertThat(members.get(ciel165907).getValueDatetime(), equalTo(new DateTimeType("2020-10-08").getValue()));
 	}
 	
-	@Test
-	public void foo() throws ParseException {
-		
-		// setup
-		FhirContext ctx = FhirContext.forR4();
-		IParser parser = ctx.newJsonParser();
-		
-		Immunization immunization = service.getImmunizationByUuid("9353776b-dead-4588-8723-d687197d8438");
-		String json = parser.encodeResourceToString(immunization);
-		
-		System.out.println(json);
-	}
-	
 }
