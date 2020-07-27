@@ -97,7 +97,6 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 		Patient patient = null;
 		
 		if (!StringUtils.isEmpty(identifier)) {
-			
 			List<Patient> patients = patientService.getPatients(identifier, 0, 1);
 			if (CollectionUtils.isEmpty(patients)) {
 				throw new IllegalArgumentException(
@@ -109,7 +108,6 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 				        "The provided UUID '" + uuid + "' is not that of the patient identified by '" + identifier + "'.");
 			}
 		} else if (!StringUtils.isEmpty(uuid)) {
-			
 			patient = patientService.getPatientByUuid(uuid);
 			if (patient == null) {
 				throw new IllegalArgumentException(
