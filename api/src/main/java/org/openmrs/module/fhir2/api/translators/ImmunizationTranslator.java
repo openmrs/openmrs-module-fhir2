@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import org.openmrs.Concept;
 import org.openmrs.Obs;
 
 public interface ImmunizationTranslator extends OpenmrsFhirUpdatableTranslator<Obs, org.hl7.fhir.r4.model.Immunization> {
@@ -30,4 +31,11 @@ public interface ImmunizationTranslator extends OpenmrsFhirUpdatableTranslator<O
 	 */
 	@Override
 	Obs toOpenmrsType(org.hl7.fhir.r4.model.Immunization fhirImmunization);
+	
+	/**
+	 * Fetches the OpenMRS concept used to capture immunization obs groups.
+	 * 
+	 * @return The OpenMRS immunization concept.
+	 */
+	Concept getOpenmrsImmunizationConcept();
 }

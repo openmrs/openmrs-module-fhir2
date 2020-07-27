@@ -11,6 +11,9 @@
 <dataset>
     <!-- Immunizations encounter type -->
     <encounter_type CREATOR="1" DATE_CREATED="2020-07-12 14:00:13.0" DESCRIPTION="An encounter to which immunizations obs groups are attached." ENCOUNTER_TYPE_ID="8000" NAME="Immunizations Encounter" RETIRED="false" UUID="29c02aff-9a93-46c9-bf6f-48b552fcb1fa"/>
+
+    <!-- Administering encounter role -->
+    <encounter_role ENCOUNTER_ROLE_ID="2000" NAME="Administering Encounter Role" DESCRIPTION="An encounter role to use when administering medications/vaccines during encounters." CREATOR="1" DATE_CREATED="2020-07-27 16:19:44.0" RETIRED="false" UUID="546cce2d-6d58-4097-ba92-206c1a2a0462"/>
     
     <!-- CIEL source -->
     <concept_reference_source CONCEPT_SOURCE_ID="60000" CREATOR="1" DATE_CREATED="2020-07-07 19:08:19.0" NAME="CIEL" RETIRED="false" UUID="88e98cff-fbcf-42bf-a074-0ab798555766"/>

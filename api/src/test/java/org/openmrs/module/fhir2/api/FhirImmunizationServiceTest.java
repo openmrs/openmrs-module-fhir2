@@ -12,6 +12,12 @@ package org.openmrs.module.fhir2.api;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1410;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1418;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1419;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1420;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel165907;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel984;
 
 import java.text.ParseException;
 import java.util.Map;
@@ -70,8 +76,8 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		    new GlobalProperty(FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY, "29c02aff-9a93-46c9-bf6f-48b552fcb1fa"));
 		adminService.saveGlobalProperty(
 		    new GlobalProperty(FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY, "546cce2d-6d58-4097-ba92-206c1a2a0462"));
-		administeringRole = FhirActivator.getAdministeringEncounterRoleOrCreateIfMissing();
 		executeDataSet(IMMUNIZATIONS_METADATA_XML);
+		administeringRole = FhirActivator.getAdministeringEncounterRoleOrCreateIfMissing();
 		immunizationEncounterType = FhirActivator.getImmunizationsEncounterTypeOrCreateIfMissing();
 		executeDataSet(IMMUNIZATIONS_INITIAL_DATA_XML);
 		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
@@ -100,7 +106,7 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		// setup
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
-		Immunization immunization = parser.parseResource(Immunization.class, "{\n"
+		Immunization newImmunization = parser.parseResource(Immunization.class, "{\n"
 		        + "  \"resourceType\": \"Immunization\",\n" + "  \"status\": \"completed\",\n" + "  \"vaccineCode\": {\n"
 		        + "    \"coding\": [\n" + "      {\n" + "        \"code\": \"15f83cd6-64e9-4e06-a5f9-364d3b14a43d\",\n"
 		        + "        \"display\": \"Aspirin as a vaccine\"\n" + "      }\n" + "    ]\n" + "  },\n"
@@ -116,13 +122,12 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		        + "  ]\n" + "}");
 		
 		// replay
-		Immunization savedImmunization = service.saveImmunization(immunization);
-		//		System.out.println(parser.encodeResourceToString(savedImmunization));
+		Immunization savedImmunization = service.createImmunization(newImmunization);
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
 		
 		// verify
-		BaseImmunizationTranslator tl = new BaseImmunizationTranslator(conceptService);
-		tl.validateImmunizationObsGroup(obs);
+		BaseImmunizationTranslator translator = new BaseImmunizationTranslator(conceptService);
+		translator.validateImmunizationObsGroup(obs);
 		assertObsCommons(obs, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 		    "f9badd80-ab76-11e2-9e96-0800200c9a66");
 		
@@ -131,15 +136,77 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 			    "f9badd80-ab76-11e2-9e96-0800200c9a66");
 		});
 		
-		Map<String, Obs> members = tl.getObsMembersMap(obs);
-		assertThat(members.get("CIEL:984").getValueCoded().getUuid(), is("15f83cd6-64e9-4e06-a5f9-364d3b14a43d"));
-		assertThat(members.get("CIEL:1410").getValueDatetime(),
+		Map<String, Obs> members = translator.getObsMembersMap(obs);
+		assertThat(members.get(ciel984).getValueCoded().getUuid(), is("15f83cd6-64e9-4e06-a5f9-364d3b14a43d"));
+		assertThat(members.get(ciel1410).getValueDatetime(),
 		    equalTo(new DateTimeType("2020-07-08T18:30:00.000Z").getValue()));
-		assertThat(members.get("CIEL:1418").getValueNumeric(), equalTo(2.0));
-		assertThat(members.get("CIEL:1419").getValueText(), is("Acme"));
-		assertThat(members.get("CIEL:1420").getValueText(), is("FOO1234"));
-		assertThat(members.get("CIEL:165907").getValueDatetime(),
+		assertThat(members.get(ciel1418).getValueNumeric(), equalTo(2.0));
+		assertThat(members.get(ciel1419).getValueText(), is("Acme"));
+		assertThat(members.get(ciel1420).getValueText(), is("FOO1234"));
+		assertThat(members.get(ciel165907).getValueDatetime(),
 		    equalTo(new DateTimeType("2022-07-31T18:30:00.000Z").getValue()));
+	}
+	
+	@Test
+	public void updateImmunization_shouldUpdateImmunizationAccordingly() throws ParseException {
+		
+		// setup
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		Immunization updatedImmunization = parser.parseResource(Immunization.class,
+		    "{\n" + "  \"resourceType\": \"Immunization\",\n" + "  \"id\": \"9353776b-dead-4588-8723-d687197d8438\",\n"
+		            + "  \"status\": \"completed\",\n" + "  \"vaccineCode\": {\n" + "    \"coding\": [\n" + "      {\n"
+		            + "        \"code\": \"d144d24f-6913-4b63-9660-a9108c2bebef\",\n"
+		            + "        \"display\": \"STAVUDINE LAMIVUDINE AND NEVIRAPINE\"\n" + "      }\n" + "    ]\n" + "  },\n"
+		            + "  \"patient\": {\n" + "    \"reference\": \"Patient/86526ed6-3c11-11de-a0ba-001e378eb67f\",\n"
+		            + "    \"type\": \"Patient\"\n" + "  },\n" + "  \"encounter\": {\n"
+		            + "    \"reference\": \"Encounter/4b568da9-0325-4986-9c44-344871788f03\",\n"
+		            + "    \"type\": \"Encounter\"\n" + "  },\n"
+		            + "  \"occurrenceDateTime\": \"2020-07-08T20:30:00+02:00\",\n" + "  \"manufacturer\": {\n"
+		            + "    \"display\": \"Pharma Inc.\"\n" + "  },\n" + "  \"lotNumber\": \"YU765YT-1\",\n"
+		            + "  \"expirationDate\": \"2020-10-08\",\n" + "  \"performer\": [\n" + "    {\n" + "      \"actor\": {\n"
+		            + "        \"reference\": \"Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66\",\n"
+		            + "        \"type\": \"Practitioner\"\n" + "      }\n" + "    }\n" + "  ],\n"
+		            + "  \"protocolApplied\": [\n" + "    {\n" + "      \"doseNumberPositiveInt\": 4\n" + "    }\n" + "  ]\n"
+		            + "}");
+		
+		// replay
+		Immunization savedImmunization = service.updateImmunization("9353776b-dead-4588-8723-d687197d8438",
+		    updatedImmunization);
+		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
+		
+		// verify
+		BaseImmunizationTranslator translator = new BaseImmunizationTranslator(conceptService);
+		translator.validateImmunizationObsGroup(obs);
+		assertObsCommons(obs, "86526ed6-3c11-11de-a0ba-001e378eb67f", "4b568da9-0325-4986-9c44-344871788f03",
+		    "f9badd80-ab76-11e2-9e96-0800200c9a66");
+		
+		obs.getGroupMembers().forEach(o -> {
+			assertObsCommons(o, "86526ed6-3c11-11de-a0ba-001e378eb67f", "4b568da9-0325-4986-9c44-344871788f03",
+			    "f9badd80-ab76-11e2-9e96-0800200c9a66");
+		});
+		
+		Map<String, Obs> members = translator.getObsMembersMap(obs);
+		assertThat(members.get(ciel984).getValueCoded().getUuid(), is("d144d24f-6913-4b63-9660-a9108c2bebef"));
+		assertThat(members.get(ciel1410).getValueDatetime(),
+		    equalTo(new DateTimeType("2020-07-08T20:30:00+02:00").getValue()));
+		assertThat(members.get(ciel1418).getValueNumeric(), equalTo(4.0));
+		assertThat(members.get(ciel1419).getValueText(), is("Pharma Inc."));
+		assertThat(members.get(ciel1420).getValueText(), is("YU765YT-1"));
+		assertThat(members.get(ciel165907).getValueDatetime(), equalTo(new DateTimeType("2020-10-08").getValue()));
+	}
+	
+	@Test
+	public void foo() throws ParseException {
+		
+		// setup
+		FhirContext ctx = FhirContext.forR4();
+		IParser parser = ctx.newJsonParser();
+		
+		Immunization immunization = service.getImmunizationByUuid("9353776b-dead-4588-8723-d687197d8438");
+		String json = parser.encodeResourceToString(immunization);
+		
+		System.out.println(json);
 	}
 	
 }

@@ -13,6 +13,7 @@ import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslat
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationGroupingConcept;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,10 +57,12 @@ public class BaseImmunizationTranslator {
 	public Obs newImmunizationObsGroup() {
 		Obs obs = new Obs();
 		obs.setConcept(concept(immunizationGroupingConcept));
+		obs.setObsDatetime(new Date());
 		
 		Arrays.asList(immunizationConcepts).stream().forEach(refTerm -> {
 			Obs o = new Obs();
 			o.setConcept(concept(refTerm));
+			o.setObsDatetime(obs.getObsDatetime());
 			obs.addGroupMember(o);
 		});
 		
@@ -99,13 +102,13 @@ public class BaseImmunizationTranslator {
 	
 	/**
 	 * @param obs An obs group
-	 * @return A map CIEL reference term to obs of all obs group members
+	 * @return A mapping from CIEL reference terms to obs of all obs group members
 	 */
 	public Map<String, Obs> getObsMembersMap(Obs obs) {
 		Map<String, Obs> members = new HashMap<String, Obs>();
 		obs.getGroupMembers().stream().forEach(o -> {
 			Arrays.asList(immunizationConcepts).stream().forEach(refTerm -> {
-				if (concept(refTerm) == o.getConcept()) {
+				if (o.getConcept().equals(concept(refTerm))) {
 					members.put(refTerm, o);
 				}
 			});

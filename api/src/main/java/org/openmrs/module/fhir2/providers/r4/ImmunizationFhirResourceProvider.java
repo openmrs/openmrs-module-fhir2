@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 
 import ca.uhn.fhir.rest.annotation.Create;
@@ -21,15 +22,16 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Patient;
@@ -75,18 +77,25 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createImmunization(@ResourceParam Immunization newImmunization) {
-		return FhirProviderUtils.buildCreate(immunizationService.saveImmunization(newImmunization));
+		return FhirProviderUtils.buildCreate(immunizationService.createImmunization(newImmunization));
+	}
+	
+	@Update
+	public MethodOutcome updateImmunization(@IdParam IdType id, @ResourceParam Immunization existingImmunization) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update resource");
+		}
+		
+		existingImmunization.setId(id.getIdPart());
+		
+		return FhirProviderUtils.buildUpdate(immunizationService.updateImmunization(id.getIdPart(), existingImmunization));
 	}
 	
 	@Search
 	@SuppressWarnings("unused")
-	public Bundle searchImmunizations(
-	        @OptionalParam(name = Immunization.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_NAME,
-	                Patient.SP_GIVEN, Patient.SP_FAMILY }) ReferenceAndListParam patientParam,
-	        @Sort SortSpec sort) {
-		//        return FhirProviderUtils.convertSearchResultsToBundle(immunizationService.searchImmunizations(patientParam, subjectParam,
-		//            code, clinicalStatus, onsetDate, onsetAge, recordedDate, sort));
-		return null;
+	public Collection<Immunization> searchImmunizations(@OptionalParam(name = Immunization.SP_PATIENT, chainWhitelist = { "",
+	        Patient.SP_IDENTIFIER }) ReferenceAndListParam patienParam, @Sort SortSpec sort) {
+		return immunizationService.searchImmunizations(patienParam, sort);
 	}
 	
 }

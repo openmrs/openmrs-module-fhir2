@@ -22,7 +22,9 @@ public interface FhirImmunizationService {
 	
 	Immunization getImmunizationByUuid(@NotNull String uuid);
 	
-	Immunization saveImmunization(@NotNull Immunization immunization);
+	Immunization createImmunization(@NotNull Immunization newImmunization);
+	
+	Immunization updateImmunization(@NotNull String uuid, @NotNull Immunization updatedImmunization);
 	
 	Collection<Immunization> searchImmunizations(ReferenceAndListParam patientParam, @Sort SortSpec sort);
 }
