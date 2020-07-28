@@ -245,7 +245,10 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 			Objects.requireNonNull(is);
 			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-		when(conditionService.update(anyString(), any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(conditionJson);
+		
+		Condition condition = new Condition();
+		condition.setId("CONDITION_UUID");
+		when(conditionService.update(anyString(), any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
 		
 		MockHttpServletResponse response = put("/Condition/" + CONDITION_UUID).jsonContent(conditionJson)
 		        .accept(FhirMediaTypes.JSON).go();
@@ -278,7 +281,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		}
 		
 		when(conditionService.update(anyString(), any(org.hl7.fhir.r4.model.Condition.class)))
-		        .thenThrow(new MethodNotAllowedException("Observation " + WRONG_CONDITION_UUID + " does not exist"));
+		        .thenThrow(new MethodNotAllowedException("Condition " + WRONG_CONDITION_UUID + " does not exist"));
 		
 		MockHttpServletResponse response = put("/Condition/" + WRONG_CONDITION_UUID).jsonContent(conditionJson)
 		        .accept(FhirMediaTypes.JSON).go();
