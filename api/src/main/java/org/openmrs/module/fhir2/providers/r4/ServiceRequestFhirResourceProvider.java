@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -29,8 +30,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -91,8 +95,27 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Search
-	public IBundleProvider searchForServiceRequests(@OptionalParam(name = ServiceRequest.SP_RES_ID) TokenAndListParam uuid,
+	public IBundleProvider searchForServiceRequests(
+	        @OptionalParam(name = ServiceRequest.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
+	                Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
+	        @OptionalParam(name = ServiceRequest.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
+	                Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
+	        @OptionalParam(name = ServiceRequest.SP_CODE) TokenAndListParam code,
+	        @OptionalParam(name = ServiceRequest.SP_ENCOUNTER, chainWhitelist = {
+	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
+	        @OptionalParam(name = ServiceRequest.SP_REQUESTER, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
+	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
+	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
+	        @OptionalParam(name = ServiceRequest.SP_OCCURRENCE) DateRangeParam occurrence,
+	        @OptionalParam(name = ServiceRequest.SP_RES_ID) TokenAndListParam uuid,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
-		return serviceRequestService.searchForServiceRequests(uuid, lastUpdated);
+		if (patientReference == null) {
+			patientReference = subjectReference;
+		}
+		
+		return serviceRequestService.searchForServiceRequests(patientReference, code, encounterReference,
+		    participantReference, occurrence, uuid, lastUpdated);
 	}
 }
