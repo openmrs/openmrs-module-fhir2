@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -36,7 +37,10 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.convertors.conv30_40.Condition30_40;
 import org.hl7.fhir.dstu3.model.Condition;
@@ -150,41 +154,41 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		//		assertThat(result.getResource(), equalTo(condition));
+		assertThat(result.getResource(), CoreMatchers.equalTo(condition));
 	}
 	
-	//	@Test(expected = InvalidRequestException.class)
-	//	public void updateCondition_shouldThrowInvalidRequestForUuidMismatch() {
-	//		when(conditionService.update(eq(WRONG_CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
-	//		        .thenThrow(InvalidRequestException.class);
-	//		
-	//		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID),
-	//		    Condition30_40.convertCondition(condition));
-	//	}
-	//	
-	//	@Test(expected = InvalidRequestException.class)
-	//	public void updateCondition_shouldThrowInvalidRequestForMissingId() {
-	//		org.hl7.fhir.r4.model.Condition noIdCondition = new org.hl7.fhir.r4.model.Condition();
-	//		
-	//		when(conditionService.update(eq(CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
-	//		        .thenThrow(InvalidRequestException.class);
-	//		
-	//		resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID),
-	//		    Condition30_40.convertCondition(noIdCondition));
-	//	}
-	//	
-	//	@Test(expected = MethodNotAllowedException.class)
-	//	public void updateCondition_shouldThrowMethodNotAllowedIfDoesNotExist() {
-	//		
-	//		org.hl7.fhir.r4.model.Condition wrongCondition = new org.hl7.fhir.r4.model.Condition();
-	//		
-	//		wrongCondition.setId(WRONG_CONDITION_UUID);
-	//		when(conditionService.update(eq(WRONG_CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
-	//		        .thenThrow(MethodNotAllowedException.class);
-	//		
-	//		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID),
-	//		    Condition30_40.convertCondition(wrongCondition));
-	//	}
+	@Test(expected = InvalidRequestException.class)
+	public void updateCondition_shouldThrowInvalidRequestForUuidMismatch() {
+		when(conditionService.update(eq(WRONG_CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID),
+		    Condition30_40.convertCondition(condition));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateCondition_shouldThrowInvalidRequestForMissingId() {
+		org.hl7.fhir.r4.model.Condition noIdCondition = new org.hl7.fhir.r4.model.Condition();
+		
+		when(conditionService.update(eq(CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID),
+		    Condition30_40.convertCondition(noIdCondition));
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateCondition_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		
+		org.hl7.fhir.r4.model.Condition wrongCondition = new org.hl7.fhir.r4.model.Condition();
+		
+		wrongCondition.setId(WRONG_CONDITION_UUID);
+		when(conditionService.update(eq(WRONG_CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID),
+		    Condition30_40.convertCondition(wrongCondition));
+	}
 	
 	@Test
 	public void searchConditions_shouldReturnConditionReturnedByService() {

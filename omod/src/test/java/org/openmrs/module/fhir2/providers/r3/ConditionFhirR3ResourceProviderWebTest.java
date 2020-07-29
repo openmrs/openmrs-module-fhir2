@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,6 +73,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<ConditionFhirResourceProvider, Condition> {
 	
 	private static final String CONDITION_UUID = "8a849d5e-6011-4279-a124-40ada5a687de";
+	//"121b73a6-e1a4-4424-8610-d5765bf2fdf7"
 	
 	private static final String WRONG_CONDITION_UUID = "9bf0d1ac-62a8-4440-a5a1-eb1015a7cc65";
 	
@@ -247,7 +249,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 			Objects.requireNonNull(is);
 			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
-		when(conditionService.update(conditionJson, any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
+		when(conditionService.update(eq(CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
 		
 		MockHttpServletResponse response = put("/Condition/" + CONDITION_UUID).jsonContent(conditionJson)
 		        .accept(FhirMediaTypes.JSON).go();
@@ -293,7 +295,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 		}
 		
 		when(conditionService.update(anyString(), any(org.hl7.fhir.r4.model.Condition.class)))
-		        .thenThrow(new MethodNotAllowedException("Observation " + WRONG_CONDITION_UUID + " does not exist"));
+		        .thenThrow(new MethodNotAllowedException("Condition " + WRONG_CONDITION_UUID + " does not exist"));
 		
 		MockHttpServletResponse response = put("/Condition/" + WRONG_CONDITION_UUID).jsonContent(conditionJson)
 		        .accept(FhirMediaTypes.JSON).go();

@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -19,6 +20,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,7 +49,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -267,8 +268,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
-		assertThat(response.getContentAsString(),
-		    Matchers.containsStringIgnoringCase("body must contain an ID element for update"));
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
 		
 	}
 	
@@ -280,7 +280,7 @@ public class ConditionFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		when(conditionService.update(anyString(), any(org.hl7.fhir.r4.model.Condition.class)))
+		when(conditionService.update(eq(WRONG_CONDITION_UUID), any(org.hl7.fhir.r4.model.Condition.class)))
 		        .thenThrow(new MethodNotAllowedException("Condition " + WRONG_CONDITION_UUID + " does not exist"));
 		
 		MockHttpServletResponse response = put("/Condition/" + WRONG_CONDITION_UUID).jsonContent(conditionJson)
