@@ -17,11 +17,13 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -36,6 +38,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.convertors.conv30_40.Condition30_40;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -134,15 +137,17 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(resourceProvider.getConditionHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 	
-	//	@Test
-	//	public void shouldCreateNewCondition() {
-	//		when(conditionService.saveCondition(condition)).thenReturn(condition);
-	//
-	//		MethodOutcome result = resourceProvider.createCondition(condition);
-	//		assertThat(result, notNullValue());
-	//		assertThat(result.getCreated(), is(true));
-	//		assertThat(result.getResource(), equalTo(condition));
-	//	}
+	@Test
+	public void createCondition_shouldCreateNewCondition() {
+		when(conditionService.saveCondition(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
+		
+		MethodOutcome result = resourceProvider.createCondition(Condition30_40.convertCondition(condition));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(CONDITION_UUID));
+	}
 	
 	@Test
 	public void searchConditions_shouldReturnConditionReturnedByService() {

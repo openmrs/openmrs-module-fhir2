@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.convertors.conv30_40.Patient30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -437,7 +436,8 @@ public class PatientFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResou
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), CoreMatchers.equalTo(patient));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PATIENT_UUID));
 	}
 	
 	@Test
@@ -456,7 +456,7 @@ public class PatientFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResou
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
-	public void deletePatient_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantPatient() {
+	public void deletePatient_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentPatient() {
 		when(patientService.delete(WRONG_PATIENT_UUID)).thenReturn(null);
 		
 		patientFhirResourceProvider.deletePatient(new IdType().setValue(WRONG_PATIENT_UUID));
@@ -469,8 +469,9 @@ public class PatientFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResou
 		MethodOutcome result = patientFhirResourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID),
 		    Patient30_40.convertPatient(patient));
 		
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(patient));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PATIENT_UUID));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -482,12 +483,26 @@ public class PatientFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceResou
 		    Patient30_40.convertPatient(patient));
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePatient_shouldThrowInvalidRequestForMissingId() {
+		org.hl7.fhir.r4.model.Patient noIdPatient = new org.hl7.fhir.r4.model.Patient();
+		
+		when(patientService.update(eq(PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		patientFhirResourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID),
+		    Patient30_40.convertPatient(noIdPatient));
+	}
+	
 	@Test(expected = MethodNotAllowedException.class)
 	public void updatePatient_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		org.hl7.fhir.r4.model.Patient wrongPatient = new org.hl7.fhir.r4.model.Patient();
+		wrongPatient.setId(WRONG_PATIENT_UUID);
+		
 		when(patientService.update(eq(WRONG_PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		patientFhirResourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID),
-		    Patient30_40.convertPatient(patient));
+		    Patient30_40.convertPatient(wrongPatient));
 	}
 }

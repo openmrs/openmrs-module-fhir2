@@ -72,7 +72,8 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createPatient(@ResourceParam Patient patient) {
-		return FhirProviderUtils.buildCreate(patientService.create(Patient30_40.convertPatient(patient)));
+		return FhirProviderUtils
+		        .buildCreate(Patient30_40.convertPatient(patientService.create(Patient30_40.convertPatient(patient))));
 	}
 	
 	@Update
@@ -84,7 +85,8 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		
 		patient.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(patientService.update(id.getIdPart(), Patient30_40.convertPatient(patient)));
+		return FhirProviderUtils.buildUpdate(
+		    Patient30_40.convertPatient(patientService.update(id.getIdPart(), Patient30_40.convertPatient(patient))));
 	}
 	
 	@Delete

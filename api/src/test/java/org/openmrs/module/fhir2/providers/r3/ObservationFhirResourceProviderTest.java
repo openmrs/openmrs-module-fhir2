@@ -200,7 +200,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), equalTo(observation));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
 	
 	@Test
@@ -212,7 +213,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    Observation30_40.convertObservation(observation));
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getResource(), equalTo(observation));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
 	
 	@Test(expected = InvalidRequestException.class)

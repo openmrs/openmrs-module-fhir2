@@ -79,7 +79,8 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createCondition(@ResourceParam Condition newCondition) {
-		return FhirProviderUtils.buildCreate(conditionService.saveCondition(Condition30_40.convertCondition(newCondition)));
+		return FhirProviderUtils.buildCreate(
+		    Condition30_40.convertCondition(conditionService.saveCondition(Condition30_40.convertCondition(newCondition))));
 	}
 	
 	@Search

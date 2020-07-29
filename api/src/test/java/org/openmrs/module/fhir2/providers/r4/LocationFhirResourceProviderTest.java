@@ -41,7 +41,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
@@ -462,15 +461,24 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		when(locationService.update(LOCATION_UUID, location)).thenReturn(newLocation);
 		
 		MethodOutcome result = resourceProvider.updateLocation(new IdType().setValue(LOCATION_UUID), location);
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(newLocation));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(newLocation));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updateLocation_shouldThrowInvalidRequestExceptionForWrongLocationUuid() {
+	public void updateLocation_shouldThrowInvalidRequestExceptionForUuidMismatch() {
 		when(locationService.update(WRONG_LOCATION_UUID, location)).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID), location);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateLocation_shouldThrowInvalidRequestExceptionForMissingId() {
+		Location noIdLocation = new Location();
+		
+		when(locationService.update(LOCATION_UUID, noIdLocation)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateLocation(new IdType().setValue(LOCATION_UUID), noIdLocation);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)

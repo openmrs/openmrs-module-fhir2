@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
@@ -143,11 +142,11 @@ public class DiagnosticReportFhirResourceProviderTest {
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateDiagnosticReport_shouldThrowInvalidRequestForMissingId() {
-		DiagnosticReport noIdDiagnostiReport = new DiagnosticReport();
+		DiagnosticReport noIdDiagnosticReport = new DiagnosticReport();
 		
-		when(service.update(UUID, noIdDiagnostiReport)).thenThrow(InvalidRequestException.class);
+		when(service.update(UUID, noIdDiagnosticReport)).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), noIdDiagnostiReport);
+		resourceProvider.updateDiagnosticReport(new IdType().setValue(UUID), noIdDiagnosticReport);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -202,7 +201,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 		when(service.delete(UUID)).thenReturn(diagnosticReport);
 		
 		OperationOutcome result = resourceProvider.deleteDiagnosticReport(new IdType().setValue(UUID));
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));

@@ -90,8 +90,8 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome creatAllergyIntolerance(@ResourceParam AllergyIntolerance allergyIntolerance) {
-		return FhirProviderUtils.buildCreate(
-		    allergyIntoleranceService.create(AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance)));
+		return FhirProviderUtils.buildCreate(AllergyIntolerance30_40.convertAllergyIntolerance(
+		    allergyIntoleranceService.create(AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance))));
 	}
 	
 	@Update
@@ -103,8 +103,8 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		
 		allergyIntolerance.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(allergyIntoleranceService.update(id.getIdPart(),
-		    AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance)));
+		return FhirProviderUtils.buildUpdate(AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntoleranceService
+		        .update(id.getIdPart(), AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance))));
 	}
 	
 	@Delete

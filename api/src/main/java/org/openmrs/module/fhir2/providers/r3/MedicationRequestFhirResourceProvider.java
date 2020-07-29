@@ -99,7 +99,7 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestService
 		        .create(MedicationRequest30_40.convertMedicationRequest(mRequest));
 		
-		return FhirProviderUtils.buildCreate(medicationRequest);
+		return FhirProviderUtils.buildCreate(MedicationRequest30_40.convertMedicationRequest(medicationRequest));
 	}
 	
 	@Update
@@ -113,7 +113,7 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestService.update(id.getIdPart(),
 		    MedicationRequest30_40.convertMedicationRequest(mRequest));
 		
-		return FhirProviderUtils.buildUpdate(medicationRequest);
+		return FhirProviderUtils.buildUpdate(MedicationRequest30_40.convertMedicationRequest(medicationRequest));
 	}
 	
 	@Delete

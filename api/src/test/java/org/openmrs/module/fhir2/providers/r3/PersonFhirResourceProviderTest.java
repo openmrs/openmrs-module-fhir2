@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.convertors.conv30_40.Person30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -341,9 +340,11 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		when(fhirPersonService.create(any(org.hl7.fhir.r4.model.Person.class))).thenReturn(person);
 		
 		MethodOutcome result = resourceProvider.createPerson(Person30_40.convertPerson(person));
-		assertThat(result, CoreMatchers.notNullValue());
+		
+		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), CoreMatchers.equalTo(person));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PERSON_UUID));
 	}
 	
 	@Test
@@ -372,8 +373,10 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		
 		MethodOutcome result = resourceProvider.updatePerson(new IdType().setValue(PERSON_UUID),
 		    Person30_40.convertPerson(person));
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(person));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PERSON_UUID));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -384,12 +387,25 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID), Person30_40.convertPerson(person));
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePerson_shouldThrowInvalidRequestForMissingId() {
+		org.hl7.fhir.r4.model.Person noIdPerson = new org.hl7.fhir.r4.model.Person();
+		
+		when(fhirPersonService.update(eq(PERSON_UUID), any(org.hl7.fhir.r4.model.Person.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updatePerson(new IdType().setValue(PERSON_UUID), Person30_40.convertPerson(noIdPerson));
+	}
+	
 	@Test(expected = MethodNotAllowedException.class)
 	public void updatePerson_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		org.hl7.fhir.r4.model.Person wrongPerson = new org.hl7.fhir.r4.model.Person();
+		wrongPerson.setId(WRONG_PERSON_UUID);
+		
 		when(fhirPersonService.update(eq(WRONG_PERSON_UUID), any(org.hl7.fhir.r4.model.Person.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID), Person30_40.convertPerson(person));
+		resourceProvider.updatePerson(new IdType().setValue(WRONG_PERSON_UUID), Person30_40.convertPerson(wrongPerson));
 	}
 	
 }

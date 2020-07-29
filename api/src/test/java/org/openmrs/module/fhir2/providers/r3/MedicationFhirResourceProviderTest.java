@@ -33,7 +33,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.convertors.conv30_40.Medication30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Medication;
@@ -253,6 +252,17 @@ public class MedicationFhirResourceProviderTest {
 		    Medication30_40.convertMedication(medication));
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void updateMedicationShouldThrowInvalidRequestForMissingId() {
+		org.hl7.fhir.r4.model.Medication noIdMedication = new org.hl7.fhir.r4.model.Medication();
+		
+		when(fhirMedicationService.update(eq(MEDICATION_UUID), any(org.hl7.fhir.r4.model.Medication.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID),
+		    Medication30_40.convertMedication(noIdMedication));
+	}
+	
 	@Test(expected = MethodNotAllowedException.class)
 	public void updateMedicationShouldThrowMethodNotAllowedIfDoesNotExist() {
 		org.hl7.fhir.r4.model.Medication wrongMedication = new org.hl7.fhir.r4.model.Medication();
@@ -271,7 +281,7 @@ public class MedicationFhirResourceProviderTest {
 		
 		OperationOutcome result = resourceProvider.deleteMedication(new IdType().setValue(MEDICATION_UUID));
 		
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
