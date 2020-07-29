@@ -10,25 +10,32 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -76,6 +83,14 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 	
 	private static final String OCCURRENCE_DATE = "2010-03-31";
 	
+	private static final String JSON_CREATE_PROCEDURE_REQUEST_PATH = "org/openmrs/module/fhir2/providers/ProcedureRequestWebTest_create.json";
+	
+	private static final String JSON_UPDATE_PROCEDURE_REQUEST_PATH = "org/openmrs/module/fhir2/providers/ProcedureRequestWebTest_update.json";
+	
+	private static final String JSON_UPDATE_PROCEDURE_REQUEST_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ProcedureRequestWebTest_updateWithoutId.json";
+	
+	private static final String JSON_UPDATE_PROCEDURE_REQUEST_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ProcedureRequestWebTest_updateWithWrongId.json";
+	
 	@Getter(AccessLevel.PUBLIC)
 	private ProcedureRequestFhirResourceProvider resourceProvider;
 	
@@ -91,20 +106,20 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
 	
-	private ProcedureRequest procedureRequest;
+	private ServiceRequest procedureRequest;
 	
 	@Before
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new ProcedureRequestFhirResourceProvider();
 		resourceProvider.setServiceRequestService(service);
-		procedureRequest = new ProcedureRequest();
+		procedureRequest = new ServiceRequest();
 		procedureRequest.setId(SERVICE_REQUEST_UUID);
 		super.setup();
 	}
 	
 	@Test
-	public void getServiceRequestById_shouldReturnServiceRequest() throws Exception {
+	public void getProcedureRequestById_shouldReturnServiceRequest() throws Exception {
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setId(SERVICE_REQUEST_UUID);
 		
@@ -118,7 +133,7 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 	}
 	
 	@Test
-	public void getEncounterByWrongUuid_shouldReturn404() throws Exception {
+	public void getProcedureRequestByWrongUuid_shouldReturn404() throws Exception {
 		MockHttpServletResponse response = get("/ProcedureRequest/" + WRONG_SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
 		
@@ -457,6 +472,109 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
+	public void createProcedureRequest_shouldCreateNewProcedureRequest() throws Exception {
+		String procedureRequestJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PROCEDURE_REQUEST_PATH)) {
+			Objects.requireNonNull(is);
+			procedureRequestJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		when(service.create(any(ServiceRequest.class))).thenReturn(procedureRequest);
+		
+		MockHttpServletResponse response = post("/ProcedureRequest").jsonContent(procedureRequestJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isCreated());
+	}
+	
+	@Test
+	public void updateProcedureRequest_shouldUpdateExistingProcedureRequest() throws Exception {
+		String procedureRequestJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PROCEDURE_REQUEST_PATH)) {
+			Objects.requireNonNull(is);
+			procedureRequestJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		when(service.update(anyString(), any(ServiceRequest.class))).thenReturn(procedureRequest);
+		
+		MockHttpServletResponse response = put("/ProcedureRequest/" + SERVICE_REQUEST_UUID).jsonContent(procedureRequestJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+	}
+	
+	@Test
+	public void updateProcedureRequest_shouldThrowErrorForIdMismatch() throws Exception {
+		String procedureRequestJson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PROCEDURE_REQUEST_PATH)) {
+			Objects.requireNonNull(is);
+			procedureRequestJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		MockHttpServletResponse response = put("/ProcedureRequest/" + WRONG_SERVICE_REQUEST_UUID)
+		        .jsonContent(procedureRequestJson).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(),
+		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
+	}
+	
+	@Test
+	public void updateProcedureRequest_shouldThrowErrorForNoId() throws Exception {
+		String procedureRequestJson;
+		try (InputStream is = this.getClass().getClassLoader()
+		        .getResourceAsStream(JSON_UPDATE_PROCEDURE_REQUEST_NO_ID_PATH)) {
+			Objects.requireNonNull(is);
+			procedureRequestJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		MockHttpServletResponse response = put("/ProcedureRequest/" + SERVICE_REQUEST_UUID).jsonContent(procedureRequestJson)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
+	}
+	
+	@Test
+	public void updateProcedureRequest_shouldThrowErrorForNonExistentProcedureRequest() throws Exception {
+		String procedureRequestJson;
+		try (InputStream is = this.getClass().getClassLoader()
+		        .getResourceAsStream(JSON_UPDATE_PROCEDURE_REQUEST_WRONG_ID_PATH)) {
+			Objects.requireNonNull(is);
+			procedureRequestJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		when(service.update(anyString(), any(ServiceRequest.class))).thenThrow(
+		    new MethodNotAllowedException("ProcedureRequest " + WRONG_SERVICE_REQUEST_UUID + " does not exist"));
+		
+		MockHttpServletResponse response = put("/ProcedureRequest/" + WRONG_SERVICE_REQUEST_UUID)
+		        .jsonContent(procedureRequestJson).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isMethodNotAllowed());
+	}
+	
+	@Test
+	public void deleteProcedureRequest_shouldDeleteProcedureRequest() throws Exception {
+		when(service.delete(SERVICE_REQUEST_UUID)).thenReturn(procedureRequest);
+		
+		MockHttpServletResponse response = delete("/ProcedureRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deleteProcedureRequest_shouldReturn404ForNonExistingProcedureRequest() throws Exception {
+		when(service.delete(WRONG_SERVICE_REQUEST_UUID)).thenReturn(null);
+		
+		MockHttpServletResponse response = delete("/ProcedureRequest/" + WRONG_SERVICE_REQUEST_UUID)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getStatus(), equalTo(404));
+	}
+	
 	@Test
 	public void searchForProcedureRequests_shouldSearchForProcedureRequestsByUUID() throws Exception {
 		verifyUri(String.format("/ProcedureRequest?_id=%s", SERVICE_REQUEST_UUID));
@@ -490,6 +608,9 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 	}
 	
 	private void verifyUri(String uri) throws Exception {
+		ProcedureRequest procedureRequest = new ProcedureRequest();
+		procedureRequest.setId(SERVICE_REQUEST_UUID);
+		
 		when(service.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(procedureRequest), 10, 1));
 		
