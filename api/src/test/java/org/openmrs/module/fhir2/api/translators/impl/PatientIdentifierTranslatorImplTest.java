@@ -63,7 +63,7 @@ public class PatientIdentifierTranslatorImplTest {
 		Identifier result = identifierTranslator.toFhirResource(patientIdentifier);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getSystem(), equalTo(IDENTIFIER_TYPE_NAME));
+		assertThat(result.getType().getText(), equalTo(IDENTIFIER_TYPE_NAME));
 		assertThat(result.getId(), equalTo(IDENTIFIER_UUID));
 		assertThat(result.getValue(), equalTo(IDENTIFIER));
 	}

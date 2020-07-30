@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Patient xmlns="http://hl7.org/fhir">
+    <name>
+        <family value="John"/>
+        <given value="Adam"/>
+    </name>
+    <gender value="male"/>
+    <birthDate value="2004-08-12"/>
+    <address>
+        <city value="Kampala"/>
+        <state value="Mukono"/>
+        <country value="Uganda"/>
+    </address>
+</Patient>

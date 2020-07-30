@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifierType;
@@ -48,7 +49,11 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	@Override
 	@Transactional(readOnly = true)
 	public PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier) {
-		return dao.getPatientIdentifierTypeByNameOrUuid(identifier.getSystem(), null);
+		if (identifier.getType() == null || StringUtils.isBlank(identifier.getType().getText())) {
+			return null;
+		}
+		
+		return dao.getPatientIdentifierTypeByNameOrUuid(identifier.getType().getText(), null);
 	}
 	
 	@Override
