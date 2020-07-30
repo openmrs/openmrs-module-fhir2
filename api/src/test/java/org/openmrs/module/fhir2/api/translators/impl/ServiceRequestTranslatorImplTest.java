@@ -39,6 +39,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
+import org.openmrs.Encounter;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
@@ -46,6 +47,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
@@ -58,6 +60,8 @@ public class ServiceRequestTranslatorImplTest {
 	private static final String LOINC_CODE = "1000-1";
 	
 	private static final String PATIENT_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
+	
+	private static final String ENCOUNTER_UUID = "y403fafb-e5e4-42d0-9d11-4f52e89d123r";
 	
 	private static final String PRACTITIONER_UUID = "b156e76e-b87a-4458-964c-a48e64a20fbb";
 	
@@ -79,6 +83,9 @@ public class ServiceRequestTranslatorImplTest {
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Mock
+	private EncounterReferenceTranslator encounterReferenceTranslator;
+	
+	@Mock
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
 	@Before
@@ -87,6 +94,7 @@ public class ServiceRequestTranslatorImplTest {
 		translator.setConceptTranslator(conceptTranslator);
 		translator.setTaskService(taskService);
 		translator.setPatientReferenceTranslator(patientReferenceTranslator);
+		translator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		translator.setProviderReferenceTranslator(practitionerReferenceTranslator);
 	}
 	
@@ -340,6 +348,27 @@ public class ServiceRequestTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getReference(), containsString(PATIENT_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateEncounter() {
+		TestOrder order = new TestOrder();
+		Encounter encounter = new Encounter();
+		Reference encounterReference = new Reference();
+		
+		encounter.setUuid(ENCOUNTER_UUID);
+		order.setUuid(SERVICE_REQUEST_UUID);
+		order.setEncounter(encounter);
+		encounterReference.setType(FhirConstants.ENCOUNTER).setReference(FhirConstants.ENCOUNTER + "/" + ENCOUNTER_UUID);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		when(encounterReferenceTranslator.toFhirResource(encounter)).thenReturn(encounterReference);
+		
+		Reference result = translator.toFhirResource(order).getEncounter();
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getReference(), containsString(ENCOUNTER_UUID));
 	}
 	
 	@Test

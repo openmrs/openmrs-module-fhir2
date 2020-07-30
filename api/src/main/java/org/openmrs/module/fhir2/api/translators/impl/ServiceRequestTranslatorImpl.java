@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
@@ -33,6 +34,9 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
+	
+	@Autowired
+	private EncounterReferenceTranslator encounterReferenceTranslator;
 	
 	@Autowired
 	private PractitionerReferenceTranslator<Provider> providerReferenceTranslator;
@@ -54,6 +58,8 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 		serviceRequest.setIntent(ServiceRequest.ServiceRequestIntent.ORDER);
 		
 		serviceRequest.setSubject(patientReferenceTranslator.toFhirResource(order.getPatient()));
+		
+		serviceRequest.setEncounter(encounterReferenceTranslator.toFhirResource(order.getEncounter()));
 		
 		serviceRequest.setRequester(providerReferenceTranslator.toFhirResource(order.getOrderer()));
 		
