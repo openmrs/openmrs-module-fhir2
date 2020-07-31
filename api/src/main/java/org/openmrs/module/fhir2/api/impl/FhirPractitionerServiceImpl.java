@@ -55,7 +55,6 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	public Practitioner get(String uuid) {
 		Practitioner practitioner = translator.toFhirResource(getDao().get(uuid));
 		if (practitioner == null) {
-			
 			practitioner = userService.get(uuid);
 		}
 		return practitioner;
