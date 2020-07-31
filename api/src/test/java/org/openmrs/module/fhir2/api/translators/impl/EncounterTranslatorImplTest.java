@@ -74,7 +74,6 @@ public class EncounterTranslatorImplTest {
 	
 	private static final String LOCACTION_UUID = "123hh34-23jk23-23jk213-23jkl";
 	
-	private static final String TEST_LOCATION_NAME = "test location name";
 	
 	private static final String TEST_FHIR_CLASS = "test fhir class";
 	
@@ -355,7 +354,7 @@ public class EncounterTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateLocationToEncounterClassFhirType() {
-		when(encounterClassMap.getFhirClass(TEST_LOCATION_NAME)).thenReturn(TEST_FHIR_CLASS);
+		when(encounterClassMap.getFhirClass(LOCACTION_UUID)).thenReturn(TEST_FHIR_CLASS);
 		omrsEncounter.setLocation(location);
 		
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);

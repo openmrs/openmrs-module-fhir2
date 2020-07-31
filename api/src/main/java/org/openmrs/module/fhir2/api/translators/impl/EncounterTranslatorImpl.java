@@ -57,7 +57,7 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		if (location == null) {
 			return coding;
 		}
-		String classCode = encounterClassMap.getFhirClass(location.getName());
+		String classCode = encounterClassMap.getFhirClass(location.getUuid());
 		if (classCode != null) {
 			coding.setCode(classCode);
 		}

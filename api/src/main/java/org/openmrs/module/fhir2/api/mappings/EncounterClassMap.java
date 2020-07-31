@@ -23,7 +23,7 @@ public class EncounterClassMap extends BaseMapping {
 		super("encounterClassMap.properties");
 	}
 	
-	public String getFhirClass(@NotNull String locationText) {
-		return getValue(locationText).orElse(null);
+	public String getFhirClass(@NotNull String locationUuid) {
+		return getValue(locationUuid).orElse(null);
 	}
 }
