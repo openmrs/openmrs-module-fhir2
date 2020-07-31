@@ -13,6 +13,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -88,6 +90,8 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	private static final String DATE_CREATED = "2018-08-18";
 	
 	private static final String WRONG_DATE_CREATED = "2008-08-18";
+	
+	private static final String OBS_RESULT_UUID = "dc386962-1c42-49ea-bed2-97650c66sd46";
 	
 	private static final String DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirDiagnosticReportDaoImplTest_initial_data.xml";
 	
@@ -689,6 +693,44 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
 		IBundleProvider diagnosticReports = search(theParams);
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), equalTo(0));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnCorrectObsByResult() {
+		ReferenceAndListParam param = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam(OBS_RESULT_UUID)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.RESULT_SEARCH_HANDLER, param);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(diagnosticReports.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(diagnosticReports);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(((DiagnosticReport) resultList.iterator().next()).getResult(),
+		    hasItem(hasProperty("referenceElement", hasProperty("idPart", equalTo(OBS_RESULT_UUID)))));
+	}
+	
+	@Test
+	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongObsResult() {
+		ReferenceAndListParam param = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam(DIAGNOSTIC_REPORT_UUID)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.RESULT_SEARCH_HANDLER, param);
+		
+		IBundleProvider diagnosticReports = search(theParams);
+		
+		assertThat(diagnosticReports, notNullValue());
+		assertThat(diagnosticReports.size(), equalTo(0));
 		
 		List<IBaseResource> resultList = get(diagnosticReports);
 		

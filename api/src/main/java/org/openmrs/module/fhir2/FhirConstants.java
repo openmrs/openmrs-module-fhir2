@@ -236,6 +236,8 @@ public class FhirConstants {
 	
 	public static final String OWNER_REFERENCE_SEARCH_HANDLER = "owner.reference.search.handler";
 	
+	public static final String RESULT_SEARCH_HANDLER = "result.search.handler";
+	
 	public static final String COMMON_SEARCH_HANDLER = "common.search.handler";
 	
 	public static final String ID_PROPERTY = "_id.property";
