@@ -16,9 +16,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -28,7 +25,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.convertors.conv30_40.List30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -106,46 +102,54 @@ public class ListFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 	
 	@Test
 	public void createList_shouldCreateNewList() {
-		when(cohortFhirListService.create(any(org.hl7.fhir.r4.model.ListResource.class))).thenReturn(list);
+		when(cohortFhirListService.create(any(ListResource.class))).thenReturn(list);
 		
 		MethodOutcome result = listFhirResourceProvider.creatListResource(List30_40.convertList(list));
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), CoreMatchers.equalTo(list));
-		
-		verify(cohortFhirListService, atLeast(1)).create(any(org.hl7.fhir.r4.model.ListResource.class));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(LIST_UUID));
 	}
 	
 	@Test
 	public void updateList_shouldUpdateList() {
-		when(cohortFhirListService.update(eq(LIST_UUID), any(org.hl7.fhir.r4.model.ListResource.class))).thenReturn(list);
+		when(cohortFhirListService.update(eq(LIST_UUID), any(ListResource.class))).thenReturn(list);
 		
 		MethodOutcome result = listFhirResourceProvider.updateListResource(new IdType().setValue(LIST_UUID),
 		    List30_40.convertList(list));
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(list));
-		
-		verify(cohortFhirListService, atLeastOnce()).update(eq(LIST_UUID), any(org.hl7.fhir.r4.model.ListResource.class));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(LIST_UUID));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateList_shouldThrowInvalidRequestForUuidMismatch() {
-		when(cohortFhirListService.update(eq(UNKNOWN_UUID), any(org.hl7.fhir.r4.model.ListResource.class)))
+		when(cohortFhirListService.update(eq(UNKNOWN_UUID), any(ListResource.class)))
 		        .thenThrow(InvalidRequestException.class);
 		
 		listFhirResourceProvider.updateListResource(new IdType().setValue(UNKNOWN_UUID), List30_40.convertList(list));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateList_shouldThrowInvalidRequestForMissingId() {
+		ListResource noIdListResource = new ListResource();
 		
-		verify(cohortFhirListService, atLeastOnce()).delete(UNKNOWN_UUID);
+		when(cohortFhirListService.update(eq(LIST_UUID), any(ListResource.class))).thenThrow(InvalidRequestException.class);
+		
+		listFhirResourceProvider.updateListResource(new IdType().setValue(LIST_UUID),
+		    List30_40.convertList(noIdListResource));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
 	public void updateList_shouldThrowMethodNotAllowedIfDoesNotExist() {
-		when(cohortFhirListService.update(eq(UNKNOWN_UUID), any(org.hl7.fhir.r4.model.ListResource.class)))
+		ListResource wrongListResource = new ListResource();
+		wrongListResource.setId(UNKNOWN_UUID);
+		
+		when(cohortFhirListService.update(eq(UNKNOWN_UUID), any(ListResource.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		listFhirResourceProvider.updateListResource(new IdType().setValue(UNKNOWN_UUID), List30_40.convertList(list));
-		
-		verify(cohortFhirListService, atLeastOnce()).delete(UNKNOWN_UUID);
+		listFhirResourceProvider.updateListResource(new IdType().setValue(UNKNOWN_UUID),
+		    List30_40.convertList(wrongListResource));
 	}
 	
 	@Test
@@ -153,19 +157,15 @@ public class ListFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		when(cohortFhirListService.delete(LIST_UUID)).thenReturn(list);
 		
 		OperationOutcome result = listFhirResourceProvider.deleteListResource(new IdType().setValue(LIST_UUID));
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-		
-		verify(cohortFhirListService, atLeastOnce()).delete(LIST_UUID);
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
-	public void deleteList_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantList() {
+	public void deleteList_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentList() {
 		when(cohortFhirListService.delete(UNKNOWN_UUID)).thenReturn(null);
 		listFhirResourceProvider.deleteListResource(new IdType().setValue(UNKNOWN_UUID));
-		
-		verify(cohortFhirListService, atLeastOnce()).delete(UNKNOWN_UUID);
 	}
 }

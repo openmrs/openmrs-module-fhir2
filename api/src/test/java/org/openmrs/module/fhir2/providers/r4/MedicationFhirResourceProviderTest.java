@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
@@ -219,9 +218,9 @@ public class MedicationFhirResourceProviderTest {
 		when(fhirMedicationService.create(medication)).thenReturn(medication);
 		
 		MethodOutcome result = resourceProvider.createMedication(medication);
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), CoreMatchers.equalTo(medication));
+		assertThat(result.getResource(), equalTo(medication));
 	}
 	
 	@Test
@@ -232,8 +231,8 @@ public class MedicationFhirResourceProviderTest {
 		when(fhirMedicationService.update(MEDICATION_UUID, medication)).thenReturn(med);
 		
 		MethodOutcome result = resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID), medication);
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(med));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(med));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -241,6 +240,15 @@ public class MedicationFhirResourceProviderTest {
 		when(fhirMedicationService.update(WRONG_MEDICATION_UUID, medication)).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateMedication(new IdType().setValue(WRONG_MEDICATION_UUID), medication);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateMedication_shouldThrowInvalidRequestForMissingId() {
+		Medication noIdMedication = new Medication();
+		
+		when(fhirMedicationService.update(MEDICATION_UUID, noIdMedication)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateMedication(new IdType().setValue(MEDICATION_UUID), noIdMedication);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -260,9 +268,9 @@ public class MedicationFhirResourceProviderTest {
 		when(fhirMedicationService.delete(MEDICATION_UUID)).thenReturn(medication);
 		
 		OperationOutcome result = resourceProvider.deleteMedication(new IdType().setValue(MEDICATION_UUID));
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));

@@ -73,7 +73,8 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createLocation(@ResourceParam Location location) {
-		return FhirProviderUtils.buildCreate(locationService.create(Location30_40.convertLocation(location)));
+		return FhirProviderUtils
+		        .buildCreate(Location30_40.convertLocation(locationService.create(Location30_40.convertLocation(location))));
 	}
 	
 	@Update
@@ -85,8 +86,8 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 		
 		location.setId(id.getIdPart());
 		
-		return FhirProviderUtils
-		        .buildUpdate(locationService.update(id.getIdPart(), Location30_40.convertLocation(location)));
+		return FhirProviderUtils.buildUpdate(
+		    Location30_40.convertLocation(locationService.update(id.getIdPart(), Location30_40.convertLocation(location))));
 	}
 	
 	@Delete

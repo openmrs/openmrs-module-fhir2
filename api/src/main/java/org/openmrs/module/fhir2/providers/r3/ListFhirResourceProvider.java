@@ -62,7 +62,7 @@ public class ListFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome creatListResource(@ResourceParam ListResource listResource) {
-		return FhirProviderUtils.buildCreate(listService.create(List30_40.convertList(listResource)));
+		return FhirProviderUtils.buildCreate(List30_40.convertList(listService.create(List30_40.convertList(listResource))));
 	}
 	
 	@Update
@@ -74,7 +74,8 @@ public class ListFhirResourceProvider implements IResourceProvider {
 		
 		listResource.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(listService.update(id.getIdPart(), List30_40.convertList(listResource)));
+		return FhirProviderUtils
+		        .buildUpdate(List30_40.convertList(listService.update(id.getIdPart(), List30_40.convertList(listResource))));
 	}
 	
 	@Delete

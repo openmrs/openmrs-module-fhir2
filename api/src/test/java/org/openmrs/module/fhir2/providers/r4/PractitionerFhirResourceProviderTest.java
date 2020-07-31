@@ -36,7 +36,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
@@ -542,19 +541,28 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		when(practitionerService.update(PRACTITIONER_UUID, practitioner)).thenReturn(newPractitioner);
 		
 		MethodOutcome result = resourceProvider.updatePractitioner(new IdType().setValue(PRACTITIONER_UUID), practitioner);
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(newPractitioner));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(newPractitioner));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updatePractitioner_shouldThrowInvalidRequestExceptionForWrongPractitionerUuid() {
+	public void updatePractitioner_shouldThrowInvalidRequestExceptionForUuidMismatch() {
 		when(practitionerService.update(WRONG_PRACTITIONER_UUID, practitioner)).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID), practitioner);
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePractitioner_shouldThrowInvalidRequestForMissingId() {
+		Practitioner noIdPractitioner = new Practitioner();
+		
+		when(practitionerService.update(PRACTITIONER_UUID, noIdPractitioner)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updatePractitioner(new IdType().setValue(PRACTITIONER_UUID), noIdPractitioner);
+	}
+	
 	@Test(expected = MethodNotAllowedException.class)
-	public void updateAllergyShouldThrowMethodNotAllowedIfDoesNotExist() {
+	public void updatePractitioner_shouldThrowMethodNotAllowedIfDoesNotExist() {
 		Practitioner wrongPractitioner = new Practitioner();
 		
 		wrongPractitioner.setId(WRONG_PRACTITIONER_UUID);
@@ -580,10 +588,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	
 	@Test(expected = ResourceNotFoundException.class)
 	public void deletePractitioner_shouldThrowResourceNotFoundException() {
-		IdType id = new IdType();
-		id.setValue(WRONG_PRACTITIONER_UUID);
-		org.hl7.fhir.r4.model.OperationOutcome practitioner = resourceProvider.deletePractitioner(id);
-		assertThat(practitioner, nullValue());
+		when(practitionerService.delete(WRONG_PRACTITIONER_UUID)).thenReturn(null);
+		resourceProvider.deletePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID));
 	}
 	
 	@Test

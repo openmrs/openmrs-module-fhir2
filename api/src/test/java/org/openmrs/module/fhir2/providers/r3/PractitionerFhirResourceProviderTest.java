@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.convertors.conv30_40.Practitioner30_40;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -543,9 +542,10 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		when(practitionerService.create(any(org.hl7.fhir.r4.model.Practitioner.class))).thenReturn(practitioner);
 		
 		MethodOutcome result = resourceProvider.createPractitioner(Practitioner30_40.convertPractitioner(practitioner));
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), CoreMatchers.equalTo(practitioner));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
 	}
 	
 	@Test
@@ -563,15 +563,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
-	public void deletePractitioner_shouldThrowResourceNotFoundException() {
-		IdType id = new IdType();
-		id.setValue(WRONG_PRACTITIONER_UUID);
-		OperationOutcome practitioner = resourceProvider.deletePractitioner(id);
-		assertThat(practitioner, nullValue());
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deletePractitioner_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantPractitioner() {
+	public void deletePractitioner_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentPractitioner() {
 		when(practitionerService.delete(WRONG_PRACTITIONER_UUID)).thenReturn(null);
 		resourceProvider.deletePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID));
 	}
@@ -583,8 +575,9 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		
 		MethodOutcome result = resourceProvider.updatePractitioner(new IdType().setValue(PRACTITIONER_UUID),
 		    Practitioner30_40.convertPractitioner(practitioner));
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(practitioner));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -596,12 +589,26 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		    Practitioner30_40.convertPractitioner(practitioner));
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePractitioner_shouldThrowInvalidRequestForMissingId() {
+		org.hl7.fhir.r4.model.Practitioner noIdPractitioner = new org.hl7.fhir.r4.model.Practitioner();
+		
+		when(practitionerService.update(eq(PRACTITIONER_UUID), any(org.hl7.fhir.r4.model.Practitioner.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updatePractitioner(new IdType().setValue(PRACTITIONER_UUID),
+		    Practitioner30_40.convertPractitioner(noIdPractitioner));
+	}
+	
 	@Test(expected = MethodNotAllowedException.class)
 	public void updatePractitioner_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		org.hl7.fhir.r4.model.Practitioner wrongPractitioner = new org.hl7.fhir.r4.model.Practitioner();
+		wrongPractitioner.setId(WRONG_PRACTITIONER_UUID);
+		
 		when(practitionerService.update(eq(WRONG_PRACTITIONER_UUID), any(org.hl7.fhir.r4.model.Practitioner.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID),
-		    Practitioner30_40.convertPractitioner(practitioner));
+		    Practitioner30_40.convertPractitioner(wrongPractitioner));
 	}
 }

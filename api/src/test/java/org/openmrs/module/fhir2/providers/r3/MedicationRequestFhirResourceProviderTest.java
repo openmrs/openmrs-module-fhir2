@@ -17,9 +17,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -264,14 +261,10 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationRequest.getId()));
-		
-		verify(fhirMedicationRequestService, atLeast(1)).create(any(org.hl7.fhir.r4.model.MedicationRequest.class));
 	}
 	
 	@Test
 	public void updateMedicationRequest_shouldUpdateMedicationRequest() {
-		medicationRequest.setStatus(org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestStatus.STOPPED);
-		
 		when(fhirMedicationRequestService.update(eq(MEDICATION_REQUEST_UUID),
 		    any(org.hl7.fhir.r4.model.MedicationRequest.class))).thenReturn(medicationRequest);
 		
@@ -281,9 +274,6 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationRequest.getId()));
-		
-		verify(fhirMedicationRequestService, atLeastOnce()).update(eq(MEDICATION_REQUEST_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationRequest.class));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -293,9 +283,17 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		resourceProvider.updateMedicationRequest(new IdType().setValue(WRONG_MEDICATION_REQUEST_UUID),
 		    MedicationRequest30_40.convertMedicationRequest(medicationRequest));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateMedicationRequest_shouldThrowInvalidRequestForMissingId() {
+		org.hl7.fhir.r4.model.MedicationRequest noIdMedicationRequest = new org.hl7.fhir.r4.model.MedicationRequest();
 		
-		verify(fhirMedicationRequestService, atLeastOnce()).update(eq(WRONG_MEDICATION_REQUEST_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationRequest.class));
+		when(fhirMedicationRequestService.update(eq(MEDICATION_REQUEST_UUID),
+		    any(org.hl7.fhir.r4.model.MedicationRequest.class))).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateMedicationRequest(new IdType().setValue(MEDICATION_REQUEST_UUID),
+		    MedicationRequest30_40.convertMedicationRequest(noIdMedicationRequest));
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)
@@ -308,9 +306,6 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		resourceProvider.updateMedicationRequest(new IdType().setValue(WRONG_MEDICATION_REQUEST_UUID),
 		    MedicationRequest30_40.convertMedicationRequest(wrongMedicationRequest));
-		
-		verify(fhirMedicationRequestService, atLeastOnce()).update(eq(WRONG_MEDICATION_REQUEST_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationRequest.class));
 	}
 	
 	@Test
@@ -322,8 +317,6 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-		
-		verify(fhirMedicationRequestService, atLeastOnce()).delete(MEDICATION_REQUEST_UUID);
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
@@ -331,8 +324,6 @@ public class MedicationRequestFhirResourceProviderTest {
 		when(fhirMedicationRequestService.delete(WRONG_MEDICATION_REQUEST_UUID)).thenReturn(null);
 		
 		resourceProvider.deleteMedicationRequest(new IdType().setValue(WRONG_MEDICATION_REQUEST_UUID));
-		
-		verify(fhirMedicationRequestService, atLeastOnce()).delete(WRONG_MEDICATION_REQUEST_UUID);
 	}
 	
 }

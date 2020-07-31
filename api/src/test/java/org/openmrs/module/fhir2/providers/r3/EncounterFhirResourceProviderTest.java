@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.convertors.conv30_40.Encounter30_40;
 import org.hl7.fhir.dstu3.model.Encounter;
@@ -183,9 +182,10 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		when(encounterService.create(any(org.hl7.fhir.r4.model.Encounter.class))).thenReturn(encounter);
 		
 		MethodOutcome result = resourceProvider.creatEncounter(Encounter30_40.convertEncounter(encounter));
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), CoreMatchers.equalTo(encounter));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
 	}
 	
 	@Test
@@ -194,8 +194,9 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		
 		MethodOutcome result = resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID),
 		    Encounter30_40.convertEncounter(encounter));
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(encounter));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -207,13 +208,27 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		    Encounter30_40.convertEncounter(encounter));
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void updateEncounter_shouldThrowInvalidRequestForMissingId() {
+		org.hl7.fhir.r4.model.Encounter noIdEncounter = new org.hl7.fhir.r4.model.Encounter();
+		
+		when(encounterService.update(eq(ENCOUNTER_UUID), any(org.hl7.fhir.r4.model.Encounter.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID),
+		    Encounter30_40.convertEncounter(noIdEncounter));
+	}
+	
 	@Test(expected = MethodNotAllowedException.class)
 	public void updateEncounter_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		org.hl7.fhir.r4.model.Encounter wrongEncounter = new org.hl7.fhir.r4.model.Encounter();
+		wrongEncounter.setId(WRONG_ENCOUNTER_UUID);
+		
 		when(encounterService.update(eq(WRONG_ENCOUNTER_UUID), any(org.hl7.fhir.r4.model.Encounter.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID),
-		    Encounter30_40.convertEncounter(encounter));
+		    Encounter30_40.convertEncounter(wrongEncounter));
 	}
 	
 	@Test
@@ -221,14 +236,14 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		when(encounterService.delete(ENCOUNTER_UUID)).thenReturn(encounter);
 		
 		OperationOutcome result = resourceProvider.deleteEncounter(new IdType().setValue(ENCOUNTER_UUID));
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
-	public void deleteEncounter_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantEncounter() {
+	public void deleteEncounter_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentEncounter() {
 		when(encounterService.delete(WRONG_ENCOUNTER_UUID)).thenReturn(null);
 		resourceProvider.deleteEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID));
 	}

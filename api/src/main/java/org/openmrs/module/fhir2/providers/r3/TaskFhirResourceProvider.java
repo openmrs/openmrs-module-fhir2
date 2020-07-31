@@ -81,13 +81,15 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createTask(@ResourceParam Task newTask) {
-		return FhirProviderUtils.buildCreate(fhirTaskService.create(TaskVersionConverter.convertTask(newTask)));
+		return FhirProviderUtils.buildCreate(
+		    TaskVersionConverter.convertTask(fhirTaskService.create(TaskVersionConverter.convertTask(newTask))));
 	}
 	
 	@Update
 	@SuppressWarnings("unused")
 	public MethodOutcome updateTask(@IdParam IdType id, @ResourceParam Task task) {
-		return FhirProviderUtils.buildUpdate(fhirTaskService.update(id.getIdPart(), TaskVersionConverter.convertTask(task)));
+		return FhirProviderUtils.buildUpdate(TaskVersionConverter
+		        .convertTask(fhirTaskService.update(id.getIdPart(), TaskVersionConverter.convertTask(task))));
 	}
 	
 	@Delete
