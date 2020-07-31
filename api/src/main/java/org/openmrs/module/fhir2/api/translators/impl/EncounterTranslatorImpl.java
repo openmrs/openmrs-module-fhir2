@@ -16,8 +16,12 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
+import org.openmrs.Location;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
@@ -42,6 +46,24 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 	@Autowired
 	private ProvenanceTranslator<org.openmrs.Encounter> provenanceTranslator;
 	
+	@Autowired
+	private EncounterClassMap encounterClassMap;
+	
+	private Coding mapLocationToClass(Location location) {
+		Coding coding = new Coding();
+		coding.setSystem(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI);
+		// The default code for anything that cannot be matched with FHIR codes.
+		coding.setCode("AMB");
+		if (location == null) {
+			return coding;
+		}
+		String classCode = encounterClassMap.getFhirClass(location.getUuid());
+		if (classCode != null) {
+			coding.setCode(classCode);
+		}
+		return coding;
+	}
+	
 	@Override
 	public Encounter toFhirResource(org.openmrs.Encounter openMrsEncounter) {
 		if (openMrsEncounter == null) {
@@ -63,6 +85,7 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		encounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());
 		encounter.addContained(provenanceTranslator.getCreateProvenance(openMrsEncounter));
 		encounter.addContained(provenanceTranslator.getUpdateProvenance(openMrsEncounter));
+		encounter.setClass_(mapLocationToClass(openMrsEncounter.getLocation()));
 		
 		return encounter;
 	}
