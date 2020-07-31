@@ -16,11 +16,13 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -28,8 +30,12 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
@@ -237,6 +243,83 @@ public class ProcedureRequestFhirResourceProviderTest {
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.SERVICE_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
+	}
+	
+	public void createProcedureRequest_shouldCreateNewProcedureRequest() {
+		when(serviceRequestService.create(any(ServiceRequest.class))).thenReturn(serviceRequest);
+		
+		MethodOutcome result = resourceProvider
+		        .createProcedureRequest((ProcedureRequest) VersionConvertor_30_40.convertResource(serviceRequest, false));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
+	}
+	
+	@Test
+	public void updateProcedureRequest_shouldUpdateProcedureRequest() {
+		when(serviceRequestService.update(eq(SERVICE_REQUEST_UUID), any(ServiceRequest.class))).thenReturn(serviceRequest);
+		
+		MethodOutcome result = resourceProvider.updateProcedureRequest(new IdType().setValue(SERVICE_REQUEST_UUID),
+		    (ProcedureRequest) VersionConvertor_30_40.convertResource(serviceRequest, false));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateProcedureRequest_shouldThrowInvalidRequestForUuidMismatch() {
+		when(serviceRequestService.update(eq(WRONG_SERVICE_REQUEST_UUID), any(ServiceRequest.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateProcedureRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID),
+		    (ProcedureRequest) VersionConvertor_30_40.convertResource(serviceRequest, false));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateProcedureRequest_shouldThrowInvalidRequestForMissingId() {
+		ServiceRequest noIdServiceRequest = new ServiceRequest();
+		
+		when(serviceRequestService.update(eq(SERVICE_REQUEST_UUID), any(ServiceRequest.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateProcedureRequest(new IdType().setValue(SERVICE_REQUEST_UUID),
+		    (ProcedureRequest) VersionConvertor_30_40.convertResource(noIdServiceRequest, false));
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateProcedureRequest_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		ServiceRequest wrongServiceRequest = new ServiceRequest();
+		wrongServiceRequest.setId(WRONG_SERVICE_REQUEST_UUID);
+		
+		when(serviceRequestService.update(eq(WRONG_SERVICE_REQUEST_UUID), any(ServiceRequest.class)))
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateProcedureRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID),
+		    (ProcedureRequest) VersionConvertor_30_40.convertResource(wrongServiceRequest, false));
+	}
+	
+	@Test
+	public void deleteProcedureRequest_shouldDeleteProcedureRequest() {
+		when(serviceRequestService.delete(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);
+		
+		OperationOutcome result = resourceProvider.deleteProcedureRequest(new IdType().setValue(SERVICE_REQUEST_UUID));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteProcedureRequest_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentProcedureRequest() {
+		when(serviceRequestService.delete(WRONG_SERVICE_REQUEST_UUID)).thenReturn(null);
+		
+		resourceProvider.deleteProcedureRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID));
 	}
 	
 	@Test
