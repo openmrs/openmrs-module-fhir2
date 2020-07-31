@@ -74,6 +74,7 @@ public class EncounterTranslatorImplTest {
 	
 	private static final String LOCACTION_UUID = "123hh34-23jk23-23jk213-23jkl";
 	
+	private static final String TEST_LOCATION_NAME = "test location name";
 	
 	private static final String TEST_FHIR_CLASS = "test fhir class";
 	
