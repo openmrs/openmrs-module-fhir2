@@ -49,14 +49,6 @@ public class FhirUserDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void shouldGetUserByUuid() {
-		User user = fhirUserDao.getUserByUuid(USER_UUID);
-		
-		assertThat(user, notNullValue());
-		assertThat(user.getUuid(), equalTo(USER_UUID));
-	}
-	
-	@Test
 	public void shouldGetUserByUserName() {
 		User user = fhirUserDao.getUserByUserName(USER_NAME);
 		
@@ -64,8 +56,4 @@ public class FhirUserDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(user.getUsername(), equalTo(USER_NAME));
 	}
 	
-	@Test
-	public void shouldReturnNullWhenGetByWrongUuid() {
-		assertThat(fhirUserDao.getUserByUuid(WRONG_USER_UUID), nullValue());
-	}
 }

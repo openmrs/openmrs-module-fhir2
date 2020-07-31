@@ -13,9 +13,7 @@ import javax.validation.constraints.NotNull;
 
 import org.openmrs.User;
 
-public interface FhirUserDao {
-	
-	User getUserByUuid(@NotNull String uuid);
-	
+public interface FhirUserDao extends FhirDao<User> {
+		
 	User getUserByUserName(String clientName);
 }

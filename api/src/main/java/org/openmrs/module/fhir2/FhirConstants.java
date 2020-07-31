@@ -218,6 +218,8 @@ public class FhirConstants {
 	
 	public static final String PRACTITIONER_NAME_SEARCH_HANDLER = "practitioner.name.search.handler";
 	
+	public static final String USER_NAME_SEARCH_HANDLER = "user.name.search.handler";
+	
 	public static final String HAPI_NARRATIVES_PROPERTY_FILE = "classpath:ca/uhn/fhir/narrative/narratives.properties";
 	
 	public static final String OPENMRS_NARRATIVES_PROPERTY_FILE = "classpath:org/openmrs/module/fhir2/narratives.properties";
