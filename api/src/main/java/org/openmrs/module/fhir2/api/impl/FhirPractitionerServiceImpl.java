@@ -85,8 +85,8 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 			theResource.addAll(userBundle.getResources(0, userBundle.size()));
 			return new SimpleBundleProvider(theResource);
 		} else if (providerBundle.isEmpty() && !userBundle.isEmpty()) {
-			return userBundle;	
-		}	
+			return userBundle;
+		}
 		return providerBundle;
 	}
 }

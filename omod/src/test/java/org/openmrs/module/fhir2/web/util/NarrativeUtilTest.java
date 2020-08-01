@@ -61,13 +61,13 @@ public class NarrativeUtilTest {
 		
 		assertThat(propFilePathResult, nullValue());
 	}
-
+	
 	@Test
 	public void shouldReturnNullWhenOpenmrsRelativePathIsEmpty() {
 		String propFilePathGiven = "openmrs: ";
-
+		
 		String propFilePathResult = NarrativeUtils.getValidatedPropertiesFilePath(propFilePathGiven);
-
+		
 		assertThat(propFilePathResult, nullValue());
 	}
 	
