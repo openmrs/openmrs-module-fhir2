@@ -35,12 +35,15 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.FhirLocationService;
+import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
+import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +70,15 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	
 	@Autowired
 	private FhirMedicationService medicationService;
+	
+	@Autowired
+	private FhirDiagnosticReportService diagnosticReportService;
+	
+	@Autowired
+	private FhirMedicationRequestService medicationRequestService;
+	
+	@Autowired
+	private FhirServiceRequestService serviceRequestService;
 	
 	public Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams) {
 		List<PropParam<?>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);
@@ -102,6 +114,10 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				case FhirConstants.INCLUDE_PART_OF_PARAM:
 				case FhirConstants.INCLUDE_LOCATION_PARAM:
 					bundleProvider = handleLocationReverseInclude(referenceParams, revIncludeParam.getParamType());
+					break;
+				case FhirConstants.INCLUDE_CONTEXT_PARAM:
+				case FhirConstants.INCLUDE_ENCOUNTER_PARAM:
+					bundleProvider = handleEncounterReverseInclude(referenceParams, revIncludeParam.getParamType());
 					break;
 			}
 			
@@ -164,7 +180,26 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return locationService.searchForLocations(null, null, null, null, null, null, params, null, null, null, null,
 				    null);
 			case FhirConstants.ENCOUNTER:
-				return encounterService.searchForEncounters(null, params, null, null, null, null, null);
+				return encounterService.searchForEncounters(null, params, null, null, null, null, null, null);
+		}
+		
+		return null;
+	}
+	
+	private IBundleProvider handleEncounterReverseInclude(ReferenceAndListParam params, String targetType) {
+		switch (targetType) {
+			case FhirConstants.OBSERVATION:
+				return observationService.searchForObservations(params, null, null, null, null, null, null, null, null, null,
+				    null, null, null, null);
+			case FhirConstants.DIAGNOSTIC_REPORT:
+				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
+				    null);
+			case FhirConstants.MEDICATION_REQUEST:
+				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null,
+				    null);
+			case FhirConstants.PROCEDURE_REQUEST:
+			case FhirConstants.SERVICE_REQUEST:
+				return serviceRequestService.searchForServiceRequests(null, null, params, null, null, null, null, null);
 		}
 		
 		return null;

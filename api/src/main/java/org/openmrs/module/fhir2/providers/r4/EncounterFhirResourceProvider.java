@@ -34,13 +34,17 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +122,11 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Encounter.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(allow = { "Encounter:" + Encounter.SP_LOCATION, "Encounter:" + Encounter.SP_PATIENT,
-	                "Encounter:" + Encounter.SP_PARTICIPANT }) HashSet<Include> includes) {
+	                "Encounter:" + Encounter.SP_PARTICIPANT }) HashSet<Include> includes,
+	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_ENCOUNTER,
+	                "DiagnosticReport:" + DiagnosticReport.SP_ENCOUNTER,
+	                "MedicationRequest:" + MedicationRequest.SP_ENCOUNTER,
+	                "ServiceRequest:" + ServiceRequest.SP_ENCOUNTER }) HashSet<Include> revIncludes) {
 		if (patientParam != null) {
 			subjectReference = patientParam;
 		}
@@ -127,8 +135,12 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			includes = null;
 		}
 		
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
+		}
+		
 		return encounterService.searchForEncounters(date, location, participantReference, subjectReference, id, lastUpdated,
-		    includes);
+		    includes, revIncludes);
 	}
 	
 }
