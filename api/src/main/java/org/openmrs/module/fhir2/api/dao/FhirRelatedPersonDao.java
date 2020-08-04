@@ -19,23 +19,24 @@ import org.openmrs.util.PrivilegeConstants;
 public interface FhirRelatedPersonDao extends FhirDao<Relationship> {
 	
 	@Override
-	@Authorized(PrivilegeConstants.GET_PERSONS)
+	@Authorized({ PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS })
 	Relationship get(String uuid);
 	
 	@Override
-	@Authorized({ PrivilegeConstants.ADD_PERSONS, PrivilegeConstants.EDIT_PERSONS })
+	@Authorized({ PrivilegeConstants.ADD_PERSONS, PrivilegeConstants.EDIT_PERSONS, PrivilegeConstants.ADD_RELATIONSHIPS,
+	        PrivilegeConstants.EDIT_RELATIONSHIPS })
 	Relationship createOrUpdate(Relationship newEntry);
 	
 	@Override
-	@Authorized(PrivilegeConstants.EDIT_PERSONS)
+	@Authorized({ PrivilegeConstants.DELETE_PERSONS, PrivilegeConstants.DELETE_RELATIONSHIPS })
 	Relationship delete(String uuid);
 	
 	@Override
-	@Authorized(PrivilegeConstants.GET_PERSONS)
+	@Authorized({ PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS })
 	List<String> getSearchResultUuids(SearchParameterMap theParams);
 	
 	@Override
-	@Authorized(PrivilegeConstants.GET_PERSONS)
+	@Authorized({ PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS })
 	List<Relationship> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
 	        int lastResult);
 }

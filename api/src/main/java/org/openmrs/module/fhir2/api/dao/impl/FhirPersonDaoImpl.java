@@ -14,7 +14,6 @@ import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.or;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -74,17 +73,8 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	
 	@Override
 	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
-		List<Optional<Criterion>> criterionList = new ArrayList<>();
-		
-		criterionList.add(handleDateRange("personDateVoided", param));
-		
-		criterionList.add(Optional.of(and(toCriteriaArray(
-		    Stream.of(Optional.of(isNull("personDateVoided")), handleDateRange("personDateChanged", param))))));
-		
-		criterionList.add(Optional.of(and(toCriteriaArray(Stream.of(Optional.of(isNull("personDateVoided")),
-		    Optional.of(isNull("personDateChanged")), handleDateRange("personDateCreated", param))))));
-		
-		return Optional.of(or(toCriteriaArray(criterionList)));
+		return Optional.of(or(toCriteriaArray(handleDateRange("personDateChanged", param), Optional.of(and(toCriteriaArray(
+		    Stream.of(Optional.of(isNull("personDateChanged")), handleDateRange("personDateCreated", param))))))));
 	}
 	
 	@Override

@@ -27,7 +27,7 @@ public interface FhirObservationDao extends FhirDao<Obs> {
 	Obs createOrUpdate(Obs newEntry);
 	
 	@Override
-	@Authorized(PrivilegeConstants.EDIT_OBS)
+	@Authorized(PrivilegeConstants.DELETE_OBS)
 	Obs delete(String uuid);
 	
 	@Override

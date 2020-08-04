@@ -61,8 +61,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	private final boolean isVoidable;
 	
 	@Autowired
-	@Getter(AccessLevel.PROTECTED)
-	@Setter(AccessLevel.PROTECTED)
+	@Getter(AccessLevel.PUBLIC)
+	@Setter(AccessLevel.PUBLIC)
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
@@ -86,12 +86,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			return null;
 		}
 		
-		if (isVoidable) {
-			if (isVoided(result)) {
-				throw new ResourceGoneException(uuid);
-			}
-		} else if (isRetireable) {
-			if (isRetired(result)) {
+		if (isVoidable || isRetireable) {
+			if (isVoided(result) || isVoided(result)) {
 				throw new ResourceGoneException(uuid);
 			}
 		}
@@ -201,7 +197,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @return true if the object is voided, false otherwise
 	 */
 	protected boolean isVoided(T object) {
-		return ((Voidable) object).getVoided();
+		return object instanceof Voidable && ((Voidable) object).getVoided();
 	}
 	
 	/**
@@ -211,7 +207,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @return true if the object is retired, false otherwise
 	 */
 	protected boolean isRetired(T object) {
-		return ((Retireable) object).getRetired();
+		return object instanceof Retireable && ((Retireable) object).getRetired();
 	}
 	
 	/**

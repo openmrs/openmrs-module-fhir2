@@ -27,7 +27,7 @@ public interface FhirAllergyIntoleranceDao extends FhirDao<Allergy> {
 	Allergy createOrUpdate(Allergy newEntry);
 	
 	@Override
-	@Authorized({ PrivilegeConstants.EDIT_ALLERGIES })
+	@Authorized(PrivilegeConstants.DELETE_ALLERGIES)
 	Allergy delete(String uuid);
 	
 	@Override

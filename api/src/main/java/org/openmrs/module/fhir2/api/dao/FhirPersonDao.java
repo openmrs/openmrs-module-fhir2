@@ -34,7 +34,7 @@ public interface FhirPersonDao extends FhirDao<Person> {
 	Person createOrUpdate(Person newEntry);
 	
 	@Override
-	@Authorized(PrivilegeConstants.EDIT_PERSONS)
+	@Authorized(PrivilegeConstants.DELETE_PERSONS)
 	Person delete(String uuid);
 	
 	@Override
