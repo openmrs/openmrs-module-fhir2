@@ -27,9 +27,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -46,6 +48,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -80,6 +83,9 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
 	
+	@Captor
+	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	
 	private Medication medication;
 	
 	@Before
@@ -110,7 +116,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		verifyUri(String.format("/Medication?code=%s", CODE));
 		
 		verify(fhirMedicationService).searchForMedications(tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull());
+		    isNull(), isNull(), isNull());
 		
 		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
 		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
@@ -124,7 +130,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		verifyUri(String.format("/Medication?form=%s", CODE));
 		
 		verify(fhirMedicationService).searchForMedications(isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
-		    isNull(), isNull());
+		    isNull(), isNull(), isNull());
 		
 		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
 		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
@@ -138,7 +144,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		verifyUri(String.format("/Medication?ingredient-code=%s", CODE));
 		
 		verify(fhirMedicationService).searchForMedications(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(),
-		    isNull(), isNull());
+		    isNull(), isNull(), isNull());
 		
 		List<TokenOrListParam> listParams = tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens();
 		TokenParam tokenParam = listParams.get(0).getValuesAsQueryTokens().get(0);
@@ -152,7 +158,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		verifyUri(String.format("/Medication?_id=%s", MEDICATION_UUID));
 		
 		verify(fhirMedicationService).searchForMedications(isNull(), isNull(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull());
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -166,7 +172,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		verifyUri(String.format("/Medication?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
 		verify(fhirMedicationService).searchForMedications(isNull(), isNull(), isNull(), isNull(),
-		    dateRangeParamArgumentCaptor.capture());
+		    dateRangeParamArgumentCaptor.capture(), isNull());
 		
 		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
 		
@@ -180,6 +186,21 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	}
 	
 	@Test
+	public void searchForMedications_shouldAddMedicationRequestsWithReturnedMedications() throws Exception {
+		verifyUri("/Medication?_revinclude=MedicationRequest:medication");
+		
+		verify(fhirMedicationService).searchForMedications(isNull(), isNull(), isNull(), isNull(), isNull(),
+		    includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_MEDICATION_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		    equalTo(FhirConstants.MEDICATION_REQUEST));
+	}
+	
+	@Test
 	public void getMedicationByUuid_shouldReturn404() throws Exception {
 		when(fhirMedicationService.get(WRONG_MEDICATION_UUID)).thenReturn(null);
 		
@@ -189,7 +210,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	}
 	
 	private void verifyUri(String uri) throws Exception {
-		when(fhirMedicationService.searchForMedications(any(), any(), any(), any(), any()))
+		when(fhirMedicationService.searchForMedications(any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medication), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

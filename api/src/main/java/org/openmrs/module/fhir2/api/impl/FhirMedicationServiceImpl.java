@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -49,13 +52,15 @@ public class FhirMedicationServiceImpl extends BaseFhirService<Medication, Drug>
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForMedications(TokenAndListParam code, TokenAndListParam dosageForm,
-	        TokenAndListParam ingredientCode, TokenAndListParam id, DateRangeParam lastUpdated) {
+	        TokenAndListParam ingredientCode, TokenAndListParam id, DateRangeParam lastUpdated,
+	        HashSet<Include> revIncludes) {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
 		        .addParameter(FhirConstants.DOSAGE_FORM_SEARCH_HANDLER, dosageForm)
 		        .addParameter(FhirConstants.INGREDIENT_SEARCH_HANDLER, ingredientCode)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}

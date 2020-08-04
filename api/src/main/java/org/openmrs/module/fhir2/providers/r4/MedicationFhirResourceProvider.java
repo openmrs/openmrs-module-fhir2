@@ -11,9 +11,13 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -28,9 +32,11 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -95,7 +101,12 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,
 	        @OptionalParam(name = Medication.SP_INGREDIENT_CODE) TokenAndListParam ingredientCode,
 	        @OptionalParam(name = Medication.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
-		return fhirMedicationService.searchForMedications(code, dosageForm, ingredientCode, id, lastUpdated);
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @IncludeParam(reverse = true, allow = {
+	                "MedicationRequest:" + MedicationRequest.SP_MEDICATION }) HashSet<Include> revIncludes) {
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
+		}
+		
+		return fhirMedicationService.searchForMedications(code, dosageForm, ingredientCode, id, lastUpdated, revIncludes);
 	}
 }

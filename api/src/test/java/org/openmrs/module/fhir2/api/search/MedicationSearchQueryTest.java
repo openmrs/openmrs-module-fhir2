@@ -12,19 +12,29 @@ package org.openmrs.module.fhir2.api.search;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Drug;
@@ -61,6 +71,8 @@ public class MedicationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private static final String DATE_CHANGED = "2010-03-31";
 	
 	private static final String WRONG_DATE_CHANGED = "2012-05-01";
+	
+	private static final String MEDICATION_REVINCLUDE_UUID = "05ec820a-d297-44e3-be6e-698531d9dd3f";
 	
 	private static final int START_INDEX = 0;
 	
@@ -274,6 +286,30 @@ public class MedicationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		List<Medication> resultList = get(results);
 		
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForMedications_shouldAddMedicationRequestsToReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REVINCLUDE_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("MedicationRequest:medication"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(6)); // reverse included resources added as part of the result list
+		assertThat(resultList.subList(1, 6),
+		    everyItem(allOf(is(instanceOf(MedicationRequest.class)), hasProperty("medicationReference",
+		        hasProperty("referenceElement", hasProperty("idPart", equalTo(MEDICATION_REVINCLUDE_UUID)))))));
 	}
 	
 	@Test

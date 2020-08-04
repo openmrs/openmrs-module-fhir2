@@ -11,9 +11,13 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -27,9 +31,11 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.Medication30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
@@ -98,8 +104,13 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,
 	        @OptionalParam(name = Medication.SP_INGREDIENT_CODE) TokenAndListParam ingredientCode,
 	        @OptionalParam(name = Medication.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @IncludeParam(reverse = true, allow = {
+	                "MedicationRequest:" + MedicationRequest.SP_MEDICATION }) HashSet<Include> revIncludes) {
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
+		}
+		
 		return new SearchQueryBundleProviderR3Wrapper(
-		        medicationService.searchForMedications(code, dosageForm, ingredientCode, id, lastUpdated));
+		        medicationService.searchForMedications(code, dosageForm, ingredientCode, id, lastUpdated, revIncludes));
 	}
 }

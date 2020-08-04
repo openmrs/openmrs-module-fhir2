@@ -119,6 +119,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				case FhirConstants.INCLUDE_ENCOUNTER_PARAM:
 					bundleProvider = handleEncounterReverseInclude(referenceParams, revIncludeParam.getParamType());
 					break;
+				case FhirConstants.INCLUDE_MEDICATION_PARAM:
+					bundleProvider = handleMedicationReverseInclude(referenceParams, revIncludeParam.getParamType());
+					break;
 			}
 			
 			if (bundleProvider != null) {
@@ -200,6 +203,16 @@ public class SearchQueryInclude<U extends IBaseResource> {
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(null, null, params, null, null, null, null, null);
+		}
+		
+		return null;
+	}
+	
+	private IBundleProvider handleMedicationReverseInclude(ReferenceAndListParam params, String targetType) {
+		switch (targetType) {
+			case FhirConstants.MEDICATION_REQUEST:
+				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null,
+				    null);
 		}
 		
 		return null;
