@@ -56,6 +56,10 @@ public class SearchParameterMap implements Serializable {
 	 * @return {@link org.openmrs.module.fhir2.api.search.param.SearchParameterMap}
 	 */
 	public SearchParameterMap addParameter(@NotNull String key, String propertyName, @NotNull Serializable param) {
+		if (param == null) {
+			return this;
+		}
+		
 		List<PropParam<?>> params = this.params.getOrDefault(key, new ArrayList<>());
 		params.add(PropParam.builder().param(param).propertyName(propertyName).build());
 		this.params.put(key, params);

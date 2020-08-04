@@ -24,12 +24,15 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +41,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.dao.FhirServiceRequestDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
@@ -54,9 +56,17 @@ public class FhirServiceRequestServiceImplTest {
 	
 	private static final ServiceRequest.ServiceRequestPriority PRIORITY = ServiceRequest.ServiceRequestPriority.ROUTINE;
 	
-	private static final String LOINC_CODE = "1000-1";
-	
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
+	
+	private static final String PATIENT_GIVEN_NAME = "Meantex";
+	
+	private static final String CODE = "5089";
+	
+	private static final String ENCOUNTER_UUID = "y403fafb-e5e4-42d0-9d11-4f52e89d123r";
+	
+	private static final String PARTICIPANT_IDENTIFIER = "101-6";
+	
+	private static final String OCCURRENCE = "2020-09-03";
 	
 	@Mock
 	private ServiceRequestTranslator<TestOrder> translator;
@@ -83,11 +93,6 @@ public class FhirServiceRequestServiceImplTest {
 		order = new TestOrder();
 		order.setUuid(SERVICE_REQUEST_UUID);
 		
-		CodeableConcept codeableConcept = new CodeableConcept();
-		Coding loincCoding = codeableConcept.addCoding();
-		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
-		loincCoding.setCode(LOINC_CODE);
-		
 		fhirServiceRequest = new ServiceRequest();
 		fhirServiceRequest.setId(SERVICE_REQUEST_UUID);
 		fhirServiceRequest.setStatus(STATUS);
@@ -110,6 +115,123 @@ public class FhirServiceRequestServiceImplTest {
 	}
 	
 	@Test
+	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByPatientParam() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(SERVICE_REQUEST_UUID));
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(order));
+		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(patientReference, null, null, null, null,
+		    null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByCode() {
+		TokenAndListParam code = new TokenAndListParam().addAnd(new TokenParam(CODE));
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
+		
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(SERVICE_REQUEST_UUID));
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(order));
+		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, code, null, null, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByEncounter() {
+		ReferenceAndListParam encounterReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID).setChain(null)));
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
+		
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(SERVICE_REQUEST_UUID));
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(order));
+		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, encounterReference, null, null,
+		    null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByRequester() {
+		ReferenceAndListParam participantReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
+		        .add(new ReferenceParam().setValue(PARTICIPANT_IDENTIFIER).setChain(Practitioner.SP_IDENTIFIER)));
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(SERVICE_REQUEST_UUID));
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(order));
+		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, participantReference,
+		    null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByOccurrence() {
+		DateRangeParam occurrence = new DateRangeParam().setLowerBound(OCCURRENCE).setUpperBound(OCCURRENCE);
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, occurrence);
+		
+		when(dao.getResultUuids(any())).thenReturn(Collections.singletonList(SERVICE_REQUEST_UUID));
+		when(dao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(order));
+		when(translator.toFhirResource(order)).thenReturn(fhirServiceRequest);
+		when(searchQuery.getQueryResults(any(), any(), any()))
+		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
+		
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, occurrence, null,
+		    null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
 	public void searchForServiceRequest_shouldReturnCollectionOfServiceRequestByUUID() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
 		
@@ -123,7 +245,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(uuid, null);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, uuid, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -146,7 +268,8 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator));
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, lastUpdated);
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null,
+		    lastUpdated);
 		
 		List<IBaseResource> resultList = get(results);
 		

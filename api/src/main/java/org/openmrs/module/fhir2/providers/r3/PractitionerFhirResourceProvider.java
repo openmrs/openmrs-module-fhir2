@@ -70,8 +70,8 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createPractitioner(@ResourceParam Practitioner practitioner) {
-		return FhirProviderUtils
-		        .buildCreate(practitionerService.create(Practitioner30_40.convertPractitioner(practitioner)));
+		return FhirProviderUtils.buildCreate(Practitioner30_40
+		        .convertPractitioner(practitionerService.create(Practitioner30_40.convertPractitioner(practitioner))));
 	}
 	
 	@Update
@@ -83,8 +83,8 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 		
 		practitioner.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(
-		    practitionerService.update(id.getIdPart(), Practitioner30_40.convertPractitioner(practitioner)));
+		return FhirProviderUtils.buildUpdate(Practitioner30_40.convertPractitioner(
+		    practitionerService.update(id.getIdPart(), Practitioner30_40.convertPractitioner(practitioner))));
 	}
 	
 	@Delete

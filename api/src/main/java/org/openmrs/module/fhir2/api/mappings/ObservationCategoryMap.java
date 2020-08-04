@@ -11,9 +11,31 @@ package org.openmrs.module.fhir2.api.mappings;
 
 import javax.validation.constraints.NotNull;
 
-public interface ObservationCategoryMap {
+import java.util.Collection;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+public class ObservationCategoryMap extends BaseMapping {
 	
-	String getCategory(@NotNull String conceptClassUuid);
+	public ObservationCategoryMap() {
+		super("observationCategoryMap.properties");
+	}
 	
-	String getConceptClassUuid(@NotNull String category);
+	public String getCategory(@NotNull String conceptClassUuid) {
+		Collection<String> categories = getKey(conceptClassUuid);
+		if (categories.isEmpty()) {
+			return null;
+		}
+		if (categories.size() > 1) {
+			log.warn("Multiple categories found for concept " + conceptClassUuid);
+		}
+		return categories.iterator().next();
+	}
+	
+	public String getConceptClassUuid(@NotNull String category) {
+		return getValue(category).orElse(null);
+	}
 }

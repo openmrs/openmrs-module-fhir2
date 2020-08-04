@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.or;
 
@@ -67,6 +68,10 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<Obs> implements Fhi
 					entry.getValue().forEach(
 					    param -> handleDateRange("dateCreated", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
 					break;
+				case FhirConstants.RESULT_SEARCH_HANDLER:
+					entry.getValue().forEach(
+					    param -> handleObservationReference(criteria, (ReferenceAndListParam) param.getParam()));
+					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
@@ -92,6 +97,15 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<Obs> implements Fhi
 				criteria.createAlias("concept", "c");
 			}
 			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
+		}
+	}
+	
+	private void handleObservationReference(Criteria criteria, ReferenceAndListParam result) {
+		if (result != null) {
+			if (lacksAlias(criteria, "gm")) {
+				criteria.createAlias("groupMembers", "gm");
+			}
+			handleAndListParam(result, token -> Optional.of(eq("gm.uuid", token.getIdPart()))).ifPresent(criteria::add);
 		}
 	}
 	

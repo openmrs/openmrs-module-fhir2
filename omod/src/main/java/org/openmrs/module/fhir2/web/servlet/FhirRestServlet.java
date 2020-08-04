@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.web.servlet;
 import java.util.Collection;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -24,6 +23,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.narrative.OpenMRSThymeleafNarrativeGenerator;
 import org.openmrs.module.fhir2.web.util.NarrativeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -75,7 +75,7 @@ public class FhirRestServlet extends RestfulServer {
 			        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE };
 		}
 		
-		getFhirContext().setNarrativeGenerator(new CustomThymeleafNarrativeGenerator(narrativePropertiesFiles));
+		getFhirContext().setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(narrativePropertiesFiles));
 	}
 	
 	@Override

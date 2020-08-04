@@ -20,10 +20,8 @@ import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-
 import java.util.Collections;
 import java.util.List;
-
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -148,12 +146,16 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 	
 	@Test
 	public void createCondition_shouldCreateNewCondition() {
+
 		when(conditionService.create(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
-		
+
+// 		when(conditionService.saveCondition(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
+
 		MethodOutcome result = resourceProvider.createCondition(Condition30_40.convertCondition(condition));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
+
 		assertThat(result.getResource(), CoreMatchers.equalTo(condition));
 	}
 	
@@ -188,6 +190,9 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		
 		resourceProvider.updateCondition(new IdType().setValue(WRONG_CONDITION_UUID),
 		    Condition30_40.convertCondition(wrongCondition));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(CONDITION_UUID));
+
 	}
 	
 	@Test

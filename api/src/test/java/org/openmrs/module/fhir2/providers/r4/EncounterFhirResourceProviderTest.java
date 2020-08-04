@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
@@ -132,12 +131,12 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.ENCOUNTER));
-		assertThat(((org.hl7.fhir.r4.model.Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
+		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
 	@Test
 	public void searchEncounters_shouldReturnMatchingEncountersWhenPatientParamIsSpecified() {
-		List<org.hl7.fhir.r4.model.Encounter> encounters = new ArrayList<>();
+		List<Encounter> encounters = new ArrayList<>();
 		encounters.add(encounter);
 		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
@@ -152,7 +151,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.ENCOUNTER));
-		assertThat(((org.hl7.fhir.r4.model.Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
+		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
 	@Test
@@ -181,9 +180,9 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		when(encounterService.create(encounter)).thenReturn(encounter);
 		
 		MethodOutcome result = resourceProvider.creatEncounter(encounter);
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), CoreMatchers.equalTo(encounter));
+		assertThat(result.getResource(), equalTo(encounter));
 	}
 	
 	@Test
@@ -191,8 +190,8 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		when(encounterService.update(ENCOUNTER_UUID, encounter)).thenReturn(encounter);
 		
 		MethodOutcome result = resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID), encounter);
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(encounter));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(encounter));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -202,11 +201,23 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), encounter);
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void updateEncounter_shouldThrowInvalidRequestForMissingId() {
+		Encounter noIdEncounter = new Encounter();
+		
+		when(encounterService.update(ENCOUNTER_UUID, noIdEncounter)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateEncounter(new IdType().setValue(ENCOUNTER_UUID), noIdEncounter);
+	}
+	
 	@Test(expected = MethodNotAllowedException.class)
 	public void updateEncounter_shouldThrowMethodNotAllowedIfDoesNotExist() {
-		when(encounterService.update(WRONG_ENCOUNTER_UUID, encounter)).thenThrow(MethodNotAllowedException.class);
+		Encounter wrongEncounter = new Encounter();
+		wrongEncounter.setId(WRONG_ENCOUNTER_UUID);
 		
-		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), encounter);
+		when(encounterService.update(WRONG_ENCOUNTER_UUID, wrongEncounter)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID), wrongEncounter);
 	}
 	
 	@Test
@@ -214,14 +225,14 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		when(encounterService.delete(ENCOUNTER_UUID)).thenReturn(encounter);
 		
 		OperationOutcome result = resourceProvider.deleteEncounter(new IdType().setValue(ENCOUNTER_UUID));
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
-	public void deleteEncounter_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantEncounter() {
+	public void deleteEncounter_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentEncounter() {
 		when(encounterService.delete(WRONG_ENCOUNTER_UUID)).thenReturn(null);
 		resourceProvider.deleteEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID));
 	}

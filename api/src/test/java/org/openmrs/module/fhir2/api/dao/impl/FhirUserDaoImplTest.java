@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.hibernate.SessionFactory;
@@ -49,14 +48,6 @@ public class FhirUserDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void shouldGetUserByUuid() {
-		User user = fhirUserDao.getUserByUuid(USER_UUID);
-		
-		assertThat(user, notNullValue());
-		assertThat(user.getUuid(), equalTo(USER_UUID));
-	}
-	
-	@Test
 	public void shouldGetUserByUserName() {
 		User user = fhirUserDao.getUserByUserName(USER_NAME);
 		
@@ -64,8 +55,4 @@ public class FhirUserDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(user.getUsername(), equalTo(USER_NAME));
 	}
 	
-	@Test
-	public void shouldReturnNullWhenGetByWrongUuid() {
-		assertThat(fhirUserDao.getUserByUuid(WRONG_USER_UUID), nullValue());
-	}
 }

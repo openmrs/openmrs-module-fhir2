@@ -37,7 +37,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
@@ -428,15 +427,24 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 		when(patientService.update(PATIENT_UUID, patient)).thenReturn(patient);
 		
 		MethodOutcome result = resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), patient);
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(patient));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(patient));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
-	public void updatePatient_shouldThrowInvalidRequestExceptionForWrongPatientUuid() {
+	public void updatePatient_shouldThrowInvalidRequestExceptionForUuidMismatch() {
 		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePatient_shouldThrowInvalidRequestExceptionForMissingId() {
+		Patient noIdPatient = new Patient();
+		
+		when(patientService.update(PATIENT_UUID, noIdPatient)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), noIdPatient);
 	}
 	
 	@Test(expected = MethodNotAllowedException.class)

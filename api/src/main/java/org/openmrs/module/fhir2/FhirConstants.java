@@ -67,6 +67,8 @@ public class FhirConstants {
 	
 	public static final String OBSERVATION_CATEGORY_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/observation-category";
 	
+	public static final String ENCOUNTER_CLASS_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v3-ActCode";
+	
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	
@@ -216,6 +218,8 @@ public class FhirConstants {
 	
 	public static final String PRACTITIONER_NAME_SEARCH_HANDLER = "practitioner.name.search.handler";
 	
+	public static final String USER_NAME_SEARCH_HANDLER = "user.name.search.handler";
+	
 	public static final String HAPI_NARRATIVES_PROPERTY_FILE = "classpath:ca/uhn/fhir/narrative/narratives.properties";
 	
 	public static final String OPENMRS_NARRATIVES_PROPERTY_FILE = "classpath:org/openmrs/module/fhir2/narratives.properties";
@@ -233,6 +237,8 @@ public class FhirConstants {
 	public static final String BASED_ON_REFERENCE_SEARCH_HANDLER = "based.on.reference.search.handler";
 	
 	public static final String OWNER_REFERENCE_SEARCH_HANDLER = "owner.reference.search.handler";
+	
+	public static final String RESULT_SEARCH_HANDLER = "result.search.handler";
 	
 	public static final String COMMON_SEARCH_HANDLER = "common.search.handler";
 	

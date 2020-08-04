@@ -85,7 +85,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	public MethodOutcome createObservationResource(@ResourceParam Observation observation) {
-		return FhirProviderUtils.buildCreate(observationService.create(Observation30_40.convertObservation(observation)));
+		return FhirProviderUtils.buildCreate(Observation30_40
+		        .convertObservation(observationService.create(Observation30_40.convertObservation(observation))));
 	}
 	
 	@Update
@@ -96,8 +97,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		
 		observation.setId(id.getIdPart());
 		
-		return FhirProviderUtils
-		        .buildUpdate(observationService.update(id.getIdPart(), Observation30_40.convertObservation(observation)));
+		return FhirProviderUtils.buildUpdate(Observation30_40.convertObservation(
+		    observationService.update(id.getIdPart(), Observation30_40.convertObservation(observation))));
 	}
 	
 	@Delete

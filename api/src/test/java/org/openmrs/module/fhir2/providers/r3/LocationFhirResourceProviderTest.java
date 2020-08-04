@@ -42,7 +42,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.convertors.conv30_40.Location30_40;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -459,12 +458,13 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	
 	@Test
 	public void createLocation_shouldCreateNewLocation() {
-		when(locationService.create(any(org.hl7.fhir.r4.model.Location.class))).thenReturn(location);
+		when(locationService.create(any(Location.class))).thenReturn(location);
 		
 		MethodOutcome result = resourceProvider.createLocation(Location30_40.convertLocation(location));
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), CoreMatchers.equalTo(location));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(LOCATION_UUID));
 	}
 	
 	@Test
@@ -482,7 +482,7 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
-	public void deleteLocation_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantLocation() {
+	public void deleteLocation_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentLocation() {
 		
 		when(locationService.delete(WRONG_LOCATION_UUID)).thenReturn(null);
 		
@@ -491,28 +491,41 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	
 	@Test
 	public void updateLocation_shouldUpdateLocation() {
-		when(locationService.update(eq(LOCATION_UUID), any(org.hl7.fhir.r4.model.Location.class))).thenReturn(location);
+		when(locationService.update(eq(LOCATION_UUID), any(Location.class))).thenReturn(location);
 		
 		MethodOutcome result = resourceProvider.updateLocation(new IdType().setValue(LOCATION_UUID),
 		    Location30_40.convertLocation(location));
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(location));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(LOCATION_UUID));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateLocation_shouldThrowInvalidRequestForUuidMismatch() {
-		when(locationService.update(eq(WRONG_LOCATION_UUID), any(org.hl7.fhir.r4.model.Location.class)))
-		        .thenThrow(InvalidRequestException.class);
+		when(locationService.update(eq(WRONG_LOCATION_UUID), any(Location.class))).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID), Location30_40.convertLocation(location));
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void updateLocation_shouldThrowInvalidRequestForMissingId() {
+		Location noIdLocation = new Location();
+		
+		when(locationService.update(eq(LOCATION_UUID), any(Location.class))).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateLocation(new IdType().setValue(LOCATION_UUID), Location30_40.convertLocation(noIdLocation));
+	}
+	
 	@Test(expected = MethodNotAllowedException.class)
 	public void updateLocation_shouldThrowMethodNotAllowedIfDoesNotExist() {
-		when(locationService.update(eq(WRONG_LOCATION_UUID), any(org.hl7.fhir.r4.model.Location.class)))
+		Location wrongLocation = new Location();
+		wrongLocation.setId(WRONG_LOCATION_UUID);
+		
+		when(locationService.update(eq(WRONG_LOCATION_UUID), any(Location.class)))
 		        .thenThrow(MethodNotAllowedException.class);
 		
-		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID), Location30_40.convertLocation(location));
+		resourceProvider.updateLocation(new IdType().setValue(WRONG_LOCATION_UUID),
+		    Location30_40.convertLocation(wrongLocation));
 	}
 	
 }

@@ -37,6 +37,13 @@ public class NarrativeUtils {
 				log.error("Properties File classpath must not be empty");
 				return false;
 			}
+		} else if (path.startsWith("openmrs:")) {
+			String openmrsRelativePath = path.substring("openmrs:".length());
+			
+			if (openmrsRelativePath == null || openmrsRelativePath.trim().isEmpty()) {
+				log.error("Properties File OpenMRS relative path must not be empty");
+				return false;
+			}
 		}
 		
 		return true;
@@ -47,9 +54,9 @@ public class NarrativeUtils {
 			return null;
 		}
 		
-		// add "file:" prefix if the path doesn't start with "classpath:" or "file:"
-		// since NarrativeTemplateManifest.loadResource() method requires one of these prefixes
-		if (!(path.startsWith("file:") || path.startsWith("classpath:"))) {
+		// add "file:" prefix if the path doesn't start with "classpath:" or "file:" or "openmrs:"
+		// since OpenMRSNarrativeTemplateManifest.loadResource() method requires one of these prefixes
+		if (!(path.startsWith("file:") || path.startsWith("classpath:") || path.startsWith("openmrs:"))) {
 			path = "file:" + path;
 		}
 		

@@ -36,7 +36,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.IdType;
@@ -395,9 +394,9 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.create(allergyIntolerance)).thenReturn(allergyIntolerance);
 		
 		MethodOutcome result = resourceProvider.createAllergy(allergyIntolerance);
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), CoreMatchers.equalTo(allergyIntolerance));
+		assertThat(result.getResource(), equalTo(allergyIntolerance));
 	}
 	
 	@Test
@@ -405,8 +404,8 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.update(ALLERGY_UUID, allergyIntolerance)).thenReturn(allergyIntolerance);
 		
 		MethodOutcome result = resourceProvider.updateAllergy(new IdType().setValue(ALLERGY_UUID), allergyIntolerance);
-		assertThat(result, CoreMatchers.notNullValue());
-		assertThat(result.getResource(), CoreMatchers.equalTo(allergyIntolerance));
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(allergyIntolerance));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
@@ -416,11 +415,23 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), allergyIntolerance);
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
-	public void updateAllergyIntolerance_shouldthrowMethodNotAllowedIfDoesNotExist() {
-		when(service.update(WRONG_ALLERGY_UUID, allergyIntolerance)).thenThrow(MethodNotAllowedException.class);
+	@Test(expected = InvalidRequestException.class)
+	public void updateAllergyIntolerance_shouldThrowInvalidRequestForMissingId() {
+		AllergyIntolerance noIdAllergyIntolerance = new AllergyIntolerance();
 		
-		resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), allergyIntolerance);
+		when(service.update(ALLERGY_UUID, noIdAllergyIntolerance)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateAllergy(new IdType().setValue(ALLERGY_UUID), noIdAllergyIntolerance);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateAllergyIntolerance_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		AllergyIntolerance wrongAllergyIntolerance = new AllergyIntolerance();
+		wrongAllergyIntolerance.setId(WRONG_ALLERGY_UUID);
+		
+		when(service.update(WRONG_ALLERGY_UUID, wrongAllergyIntolerance)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateAllergy(new IdType().setValue(WRONG_ALLERGY_UUID), wrongAllergyIntolerance);
 	}
 	
 	@Test
@@ -428,14 +439,14 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 		when(service.delete(ALLERGY_UUID)).thenReturn(allergyIntolerance);
 		
 		OperationOutcome result = resourceProvider.deleteAllergy(new IdType().setValue(ALLERGY_UUID));
-		assertThat(result, CoreMatchers.notNullValue());
+		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 	}
 	
 	@Test(expected = ResourceNotFoundException.class)
-	public void deleteAllergyIntolerance_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantAllergyIntolerance() {
+	public void deleteAllergyIntolerance_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentAllergyIntolerance() {
 		when(service.delete(WRONG_ALLERGY_UUID)).thenReturn(null);
 		resourceProvider.deleteAllergy(new IdType().setValue(WRONG_ALLERGY_UUID));
 	}

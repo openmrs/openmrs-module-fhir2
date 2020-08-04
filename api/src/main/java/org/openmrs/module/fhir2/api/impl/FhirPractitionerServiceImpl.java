@@ -9,17 +9,22 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import java.util.List;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
+import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -43,6 +48,18 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	@Autowired
 	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>> searchQuery;
 	
+	@Autowired
+	private FhirUserService userService;
+	
+	@Override
+	public Practitioner get(String uuid) {
+		Practitioner practitioner = translator.toFhirResource(getDao().get(uuid));
+		if (practitioner == null) {
+			practitioner = userService.get(uuid);
+		}
+		return practitioner;
+	}
+	
 	@Override
 	public IBundleProvider searchForPractitioners(StringAndListParam name, TokenAndListParam identifier,
 	        StringAndListParam given, StringAndListParam family, StringAndListParam city, StringAndListParam state,
@@ -59,6 +76,17 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		IBundleProvider providerBundle = searchQuery.getQueryResults(theParams, dao, translator);
+		IBundleProvider userBundle = userService.searchForUsers(name, identifier, given, family, city, state, postalCode,
+		    country, id, lastUpdated);
+		
+		if (!providerBundle.isEmpty() && !userBundle.isEmpty()) {
+			List<IBaseResource> theResource = providerBundle.getResources(0, providerBundle.size());
+			theResource.addAll(userBundle.getResources(0, userBundle.size()));
+			return new SimpleBundleProvider(theResource);
+		} else if (providerBundle.isEmpty() && !userBundle.isEmpty()) {
+			return userBundle;
+		}
+		return providerBundle;
 	}
 }
