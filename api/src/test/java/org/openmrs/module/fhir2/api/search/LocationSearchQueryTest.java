@@ -491,7 +491,7 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldAddReverseIncludedLocationToReturnedResults() {
-		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_PARENT_ID));
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_PARENT_UUID));
 		
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("Location:partof"));
@@ -515,7 +515,7 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldAddReverseIncludedEncounterToReturnedResults() {
-		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_PARENT_ID));
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_PARENT_UUID));
 		
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("Encounter:location"));
@@ -541,7 +541,7 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForLocations_shouldHandleMultipleReverseIncludes() {
-		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_PARENT_ID));
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(LOCATION_PARENT_UUID));
 		
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("Location:partof"));

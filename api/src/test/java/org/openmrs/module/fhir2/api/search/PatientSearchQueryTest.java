@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
@@ -18,6 +20,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
@@ -25,10 +28,15 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hl7.fhir.r4.model.Patient.SP_FAMILY;
 import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
+import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -38,12 +46,20 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
@@ -58,7 +74,15 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_initial_data.xml",
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_address_data.xml" };
 	
+	private static final String SEVERITY_SEVERE_CONCEPT_UUID = "c607c80f-1ea9-4da3-bb88-6276ce8868dd";
+	
 	private static final String PATIENT_GIVEN_NAME = "Jeannette";
+	
+	private static final String PATIENT_OTHER1_UUID = "f363b024-7ff2-4882-9f5b-d9bce5d10a9e";
+	
+	private static final String PATIENT_OTHER2_UUID = "ca17fcc5-ec96-487f-b9ea-42973c8973e3";
+	
+	private static final String PATIENT_OTHER3_UUID = "61b38324-e2fd-4feb-95b7-9e9a2a4400df";
 	
 	private static final String PATIENT_UUID = "f363b024-7ff2-4882-9f5b-d9bce5d10a9e";
 	
@@ -108,6 +132,8 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final int END_INDEX = 10;
 	
+	private static final Map<String, String> SEVERITY_CONCEPT_UUIDS = new HashMap<>();
+	
 	@Autowired
 	private PatientTranslator translator;
 	
@@ -118,6 +144,9 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private SearchQueryInclude<Patient> searchQueryInclude;
 	
 	@Autowired
+	private FhirGlobalPropertyService globalPropertyService;
+	
+	@Autowired
 	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator, SearchQueryInclude<Patient>> searchQuery;
 	
 	@Before
@@ -125,6 +154,15 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 		for (String search_data : PATIENT_SEARCH_DATA_FILES) {
 			executeDataSet(search_data);
 		}
+	}
+	
+	@Before
+	public void setupMocks() {
+		SEVERITY_CONCEPT_UUIDS.put(FhirConstants.GLOBAL_PROPERTY_SEVERE, SEVERITY_SEVERE_CONCEPT_UUID);
+		
+		when(globalPropertyService.getGlobalProperties(FhirConstants.GLOBAL_PROPERTY_MILD,
+		    FhirConstants.GLOBAL_PROPERTY_MODERATE, FhirConstants.GLOBAL_PROPERTY_SEVERE,
+		    FhirConstants.GLOBAL_PROPERTY_OTHER)).thenReturn(SEVERITY_CONCEPT_UUIDS);
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
@@ -591,6 +629,192 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 		List<Patient> resultList = get(results);
 		
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPatients_shouldReverseIncludeAllergiesWithReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_OTHER1_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("AllergyIntolerance:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(2)); // reverse included resource added as part of the result list
+		assertThat(resultList.get(1), allOf(is(instanceOf(AllergyIntolerance.class)),
+		    hasProperty("patient", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER1_UUID))))));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReverseIncludeDiagnosticReportsWithReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_OTHER1_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("DiagnosticReport:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(2)); // reverse included resource added as part of the result list
+		assertThat(resultList.get(1), allOf(is(instanceOf(DiagnosticReport.class)),
+		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER1_UUID))))));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReverseIncludeEncountersWithReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_OTHER2_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("Encounter:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(4)); // reverse included resources added as part of the result list
+		assertThat(resultList.subList(1, 4), everyItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER2_UUID)))))));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReverseIncludeObservationsWithReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_OTHER2_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("Observation:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(10)); // reverse included resources added as part of the result list
+		assertThat(resultList.subList(1, 10), everyItem(allOf(is(instanceOf(Observation.class)),
+		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER2_UUID)))))));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReverseIncludeMedicationRequestsWithReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_OTHER3_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("MedicationRequest:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(9)); // reverse included resources added as part of the result list
+		assertThat(resultList.subList(1, 9), everyItem(allOf(is(instanceOf(MedicationRequest.class)),
+		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER3_UUID)))))));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReverseIncludeServiceRequestsWithReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_OTHER3_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("ServiceRequest:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(4)); // reverse included resources added as part of the result list
+		assertThat(resultList.subList(1, 4), everyItem(allOf(is(instanceOf(ServiceRequest.class)),
+		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER3_UUID)))))));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReverseIncludeProcedureRequestsWithReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_OTHER3_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("ProcedureRequest:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(4)); // reverse included resources added as part of the result list
+		assertThat(resultList.subList(1, 4), everyItem(allOf(is(instanceOf(ServiceRequest.class)),
+		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER3_UUID)))))));
+	}
+	
+	@Test
+	public void searchForPatients_shouldHandleMultipleReverseIncludes() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_OTHER2_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("Encounter:patient"));
+		revIncludes.add(new Include("Observation:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(13)); // reverse included resources (3 encounters + 9 observations) added as part of the result list
+		assertThat(resultList.subList(1, 13), everyItem(allOf(
+		    anyOf(is(instanceOf(Encounter.class)), is(instanceOf(Observation.class))),
+		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER2_UUID)))))));
 	}
 	
 	@Test

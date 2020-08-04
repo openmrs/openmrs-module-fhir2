@@ -11,6 +11,9 @@ package org.openmrs.module.fhir2.api;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -30,5 +33,6 @@ public interface FhirPatientService extends FhirService<Patient> {
 	IBundleProvider searchForPatients(StringAndListParam name, StringAndListParam given, StringAndListParam family,
 	        TokenAndListParam identifier, TokenAndListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
 	        TokenAndListParam deceased, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
-	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort);
+	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
+	        HashSet<Include> revIncludes);
 }

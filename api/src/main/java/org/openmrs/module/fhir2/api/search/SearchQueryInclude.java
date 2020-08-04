@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.FhirLocationService;
@@ -80,6 +81,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	@Autowired
 	private FhirServiceRequestService serviceRequestService;
 	
+	@Autowired
+	private FhirAllergyIntoleranceService allergyIntoleranceService;
+	
 	public Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams) {
 		List<PropParam<?>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);
 		Set<IBaseResource> _includeResources = handleInclude(resourceList, includeParamList);
@@ -121,6 +125,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 					break;
 				case FhirConstants.INCLUDE_MEDICATION_PARAM:
 					bundleProvider = handleMedicationReverseInclude(referenceParams, revIncludeParam.getParamType());
+					break;
+				case FhirConstants.INCLUDE_PATIENT_PARAM:
+					bundleProvider = handlePatientReverseInclude(referenceParams, revIncludeParam.getParamType());
 					break;
 			}
 			
@@ -213,6 +220,30 @@ public class SearchQueryInclude<U extends IBaseResource> {
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null,
 				    null);
+		}
+		
+		return null;
+	}
+	
+	private IBundleProvider handlePatientReverseInclude(ReferenceAndListParam params, String targetType) {
+		switch (targetType) {
+			case FhirConstants.OBSERVATION:
+				return observationService.searchForObservations(null, params, null, null, null, null, null, null, null, null,
+				    null, null, null, null);
+			case FhirConstants.DIAGNOSTIC_REPORT:
+				return diagnosticReportService.searchForDiagnosticReports(null, params, null, null, null, null, null, null,
+				    null);
+			case FhirConstants.ALLERGY_INTOLERANCE:
+				return allergyIntoleranceService.searchForAllergies(params, null, null, null, null, null, null, null, null,
+				    null);
+			case FhirConstants.ENCOUNTER:
+				return encounterService.searchForEncounters(null, null, null, params, null, null, null, null);
+			case FhirConstants.MEDICATION_REQUEST:
+				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null,
+				    null);
+			case FhirConstants.SERVICE_REQUEST:
+			case FhirConstants.PROCEDURE_REQUEST:
+				return serviceRequestService.searchForServiceRequests(params, null, null, null, null, null, null, null);
 		}
 		
 		return null;
