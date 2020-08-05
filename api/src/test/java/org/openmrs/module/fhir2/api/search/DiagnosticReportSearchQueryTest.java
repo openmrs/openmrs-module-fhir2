@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.search;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -534,6 +535,18 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
+	public void searchForDiagnosticReports_shouldReturnObsHavingGroupMembers() {
+		SearchParameterMap theParams = new SearchParameterMap();
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results.size(), equalTo(2)); // actual number of obs = 15
+		
+		List<DiagnosticReport> resultList = get(results);
+		
+		assertThat(resultList, everyItem(hasProperty("result", hasSize(greaterThanOrEqualTo(1)))));
+	}
+	
+	@Test
 	public void searchForDiagnosticReports_shouldReturnEmptyListOfDiagnosticReportsByMultiplePatientGivenNameAnd() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
@@ -905,10 +918,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		assertThat(diagnosticReports, notNullValue());
 		assertThat(diagnosticReports.size(), greaterThanOrEqualTo(1));
 		
-		// collect only those obs which are an obs group
-		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
-		List<DiagnosticReport> results = dao.getSearchResults(theParams, matchingResourceUuids, START_INDEX, END_INDEX)
-		        .stream().filter(Obs::isObsGrouping).map(translator::toFhirResource).collect(Collectors.toList());
+		List<DiagnosticReport> results = get(diagnosticReports);
 		
 		assertThat(results, not(empty()));
 		assertThat(results.size(), greaterThanOrEqualTo(1));
