@@ -15,13 +15,17 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hl7.fhir.r4.model.Patient.SP_FAMILY;
+import static org.hl7.fhir.r4.model.Patient.SP_GIVEN;
+import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
+import static org.hl7.fhir.r4.model.Patient.SP_NAME;
+import static org.openmrs.module.fhir2.FhirConstants.RESULT_SEARCH_HANDLER;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -35,7 +39,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -52,6 +55,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+	
+	private static final String DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirDiagnosticReportDaoImplTest_initial_data.xml";
 	
 	private static final String DIAGNOSTIC_REPORT_UUID = "dchf6962-1c42-49ea-bed2-97650c66f246";
 	
@@ -93,20 +98,18 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	
 	private static final String OBS_RESULT_UUID = "dc386962-1c42-49ea-bed2-97650c66sd46";
 	
-	private static final String DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirDiagnosticReportDaoImplTest_initial_data.xml";
-	
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
+	
+	@Autowired
+	SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
 	
 	@Autowired
 	private FhirDiagnosticReportDao dao;
 	
 	@Autowired
 	private DiagnosticReportTranslator translator;
-	
-	@Autowired
-	SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
 	
 	@Before
 	public void setup() throws Exception {
@@ -117,8 +120,9 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private List<DiagnosticReport> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof DiagnosticReport)
+		        .map(it -> (DiagnosticReport) it).collect(Collectors.toList());
 	}
 	
 	@Test
@@ -131,12 +135,11 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
+		List<DiagnosticReport> resultList = get(diagnosticReports);
 		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getEncounter().getReferenceElement().getIdPart(),
-		    equalTo(ENCOUNTER_UUID));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getEncounter().getReferenceElement().getIdPart(), equalTo(ENCOUNTER_UUID));
 	}
 	
 	@Test
@@ -149,10 +152,10 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
+		List<DiagnosticReport> resultList = get(diagnosticReports);
 		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -165,12 +168,13 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getSubject().getReferenceElement().getIdPart(),
-		    equalTo(PATIENT_UUID));
+		assertThat(diagnosticReports.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getSubject().getReferenceElement().getIdPart(), equalTo(PATIENT_UUID));
 	}
 	
 	@Test
@@ -183,10 +187,12 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
+		assertThat(diagnosticReports.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -207,11 +213,12 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -231,7 +238,7 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<DiagnosticReport> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -247,28 +254,31 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
-		    equalTo(PATIENT_IDENTIFIER));
+		assertThat(diagnosticReports.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getSubject().getIdentifier().getValue(), equalTo(PATIENT_IDENTIFIER));
 	}
 	
 	@Test
 	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientIdentifier() {
-		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(WRONG_PATIENT_IDENTIFIER).setChain(Patient.SP_IDENTIFIER)));
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(WRONG_PATIENT_IDENTIFIER).setChain(SP_IDENTIFIER)));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientReference);
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
+		assertThat(diagnosticReports.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -291,13 +301,13 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
-		    equalTo(PATIENT_IDENTIFIER));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getSubject().getIdentifier().getValue(), equalTo(PATIENT_IDENTIFIER));
 	}
 	
 	@Test
@@ -317,11 +327,14 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    referenceParam);
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -335,12 +348,13 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(diagnosticReports.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
 	
 	@Test
@@ -357,24 +371,27 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		List<String> resultSet = dao.getSearchResultUuids(theParams);
+		
 		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
 	}
 	
 	@Test
 	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientName() {
-		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(WRONG_PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(WRONG_PATIENT_GIVEN_NAME).setChain(SP_NAME)));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientReference);
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
+		assertThat(diagnosticReports.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -394,15 +411,16 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    referenceParam);
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
 	
 	@Test
@@ -424,9 +442,11 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -440,12 +460,13 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(diagnosticReports.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
 	
 	@Test
@@ -462,24 +483,27 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		List<String> resultSet = dao.getSearchResultUuids(theParams);
+		
 		assertThat(resultSet.size(), equalTo(1)); // 2 with repetitions
 	}
 	
 	@Test
 	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientGivenName() {
-		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(WRONG_PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(WRONG_PATIENT_GIVEN_NAME).setChain(SP_GIVEN)));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientReference);
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
+		assertThat(diagnosticReports.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -501,11 +525,12 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -527,7 +552,7 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<DiagnosticReport> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -543,12 +568,13 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(diagnosticReports.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
 	
 	@Test
@@ -565,24 +591,27 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<String> resultSet = new HashSet<>(dao.getResultUuids(theParams));
+		List<String> resultSet = dao.getSearchResultUuids(theParams);
+		
 		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
 	}
 	
 	@Test
 	public void searchForDiagnosticReports_shouldReturnEmptyCollectionByWrongPatientFamilyName() {
-		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
-		        .add(new ReferenceParam().setValue(WRONG_PATIENT_FAMILY_NAME).setChain(Patient.SP_FAMILY)));
+		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(WRONG_PATIENT_FAMILY_NAME).setChain(SP_FAMILY)));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientReference);
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
+		assertThat(diagnosticReports.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -602,13 +631,15 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    referenceParam);
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -628,11 +659,14 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    referenceParam);
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -645,12 +679,11 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
+		List<DiagnosticReport> resultList = get(diagnosticReports);
 		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getIssued().toString(),
-		    equalTo(DIAGNOSTIC_REPORT_DATE));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getIssued().toString(), equalTo(DIAGNOSTIC_REPORT_DATE));
 	}
 	
 	@Test
@@ -662,10 +695,12 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
+		assertThat(diagnosticReports.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -677,12 +712,13 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getCode().getCodingFirstRep().getCode(),
-		    equalTo(CODEABLE_CONCEPT_UUID));
+		assertThat(diagnosticReports.size(), greaterThanOrEqualTo(1));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).getCode().getCodingFirstRep().getCode(), equalTo(CODEABLE_CONCEPT_UUID));
 	}
 	
 	@Test
@@ -694,10 +730,12 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), equalTo(0));
+		assertThat(diagnosticReports.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, empty());
 	}
 	
 	@Test
@@ -705,18 +743,18 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		ReferenceAndListParam param = new ReferenceAndListParam()
 		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam(OBS_RESULT_UUID)));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.RESULT_SEARCH_HANDLER, param);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(RESULT_SEARCH_HANDLER, param);
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
 		assertThat(diagnosticReports, notNullValue());
 		assertThat(diagnosticReports.size(), equalTo(1));
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
+		List<DiagnosticReport> resultList = get(diagnosticReports);
 		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getResult(),
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getResult(),
 		    hasItem(hasProperty("referenceElement", hasProperty("idPart", equalTo(OBS_RESULT_UUID)))));
 	}
 	
@@ -732,7 +770,7 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		assertThat(diagnosticReports, notNullValue());
 		assertThat(diagnosticReports.size(), equalTo(0));
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
+		List<DiagnosticReport> resultList = get(diagnosticReports);
 		
 		assertThat(diagnosticReports, notNullValue());
 		assertThat(resultList.size(), equalTo(0));
@@ -747,13 +785,13 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
 	
 	@Test
@@ -765,11 +803,12 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(results.size(), equalTo(1));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -783,13 +822,13 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((DiagnosticReport) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
 	
 	@Test
@@ -804,9 +843,11 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<DiagnosticReport> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -822,12 +863,15 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		List<IBaseResource> resultList = get(diagnosticReports);
-		
 		assertThat(diagnosticReports, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(diagnosticReports.size(), greaterThanOrEqualTo(1));
 		
-		DiagnosticReport diagnosticReport = (DiagnosticReport) resultList.iterator().next();
+		List<DiagnosticReport> resultList = get(diagnosticReports);
+		
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		
+		DiagnosticReport diagnosticReport = resultList.get(0);
+		
 		assertThat(diagnosticReport.getCode().getCodingFirstRep().getCode(), equalTo(CODEABLE_CONCEPT_UUID));
 		assertThat(diagnosticReport.getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
@@ -855,22 +899,23 @@ public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensit
 	
 	private List<DiagnosticReport> getNonNullObsListForSorting(SortSpec sort) {
 		SearchParameterMap theParams = new SearchParameterMap().setSortSpec(sort);
+		
 		IBundleProvider diagnosticReports = search(theParams);
 		
-		// collect only those obs which are an obs group
-		List<String> matchingResourceUuids = dao.getResultUuids(theParams);
-		List<DiagnosticReport> results = dao.search(theParams, matchingResourceUuids, START_INDEX, END_INDEX).stream()
-		        .filter(Obs::isObsGrouping).map(translator::toFhirResource).collect(Collectors.toList());
-		
 		assertThat(diagnosticReports, notNullValue());
+		assertThat(diagnosticReports.size(), greaterThanOrEqualTo(1));
+		
+		// collect only those obs which are an obs group
+		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
+		List<DiagnosticReport> results = dao.getSearchResults(theParams, matchingResourceUuids, START_INDEX, END_INDEX)
+		        .stream().filter(Obs::isObsGrouping).map(translator::toFhirResource).collect(Collectors.toList());
+		
 		assertThat(results, not(empty()));
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		
 		// Remove diagnostic reports with sort parameter value null, to allow comparison while asserting.
-		switch (sort.getParamName()) {
-			case DiagnosticReport.SP_ISSUED:
-				results.removeIf(p -> p.getIssued() == null);
-				break;
+		if (DiagnosticReport.SP_ISSUED.equals(sort.getParamName())) {
+			results.removeIf(p -> p.getIssued() == null);
 		}
 		
 		return results;

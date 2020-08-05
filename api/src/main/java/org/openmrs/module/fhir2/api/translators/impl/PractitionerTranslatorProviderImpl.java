@@ -11,9 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -22,6 +21,7 @@ import org.apache.commons.lang.Validate;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
@@ -52,7 +52,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	private GenderTranslator genderTranslator;
 	
 	@Autowired
-	private TelecomTranslator<Object> telecomTranslator;
+	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Autowired
 	private FhirPractitionerDao fhirPractitionerDao;
@@ -69,20 +69,15 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 		if (practitioner == null) {
 			return existingProvider;
 		}
+		
 		existingProvider.setUuid(practitioner.getId());
+		
 		Validate.notEmpty(practitioner.getIdentifier(), "Practitioner Identifier cannot be empty");
 		existingProvider.setIdentifier(practitioner.getIdentifier().get(0).getValue());
-		if (!practitioner.getActive()) {
-			existingProvider.setRetired(practitioner.getActive());
-			existingProvider.setDateRetired(new Date());
-			existingProvider.setRetireReason("Retired By FHIR module");
-		}
 		
-		Set<ProviderAttribute> attributes = practitioner.getTelecom().stream().map(
+		practitioner.getTelecom().stream().map(
 		    contactPoint -> (ProviderAttribute) telecomTranslator.toOpenmrsType(new ProviderAttribute(), contactPoint))
-		        .collect(Collectors.toSet());
-		existingProvider.setAttributes(attributes);
-		existingProvider.setDateChanged(practitioner.getMeta().getLastUpdated());
+		        .filter(Objects::nonNull).forEach(existingProvider::addAttribute);
 		
 		return existingProvider;
 	}
@@ -115,6 +110,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 				practitioner.addAddress(addressTranslator.toFhirResource(address));
 			}
 		}
+		
 		practitioner.getMeta().setLastUpdated(provider.getDateChanged());
 		practitioner.addContained(provenanceTranslator.getCreateProvenance(provider));
 		practitioner.addContained(provenanceTranslator.getUpdateProvenance(provider));
@@ -125,7 +121,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	public List<ContactPoint> getProviderContactDetails(@NotNull Provider provider) {
 		return fhirPractitionerDao
 		        .getActiveAttributesByPractitionerAndAttributeTypeUuid(provider,
-		            globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY))
+		            globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_ATTRIBUTE_TYPE))
 		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	

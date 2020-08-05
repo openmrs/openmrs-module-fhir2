@@ -61,12 +61,12 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	}
 	
 	@Override
-	public IBundleProvider searchForPractitioners(StringAndListParam name, TokenAndListParam identifier,
+	public IBundleProvider searchForPractitioners(TokenAndListParam identifier, StringAndListParam name,
 	        StringAndListParam given, StringAndListParam family, StringAndListParam city, StringAndListParam state,
 	        StringAndListParam postalCode, StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated) {
 		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER, name)
 		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier)
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.NAME_PROPERTY, name)
 		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY, given)
 		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY, family)
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)
@@ -77,16 +77,22 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
 		IBundleProvider providerBundle = searchQuery.getQueryResults(theParams, dao, translator);
-		IBundleProvider userBundle = userService.searchForUsers(name, identifier, given, family, city, state, postalCode,
+		IBundleProvider userBundle = userService.searchForUsers(identifier, name, given, family, city, state, postalCode,
 		    country, id, lastUpdated);
 		
 		if (!providerBundle.isEmpty() && !userBundle.isEmpty()) {
-			List<IBaseResource> theResource = providerBundle.getResources(0, providerBundle.size());
-			theResource.addAll(userBundle.getResources(0, userBundle.size()));
+			final Integer providerBundleSize = providerBundle.size();
+			List<IBaseResource> theResource = providerBundle.getResources(0,
+			    providerBundleSize == null ? Integer.MAX_VALUE : providerBundleSize);
+			
+			final Integer userBundleSize = userBundle.size();
+			theResource.addAll(userBundle.getResources(0, userBundleSize == null ? Integer.MAX_VALUE : userBundleSize));
+			
 			return new SimpleBundleProvider(theResource);
 		} else if (providerBundle.isEmpty() && !userBundle.isEmpty()) {
 			return userBundle;
 		}
+		
 		return providerBundle;
 	}
 }

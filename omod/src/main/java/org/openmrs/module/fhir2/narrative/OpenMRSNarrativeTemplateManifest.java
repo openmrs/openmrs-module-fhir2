@@ -198,7 +198,7 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 			}
 		} else if (name.startsWith("file:")) {
 			File file = new File(name.substring("file:".length()));
-			if (file.exists() == false) {
+			if (!file.exists()) {
 				throw new IOException("File not found: " + file.getAbsolutePath());
 			}
 			try (FileInputStream inputStream = new FileInputStream(file)) {
@@ -206,7 +206,7 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 			}
 		} else if (name.startsWith("openmrs:")) {
 			File file = new File(OpenmrsUtil.getApplicationDataDirectory(), name.substring("openmrs:".length()));
-			if (file.exists() == false) {
+			if (!file.exists()) {
 				throw new IOException("File not found: " + file.getAbsolutePath());
 			}
 			try (FileInputStream inputStream = new FileInputStream(file)) {

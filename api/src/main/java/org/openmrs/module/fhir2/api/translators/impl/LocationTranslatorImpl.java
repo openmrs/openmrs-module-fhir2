@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationTag;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -42,7 +43,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	private LocationAddressTranslator locationAddressTranslator;
 	
 	@Autowired
-	private TelecomTranslator<Object> telecomTranslator;
+	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Autowired
 	private FhirGlobalPropertyService propertyService;
@@ -108,7 +109,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	protected List<ContactPoint> getLocationContactDetails(@NotNull org.openmrs.Location location) {
 		return fhirLocationDao
 		        .getActiveAttributesByLocationAndAttributeTypeUuid(location,
-		            propertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY))
+		            propertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_ATTRIBUTE_TYPE))
 		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
@@ -143,10 +144,9 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 				openmrsLocation.setLongitude(fhirLocation.getPosition().getLongitude().toString());
 			}
 			
-			Set<LocationAttribute> attributes = fhirLocation.getTelecom().stream().map(
+			fhirLocation.getTelecom().stream().map(
 			    contactPoint -> (LocationAttribute) telecomTranslator.toOpenmrsType(new LocationAttribute(), contactPoint))
-			        .collect(Collectors.toSet());
-			openmrsLocation.setAttributes(attributes);
+			        .distinct().filter(Objects::nonNull).forEach(openmrsLocation::addAttribute);
 			
 			if (fhirLocation.getMeta().hasTag()) {
 				for (Coding tag : fhirLocation.getMeta().getTag()) {

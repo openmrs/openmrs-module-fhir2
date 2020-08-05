@@ -9,13 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
+import static org.exparity.hamcrest.date.DateMatchers.sameDay;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrBefore;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
@@ -30,6 +33,7 @@ import static org.openmrs.util.OpenmrsUtil.compareWithNullAsGreatest;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,13 +47,11 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.comparator.ComparatorMatcherBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Person;
 import org.junit.Test;
-import org.openmrs.Person;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
@@ -61,6 +63,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+	
+	private static final String ADDRESS_SEARCH_FILE = "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_address_data.xml";
 	
 	private static final String MALE_GENDER = "male";
 	
@@ -133,10 +137,11 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	private PersonTranslator translator;
 	
 	@Autowired
-	private SearchQuery<Person, org.hl7.fhir.r4.model.Person, FhirPersonDao, PersonTranslator> searchQuery;
+	private SearchQuery<org.openmrs.Person, Person, FhirPersonDao, PersonTranslator> searchQuery;
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private List<Person> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof Person)
+		        .map(it -> (Person) it).collect(Collectors.toList());
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
@@ -145,20 +150,18 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void shouldReturnCollectionOfPeopleForMatchOnPersonName() {
-		StringAndListParam personName = new StringAndListParam()
-		        .addAnd(new StringOrListParam().add(new StringParam(PERSON_NAME)));
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, personName);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.NAME_PROPERTY, new StringAndListParam().addAnd(new StringParam(PERSON_NAME)));
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		
+		List<Person> resultList = get(people);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getNameFirstRep().getNameAsSingleString(),
-		    containsString(PERSON_NAME));
+		assertThat(resultList.get(0).getNameFirstRep().getNameAsSingleString(), containsString(PERSON_NAME));
 	}
 	
 	@Test
@@ -166,17 +169,18 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		StringAndListParam personName = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(PERSON_PARTIAL_NAME)));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, personName);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.NAME_PROPERTY, personName);
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		
+		List<Person> resultList = get(people);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getNameFirstRep().getNameAsSingleString(),
-		    containsString(PERSON_PARTIAL_NAME));
+		assertThat(resultList.get(0).getNameFirstRep().getNameAsSingleString(), containsString(PERSON_PARTIAL_NAME));
 	}
 	
 	@Test
@@ -184,13 +188,16 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		StringAndListParam personName = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NOT_FOUND_NAME)));
 		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, personName);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.NAME_PROPERTY, personName);
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), equalTo(0));
+		
+		List<Person> resultList = get(people);
+		
 		assertThat(resultList, is(empty()));
 	}
 	
@@ -201,13 +208,13 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		
+		List<Person> resultList = get(people);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getGenderElement().getValue(),
-		    equalTo(Enumerations.AdministrativeGender.MALE));
+		assertThat(resultList.get(0).getGenderElement().getValue(), equalTo(Enumerations.AdministrativeGender.MALE));
 	}
 	
 	@Test
@@ -217,7 +224,7 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
+		List<Person> resultList = get(people);
 		
 		assertThat(people, notNullValue());
 		assertThat(resultList, is(empty()));
@@ -231,13 +238,13 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		
+		List<Person> resultList = get(people);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getBirthDate(),
-		    DateMatchers.sameDay(DATE_FORMAT.parse(BIRTH_DATE)));
+		assertThat(resultList.get(0).getBirthDate(), sameDay(DATE_FORMAT.parse(BIRTH_DATE)));
 	}
 	
 	@Test
@@ -249,9 +256,11 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), equalTo(0));
+		
+		List<Person> resultList = get(people);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -264,13 +273,13 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		
+		List<Person> resultList = get(people);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getAddressFirstRep().getCity(),
-		    equalTo(CITY));
+		assertThat(resultList.get(0).getAddressFirstRep().getCity(), equalTo(CITY));
 	}
 	
 	@Test
@@ -282,13 +291,13 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		
+		List<Person> resultList = get(people);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getAddressFirstRep().getState(),
-		    equalTo(STATE));
+		assertThat(resultList.get(0).getAddressFirstRep().getState(), equalTo(STATE));
 	}
 	
 	@Test
@@ -301,13 +310,13 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		
+		List<Person> resultList = get(people);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getAddressFirstRep().getPostalCode(),
-		    equalTo(POSTAL_CODE));
+		assertThat(resultList.get(0).getAddressFirstRep().getPostalCode(), equalTo(POSTAL_CODE));
 	}
 	
 	@Test
@@ -319,13 +328,13 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		
+		List<Person> resultList = get(people);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getAddressFirstRep().getCountry(),
-		    equalTo(COUNTRY));
+		assertThat(resultList.get(0).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
 	}
 	
 	@Test
@@ -337,13 +346,13 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThanOrEqualTo(1));
+		
+		List<Person> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(PERSON_UUID));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(PERSON_UUID));
 	}
 	
 	@Test
@@ -355,9 +364,11 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(4));
+		
+		List<Person> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(4));
 	}
@@ -374,13 +385,14 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<Person> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(PERSON_UUID));
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(PERSON_UUID));
 	}
 	
 	@Test
@@ -394,19 +406,31 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<Person> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
 	@Test
 	public void shouldReturnCollectionOfPeopleSortedByGivenName() {
 		SortSpec sort = new SortSpec();
-		sort.setParamName("name");
+		sort.setParamName(SP_NAME);
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		List<org.hl7.fhir.r4.model.Person> people = getPersonListForSorting(sort);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
+		    FhirConstants.NAME_PROPERTY, new StringAndListParam().addAnd(new StringParam(""))).setSortSpec(sort);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Person> people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getNameFirstRep(), NAME_MATCHER.lessThanOrEqualTo(people.get(i).getNameFirstRep()));
@@ -414,7 +438,16 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		people = getPersonListForSorting(sort);
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getNameFirstRep(),
@@ -425,17 +458,38 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void shouldReturnCollectionOfPeopleSortedByBirthDate() {
 		SortSpec sort = new SortSpec();
-		sort.setParamName("birthdate");
+		sort.setParamName(SP_BIRTHDATE);
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		List<org.hl7.fhir.r4.model.Person> people = getPersonListForSorting(sort);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
+		    "birthdate", new DateRangeParam().setLowerBound("1900-01-01").setUpperBoundInclusive(new Date()))
+		        .setSortSpec(sort);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Person> people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getBirthDate(), sameOrBefore(people.get(i).getBirthDate()));
 		}
 		
 		sort.setOrder(SortOrderEnum.DESC);
-		people = getPersonListForSorting(sort);
+		
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getBirthDate(), sameOrAfter(people.get(i).getBirthDate()));
@@ -443,12 +497,24 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void shouldReturnCollectionOfPeopleSortedByCity() {
+	public void shouldReturnCollectionOfPeopleSortedByCity() throws Exception {
+		executeDataSet(ADDRESS_SEARCH_FILE);
+		
 		SortSpec sort = new SortSpec();
-		sort.setParamName("address-city");
+		sort.setParamName(SP_ADDRESS_CITY);
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		List<org.hl7.fhir.r4.model.Person> people = getPersonListForSorting(sort);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.CITY_PROPERTY, new StringAndListParam().addAnd(new StringParam("City"))).setSortSpec(sort);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Person> people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getAddressFirstRep().getCity(),
@@ -457,7 +523,16 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		people = getPersonListForSorting(sort);
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getAddressFirstRep().getCity(),
@@ -466,12 +541,24 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void shouldReturnCollectionOfPeopleSortedByState() {
+	public void shouldReturnCollectionOfPeopleSortedByState() throws Exception {
+		executeDataSet(ADDRESS_SEARCH_FILE);
+		
 		SortSpec sort = new SortSpec();
-		sort.setParamName("address-state");
+		sort.setParamName(SP_ADDRESS_STATE);
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		List<org.hl7.fhir.r4.model.Person> people = getPersonListForSorting(sort);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.STATE_PROPERTY, new StringAndListParam().addAnd(new StringParam("M"))).setSortSpec(sort);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Person> people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getAddressFirstRep().getState(),
@@ -480,7 +567,16 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		people = getPersonListForSorting(sort);
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getAddressFirstRep().getState(),
@@ -489,12 +585,24 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void shouldReturnCollectionOfPeopleSortedByPostalCode() {
+	public void shouldReturnCollectionOfPeopleSortedByPostalCode() throws Exception {
+		executeDataSet(ADDRESS_SEARCH_FILE);
+		
 		SortSpec sort = new SortSpec();
-		sort.setParamName("address-postalcode");
+		sort.setParamName(SP_ADDRESS_POSTALCODE);
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		List<org.hl7.fhir.r4.model.Person> people = getPersonListForSorting(sort);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.POSTAL_CODE_PROPERTY, new StringAndListParam().addAnd(new StringParam("0"))).setSortSpec(sort);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Person> people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getAddressFirstRep().getPostalCode(),
@@ -503,7 +611,16 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		people = getPersonListForSorting(sort);
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getAddressFirstRep().getPostalCode(),
@@ -512,12 +629,24 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void shouldReturnCollectionOfPeopleSortedByCountry() {
+	public void shouldReturnCollectionOfPeopleSortedByCountry() throws Exception {
+		executeDataSet(ADDRESS_SEARCH_FILE);
+		
 		SortSpec sort = new SortSpec();
-		sort.setParamName("address-country");
+		sort.setParamName(SP_ADDRESS_COUNTRY);
 		sort.setOrder(SortOrderEnum.ASC);
 		
-		List<org.hl7.fhir.r4.model.Person> people = getPersonListForSorting(sort);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
+		    FhirConstants.COUNTRY_PROPERTY, new StringAndListParam().addAnd(new StringParam("F"))).setSortSpec(sort);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Person> people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getAddressFirstRep().getCountry(),
@@ -526,7 +655,16 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		sort.setOrder(SortOrderEnum.DESC);
 		
-		people = getPersonListForSorting(sort);
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		people = get(results);
+		
+		assertThat(people, hasSize(greaterThan(1)));
 		
 		for (int i = 1; i < people.size(); i++) {
 			assertThat(people.get(i - 1).getAddressFirstRep().getCountry(),
@@ -555,63 +693,20 @@ public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		IBundleProvider people = search(theParams);
 		
-		List<IBaseResource> resultList = get(people);
-		
 		assertThat(people, notNullValue());
+		assertThat(people.size(), greaterThanOrEqualTo(1));
+		
+		List<Person> resultList = get(people);
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getGenderElement().getValue(),
-		    equalTo(Enumerations.AdministrativeGender.MALE));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getBirthDate(),
-		    DateMatchers.sameDay(DATE_FORMAT.parse(BIRTH_DATE)));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getAddressFirstRep().getCity(),
-		    equalTo(CITY));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getAddressFirstRep().getState(),
-		    equalTo(STATE));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getAddressFirstRep().getPostalCode(),
-		    equalTo(POSTAL_CODE));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getAddressFirstRep().getCountry(),
-		    equalTo(COUNTRY));
-		assertThat(((org.hl7.fhir.r4.model.Person) resultList.iterator().next()).getId(), equalTo(PERSON_UUID));
+		
+		Person person = resultList.get(0);
+		
+		assertThat(person.getGenderElement().getValue(), equalTo(Enumerations.AdministrativeGender.MALE));
+		assertThat(person.getBirthDate(), sameDay(DATE_FORMAT.parse(BIRTH_DATE)));
+		assertThat(person.getAddressFirstRep().getCity(), equalTo(CITY));
+		assertThat(person.getAddressFirstRep().getState(), equalTo(STATE));
+		assertThat(person.getAddressFirstRep().getPostalCode(), equalTo(POSTAL_CODE));
+		assertThat(person.getAddressFirstRep().getCountry(), equalTo(COUNTRY));
+		assertThat(person.getId(), equalTo(PERSON_UUID));
 	}
-	
-	private List<org.hl7.fhir.r4.model.Person> getPersonListForSorting(SortSpec sortSpec) {
-		SearchParameterMap theParams = new SearchParameterMap().setSortSpec(sortSpec);
-		
-		IBundleProvider people = search(theParams);
-		
-		List<IBaseResource> resultList = get(people);
-		
-		assertThat(people, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		
-		List<org.hl7.fhir.r4.model.Person> peopleList = get(people).stream().map(p -> (org.hl7.fhir.r4.model.Person) p)
-		        .collect(Collectors.toList());
-		
-		// Remove people with sort parameter value null, to allow comparison while asserting.
-		switch (sortSpec.getParamName()) {
-			case SP_NAME:
-				peopleList.removeIf(p -> p.getNameFirstRep() == null);
-				break;
-			case SP_BIRTHDATE:
-				peopleList.removeIf(p -> p.getBirthDate() == null);
-				break;
-			case SP_ADDRESS_CITY:
-				peopleList.removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getCity() == null);
-				break;
-			case SP_ADDRESS_STATE:
-				peopleList.removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getState() == null);
-				break;
-			case SP_ADDRESS_POSTALCODE:
-				peopleList.removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getPostalCode() == null);
-				break;
-			case SP_ADDRESS_COUNTRY:
-				peopleList.removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getCountry() == null);
-				break;
-		}
-		
-		return peopleList;
-	}
-	
 }

@@ -12,15 +12,16 @@ package org.openmrs.module.fhir2.providers.r3;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -37,7 +38,6 @@ import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,8 +82,9 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		diagnosticReport.setId(UUID);
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private List<DiagnosticReport> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof DiagnosticReport)
+		        .map(it -> (DiagnosticReport) it).collect(Collectors.toList());
 	}
 	
 	@Test
@@ -103,7 +104,6 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		
 		assertThat(result, notNullValue());
 		assertThat(result.isResource(), is(true));
-		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(UUID));
 	}
 	
@@ -112,8 +112,7 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		IdType idType = new IdType();
 		idType.setValue(WRONG_UUID);
 		
-		assertThat(resourceProvider.getDiagnosticReportById(idType).isResource(), is(true));
-		assertThat(resourceProvider.getDiagnosticReportById(idType), nullValue());
+		resourceProvider.getDiagnosticReportById(idType);
 	}
 	
 	@Test
@@ -179,12 +178,12 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, null, null, null, null, null, null,
 		    null);
 		
-		List<IBaseResource> resultList = get(results);
+		List<DiagnosticReport> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
-		assertThat(((org.hl7.fhir.r4.model.DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
+		assertThat(resultList.get(0).getId(), equalTo(UUID));
 	}
 	
 	@Test
@@ -199,12 +198,12 @@ public class DiagnosticReportFhirResourceProviderTest extends BaseFhirR3Provenan
 		IBundleProvider results = resourceProvider.searchForDiagnosticReports(null, null, subject, null, null, null, null,
 		    null, null);
 		
-		List<IBaseResource> resultList = get(results);
+		List<DiagnosticReport> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
-		assertThat(((org.hl7.fhir.r4.model.DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
+		assertThat(resultList.get(0).getId(), equalTo(UUID));
 	}
 	
 	@Test

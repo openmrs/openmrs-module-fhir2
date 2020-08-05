@@ -49,11 +49,12 @@ public class FhirUserServiceImpl extends BaseFhirService<Practitioner, User> imp
 	}
 	
 	@Override
-	public IBundleProvider searchForUsers(StringAndListParam name, TokenAndListParam identifier, StringAndListParam given,
+	public IBundleProvider searchForUsers(TokenAndListParam identifier, StringAndListParam name, StringAndListParam given,
 	        StringAndListParam family, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
 	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated) {
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.USER_NAME_SEARCH_HANDLER, name)
+		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier)
+		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.NAME_PROPERTY, name)
 		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY, given)
 		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY, family)
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)

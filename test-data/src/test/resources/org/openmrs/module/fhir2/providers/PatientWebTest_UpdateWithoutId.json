@@ -1,0 +1,20 @@
+{
+  "resourceType": "Patient",
+  "name": [
+    {
+      "given": [
+        "Adam"
+      ],
+      "family": "John"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "2004-08-12",
+  "address": [
+    {
+      "state": "Mukono",
+      "city": "Kampala",
+      "country": "Uganda"
+    }
+  ]
+} 

@@ -46,6 +46,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Provenance;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -136,7 +137,7 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
-		return allergyIntoleranceService.searchForAllergies(patientReference, category, allergen, severity,
-		    manifestationCode, clinicalStatus, id, lastUpdated, sort);
+		return new SearchQueryBundleProviderR3Wrapper(allergyIntoleranceService.searchForAllergies(patientReference,
+		    category, allergen, severity, manifestationCode, clinicalStatus, id, lastUpdated, sort));
 	}
 }

@@ -22,8 +22,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.fhir2.FhirConstants.AUT;
-import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
 
 import javax.servlet.ServletException;
 
@@ -52,7 +50,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -82,11 +79,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	
 	private static final String POSTAL_CODE = "234-30100";
 	
-	private static final String SYSTEM = "https://fhir.openmrs.org/ext/location-tag";
-	
 	private static final String LOGIN_LOCATION_TAG_NAME = "login";
-	
-	private static final String LOGIN_LOCATION_TAG_DESCRIPTION = "Identify login locations";
 	
 	private static final String PARENT_LOCATION_NAME = "Test parent location";
 	
@@ -379,8 +372,9 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		provenance.setActivity(new CodeableConcept().addCoding(
 		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
 		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
-		        .setType(new CodeableConcept().addCoding(new Coding().setCode(AUT).setDisplay(AUTHOR)
-		                .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
+		        .setType(
+		            new CodeableConcept().addCoding(new Coding().setCode(FhirConstants.AUT).setDisplay(FhirConstants.AUTHOR)
+		                    .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
 		        .addRole(new CodeableConcept().addCoding(
 		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
@@ -437,7 +431,6 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		assertThat(readBundleResponse(response).getEntry().size(), greaterThanOrEqualTo(1));
 	}
 	
-	@Ignore
 	@Test
 	public void createLocation_shouldCreateLocation() throws Exception {
 		String jsonLocation;
@@ -445,6 +438,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 			Objects.requireNonNull(is);
 			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
+		
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
 		location.setId(LOCATION_UUID);
 		

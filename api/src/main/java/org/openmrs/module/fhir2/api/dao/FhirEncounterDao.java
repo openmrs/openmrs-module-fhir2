@@ -9,12 +9,33 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
+import java.util.List;
 
 import org.openmrs.Encounter;
+import org.openmrs.annotation.Authorized;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirEncounterDao extends FhirDao<Encounter> {
 	
-	Encounter get(@NotNull String uuid);
+	@Override
+	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+	Encounter get(String uuid);
 	
+	@Override
+	@Authorized({ PrivilegeConstants.ADD_ENCOUNTERS, PrivilegeConstants.EDIT_ENCOUNTERS })
+	Encounter createOrUpdate(Encounter newEntry);
+	
+	@Override
+	@Authorized(PrivilegeConstants.DELETE_ENCOUNTERS)
+	Encounter delete(String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+	List<Encounter> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
+	        int lastResult);
 }

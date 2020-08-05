@@ -44,6 +44,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
@@ -100,7 +101,7 @@ public class PatientTranslatorImplTest {
 	private FhirPersonDao fhirPersonDao;
 	
 	@Mock
-	private TelecomTranslator<Object> telecomTranslator;
+	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;

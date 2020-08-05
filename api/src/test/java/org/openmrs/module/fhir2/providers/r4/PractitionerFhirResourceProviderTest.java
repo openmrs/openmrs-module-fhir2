@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
@@ -171,7 +172,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	public void findPractitionersByName_shouldReturnMatchingBundleOfPractitioners() {
 		StringAndListParam nameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(GIVEN_NAME)));
-		when(practitionerService.searchForPractitioners(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(),
+		when(practitionerService.searchForPractitioners(isNull(), argThat(is(nameParam)), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
@@ -182,14 +183,14 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
 	public void findPractitionersByWrongName_shouldReturnBundleWithEmptyEntries() {
 		StringAndListParam nameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(WRONG_NAME)));
-		when(practitionerService.searchForPractitioners(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(),
+		when(practitionerService.searchForPractitioners(isNull(), argThat(is(nameParam)), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
@@ -205,29 +206,29 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByIdentifier_shouldReturnMatchingBundleOfPractitioners() {
 		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(PRACTITIONER_IDENTIFIER));
-		when(practitionerService.searchForPractitioners(isNull(), argThat(is(identifier)), isNull(), isNull(), isNull(),
+		when(practitionerService.searchForPractitioners(argThat(is(identifier)), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, identifier, null, null, null, null, null,
+		IBundleProvider results = practitionerService.searchForPractitioners(identifier, null, null, null, null, null, null,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
 	public void findPractitionersByWrongIdentifier_shouldReturnBundleWithEmptyEntries() {
 		TokenAndListParam identifier = new TokenAndListParam()
 		        .addAnd(new TokenOrListParam().add(WRONG_PRACTITIONER_IDENTIFIER));
-		when(practitionerService.searchForPractitioners(isNull(), argThat(is(identifier)), isNull(), isNull(), isNull(),
+		when(practitionerService.searchForPractitioners(argThat(is(identifier)), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, identifier, null, null, null, null, null,
+		IBundleProvider results = practitionerService.searchForPractitioners(identifier, null, null, null, null, null, null,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -250,7 +251,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -283,7 +284,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -316,7 +317,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -349,7 +350,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -382,7 +383,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -415,7 +416,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -448,7 +449,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -481,7 +482,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList.iterator().next().fhirType(), is(FhirConstants.PRACTITIONER));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test

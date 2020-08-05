@@ -42,6 +42,7 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -73,7 +74,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	
 	@Create
 	@SuppressWarnings("unused")
-	public MethodOutcome creatEncounter(@ResourceParam Encounter encounter) {
+	public MethodOutcome createEncounter(@ResourceParam Encounter encounter) {
 		return FhirProviderUtils.buildCreate(
 		    Encounter30_40.convertEncounter(encounterService.create(Encounter30_40.convertEncounter(encounter))));
 	}
@@ -130,7 +131,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			subjectReference = patientParam;
 		}
 		
-		return encounterService.searchForEncounters(date, location, participantReference, subjectReference, id, lastUpdated);
+		return new SearchQueryBundleProviderR3Wrapper(encounterService.searchForEncounters(date, location,
+		    participantReference, subjectReference, id, lastUpdated));
 	}
 	
 }

@@ -14,7 +14,7 @@ import static org.apache.commons.lang3.Validate.notNull;
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonAttribute;
@@ -67,7 +68,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	private FhirPersonDao fhirPersonDao;
 	
 	@Autowired
-	private TelecomTranslator<Object> telecomTranslator;
+	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Autowired
 	private ProvenanceTranslator<org.openmrs.Patient> provenanceTranslator;
@@ -117,7 +118,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	public List<ContactPoint> getPatientContactDetails(@NotNull org.openmrs.Patient patient) {
 		return fhirPersonDao
 		        .getActiveAttributesByPersonAndAttributeTypeUuid(patient,
-		            globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY))
+		            globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_ATTRIBUTE_TYPE))
 		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
@@ -174,10 +175,10 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		for (Address address : patient.getAddress()) {
 			currentPatient.addAddress(addressTranslator.toOpenmrsType(address));
 		}
-		Set<PersonAttribute> attributes = patient.getTelecom().stream()
+		
+		patient.getTelecom().stream()
 		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
-		        .collect(Collectors.toSet());
-		currentPatient.setAttributes(attributes);
+		        .distinct().filter(Objects::nonNull).forEach(currentPatient::addAttribute);
 		
 		return currentPatient;
 	}

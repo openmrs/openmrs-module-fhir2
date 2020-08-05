@@ -13,6 +13,7 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Identifier;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
@@ -48,7 +49,7 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 		}
 		
 		if (identifier.getIdentifierType() != null) {
-			patientIdentifier.setSystem(identifier.getIdentifierType().getName());
+			patientIdentifier.setType(new CodeableConcept().setText(identifier.getIdentifierType().getName()));
 		}
 		
 		patientIdentifier.setValue(identifier.getIdentifier()).setId(identifier.getUuid());

@@ -15,10 +15,34 @@ import java.util.List;
 
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
+import org.openmrs.annotation.Authorized;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirPersonDao extends FhirDao<Person> {
 	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PERSONS)
+	Person get(String uuid);
+	
+	@Authorized(PrivilegeConstants.GET_PERSONS)
 	List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@NotNull Person person,
 	        @NotNull String personAttributeTypeUuid);
 	
+	@Override
+	@Authorized({ PrivilegeConstants.ADD_PERSONS, PrivilegeConstants.EDIT_PERSONS })
+	Person createOrUpdate(Person newEntry);
+	
+	@Override
+	@Authorized(PrivilegeConstants.DELETE_PERSONS)
+	Person delete(String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PERSONS)
+	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_PERSONS)
+	List<Person> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
+	        int lastResult);
 }

@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -115,7 +116,7 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
-		return diagnosticReportService.searchForDiagnosticReports(encounterReference, patientReference, issueDate, code,
-		    result, id, lastUpdated, sort);
+		return new SearchQueryBundleProviderR3Wrapper(diagnosticReportService.searchForDiagnosticReports(encounterReference,
+		    patientReference, issueDate, code, result, id, lastUpdated, sort));
 	}
 }

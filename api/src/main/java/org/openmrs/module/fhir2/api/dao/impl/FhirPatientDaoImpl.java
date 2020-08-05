@@ -11,28 +11,24 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.isNull;
+import static org.hibernate.criterion.Restrictions.in;
 import static org.hibernate.criterion.Restrictions.or;
 import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
+import org.hibernate.sql.JoinType;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
-import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
@@ -74,7 +70,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					handleNames(entry.getValue(), criteria);
+					handleNames(criteria, entry.getValue());
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -102,19 +98,24 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		});
 	}
 	
-	@Override
-	protected Optional<Criterion> getCriteriaForLastUpdated(DateRangeParam param) {
-		List<Optional<Criterion>> criterionList = new ArrayList<>();
+	protected void handleIdentifier(Criteria criteria, TokenAndListParam identifier) {
+		if (identifier == null) {
+			return;
+		}
 		
-		criterionList.add(handleDateRange("dateVoided", param));
+		criteria.createAlias("identifiers", "pi", JoinType.INNER_JOIN, eq("pi.voided", false));
 		
-		criterionList.add(Optional.of(
-		    and(toCriteriaArray(Stream.of(Optional.of(isNull("dateVoided")), handleDateRange("dateChanged", param))))));
-		
-		criterionList.add(Optional.of(and(toCriteriaArray(Stream.of(Optional.of(isNull("dateVoided")),
-		    Optional.of(isNull("dateChanged")), handleDateRange("dateCreated", param))))));
-		
-		return Optional.of(or(toCriteriaArray(criterionList)));
+		handleAndListParamBySystem(identifier, (system, tokens) -> {
+			if (system.isEmpty()) {
+				return Optional.of(in("pi.identifier", tokensToList(tokens)));
+			} else {
+				if (lacksAlias(criteria, "pit")) {
+					criteria.createAlias("pi.identifierType", "pit");
+				}
+				
+				return Optional.of(and(eq("pit.name", system), in("pi.identifier", tokensToList(tokens))));
+			}
+		}).ifPresent(criteria::add);
 	}
 	
 	@Override
@@ -129,26 +130,5 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 		}
 		
 		return super.paramToProp(param);
-	}
-	
-	private void handleNames(List<PropParam<?>> params, Criteria criteria) {
-		StringAndListParam name = null;
-		StringAndListParam given = null;
-		StringAndListParam family = null;
-		for (PropParam<?> param : params) {
-			switch (param.getPropertyName()) {
-				case FhirConstants.NAME_PROPERTY:
-					name = (StringAndListParam) param.getParam();
-					break;
-				case FhirConstants.GIVEN_PROPERTY:
-					given = (StringAndListParam) param.getParam();
-					break;
-				case FhirConstants.FAMILY_PROPERTY:
-					family = (StringAndListParam) param.getParam();
-					break;
-			}
-		}
-		
-		handleNames(criteria, name, given, family);
 	}
 }

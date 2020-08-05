@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -171,7 +172,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
 	}
@@ -191,7 +192,7 @@ public class DiagnosticReportFhirResourceProviderTest {
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 		assertThat(((DiagnosticReport) resultList.iterator().next()).getId(), equalTo(UUID));
 	}

@@ -39,6 +39,7 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -119,8 +120,8 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Practitioner.SP_ADDRESS_COUNTRY) StringAndListParam country,
 	        @OptionalParam(name = Practitioner.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
-		return practitionerService.searchForPractitioners(name, identifier, given, family, city, state, postalCode, country,
-		    id, lastUpdated);
+		return new SearchQueryBundleProviderR3Wrapper(practitionerService.searchForPractitioners(identifier, name, given,
+		    family, city, state, postalCode, country, id, lastUpdated));
 	}
 	
 }

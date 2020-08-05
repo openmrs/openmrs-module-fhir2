@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <concept concept_id="5085" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept concept_id="5086" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept concept_id="5087" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept concept_id="5088" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+    <drug drug_id="1010" name="ALBENDAZOLE"  combination="0" strength="200mg" concept_id="5085" dosage_form="5086" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+    <drug_ingredient drug_id="1010" ingredient_id="5088" uuid="5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  strength="200" units="5087"/>
+
+    <drug drug_id="1011" name="ALPENDAZOLE"  combination="1" strength="300mg" concept_id="23" dosage_form="22" creator="1" date_created="2005-01-01 00:00:00.0" date_retired="2010-09-03 00:00:00.0" retired="true" uuid="1086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" maximum_daily_dose="23.08" minimum_daily_dose="10.00" />
+    <drug_ingredient drug_id="1011" ingredient_id="26" uuid="5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  strength="300" units="5089"/>
+
+    <drug drug_id="1012" name="ALPENDAZILE" combination="1" strength="400mg" concept_id="24" dosage_form="21" creator="1" date_created="2005-01-01 00:00:00.0" date_changed="2010-03-31 00:00:00.0" retired="false" uuid="1087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" maximum_daily_dose="23.08" minimum_daily_dose="10.00" />
+    <drug_ingredient drug_id="1012" ingredient_id="26" uuid="5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  strength="400" units="5089"/>
+</dataset>

@@ -20,8 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.fhir2.FhirConstants.AUT;
-import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
 
 import javax.servlet.ServletException;
 
@@ -143,7 +141,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 	public void findPractitionersByName_shouldReturnBundleOfPractitioners() throws Exception {
 		verifyUri(String.format("/Practitioner?name=%s", NAME));
 		
-		verify(practitionerService).searchForPractitioners(stringAndListParamArgumentCaptor.capture(), any(), any(), any(),
+		verify(practitionerService).searchForPractitioners(any(), stringAndListParamArgumentCaptor.capture(), any(), any(),
 		    any(), any(), any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
@@ -157,7 +155,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 	public void findPractitionersByIdentifier_shouldReturnBundleOfPractitioners() throws Exception {
 		verifyUri(String.format("/Practitioner?identifier=%s", PRACTITIONER_IDENTIFIER));
 		
-		verify(practitionerService).searchForPractitioners(any(), tokenAndListParamArgumentCaptor.capture(), any(), any(),
+		verify(practitionerService).searchForPractitioners(tokenAndListParamArgumentCaptor.capture(), any(), any(), any(),
 		    any(), any(), any(), any(), any(), any());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
@@ -287,8 +285,8 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 	public void findPractitioners_shouldHandleComplexQuery() throws Exception {
 		verifyUri(String.format("/Practitioner?identifier=%s&name=%s", PRACTITIONER_IDENTIFIER, NAME));
 		
-		verify(practitionerService).searchForPractitioners(stringAndListParamArgumentCaptor.capture(),
-		    tokenAndListParamArgumentCaptor.capture(), any(), any(), any(), any(), any(), any(), any(), any());
+		verify(practitionerService).searchForPractitioners(tokenAndListParamArgumentCaptor.capture(),
+		    stringAndListParamArgumentCaptor.capture(), any(), any(), any(), any(), any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -323,8 +321,9 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 		provenance.setActivity(new CodeableConcept().addCoding(
 		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
 		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
-		        .setType(new CodeableConcept().addCoding(new Coding().setCode(AUT).setDisplay(AUTHOR)
-		                .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
+		        .setType(
+		            new CodeableConcept().addCoding(new Coding().setCode(FhirConstants.AUT).setDisplay(FhirConstants.AUTHOR)
+		                    .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
 		        .addRole(new CodeableConcept().addCoding(
 		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();

@@ -15,13 +15,13 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Allergy;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
@@ -73,6 +74,9 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	
 	@Mock
 	private AllergyIntoleranceTranslator translator;
+	
+	@Mock
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
 	private SearchQuery<Allergy, AllergyIntolerance, FhirAllergyIntoleranceDao, AllergyIntoleranceTranslator> searchQuery;
@@ -120,7 +124,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByIdentifier() {
-		Collection<Allergy> allergies = new ArrayList<>();
+		List<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		ReferenceParam referenceParam = new ReferenceParam();
@@ -133,10 +137,10 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientParam);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null, null, null);
@@ -145,12 +149,12 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByPatientGivenName() {
-		Collection<Allergy> allergies = new ArrayList<>();
+		List<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		ReferenceParam referenceParam = new ReferenceParam();
@@ -163,10 +167,10 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientParam);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null, null, null);
@@ -175,12 +179,12 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByPatientFamilyName() {
-		Collection<Allergy> allergies = new ArrayList<>();
+		List<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		ReferenceParam referenceParam = new ReferenceParam();
@@ -193,10 +197,10 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientParam);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null, null, null);
@@ -204,13 +208,13 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList, not(empty()));
 	}
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByPatientName() {
-		Collection<Allergy> allergies = new ArrayList<>();
+		List<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		ReferenceParam referenceParam = new ReferenceParam();
@@ -223,10 +227,10 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientParam);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(patientParam, null, null, null, null, null, null, null, null);
@@ -234,13 +238,13 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList, not(empty()));
 	}
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByCategory() {
-		Collection<Allergy> allergies = new ArrayList<>();
+		List<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		
 		TokenAndListParam category = new TokenAndListParam();
@@ -249,10 +253,10 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
 		    category);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(null, category, null, null, null, null, null, null, null);
@@ -261,12 +265,12 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByAllergen() {
-		Collection<Allergy> allergies = new ArrayList<>();
+		List<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		
 		TokenAndListParam allergen = new TokenAndListParam();
@@ -275,10 +279,10 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ALLERGEN_SEARCH_HANDLER,
 		    allergen);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(null, null, allergen, null, null, null, null, null, null);
@@ -286,13 +290,13 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList, not(empty()));
 	}
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesBySeverity() {
-		Collection<Allergy> allergies = new ArrayList<>();
+		List<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		
 		TokenAndListParam severity = new TokenAndListParam();
@@ -301,10 +305,10 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER,
 		    severity);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(null, null, null, severity, null, null, null, null, null);
@@ -313,12 +317,12 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByManifestation() {
-		Collection<Allergy> allergies = new ArrayList<>();
+		List<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		
 		TokenAndListParam manifestation = new TokenAndListParam();
@@ -327,10 +331,10 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER,
 		    manifestation);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(null, null, null, null, manifestation, null, null, null, null);
@@ -339,12 +343,12 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
 	public void searchForAllergies_shouldSearchForAllergiesByClinicalStatus() {
-		Collection<Allergy> allergies = new ArrayList<>();
+		List<Allergy> allergies = new ArrayList<>();
 		allergies.add(omrsAllergy);
 		
 		TokenAndListParam status = new TokenAndListParam();
@@ -352,10 +356,10 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, status);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(null, null, null, null, null, status, null, null, null);
@@ -364,7 +368,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -374,11 +378,11 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt()))
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt()))
 		        .thenReturn(Collections.singletonList(omrsAllergy));
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(null, null, null, null, null, null, uuid, null, null);
@@ -387,7 +391,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -397,11 +401,11 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
-		when(allergyIntoleranceDao.search(any(), any(), anyInt(), anyInt()))
+		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt()))
 		        .thenReturn(Collections.singletonList(omrsAllergy));
-		when(allergyIntoleranceDao.getResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator));
+		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, allergyIntoleranceDao, translator, globalPropertyService));
 		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
 		
 		IBundleProvider results = service.searchForAllergies(null, null, null, null, null, null, null, lastUpdated, null);
@@ -410,7 +414,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test

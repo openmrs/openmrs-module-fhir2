@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.LocationAttribute;
 import org.openmrs.PersonAttribute;
 import org.openmrs.ProviderAttribute;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class TelecomTranslatorImpl implements TelecomTranslator<Object> {
+public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData> {
 	
 	@Autowired
 	private PersonService personService;
@@ -41,7 +42,7 @@ public class TelecomTranslatorImpl implements TelecomTranslator<Object> {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
-	public Object toOpenmrsType(Object attribute, ContactPoint contactPoint) {
+	public BaseOpenmrsData toOpenmrsType(BaseOpenmrsData attribute, ContactPoint contactPoint) {
 		if (attribute == null) {
 			return null;
 		}
@@ -55,26 +56,26 @@ public class TelecomTranslatorImpl implements TelecomTranslator<Object> {
 			personAttribute.setUuid(contactPoint.getId());
 			personAttribute.setValue(contactPoint.getValue());
 			personAttribute.setAttributeType(personService.getPersonAttributeTypeByUuid(
-			    globalPropertyService.getGlobalProperty(FhirConstants.PERSON_ATTRIBUTE_TYPE_PROPERTY)));
+			    globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_ATTRIBUTE_TYPE)));
 		} else if (attribute instanceof LocationAttribute) {
 			LocationAttribute locationAttribute = (LocationAttribute) attribute;
 			locationAttribute.setUuid(contactPoint.getId());
 			locationAttribute.setValue(contactPoint.getValue());
 			locationAttribute.setAttributeType(locationService.getLocationAttributeTypeByUuid(
-			    globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_ATTRIBUTE_TYPE_PROPERTY)));
+			    globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_ATTRIBUTE_TYPE)));
 		} else if (attribute instanceof ProviderAttribute) {
 			ProviderAttribute providerAttribute = (ProviderAttribute) attribute;
 			providerAttribute.setUuid(contactPoint.getId());
 			providerAttribute.setValue(contactPoint.getValue());
 			providerAttribute.setAttributeType(providerService.getProviderAttributeTypeByUuid(
-			    globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_ATTRIBUTE_TYPE_PROPERTY)));
+			    globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_ATTRIBUTE_TYPE)));
 		}
 		
 		return attribute;
 	}
 	
 	@Override
-	public ContactPoint toFhirResource(Object attribute) {
+	public ContactPoint toFhirResource(BaseOpenmrsData attribute) {
 		ContactPoint contactPoint = new ContactPoint();
 		
 		if (attribute instanceof PersonAttribute) {

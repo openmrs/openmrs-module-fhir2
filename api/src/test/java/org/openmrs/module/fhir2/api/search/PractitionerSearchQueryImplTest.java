@@ -16,9 +16,12 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.openmrs.module.fhir2.FhirConstants.NAME_PROPERTY;
+import static org.openmrs.module.fhir2.FhirConstants.NAME_SEARCH_HANDLER;
 
 import java.util.List;
 
@@ -50,8 +53,6 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 	private static final String PRACTITIONER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPractitionerDaoImplTest_initial_data.xml";
 	
 	private static final String PRACTITIONER_UUID = "f9badd80-ab76-11e2-9e96-0800200c9a66";
-	
-	private static final String PRACTITIONER_NAME = "ricky";
 	
 	private static final String PRACTITIONER_GIVEN_NAME = "John";
 	
@@ -118,9 +119,8 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 	@Test
 	public void searchForPractitioners_shouldReturnPractitionersByName() {
 		StringAndListParam name = new StringAndListParam()
-		        .addAnd(new StringOrListParam().add(new StringParam(PRACTITIONER_NAME)));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER,
-		    name);
+		        .addAnd(new StringOrListParam().add(new StringParam(PRACTITIONER_GIVEN_NAME)));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(NAME_SEARCH_HANDLER, NAME_PROPERTY, name);
 		
 		IBundleProvider results = search(theParams);
 		
@@ -128,7 +128,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
 	}
 	
@@ -136,8 +136,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 	public void searchForPractitioners_shouldReturnEmptyCollectionWhenNameNotMatched() {
 		StringAndListParam name = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NOT_FOUND_PRACTITIONER_NAME)));
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER,
-		    name);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(NAME_SEARCH_HANDLER, NAME_PROPERTY, name);
 		
 		IBundleProvider results = search(theParams);
 		
@@ -159,7 +158,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Practitioner) resultList.iterator().next()).getIdentifierFirstRep().getValue(),
 		    equalTo(PRACTITIONER_IDENTIFIER));
 	}
@@ -191,7 +190,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList, everyItem(hasProperty("name",
 		    hasItem(hasProperty("given", hasItem(hasProperty("value", equalTo(PRACTITIONER_GIVEN_NAME))))))));
 	}
@@ -222,7 +221,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList,
 		    everyItem(hasProperty("name", hasItem(hasProperty("family", equalTo(PRACTITIONER_FAMILY_NAME))))));
 	}
@@ -256,7 +255,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList, everyItem(hasProperty("name",
 		    hasItem(hasProperty("given", hasItem(hasProperty("value", equalTo(PRACTITIONER_GIVEN_NAME))))))));
 		assertThat(resultList,
@@ -293,7 +292,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCity(), equalTo(CITY));
 	}
 	
@@ -325,7 +324,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getState(), equalTo(STATE));
 	}
 	
@@ -357,7 +356,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getPostalCode(), equalTo(POSTAL_CODE));
 	}
 	
@@ -389,7 +388,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
 	}
 	
@@ -423,7 +422,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCity(), equalTo(CITY));
 		assertThat(((Practitioner) resultList.iterator().next()).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
 	}
@@ -448,11 +447,10 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 	@Test
 	public void searchForPractitioners_shouldHandleComplexQuery() {
 		StringAndListParam name = new StringAndListParam()
-		        .addAnd(new StringOrListParam().add(new StringParam(PRACTITIONER_NAME)));
+		        .addAnd(new StringOrListParam().add(new StringParam(PRACTITIONER_GIVEN_NAME)));
 		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(PRACTITIONER_IDENTIFIER));
 		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PRACTITIONER_NAME_SEARCH_HANDLER, name)
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(NAME_SEARCH_HANDLER, NAME_PROPERTY, name)
 		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier);
 		
 		IBundleProvider results = search(theParams);
@@ -461,7 +459,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Practitioner) resultList.iterator().next()).getIdentifierFirstRep().getValue(),
 		    equalTo(PRACTITIONER_IDENTIFIER));
 		assertThat(resultList.iterator().next().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
@@ -480,7 +478,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Practitioner) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
 	}
 	
@@ -513,7 +511,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -531,7 +529,7 @@ public class PractitionerSearchQueryImplTest extends BaseModuleContextSensitiveT
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Practitioner) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
 	}
 	

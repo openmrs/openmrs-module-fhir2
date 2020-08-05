@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Concept;
@@ -18,6 +19,7 @@ import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
@@ -113,10 +115,13 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		// DiagnosticReport.subject
 		Person subject = obsGroup.getPerson();
 		if (subject != null) {
-			try {
+			if (subject instanceof HibernateProxy) {
+				subject = HibernateUtil.getRealObjectFromProxy(subject);
+			}
+			
+			if (subject instanceof Patient) {
 				diagnosticReport.setSubject(patientReferenceTranslator.toFhirResource((Patient) subject));
 			}
-			catch (ClassCastException ignored) {}
 		}
 		
 		// DiagnosticReport.code
@@ -126,7 +131,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		}
 		
 		// DiagnosticReport.category
-		diagnosticReport.addCategory().addCoding().setSystem(FhirConstants.DIAGNOSTIC_SERVICE_SECTIONS_VALUESET_URI)
+		diagnosticReport.addCategory().addCoding().setSystem(FhirConstants.DIAGNOSTIC_SERVICE_SECTIONS_VALUE_SET_URI)
 		        .setCode(FhirConstants.DIAGNOSTIC_REPORT_CATEGORY_LAB);
 		
 		// DiagnosticReport.issued

@@ -13,57 +13,71 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import lombok.Getter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.InstantType;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ToFhirTranslator;
+import org.springframework.transaction.annotation.Transactional;
 
 public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U extends IBaseResource> implements IBundleProvider, Serializable {
 	
-	private static final long serialVersionUID = 3L;
+	private static final long serialVersionUID = 4L;
 	
 	private final FhirDao<T> dao;
 	
-	private final Date datePublished;
+	@Getter
+	private final IPrimitiveType<Date> published;
 	
-	private final SearchParameterMap theParams;
+	private final SearchParameterMap searchParameterMap;
 	
 	private final ToFhirTranslator<T, U> translator;
 	
-	private final UUID uuid;
+	@Getter
+	private final String uuid;
+	
+	private final FhirGlobalPropertyService globalPropertyService;
 	
 	private transient Integer count;
 	
+	private transient Integer pageSize;
+	
 	private transient List<String> matchingResourceUuids;
 	
-	public SearchQueryBundleProvider(SearchParameterMap theParams, FhirDao<T> dao, ToFhirTranslator<T, U> translator) {
+	public SearchQueryBundleProvider(SearchParameterMap searchParameterMap, FhirDao<T> dao,
+	    ToFhirTranslator<T, U> translator, FhirGlobalPropertyService globalPropertyService) {
 		this.dao = dao;
-		this.datePublished = new Date();
-		this.theParams = theParams;
+		this.published = InstantDt.withCurrentTime();
+		this.searchParameterMap = searchParameterMap;
 		this.translator = translator;
-		this.uuid = UUID.randomUUID();
+		this.uuid = UUID.randomUUID().toString();
+		this.globalPropertyService = globalPropertyService;
 	}
 	
+	@Transactional(readOnly = true)
 	@Override
-	public IPrimitiveType<Date> getPublished() {
-		return new InstantType(datePublished);
-	}
-	
 	@Nonnull
-	@Override
 	public List<IBaseResource> getResources(int fromIndex, int toIndex) {
-		if (this.matchingResourceUuids == null) {
-			this.matchingResourceUuids = dao.getResultUuids(theParams);
+		if (matchingResourceUuids == null) {
+			matchingResourceUuids = dao.getSearchResultUuids(searchParameterMap);
+		}
+		
+		if (matchingResourceUuids.isEmpty()) {
+			return Collections.emptyList();
 		}
 		
 		int firstResult = 0;
@@ -71,34 +85,37 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 			firstResult = fromIndex;
 		}
 		
-		int lastResult = this.size();
+		// NPE-safe unboxing
+		int lastResult = Integer.MAX_VALUE;
+		Integer lastResultHolder = size();
+		lastResult = lastResultHolder == null ? lastResult : lastResultHolder;
+		
 		if (toIndex - firstResult > 0) {
 			lastResult = Math.min(lastResult, toIndex);
 		}
-		return dao.search(this.theParams, this.matchingResourceUuids, firstResult, lastResult).stream()
-		        .map(translator::toFhirResource).collect(Collectors.toList());
-	}
-	
-	@Nullable
-	@Override
-	public String getUuid() {
-		return uuid.toString();
+		
+		return dao.getSearchResults(searchParameterMap, matchingResourceUuids, firstResult, lastResult).stream()
+		        .map(translator::toFhirResource).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 	
 	@Override
 	public Integer preferredPageSize() {
-		return dao.getPreferredPageSize();
+		if (pageSize == null) {
+			pageSize = globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE, 10);
+		}
+		
+		return pageSize;
 	}
 	
-	@Nullable
 	@Override
+	@Nullable
 	public Integer size() {
-		if (this.matchingResourceUuids == null) {
-			this.matchingResourceUuids = dao.getResultUuids(theParams);
+		if (matchingResourceUuids == null) {
+			matchingResourceUuids = dao.getSearchResultUuids(searchParameterMap);
 		}
 		
 		if (count == null) {
-			count = this.matchingResourceUuids.size();
+			count = matchingResourceUuids.size();
 		}
 		
 		return count;

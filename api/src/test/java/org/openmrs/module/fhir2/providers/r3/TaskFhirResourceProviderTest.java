@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -220,7 +221,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.TASK));
 	}
 	

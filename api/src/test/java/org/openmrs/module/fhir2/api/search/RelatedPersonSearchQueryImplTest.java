@@ -19,17 +19,12 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
-import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_CITY;
-import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_COUNTRY;
-import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_POSTALCODE;
-import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_STATE;
-import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
-import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,7 +39,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.junit.Before;
@@ -124,8 +118,9 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private List<RelatedPerson> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof RelatedPerson)
+		        .map(it -> (RelatedPerson) it).collect(Collectors.toList());
 	}
 	
 	@Test
@@ -136,13 +131,13 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relations = search(theParams);
 		
-		List<IBaseResource> relationList = get(relations);
-		
 		assertThat(relations, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), greaterThanOrEqualTo(1));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getNameFirstRep().getNameAsSingleString(),
-		    containsString(NAME));
+		assertThat(relations.size(), greaterThanOrEqualTo(1));
+		
+		List<RelatedPerson> relationList = get(relations);
+		
+		assertThat(relationList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(relationList.get(0).getNameFirstRep().getNameAsSingleString(), containsString(NAME));
 	}
 	
 	@Test
@@ -154,13 +149,13 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relations = search(theParams);
 		
-		List<IBaseResource> relationList = get(relations);
-		
 		assertThat(relations, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), greaterThanOrEqualTo(1));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getNameFirstRep().getNameAsSingleString(),
-		    containsString(NAME));
+		assertThat(relations.size(), greaterThanOrEqualTo(1));
+		
+		List<RelatedPerson> relationList = get(relations);
+		
+		assertThat(relationList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(relationList.get(0).getNameFirstRep().getNameAsSingleString(), containsString(NAME));
 	}
 	
 	@Test
@@ -172,9 +167,11 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relations = search(theParams);
 		
-		List<IBaseResource> relationList = get(relations);
-		
 		assertThat(relations, notNullValue());
+		assertThat(relations.size(), equalTo(0));
+		
+		List<RelatedPerson> relationList = get(relations);
+		
 		assertThat(relationList, empty());
 	}
 	
@@ -187,11 +184,12 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relationships = search(maleGenderParams);
 		
-		List<IBaseResource> relationList = get(relationships);
-		
 		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(3));
+		assertThat(relationships.size(), equalTo(3));
+		
+		List<RelatedPerson> relationList = get(relationships);
+		
+		assertThat(relationList, hasSize(equalTo(3)));
 		assertThat(relationList, everyItem(hasProperty("gender", equalTo(Enumerations.AdministrativeGender.MALE))));
 		
 		gender = new TokenAndListParam().addAnd(new TokenOrListParam().add(FEMALE_GENDER));
@@ -201,11 +199,12 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		relationships = search(femaleGenderParams);
 		
+		assertThat(relationships, notNullValue());
+		assertThat(relationships.size(), equalTo(1));
+		
 		relationList = get(relationships);
 		
-		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(1));
+		assertThat(relationList, hasSize(equalTo(1)));
 		assertThat(relationList, everyItem(hasProperty("gender", equalTo(Enumerations.AdministrativeGender.FEMALE))));
 		
 		gender = new TokenAndListParam().addAnd(new TokenOrListParam().add(OTHER_GENDER));
@@ -215,11 +214,12 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		relationships = search(otherGenderParams);
 		
+		assertThat(relationships, notNullValue());
+		assertThat(relationships.size(), equalTo(2));
+		
 		relationList = get(relationships);
 		
-		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(3));
+		assertThat(relationList, hasSize(equalTo(2)));
 		assertThat(relationList, everyItem(hasProperty("gender", equalTo(null))));
 		
 		gender = new TokenAndListParam().addAnd(new TokenOrListParam().add(NULL_GENDER));
@@ -229,11 +229,12 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		relationships = search(nullGenderParams);
 		
+		assertThat(relationships, notNullValue());
+		assertThat(relationships.size(), equalTo(2));
+		
 		relationList = get(relationships);
 		
-		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(3));
+		assertThat(relationList, hasSize(equalTo(2)));
 		assertThat(relationList, everyItem(hasProperty("gender", equalTo(null))));
 		
 		gender = new TokenAndListParam().addAnd(new TokenOrListParam().add(UNKNOWN_GENDER));
@@ -243,11 +244,12 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		relationships = search(unknownGenderParams);
 		
+		assertThat(relationships, notNullValue());
+		assertThat(relationships.size(), equalTo(2));
+		
 		relationList = get(relationships);
 		
-		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(3));
+		assertThat(relationList.size(), equalTo(2));
 		assertThat(relationList, everyItem(hasProperty("gender", equalTo(null))));
 	}
 	
@@ -260,9 +262,11 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relationships = search(theParams);
 		
-		List<IBaseResource> relationList = get(relationships);
-		
 		assertThat(relationships, notNullValue());
+		assertThat(relationships.size(), equalTo(0));
+		
+		List<RelatedPerson> relationList = get(relationships);
+		
 		assertThat(relationList, is(empty()));
 	}
 	
@@ -275,12 +279,13 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relationships = search(theParams);
 		
-		List<IBaseResource> relationList = get(relationships);
-		
 		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(1));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getBirthDate().toString(), startsWith(BIRTH_DATE));
+		assertThat(relationships.size(), equalTo(1));
+		
+		List<RelatedPerson> relationList = get(relationships);
+		
+		assertThat(relationList, hasSize(equalTo(1)));
+		assertThat(relationList.get(0).getBirthDate().toString(), startsWith(BIRTH_DATE));
 	}
 	
 	@Test
@@ -293,9 +298,11 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relationships = search(theParams);
 		
-		List<IBaseResource> relationList = get(relationships);
-		
 		assertThat(relationships, notNullValue());
+		assertThat(relationships.size(), equalTo(0));
+		
+		List<RelatedPerson> relationList = get(relationships);
+		
 		assertThat(relationList, empty());
 	}
 	
@@ -309,12 +316,13 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relationships = search(theParams);
 		
-		List<IBaseResource> relationList = get(relationships);
-		
 		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(1));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getAddressFirstRep().getCity(), equalTo(CITY));
+		assertThat(relationships.size(), equalTo(1));
+		
+		List<RelatedPerson> relationList = get(relationships);
+		
+		assertThat(relationList, hasSize(equalTo(1)));
+		assertThat(relationList.get(0).getAddressFirstRep().getCity(), equalTo(CITY));
 	}
 	
 	@Test
@@ -327,12 +335,13 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relationships = search(theParams);
 		
-		List<IBaseResource> relationList = get(relationships);
-		
 		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(1));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getAddressFirstRep().getState(), equalTo(STATE));
+		assertThat(relationships.size(), equalTo(1));
+		
+		List<RelatedPerson> relationList = get(relationships);
+		
+		assertThat(relationList, hasSize(equalTo(1)));
+		assertThat(relationList.get(0).getAddressFirstRep().getState(), equalTo(STATE));
 	}
 	
 	@Test
@@ -345,13 +354,13 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relationships = search(theParams);
 		
-		List<IBaseResource> relationList = get(relationships);
-		
 		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(1));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getAddressFirstRep().getPostalCode(),
-		    equalTo(POSTAL_CODE));
+		assertThat(relationships.size(), equalTo(1));
+		
+		List<RelatedPerson> relationList = get(relationships);
+		
+		assertThat(relationList, hasSize(equalTo(1)));
+		assertThat(relationList.get(0).getAddressFirstRep().getPostalCode(), equalTo(POSTAL_CODE));
 	}
 	
 	@Test
@@ -364,12 +373,13 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relationships = search(theParams);
 		
-		List<IBaseResource> relationList = get(relationships);
-		
 		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), equalTo(1));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
+		assertThat(relationships.size(), equalTo(1));
+		
+		List<RelatedPerson> relationList = get(relationships);
+		
+		assertThat(relationList, hasSize(equalTo(1)));
+		assertThat(relationList.get(0).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
 	}
 	
 	@Test
@@ -381,12 +391,13 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((RelatedPerson) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(RELATIONSHIP_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<RelatedPerson> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(RELATIONSHIP_UUID));
 	}
 	
 	@Test
@@ -398,10 +409,11 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
+		assertThat(results.size(), equalTo(2));
+		
+		List<RelatedPerson> resultList = get(results);
+		
 		assertThat(resultList.size(), equalTo(2));
 	}
 	
@@ -414,27 +426,11 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<RelatedPerson> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-	}
-	
-	@Test
-	public void shouldReturnCollectionOfRelatedPeopleByLastUpdatedDateVoided() {
-		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		
-		IBundleProvider results = search(theParams);
-		
-		List<IBaseResource> resultList = get(results);
-		
-		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -448,12 +444,13 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((RelatedPerson) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(RELATIONSHIP_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<RelatedPerson> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(RELATIONSHIP_UUID));
 	}
 	
 	@Test
@@ -467,9 +464,11 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<RelatedPerson> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -633,20 +632,18 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relationships = search(theParams);
 		
-		List<IBaseResource> relationList = get(relationships);
+		List<RelatedPerson> relationList = get(relationships);
 		
 		assertThat(relationships, notNullValue());
 		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), greaterThanOrEqualTo(1));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getNameFirstRep().getNameAsSingleString(),
-		    containsString(NAME));
+		assertThat(relationList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(relationList.get(0).getNameFirstRep().getNameAsSingleString(), containsString(NAME));
 		assertThat(relationList, everyItem(hasProperty("gender", equalTo(Enumerations.AdministrativeGender.MALE))));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getBirthDate().toString(), startsWith(BIRTH_DATE));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getAddressFirstRep().getCity(), equalTo(CITY));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getAddressFirstRep().getState(), equalTo(STATE));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getAddressFirstRep().getPostalCode(),
-		    equalTo(POSTAL_CODE));
-		assertThat(((RelatedPerson) relationList.iterator().next()).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
+		assertThat(relationList.get(0).getBirthDate().toString(), startsWith(BIRTH_DATE));
+		assertThat(relationList.get(0).getAddressFirstRep().getCity(), equalTo(CITY));
+		assertThat(relationList.get(0).getAddressFirstRep().getState(), equalTo(STATE));
+		assertThat(relationList.get(0).getAddressFirstRep().getPostalCode(), equalTo(POSTAL_CODE));
+		assertThat(relationList.get(0).getAddressFirstRep().getCountry(), equalTo(COUNTRY));
 	}
 	
 	private List<RelatedPerson> getRelationListForSorting(SortSpec sort) {
@@ -654,42 +651,37 @@ public class RelatedPersonSearchQueryImplTest extends BaseModuleContextSensitive
 		
 		IBundleProvider relationships = search(theParams);
 		
-		List<IBaseResource> relationList = get(relationships);
-		
 		assertThat(relationships, notNullValue());
-		assertThat(relationList, not(empty()));
-		assertThat(relationList.size(), greaterThan(1));
 		
-		List<RelatedPerson> relationshipList = relationList.stream().map(p -> (RelatedPerson) p)
-		        .collect(Collectors.toList());
+		List<RelatedPerson> relationList = get(relationships);
+		
+		assertThat(relationList, hasSize(greaterThan(1)));
 		
 		// Remove related persons with sort parameter value null, to allow comparison while asserting.
 		switch (sort.getParamName()) {
-			case SP_NAME:
-				relationshipList.removeIf(p -> p.getNameFirstRep() == null);
+			case RelatedPerson.SP_NAME:
+				relationList.removeIf(p -> p.getNameFirstRep() == null);
 				break;
-			case SP_BIRTHDATE:
-				relationshipList.removeIf(p -> p.getBirthDate() == null);
+			case RelatedPerson.SP_BIRTHDATE:
+				relationList.removeIf(p -> p.getBirthDate() == null);
 				break;
-			case SP_ADDRESS_CITY:
-				relationshipList.removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getCity() == null);
+			case RelatedPerson.SP_ADDRESS_CITY:
+				relationList.removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getCity() == null);
 				break;
-			case SP_ADDRESS_STATE:
-				relationshipList.removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getState() == null);
+			case RelatedPerson.SP_ADDRESS_STATE:
+				relationList.removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getState() == null);
 				break;
-			case SP_ADDRESS_POSTALCODE:
-				relationshipList
-				        .removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getPostalCode() == null);
+			case RelatedPerson.SP_ADDRESS_POSTALCODE:
+				relationList.removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getPostalCode() == null);
 				break;
-			case SP_ADDRESS_COUNTRY:
-				relationshipList
-				        .removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getCountry() == null);
+			case RelatedPerson.SP_ADDRESS_COUNTRY:
+				relationList.removeIf(p -> p.getAddressFirstRep() == null || p.getAddressFirstRep().getCountry() == null);
 				break;
 		}
 		
-		assertThat(relationshipList.size(), greaterThan(1));
+		assertThat(relationList, hasSize(greaterThan(1)));
 		
-		return relationshipList;
+		return relationList;
 	}
 	
 }

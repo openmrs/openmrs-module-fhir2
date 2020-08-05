@@ -30,6 +30,7 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -68,7 +69,7 @@ public class RelatedPersonFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = RelatedPerson.SP_ADDRESS_COUNTRY) StringAndListParam country,
 	        @OptionalParam(name = RelatedPerson.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
-		return relatedPersonService.searchForRelatedPeople(name, gender, birthDate, city, state, postalCode, country, id,
-		    lastUpdated, sort);
+		return new SearchQueryBundleProviderR3Wrapper(relatedPersonService.searchForRelatedPeople(name, gender, birthDate,
+		    city, state, postalCode, country, id, lastUpdated, sort));
 	}
 }

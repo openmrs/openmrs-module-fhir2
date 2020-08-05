@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Concept;
@@ -20,6 +21,7 @@ import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationBasedOnReferenceTranslator;
@@ -90,10 +92,13 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		Person obsPerson = observation.getPerson();
 		if (obsPerson != null) {
-			try {
-				obs.setSubject(patientReferenceTranslator.toFhirResource((Patient) observation.getPerson()));
+			if (obsPerson instanceof HibernateProxy) {
+				obsPerson = HibernateUtil.getRealObjectFromProxy(obsPerson);
 			}
-			catch (ClassCastException ignored) {}
+			
+			if (obsPerson instanceof Patient) {
+				obs.setSubject(patientReferenceTranslator.toFhirResource((Patient) obsPerson));
+			}
 		}
 		
 		obs.setCode(conceptTranslator.toFhirResource(observation.getConcept()));

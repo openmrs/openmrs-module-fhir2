@@ -14,13 +14,11 @@ import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.or;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -53,8 +51,7 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleNames(criteria, (StringAndListParam) param.getParam(), null, null));
+					entry.getValue().forEach(param -> handleNames(criteria, entry.getValue()));
 					break;
 				case FhirConstants.GENDER_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -75,22 +72,30 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected Optional<Criterion> getCriteriaForLastUpdated(DateRangeParam param) {
-		List<Optional<Criterion>> criterionList = new ArrayList<>();
-		
-		criterionList.add(handleDateRange("personDateVoided", param));
-		
-		criterionList.add(Optional.of(and(toCriteriaArray(
-		    Stream.of(Optional.of(isNull("personDateVoided")), handleDateRange("personDateChanged", param))))));
-		
-		criterionList.add(Optional.of(and(toCriteriaArray(Stream.of(Optional.of(isNull("personDateVoided")),
-		    Optional.of(isNull("personDateChanged")), handleDateRange("personDateCreated", param))))));
-		
-		return Optional.of(or(toCriteriaArray(criterionList)));
+	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
+		return Optional.of(or(toCriteriaArray(handleDateRange("personDateChanged", param), Optional.of(and(toCriteriaArray(
+		    Stream.of(Optional.of(isNull("personDateChanged")), handleDateRange("personDateCreated", param))))))));
 	}
 	
 	@Override
 	protected String getSqlAlias() {
 		return "this_";
+	}
+	
+	@Override
+	protected void handleVoidable(Criteria criteria) {
+		criteria.add(eq("personVoided", false));
+	}
+	
+	@Override
+	protected boolean isVoided(Person object) {
+		return object.getPersonVoided();
+	}
+	
+	@Override
+	protected Person voidObject(Person object) {
+		object.setPersonVoided(true);
+		object.setPersonVoidReason("Voided via FHIR API");
+		return object;
 	}
 }

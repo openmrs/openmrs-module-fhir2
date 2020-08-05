@@ -28,70 +28,71 @@ public class ObservationInterpretationTranslatorImpl_2_1 extends ObservationInte
 		if (obs.getInterpretation() == null) {
 			return null;
 		}
+		
 		CodeableConcept interpretation = new CodeableConcept();
 		switch (obs.getInterpretation()) {
 			case NORMAL:
-				interpretation.addCoding(addIntepretationCoding("N", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("N", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case ABNORMAL:
-				interpretation.addCoding(addIntepretationCoding("A", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("A", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case CRITICALLY_ABNORMAL:
-				interpretation.addCoding(addIntepretationCoding("AA", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("AA", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case CRITICALLY_HIGH:
-				interpretation.addCoding(addIntepretationCoding("HH", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("HH", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case CRITICALLY_LOW:
-				interpretation.addCoding(addIntepretationCoding("LL", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("LL", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case HIGH:
-				interpretation.addCoding(addIntepretationCoding("H", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("H", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case LOW:
-				interpretation.addCoding(addIntepretationCoding("L", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("L", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case OFF_SCALE_LOW:
-				interpretation.addCoding(addIntepretationCoding("<", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("<", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case OFF_SCALE_HIGH:
-				interpretation.addCoding(addIntepretationCoding(">", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding(">", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case SIGNIFICANT_CHANGE_DOWN:
-				interpretation.addCoding(addIntepretationCoding("D", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("D", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case SIGNIFICANT_CHANGE_UP:
-				interpretation.addCoding(addIntepretationCoding("U", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("U", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case RESISTANT:
-				interpretation.addCoding(addIntepretationCoding("R", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("R", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case SUSCEPTIBLE:
-				interpretation.addCoding(addIntepretationCoding("S", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("S", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case INTERMEDIATE:
-				interpretation.addCoding(addIntepretationCoding("I", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("I", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case POSITIVE:
-				interpretation.addCoding(addIntepretationCoding("POS", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("POS", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case NEGATIVE:
-				interpretation.addCoding(addIntepretationCoding("NEG", obs.getInterpretation()));
+				interpretation.addCoding(addInterpretationCoding("NEG", obs.getInterpretation()));
 				setText(interpretation, obs.getInterpretation());
 				break;
 			case VERY_SUSCEPTIBLE:
@@ -170,7 +171,7 @@ public class ObservationInterpretationTranslatorImpl_2_1 extends ObservationInte
 		return openmrsObs;
 	}
 	
-	private Coding addIntepretationCoding(String code, Obs.Interpretation display) {
+	private Coding addInterpretationCoding(String code, Obs.Interpretation display) {
 		Coding coding = new Coding();
 		coding.setSystem(FhirConstants.INTERPRETATION_VALUE_SET_URI);
 		coding.setCode(code);

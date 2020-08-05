@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -115,7 +116,7 @@ public class TaskSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(BASED_ON_TASK_UUID));
 	}
 	
@@ -151,7 +152,7 @@ public class TaskSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(BASED_ON_TASK_UUID));
 	}
 	
@@ -172,7 +173,7 @@ public class TaskSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(BASED_ON_TASK_UUID));
 	}
 	
@@ -330,7 +331,7 @@ public class TaskSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(TASK_UUID));
 	}
 	
@@ -347,7 +348,7 @@ public class TaskSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -363,23 +364,7 @@ public class TaskSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-	}
-	
-	@Test
-	public void searchForTasks_shouldSearchForTasksByLastUpdatedDateRetired() {
-		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_RETIRED).setLowerBound(DATE_RETIRED);
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		
-		IBundleProvider results = search(theParams);
-		
-		List<IBaseResource> resultList = get(results);
-		
-		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 	}
 	
 	@Test
@@ -397,7 +382,7 @@ public class TaskSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(TASK_UUID));
 	}
 	
@@ -432,7 +417,7 @@ public class TaskSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		
 		// remove tasks with null date changed to allow comparison
 		resultList.removeIf(p -> p.getLastModified() == null);
@@ -452,7 +437,7 @@ public class TaskSearchQueryImplTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		
 		// remove tasks with null date changed to allow comparison
 		resultList.removeIf(p -> p.getLastModified() == null);

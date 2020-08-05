@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.search;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -21,6 +20,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -128,10 +127,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(results, notNullValue());
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, not(empty()));
-		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -152,11 +151,11 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
@@ -177,7 +176,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -195,10 +194,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(results, notNullValue());
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, not(empty()));
-		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -220,11 +219,11 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -246,7 +245,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -264,10 +263,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(results, notNullValue());
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, not(empty()));
-		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -289,11 +288,11 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -315,7 +314,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -333,10 +332,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(results, notNullValue());
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, not(empty()));
-		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -358,11 +357,11 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -384,7 +383,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -401,10 +400,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(results, notNullValue());
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, not(empty()));
-		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -427,11 +426,11 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -453,7 +452,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		    referenceParam);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -471,10 +470,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(results, notNullValue());
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -488,12 +487,12 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(14));
+		assertThat(results.size(), equalTo(13));
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(10)));
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -511,12 +510,14 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(14));
+		assertThat(results.size(), equalTo(13));
+		
+		List<MedicationRequest> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
 	}
@@ -539,7 +540,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -556,12 +557,12 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(14));
+		assertThat(results.size(), equalTo(13));
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(10)));
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -581,12 +582,14 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(14));
+		assertThat(results.size(), equalTo(13));
+		
+		List<MedicationRequest> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
 	}
@@ -611,7 +614,7 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
@@ -628,12 +631,12 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(14));
+		assertThat(results.size(), equalTo(13));
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(10)));
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -653,12 +656,14 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
+		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(14));
+		assertThat(results.size(), equalTo(13));
+		
+		List<MedicationRequest> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
 	}
@@ -683,9 +688,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
 		assertThat(resultList, empty());
 	}
 	
@@ -701,12 +707,12 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(14));
+		assertThat(results.size(), equalTo(13));
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(10)));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -728,10 +734,11 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(14));
+		assertThat(results.size(), equalTo(13));
+		
+		List<MedicationRequest> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
 	}
@@ -756,9 +763,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
 		assertThat(resultList, empty());
 	}
 	
@@ -772,12 +780,12 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(14));
+		assertThat(results.size(), equalTo(13));
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(10)));
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(10)));
 	}
 	
 	@Test
@@ -799,14 +807,15 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(14));
+		assertThat(results.size(), equalTo(13));
+		
+		List<MedicationRequest> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(10)));
-		assertThat(((MedicationRequest) resultList.iterator().next()).getRequester().getIdentifier().getValue(),
-		    equalTo(PARTICIPANT_IDENTIFIER));
+		
+		assertThat(resultList.get(0).getRequester().getIdentifier().getValue(), equalTo(PARTICIPANT_IDENTIFIER));
 	}
 	
 	@Test
@@ -829,9 +838,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference);
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
 		assertThat(resultList, empty());
 	}
 	
@@ -847,10 +857,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		assertThat(results, notNullValue());
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -867,8 +877,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+		List<MedicationRequest> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -885,9 +897,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(0)));
-		assertThat(get(results), hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+		List<MedicationRequest> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -905,9 +918,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		assertThat(get(results), not(empty()));
-		assertThat(get(results), hasSize(greaterThan(0)));
-		assertThat(get(results), hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+		List<MedicationRequest> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
 	}
 	
 	@Test
@@ -930,10 +944,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(2)));
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasSize(equalTo(2)));
 	}
 	
 	@Test
@@ -950,10 +964,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(resources, hasSize(equalTo(2)));
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasSize(equalTo(2)));
 	}
 	
 	@Test
@@ -970,10 +984,10 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		List<IBaseResource> resources = get(results);
+		List<MedicationRequest> resultList = get(results);
 		
-		assertThat(resources, notNullValue());
-		assertThat(results.size(), equalTo(2));
+		assertThat(resultList, notNullValue());
+		assertThat(resultList, hasSize(equalTo(2)));
 	}
 	
 	@Test
@@ -985,13 +999,13 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((MedicationRequest) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(MEDICATION_REQUEST_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<MedicationRequest> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
 	
 	@Test
@@ -1003,27 +1017,12 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
+		assertThat(results.size(), equalTo(3));
+		
+		List<MedicationRequest> resultList = get(results);
+		
 		assertThat(resultList.size(), equalTo(3));
-	}
-	
-	@Test
-	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByLastUpdatedDateVoided() {
-		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_VOIDED).setLowerBound(DATE_VOIDED);
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
-		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		
-		IBundleProvider results = search(theParams);
-		
-		List<IBaseResource> resultList = get(results);
-		
-		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
 	}
 	
 	@Test
@@ -1037,13 +1036,13 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(1));
-		assertThat(((MedicationRequest) resultList.iterator().next()).getIdElement().getIdPart(),
-		    equalTo(MEDICATION_REQUEST_UUID));
+		assertThat(results.size(), equalTo(1));
+		
+		List<MedicationRequest> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
 	
 	@Test
@@ -1057,9 +1056,11 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		
 		IBundleProvider results = search(theParams);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(0));
+		
+		List<MedicationRequest> resultList = get(results);
+		
 		assertThat(resultList, empty());
 	}
 	
@@ -1067,8 +1068,9 @@ public class MedicationRequestSearchQueryImplTest extends BaseModuleContextSensi
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(0, 10);
+	private List<MedicationRequest> get(IBundleProvider results) {
+		return results.getResources(0, 10).stream().filter(it -> it instanceof MedicationRequest)
+		        .map(it -> (MedicationRequest) it).collect(Collectors.toList());
 	}
 	
 }

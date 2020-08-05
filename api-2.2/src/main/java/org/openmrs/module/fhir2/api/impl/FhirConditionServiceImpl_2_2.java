@@ -70,6 +70,6 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 	
 	@Override
 	public Condition saveCondition(Condition condition) {
-		return translator.toFhirResource(dao.saveCondition(translator.toOpenmrsType(condition)));
+		return translator.toFhirResource(dao.createOrUpdate(translator.toOpenmrsType(condition)));
 	}
 }

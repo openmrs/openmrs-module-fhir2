@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <person person_id="2" gender="M" birthdate="1999-12-20" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="61b38324-e2fd-4feb-95b7-9e9a2a4400df"/>
+    <person person_id="3" gender="M" birthdate="2000-11-18" dead="true" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="5c521595-4e12-46b0-8248-b8f2d3697766"/>
+    <person person_id="4" gender="M" birthdate="1993-04-02" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="256ccf6d-6b41-455c-9be2-51ff4386ae76"/>
+    <person_name person_name_id="2" preferred="true" person_id="2" given_name="John" middle_name="F" family_name="Doe" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="7e2acadc-5073-4a39-914a-debcbec8c1c9"/>
+    <provider provider_id="1" person_id="2" identifier="347834-gf" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="f9badd80-ab76-11e2-9e96-0800200c9a66" />
+    <provider provider_id="2" person_id="4" identifier="367gw324-t" creator="1" date_created="2005-01-01 00:00:00.0"  retired="false" uuid="f23add80-ab76-11e2-9e96-0800210c9a56" />
+    <provider provider_id="3" person_id="3" identifier="367gw324-js" creator="1" date_created="2005-01-01 00:00:00.0" date_retired="2010-09-03 00:00:00.0" retired="true" uuid="f23add80-ab76-1bd2-9e96-0800210c9a56" />
+    <provider provider_id="4" person_id="3" identifier="367gw324-js" creator="1" date_created="2005-01-01 00:00:00.0"  date_changed="2010-03-31 00:00:00.0" retired="false" uuid="f23add80-ab76-11e2-9e96-0803210c9a56" />
+</dataset>

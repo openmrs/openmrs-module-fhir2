@@ -15,9 +15,11 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
@@ -37,6 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
@@ -50,8 +53,8 @@ import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
-import org.openmrs.module.fhir2.api.translators.PersonTelecomTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -93,7 +96,7 @@ public class PersonTranslatorImplTest {
 	private PersonAddressTranslator addressTranslator;
 	
 	@Mock
-	private PersonTelecomTranslator telecomTranslator;
+	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Mock
 	private ProvenanceTranslator<Person> provenanceTranslator;
@@ -361,13 +364,13 @@ public class PersonTranslatorImplTest {
 		contactPoint.setValue(PERSON_ATTRIBUTE_VALUE);
 		person.addTelecom(contactPoint);
 		
-		when(telecomTranslator.toOpenmrsType(person.getTelecom())).thenReturn(omrsPerson.getAttributes());
+		when(telecomTranslator.toOpenmrsType(any(), any())).thenReturn(personAttribute);
 		Person people = personTranslator.toOpenmrsType(person);
 		
 		assertThat(people, notNullValue());
 		assertThat(people.getAttributes(), notNullValue());
 		assertThat(people.getAttributes().isEmpty(), is(false));
-		assertThat(people.getAttributes().size(), greaterThanOrEqualTo(1));
+		assertThat(people.getAttributes(), hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test

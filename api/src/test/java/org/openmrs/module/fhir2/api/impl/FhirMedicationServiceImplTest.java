@@ -15,13 +15,13 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Drug;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
@@ -67,6 +68,9 @@ public class FhirMedicationServiceImplTest {
 	
 	@Mock
 	private FhirMedicationDao medicationDao;
+	
+	@Mock
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
 	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator> searchQuery;
@@ -114,7 +118,7 @@ public class FhirMedicationServiceImplTest {
 	
 	@Test
 	public void searchForMedications_shouldSearchMedicationsByCode() {
-		Collection<Drug> medications = new ArrayList<>();
+		List<Drug> medications = new ArrayList<>();
 		medications.add(drug);
 		
 		TokenAndListParam code = new TokenAndListParam();
@@ -122,24 +126,24 @@ public class FhirMedicationServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
-		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(medications);
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
+		when(medicationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(medications);
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator, globalPropertyService));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(code, null, null, null, null, null);
+		IBundleProvider result = fhirMedicationService.searchForMedications(code, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(result);
 		
 		assertThat(result, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
 	public void searchForMedications_shouldSearchMedicationsByDosageForm() {
-		Collection<Drug> medications = new ArrayList<>();
+		List<Drug> medications = new ArrayList<>();
 		medications.add(drug);
 		
 		TokenAndListParam dosageForm = new TokenAndListParam();
@@ -148,24 +152,24 @@ public class FhirMedicationServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DOSAGE_FORM_SEARCH_HANDLER,
 		    dosageForm);
 		
-		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
-		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(medications);
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
+		when(medicationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(medications);
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator, globalPropertyService));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, dosageForm, null, null, null, null);
+		IBundleProvider result = fhirMedicationService.searchForMedications(null, dosageForm, null, null, null);
 		
 		List<IBaseResource> resultList = get(result);
 		
 		assertThat(result, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
 	public void searchForMedications_shouldSearchMedicationsByIngredientCode() {
-		Collection<Drug> medications = new ArrayList<>();
+		List<Drug> medications = new ArrayList<>();
 		medications.add(drug);
 		
 		TokenAndListParam ingredientCode = new TokenAndListParam();
@@ -174,44 +178,19 @@ public class FhirMedicationServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INGREDIENT_SEARCH_HANDLER,
 		    ingredientCode);
 		
-		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
-		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(medications);
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
+		when(medicationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(medications);
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator, globalPropertyService));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, ingredientCode, null, null, null);
+		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, ingredientCode, null, null);
 		
 		List<IBaseResource> resultList = get(result);
 		
 		assertThat(result, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-	}
-	
-	@Test
-	public void searchForMedications_shouldSearchMedicationsByStatus() {
-		Collection<Drug> medications = new ArrayList<>();
-		medications.add(drug);
-		
-		TokenAndListParam status = new TokenAndListParam();
-		status.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue("inactive")));
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, status);
-		
-		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
-		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(medications);
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
-		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
-		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, status, null, null);
-		
-		List<IBaseResource> resultList = get(result);
-		
-		assertThat(result, notNullValue());
-		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -221,19 +200,19 @@ public class FhirMedicationServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
 		
-		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
-		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(drug));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
+		when(medicationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(drug));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator, globalPropertyService));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, null, uuid, null);
+		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, uuid, null);
 		
 		List<IBaseResource> resultList = get(result);
 		
 		assertThat(result, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test
@@ -243,19 +222,19 @@ public class FhirMedicationServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
-		when(medicationDao.getResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
-		when(medicationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(drug));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator));
+		when(medicationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
+		when(medicationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(drug));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator, globalPropertyService));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, null, null, lastUpdated);
+		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, null, lastUpdated);
 		
 		List<IBaseResource> resultList = get(result);
 		
 		assertThat(result, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 	@Test

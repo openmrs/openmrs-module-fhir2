@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Drug;
@@ -26,6 +27,7 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.Person;
 import org.openmrs.Provider;
 import org.openmrs.User;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,26 +43,46 @@ public abstract class BaseReferenceHandlingTranslator {
 	private PatientIdentifierTranslator patientIdentifierTranslator;
 	
 	protected Reference createEncounterReference(@NotNull Encounter encounter) {
+		if (encounter instanceof HibernateProxy) {
+			encounter = HibernateUtil.getRealObjectFromProxy(encounter);
+		}
+		
 		return new Reference().setReference(FhirConstants.ENCOUNTER + "/" + encounter.getUuid())
 		        .setType(FhirConstants.ENCOUNTER);
 	}
 	
 	protected Reference createMedicationReference(@NotNull Drug drug) {
+		if (drug instanceof HibernateProxy) {
+			drug = HibernateUtil.getRealObjectFromProxy(drug);
+		}
+		
 		return new Reference().setReference(FhirConstants.MEDICATION + "/" + drug.getUuid())
 		        .setType(FhirConstants.MEDICATION);
 	}
 	
 	protected Reference createObservationReference(@NotNull Obs obs) {
+		if (obs instanceof HibernateProxy) {
+			obs = HibernateUtil.getRealObjectFromProxy(obs);
+		}
+		
 		return new Reference().setReference(FhirConstants.OBSERVATION + "/" + obs.getUuid())
 		        .setType(FhirConstants.OBSERVATION);
 	}
 	
 	protected Reference createLocationReference(@NotNull Location location) {
+		if (location instanceof HibernateProxy) {
+			location = HibernateUtil.getRealObjectFromProxy(location);
+		}
+		
 		return new Reference().setReference(FhirConstants.LOCATION + "/" + location.getUuid())
 		        .setType(FhirConstants.LOCATION).setDisplay(location.getName());
 	}
 	
 	protected Reference createPatientReference(@NotNull Patient patient) {
+		if (patient instanceof HibernateProxy) {
+			patient = HibernateUtil.getRealObjectFromProxy(patient);
+		}
+		
 		Reference reference = new Reference().setReference(FhirConstants.PATIENT + "/" + patient.getUuid())
 		        .setType(FhirConstants.PATIENT);
 		
@@ -84,11 +106,14 @@ public abstract class BaseReferenceHandlingTranslator {
 	}
 	
 	protected Reference createPractitionerReference(@NotNull User user) {
+		if (user instanceof HibernateProxy) {
+			user = HibernateUtil.getRealObjectFromProxy(user);
+		}
+		
 		Reference reference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + user.getUuid())
 		        .setType(FhirConstants.PRACTITIONER);
 		
 		if (user.getPerson() != null) {
-			
 			if (user.getPerson().getPersonName() != null) {
 				reference.setDisplay(user.getPerson().getPersonName().getFullName());
 			}
@@ -98,6 +123,10 @@ public abstract class BaseReferenceHandlingTranslator {
 	}
 	
 	protected Reference createPractitionerReference(@NotNull Provider provider) {
+		if (provider instanceof HibernateProxy) {
+			provider = HibernateUtil.getRealObjectFromProxy(provider);
+		}
+		
 		Reference reference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + provider.getUuid())
 		        .setType(FhirConstants.PRACTITIONER);
 		
@@ -121,6 +150,10 @@ public abstract class BaseReferenceHandlingTranslator {
 	}
 	
 	protected Reference createOrderReference(@NotNull Order order) {
+		if (order instanceof HibernateProxy) {
+			order = HibernateUtil.getRealObjectFromProxy(order);
+		}
+		
 		if (order.getOrderType() == null) {
 			return null;
 		}

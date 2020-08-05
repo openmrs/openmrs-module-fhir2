@@ -38,10 +38,19 @@ import org.hibernate.criterion.Subqueries;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
+import org.openmrs.Patient;
+import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 
+/**
+ * Base class for Person-related DAO objects. This helps standardise the logic used to search for
+ * and sort objects that represent a Person, including {@link Person}, {@link Patient}, but also
+ * classes like {@link org.openmrs.Provider} and {@link org.openmrs.User}.
+ *
+ * @param <T> The OpenMRS object that represents a person.
+ */
 public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	/**
@@ -50,6 +59,22 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	 * @return the sqlAlias for the Person class for queries from this class
 	 */
 	protected abstract String getSqlAlias();
+	
+	/**
+	 * This is intended to be overridden by subclasses to provide the property that defines the Person
+	 * for this object
+	 *
+	 * @return the property that points to the person for this object
+	 */
+	@SuppressWarnings("UnstableApiUsage")
+	protected String getPersonProperty() {
+		Class<? super T> rawType = typeToken.getRawType();
+		if (rawType.equals(Person.class) || rawType.equals(Patient.class)) {
+			return null;
+		}
+		
+		return "person";
+	}
 	
 	@Override
 	protected Collection<Order> paramToProps(SortState sortState) {
@@ -61,10 +86,10 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		
 		Criteria criteria = sortState.getCriteria();
 		if (param.startsWith("address") && lacksAlias(criteria, "pad")) {
-			criteria.createAlias("addresses", "pad", JoinType.LEFT_OUTER_JOIN);
+			criteria.createAlias(getAssociationPath("addresses"), "pad", JoinType.LEFT_OUTER_JOIN);
 		} else if (param.equals(SP_NAME) || param.equals(SP_GIVEN) || param.equals(SP_FAMILY)) {
 			if (lacksAlias(criteria, "pn")) {
-				criteria.createAlias("names", "pn", JoinType.LEFT_OUTER_JOIN);
+				criteria.createAlias(getAssociationPath("names"), "pn", JoinType.LEFT_OUTER_JOIN);
 			}
 			
 			String sqlAlias = getSqlAlias();
@@ -152,9 +177,35 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 		}
 		
 		handlePersonAddress("pad", city, state, postalCode, country).ifPresent(c -> {
-			criteria.createAlias("addresses", "pad");
+			criteria.createAlias(getAssociationPath("addresses"), "pad");
 			criteria.add(c);
 		});
 	}
 	
+	protected void handleNames(Criteria criteria, List<PropParam<?>> params) {
+		StringAndListParam name = null;
+		StringAndListParam given = null;
+		StringAndListParam family = null;
+		
+		for (PropParam<?> param : params) {
+			switch (param.getPropertyName()) {
+				case FhirConstants.NAME_PROPERTY:
+					name = (StringAndListParam) param.getParam();
+					break;
+				case FhirConstants.GIVEN_PROPERTY:
+					given = (StringAndListParam) param.getParam();
+					break;
+				case FhirConstants.FAMILY_PROPERTY:
+					family = (StringAndListParam) param.getParam();
+					break;
+			}
+		}
+		
+		handleNames(criteria, name, given, family, getPersonProperty());
+	}
+	
+	private String getAssociationPath(String property) {
+		String personProperty = getPersonProperty();
+		return personProperty == null ? property : personProperty + "." + property;
+	}
 }

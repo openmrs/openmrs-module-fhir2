@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -44,7 +46,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,8 +88,9 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		setProvenanceResources(condition);
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private List<Condition> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof Condition)
+		        .map(it -> (Condition) it).collect(Collectors.toList());
 	}
 	
 	@Test
@@ -183,11 +185,11 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		IBundleProvider result = resourceProvider.searchConditions(patientReference, subjectReference, codeList,
 		    clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort);
 		
-		List<IBaseResource> resultList = get(result);
+		List<Condition> resultList = get(result);
 		
 		assertThat(result, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.CONDITION));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.CONDITION));
 	}
 	
 	@Test
@@ -221,10 +223,10 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		IBundleProvider result = resourceProvider.searchConditions(subjectReference, subjectReference, codeList,
 		    clinicalList, onsetDate, onsetAge, recordDate, uuid, lastUpdated, sort);
 		
-		List<IBaseResource> resultList = get(result);
+		List<Condition> resultList = get(result);
 		
 		assertThat(result, notNullValue());
-		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-		assertThat(resultList.iterator().next().fhirType(), equalTo(FhirConstants.CONDITION));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.CONDITION));
 	}
 }

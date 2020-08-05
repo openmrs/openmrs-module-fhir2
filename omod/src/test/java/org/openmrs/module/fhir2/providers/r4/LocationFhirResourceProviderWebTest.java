@@ -22,8 +22,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.fhir2.FhirConstants.AUT;
-import static org.openmrs.module.fhir2.FhirConstants.AUTHOR;
 
 import javax.servlet.ServletException;
 
@@ -80,11 +78,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	
 	private static final String POSTAL_CODE = "234-30100";
 	
-	private static final String SYSTEM = "https://fhir.openmrs.org/ext/location-tag";
-	
 	private static final String LOGIN_LOCATION_TAG_NAME = "login";
-	
-	private static final String LOGIN_LOCATION_TAG_DESCRIPTION = "Identify login locations";
 	
 	private static final String PARENT_LOCATION_NAME = "Test parent location";
 	
@@ -398,8 +392,9 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 		provenance.setActivity(new CodeableConcept().addCoding(
 		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
 		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
-		        .setType(new CodeableConcept().addCoding(new Coding().setCode(AUT).setDisplay(AUTHOR)
-		                .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
+		        .setType(
+		            new CodeableConcept().addCoding(new Coding().setCode(FhirConstants.AUT).setDisplay(FhirConstants.AUTHOR)
+		                    .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
 		        .addRole(new CodeableConcept().addCoding(
 		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
 		Location location = new Location();

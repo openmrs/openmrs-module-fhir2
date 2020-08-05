@@ -26,17 +26,18 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.Location;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.Location;
 import org.openmrs.LocationTag;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
@@ -69,19 +70,22 @@ public class FhirLocationServiceImplTest {
 	private static final int END_INDEX = 10;
 	
 	@Mock
-	FhirLocationDao locationDao;
+	private FhirLocationDao locationDao;
 	
 	@Mock
-	LocationTranslator locationTranslator;
+	private LocationTranslator locationTranslator;
 	
 	@Mock
-	SearchQuery<Location, org.hl7.fhir.r4.model.Location, FhirLocationDao, LocationTranslator> searchQuery;
+	private FhirGlobalPropertyService globalPropertyService;
+	
+	@Mock
+	private SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator> searchQuery;
 	
 	private FhirLocationServiceImpl fhirLocationService;
 	
-	private Location location;
+	private org.openmrs.Location location;
 	
-	private org.hl7.fhir.r4.model.Location fhirLocation;
+	private Location fhirLocation;
 	
 	@Before
 	public void setUp() {
@@ -90,7 +94,7 @@ public class FhirLocationServiceImplTest {
 		fhirLocationService.setTranslator(locationTranslator);
 		fhirLocationService.setSearchQuery(searchQuery);
 		
-		location = new Location();
+		location = new org.openmrs.Location();
 		location.setUuid(LOCATION_UUID);
 		location.setName(LOCATION_NAME);
 		location.setDescription(LOCATION_DESCRIPTION);
@@ -100,7 +104,7 @@ public class FhirLocationServiceImplTest {
 		locationTags.add(new LocationTag(LOGIN_LOCATION_TAG_NAME, LOGIN_LOCATION_TAG_DESCRIPTION));
 		location.setTags(locationTags);
 		
-		fhirLocation = new org.hl7.fhir.r4.model.Location();
+		fhirLocation = new Location();
 		fhirLocation.setId(LOCATION_UUID);
 		fhirLocation.setName(LOCATION_NAME);
 		fhirLocation.setDescription(LOCATION_DESCRIPTION);
@@ -128,27 +132,29 @@ public class FhirLocationServiceImplTest {
 	
 	@Test
 	public void searchForLocations_shouldReturnLocationsByParameters() {
-		List<Location> locations = new ArrayList<>();
+		List<org.openmrs.Location> locations = new ArrayList<>();
 		locations.add(location);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		when(locationDao.getResultUuids(any())).thenReturn(Collections.singletonList(LOCATION_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, locationDao, locationTranslator));
+		when(locationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(LOCATION_UUID));
+		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, locationDao, locationTranslator, globalPropertyService));
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-		when(locationDao.search(any(), any(), anyInt(), anyInt())).thenReturn(locations);
+		when(locationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(locations);
 		
 		IBundleProvider results = fhirLocationService.searchForLocations(null, null, null, null, null, null, null, null,
 		    null, null);
 		
-		List<IBaseResource> resultList = get(results);
-		
 		assertThat(results, notNullValue());
+		
+		List<Location> resultList = get(results);
+		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(LOCATION_UUID))));
 	}
 	
-	private List<IBaseResource> get(IBundleProvider results) {
-		return results.getResources(START_INDEX, END_INDEX);
+	private List<Location> get(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof Location)
+		        .map(it -> (Location) it).collect(Collectors.toList());
 	}
 }

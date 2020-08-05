@@ -66,32 +66,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		return medicationRequest;
 	}
 	
-	@Search
-	@SuppressWarnings("unused")
-	public IBundleProvider searchForMedicationRequests(
-	        @OptionalParam(name = MedicationRequest.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
-	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
-	        @OptionalParam(name = MedicationRequest.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
-	                Patient.SP_GIVEN, Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
-	        @OptionalParam(name = MedicationRequest.SP_ENCOUNTER, chainWhitelist = {
-	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
-	        @OptionalParam(name = MedicationRequest.SP_CODE) TokenAndListParam code,
-	        @OptionalParam(name = MedicationRequest.SP_REQUESTER, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
-	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
-	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
-	        @OptionalParam(name = MedicationRequest.SP_MEDICATION, chainWhitelist = {
-	                "" }, targetTypes = Medication.class) ReferenceAndListParam medicationReference,
-	        @OptionalParam(name = MedicationRequest.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
-		if (patientReference == null) {
-			patientReference = subjectReference;
-		}
-		return fhirMedicationRequestService.searchForMedicationRequests(patientReference, encounterReference, code,
-		    participantReference, medicationReference, id, lastUpdated);
-	}
-	
 	@Create
 	public MethodOutcome createMedicationRequest(@ResourceParam MedicationRequest mRequest) {
 		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = fhirMedicationRequestService.create(mRequest);
@@ -124,4 +98,29 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		return FhirProviderUtils.buildDelete(medicationRequest);
 	}
 	
+	@Search
+	@SuppressWarnings("unused")
+	public IBundleProvider searchForMedicationRequests(
+	        @OptionalParam(name = MedicationRequest.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
+	                Patient.SP_GIVEN, Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
+	        @OptionalParam(name = MedicationRequest.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
+	                Patient.SP_GIVEN, Patient.SP_FAMILY,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
+	        @OptionalParam(name = MedicationRequest.SP_ENCOUNTER, chainWhitelist = {
+	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
+	        @OptionalParam(name = MedicationRequest.SP_CODE) TokenAndListParam code,
+	        @OptionalParam(name = MedicationRequest.SP_REQUESTER, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
+	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
+	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
+	        @OptionalParam(name = MedicationRequest.SP_MEDICATION, chainWhitelist = {
+	                "" }, targetTypes = Medication.class) ReferenceAndListParam medicationReference,
+	        @OptionalParam(name = MedicationRequest.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated) {
+		if (patientReference == null) {
+			patientReference = subjectReference;
+		}
+		return fhirMedicationRequestService.searchForMedicationRequests(patientReference, encounterReference, code,
+		    participantReference, medicationReference, id, lastUpdated);
+	}
 }

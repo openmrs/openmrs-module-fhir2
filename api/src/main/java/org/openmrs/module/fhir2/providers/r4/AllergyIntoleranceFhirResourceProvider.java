@@ -86,7 +86,6 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	        @OptionalParam(name = AllergyIntolerance.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER,
 	                Patient.SP_GIVEN, Patient.SP_FAMILY,
 	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
-	        
 	        @OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY,
 	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,

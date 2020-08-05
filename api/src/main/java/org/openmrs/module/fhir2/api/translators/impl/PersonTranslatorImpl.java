@@ -13,21 +13,25 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Objects;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.HumanName;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
+import org.openmrs.PersonAttribute;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
-import org.openmrs.module.fhir2.api.translators.PersonTelecomTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +49,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	private GenderTranslator genderTranslator;
 	
 	@Autowired
-	private PersonTelecomTranslator telecomTranslator;
+	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Autowired
 	private ProvenanceTranslator<Person> provenanceTranslator;
@@ -75,7 +79,8 @@ public class PersonTranslatorImpl implements PersonTranslator {
 			for (PersonAddress address : openmrsPerson.getAddresses()) {
 				person.addAddress(addressTranslator.toFhirResource(address));
 			}
-			person.setTelecom(telecomTranslator.toFhirResource(openmrsPerson));
+			
+			person.addTelecom(telecomTranslator.toFhirResource(openmrsPerson));
 			
 			if (openmrsPerson.getIsPatient()) {
 				person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent()
@@ -105,18 +110,21 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		openmrsPerson.setVoided(person.getActive());
 		openmrsPerson.setBirthdate(person.getBirthDate());
 		
-		if (person.hasGender()) {
-			openmrsPerson.setGender(genderTranslator.toOpenmrsType(person.getGender()));
-		}
-		
 		for (HumanName name : person.getName()) {
 			openmrsPerson.addName(nameTranslator.toOpenmrsType(name));
+		}
+		
+		if (person.hasGender()) {
+			openmrsPerson.setGender(genderTranslator.toOpenmrsType(person.getGender()));
 		}
 		
 		for (Address address : person.getAddress()) {
 			openmrsPerson.addAddress(addressTranslator.toOpenmrsType(address));
 		}
-		openmrsPerson.setAttributes(telecomTranslator.toOpenmrsType(person.getTelecom()));
+		
+		person.getTelecom().stream()
+		        .map(contactPoint -> (PersonAttribute) telecomTranslator.toOpenmrsType(new PersonAttribute(), contactPoint))
+		        .distinct().filter(Objects::nonNull).forEach(openmrsPerson::addAttribute);
 		
 		return openmrsPerson;
 	}

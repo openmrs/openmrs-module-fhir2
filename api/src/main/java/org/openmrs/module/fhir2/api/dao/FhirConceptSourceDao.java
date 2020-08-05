@@ -14,13 +14,18 @@ import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.FhirConceptSource;
+import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirConceptSourceDao {
 	
+	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
 	Collection<FhirConceptSource> getFhirConceptSources();
 	
+	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
 	Optional<FhirConceptSource> getFhirConceptSourceByUrl(@NotNull String url);
 	
+	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
 	Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@NotNull String sourceName);
 }

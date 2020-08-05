@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -18,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.exparity.hamcrest.date.DateMatchers;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,8 +47,6 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	private static final String CONDITION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirConditionDaoImplTest_initial_data.xml";
 	
-	private static final String END_REASON = "End reason";
-	
 	private static final Integer PATIENT_ID = 6;
 	
 	private static final Integer CONDITION_ID = 9;
@@ -78,6 +74,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		dao = new FhirConditionDaoImpl_2_2();
 		dao.setSessionFactory(sessionFactory);
 		dao.setLocalDateTimeFactory(localDateTimeFactory);
+		
 		executeDataSet(CONDITION_INITIAL_DATA_XML);
 	}
 	
@@ -98,17 +95,18 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	@Test
 	public void shouldSaveNewCondition() {
 		Condition condition = new Condition();
-		condition.setUuid(CONDITION_UUID);
+		condition.setUuid(NEW_CONDITION_UUID);
 		condition.setOnsetDate(new Date());
 		condition.setEndDate(null);
 		
 		org.openmrs.Patient patient = patientService.getPatient(PATIENT_ID);
 		condition.setPatient(patient);
 		
-		dao.saveCondition(condition);
-		Condition result = dao.get(CONDITION_UUID);
+		dao.createOrUpdate(condition);
+		
+		Condition result = dao.get(NEW_CONDITION_UUID);
 		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), equalTo(CONDITION_UUID));
+		assertThat(result.getUuid(), equalTo(NEW_CONDITION_UUID));
 	}
 	
 	@Test
@@ -128,7 +126,7 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		codedOrFreeText.setCoded(conceptService.getConceptByUuid(CONDITION_CONCEPT_UUID));
 		condition.setCondition(codedOrFreeText);
 		
-		Condition result = dao.saveCondition(condition);
+		Condition result = dao.createOrUpdate(condition);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(condition.getUuid()));
 		assertThat(result.getClinicalStatus(), equalTo(condition.getClinicalStatus()));
@@ -137,49 +135,18 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void shouldUpdateExistingCondition() {
-		Condition condition = new Condition();
-		condition.setUuid(EXISTING_CONDITION_UUID);
+		Condition condition = dao.get(EXISTING_CONDITION_UUID);
 		
 		condition.setPatient(patientService.getPatient(PATIENT_ID));
 		condition.setOnsetDate(new Date());
 		condition.setClinicalStatus(ConditionClinicalStatus.HISTORY_OF);
 		
-		dao.saveCondition(condition);
+		dao.createOrUpdate(condition);
 		Condition result = dao.get(EXISTING_CONDITION_UUID);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(EXISTING_CONDITION_UUID));
 		assertThat(result.getPatient(), equalTo(patientService.getPatient(PATIENT_ID)));
-		assertThat(result.getEndDate(), notNullValue());
-		assertThat(result.getEndDate(), DateMatchers.sameDay(condition.getOnsetDate()));
-	}
-	
-	@Test
-	public void shouldSetConditionVoidedStatusTrue() {
-		Condition condition = new Condition();
-		condition.setUuid(EXISTING_CONDITION_UUID);
-		condition.setPatient(patientService.getPatient(PATIENT_ID));
-		condition.setClinicalStatus(ConditionClinicalStatus.ACTIVE);
-		condition.setOnsetDate(new Date());
-		
-		dao.saveCondition(condition);
-		Condition result = dao.get(EXISTING_CONDITION_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getVoided(), is(true));
-	}
-	
-	@Test
-	public void shouldSetEndDateIfEndReasonIsNotNull() {
-		Condition condition = new Condition();
-		condition.setUuid(NEW_CONDITION_UUID);
-		condition.setPatient(patientService.getPatient(PATIENT_ID));
-		condition.setClinicalStatus(ConditionClinicalStatus.ACTIVE);
-		condition.setEndReason(END_REASON);
-		
-		dao.saveCondition(condition);
-		Condition result = dao.get(NEW_CONDITION_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getEndDate(), notNullValue());
-		assertThat(result.getEndDate(), DateMatchers.sameDay(new Date()));
+		assertThat(result.getEndDate(), nullValue());
 	}
 }

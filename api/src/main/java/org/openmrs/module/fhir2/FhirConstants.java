@@ -30,7 +30,7 @@ public class FhirConstants {
 	
 	public static final String FHIR_TERMINOLOGY_PARTICIPATION_TYPE = HL7_FHIR_CODE_SYSTEM_PREFIX + "v3-ParticipationType";
 	
-	public static final String DIAGNOSTIC_SERVICE_SECTIONS_VALUESET_URI = HL7_FHIR_VALUE_SET_PREFIX
+	public static final String DIAGNOSTIC_SERVICE_SECTIONS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX
 	        + "/diagnostic-service-sections";
 	
 	public static final String INTERPRETATION_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/observation-interpretation";
@@ -40,23 +40,16 @@ public class FhirConstants {
 	
 	public static final String CONDITION_CLINICAL_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/condition-clinical ";
 	
-	public static final String ALLERGY_SUBSTANCE_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/substance-code";
-	
 	public static final String CLINICAL_FINDINGS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/clinical-findings";
 	
 	public static final String MEDICATION_CODES_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/medication-codes";
 	
 	public static final String MEDICATION_FORM_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/medication-form-codes";
 	
-	public static final String MEDICATION_INGREDIENT_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX
-	        + "/medication-ingredient-codes";
-	
 	public static final String ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/allergyintolerance-clinical";
 	
 	public static final String TASK_STATUS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/task-status";
-	
-	public static final String RESOURCE_TYPES_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/resource-types";
 	
 	public static final String OBSERVATION_REFERENCE_RANGE_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/referencerange-meaning";
@@ -134,11 +127,11 @@ public class FhirConstants {
 	
 	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
 	
-	public static final String PERSON_ATTRIBUTE_TYPE_PROPERTY = "fhir2.personAttributeTypeUuid";
+	public static final String PERSON_CONTACT_ATTRIBUTE_TYPE = "fhir2.personAttributeTypeUuid";
 	
-	public static final String LOCATION_ATTRIBUTE_TYPE_PROPERTY = "fhir2.locationAttributeTypeUuid";
+	public static final String LOCATION_CONTACT_ATTRIBUTE_TYPE = "fhir2.locationAttributeTypeUuid";
 	
-	public static final String PROVIDER_ATTRIBUTE_TYPE_PROPERTY = "fhir2.providerAttributeTypeUuid";
+	public static final String PROVIDER_CONTACT_ATTRIBUTE_TYPE = "fhir2.providerAttributeTypeUuid";
 	
 	public static final String GLOBAL_PROPERTY_MILD = "allergy.concept.severity.mild";
 	
@@ -215,10 +208,6 @@ public class FhirConstants {
 	public static final String INGREDIENT_SEARCH_HANDLER = "ingredient.search.handler";
 	
 	public static final String TAG_SEARCH_HANDLER = "tag.search.handler";
-	
-	public static final String PRACTITIONER_NAME_SEARCH_HANDLER = "practitioner.name.search.handler";
-	
-	public static final String USER_NAME_SEARCH_HANDLER = "user.name.search.handler";
 	
 	public static final String HAPI_NARRATIVES_PROPERTY_FILE = "classpath:ca/uhn/fhir/narrative/narratives.properties";
 	

@@ -50,6 +50,7 @@ public abstract class BaseMapping {
 		return inverseMap.get(value);
 	}
 	
+	@SuppressWarnings("UnstableApiUsage")
 	private void setupDelegates() {
 		if (map == null) {
 			synchronized (this) {
