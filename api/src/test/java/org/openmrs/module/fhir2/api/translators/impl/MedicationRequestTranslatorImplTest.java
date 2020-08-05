@@ -34,14 +34,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugOrder;
+import org.openmrs.Encounter;
+import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,6 +58,10 @@ public class MedicationRequestTranslatorImplTest {
 	private static final String CONCEPT_UUID = "33fdc8ad-fe4d-499b-93a8-8a991c1d488g";
 	
 	private static final String PRACTITIONER_UUID = "88fdc8ad-fe4d-499b-93a8-8a991c1d477d";
+	
+	private static final String PATIENT_UUID = "c0938432-1691-11df-9pa5-7038c432aaba";
+	
+	private static final String ENCOUNTER_UUID = "12345-abcde-54321";
 	
 	private static final String COMMENT_TO_THE_FULL_FILLER = "comment to the full filler";
 	
@@ -70,6 +78,12 @@ public class MedicationRequestTranslatorImplTest {
 	
 	@Mock
 	private MedicationReferenceTranslator medicationReferenceTranslator;
+	
+	@Mock
+	private EncounterReferenceTranslator encounterReferenceTranslator;
+	
+	@Mock
+	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Mock
 	private ConceptTranslator conceptTranslator;
@@ -92,6 +106,8 @@ public class MedicationRequestTranslatorImplTest {
 		medicationRequestTranslator.setMedicationReferenceTranslator(medicationReferenceTranslator);
 		medicationRequestTranslator.setConceptTranslator(conceptTranslator);
 		medicationRequestTranslator.setDosageTranslator(dosageTranslator);
+		medicationRequestTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
+		medicationRequestTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		
 		drugOrder = new DrugOrder();
 		drugOrder.setUuid(DRUG_ORDER_UUID);
@@ -195,6 +211,74 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getUrgency(), notNullValue());
 		assertThat(result.getUrgency(), equalTo(DrugOrder.Urgency.ROUTINE));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldTranslateEncounterToOpenMrsType() {
+		Encounter encounter = new Encounter();
+		encounter.setUuid(ENCOUNTER_UUID);
+		
+		Reference encounterReference = new Reference();
+		encounterReference.setReference(FhirConstants.ENCOUNTER + "/" + ENCOUNTER_UUID);
+		medicationRequest.setEncounter(encounterReference);
+		
+		when(encounterReferenceTranslator.toOpenmrsType(encounterReference)).thenReturn(encounter);
+		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getEncounter(), notNullValue());
+		assertThat(result.getEncounter().getUuid(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateEncounterToFhirType() {
+		Encounter encounter = new Encounter();
+		encounter.setUuid(ENCOUNTER_UUID);
+		drugOrder.setEncounter(encounter);
+		
+		Reference encounterReference = new Reference();
+		encounterReference.setReference(FhirConstants.ENCOUNTER + "/" + ENCOUNTER_UUID);
+		
+		when(encounterReferenceTranslator.toFhirResource(encounter)).thenReturn(encounterReference);
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getEncounter(), notNullValue());
+		assertThat(result.getEncounter().getReference(), equalTo(encounterReference.getReference()));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldTranslatePatientToOpenMrsType() {
+		Patient patient = new Patient();
+		patient.setUuid(PATIENT_UUID);
+		
+		Reference patientReference = new Reference();
+		patientReference.setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID);
+		medicationRequest.setSubject(patientReference);
+		
+		when(patientReferenceTranslator.toOpenmrsType(patientReference)).thenReturn(patient);
+		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPatient(), notNullValue());
+		assertThat(result.getPatient().getUuid(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslatePatientToFhirType() {
+		Patient patient = new Patient();
+		patient.setUuid(PATIENT_UUID);
+		drugOrder.setPatient(patient);
+		
+		Reference patientReference = new Reference();
+		patientReference.setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID);
+		
+		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientReference);
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getSubject(), notNullValue());
+		assertThat(result.getSubject().getReference(), equalTo(patientReference.getReference()));
 	}
 	
 	@Test
