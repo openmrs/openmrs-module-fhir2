@@ -43,7 +43,7 @@ a browser.
                     </tr>
                     <tr th:each="statusHistory, statusHistoryItr: ${resource.statusHistory}">
                         <td th:text="${statusHistoryItr.count}"></td>
-                        <td th:narrative="${statusHistory.status}"></td>
+                        <td th:text="${statusHistory.status}"></td>
                         <td th:narrative="${statusHistory.period}"></td>
                     </tr>
                     </tbody>
@@ -313,7 +313,7 @@ a browser.
                         <td th:text="${locationItr.count}"></td>
                         <td th:narrative="${location.location}"></td>
                         <td>
-                            <th:block th:if="${location.status}" th:narrative="${location.status}"></th:block>
+                            <th:block th:if="${location.status}" th:text="${location.status}"></th:block>
                         </td>
                         <th:block th:if="${fhirVersion} eq 'R4'">
                             <td>

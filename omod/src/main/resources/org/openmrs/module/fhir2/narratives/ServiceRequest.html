@@ -68,7 +68,7 @@ a browser.
         </tr>
         <tr th:if="${resource.priority}">
             <td>Priority:</td>
-            <td th:narrative="${resource.priority}"></td>
+            <td th:text="${resource.priority}"></td>
         </tr>
         <tr th:if="${resource.doNotPerform}">
             <td>Do Not Perform:</td>
