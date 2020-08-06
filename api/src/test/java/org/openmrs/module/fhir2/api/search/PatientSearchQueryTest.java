@@ -52,7 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class PatientSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String[] PATIENT_SEARCH_DATA_FILES = {
 	        "org/openmrs/api/include/PatientServiceTest-findPatients.xml",

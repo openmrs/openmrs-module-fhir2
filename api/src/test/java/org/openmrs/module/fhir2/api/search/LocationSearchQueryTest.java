@@ -51,7 +51,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @SkipBaseSetup
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class LocationSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	public static final String LOCATION_UUID = "c0938432-1691-11df-2222-8038u432aabd";
 	

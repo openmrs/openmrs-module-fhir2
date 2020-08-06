@@ -62,7 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class PersonSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+public class PersonSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String ADDRESS_SEARCH_FILE = "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_address_data.xml";
 	

@@ -60,7 +60,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class ObservationSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String OBS_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirObservationDaoImplTest_initial_data_suppl.xml";
 	

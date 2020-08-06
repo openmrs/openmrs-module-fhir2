@@ -50,7 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class ServiceRequestSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String TEST_ORDER_INITIAL_DATA = "org/openmrs/module/fhir2/api/dao/impl/FhirServiceRequestTest_initial_data.xml";
 	

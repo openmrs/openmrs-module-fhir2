@@ -58,7 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class UserSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+public class UserSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String USER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirUserDaoImplTest_initial_data.xml";
 	

@@ -54,7 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class DiagnosticReportSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirDiagnosticReportDaoImplTest_initial_data.xml";
 	

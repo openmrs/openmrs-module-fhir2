@@ -46,7 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class EncounterSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String ENC_UUID = "eec646cb-c847-45a7-98bc-91c8c4f70add";
 	

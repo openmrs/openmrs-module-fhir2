@@ -53,7 +53,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = { TestFhirSpringConfiguration.class }, inheritLocations = false)
-public class AllergyIntoleranceSearchQueryImplTest extends BaseModuleContextSensitiveTest {
+public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String ALLERGY_INTOLERANCE_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirAllergyIntoleranceDaoImplTest_initial_data.xml";
 	
