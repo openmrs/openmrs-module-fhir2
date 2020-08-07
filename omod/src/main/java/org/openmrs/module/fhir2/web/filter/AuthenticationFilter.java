@@ -40,27 +40,29 @@ public class AuthenticationFilter implements Filter {
 			if (httpRequest.getRequestedSessionId() != null && !httpRequest.isRequestedSessionIdValid()) {
 				Context.logout();
 			}
-			
-			if (!Context.isAuthenticated()) {
-				String basicAuth = httpRequest.getHeader("Authorization");
-				if (!StringUtils.isBlank(basicAuth) && basicAuth.startsWith("Basic")) {
-					// this is "Basic ${base64encode(username + ":" + password)}"
-					try {
-						basicAuth = basicAuth.substring(6); // remove the leading "Basic "
-						String decoded = new String(Base64.decodeBase64(basicAuth), StandardCharsets.UTF_8);
-						String[] userAndPass = decoded.split(":");
-						Context.authenticate(userAndPass[0], userAndPass[1]);
-					}
-					catch (Exception e) {
+			if (!(httpRequest.getRequestURI().contains("/.well-known")
+			        || httpRequest.getRequestURI().endsWith("/metadata"))) {
+				if (!Context.isAuthenticated()) {
+					String basicAuth = httpRequest.getHeader("Authorization");
+					if (!StringUtils.isBlank(basicAuth) && basicAuth.startsWith("Basic")) {
+						// this is "Basic ${base64encode(username + ":" + password)}"
+						try {
+							basicAuth = basicAuth.substring(6); // remove the leading "Basic "
+							String decoded = new String(Base64.decodeBase64(basicAuth), StandardCharsets.UTF_8);
+							String[] userAndPass = decoded.split(":");
+							Context.authenticate(userAndPass[0], userAndPass[1]);
+						}
+						catch (Exception e) {
+							HttpServletResponse httpResponse = (HttpServletResponse) response;
+							httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+							return;
+						}
+					} else {
+						// This sends 401 error if not authenticated
 						HttpServletResponse httpResponse = (HttpServletResponse) response;
 						httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
 						return;
 					}
-				} else {
-					// This sends 401 error if not authenticated
-					HttpServletResponse httpResponse = (HttpServletResponse) response;
-					httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
-					return;
 				}
 			}
 		}
