@@ -51,7 +51,7 @@ a browser.
         </tr>
         <tr th:if="${resource.priority}">
             <td>Priority:</td>
-            <td th:narrative="${resource.priority}"></td>
+            <td th:text="${resource.priority}"></td>
         </tr>
         <th:block th:if="${fhirVersion} eq 'R4'">
             <tr th:if="${resource.doNotPerform}">
