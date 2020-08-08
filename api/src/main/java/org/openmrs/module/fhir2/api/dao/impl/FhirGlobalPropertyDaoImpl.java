@@ -34,8 +34,8 @@ public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
 	
 	@Override
 	public String getGlobalProperty(String property) throws APIException {
-		GlobalProperty globalProperty = (GlobalProperty) sessionFactory.getCurrentSession()
-		        .createCriteria(GlobalProperty.class).add(Restrictions.eq("property", property)).uniqueResult();
+		GlobalProperty globalProperty = (GlobalProperty) sessionFactory.getCurrentSession().get(GlobalProperty.class,
+		    property);
 		return globalProperty == null ? null : globalProperty.getPropertyValue();
 	}
 	
