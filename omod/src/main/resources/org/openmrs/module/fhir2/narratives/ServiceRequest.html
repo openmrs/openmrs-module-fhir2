@@ -13,7 +13,7 @@ a browser.
 <!--*/-->
 
 <div>
-    <table class="hapiPropertyTable">
+    <table class="hapiPropertyTable" th:if="${not resource.empty}">
         <tbody>
         <tr th:if="${resource.id}">
             <td>Id:</td>

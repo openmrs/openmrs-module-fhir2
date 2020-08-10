@@ -13,7 +13,7 @@ a browser.
 <!--*/-->
 
 <div>
-    <table class="hapiPropertyTable">
+    <table class="hapiPropertyTable" th:if="${not resource.empty}">
         <tbody>
         <tr th:if="${resource.id}">
             <td>Id:</td>
@@ -27,14 +27,26 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <tr th:if="${resource.clinicalStatus}">
-            <td>Clinical Status:</td>
-            <td th:narrative="${resource.clinicalStatus}"></td>
-        </tr>
-        <tr th:if="${resource.verificationStatus}">
-            <td>Verification Status:</td>
-            <td th:narrative="${resource.verificationStatus}"></td>
-        </tr>
+        <th:block th:if="${fhirVersion} eq 'R4'">
+            <tr th:if="${not resource.clinicalStatus.empty}">
+                <td>Clinical Status:</td>
+                <td th:narrative="${resource.clinicalStatus}"></td>
+            </tr>
+            <tr th:if="${not resource.verificationStatus.empty}">
+                <td>Verification Status:</td>
+                <td th:narrative="${resource.verificationStatus}"></td>
+            </tr>
+        </th:block>
+        <th:block th:unless="${fhirVersion} eq 'R4'">
+            <tr th:if="${resource.clinicalStatus}">
+                <td>Clinical Status:</td>
+                <td th:narrative="${resource.clinicalStatus}"></td>
+            </tr>
+            <tr th:if="${resource.verificationStatus}">
+                <td>Verification Status:</td>
+                <td th:narrative="${resource.verificationStatus}"></td>
+            </tr>
+        </th:block>
         <tr th:if="${resource.type}">
             <td>Type:</td>
             <td th:text="${resource.type.display}"></td>
