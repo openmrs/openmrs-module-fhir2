@@ -22,6 +22,9 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Subqueries;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Obs;
 import org.openmrs.api.db.DAOException;
@@ -29,6 +32,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -44,7 +48,26 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<Obs> implements Fhi
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
+	public Obs get(String uuid) {
+		Obs returnedObs = super.get(uuid);
+		
+		if (returnedObs.isObsGrouping()) {
+			return returnedObs;
+		}
+		
+		return null;
+	}
+	
+	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		if (lacksAlias(criteria, "gm")) {
+			criteria.createAlias("groupMembers", "gm");
+		}
+		
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(org.openmrs.Obs.class, "groupMembers");
+		criteria.add(Subqueries.exists(detachedCriteria.setProjection(Projections.property("groupMembers.id"))));
+		
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
