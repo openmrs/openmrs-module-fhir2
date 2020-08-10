@@ -16,11 +16,11 @@ a browser.
     <table class="hapiPropertyTable" th:if="${not resource.empty}">
         <tbody>
         <tr th:if="${resource.id}">
-            <td>Id:</td>
+            <td th:text="(#{narrative.propertyName.id} ?: 'Id') + ':'"></td>
             <td th:text="${resource.id}"></td>
         </tr>
         <tr th:if="${not resource.identifier.empty}">
-            <td>Identifier:</td>
+            <td th:text="(#{narrative.propertyName.identifier} ?: 'Identifier') + ':'"></td>
             <td>
                 <th:block th:each="identifier: ${resource.identifier}">
                     <div th:narrative="${identifier}"></div>
@@ -29,30 +29,30 @@ a browser.
         </tr>
         <th:block th:if="${fhirVersion} eq 'R4'">
             <tr th:if="${not resource.clinicalStatus.empty}">
-                <td>Clinical Status:</td>
+                <td th:text="(#{narrative.propertyName.clinicalStatus} ?: 'Clinical Status') + ':'"></td>
                 <td th:narrative="${resource.clinicalStatus}"></td>
             </tr>
             <tr th:if="${not resource.verificationStatus.empty}">
-                <td>Verification Status:</td>
+                <td th:text="(#{narrative.propertyName.verificationStatus} ?: 'Verification Status') + ':'"></td>
                 <td th:narrative="${resource.verificationStatus}"></td>
             </tr>
         </th:block>
         <th:block th:unless="${fhirVersion} eq 'R4'">
             <tr th:if="${resource.clinicalStatus}">
-                <td>Clinical Status:</td>
+                <td th:text="(#{narrative.propertyName.clinicalStatus} ?: 'Clinical Status') + ':'"></td>
                 <td th:narrative="${resource.clinicalStatus}"></td>
             </tr>
             <tr th:if="${resource.verificationStatus}">
-                <td>Verification Status:</td>
+                <td th:text="(#{narrative.propertyName.verificationStatus} ?: 'Verification Status') + ':'"></td>
                 <td th:narrative="${resource.verificationStatus}"></td>
             </tr>
         </th:block>
         <tr th:if="${resource.type}">
-            <td>Type:</td>
+            <td th:text="(#{narrative.propertyName.type} ?: 'Type') + ':'"></td>
             <td th:text="${resource.type.display}"></td>
         </tr>
         <tr th:if="${not resource.category.empty}">
-            <td>Category:</td>
+            <td th:text="(#{narrative.propertyName.category} ?: 'Category') + ':'"></td>
             <td>
                 <th:block th:each="category: ${resource.category}">
                     <th:block th:text="${category.code}"></th:block>
@@ -60,68 +60,68 @@ a browser.
             </td>
         </tr>
         <tr th:if="${resource.criticality}">
-            <td>Criticality:</td>
+            <td th:text="(#{narrative.propertyName.criticality} ?: 'Criticality') + ':'"></td>
             <td th:text="${resource.criticality}"></td>
         </tr>
         <tr th:if="${not resource.code.empty}">
-            <td>Code:</td>
+            <td th:text="(#{narrative.propertyName.code} ?: 'Code') + ':'"></td>
             <td th:narrative="${resource.code}"></td>
         </tr>
         <tr th:if="${not resource.patient.empty}">
-            <td>Patient:</td>
+            <td th:text="(#{narrative.propertyName.patient} ?: 'Patient') + ':'"></td>
             <td th:narrative="${resource.patient}"></td>
         </tr>
         <th:block th:if="${fhirVersion} eq 'R4'">
             <tr th:if="${not resource.encounter.empty}">
-                <td>Encounter:</td>
+                <td th:text="(#{narrative.propertyName.encounter} ?: 'Encounter') + ':'"></td>
                 <td th:narrative="${resource.encounter}"></td>
             </tr>
         </th:block>
         <tr th:if="${resource.onset}">
-            <td>Onset:</td>
+            <td th:text="(#{narrative.propertyName.onset} ?: 'Onset') + ':'"></td>
             <td th:narrative="${resource.onset}"></td>
         </tr>
         <th:block th:if="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.assertedDate}">
-                <td>Asserted Date:</td>
+                <td th:text="(#{narrative.propertyName.assertedDate} ?: 'Asserted Date') + ':'"></td>
                 <td th:text="${#dates.format(resource.assertedDate,'dd/MM/yyyy')}"></td>
             </tr>
         </th:block>
         <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.recordedDate}">
-                <td>Recorded Date:</td>
+                <td th:text="(#{narrative.propertyName.recordedDate} ?: 'Recorded Date') + ':'"></td>
                 <td th:text="${#dates.format(resource.recordedDate,'dd/MM/yyyy')}"></td>
             </tr>
         </th:block>
         <tr th:if="${not resource.recorder.empty}">
-            <td>Recorder:</td>
+            <td th:text="(#{narrative.propertyName.recorder} ?: 'Recorder') + ':'"></td>
             <td th:narrative="${resource.recorder}"></td>
         </tr>
         <tr th:if="${not resource.asserter.empty}">
-            <td>Asserter:</td>
+            <td th:text="(#{narrative.propertyName.asserter} ?: 'Asserter') + ':'"></td>
             <td th:narrative="${resource.asserter}"></td>
         </tr>
         <tr th:if="${resource.lastOccurrence}">
-            <td>Last Occurrence:</td>
+            <td th:text="(#{narrative.propertyName.lastOccurrence} ?: 'Last Occurrence') + ':'"></td>
             <td th:text="${#dates.format(resource.lastOccurrence,'dd/MM/yyyy')}"></td>
         </tr>
         <tr th:if="${not resource.note.empty}">
-            <td>Note:</td>
+            <td th:text="(#{narrative.propertyName.note} ?: 'Note') + ':'"></td>
             <td>
                 <div th:each="note: ${resource.note}" th:text="${note.text}"></div>
             </td>
         </tr>
         <th:block th:each="reaction: ${resource.reaction}">
             <tr>
-                <td>Reaction:</td>
+                <td th:text="(#{narrative.propertyName.reaction} ?: 'Reaction') + ':'"></td>
                 <td></td>
             </tr>
             <tr th:if="${not reaction.substance.empty}">
-                <td>Substance:</td>
+                <td th:text="(#{narrative.propertyName.substance} ?: 'Substance') + ':'"></td>
                 <td th:narrative="${reaction.substance}"></td>
             </tr>
             <tr th:if="${not reaction.manifestation.empty}">
-                <td>Manifestation:</td>
+                <td th:text="(#{narrative.propertyName.manifestation} ?: 'Manifestation') + ':'"></td>
                 <td>
                     <th:block th:each="manifestation: ${reaction.manifestation}">
                         <div th:if="${not manifestation.empty}" th:narrative="${manifestation}"></div>
@@ -129,23 +129,23 @@ a browser.
                 </td>
             </tr>
             <tr th:if="${reaction.description}">
-                <td>Description:</td>
+                <td th:text="(#{narrative.propertyName.description} ?: 'Description') + ':'"></td>
                 <td th:text="${reaction.description}"></td>
             </tr>
             <tr th:if="${reaction.onset}">
-                <td>Onset:</td>
+                <td th:text="(#{narrative.propertyName.onset} ?: 'Onset') + ':'"></td>
                 <td th:text="${#dates.format(reaction.onset,'dd/MM/yyyy')}"></td>
             </tr>
             <tr th:if="${reaction.severity}">
-                <td>Severity:</td>
+                <td th:text="(#{narrative.propertyName.severity} ?: 'Severity') + ':'"></td>
                 <td th:text="${reaction.severity}"></td>
             </tr>
             <tr th:if="${not reaction.exposureRoute.empty}">
-                <td>Exposure Route:</td>
+                <td th:text="(#{narrative.propertyName.exposureRoute} ?: 'Exposure Route') + ':'"></td>
                 <td th:narrative="${reaction.exposureRoute}"></td>
             </tr>
             <tr th:if="${not reaction.noteFirstRep.empty}">
-                <td>Note:</td>
+                <td th:text="(#{narrative.propertyName.note} ?: 'Note') + ':'"></td>
                 <td th:text="${reaction.noteFirstRep.text}"></td>
             </tr>
         </th:block>

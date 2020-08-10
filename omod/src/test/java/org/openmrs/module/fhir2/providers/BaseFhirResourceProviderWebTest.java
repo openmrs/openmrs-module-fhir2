@@ -38,6 +38,7 @@ import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.impl.FhirGlobalPropertyServiceImpl;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -103,6 +104,9 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		});
 		
 		servlet.setResourceProviders(getResourceProvider());
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+		messageSource.setBasename("classpath:messages");
+		servlet.setMessageSource(messageSource);
 		servlet.init(servletConfig);
 	}
 	

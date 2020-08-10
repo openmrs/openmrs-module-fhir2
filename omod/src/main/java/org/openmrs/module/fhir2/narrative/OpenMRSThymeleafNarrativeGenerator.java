@@ -30,6 +30,7 @@ import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.context.MessageSource;
 
 public class OpenMRSThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator {
 	
@@ -37,9 +38,10 @@ public class OpenMRSThymeleafNarrativeGenerator extends ThymeleafNarrativeGenera
 	
 	private List<String> propertyFile;
 	
-	public OpenMRSThymeleafNarrativeGenerator(String... thePropertyFile) {
+	public OpenMRSThymeleafNarrativeGenerator(MessageSource messageSource, String... propertyFile) {
 		super();
-		setPropertyFile(thePropertyFile);
+		setMessageResolver(new OpenmrsMessageResolver(messageSource));
+		setPropertyFile(propertyFile);
 	}
 	
 	public void setPropertyFile(String... propertyFile) {
