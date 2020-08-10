@@ -43,13 +43,13 @@ a browser.
             <td>Category:</td>
             <td>
                 <th:block th:each="category: ${resource.category}">
-                    <th:block th:if="${not category.empty}" th:text="${category.code}"></th:block>
+                    <th:block th:text="${category.code}"></th:block>
                 </th:block>
             </td>
         </tr>
         <tr th:if="${resource.criticality}">
             <td>Criticality:</td>
-            <td th:text="${resource.criticality.display}"></td>
+            <td th:text="${resource.criticality}"></td>
         </tr>
         <tr th:if="${not resource.code.empty}">
             <td>Code:</td>
