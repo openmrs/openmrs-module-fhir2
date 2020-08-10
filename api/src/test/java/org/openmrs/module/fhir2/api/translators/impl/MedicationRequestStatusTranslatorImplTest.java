@@ -48,10 +48,10 @@ public class MedicationRequestStatusTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateToNull() {
+	public void toFhirResource_shouldTranslateToUnknown() {
 		drugOrder.setVoided(true);
 		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
 		assertThat(status, notNullValue());
-		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.NULL));
+		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.UNKNOWN));
 	}
 }
