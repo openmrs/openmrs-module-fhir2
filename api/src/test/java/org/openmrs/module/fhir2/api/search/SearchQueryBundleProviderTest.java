@@ -44,13 +44,16 @@ public class SearchQueryBundleProviderTest {
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
+	@Mock
+	private SearchQueryInclude<Observation> searchQueryInclude;
+	
 	private SearchQueryBundleProvider<Obs, Observation> searchQueryBundleProvider;
 	
 	@Before
 	public void setup() {
 		SearchParameterMap theParams = new SearchParameterMap();
 		searchQueryBundleProvider = new SearchQueryBundleProvider<>(theParams, observationDao, translator,
-		        globalPropertyService);
+		        globalPropertyService, searchQueryInclude);
 	}
 	
 	@Test

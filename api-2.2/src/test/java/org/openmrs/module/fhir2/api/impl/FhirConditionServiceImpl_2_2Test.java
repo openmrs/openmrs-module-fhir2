@@ -51,6 +51,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 
@@ -77,7 +78,10 @@ public class FhirConditionServiceImpl_2_2Test {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>> searchQuery;
+	private SearchQueryInclude<org.hl7.fhir.r4.model.Condition> searchQueryInclude;
+	
+	@Mock
+	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
 	
 	private FhirConditionServiceImpl_2_2 conditionService;
 	
@@ -96,6 +100,7 @@ public class FhirConditionServiceImpl_2_2Test {
 		conditionService.setDao(dao);
 		conditionService.setTranslator(conditionTranslator);
 		conditionService.setSearchQuery(searchQuery);
+		conditionService.setSearchQueryInclude(searchQueryInclude);
 		
 		openmrsCondition = new Condition();
 		openmrsCondition.setUuid(CONDITION_UUID);
@@ -251,8 +256,9 @@ public class FhirConditionServiceImpl_2_2Test {
 		
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(CONDITION_UUID));
 		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openmrsCondition));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, conditionTranslator, globalPropertyService));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, conditionTranslator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
 		
 		IBundleProvider result = conditionService.searchConditions(patientReference, codeList, clinicalList, onsetDate,

@@ -111,10 +111,13 @@ public class UserSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private PractitionerTranslator<User> translator;
 	
 	@Autowired
-	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>> searchQuery;
+	private SearchQueryInclude<Practitioner> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>, SearchQueryInclude<Practitioner>> searchQuery;
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<Practitioner> get(IBundleProvider results) {

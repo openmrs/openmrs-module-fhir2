@@ -45,6 +45,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 
@@ -73,7 +74,10 @@ public class FhirMedicationServiceImplTest {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator> searchQuery;
+	private SearchQueryInclude<Medication> searchQueryInclude;
+	
+	@Mock
+	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator, SearchQueryInclude<Medication>> searchQuery;
 	
 	private FhirMedicationServiceImpl fhirMedicationService;
 	
@@ -93,6 +97,7 @@ public class FhirMedicationServiceImplTest {
 		fhirMedicationService.setTranslator(medicationTranslator);
 		fhirMedicationService.setDao(medicationDao);
 		fhirMedicationService.setSearchQuery(searchQuery);
+		fhirMedicationService.setSearchQueryInclude(searchQueryInclude);
 		
 		medication = new Medication();
 		medication.setId(MEDICATION_UUID);
@@ -133,8 +138,9 @@ public class FhirMedicationServiceImplTest {
 		
 		when(medicationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
 		when(medicationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(medications);
-		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator, globalPropertyService));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
+		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
 		IBundleProvider result = fhirMedicationService.searchForMedications(code, null, null, null, null);
@@ -159,8 +165,9 @@ public class FhirMedicationServiceImplTest {
 		
 		when(medicationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
 		when(medicationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(medications);
-		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator, globalPropertyService));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
+		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
 		IBundleProvider result = fhirMedicationService.searchForMedications(null, dosageForm, null, null, null);
@@ -185,8 +192,9 @@ public class FhirMedicationServiceImplTest {
 		
 		when(medicationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
 		when(medicationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(medications);
-		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator, globalPropertyService));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
+		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
 		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, ingredientCode, null, null);
@@ -195,7 +203,7 @@ public class FhirMedicationServiceImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
@@ -207,8 +215,9 @@ public class FhirMedicationServiceImplTest {
 		
 		when(medicationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
 		when(medicationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(drug));
-		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator, globalPropertyService));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
+		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
 		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, uuid, null);
@@ -229,8 +238,9 @@ public class FhirMedicationServiceImplTest {
 		
 		when(medicationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_UUID));
 		when(medicationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(drug));
-		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, medicationDao, medicationTranslator, globalPropertyService));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
+		        medicationDao, medicationTranslator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
 		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, null, lastUpdated);

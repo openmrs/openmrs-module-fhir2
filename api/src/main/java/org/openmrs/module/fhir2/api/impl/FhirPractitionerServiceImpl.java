@@ -33,6 +33,7 @@ import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,10 +53,13 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	private PractitionerTranslator<Provider> translator;
 	
 	@Autowired
-	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>> searchQuery;
+	private SearchQueryInclude<Practitioner> searchQueryInclude;
 	
 	@Autowired
-	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>> userSearchQuery;
+	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>, SearchQueryInclude<Practitioner>> searchQuery;
+	
+	@Autowired
+	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>, SearchQueryInclude<Practitioner>> userSearchQuery;
 	
 	@Autowired
 	private FhirUserService userService;
@@ -93,7 +97,7 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
-		IBundleProvider providerBundle = searchQuery.getQueryResults(theParams, dao, translator);
+		IBundleProvider providerBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 		IBundleProvider userBundle = userService.searchForUsers(theParams);
 		
 		if (!providerBundle.isEmpty() && !userBundle.isEmpty()) {

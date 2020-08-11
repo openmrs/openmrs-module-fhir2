@@ -41,6 +41,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 
@@ -79,7 +80,10 @@ public class FhirLocationServiceImplTest {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator> searchQuery;
+	SearchQueryInclude<Location> searchQueryInclude;
+	
+	@Mock
+	SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator, SearchQueryInclude<Location>> searchQuery;
 	
 	private FhirLocationServiceImpl fhirLocationService;
 	
@@ -99,6 +103,7 @@ public class FhirLocationServiceImplTest {
 		fhirLocationService.setDao(locationDao);
 		fhirLocationService.setTranslator(locationTranslator);
 		fhirLocationService.setSearchQuery(searchQuery);
+		fhirLocationService.setSearchQueryInclude(searchQueryInclude);
 		
 		location = new org.openmrs.Location();
 		location.setUuid(LOCATION_UUID);
@@ -142,9 +147,12 @@ public class FhirLocationServiceImplTest {
 		locations.add(location);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
+		
 		when(locationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(LOCATION_UUID));
-		when(searchQuery.getQueryResults(any(), any(), any())).thenReturn(
-		    new SearchQueryBundleProvider<>(theParams, locationDao, locationTranslator, globalPropertyService));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
+		        locationDao, locationTranslator, globalPropertyService, searchQueryInclude));
+		
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 		when(locationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(locations);
 		

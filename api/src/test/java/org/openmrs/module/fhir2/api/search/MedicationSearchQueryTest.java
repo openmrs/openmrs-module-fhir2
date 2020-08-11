@@ -73,7 +73,10 @@ public class MedicationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private MedicationTranslator translator;
 	
 	@Autowired
-	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator> searchQuery;
+	private SearchQueryInclude<Medication> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator, SearchQueryInclude<Medication>> searchQuery;
 	
 	@Before
 	public void setup() throws Exception {
@@ -81,7 +84,7 @@ public class MedicationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<Medication> get(IBundleProvider results) {

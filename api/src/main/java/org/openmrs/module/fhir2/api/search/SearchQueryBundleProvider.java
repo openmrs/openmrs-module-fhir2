@@ -13,10 +13,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -58,14 +60,18 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	
 	private transient List<String> matchingResourceUuids;
 	
+	private final SearchQueryInclude<U> searchQueryInclude;
+	
 	public SearchQueryBundleProvider(SearchParameterMap searchParameterMap, FhirDao<T> dao,
-	    ToFhirTranslator<T, U> translator, FhirGlobalPropertyService globalPropertyService) {
+	    ToFhirTranslator<T, U> translator, FhirGlobalPropertyService globalPropertyService,
+	    SearchQueryInclude<U> searchQueryInclude) {
 		this.dao = dao;
 		this.published = InstantDt.withCurrentTime();
 		this.searchParameterMap = searchParameterMap;
 		this.translator = translator;
 		this.uuid = FhirUtils.newUuid();
 		this.globalPropertyService = globalPropertyService;
+		this.searchQueryInclude = searchQueryInclude;
 	}
 	
 	@Transactional(readOnly = true)
@@ -94,8 +100,17 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 			lastResult = Math.min(lastResult, toIndex);
 		}
 		
-		return dao.getSearchResults(searchParameterMap, matchingResourceUuids, firstResult, lastResult).stream()
+		List<U> returnedResourceList = dao
+		        .getSearchResults(searchParameterMap, matchingResourceUuids, firstResult, lastResult).stream()
 		        .map(translator::toFhirResource).filter(Objects::nonNull).collect(Collectors.toList());
+		
+		Set<IBaseResource> includedResources = searchQueryInclude.getIncludedResources(returnedResourceList,
+		    this.searchParameterMap);
+		
+		List<IBaseResource> resultList = new ArrayList<>(returnedResourceList);
+		resultList.addAll(includedResources);
+		
+		return resultList;
 	}
 	
 	@Override

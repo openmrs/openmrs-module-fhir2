@@ -125,7 +125,10 @@ public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiv
 	private AllergyIntoleranceTranslator translator;
 	
 	@Autowired
-	private SearchQuery<Allergy, AllergyIntolerance, FhirAllergyIntoleranceDao, AllergyIntoleranceTranslator> searchQuery;
+	private SearchQueryInclude<AllergyIntolerance> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Allergy, AllergyIntolerance, FhirAllergyIntoleranceDao, AllergyIntoleranceTranslator, SearchQueryInclude<AllergyIntolerance>> searchQuery;
 	
 	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
@@ -156,7 +159,7 @@ public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiv
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, allergyDao, translator);
+		return searchQuery.getQueryResults(theParams, allergyDao, translator, searchQueryInclude);
 	}
 	
 	@Test

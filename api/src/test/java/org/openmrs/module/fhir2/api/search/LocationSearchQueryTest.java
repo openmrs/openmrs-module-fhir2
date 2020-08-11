@@ -102,7 +102,10 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private static final int END_INDEX = 10;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator> searchQuery;
+	private SearchQueryInclude<Location> searchQueryInclude;
+	
+	@Autowired
+	SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator, SearchQueryInclude<Location>> searchQuery;
 	
 	@Autowired
 	private FhirLocationDao fhirLocationDao;
@@ -117,7 +120,7 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, fhirLocationDao, translator);
+		return searchQuery.getQueryResults(theParams, fhirLocationDao, translator, searchQueryInclude);
 	}
 	
 	private List<Location> get(IBundleProvider results) {

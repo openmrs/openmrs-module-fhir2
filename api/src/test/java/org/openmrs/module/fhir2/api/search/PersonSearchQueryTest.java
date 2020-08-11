@@ -137,7 +137,10 @@ public class PersonSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private PersonTranslator translator;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Person, Person, FhirPersonDao, PersonTranslator> searchQuery;
+	private SearchQueryInclude<Person> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<org.openmrs.Person, Person, FhirPersonDao, PersonTranslator, SearchQueryInclude<org.hl7.fhir.r4.model.Person>> searchQuery;
 	
 	private List<Person> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof Person)
@@ -145,7 +148,7 @@ public class PersonSearchQueryTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	@Test
