@@ -104,13 +104,16 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	private static final int END_INDEX = 10;
 	
 	@Autowired
-	SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
-	
-	@Autowired
 	private FhirDiagnosticReportDao dao;
 	
 	@Autowired
 	private DiagnosticReportTranslator translator;
+	
+	@Autowired
+	private SearchQueryInclude<DiagnosticReport> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator, SearchQueryInclude<DiagnosticReport>> searchQuery;
 	
 	@Before
 	public void setup() throws Exception {
@@ -118,7 +121,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<DiagnosticReport> get(IBundleProvider results) {

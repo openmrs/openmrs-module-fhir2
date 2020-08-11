@@ -127,7 +127,10 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	private ConditionTranslator<Condition> translator;
 	
 	@Autowired
-	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>> searchQuery;
+	private SearchQueryInclude<org.hl7.fhir.r4.model.Condition> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
 	
 	@Autowired
 	private LocalDateTimeFactory localDateTimeFactory;
@@ -138,7 +141,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {

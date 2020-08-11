@@ -21,6 +21,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,10 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	EncounterTranslator translator;
 	
 	@Autowired
-	SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
+	private SearchQueryInclude<Encounter> searchQueryInclude;
+	
+	@Autowired
+	SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator, SearchQueryInclude<Encounter>> searchQuery;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -53,6 +57,6 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, subject)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

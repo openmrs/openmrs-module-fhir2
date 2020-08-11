@@ -87,7 +87,10 @@ public class TaskSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private TaskTranslator translator;
 	
 	@Autowired
-	private SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator> searchQuery;
+	private SearchQueryInclude<Task> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator, SearchQueryInclude<Task>> searchQuery;
 	
 	@Before
 	public void setup() throws Exception {
@@ -99,7 +102,7 @@ public class TaskSearchQueryTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	@Test

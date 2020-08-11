@@ -123,7 +123,10 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 	private ServiceRequestTranslator<TestOrder> translator;
 	
 	@Autowired
-	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>> searchQuery;
+	private SearchQueryInclude<ServiceRequest> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<TestOrder, ServiceRequest, FhirServiceRequestDao<TestOrder>, ServiceRequestTranslator<TestOrder>, SearchQueryInclude<ServiceRequest>> searchQuery;
 	
 	@Before
 	public void setup() throws Exception {
@@ -131,7 +134,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 	private List<ServiceRequest> get(IBundleProvider results) {
@@ -150,8 +153,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(4));
 		
-		// TODO -> to be removed
-		List<ServiceRequest> resultList = get(results).stream().map(p -> (ServiceRequest) p).collect(Collectors.toList());
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(4));

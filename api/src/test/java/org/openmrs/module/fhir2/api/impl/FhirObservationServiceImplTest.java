@@ -41,6 +41,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 
@@ -58,7 +59,10 @@ public class FhirObservationServiceImplTest {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator> searchQuery;
+	private SearchQueryInclude<Observation> searchQueryInclude;
+	
+	@Mock
+	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator, SearchQueryInclude<Observation>> searchQuery;
 	
 	@Mock
 	private ObservationTranslator translator;
@@ -71,6 +75,7 @@ public class FhirObservationServiceImplTest {
 		fhirObservationService.setDao(dao);
 		fhirObservationService.setSearchQuery(searchQuery);
 		fhirObservationService.setTranslator(translator);
+		fhirObservationService.setSearchQueryInclude(searchQueryInclude);
 	}
 	
 	@Test
@@ -109,8 +114,9 @@ public class FhirObservationServiceImplTest {
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
 		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(obs));
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
 		IBundleProvider results = fhirObservationService.searchForObservations(null, patientReference, null, null, null,

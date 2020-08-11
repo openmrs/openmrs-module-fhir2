@@ -21,6 +21,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,10 @@ public class FhirMedicationServiceImpl extends BaseFhirService<Medication, Drug>
 	private FhirMedicationDao dao;
 	
 	@Autowired
-	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator> searchQuery;
+	private SearchQueryInclude<Medication> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<Drug, Medication, FhirMedicationDao, MedicationTranslator, SearchQueryInclude<Medication>> searchQuery;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -53,7 +57,7 @@ public class FhirMedicationServiceImpl extends BaseFhirService<Medication, Drug>
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 }

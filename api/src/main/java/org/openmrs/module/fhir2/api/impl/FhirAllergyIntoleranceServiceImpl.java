@@ -23,6 +23,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.dao.FhirAllergyIntoleranceDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,10 @@ public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIn
 	private FhirAllergyIntoleranceDao dao;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Allergy, AllergyIntolerance, FhirAllergyIntoleranceDao, AllergyIntoleranceTranslator> searchQuery;
+	private SearchQueryInclude<AllergyIntolerance> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<org.openmrs.Allergy, AllergyIntolerance, FhirAllergyIntoleranceDao, AllergyIntoleranceTranslator, SearchQueryInclude<AllergyIntolerance>> searchQuery;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -61,6 +65,6 @@ public class FhirAllergyIntoleranceServiceImpl extends BaseFhirService<AllergyIn
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

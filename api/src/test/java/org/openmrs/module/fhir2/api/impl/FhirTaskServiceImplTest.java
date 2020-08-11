@@ -39,6 +39,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 
@@ -66,16 +67,19 @@ public class FhirTaskServiceImplTest {
 	private static final int END_INDEX = 10;
 	
 	@Mock
-	FhirTaskDao dao;
+	private FhirTaskDao dao;
 	
 	@Mock
-	TaskTranslator translator;
+	private TaskTranslator translator;
 	
 	@Mock
-	FhirGlobalPropertyService fhirGlobalPropertyService;
+	private FhirGlobalPropertyService fhirGlobalPropertyService;
 	
 	@Mock
-	SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator> searchQuery;
+	private SearchQueryInclude<Task> searchQueryInclude;
+	
+	@Mock
+	SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator, SearchQueryInclude<Task>> searchQuery;
 	
 	private FhirTaskServiceImpl fhirTaskService;
 	
@@ -85,6 +89,7 @@ public class FhirTaskServiceImplTest {
 		fhirTaskService.setDao(dao);
 		fhirTaskService.setTranslator(translator);
 		fhirTaskService.setSearchQuery(searchQuery);
+		fhirTaskService.setSearchQueryInclude(searchQueryInclude);
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {
@@ -199,8 +204,9 @@ public class FhirTaskServiceImplTest {
 		
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(TASK_UUID));
 		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(openmrsTasks);
-		when(searchQuery.getQueryResults(any(), any(), any()))
-		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, fhirGlobalPropertyService));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, translator, fhirGlobalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(openmrsTask)).thenReturn(task);
 		
 		IBundleProvider results = fhirTaskService.searchForTasks(null, null, null, null, null, null);

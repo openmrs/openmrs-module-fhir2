@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
  * @param <T> FHIR generic translator Class
  */
 @Component
-public class SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends ToFhirTranslator<T, U>> {
+public class SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseResource, O extends FhirDao<T>, V extends ToFhirTranslator<T, U>, W extends SearchQueryInclude<U>> {
 	
 	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
@@ -40,7 +40,7 @@ public class SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseRes
 	 * @param translator generic translator
 	 * @return IBundleProvider
 	 */
-	public IBundleProvider getQueryResults(SearchParameterMap theParams, O dao, V translator) {
-		return new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService);
+	public IBundleProvider getQueryResults(SearchParameterMap theParams, O dao, V translator, W searchQueryInclude) {
+		return new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude);
 	}
 }

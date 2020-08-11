@@ -22,6 +22,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPersonService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,10 @@ public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.P
 	private PersonTranslator translator;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Person, Person, FhirPersonDao, PersonTranslator> searchQuery;
+	private SearchQueryInclude<Person> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<org.openmrs.Person, Person, FhirPersonDao, PersonTranslator, SearchQueryInclude<Person>> searchQuery;
 	
 	@Override
 	public IBundleProvider searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
@@ -60,7 +64,7 @@ public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.P
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		return searchQuery.getQueryResults(theParams, dao, translator);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
 }
