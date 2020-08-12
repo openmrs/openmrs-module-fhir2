@@ -1,9 +1,9 @@
 {
   "resourceType" : "Medication",
-  "code": {
-    "coding": [
+  "code":{
+    "coding":[
       {
-        "code": "be472ea0-1691-11df-97a5-7038c432aabf"
+        "code":"5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
       }
     ]
   },
@@ -11,7 +11,7 @@
   "form": {
     "coding": [
       {
-        "code": "a2c16152-9d07-4c3b-be06-86efdea2aee0"
+        "code":"5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
       }
     ]
   },
@@ -39,7 +39,7 @@
       "itemCodeableConcept": {
         "coding": [
           {
-            "code": "be49478f-1691-11df-97a5-7038c432aabf"
+            "code":"5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
           }
         ]
       }

@@ -54,7 +54,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<MedicationFhirResourceProvider, Medication> {
 	
-	private static final String MEDICATION_UUID = "a2749656-1bc0-4d22-9c11-1d60026b672b";
+	private static final String MEDICATION_UUID = "1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
 	

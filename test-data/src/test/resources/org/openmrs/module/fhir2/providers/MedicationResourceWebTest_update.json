@@ -1,21 +1,6 @@
 {
-  "resourceType" : "Medication",
-  "id": "a2749656-1bc0-4d22-9c11-1d60026b672b",
-  "code": {
-    "coding": [
-      {
-        "code": "be472ea0-1691-11df-97a5-7038c432aabf"
-      }
-    ]
-  },
-  "status": "inactive",
-  "form": {
-    "coding": [
-      {
-        "code": "a2c16152-9d07-4c3b-be06-86efdea2aee0"
-      }
-    ]
-  },
+  "resourceType": "Medication",
+  "id": "1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
   "extension": [
     {
       "url": "https://fhir.openmrs.org/ext/medicine",
@@ -25,22 +10,33 @@
           "valueString": "3.5"
         },
         {
-          "url": "https://fhir.openmrs.org/ext/medicine#minimumDailyDose",
-          "valueString": "3.0"
-        },
-        {
           "url": "https://fhir.openmrs.org/ext/medicine#strength",
-          "valueString": "1000mg"
+          "valueString": "800mg"
         }
       ]
     }
   ],
+  "code": {
+    "coding": [
+      {
+        "code": "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    ]
+  },
+  "status": "inactive",
+  "form": {
+    "coding": [
+      {
+        "code": "5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    ]
+  },
   "ingredient": [
     {
       "itemCodeableConcept": {
         "coding": [
           {
-            "code": "be49478f-1691-11df-97a5-7038c432aabf"
+            "code": "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
           }
         ]
       }
