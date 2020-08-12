@@ -26,7 +26,7 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
@@ -174,8 +174,8 @@ public class FhirTaskServiceImplTest {
 		fhirTaskService.update(TASK_UUID, fhirTask);
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
-	public void updateTask_shouldThrowMethodNotAllowedIfTaskDoesNotExist() {
+	@Test(expected = ResourceNotFoundException.class)
+	public void updateTask_shouldThrowResourceNotFoundIfTaskDoesNotExist() {
 		org.hl7.fhir.r4.model.Task fhirTask = new org.hl7.fhir.r4.model.Task();
 		fhirTask.setId(WRONG_TASK_UUID);
 		

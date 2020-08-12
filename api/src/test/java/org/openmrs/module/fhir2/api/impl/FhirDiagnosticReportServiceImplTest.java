@@ -27,7 +27,7 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.junit.Before;
@@ -166,8 +166,8 @@ public class FhirDiagnosticReportServiceImplTest {
 		service.update(UUID, diagnosticReport);
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
-	public void updateTask_shouldThrowMethodNotAllowedIfTaskDoesNotExist() {
+	@Test(expected = ResourceNotFoundException.class)
+	public void updateTask_shouldThrowResourceNotFoundIfTaskDoesNotExist() {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(WRONG_UUID);
 		

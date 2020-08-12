@@ -79,7 +79,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		if (openmrsPatient != null) {
 			patient.setId(openmrsPatient.getUuid());
 			patient.setBirthDate(openmrsPatient.getBirthdate());
-			patient.setActive(!openmrsPatient.getVoided());
+			patient.setActive(true);
 			
 			if (openmrsPatient.getDead()) {
 				if (openmrsPatient.getDeathDate() != null) {
@@ -137,11 +137,6 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		
 		currentPatient.setUuid(patient.getId());
 		currentPatient.setBirthdate(patient.getBirthDate());
-		
-		if (!patient.getActive()) {
-			currentPatient.setVoided(true);
-			currentPatient.setVoidReason("Voided by FHIR module");
-		}
 		
 		if (patient.hasDeceased()) {
 			try {

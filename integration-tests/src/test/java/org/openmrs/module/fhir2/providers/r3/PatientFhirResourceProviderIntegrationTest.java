@@ -36,6 +36,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<PatientFhirResourceProvider, Patient> {
+public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<org.openmrs.module.fhir2.providers.r3.PatientFhirResourceProvider, org.hl7.fhir.dstu3.model.Patient> {
 	
 	private static final String[] PATIENT_SEARCH_DATA_FILES = {
 	        "org/openmrs/api/include/PatientServiceTest-findPatients.xml",
@@ -54,6 +55,8 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	private static final String XML_CREATE_PATIENT_DOCUMENT = "org/openmrs/module/fhir2/providers/PatientWebTest_create.xml";
 	
 	private static final String PATIENT_UUID = "256ccf6d-6b41-455c-9be2-51ff4386ae76";
+	
+	private static final String WRONG_PATIENT_UUID = "f090747b-459b-4a13-8c1b-c0567d8aeb63";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -70,7 +73,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	}
 	
 	@Test
-	public void shouldReturnExistingPatient() throws Exception {
+	public void shouldReturnExistingPatientAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -82,6 +85,20 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		assertThat(patient, notNullValue());
 		assertThat(patient.getIdElement().getIdPart(), equalTo(PATIENT_UUID));
 		assertThat(patient, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotFoundWhenPatientNotFoundAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Patient/" + WRONG_PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
 	}
 	
 	@Test
@@ -100,7 +117,21 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	}
 	
 	@Test
-	public void shouldCreateNewPatient() throws Exception {
+	public void shouldReturnNotFoundWhenPatientNotFoundAsXML() throws Exception {
+		MockHttpServletResponse response = get("/Patient/" + WRONG_PATIENT_UUID).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldCreateNewPatientAsJson() throws Exception {
 		// read JSON record
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PATIENT_DOCUMENT)) {
@@ -113,12 +144,14 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		// verify created correctly
 		assertThat(response, isCreated());
+		assertThat(response.getHeader("Location"), containsString("/Patient/"));
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Patient patient = readResponse(response);
 		
 		assertThat(patient, notNullValue());
+		assertThat(patient.getIdElement().getIdPart(), notNullValue());
 		assertThat(patient.getName().get(0).getGiven().get(0).toString(), equalToIgnoringCase("Adam"));
 		assertThat(patient.getName().get(0).getFamily(), equalToIgnoringCase("John"));
 		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.MALE));
@@ -132,7 +165,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		assertThat(patient, validResource());
 		
 		// try to get new patient
-		response = get("/Patient/" + patient.getId()).accept(FhirMediaTypes.JSON).go();
+		response = get("/Patient/" + patient.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		
@@ -155,12 +188,14 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		
 		// verify created correctly
 		assertThat(response, isCreated());
+		assertThat(response.getHeader("Location"), containsString("/Patient/"));
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Patient patient = readResponse(response);
 		
 		assertThat(patient, notNullValue());
+		assertThat(patient.getIdElement().getIdPart(), notNullValue());
 		assertThat(patient.getName().get(0).getGiven().get(0).toString(), equalToIgnoringCase("Adam"));
 		assertThat(patient.getName().get(0).getFamily(), equalToIgnoringCase("John"));
 		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.MALE));
@@ -174,7 +209,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		assertThat(patient, validResource());
 		
 		// try to get new patient
-		response = get("/Patient/" + patient.getId()).accept(FhirMediaTypes.XML).go();
+		response = get("/Patient/" + patient.getIdElement().getIdPart()).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		
@@ -184,7 +219,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	}
 	
 	@Test
-	public void shouldUpdateExistingPatient() throws Exception {
+	public void shouldUpdateExistingPatientAsJson() throws Exception {
 		// get the existing record
 		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
 		Patient patient = readResponse(response);
@@ -213,6 +248,50 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		Patient reReadPatient = readResponse(response);
 		
 		assertThat(reReadPatient.getBirthDate(), equalTo(birthDate));
+	}
+	
+	@Test
+	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchPatientIdAsJson() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		Patient patient = readResponse(response);
+		
+		// update the existing record
+		patient.setId(WRONG_PATIENT_UUID);
+		
+		// send the update to the server
+		response = put("/Patient/" + PATIENT_UUID).jsonContent(toJson(patient)).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldReturnNotFoundWhenUpdatingNonExistentPatientAsJson() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		Patient patient = readResponse(response);
+		
+		// update the existing record
+		patient.setId(WRONG_PATIENT_UUID);
+		
+		// send the update to the server
+		response = put("/Patient/" + WRONG_PATIENT_UUID).jsonContent(toJson(patient)).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
 	}
 	
 	@Test
@@ -248,6 +327,50 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	}
 	
 	@Test
+	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchPatientIdAsXML() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.XML).go();
+		Patient patient = readResponse(response);
+		
+		// update the existing record
+		patient.setId(WRONG_PATIENT_UUID);
+		
+		// send the update to the server
+		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldReturnNotFoundWhenUpdatingNonExistentPatientAsXML() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		Patient patient = readResponse(response);
+		
+		// update the existing record
+		patient.setId(WRONG_PATIENT_UUID);
+		
+		// send the update to the server
+		response = put("/Patient/" + WRONG_PATIENT_UUID).jsonContent(toJson(patient)).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
 	public void shouldDeleteExistingPatient() throws Exception {
 		MockHttpServletResponse response = delete("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -259,7 +382,21 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	}
 	
 	@Test
-	public void shouldSearchForExistingPatients() throws Exception {
+	public void shouldReturnNotFoundWhenDeletingNonExistentPatient() throws Exception {
+		MockHttpServletResponse response = delete("/Patient/" + WRONG_PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldSearchForAllPatientsAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Patient").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -277,20 +414,23 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Patient/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Patient.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
-		
-		response = get("/Patient?family=Doe&_sort=given").accept(FhirMediaTypes.JSON).go();
+	}
+	
+	@Test
+	public void shouldReturnSortedAndFilteredSearchResultsForPatientsAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Patient?family=Doe&_sort=given").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		results = readBundleResponse(response);
+		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		
-		entries = results.getEntry();
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
 		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("Doe"))))));
 		assertThat(entries,
@@ -301,7 +441,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	}
 	
 	@Test
-	public void shouldSearchForExistingPatientsAsXML() throws Exception {
+	public void shouldSearchForAllPatientsAsXML() throws Exception {
 		MockHttpServletResponse response = get("/Patient").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
@@ -319,20 +459,23 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Patient/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Patient.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
-		
-		response = get("/Patient?family=Doe&_sort=given").accept(FhirMediaTypes.XML).go();
+	}
+	
+	@Test
+	public void shouldReturnSortedAndFilteredSearchResultsForPatientsAsXML() throws Exception {
+		MockHttpServletResponse response = get("/Patient?family=Doe&_sort=given").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		results = readBundleResponse(response);
+		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		
-		entries = results.getEntry();
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
 		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("Doe"))))));
 		assertThat(entries,

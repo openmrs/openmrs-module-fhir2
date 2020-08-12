@@ -141,14 +141,6 @@ public class PatientTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldMarkVoidedPatientAsInactive() {
-		org.openmrs.Patient patient = new org.openmrs.Patient();
-		patient.setVoided(true);
-		
-		assertThat(patientTranslator.toFhirResource(patient).getActive(), is(false));
-	}
-	
-	@Test
 	public void shouldTranslateAlivePatientToAlive() {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setDead(false);
@@ -264,16 +256,6 @@ public class PatientTranslatorImplTest {
 		
 		org.openmrs.Patient result = patientTranslator.toOpenmrsType(patient);
 		assertThat(result.getUuid(), equalTo(PATIENT_UUID));
-	}
-	
-	@Test
-	public void shouldVoidInactivePatient() {
-		Patient patient = new Patient();
-		patient.setActive(false);
-		
-		org.openmrs.Patient result = patientTranslator.toOpenmrsType(patient);
-		assertThat(result.getVoided(), is(true));
-		assertThat(result.getVoidReason(), equalTo("Voided by FHIR module"));
 	}
 	
 	@Test

@@ -11,12 +11,12 @@ package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Medication;
 import org.junit.Before;
@@ -111,9 +111,8 @@ public class FhirMedicationServiceImplTest {
 	}
 	
 	@Test
-	public void getMedicationByUuid_shouldReturnNullWhenCalledWithUnknownUuid() {
-		Medication medication = fhirMedicationService.get(WRONG_MEDICATION_UUID);
-		assertThat(medication, nullValue());
+	public void getMedicationByUuid_shouldThrowResourceNotFoundWhenCalledWithUnknownUuid() {
+		assertThrows(ResourceNotFoundException.class, () -> fhirMedicationService.get(WRONG_MEDICATION_UUID));
 	}
 	
 	@Test
@@ -270,8 +269,8 @@ public class FhirMedicationServiceImplTest {
 		fhirMedicationService.update(WRONG_MEDICATION_UUID, medication);
 	}
 	
-	@Test(expected = MethodNotAllowedException.class)
-	public void updateMedication_shouldThrowMethodNotAllowedException() {
+	@Test(expected = ResourceNotFoundException.class)
+	public void updateMedication_shouldThrowResourceNotFoundException() {
 		Medication medication = new Medication();
 		medication.setId(MEDICATION_UUID);
 		
