@@ -79,6 +79,11 @@ public abstract class BaseFhirR3IntegrationTest<T extends IResourceProvider, U e
 		return (Bundle) super.readBundleResponse(response);
 	}
 	
+	@Override
+	public OperationOutcome readOperationOutcome(MockHttpServletResponse response) throws UnsupportedEncodingException {
+		return (OperationOutcome) super.readOperationOutcome(response);
+	}
+	
 	public static Matcher<Bundle.BundleEntryComponent> hasResource(Matcher<? extends IDomainResource> matcher) {
 		return new HasResourceMatcher(matcher);
 	}

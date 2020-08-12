@@ -185,6 +185,16 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		}
 	}
 	
+	public IBaseOperationOutcome readOperationOutcome(MockHttpServletResponse response) throws UnsupportedEncodingException {
+		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
+		if (mediaType.isCompatibleWith(FhirMediaTypes.XML) || mediaType.isCompatibleWith(MediaType.APPLICATION_XML)
+		        || mediaType.isCompatibleWith(MediaType.TEXT_XML)) {
+			return xmlParser.parseResource(getOperationOutcomeClass(), response.getContentAsString());
+		} else {
+			return jsonParser.parseResource(getOperationOutcomeClass(), response.getContentAsString());
+		}
+	}
+	
 	public String toJson(U resource) {
 		return jsonParser.encodeResourceToString(resource);
 	}

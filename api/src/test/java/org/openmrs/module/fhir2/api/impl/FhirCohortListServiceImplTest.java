@@ -12,12 +12,13 @@ package org.openmrs.module.fhir2.api.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Date;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.ListResource;
 import org.junit.Before;
@@ -89,8 +90,7 @@ public class FhirCohortListServiceImplTest {
 	}
 	
 	@Test
-	public void getListByUuid_shouldReturnNullForUnknownUuid() {
-		ListResource list = fhirCohortListService.get(UNKNOWN_UUID);
-		assertThat(list, nullValue());
+	public void getListByUuid_shouldThrowResourceNotFoundForUnknownUuid() {
+		assertThrows(ResourceNotFoundException.class, () -> fhirCohortListService.get(UNKNOWN_UUID));
 	}
 }

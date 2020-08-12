@@ -9,8 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.reflect.TypeToken;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
@@ -19,15 +22,46 @@ import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 
+@SuppressWarnings("UnstableApiUsage")
 public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsObject & Auditable> implements FhirService<T> {
+	
+	protected final Class<? extends IResource> resourceClass;
+	
+	protected final TypeToken<T> resourceTypeToken;
+	
+	protected BaseFhirService() {
+		resourceTypeToken = new TypeToken<T>(getClass()) {
+			
+		};
+		
+		// this doesn't seem like it should work but does?
+		@SuppressWarnings("unchecked")
+		Class<? extends IResource> resourceClass = (Class<? extends IResource>) resourceTypeToken.getRawType();
+		
+		this.resourceClass = resourceClass;
+	}
 	
 	@Override
 	public T get(String uuid) {
-		return getTranslator().toFhirResource(getDao().get(uuid));
+		if (uuid == null) {
+			throw new InvalidRequestException("Uuid cannot be null.");
+		}
+		
+		U openmrsObj = getDao().get(uuid);
+		
+		if (openmrsObj == null) {
+			throw resourceNotFound(uuid);
+		}
+		
+		return getTranslator().toFhirResource(openmrsObj);
 	}
 	
 	@Override
 	public T create(T newResource) {
+		if (newResource == null) {
+			throw new InvalidRequestException("A resource of type " + resourceClass.getSimpleName() + " must be supplied");
+		}
+		
 		return getTranslator().toFhirResource(getDao().createOrUpdate(getTranslator().toOpenmrsType(newResource)));
 	}
 	
@@ -51,7 +85,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U existingObject = getDao().get(uuid);
 		
 		if (existingObject == null) {
-			throw new MethodNotAllowedException("No object found to update");
+			throw resourceNotFound(uuid);
 		}
 		
 		OpenmrsFhirTranslator<U, T> translator = getTranslator();
@@ -67,10 +101,24 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	@Override
 	public T delete(String uuid) {
-		return getTranslator().toFhirResource(getDao().delete(uuid));
+		if (uuid == null) {
+			throw new InvalidRequestException("Uuid cannot be null.");
+		}
+		
+		U openmrsObj = getDao().delete(uuid);
+		
+		if (openmrsObj == null) {
+			throw resourceNotFound(uuid);
+		}
+		
+		return getTranslator().toFhirResource(openmrsObj);
 	}
 	
 	protected abstract FhirDao<U> getDao();
 	
 	protected abstract OpenmrsFhirTranslator<U, T> getTranslator();
+	
+	private ResourceNotFoundException resourceNotFound(String uuid) {
+		return new ResourceNotFoundException(resourceClass, new IdDt(uuid));
+	}
 }

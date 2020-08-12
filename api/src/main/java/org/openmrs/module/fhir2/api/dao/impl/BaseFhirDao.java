@@ -19,6 +19,7 @@ import static org.hibernate.criterion.Subqueries.propertyIn;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -97,6 +98,10 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	public T createOrUpdate(T newEntry) {
+		if (newEntry.getUuid() == null) {
+			newEntry.setUuid(UUID.randomUUID().toString());
+		}
+		
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
 		return newEntry;
 	}

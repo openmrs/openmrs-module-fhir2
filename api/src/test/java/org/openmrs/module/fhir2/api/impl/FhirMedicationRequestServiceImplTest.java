@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
@@ -107,9 +108,8 @@ public class FhirMedicationRequestServiceImplTest {
 	}
 	
 	@Test
-	public void shouldReturnNullForBadMedicationRequestUuid() {
-		MedicationRequest result = medicationRequestService.get(BAD_MEDICATION_REQUEST_UUID);
-		assertThat(result, nullValue());
+	public void shouldThrowResourceNotFoundForBadMedicationRequestUuid() {
+		assertThrows(ResourceNotFoundException.class, () -> medicationRequestService.get(BAD_MEDICATION_REQUEST_UUID));
 	}
 	
 	private List<IBaseResource> get(IBundleProvider results) {
