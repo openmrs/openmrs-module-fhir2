@@ -95,7 +95,7 @@ public class NarrativeGeneratorTest {
 		expectedResourceType.add("testResourceType");
 		TemplateTypeEnum expectedTemplateType = TemplateTypeEnum.THYMELEAF;
 		String expectedContextPath = "testContextPath";
-		String expectedNarrative = "<div>testNarrativeContent</div>\n";
+		String expectedNarrative = "<div>testNarrativeContent</div>";
 		
 		OpenMRSNarrativeTemplateManifest manifest = OpenMRSNarrativeTemplateManifest
 		        .forManifestFileLocation(Arrays.asList(testNarrativePropFile));
@@ -106,7 +106,7 @@ public class NarrativeGeneratorTest {
 		assertEquals(template.getAppliesToResourceTypes(), expectedResourceType);
 		assertEquals(template.getTemplateType(), expectedTemplateType);
 		assertEquals(template.getContextPath(), expectedContextPath);
-		assertEquals(template.getTemplateText(), expectedNarrative);
+		assertEquals(template.getTemplateText().trim(), expectedNarrative.trim());
 	}
 	
 	@Test
