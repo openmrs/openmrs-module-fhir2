@@ -18,7 +18,6 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Subqueries;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
-import org.openmrs.DrugIngredient;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -27,17 +26,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirMedicationDaoImpl extends BaseFhirDao<Drug> implements FhirMedicationDao {
-	
-	@Override
-	public Drug createOrUpdate(Drug drug) {
-		super.createOrUpdate(drug);
-		
-		for (DrugIngredient ingredient : drug.getIngredients()) {
-			getSessionFactory().getCurrentSession().saveOrUpdate(ingredient);
-		}
-		
-		return drug;
-	}
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
