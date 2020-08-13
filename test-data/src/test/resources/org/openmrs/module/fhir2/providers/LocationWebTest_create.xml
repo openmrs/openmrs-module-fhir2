@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Location xmlns="http://hl7.org/fhir">
+	<name value="Test location"/>
+	<address>
+		<city value="kampala"/>
+		<country value="uganda"/>
+		<postalCode value="9105 PZ"/>
+		<state value="MI"/>
+	</address>
+</Location>

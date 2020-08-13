@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.translators;
 
 import org.hl7.fhir.r4.model.Location;
 
-public interface LocationTranslator extends OpenmrsFhirTranslator<org.openmrs.Location, org.hl7.fhir.r4.model.Location> {
+public interface LocationTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Location, Location> {
 	
 	/**
 	 * Maps an {@link org.openmrs.Location} to a {@link org.hl7.fhir.r4.model.Location}
@@ -30,4 +30,14 @@ public interface LocationTranslator extends OpenmrsFhirTranslator<org.openmrs.Lo
 	 */
 	@Override
 	org.openmrs.Location toOpenmrsType(Location fhirLocation);
+	
+	/**
+	 * Maps a {@link Location} to an existing {@link org.openmrs.Location}
+	 *
+	 * @param existingLocation the location to update
+	 * @param fhirLocation the FHIR location to map
+	 * @return the updated OpenMRS location
+	 */
+	@Override
+	org.openmrs.Location toOpenmrsType(org.openmrs.Location existingLocation, Location fhirLocation);
 }

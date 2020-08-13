@@ -1,7 +1,10 @@
 {
   "resourceType": "Location",
-  "city": "kampala",
-  "country": "uganda",
-  "postalCode": "9105 PZ",
-  "state": "MI"
-} 
+  "name": "Test location",
+  "address": {
+    "city": "kampala",
+    "country": "uganda",
+    "postalCode": "9105 PZ",
+    "state": "MI"
+  }
+}
