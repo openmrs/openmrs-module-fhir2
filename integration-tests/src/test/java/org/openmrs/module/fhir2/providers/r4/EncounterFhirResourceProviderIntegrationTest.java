@@ -287,5 +287,4 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
-	
 }
