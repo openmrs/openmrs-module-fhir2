@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
@@ -118,44 +120,53 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	 */
 	@Override
 	public org.openmrs.Location toOpenmrsType(Location fhirLocation) {
-		org.openmrs.Location openmrsLocation = new org.openmrs.Location();
+		notNull(fhirLocation, "The Location object should not be null");
+		return toOpenmrsType(new org.openmrs.Location(), fhirLocation);
+	}
+	
+	/**
+	 * @see org.openmrs.module.fhir2.api.translators.LocationTranslator#toOpenmrsType(org.openmrs.Location,
+	 *      org.hl7.fhir.r4.model.Location)
+	 */
+	@Override
+	public org.openmrs.Location toOpenmrsType(org.openmrs.Location openmrsLocation, Location fhirLocation) {
+		notNull(openmrsLocation, "The existing Openmrs location should not be null");
+		notNull(fhirLocation, "The Location object should not be null");
 		
-		if (fhirLocation != null) {
-			openmrsLocation.setUuid(fhirLocation.getId());
-			openmrsLocation.setName(fhirLocation.getName());
-			openmrsLocation.setDescription(fhirLocation.getDescription());
-			
-			if (fhirLocation.getAddress() != null) {
-				openmrsLocation.setCityVillage(fhirLocation.getAddress().getCity());
-				openmrsLocation.setStateProvince(fhirLocation.getAddress().getState());
-				openmrsLocation.setCountry(fhirLocation.getAddress().getCountry());
-				openmrsLocation.setPostalCode(fhirLocation.getAddress().getPostalCode());
-			}
-			
-			if (fhirLocation.hasStatus() && fhirLocation.getStatus().equals(Location.LocationStatus.INACTIVE)) {
-				openmrsLocation.setRetired(true);
-				openmrsLocation.setRetireReason("Retired by FHIR module");
-			}
-			
-			if (fhirLocation.getPosition().hasLatitude()) {
-				openmrsLocation.setLatitude(fhirLocation.getPosition().getLatitude().toString());
-			}
-			if (fhirLocation.getPosition().hasLongitude()) {
-				openmrsLocation.setLongitude(fhirLocation.getPosition().getLongitude().toString());
-			}
-			
-			fhirLocation.getTelecom().stream().map(
-			    contactPoint -> (LocationAttribute) telecomTranslator.toOpenmrsType(new LocationAttribute(), contactPoint))
-			        .distinct().filter(Objects::nonNull).forEach(openmrsLocation::addAttribute);
-			
-			if (fhirLocation.getMeta().hasTag()) {
-				for (Coding tag : fhirLocation.getMeta().getTag()) {
-					openmrsLocation.addTag(new LocationTag(tag.getCode(), tag.getDisplay()));
-				}
-			}
-			
-			openmrsLocation.setParentLocation(getOpenmrsParentLocation(fhirLocation.getPartOf()));
+		openmrsLocation.setUuid(fhirLocation.getId());
+		openmrsLocation.setName(fhirLocation.getName());
+		openmrsLocation.setDescription(fhirLocation.getDescription());
+		
+		if (fhirLocation.getAddress() != null) {
+			openmrsLocation.setCityVillage(fhirLocation.getAddress().getCity());
+			openmrsLocation.setStateProvince(fhirLocation.getAddress().getState());
+			openmrsLocation.setCountry(fhirLocation.getAddress().getCountry());
+			openmrsLocation.setPostalCode(fhirLocation.getAddress().getPostalCode());
 		}
+		
+		if (fhirLocation.hasStatus() && fhirLocation.getStatus().equals(Location.LocationStatus.INACTIVE)) {
+			openmrsLocation.setRetired(true);
+			openmrsLocation.setRetireReason("Retired by FHIR module");
+		}
+		
+		if (fhirLocation.getPosition().hasLatitude()) {
+			openmrsLocation.setLatitude(fhirLocation.getPosition().getLatitude().toString());
+		}
+		if (fhirLocation.getPosition().hasLongitude()) {
+			openmrsLocation.setLongitude(fhirLocation.getPosition().getLongitude().toString());
+		}
+		
+		fhirLocation.getTelecom().stream().map(
+		    contactPoint -> (LocationAttribute) telecomTranslator.toOpenmrsType(new LocationAttribute(), contactPoint))
+		        .distinct().filter(Objects::nonNull).forEach(openmrsLocation::addAttribute);
+		
+		if (fhirLocation.getMeta().hasTag()) {
+			for (Coding tag : fhirLocation.getMeta().getTag()) {
+				openmrsLocation.addTag(new LocationTag(tag.getCode(), tag.getDisplay()));
+			}
+		}
+		
+		openmrsLocation.setParentLocation(getOpenmrsParentLocation(fhirLocation.getPartOf()));
 		
 		return openmrsLocation;
 	}

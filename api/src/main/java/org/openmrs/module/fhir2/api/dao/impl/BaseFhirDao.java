@@ -88,7 +88,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		}
 		
 		if (isVoidable || isRetireable) {
-			if (isVoided(result) || isVoided(result)) {
+			if (isVoided(result) || isRetired(result)) {
 				throw new ResourceGoneException(uuid);
 			}
 		}

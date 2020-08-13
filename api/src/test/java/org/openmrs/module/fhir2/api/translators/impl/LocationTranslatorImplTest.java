@@ -129,7 +129,7 @@ public class LocationTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateLocationUuidToFhiIdType() {
+	public void shouldTranslateLocationUuidToFhirIdType() {
 		omrsLocation.setUuid(LOCATION_UUID);
 		org.hl7.fhir.r4.model.Location fhirLocation = locationTranslator.toFhirResource(omrsLocation);
 		assertThat(fhirLocation, notNullValue());
@@ -166,15 +166,9 @@ public class LocationTranslatorImplTest {
 		assertThat(location.getAddress().getCity(), nullValue());
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnEmptyLocationWhenCalledWithEmptyFhirLocation() {
-		Location location = locationTranslator.toOpenmrsType(null);
-		assertThat(location.getName(), nullValue());
-		assertThat(location.getDescription(), nullValue());
-		assertThat(location.getId(), nullValue());
-		assertThat(location.getLatitude(), nullValue());
-		assertThat(location.getLongitude(), nullValue());
-		assertThat(location.getCountry(), nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionWhenCalledWithEmptyFhirLocation() {
+		locationTranslator.toOpenmrsType(null);
 	}
 	
 	@Test
