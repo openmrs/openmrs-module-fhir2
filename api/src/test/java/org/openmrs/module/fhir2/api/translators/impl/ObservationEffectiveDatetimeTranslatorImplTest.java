@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -55,11 +54,9 @@ public class ObservationEffectiveDatetimeTranslatorImplTest {
 		assertThat(((DateTimeType) datetimeType).getValue(), DateMatchers.sameDay(new Date()));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnObsAsIsIfTypeIsNull() {
-		
-		Obs expected = datetimeTranslator.toOpenmrsType(obs, null);
-		assertThat(expected, equalTo(obs));
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionIfTypeIsNull() {
+		datetimeTranslator.toOpenmrsType(obs, null);
 	}
 	
 	@Test

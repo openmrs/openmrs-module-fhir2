@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
@@ -47,8 +49,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 	
 	@Override
 	public DiagnosticReport toFhirResource(Obs obsGroup) {
-		if (obsGroup == null)
-			return null;
+		notNull(obsGroup, "The Obs object should not be null");
 		
 		if (!obsGroup.isObsGrouping()) {
 			throw new IllegalArgumentException("Obs object must be an Obs group.");
@@ -65,9 +66,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 	
 	@Override
 	public Obs toOpenmrsType(DiagnosticReport diagnosticReport) {
-		if (diagnosticReport == null) {
-			return null;
-		}
+		notNull(diagnosticReport, "The DiagnosticReport object should not be null");
 		
 		if (!diagnosticReport.hasResult()) {
 			throw new IllegalArgumentException("Diagnostic Report must have at least one result");
@@ -82,13 +81,8 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 	
 	@Override
 	public Obs toOpenmrsType(Obs existingObs, DiagnosticReport diagnosticReport) {
-		if (existingObs == null) {
-			existingObs = new Obs();
-		}
-		
-		if (diagnosticReport == null) {
-			return existingObs;
-		}
+		notNull(existingObs, "The existing Obs should not be null");
+		notNull(diagnosticReport, "The DiagnosticReport object should not be null");
 		
 		if (!diagnosticReport.hasResult()) {
 			throw new IllegalArgumentException("Diagnostic Report must have at least one result");

@@ -31,7 +31,7 @@ public class ConditionVerificationStatusTranslatorImpl_2_2 implements ConditionV
 	
 	@Override
 	public ConditionVerificationStatus toOpenmrsType(CodeableConcept codeableConcept) {
-		if (codeableConcept.getCoding().isEmpty()) {
+		if (codeableConcept == null || codeableConcept.getCoding().isEmpty()) {
 			return null;
 		}
 		switch (codeableConcept.getCoding().get(0).getCode().toUpperCase()) {

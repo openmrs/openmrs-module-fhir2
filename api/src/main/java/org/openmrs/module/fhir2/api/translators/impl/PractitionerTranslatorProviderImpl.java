@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
@@ -65,10 +67,8 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	
 	@Override
 	public Provider toOpenmrsType(Provider existingProvider, Practitioner practitioner) {
-		Validate.notNull(existingProvider, "Existing provider cannot be null");
-		if (practitioner == null) {
-			return existingProvider;
-		}
+		notNull(existingProvider, "The existing Provider object should not be null");
+		notNull(practitioner, "The Practitioner object should not be null");
 		
 		existingProvider.setUuid(practitioner.getId());
 		
@@ -84,11 +84,9 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	
 	@Override
 	public Practitioner toFhirResource(Provider provider) {
-		Practitioner practitioner = new Practitioner();
-		if (provider == null) {
-			return practitioner;
-		}
+		notNull(provider, "The Provider object should not be null");
 		
+		Practitioner practitioner = new Practitioner();
 		Identifier identifier = new Identifier();
 		identifier.setSystem(FhirConstants.OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER);
 		identifier.setValue(provider.getIdentifier());
@@ -127,6 +125,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	
 	@Override
 	public Provider toOpenmrsType(Practitioner practitioner) {
+		notNull(practitioner, "The Practitioner object should not be null");
 		return toOpenmrsType(new org.openmrs.Provider(), practitioner);
 	}
 	

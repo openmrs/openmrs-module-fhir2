@@ -43,11 +43,7 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 	
 	@Override
 	public BaseOpenmrsData toOpenmrsType(BaseOpenmrsData attribute, ContactPoint contactPoint) {
-		if (attribute == null) {
-			return null;
-		}
-		
-		if (contactPoint == null) {
+		if (attribute == null || contactPoint == null) {
 			return attribute;
 		}
 		
@@ -76,6 +72,10 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 	
 	@Override
 	public ContactPoint toFhirResource(BaseOpenmrsData attribute) {
+		if (attribute == null) {
+			return null;
+		}
+		
 		ContactPoint contactPoint = new ContactPoint();
 		
 		if (attribute instanceof PersonAttribute) {

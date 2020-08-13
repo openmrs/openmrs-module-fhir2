@@ -14,7 +14,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -113,11 +112,9 @@ public class DiagnosticReportTranslatorImplTest {
 		assertThat(result, notNullValue());
 	}
 	
-	@Test
-	public void toFhirResource_shouldReturnNullForNullObsGroup() {
-		DiagnosticReport result = translator.toFhirResource(null);
-		
-		assertThat(result, nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toFhirResource_shouldThrowExceptionForNullObsGroup() {
+		translator.toFhirResource(null);
 	}
 	
 	@Test
@@ -242,18 +239,14 @@ public class DiagnosticReportTranslatorImplTest {
 		assertThat(result.getGroupMembers().iterator().next().getUuid(), equalTo(CHILD_UUID));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnNullForCreatingNullDiagnosticReport() {
-		Obs result = translator.toOpenmrsType(null);
-		
-		assertThat(result, nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionForCreatingNullDiagnosticReport() {
+		translator.toOpenmrsType(null);
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnObsGroupForUpdatingDiagnosticReport() {
-		Obs result = translator.toOpenmrsType(obsGroup, null);
-		
-		assertThat(result, equalTo(obsGroup));
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionForUpdatingWithNullDiagnosticReport() {
+		translator.toOpenmrsType(obsGroup, null);
 	}
 	
 	@Test
@@ -335,20 +328,9 @@ public class DiagnosticReportTranslatorImplTest {
 		assertThat(result.getConcept(), equalTo(translatedCode));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldCreateObsGroupWhenNoneProvided() {
-		CodeableConcept newCode = new CodeableConcept();
-		Concept translatedCode = new Concept();
-		
-		newCode.addCoding().setCode(CODE);
-		diagnosticReport.setCode(newCode);
-		
-		when(conceptTranslator.toOpenmrsType(newCode)).thenReturn(translatedCode);
-		
-		Obs result = translator.toOpenmrsType(null, diagnosticReport);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getConcept(), equalTo(translatedCode));
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionWhenNoneProvided() {
+		translator.toOpenmrsType(null, diagnosticReport);
 	}
 	
 }

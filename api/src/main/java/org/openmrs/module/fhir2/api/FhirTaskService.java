@@ -17,17 +17,19 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Task;
 
 /**
- * Contains methods pertaining to creating/updating/voiding Tasks
+ * Contains methods pertaining to creating/updating/voiding/searching Tasks
  */
 public interface FhirTaskService extends FhirService<Task> {
 	
 	/**
-	 * Get list of tasks that reference the object type/UUID combo provided
+	 * Get collection of tasks corresponding to the provided search parameters
 	 *
-	 * @param basedOnReference
-	 * @param ownerReference
-	 * @param status
-	 * @param sort
+	 * @param basedOnReference A reference list to basedOn resources
+	 * @param ownerReference A reference list to owner resources
+	 * @param status A list of statuses
+	 * @param id The UUID of the requested task
+	 * @param lastUpdated A date range corresponding to when the Tasks were last updated
+	 * @param sort The sort parameters for the search results
 	 * @return the collection of Tasks that match the search parameters
 	 */
 	IBundleProvider searchForTasks(ReferenceAndListParam basedOnReference, ReferenceAndListParam ownerReference,

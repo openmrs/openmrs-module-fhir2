@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -131,11 +130,9 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result.getId(), equalTo(DRUG_ORDER_UUID));
 	}
 	
-	@Test
-	public void toOpenMrsType_shouldReturnExistingDrugOrderIfMedicationIsNull() {
-		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), null);
-		assertThat(result, notNullValue());
-		assertThat(result, instanceOf(DrugOrder.class));
+	@Test(expected = NullPointerException.class)
+	public void toOpenMrsType_shouldThrowExceptionIfMedicationIsNull() {
+		medicationRequestTranslator.toOpenmrsType(new DrugOrder(), null);
 	}
 	
 	@Test

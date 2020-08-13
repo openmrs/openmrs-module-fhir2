@@ -46,8 +46,8 @@ public class ObservationBasedOnReferenceTranslatorImpl extends BaseReferenceHand
 			return null;
 		}
 		
-		if (!reference.getType().equals(FhirConstants.SERVICE_REQUEST)
-		        && !reference.getType().equals(FhirConstants.MEDICATION)) {
+		String type = reference.getType();
+		if (type != null && !type.equals(FhirConstants.SERVICE_REQUEST) && !type.equals(FhirConstants.MEDICATION)) {
 			throw new IllegalArgumentException("Reference must be to a ServiceRequest or MedicationRequest");
 		}
 		

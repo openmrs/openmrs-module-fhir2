@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -45,38 +47,32 @@ public class TaskTranslatorImpl implements TaskTranslator {
 	
 	@Override
 	public Task toFhirResource(FhirTask openmrsTask) {
-		Task fhirTask = null;
+		notNull(openmrsTask, "The openmrsTask object should not be null");
 		
-		if (openmrsTask != null) {
-			fhirTask = new Task();
-			setFhirTaskFields(openmrsTask, fhirTask);
-			fhirTask.addContained(provenanceTranslator.getCreateProvenance(openmrsTask));
-			fhirTask.addContained(provenanceTranslator.getUpdateProvenance(openmrsTask));
-		}
+		Task fhirTask = new Task();
+		setFhirTaskFields(openmrsTask, fhirTask);
+		fhirTask.addContained(provenanceTranslator.getCreateProvenance(openmrsTask));
+		fhirTask.addContained(provenanceTranslator.getUpdateProvenance(openmrsTask));
 		
 		return fhirTask;
 	}
 	
 	@Override
 	public FhirTask toOpenmrsType(Task fhirTask) {
-		FhirTask openmrsTask = null;
+		notNull(fhirTask, "The Task object should not be null");
 		
-		if (fhirTask != null) {
-			openmrsTask = new FhirTask();
-			setOpenmrsTaskFields(openmrsTask, fhirTask);
-		}
+		FhirTask openmrsTask = new FhirTask();
+		setOpenmrsTaskFields(openmrsTask, fhirTask);
 		
 		return openmrsTask;
 	}
 	
 	@Override
 	public FhirTask toOpenmrsType(FhirTask openmrsTask, Task fhirTask) {
-		if (fhirTask != null) {
-			if (openmrsTask == null) {
-				openmrsTask = new FhirTask();
-			}
-			setOpenmrsTaskFields(openmrsTask, fhirTask);
-		}
+		notNull(openmrsTask, "The existing openmrsTask object should not be null");
+		notNull(fhirTask, "The Task object should not be null");
+		
+		setOpenmrsTaskFields(openmrsTask, fhirTask);
 		
 		return openmrsTask;
 	}

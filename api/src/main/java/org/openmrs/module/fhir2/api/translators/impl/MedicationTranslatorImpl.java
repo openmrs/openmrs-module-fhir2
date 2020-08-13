@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import javax.validation.constraints.NotNull;
 
 import java.util.Collection;
@@ -37,9 +39,7 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 	
 	@Override
 	public Medication toFhirResource(Drug drug) {
-		if (drug == null) {
-			return null;
-		}
+		notNull(drug, "The Drug object should not be null");
 		
 		Medication medication = new Medication();
 		medication.setId(drug.getUuid());
@@ -73,14 +73,15 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 	
 	@Override
 	public Drug toOpenmrsType(Medication medication) {
+		notNull(medication, "The Medication object should not be null");
 		return toOpenmrsType(new Drug(), medication);
 	}
 	
 	@Override
 	public Drug toOpenmrsType(Drug existingDrug, Medication med) {
-		if (med == null) {
-			return existingDrug;
-		}
+		notNull(existingDrug, "The existing Drug object should not be null");
+		notNull(med, "The Medication object should not be null");
+		
 		if (med.getId() != null) {
 			existingDrug.setUuid(med.getId());
 		}

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -62,9 +64,7 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 	
 	@Override
 	public AllergyIntolerance toFhirResource(Allergy omrsAllergy) {
-		if (omrsAllergy == null) {
-			return null;
-		}
+		notNull(omrsAllergy, "The Allergy object should not be null");
 		
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.setId(omrsAllergy.getUuid());
@@ -90,14 +90,14 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 	
 	@Override
 	public Allergy toOpenmrsType(AllergyIntolerance fhirAllergy) {
+		notNull(fhirAllergy, "The AllergyIntolerance object should not be null");
 		return toOpenmrsType(new Allergy(), fhirAllergy);
 	}
 	
 	@Override
 	public Allergy toOpenmrsType(Allergy allergy, AllergyIntolerance fhirAllergy) {
-		if (fhirAllergy == null) {
-			return allergy;
-		}
+		notNull(allergy, "The existing Allergy should not be null");
+		notNull(fhirAllergy, "The AllergyIntolerance object should not be null");
 		
 		if (fhirAllergy.getId() != null) {
 			allergy.setUuid(fhirAllergy.getId());

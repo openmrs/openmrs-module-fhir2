@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Annotation;
@@ -57,9 +59,7 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 	
 	@Override
 	public MedicationRequest toFhirResource(DrugOrder drugOrder) {
-		if (drugOrder == null) {
-			return null;
-		}
+		notNull(drugOrder, "The DrugOrder object should not be null");
 		
 		MedicationRequest medicationRequest = new MedicationRequest();
 		medicationRequest.setId(drugOrder.getUuid());
@@ -81,14 +81,15 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 	
 	@Override
 	public DrugOrder toOpenmrsType(MedicationRequest medicationRequest) {
+		notNull(medicationRequest, "The MedicationRequest object should not be null");
 		return toOpenmrsType(new DrugOrder(), medicationRequest);
 	}
 	
 	@Override
 	public DrugOrder toOpenmrsType(DrugOrder existingDrugOrder, MedicationRequest medicationRequest) {
-		if (medicationRequest == null) {
-			return existingDrugOrder;
-		}
+		notNull(existingDrugOrder, "The existing DrugOrder object should not be null");
+		notNull(medicationRequest, "The MedicationRequest object should not be null");
+		
 		existingDrugOrder.setUuid(medicationRequest.getId());
 		
 		existingDrugOrder.setDrug(medicationReferenceTranslator.toOpenmrsType(medicationRequest.getMedicationReference()));

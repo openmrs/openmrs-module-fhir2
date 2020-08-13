@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -64,9 +66,8 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 	
 	@Override
 	public Obs toOpenmrsType(Obs obs, Type resource) {
-		if (obs == null) {
-			return null;
-		}
+		notNull(obs, "The existing Obs object should not be null");
+		notNull(resource, "The Type object should not be null");
 		
 		if (resource instanceof CodeableConcept) {
 			obs.setValueCoded(conceptTranslator.toOpenmrsType((CodeableConcept) resource));

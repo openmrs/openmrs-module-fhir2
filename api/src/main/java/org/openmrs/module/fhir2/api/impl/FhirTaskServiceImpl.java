@@ -45,13 +45,15 @@ public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> impleme
 	private SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator> searchQuery;
 	
 	/**
-	 * Get a list of Tasks that match the given search and sort criteria
+	 * Get collection of tasks corresponding to the provided search parameters
 	 *
-	 * @param basedOnReference A reference to a basedOn resource
-	 * @param ownerReference A reference to an owner resource
-	 * @param status The list of statuses for requested Tasks
-	 * @param sort
-	 * @return the saved task
+	 * @param basedOnReference A reference list to basedOn resources
+	 * @param ownerReference A reference list to owner resources
+	 * @param status A list of statuses
+	 * @param id The UUID of the requested task
+	 * @param lastUpdated A date range corresponding to when the Tasks were last updated
+	 * @param sort The sort parameters for the search results
+	 * @return the collection of Tasks that match the search parameters
 	 */
 	@Override
 	@Transactional(readOnly = true)

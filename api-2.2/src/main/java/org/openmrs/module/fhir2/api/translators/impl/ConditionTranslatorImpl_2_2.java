@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -59,9 +61,7 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(Condition condition) {
-		if (condition == null) {
-			return null;
-		}
+		notNull(condition, "The Openmrs Condition object should not be null");
 		
 		org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
 		fhirCondition.setId(condition.getUuid());
@@ -92,14 +92,14 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 	
 	@Override
 	public Condition toOpenmrsType(org.hl7.fhir.r4.model.Condition condition) {
+		notNull(condition, "The Condition object should not be null");
 		return this.toOpenmrsType(new Condition(), condition);
 	}
 	
 	@Override
 	public Condition toOpenmrsType(Condition existingCondition, org.hl7.fhir.r4.model.Condition condition) {
-		if (condition == null) {
-			return existingCondition;
-		}
+		notNull(existingCondition, "The existing Openmrs Condition object should not be null");
+		notNull(condition, "The Condition object should not be null");
 		
 		existingCondition.setUuid(condition.getId());
 		existingCondition.setPatient(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));

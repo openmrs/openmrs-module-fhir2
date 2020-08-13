@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang3.Validate.notNull;
-
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.PersonAddress;
@@ -22,11 +20,11 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslatorImpl imple
 	
 	@Override
 	public Address toFhirResource(PersonAddress address) {
-		Address fhirAddress = new Address();
 		if (address == null) {
-			return fhirAddress;
+			return null;
 		}
 		
+		Address fhirAddress = new Address();
 		fhirAddress.setId(address.getUuid());
 		fhirAddress.setCity(address.getCityVillage());
 		fhirAddress.setState(address.getStateProvince());
@@ -49,14 +47,16 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslatorImpl imple
 	
 	@Override
 	public PersonAddress toOpenmrsType(Address address) {
+		if (address == null) {
+			return null;
+		}
+		
 		return toOpenmrsType(new PersonAddress(), address);
 	}
 	
 	@Override
 	public PersonAddress toOpenmrsType(PersonAddress personAddress, Address address) {
-		notNull(personAddress, "personAddress cannot be null");
-		
-		if (address == null) {
+		if (personAddress == null || address == null) {
 			return personAddress;
 		}
 		

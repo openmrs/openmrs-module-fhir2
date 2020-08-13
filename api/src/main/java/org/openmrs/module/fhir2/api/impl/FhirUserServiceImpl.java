@@ -44,11 +44,6 @@ public class FhirUserServiceImpl extends BaseFhirService<Practitioner, User> imp
 	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>> searchQuery;
 	
 	@Override
-	public Practitioner get(String uuid) {
-		return translator.toFhirResource(getDao().get(uuid));
-	}
-	
-	@Override
 	public IBundleProvider searchForUsers(TokenAndListParam identifier, StringAndListParam name, StringAndListParam given,
 	        StringAndListParam family, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
 	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated) {

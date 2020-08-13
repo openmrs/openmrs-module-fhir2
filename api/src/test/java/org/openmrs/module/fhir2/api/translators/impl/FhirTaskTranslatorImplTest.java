@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -108,11 +107,9 @@ public class FhirTaskTranslatorImplTest {
 		assertThat(result, notNullValue());
 	}
 	
-	@Test
-	public void toFhirResource_shouldTranslateNullToNull() {
-		Task result = taskTranslator.toFhirResource(null);
-		
-		assertThat(result, nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toFhirResource_shouldThrowExceptionForNullOpenmrsTask() {
+		taskTranslator.toFhirResource(null);
 	}
 	
 	@Test
@@ -124,11 +121,9 @@ public class FhirTaskTranslatorImplTest {
 		assertThat(result, notNullValue());
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldTranslateNullToNull() {
-		FhirTask result = taskTranslator.toOpenmrsType(null);
-		
-		assertThat(result, nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionForNullTask() {
+		taskTranslator.toOpenmrsType(null);
 	}
 	
 	@Test
@@ -167,34 +162,25 @@ public class FhirTaskTranslatorImplTest {
 		assertThat(result.getStatus(), equalTo(OPENMRS_NEW_TASK_STATUS));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldCreateOpenmrsTaskWhenNull() {
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionWhenNullProvided() {
 		Task fhirTask = new Task();
 		fhirTask.setId(TASK_UUID);
 		fhirTask.setStatus(FHIR_NEW_TASK_STATUS);
-		
-		FhirTask result = taskTranslator.toOpenmrsType(null, fhirTask);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getStatus(), equalTo(OPENMRS_NEW_TASK_STATUS));
+		taskTranslator.toOpenmrsType(null, fhirTask);
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnExistingOpenmrsTaskWhenFhirTaskNull() {
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionWhenFhirTaskNull() {
 		FhirTask task = new FhirTask();
 		task.setUuid(TASK_UUID);
 		
-		FhirTask result = taskTranslator.toOpenmrsType(task, null);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), equalTo(TASK_UUID));
+		taskTranslator.toOpenmrsType(task, null);
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnNullWhenAllNull() {
-		FhirTask result = taskTranslator.toOpenmrsType(null, null);
-		
-		assertThat(result, nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionWhenAllNull() {
+		taskTranslator.toOpenmrsType(null, null);
 	}
 	
 	@Test

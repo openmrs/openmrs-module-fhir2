@@ -19,6 +19,10 @@ public class MedicationRequestStatusTranslatorImpl implements MedicationRequestS
 	
 	@Override
 	public MedicationRequest.MedicationRequestStatus toFhirResource(DrugOrder drugOrder) {
+		if (drugOrder == null) {
+			return null;
+		}
+		
 		if (drugOrder.isActive()) {
 			return MedicationRequest.MedicationRequestStatus.ACTIVE;
 		} else if (drugOrder.isDiscontinuedRightNow()) {

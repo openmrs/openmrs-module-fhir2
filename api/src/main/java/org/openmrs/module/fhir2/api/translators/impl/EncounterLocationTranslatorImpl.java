@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
@@ -31,6 +33,10 @@ public class EncounterLocationTranslatorImpl extends BaseReferenceHandlingTransl
 	
 	@Override
 	public Encounter.EncounterLocationComponent toFhirResource(Location location) {
+		if (location == null) {
+			return null;
+		}
+		
 		Encounter.EncounterLocationComponent locationComponent = new Encounter.EncounterLocationComponent();
 		locationComponent.setLocation(createLocationReference(location));
 		return locationComponent;
@@ -38,6 +44,8 @@ public class EncounterLocationTranslatorImpl extends BaseReferenceHandlingTransl
 	
 	@Override
 	public Location toOpenmrsType(Encounter.EncounterLocationComponent encounterLocationComponent) {
+		notNull(encounterLocationComponent, "The EncounterLocationComponent object should not be null");
+		
 		String locationUuid = getReferenceId(encounterLocationComponent.getLocation());
 		return locationTranslator.toOpenmrsType(locationService.get(locationUuid));
 	}

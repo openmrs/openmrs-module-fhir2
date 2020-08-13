@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -37,9 +39,8 @@ public class ObservationEffectiveDatetimeTranslatorImpl implements ObservationEf
 	
 	@Override
 	public Obs toOpenmrsType(Obs obs, Type resource) {
-		if (resource == null) {
-			return obs;
-		}
+		notNull(obs, "The existing Obs object should not be null");
+		notNull(resource, "The DateTime object should not be null");
 		
 		if (resource instanceof DateTimeType) {
 			obs.setObsDatetime(((DateTimeType) resource).getValue());

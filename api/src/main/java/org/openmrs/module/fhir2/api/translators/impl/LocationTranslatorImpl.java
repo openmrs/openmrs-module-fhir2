@@ -61,50 +61,51 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	 */
 	@Override
 	public Location toFhirResource(org.openmrs.Location openmrsLocation) {
+		notNull(openmrsLocation, "The Openmrs Location object should not be null");
+		
 		Location fhirLocation = new Location();
-		if (openmrsLocation != null) {
-			Location.LocationPositionComponent position = new Location.LocationPositionComponent();
-			fhirLocation.setId(openmrsLocation.getUuid());
-			fhirLocation.setName(openmrsLocation.getName());
-			fhirLocation.setDescription(openmrsLocation.getDescription());
-			fhirLocation.setAddress(locationAddressTranslator.toFhirResource(openmrsLocation));
-			
-			double latitude = NumberUtils.toDouble(openmrsLocation.getLatitude(), -1.0d);
-			if (latitude >= 0.0d) {
-				position.setLatitude(latitude);
-			}
-			
-			double longitude = NumberUtils.toDouble(openmrsLocation.getLongitude(), -1.0d);
-			if (longitude >= 0.0d) {
-				position.setLongitude(longitude);
-			}
-			
-			fhirLocation.setPosition(position);
-			
-			if (!openmrsLocation.getRetired()) {
-				fhirLocation.setStatus(Location.LocationStatus.ACTIVE);
-			}
-			
-			if (openmrsLocation.getRetired()) {
-				fhirLocation.setStatus(Location.LocationStatus.INACTIVE);
-			}
-			
-			fhirLocation.setTelecom(getLocationContactDetails(openmrsLocation));
-			
-			if (openmrsLocation.getTags() != null) {
-				for (LocationTag tag : openmrsLocation.getTags()) {
-					fhirLocation.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, tag.getName(),
-					    tag.getDescription());
-				}
-			}
-			if (openmrsLocation.getParentLocation() != null) {
-				fhirLocation.setPartOf(createLocationReference(openmrsLocation.getParentLocation()));
-			}
-			
-			fhirLocation.getMeta().setLastUpdated(openmrsLocation.getDateChanged());
-			fhirLocation.addContained(provenanceTranslator.getCreateProvenance(openmrsLocation));
-			fhirLocation.addContained(provenanceTranslator.getUpdateProvenance(openmrsLocation));
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent();
+		fhirLocation.setId(openmrsLocation.getUuid());
+		fhirLocation.setName(openmrsLocation.getName());
+		fhirLocation.setDescription(openmrsLocation.getDescription());
+		fhirLocation.setAddress(locationAddressTranslator.toFhirResource(openmrsLocation));
+		
+		double latitude = NumberUtils.toDouble(openmrsLocation.getLatitude(), -1.0d);
+		if (latitude >= 0.0d) {
+			position.setLatitude(latitude);
 		}
+		
+		double longitude = NumberUtils.toDouble(openmrsLocation.getLongitude(), -1.0d);
+		if (longitude >= 0.0d) {
+			position.setLongitude(longitude);
+		}
+		
+		fhirLocation.setPosition(position);
+		
+		if (!openmrsLocation.getRetired()) {
+			fhirLocation.setStatus(Location.LocationStatus.ACTIVE);
+		}
+		
+		if (openmrsLocation.getRetired()) {
+			fhirLocation.setStatus(Location.LocationStatus.INACTIVE);
+		}
+		
+		fhirLocation.setTelecom(getLocationContactDetails(openmrsLocation));
+		
+		if (openmrsLocation.getTags() != null) {
+			for (LocationTag tag : openmrsLocation.getTags()) {
+				fhirLocation.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, tag.getName(),
+				    tag.getDescription());
+			}
+		}
+		if (openmrsLocation.getParentLocation() != null) {
+			fhirLocation.setPartOf(createLocationReference(openmrsLocation.getParentLocation()));
+		}
+		
+		fhirLocation.getMeta().setLastUpdated(openmrsLocation.getDateChanged());
+		fhirLocation.addContained(provenanceTranslator.getCreateProvenance(openmrsLocation));
+		fhirLocation.addContained(provenanceTranslator.getUpdateProvenance(openmrsLocation));
+		
 		return fhirLocation;
 	}
 	
@@ -142,11 +143,6 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 			openmrsLocation.setStateProvince(fhirLocation.getAddress().getState());
 			openmrsLocation.setCountry(fhirLocation.getAddress().getCountry());
 			openmrsLocation.setPostalCode(fhirLocation.getAddress().getPostalCode());
-		}
-		
-		if (fhirLocation.hasStatus() && fhirLocation.getStatus().equals(Location.LocationStatus.INACTIVE)) {
-			openmrsLocation.setRetired(true);
-			openmrsLocation.setRetireReason("Retired by FHIR module");
 		}
 		
 		if (fhirLocation.getPosition().hasLatitude()) {

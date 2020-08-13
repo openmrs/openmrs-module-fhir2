@@ -121,10 +121,9 @@ public class AllergyIntoleranceTranslatorImplTest {
 		omrsAllergy.setAllergen(allergen);
 	}
 	
-	@Test
-	public void toFhirResource_shouldReturnNullWhenCalledWithANullObject() {
-		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(null);
-		assertThat(allergyIntolerance, nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toFhirResource_shouldThrowExceptionWhenCalledWithANullObject() {
+		allergyIntoleranceTranslator.toFhirResource(null);
 	}
 	
 	@Test
@@ -335,10 +334,9 @@ public class AllergyIntoleranceTranslatorImplTest {
 		assertThat(allergyIntolerance.getNote().get(0).getText(), equalTo(""));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnAllergyAsIsIfAllergyIntoleranceIsNull() {
-		Allergy result = allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, null);
-		assertThat(result, equalTo(omrsAllergy));
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionIfAllergyIntoleranceIsNull() {
+		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, null);
 	}
 	
 	@Test

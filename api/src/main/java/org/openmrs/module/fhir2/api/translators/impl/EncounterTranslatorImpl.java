@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang.Validate.notNull;
+import static org.apache.commons.lang3.Validate.notNull;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -67,9 +67,8 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 	
 	@Override
 	public Encounter toFhirResource(org.openmrs.Encounter openMrsEncounter) {
-		if (openMrsEncounter == null) {
-			return null;
-		}
+		notNull(openMrsEncounter, "The Openmrs Encounter object should not be null");
+		
 		Encounter encounter = new Encounter();
 		encounter.setId(openMrsEncounter.getUuid());
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
@@ -93,16 +92,15 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 	
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(Encounter fhirEncounter) {
+		notNull(fhirEncounter, "The Encounter object should not be null");
 		return this.toOpenmrsType(new org.openmrs.Encounter(), fhirEncounter);
 	}
 	
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(org.openmrs.Encounter existingEncounter, Encounter encounter) {
-		notNull(existingEncounter, "Existing encounter cannot be null");
+		notNull(existingEncounter, "The existing Openmrs Encounter object should not be null");
+		notNull(encounter, "The Encounter object should not be null");
 		
-		if (encounter == null) {
-			return existingEncounter;
-		}
 		existingEncounter.setUuid(encounter.getId());
 		
 		existingEncounter.setPatient(patientReferenceTranslator.toOpenmrsType(encounter.getSubject()));
