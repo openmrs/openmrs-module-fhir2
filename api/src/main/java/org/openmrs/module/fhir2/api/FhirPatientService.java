@@ -22,6 +22,7 @@ import org.openmrs.PatientIdentifierType;
 
 public interface FhirPatientService extends FhirService<Patient> {
 	
+	@Override
 	Patient get(@NotNull String uuid);
 	
 	PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier);

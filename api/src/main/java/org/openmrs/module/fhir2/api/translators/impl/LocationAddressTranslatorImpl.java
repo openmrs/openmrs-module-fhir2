@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.Location;
@@ -20,8 +22,9 @@ public class LocationAddressTranslatorImpl extends BaseAddressTranslatorImpl imp
 	
 	@Override
 	public Address toFhirResource(Location omrsLocation) {
-		Address address = new Address();
+		Address address = null;
 		if (omrsLocation != null) {
+			address = new Address();
 			address.setId(null);
 			address.setCity(omrsLocation.getCityVillage());
 			address.setState(omrsLocation.getStateProvince());
@@ -36,14 +39,14 @@ public class LocationAddressTranslatorImpl extends BaseAddressTranslatorImpl imp
 	
 	@Override
 	public Location toOpenmrsType(Address address) {
+		notNull(address, "The Address object should not be null");
 		return toOpenmrsType(new Location(), address);
 	}
 	
 	@Override
 	public Location toOpenmrsType(Location omrsLocation, Address address) {
-		if (address == null) {
-			return omrsLocation;
-		}
+		notNull(omrsLocation, "The existing Location object should not be null");
+		notNull(address, "The Address object should not be null");
 		
 		omrsLocation.setCityVillage(address.getCity());
 		omrsLocation.setStateProvince(address.getState());

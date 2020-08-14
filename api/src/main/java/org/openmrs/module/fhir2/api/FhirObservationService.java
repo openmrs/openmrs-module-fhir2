@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Observation;
 
 public interface FhirObservationService extends FhirService<Observation> {
 	
+	@Override
 	Observation get(@NotNull String uuid);
 	
 	IBundleProvider searchForObservations(ReferenceAndListParam encounterReference, ReferenceAndListParam patientReference,

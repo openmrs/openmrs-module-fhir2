@@ -77,10 +77,9 @@ public class MedicationTranslatorImplTest {
 		drug.setDosageForm(dosageConcept);
 	}
 	
-	@Test
-	public void toFhirResource_shouldReturnNullWhenCalledWithNullObject() {
-		Medication medication = medicationTranslator.toFhirResource(null);
-		assertThat(medication, nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toFhirResource_shouldThrowExceptionWhenCalledWithNullObject() {
+		medicationTranslator.toFhirResource(null);
 	}
 	
 	@Test
@@ -143,10 +142,9 @@ public class MedicationTranslatorImplTest {
 		assertThat(medication.getStatus(), equalTo(Medication.MedicationStatus.ACTIVE));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnDrugAsItIsIfCalledWithNull() {
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionIfCalledWithNull() {
 		medicationTranslator.toOpenmrsType(drug, null);
-		assertThat(drug, equalTo(drug));
 	}
 	
 	@Test

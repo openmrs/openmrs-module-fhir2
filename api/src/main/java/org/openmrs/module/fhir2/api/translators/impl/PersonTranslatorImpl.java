@@ -62,49 +62,48 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	
 	@Override
 	public org.hl7.fhir.r4.model.Person toFhirResource(@NotNull Person openmrsPerson) {
+		notNull(openmrsPerson, "The Openmrs Person object should not be null");
+		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
-		if (openmrsPerson != null) {
-			person.setId(openmrsPerson.getUuid());
-			person.setActive(!openmrsPerson.getVoided());
-			person.setBirthDate(openmrsPerson.getBirthdate());
-			
-			if (openmrsPerson.getGender() != null) {
-				person.setGender(genderTranslator.toFhirResource(openmrsPerson.getGender()));
-			}
-			
-			for (PersonName name : openmrsPerson.getNames()) {
-				person.addName(nameTranslator.toFhirResource(name));
-			}
-			
-			for (PersonAddress address : openmrsPerson.getAddresses()) {
-				person.addAddress(addressTranslator.toFhirResource(address));
-			}
-			
-			person.addTelecom(telecomTranslator.toFhirResource(openmrsPerson));
-			
-			if (openmrsPerson.getIsPatient()) {
-				person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent()
-				        .setTarget(patientReferenceTranslator.toFhirResource(patientDao.get(openmrsPerson.getUuid()))));
-			}
-			person.getMeta().setLastUpdated(openmrsPerson.getDateChanged());
-			person.addContained(provenanceTranslator.getCreateProvenance(openmrsPerson));
-			person.addContained(provenanceTranslator.getUpdateProvenance(openmrsPerson));
+		person.setId(openmrsPerson.getUuid());
+		person.setActive(!openmrsPerson.getVoided());
+		person.setBirthDate(openmrsPerson.getBirthdate());
+		
+		if (openmrsPerson.getGender() != null) {
+			person.setGender(genderTranslator.toFhirResource(openmrsPerson.getGender()));
 		}
+		
+		for (PersonName name : openmrsPerson.getNames()) {
+			person.addName(nameTranslator.toFhirResource(name));
+		}
+		
+		for (PersonAddress address : openmrsPerson.getAddresses()) {
+			person.addAddress(addressTranslator.toFhirResource(address));
+		}
+		
+		person.addTelecom(telecomTranslator.toFhirResource(openmrsPerson));
+		
+		if (openmrsPerson.getIsPatient()) {
+			person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent()
+			        .setTarget(patientReferenceTranslator.toFhirResource(patientDao.get(openmrsPerson.getUuid()))));
+		}
+		person.getMeta().setLastUpdated(openmrsPerson.getDateChanged());
+		person.addContained(provenanceTranslator.getCreateProvenance(openmrsPerson));
+		person.addContained(provenanceTranslator.getUpdateProvenance(openmrsPerson));
+		
 		return person;
 	}
 	
 	@Override
 	public Person toOpenmrsType(org.hl7.fhir.r4.model.Person person) {
+		notNull(person, "The Person object should not be null");
 		return toOpenmrsType(new Person(), person);
 	}
 	
 	@Override
 	public Person toOpenmrsType(Person openmrsPerson, org.hl7.fhir.r4.model.Person person) {
-		notNull(openmrsPerson, "openmrsPerson cannot be null");
-		
-		if (person == null) {
-			return openmrsPerson;
-		}
+		notNull(openmrsPerson, "The existing Openmrs Person object should not be null");
+		notNull(person, "The Person object should not be null");
 		
 		openmrsPerson.setUuid(person.getId());
 		openmrsPerson.setVoided(person.getActive());

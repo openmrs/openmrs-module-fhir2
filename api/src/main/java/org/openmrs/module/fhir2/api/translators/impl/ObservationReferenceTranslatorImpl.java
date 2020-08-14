@@ -41,8 +41,9 @@ public class ObservationReferenceTranslatorImpl extends BaseReferenceHandlingTra
 			return null;
 		}
 		
-		if (!obsReference.getType().equals(FhirConstants.OBSERVATION)) {
-			throw new IllegalArgumentException("Reference must be to an Observation not a " + obsReference.getType());
+		String type = obsReference.getType();
+		if (type != null && !type.equals(FhirConstants.OBSERVATION)) {
+			throw new IllegalArgumentException("Reference must be to an Observation not a " + type);
 		}
 		
 		String uuid = getReferenceId(obsReference);

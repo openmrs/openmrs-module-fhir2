@@ -40,8 +40,9 @@ public class EncounterReferenceTranslatorImpl extends BaseReferenceHandlingTrans
 			return null;
 		}
 		
-		if (!encounter.getType().equals("Encounter")) {
-			throw new IllegalArgumentException("Reference must be to an Encounter not a " + encounter.getType());
+		String type = encounter.getType();
+		if (type != null && !type.equals("Encounter")) {
+			throw new IllegalArgumentException("Reference must be to an Encounter not a " + type);
 		}
 		
 		String uuid = getReferenceId(encounter);

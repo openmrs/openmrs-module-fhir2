@@ -38,8 +38,6 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	private static final String NEW_ALLERGY_UUID = "9999AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String UNKNOWN_ALLERGY_UUID = "9999AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
 	private static final String CODED_REACTION_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	@Autowired
@@ -72,7 +70,7 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	
 	@Test
 	public void getAllergyIntoleranceByUuid_shouldReturnNullWhenCalledWithUnknownUuid() {
-		Allergy allergy = allergyDao.get(UNKNOWN_ALLERGY_UUID);
+		Allergy allergy = allergyDao.get(NEW_ALLERGY_UUID);
 		assertThat(allergy, nullValue());
 	}
 	
@@ -86,7 +84,7 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 		
 		Allergy result = allergyDao.createOrUpdate(newAllergy);
 		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), equalTo(UNKNOWN_ALLERGY_UUID));
+		assertThat(result.getUuid(), equalTo(NEW_ALLERGY_UUID));
 	}
 	
 	@Test

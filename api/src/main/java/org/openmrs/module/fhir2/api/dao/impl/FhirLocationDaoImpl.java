@@ -36,7 +36,6 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		handleBooleanProperty("retired", false).ifPresent(criteria::add);
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.NAME_SEARCH_HANDLER:

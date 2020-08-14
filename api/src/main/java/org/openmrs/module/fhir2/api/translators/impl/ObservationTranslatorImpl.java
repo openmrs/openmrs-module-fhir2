@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import java.util.function.Supplier;
 
 import lombok.AccessLevel;
@@ -80,9 +82,7 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	
 	@Override
 	public Observation toFhirResource(Obs observation) {
-		if (observation == null) {
-			return null;
-		}
+		notNull(observation, "The Obs object should not be null");
 		
 		Observation obs = new Observation();
 		obs.setId(observation.getUuid());
@@ -133,18 +133,14 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	
 	@Override
 	public Obs toOpenmrsType(Observation fhirObservation) {
+		notNull(fhirObservation, "The Observation object should not be null");
 		return toOpenmrsType(new Obs(), fhirObservation);
 	}
 	
 	@Override
 	public Obs toOpenmrsType(Obs existingObs, Observation observation, Supplier<Obs> groupedObsFactory) {
-		if (existingObs == null) {
-			return null;
-		}
-		
-		if (observation == null) {
-			return existingObs;
-		}
+		notNull(existingObs, "The existing Obs object should not be null");
+		notNull(observation, "The Observation object should not be null");
 		
 		existingObs.setUuid(observation.getId());
 		observationStatusTranslator.toOpenmrsType(existingObs, observation.getStatus());

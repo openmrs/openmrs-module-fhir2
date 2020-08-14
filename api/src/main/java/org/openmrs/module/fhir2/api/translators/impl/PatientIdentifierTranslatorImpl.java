@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang3.Validate.notNull;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -68,9 +66,7 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 	
 	@Override
 	public PatientIdentifier toOpenmrsType(PatientIdentifier patientIdentifier, Identifier identifier) {
-		notNull(patientIdentifier, "patientIdentifier cannot be null");
-		
-		if (identifier == null) {
+		if (patientIdentifier == null || identifier == null) {
 			return patientIdentifier;
 		}
 		

@@ -75,42 +75,42 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	
 	@Override
 	public Patient toFhirResource(org.openmrs.Patient openmrsPatient) {
+		notNull(openmrsPatient, "The Openmrs Patient object should not be null");
+		
 		Patient patient = new Patient();
-		if (openmrsPatient != null) {
-			patient.setId(openmrsPatient.getUuid());
-			patient.setBirthDate(openmrsPatient.getBirthdate());
-			patient.setActive(true);
-			
-			if (openmrsPatient.getDead()) {
-				if (openmrsPatient.getDeathDate() != null) {
-					patient.setDeceased(new DateTimeType(openmrsPatient.getDeathDate()));
-				} else {
-					patient.setDeceased(new BooleanType(true));
-				}
+		patient.setId(openmrsPatient.getUuid());
+		patient.setBirthDate(openmrsPatient.getBirthdate());
+		patient.setActive(!openmrsPatient.getVoided());
+		
+		if (openmrsPatient.getDead()) {
+			if (openmrsPatient.getDeathDate() != null) {
+				patient.setDeceased(new DateTimeType(openmrsPatient.getDeathDate()));
 			} else {
-				patient.setDeceased(new BooleanType(false));
+				patient.setDeceased(new BooleanType(true));
 			}
-			
-			for (PatientIdentifier identifier : openmrsPatient.getActiveIdentifiers()) {
-				patient.addIdentifier(identifierTranslator.toFhirResource(identifier));
-			}
-			
-			for (PersonName name : openmrsPatient.getNames()) {
-				patient.addName(nameTranslator.toFhirResource(name));
-			}
-			
-			if (openmrsPatient.getGender() != null) {
-				patient.setGender(genderTranslator.toFhirResource(openmrsPatient.getGender()));
-			}
-			
-			for (PersonAddress address : openmrsPatient.getAddresses()) {
-				patient.addAddress(addressTranslator.toFhirResource(address));
-			}
-			patient.setTelecom(getPatientContactDetails(openmrsPatient));
-			patient.getMeta().setLastUpdated(openmrsPatient.getDateChanged());
-			patient.addContained(provenanceTranslator.getCreateProvenance(openmrsPatient));
-			patient.addContained(provenanceTranslator.getUpdateProvenance(openmrsPatient));
+		} else {
+			patient.setDeceased(new BooleanType(false));
 		}
+		
+		for (PatientIdentifier identifier : openmrsPatient.getActiveIdentifiers()) {
+			patient.addIdentifier(identifierTranslator.toFhirResource(identifier));
+		}
+		
+		for (PersonName name : openmrsPatient.getNames()) {
+			patient.addName(nameTranslator.toFhirResource(name));
+		}
+		
+		if (openmrsPatient.getGender() != null) {
+			patient.setGender(genderTranslator.toFhirResource(openmrsPatient.getGender()));
+		}
+		
+		for (PersonAddress address : openmrsPatient.getAddresses()) {
+			patient.addAddress(addressTranslator.toFhirResource(address));
+		}
+		patient.setTelecom(getPatientContactDetails(openmrsPatient));
+		patient.getMeta().setLastUpdated(openmrsPatient.getDateChanged());
+		patient.addContained(provenanceTranslator.getCreateProvenance(openmrsPatient));
+		patient.addContained(provenanceTranslator.getUpdateProvenance(openmrsPatient));
 		
 		return patient;
 	}
@@ -124,16 +124,14 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	
 	@Override
 	public org.openmrs.Patient toOpenmrsType(Patient fhirPatient) {
+		notNull(fhirPatient, "The Patient object should not be null");
 		return toOpenmrsType(new org.openmrs.Patient(), fhirPatient);
 	}
 	
 	@Override
 	public org.openmrs.Patient toOpenmrsType(org.openmrs.Patient currentPatient, Patient patient) {
-		notNull(currentPatient, "currentPatient cannot be null");
-		
-		if (patient == null) {
-			return currentPatient;
-		}
+		notNull(currentPatient, "The existing Openmrs Patient object should not be null");
+		notNull(patient, "The Patient object should not be null");
 		
 		currentPatient.setUuid(patient.getId());
 		currentPatient.setBirthdate(patient.getBirthDate());

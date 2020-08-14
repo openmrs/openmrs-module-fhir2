@@ -25,6 +25,10 @@ public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClini
 	
 	@Override
 	public CodeableConcept toFhirResource(ConditionClinicalStatus clinicalStatus) {
+		if (clinicalStatus == null) {
+			return null;
+		}
+		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		switch (clinicalStatus) {
 			case ACTIVE:
@@ -43,6 +47,10 @@ public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClini
 	
 	@Override
 	public ConditionClinicalStatus toOpenmrsType(CodeableConcept codeableConcept) {
+		if (codeableConcept == null) {
+			return null;
+		}
+		
 		return codeableConcept.getCoding().stream()
 		        .filter(coding -> coding.getSystem().equals(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI))
 		        .map(this::getClinicalStatus).findFirst().orElse(null);

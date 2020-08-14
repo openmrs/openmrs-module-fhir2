@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,10 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 	
 	@Override
 	public AllergyIntolerance.AllergyIntoleranceReactionComponent toFhirResource(Allergy allergy) {
+		if (allergy == null) {
+			return null;
+		}
+		
 		AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent = new AllergyIntolerance.AllergyIntoleranceReactionComponent();
 		reactionComponent.setSubstance(getAllergySubstance(allergy.getAllergen()));
 		reactionComponent.setManifestation(getManifestation(allergy.getReactions()));
@@ -46,6 +52,9 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 	
 	@Override
 	public Allergy toOpenmrsType(Allergy allergy, AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent) {
+		notNull(allergy, "The existing Allergy should not be null");
+		notNull(reactionComponent, "The ReactionComponent object should not be null");
+		
 		if (allergy.getReactions() == null) {
 			allergy.setReactions(new ArrayList<>());
 		}
@@ -53,6 +62,7 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 		if (reactionComponent.hasSeverity()) {
 			allergy.setSeverity(severityTranslator.toOpenmrsType(reactionComponent.getSeverity()));
 		}
+		
 		if (reactionComponent.hasManifestation()) {
 			reactionComponent.getManifestation().forEach(manifestation -> allergy.getReactions().add(
 			    new AllergyReaction(allergy, conceptTranslator.toOpenmrsType(manifestation), manifestation.getText())));
@@ -63,6 +73,7 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 	
 	@Override
 	public Allergy toOpenmrsType(AllergyIntolerance.AllergyIntoleranceReactionComponent resource) {
+		notNull(resource, "The ReactionComponent object should not be null");
 		return toOpenmrsType(new Allergy(), resource);
 	}
 	

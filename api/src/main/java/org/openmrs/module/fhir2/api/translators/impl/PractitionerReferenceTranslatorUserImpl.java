@@ -42,8 +42,10 @@ public class PractitionerReferenceTranslatorUserImpl extends BaseReferenceHandli
 		if (reference == null) {
 			return null;
 		}
-		if (!getReferenceType(reference).equals("Practitioner")) {
-			throw new IllegalArgumentException("Reference must be to an User not a " + reference.getType());
+		
+		String type = reference.getType();
+		if (type != null && !type.equals("Practitioner")) {
+			throw new IllegalArgumentException("Reference must be to an User not a " + type);
 		}
 		
 		String uuid = getReferenceId(reference);

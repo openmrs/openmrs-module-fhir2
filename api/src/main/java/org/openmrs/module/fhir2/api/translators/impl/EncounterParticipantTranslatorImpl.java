@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
@@ -32,6 +34,10 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 	
 	@Override
 	public Encounter.EncounterParticipantComponent toFhirResource(EncounterProvider encounter) {
+		if (encounter == null) {
+			return null;
+		}
+		
 		Encounter.EncounterParticipantComponent participantComponent = new Encounter.EncounterParticipantComponent();
 		participantComponent.setIndividual(createPractitionerReference(encounter.getProvider()));
 		return participantComponent;
@@ -40,9 +46,9 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 	@Override
 	public EncounterProvider toOpenmrsType(EncounterProvider encounterProvider,
 	        Encounter.EncounterParticipantComponent encounterParticipantComponent) {
-		if (encounterParticipantComponent == null) {
-			return encounterProvider;
-		}
+		notNull(encounterProvider, "The existing EncounterProvider object should not be null");
+		notNull(encounterParticipantComponent, "The EncounterParticipantComponent object should not be null");
+		
 		String practitionerUuid = getReferenceId(encounterParticipantComponent.getIndividual());
 		Provider provider = practitionerTranslator.toOpenmrsType(practitionerService.get(practitionerUuid));
 		encounterProvider.setProvider(provider);

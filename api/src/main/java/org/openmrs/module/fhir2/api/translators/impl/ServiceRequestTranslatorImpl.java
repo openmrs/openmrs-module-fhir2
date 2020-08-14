@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import java.util.Collections;
 
 import lombok.AccessLevel;
@@ -43,9 +45,7 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 	
 	@Override
 	public ServiceRequest toFhirResource(TestOrder order) {
-		if (order == null) {
-			return null;
-		}
+		notNull(order, "The TestOrder object should not be null");
 		
 		ServiceRequest serviceRequest = new ServiceRequest();
 		

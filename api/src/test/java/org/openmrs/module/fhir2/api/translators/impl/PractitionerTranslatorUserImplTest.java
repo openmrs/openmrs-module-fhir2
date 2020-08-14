@@ -97,12 +97,9 @@ public class PractitionerTranslatorUserImplTest {
 		assertThat(practitioner, notNullValue());
 	}
 	
-	@Test
-	public void shouldReturnUnchangedExistingUserWhenPractitionerIsNull() {
-		User result = practitionerTranslatorUser.toOpenmrsType(user, null);
-		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), notNullValue());
-		assertThat(result.getUuid(), equalTo(USER_UUID));
+	@Test(expected = NullPointerException.class)
+	public void shouldThrowExceptionWhenPractitionerIsNull() {
+		practitionerTranslatorUser.toOpenmrsType(user, null);
 	}
 	
 	@Test

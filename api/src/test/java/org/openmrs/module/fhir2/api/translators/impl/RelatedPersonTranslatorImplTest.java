@@ -133,9 +133,9 @@ public class RelatedPersonTranslatorImplTest {
 		assertThat(result, notNullValue());
 	}
 	
-	@Test
-	public void shouldReturnNullIfRelationshipToTranslateIsNull() {
-		assertThat(relatedPersonTranslator.toFhirResource(null), nullValue());
+	@Test(expected = NullPointerException.class)
+	public void shouldThrowExceptionIfRelationshipToTranslateIsNull() {
+		relatedPersonTranslator.toFhirResource(null);
 	}
 	
 	@Test

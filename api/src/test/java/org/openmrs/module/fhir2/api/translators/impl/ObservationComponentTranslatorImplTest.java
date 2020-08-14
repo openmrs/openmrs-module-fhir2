@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.any;
@@ -110,22 +109,16 @@ public class ObservationComponentTranslatorImplTest {
 		assertThat(((Quantity) result.getValue()).getValue().doubleValue(), equalTo(130d));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnNullIfObsIsNull() {
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionIfObsIsNull() {
 		Observation.ObservationComponentComponent component = new Observation.ObservationComponentComponent();
-		
-		Obs result = observationComponentTranslator.toOpenmrsType(null, component);
-		
-		assertThat(result, nullValue());
+		observationComponentTranslator.toOpenmrsType(null, component);
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnObsIfComponentNull() {
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionIfComponentNull() {
 		Obs obs = new Obs();
-		
-		Obs result = observationComponentTranslator.toOpenmrsType(obs, null);
-		
-		assertThat(result, is(obs));
+		observationComponentTranslator.toOpenmrsType(obs, null);
 	}
 	
 	@Test

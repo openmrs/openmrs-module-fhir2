@@ -49,12 +49,6 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Observation get(String uuid) {
-		return translator.toFhirResource(dao.get(uuid));
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
 	public IBundleProvider searchForObservations(ReferenceAndListParam encounterReference,
 	        ReferenceAndListParam patientReference, ReferenceParam hasMemberReference, TokenAndListParam valueConcept,
 	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,

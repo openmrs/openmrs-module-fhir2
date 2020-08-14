@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 import java.util.Collections;
 
 import lombok.AccessLevel;
@@ -30,9 +32,7 @@ public class ListTranslatorImpl implements ListTranslator<Cohort> {
 	
 	@Override
 	public ListResource toFhirResource(Cohort cohort) {
-		if (cohort == null) {
-			return null;
-		}
+		notNull(cohort, "The Cohort object should not be null");
 		
 		ListResource list = new ListResource();
 		list.setId(cohort.getUuid());
@@ -62,14 +62,14 @@ public class ListTranslatorImpl implements ListTranslator<Cohort> {
 	
 	@Override
 	public Cohort toOpenmrsType(ListResource cohortList) {
+		notNull(cohortList, "The ListResource object should not be null");
 		return toOpenmrsType(new Cohort(), cohortList);
 	}
 	
 	@Override
 	public Cohort toOpenmrsType(Cohort cohort, ListResource cohortList) {
-		if (cohortList == null) {
-			return cohort;
-		}
+		notNull(cohort, "The existing Cohort object should not be null");
+		notNull(cohortList, "The ListResource object should not be null");
 		
 		cohort.setUuid(cohortList.getId());
 		cohort.setName(cohortList.getTitle());

@@ -118,10 +118,7 @@ public class LocationAddressTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldReturnNullIfCalledWithoutLocation() {
 		Address address = translator.toFhirResource(null);
-		assertThat(address.getCity(), nullValue());
-		assertThat(address.getState(), nullValue());
-		assertThat(address.getPostalCode(), nullValue());
-		assertThat(address.getCountry(), nullValue());
+		assertThat(address, nullValue());
 	}
 	
 	@Test

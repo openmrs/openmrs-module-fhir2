@@ -40,8 +40,9 @@ public class PatientReferenceTranslatorImpl extends BaseReferenceHandlingTransla
 			return null;
 		}
 		
-		if (!getReferenceType(patient).equals("Patient")) {
-			throw new IllegalArgumentException("Reference must be to an Patient not a " + patient.getType());
+		String type = patient.getType();
+		if (type != null && !type.equals("Patient")) {
+			throw new IllegalArgumentException("Reference must be to an Patient not a " + type);
 		}
 		
 		String uuid = getReferenceId(patient);

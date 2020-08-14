@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 
 import java.util.Date;
 
@@ -50,10 +49,9 @@ public class ListTranslatorImplTest {
 		cohort = new Cohort();
 	}
 	
-	@Test
-	public void toFhirResource_shouldReturnNullIfCohortIsNull() {
-		ListResource list = listTranslator.toFhirResource(null);
-		assertThat(list, nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toFhirResource_shouldThrowExceptionIfCohortIsNull() {
+		listTranslator.toFhirResource(null);
 	}
 	
 	@Test
@@ -128,11 +126,9 @@ public class ListTranslatorImplTest {
 		assertThat(list.getStatus(), equalTo(ListResource.ListStatus.CURRENT));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnCohortAsIsIfListResourceIsNull() {
-		Cohort result = listTranslator.toOpenmrsType(cohort, null);
-		
-		assertThat(result, equalTo(cohort));
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionIfListResourceIsNull() {
+		listTranslator.toOpenmrsType(cohort, null);
 	}
 	
 	@Test

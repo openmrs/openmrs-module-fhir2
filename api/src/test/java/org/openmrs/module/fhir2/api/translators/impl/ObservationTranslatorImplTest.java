@@ -290,11 +290,9 @@ public class ObservationTranslatorImplTest {
 		assertThat(result.getHasMember(), hasItem(hasProperty("type", equalTo(FhirConstants.OBSERVATION))));
 	}
 	
-	@Test
-	public void toFhirResource_shouldReturnNullIfObsIsNull() {
-		Observation result = observationTranslator.toFhirResource(null);
-		
-		assertThat(result, nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toFhirResource_shouldThrowExceptionIfObsIsNull() {
+		observationTranslator.toFhirResource(null);
 	}
 	
 	@Test
@@ -393,23 +391,16 @@ public class ObservationTranslatorImplTest {
 		assertThat(result.getGroupMembers(), hasItem(hasProperty("uuid", equalTo(OBS_UUID))));
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldReturnNullIfObsNull() {
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionIfObsNull() {
 		Observation observation = new Observation();
-		
-		Obs result = observationTranslator.toOpenmrsType(null, observation);
-		
-		assertThat(result, nullValue());
+		observationTranslator.toOpenmrsType(null, observation);
 	}
 	
-	@Test
-	public void toOpenmrsType_shouldNotModifyObsIfObservationNull() {
+	@Test(expected = NullPointerException.class)
+	public void toOpenmrsType_shouldThrowExceptionIfObservationNull() {
 		Obs expected = new Obs();
-		
-		Obs result = observationTranslator.toOpenmrsType(expected, null);
-		
-		assertThat(result, notNullValue());
-		assertThat(result, equalTo(expected));
+		observationTranslator.toOpenmrsType(expected, null);
 	}
 	
 	@Test

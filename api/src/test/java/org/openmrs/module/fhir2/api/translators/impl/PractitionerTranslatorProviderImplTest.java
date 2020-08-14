@@ -17,7 +17,6 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -136,19 +135,14 @@ public class PractitionerTranslatorProviderImplTest {
 		assertThat(practitioner, notNullValue());
 	}
 	
-	@Test
-	public void shouldReturnUnchangedExistingProviderWhenPractitionerIsNull() {
-		Provider result = practitionerTranslator.toOpenmrsType(provider, null);
-		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), notNullValue());
-		assertThat(result.getUuid(), equalTo(PROVIDER_UUID));
+	@Test(expected = NullPointerException.class)
+	public void shouldThrowExceptionWhenPractitionerIsNull() {
+		practitionerTranslator.toOpenmrsType(provider, null);
 	}
 	
-	@Test
-	public void shouldReturnEmptyPractitionerWhenProviderIsNull() {
-		Practitioner result = practitionerTranslator.toFhirResource(null);
-		assertThat(result, notNullValue());
-		assertThat(result.getId(), nullValue());
+	@Test(expected = NullPointerException.class)
+	public void shouldThrowExceptionWhenProviderIsNull() {
+		practitionerTranslator.toFhirResource(null);
 	}
 	
 	@Test

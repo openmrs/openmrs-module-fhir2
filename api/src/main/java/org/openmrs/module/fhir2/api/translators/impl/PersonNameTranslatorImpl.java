@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang3.Validate.notNull;
-
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
@@ -29,6 +27,10 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 	
 	@Override
 	public HumanName toFhirResource(PersonName name) {
+		if (name == null) {
+			return null;
+		}
+		
 		HumanName humanName = new HumanName();
 		humanName.setId(name.getUuid());
 		if (name.getGivenName() != null) {
@@ -54,14 +56,16 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 	
 	@Override
 	public PersonName toOpenmrsType(HumanName name) {
+		if (name == null) {
+			return null;
+		}
+		
 		return toOpenmrsType(new PersonName(), name);
 	}
 	
 	@Override
 	public PersonName toOpenmrsType(PersonName personName, HumanName name) {
-		notNull(personName, "personName cannot be null");
-		
-		if (name == null) {
+		if (personName == null || name == null) {
 			return personName;
 		}
 		

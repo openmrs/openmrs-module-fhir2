@@ -155,15 +155,9 @@ public class LocationTranslatorImplTest {
 		assertThat(fhirLocation.getDescription(), equalTo(LOCATION_DESCRIPTION));
 	}
 	
-	@Test
-	public void toFhirResource_shouldReturnEmptyLocationWhenCalledWitEmptyOmrsLocation() {
-		org.hl7.fhir.r4.model.Location location = locationTranslator.toFhirResource(null);
-		assertThat(location.getName(), nullValue());
-		assertThat(location.getDescription(), nullValue());
-		assertThat(location.getId(), nullValue());
-		assertThat(location.getPosition().getLatitude(), nullValue());
-		assertThat(location.getPosition().getLongitude(), nullValue());
-		assertThat(location.getAddress().getCity(), nullValue());
+	@Test(expected = NullPointerException.class)
+	public void toFhirResource_shouldThrowExceptionWhenCalledWithEmptyOmrsLocation() {
+		locationTranslator.toFhirResource(null);
 	}
 	
 	@Test(expected = NullPointerException.class)
@@ -391,17 +385,6 @@ public class LocationTranslatorImplTest {
 		Reference reference = new Reference().setReference("Unknown" + "/" + PARENT_LOCATION_NAME).setType("Unknown");
 		
 		locationTranslator.getOpenmrsParentLocation(reference);
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldRetireLocationIfFhirLocationIsInActive() {
-		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
-		location.setStatus(org.hl7.fhir.r4.model.Location.LocationStatus.INACTIVE);
-		
-		Location omrsLocation = locationTranslator.toOpenmrsType(location);
-		assertThat(omrsLocation, notNullValue());
-		assertThat(omrsLocation.getRetired(), is(true));
-		assertThat(omrsLocation.getRetireReason(), is("Retired by FHIR module"));
 	}
 	
 	@Test

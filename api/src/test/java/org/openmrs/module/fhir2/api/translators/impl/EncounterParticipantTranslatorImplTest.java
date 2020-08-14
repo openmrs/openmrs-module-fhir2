@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -105,11 +104,9 @@ public class EncounterParticipantTranslatorImplTest {
 		assertThat(encounterProvider.getProvider().getUuid(), equalTo(PROVIDER_UUID));
 	}
 	
-	@Test
-	public void shouldReturnInstanceOfEncounterProviderWhenEncounterParticipantIsNull() {
-		EncounterProvider encounterProvider = participantTranslator.toOpenmrsType(new EncounterProvider(), null);
-		assertThat(encounterProvider, notNullValue());
-		assertThat(encounterProvider, is(instanceOf(EncounterProvider.class)));
+	@Test(expected = NullPointerException.class)
+	public void shouldThrowExceptionWhenEncounterParticipantIsNull() {
+		participantTranslator.toOpenmrsType(new EncounterProvider(), null);
 	}
 	
 }
