@@ -27,7 +27,8 @@
     <allergy_reaction allergy_reaction_id="2020" allergy_id="1010"  reaction_concept_id="5087" reaction_non_coded="" uuid="9950AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
     <allergy_reaction allergy_reaction_id="2021" allergy_id="1010"  reaction_concept_id="5086" reaction_non_coded="" uuid="5099AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
     <allergy_reaction allergy_reaction_id="2022" allergy_id="1011"  reaction_concept_id="5086" reaction_non_coded="" uuid="5097AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
-
+    <allergy_reaction allergy_reaction_id="2023" allergy_id="1012"  reaction_concept_id="5087" reaction_non_coded="" uuid="5098AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <allergy_reaction allergy_reaction_id="2024" allergy_id="1013"  reaction_concept_id="5087" reaction_non_coded="" uuid="5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
 
     <person person_id="6" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="8d703ff2-c3e2-4070-9737-73e713d5a50d"/>
     <person person_id="7" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="ca17fcc5-ec96-487f-b9ea-42973c8973e3"/>
@@ -51,4 +52,11 @@
     <allergy allergy_id="1015" patient_id="2" severity_concept_id="21" allergen_type="ENVIRONMENT" coded_allergen="23" creator="1" date_voided="2010-09-03 11:12:00.0" date_changed="2010-03-31 00:12:00.0" date_created="2005-01-01 00:00:00.0" voided="true" uuid="1090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
     <allergy allergy_id="1016" patient_id="2" severity_concept_id="21" allergen_type="ENVIRONMENT" coded_allergen="23" creator="1" date_changed="2010-03-31 00:12:00.0" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1091AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
 
+    <allergy_reaction allergy_reaction_id="2025" allergy_id="1014"  reaction_concept_id="5086" reaction_non_coded="" uuid="5100AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <allergy_reaction allergy_reaction_id="2026" allergy_id="1015"  reaction_concept_id="5086" reaction_non_coded="" uuid="5101AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <allergy_reaction allergy_reaction_id="2027" allergy_id="1016"  reaction_concept_id="5086" reaction_non_coded="" uuid="5102AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+    <global_property property="allergy.concept.severity.mild" property_value="5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" uuid="4f55827e-26fe-dsfb-80cb-0017a47871b3"/>
+    <global_property property="allergy.concept.severity.moderate" property_value="5091AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" uuid="4f5dgs7e-26fe-dsfb-80cb-0017a47871b3"/>
+    <global_property property="allergy.concept.severity.severe" property_value="5092AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" uuid="4f55827e-26fe-dsfb-80cb-0017fhfd1b3"/>
 </dataset>

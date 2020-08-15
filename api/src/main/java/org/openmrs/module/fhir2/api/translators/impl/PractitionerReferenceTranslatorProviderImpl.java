@@ -14,9 +14,8 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirPractitionerService;
+import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,10 +24,7 @@ import org.springframework.stereotype.Component;
 public class PractitionerReferenceTranslatorProviderImpl extends BaseReferenceHandlingTranslator implements PractitionerReferenceTranslator<Provider> {
 	
 	@Autowired
-	private FhirPractitionerService practitionerService;
-	
-	@Autowired
-	private PractitionerTranslator<Provider> practitionerTranslator;
+	private FhirPractitionerDao practitionerDao;
 	
 	@Override
 	public Reference toFhirResource(Provider provider) {
@@ -48,7 +44,6 @@ public class PractitionerReferenceTranslatorProviderImpl extends BaseReferenceHa
 			throw new IllegalArgumentException("Reference must be to an Provider not a " + getReferenceType(reference));
 		}
 		
-		return getReferenceId(reference).map(uuid -> practitionerTranslator.toOpenmrsType(practitionerService.get(uuid)))
-		        .orElse(null);
+		return getReferenceId(reference).map(uuid -> practitionerDao.get(uuid)).orElse(null);
 	}
 }

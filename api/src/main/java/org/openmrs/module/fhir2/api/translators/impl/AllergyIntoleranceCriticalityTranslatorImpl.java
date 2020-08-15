@@ -19,15 +19,18 @@ public class AllergyIntoleranceCriticalityTranslatorImpl implements AllergyIntol
 	@Override
 	public AllergyIntolerance.AllergyIntoleranceCriticality toFhirResource(
 	        AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity) {
+		if (allergyIntoleranceSeverity == null) {
+			return null;
+		}
+		
 		switch (allergyIntoleranceSeverity) {
 			case SEVERE:
 				return AllergyIntolerance.AllergyIntoleranceCriticality.HIGH;
 			case MILD:
 				return AllergyIntolerance.AllergyIntoleranceCriticality.LOW;
 			case MODERATE:
-				return AllergyIntolerance.AllergyIntoleranceCriticality.UNABLETOASSESS;
 			default:
-				return AllergyIntolerance.AllergyIntoleranceCriticality.NULL;
+				return AllergyIntolerance.AllergyIntoleranceCriticality.UNABLETOASSESS;
 		}
 	}
 }
