@@ -36,7 +36,7 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.partOf.empty}">
                 <td>Part Of:</td>
                 <td>
@@ -68,7 +68,7 @@ a browser.
             <td>Subject:</td>
             <td th:narrative="${resource.subject}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.focus.empty}">
                 <td>Focus:</td>
                 <td>
@@ -79,13 +79,13 @@ a browser.
                 </td>
             </tr>
         </th:block>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.encounter.empty}">
                 <td>Encounter:</td>
                 <td th:narrative="${resource.encounter}"></td>
             </tr>
         </th:block>
-        <th:block th:unless="${fhirVersion} eq 'R4'">
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.context}">
                 <td>Context:</td>
                 <td th:narrative="${resource.context}"></td>
@@ -125,7 +125,7 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.note.empty}">
                 <td>Note:</td>
                 <td>
@@ -133,10 +133,10 @@ a browser.
                 </td>
             </tr>
         </th:block>
-        <th:block th:unless="${fhirVersion} eq 'R4'">
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.comment}">
                 <td>Comment:</td>
-                <td th:narrative="${resource.comment}"></td>
+                <td th:text="${resource.comment}"></td>
             </tr>
         </th:block>
         <tr th:if="${not resource.bodySite.empty}">
@@ -185,7 +185,7 @@ a browser.
                 </table>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.hasMember.empty}">
                 <td>Has Member:</td>
                 <td>
