@@ -97,7 +97,8 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 		Patient patient = null;
 		
 		if (!StringUtils.isEmpty(identifier)) {
-			List<Patient> patients = patientService.getPatients(identifier, 0, 1);
+			
+			List<Patient> patients = patientService.getPatients(identifier, false, 0, 1);
 			if (CollectionUtils.isEmpty(patients)) {
 				throw new IllegalArgumentException(
 				        "No patient could be found for the following OpenMRS identifier: '" + identifier + "'.");

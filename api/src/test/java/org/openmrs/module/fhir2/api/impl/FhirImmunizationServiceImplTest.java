@@ -51,7 +51,7 @@ public class FhirImmunizationServiceImplTest {
 	@Test
 	public void getPatient_shouldFetchByIdentifierFirst() {
 		// setup
-		when(patientService.getPatients(PATIENT_IDENTIFIER, 0, 1)).thenReturn(Arrays.asList(patient));
+		when(patientService.getPatients(PATIENT_IDENTIFIER, false, 0, 1)).thenReturn(Arrays.asList(patient));
 		
 		// replay
 		ReferenceAndListParam param = new ReferenceAndListParam();
@@ -106,7 +106,7 @@ public class FhirImmunizationServiceImplTest {
 		// setup
 		Patient patientWithOtherUuid = new Patient();
 		patientWithOtherUuid.setUuid("a3bec526-287a-45a4-b01a-030cdea96023");
-		when(patientService.getPatients(PATIENT_IDENTIFIER, 0, 1)).thenReturn(Arrays.asList(patientWithOtherUuid));
+		when(patientService.getPatients(PATIENT_IDENTIFIER, false, 0, 1)).thenReturn(Arrays.asList(patientWithOtherUuid));
 		
 		// replay
 		ReferenceAndListParam param = new ReferenceAndListParam();

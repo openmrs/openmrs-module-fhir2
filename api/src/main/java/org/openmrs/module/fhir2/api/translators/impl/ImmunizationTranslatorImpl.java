@@ -194,7 +194,7 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding coding = new Coding();
 		coding.setCode(members.get(ciel984).getValueCoded().getUuid());
-		coding.setDisplay(members.get(ciel984).getValueCoded().getFullySpecifiedName(Context.getLocale()).getName());
+		coding.setDisplay(members.get(ciel984).getValueCoded().getName(Context.getLocale()).getName());
 		codeableConcept.addCoding(coding);
 		immunization.setVaccineCode(codeableConcept);
 		immunization.setOccurrence(new DateTimeType(members.get(ciel1410).getValueDatetime()));
