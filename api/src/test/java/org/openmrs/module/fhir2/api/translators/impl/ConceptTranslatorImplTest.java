@@ -14,7 +14,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -24,7 +23,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -42,7 +40,6 @@ import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.FhirConceptSource;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
@@ -329,7 +326,6 @@ public class ConceptTranslatorImplTest {
 		name.setConcept(concept);
 		name.setLocale(Locale.ENGLISH);
 		when(concept.getName(any())).thenReturn(name);
-		when(concept.getNames()).thenReturn(Collections.singletonList(name));
 		
 		FhirConceptSource loinc = new FhirConceptSource();
 		ConceptSource loincConceptSource = new ConceptSource();
@@ -344,22 +340,5 @@ public class ConceptTranslatorImplTest {
 		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
 		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1000-1"))));
 		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo("Weight"))));
-		// Testing for extensions
-		assertThat(result.getCodingFirstRep().hasExtension(), is(true));
-		assertThat(result.getCodingFirstRep().hasExtension(FhirConstants.FHIR_EXT_TRANSLATIONS), is(true));
-		assertThat(result.getCodingFirstRep().getExtensionByUrl(FhirConstants.FHIR_EXT_TRANSLATIONS).getUrl(),
-		    equalTo(FhirConstants.FHIR_EXT_TRANSLATIONS));
-		assertThat(result.getCodingFirstRep().getExtensionByUrl(FhirConstants.FHIR_EXT_TRANSLATIONS)
-		        .getExtensionByUrl("lang").getUrl(),
-		    equalTo("lang"));
-		assertThat(result.getCodingFirstRep().getExtensionByUrl(FhirConstants.FHIR_EXT_TRANSLATIONS)
-		        .getExtensionByUrl("lang").getValue().toString(),
-		    equalTo("en"));
-		assertThat(result.getCodingFirstRep().getExtensionByUrl(FhirConstants.FHIR_EXT_TRANSLATIONS)
-		        .getExtensionByUrl("content").getUrl(),
-		    equalTo("content"));
-		assertThat(result.getCodingFirstRep().getExtensionByUrl(FhirConstants.FHIR_EXT_TRANSLATIONS)
-		        .getExtensionByUrl("content").getValue().toString(),
-		    equalTo("Weight"));
 	}
 }

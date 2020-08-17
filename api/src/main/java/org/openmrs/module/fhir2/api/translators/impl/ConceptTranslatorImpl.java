@@ -16,13 +16,10 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.FhirUserDefaultProperties;
@@ -111,12 +108,6 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		
 		String display = (conceptName == null || conceptName.getName() == null) ? "" : conceptName.getName();
 		coding.setDisplay(display);
-		
-		for (ConceptName name : concept.getNames()) {
-			Extension ext = coding.addExtension().setUrl(FhirConstants.FHIR_EXT_TRANSLATIONS);
-			ext.addExtension("lang", new StringType(name.getLocale().toLanguageTag()));
-			ext.addExtension("content", new StringType(name.getName()));
-		}
 	}
 	
 	private String conceptSourceToURL(String conceptSourceName) {
