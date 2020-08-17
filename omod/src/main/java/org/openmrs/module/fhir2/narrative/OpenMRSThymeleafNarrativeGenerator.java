@@ -31,26 +31,49 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+/**
+ * Class for carrying out the task of narrative generation
+ */
 public class OpenMRSThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator {
 	
 	private boolean isInitialized;
 	
 	private List<String> propertyFile;
 	
+	/**
+	 * Constructor for OpenMRSThymeleafNarrativeGenerator
+	 * 
+	 * @param thePropertyFile
+	 */
 	public OpenMRSThymeleafNarrativeGenerator(String... thePropertyFile) {
 		super();
 		setPropertyFile(thePropertyFile);
 	}
 	
+	/**
+	 * Sets property file paths for the narrative generator
+	 * 
+	 * @param propertyFile
+	 */
 	public void setPropertyFile(String... propertyFile) {
 		Validate.notNull(propertyFile, "Property file can not be null");
 		this.propertyFile = Arrays.asList(propertyFile);
 	}
 	
+	/**
+	 * @return the list of property file paths for the narrative generator
+	 */
 	public List<String> getPropertyFile() {
 		return propertyFile;
 	}
 	
+	/**
+	 * populates the resource narratives specified in property file with resource property values
+	 * 
+	 * @param theFhirContext
+	 * @param theResource
+	 * @return
+	 */
 	@Override
 	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
 		if (!isInitialized) {

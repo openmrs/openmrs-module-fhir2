@@ -54,6 +54,9 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.util.OpenmrsUtil;
 
+/**
+ * Class for creating style mappings to Narrative Template from specified properties and resources
+ */
 @Slf4j
 public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManifest {
 	
@@ -84,18 +87,36 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 		styleToDatatypeToTemplate = makeImmutable(datatypeToTemplate);
 	}
 	
+	/**
+	 * @param fhirContext
+	 * @param styles
+	 * @param resourceName
+	 * @return list of narrative templates by resource name
+	 */
 	@Override
 	public List<INarrativeTemplate> getTemplateByResourceName(FhirContext fhirContext, EnumSet<TemplateTypeEnum> styles,
 	        String resourceName) {
 		return getFromMap(styles, resourceName.toUpperCase(), styleToResourceTypeToTemplate);
 	}
 	
+	/**
+	 * @param fhirContext
+	 * @param styles
+	 * @param name
+	 * @return list of narrative templates by name
+	 */
 	@Override
 	public List<INarrativeTemplate> getTemplateByName(FhirContext fhirContext, EnumSet<TemplateTypeEnum> styles,
 	        String name) {
 		return getFromMap(styles, name, styleToNameToTemplate);
 	}
 	
+	/**
+	 * @param fhirContext
+	 * @param styles
+	 * @param element
+	 * @return list of narrative templates by element
+	 */
 	@Override
 	public List<INarrativeTemplate> getTemplateByElement(FhirContext fhirContext, EnumSet<TemplateTypeEnum> styles,
 	        IBase element) {
@@ -107,6 +128,12 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 		return getFromMap(styles, datatypeName.toUpperCase(), styleToDatatypeToTemplate);
 	}
 	
+	/**
+	 * @param propertyFilePaths
+	 * @return a template manifest configured with style mappings according to property files specified
+	 *         by their filepath
+	 * @throws IOException
+	 */
 	public static OpenMRSNarrativeTemplateManifest forManifestFileLocation(Collection<String> propertyFilePaths)
 	        throws IOException {
 		log.debug("Loading narrative properties file(s): {}", propertyFilePaths);
@@ -118,6 +145,12 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 		return forManifestFileContents(manifestFileContents);
 	}
 	
+	/**
+	 * @param resources
+	 * @return a template manifest configured with style mappings according to file content of property
+	 *         files
+	 * @throws IOException
+	 */
 	public static OpenMRSNarrativeTemplateManifest forManifestFileContents(Collection<String> resources) throws IOException {
 		List<OpenMRSNarrativeTemplate> templates = new ArrayList<>();
 		for (String next : resources) {
@@ -181,6 +214,13 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 		return nameToTemplate.values();
 	}
 	
+	/**
+	 * Utility method to load the resource specified by its classpath, filepath or OpenMRS relative path
+	 * 
+	 * @param name
+	 * @return file resource as string
+	 * @throws IOException
+	 */
 	static String loadResource(String name) throws IOException {
 		if (name.startsWith("classpath:")) {
 			String cpName = name.substring("classpath:".length());

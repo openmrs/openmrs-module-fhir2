@@ -29,12 +29,19 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.Test;
 import org.openmrs.util.OpenmrsUtil;
 
+/**
+ * Tests for Narrative Generator (OpenMRSThymeleafNarrativeGenerator,
+ * OpenMRSNarrativeTemplateManifest and OpenMRSNarrativeTemplate)
+ */
 public class NarrativeGeneratorTest {
 	
 	protected final FhirContext ctx = FhirContext.forR4();
 	
 	protected final BaseResource dummyResource = new Patient();
 	
+	/**
+	 * Check that IOException is thrown when no valid prefix is present in property file path
+	 */
 	@Test
 	public void shouldThrowIOExcpetionWhenNoValidPrefixInPath() {
 		String givenPath = "some/random/path/without/prefix.properties";
@@ -48,6 +55,9 @@ public class NarrativeGeneratorTest {
 		assertEquals(e.getMessage(), expectedErrorMessage);
 	}
 	
+	/**
+	 * Check that IOException is thrown when property file classpath is incorrect
+	 */
 	@Test
 	public void shouldThrowIOExcpetionForIncorrectClassPath() {
 		String givenPath = "classpath:some/random/class/path.properties";
@@ -60,6 +70,9 @@ public class NarrativeGeneratorTest {
 		assertEquals(e.getMessage(), expectedErrorMessage);
 	}
 	
+	/**
+	 * Check that IOException is thrown when property file filepath is incorrect
+	 */
 	@Test
 	public void shouldThrowIOExcpetionForIncorrectFilePath() {
 		String givenPath = "file:some/random/file/path.properties";
@@ -73,6 +86,9 @@ public class NarrativeGeneratorTest {
 		assertEquals(e.getMessage(), expectedErrorMessage);
 	}
 	
+	/**
+	 * Check that IOException is thrown when property file OpenMRS relative path is incorrect
+	 */
 	@Test
 	public void shouldThrowIOExcpetionForIncorrectOpenmrsPath() {
 		String givenPath = "openmrs:some/random/openmrs/path.properties";
@@ -86,6 +102,11 @@ public class NarrativeGeneratorTest {
 		assertEquals(e.getMessage(), expectedErrorMessage);
 	}
 	
+	/**
+	 * Check that property values are correctly mapped from property file to the template
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void shouldMapValuesFromPropertiesFileToTemplate() throws IOException {
 		String testNarrativePropFile = "classpath:org/openmrs/module/fhir2/narrative/testNarratives.properties";
@@ -109,6 +130,9 @@ public class NarrativeGeneratorTest {
 		assertEquals(template.getTemplateText().trim(), expectedNarrative.trim());
 	}
 	
+	/**
+	 * Check that ConfigurationException is thrown when property name is invalid
+	 */
 	@Test
 	public void shouldThrowConfigurationExceptionWhenPropertyNameInvalid() {
 		String testNarrativePropFile = "classpath:org/openmrs/module/fhir2/narrative/testNarrativesWithInvalidProperty.properties";

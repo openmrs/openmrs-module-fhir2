@@ -18,12 +18,20 @@ import java.io.IOException;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Test;
 
+/**
+ * Test for Task resource narrative generation
+ */
 public class TaskNarrativeTest extends BaseFhirNarrativeTest {
 	
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/task-example.json";
 	
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/task-expected.html";
 	
+	/**
+	 * Check that the expected narrative is generated for some example Task resource
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void shouldGenerateTaskNarrative() throws IOException {
 		Task given = parser.parseResource(Task.class,

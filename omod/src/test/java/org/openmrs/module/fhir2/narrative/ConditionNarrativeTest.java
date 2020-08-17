@@ -18,12 +18,20 @@ import java.io.IOException;
 import org.hl7.fhir.r4.model.Condition;
 import org.junit.Test;
 
+/**
+ * Test for Condition resource narrative generation
+ */
 public class ConditionNarrativeTest extends BaseFhirNarrativeTest {
 	
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/condition-example.json";
 	
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/condition-expected.html";
 	
+	/**
+	 * Check that the expected narrative is generated for some example Condition resource
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void shouldGenerateConditionNarrative() throws IOException {
 		Condition given = parser.parseResource(Condition.class,

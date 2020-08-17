@@ -18,12 +18,20 @@ import java.io.IOException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.junit.Test;
 
+/**
+ * Test for Encounter resource narrative generation
+ */
 public class EncounterNarrativeTest extends BaseFhirNarrativeTest {
 	
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/encounter-example.json";
 	
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/encounter-expected.html";
 	
+	/**
+	 * Check that the expected narrative is generated for some example Encounter resource
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void shouldGenerateEncounterNarrative() throws IOException {
 		Encounter given = parser.parseResource(Encounter.class,

@@ -18,12 +18,20 @@ import java.io.IOException;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.junit.Test;
 
+/**
+ * Test for RelatedPerson resource narrative generation
+ */
 public class RelatedPersonNarrativeTest extends BaseFhirNarrativeTest {
 	
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/relatedperson-example.json";
 	
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/relatedperson-expected.html";
 	
+	/**
+	 * Check that the expected narrative is generated for some example RelatedPerson resource
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void shouldGenerateRelatedPersonNarrative() throws IOException {
 		RelatedPerson given = parser.parseResource(RelatedPerson.class,

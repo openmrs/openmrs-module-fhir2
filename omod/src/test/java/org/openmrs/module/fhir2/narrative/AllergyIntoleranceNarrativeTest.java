@@ -18,12 +18,20 @@ import java.io.IOException;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.junit.Test;
 
+/**
+ * Test for AllergyIntolerance resource narrative generation
+ */
 public class AllergyIntoleranceNarrativeTest extends BaseFhirNarrativeTest {
 	
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/allergyintolerance-example.json";
 	
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/allergyintolerance-expected.html";
 	
+	/**
+	 * Check that the expected narrative is generated for some example AllergyIntolerance resource
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void shouldGenerateAllergyIntoleranceNarrative() throws IOException {
 		AllergyIntolerance given = parser.parseResource(AllergyIntolerance.class,

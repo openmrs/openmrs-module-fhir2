@@ -21,6 +21,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.openmrs.module.fhir2.FhirConstants;
 
+/**
+ * Base class for narrative generation tests
+ */
 public class BaseFhirNarrativeTest {
 	
 	protected static TimeZone defaultTimeZone;
@@ -29,12 +32,20 @@ public class BaseFhirNarrativeTest {
 	
 	protected IParser parser;
 	
+	/**
+	 * Setup a common timezone before all the tests to avoid assertion errors in narrative generation
+	 * tests due to timezone mismatch
+	 */
 	@BeforeClass
 	public static void setupTimeZone() {
 		defaultTimeZone = TimeZone.getDefault();
 		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 	}
 	
+	/**
+	 * Set OpenMRSThymeleafNarrativeGenerator as the narrative generator for the FhirContext and
+	 * initialize the parser
+	 */
 	@Before
 	public void setup() {
 		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE,
@@ -42,10 +53,20 @@ public class BaseFhirNarrativeTest {
 		parser = ctx.newJsonParser();
 	}
 	
+	/**
+	 * A utility to read expected narrative files in tests
+	 * 
+	 * @param resource
+	 * @return narrative file content as a String
+	 * @throws IOException
+	 */
 	protected String readNarrativeFile(String resource) throws IOException {
 		return IOUtils.resourceToString(resource, StandardCharsets.UTF_8, getClass().getClassLoader()).trim();
 	}
 	
+	/**
+	 * Reset the timezone to defaultTimeZone after all tests are run
+	 */
 	@AfterClass
 	public static void resetTimeZone() {
 		TimeZone.setDefault(defaultTimeZone);
