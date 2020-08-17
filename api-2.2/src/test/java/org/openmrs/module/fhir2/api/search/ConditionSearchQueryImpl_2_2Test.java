@@ -9,14 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
@@ -161,8 +162,8 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
-		    equalTo(PATIENT_IDENTIFIER));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReference(),
+		    endsWith(PATIENT_UUID));
 	}
 	
 	@Test
@@ -190,8 +191,8 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
-		    equalTo(PATIENT_IDENTIFIER));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getSubject().getReference(),
+		    endsWith(PATIENT_UUID));
 	}
 	
 	@Test

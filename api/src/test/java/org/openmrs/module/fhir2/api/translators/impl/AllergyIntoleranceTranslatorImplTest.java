@@ -231,7 +231,8 @@ public class AllergyIntoleranceTranslatorImplTest {
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
 		assertThat(allergyIntolerance.getPatient(), notNullValue());
 		assertThat(allergyIntolerance.getPatient().getType(), is(FhirTestConstants.PATIENT));
-		assertThat(allergyIntoleranceTranslator.getReferenceId(allergyIntolerance.getPatient()), equalTo(PATIENT_UUID));
+		assertThat(allergyIntoleranceTranslator.getReferenceId(allergyIntolerance.getPatient()).orElse(null),
+		    equalTo(PATIENT_UUID));
 	}
 	
 	@Test
@@ -244,10 +245,13 @@ public class AllergyIntoleranceTranslatorImplTest {
 		        .setType(FhirTestConstants.PRACTITIONER).setIdentifier(new Identifier().setValue(CREATOR_UUID));
 		
 		when(practitionerReferenceTranslator.toFhirResource(user)).thenReturn(practionerReference);
+		
 		AllergyIntolerance allergyIntolerance = allergyIntoleranceTranslator.toFhirResource(omrsAllergy);
+		
 		assertThat(allergyIntolerance.getRecorder(), notNullValue());
 		assertThat(allergyIntolerance.getRecorder().getType(), is(FhirTestConstants.PRACTITIONER));
-		assertThat(allergyIntoleranceTranslator.getReferenceId(allergyIntolerance.getRecorder()), equalTo(CREATOR_UUID));
+		assertThat(allergyIntoleranceTranslator.getReferenceId(allergyIntolerance.getRecorder()).orElse(null),
+		    equalTo(CREATOR_UUID));
 	}
 	
 	@Test

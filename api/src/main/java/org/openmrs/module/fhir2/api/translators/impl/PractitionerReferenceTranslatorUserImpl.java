@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.User;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
@@ -43,15 +44,12 @@ public class PractitionerReferenceTranslatorUserImpl extends BaseReferenceHandli
 			return null;
 		}
 		
-		String type = reference.getType();
-		if (type != null && !type.equals("Practitioner")) {
-			throw new IllegalArgumentException("Reference must be to an User not a " + type);
+		if (getReferenceType(reference).map(ref -> !ref.equals(FhirConstants.PRACTITIONER)).orElse(false)) {
+			throw new IllegalArgumentException(
+			        "Reference must be to an User not a " + getReferenceType(reference).orElse(""));
 		}
 		
-		String uuid = getReferenceId(reference);
-		if (uuid == null) {
-			return null;
-		}
-		return practitionerTranslator.toOpenmrsType(userService.get(uuid));
+		return getReferenceId(reference).map(uuid -> practitionerTranslator.toOpenmrsType(userService.get(uuid)))
+		        .orElse(null);
 	}
 }

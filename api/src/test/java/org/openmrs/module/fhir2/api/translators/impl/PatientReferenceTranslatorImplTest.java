@@ -51,7 +51,7 @@ public class PatientReferenceTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.PATIENT));
-		assertThat(patientReferenceTranslator.getReferenceId(result), equalTo(PATIENT_UUID));
+		assertThat(patientReferenceTranslator.getReferenceId(result).orElse(null), equalTo(PATIENT_UUID));
 	}
 	
 	@Test

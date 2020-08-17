@@ -55,7 +55,7 @@ import org.springframework.test.context.ContextConfiguration;
 public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String[] PATIENT_SEARCH_DATA_FILES = {
-	        "org/openmrs/api/include/PatientServiceTest-findPatients.xml",
+	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_initial_data.xml",
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_address_data.xml" };
 	
 	private static final String PATIENT_GIVEN_NAME = "Jeannette";
@@ -70,7 +70,7 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PATIENT_NOT_FOUND_NAME = "Igor";
 	
-	private static final String PATIENT_IDENTIFIER = "563422";
+	private static final String PATIENT_IDENTIFIER = "563422-5";
 	
 	private static final String BAD_PATIENT_IDENTIFIER = "9999X9999";
 	

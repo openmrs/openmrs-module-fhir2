@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -261,7 +262,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		List<DiagnosticReport> resultList = get(diagnosticReports);
 		
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(resultList.get(0).getSubject().getIdentifier().getValue(), equalTo(PATIENT_IDENTIFIER));
+		assertThat(resultList.get(0).getSubject().getReference(), endsWith(PATIENT_UUID));
 	}
 	
 	@Test
@@ -308,7 +309,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		List<DiagnosticReport> resultList = get(results);
 		
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(resultList.get(0).getSubject().getIdentifier().getValue(), equalTo(PATIENT_IDENTIFIER));
+		assertThat(resultList.get(0).getSubject().getReference(), endsWith(PATIENT_UUID));
 	}
 	
 	@Test

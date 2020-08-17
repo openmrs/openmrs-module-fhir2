@@ -13,6 +13,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -61,13 +62,13 @@ public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiv
 	
 	private static final String CODED_ALLERGEN_UUID = "a09ab2c5-878e-4905-b25d-5784167d0216";
 	
-	private static final String SEVERITY_MILD_CONCEPT_UUID = "5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String SEVERITY_MILD_CONCEPT_UUID = "5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String SEVERITY_MODERATE_CONCEPT_UUID = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String SEVERITY_MODERATE_CONCEPT_UUID = "5091AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String SEVERITY_SEVERE_CONCEPT_UUID = "7088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String SEVERITY_SEVERE_CONCEPT_UUID = "5092AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String SEVERITY_NULL_CONCEPT_UUID = "8088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	private static final String SEVERITY_NULL_CONCEPT_UUID = "5093AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String CODED_REACTION_UUID = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -177,8 +178,7 @@ public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiv
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getIdentifier().getValue(),
-		    equalTo(PATIENT_IDENTIFIER));
+		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getReference(), endsWith(PATIENT_UUID));
 	}
 	
 	@Test
@@ -206,8 +206,7 @@ public class AllergyIntoleranceSearchQueryTest extends BaseModuleContextSensitiv
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getIdentifier().getValue(),
-		    equalTo(PATIENT_IDENTIFIER));
+		assertThat(((AllergyIntolerance) resultList.iterator().next()).getPatient().getReference(), endsWith(PATIENT_UUID));
 	}
 	
 	@Test

@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Patient;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,16 +41,11 @@ public class PatientReferenceTranslatorImpl extends BaseReferenceHandlingTransla
 			return null;
 		}
 		
-		String type = patient.getType();
-		if (type != null && !type.equals("Patient")) {
-			throw new IllegalArgumentException("Reference must be to an Patient not a " + type);
+		if (getReferenceType(patient).map(ref -> !ref.equals(FhirConstants.PATIENT)).orElse(true)) {
+			throw new IllegalArgumentException(
+			        "Reference must be to an Patient not a " + getReferenceType(patient).orElse(""));
 		}
 		
-		String uuid = getReferenceId(patient);
-		if (uuid == null) {
-			return null;
-		}
-		
-		return patientDao.get(uuid);
+		return getReferenceId(patient).map(uuid -> patientDao.get(uuid)).orElse(null);
 	}
 }

@@ -24,7 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Drug;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
-import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationReferenceTranslatorImplTest {
@@ -34,16 +33,12 @@ public class MedicationReferenceTranslatorImplTest {
 	@Mock
 	private FhirMedicationDao dao;
 	
-	@Mock
-	private PatientIdentifierTranslator patientIdentifierTranslator;
-	
 	private MedicationReferenceTranslatorImpl medicationReferenceTranslator;
 	
 	@Before
 	public void setup() {
 		medicationReferenceTranslator = new MedicationReferenceTranslatorImpl();
 		medicationReferenceTranslator.setMedicationDao(dao);
-		medicationReferenceTranslator.setPatientIdentifierTranslator(patientIdentifierTranslator);
 	}
 	
 	@Test
@@ -55,7 +50,7 @@ public class MedicationReferenceTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.MEDICATION));
-		assertThat(medicationReferenceTranslator.getReferenceId(result), equalTo(MEDICATION_UUID));
+		assertThat(medicationReferenceTranslator.getReferenceId(result).orElse(null), equalTo(MEDICATION_UUID));
 	}
 	
 	@Test

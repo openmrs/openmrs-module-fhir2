@@ -9,20 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
-import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.FhirUserDefaultProperties;
@@ -51,7 +47,6 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		}
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
-		// TODO fix this so it refers to a specific system
 		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
 		
 		for (ConceptMap mapping : concept.getConceptMappings()) {
@@ -90,11 +85,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			        ? conceptService.getConceptBySourceNameAndCode(codingSource, coding.getCode()).orElse(null)
 			        : null;
 			if (codedConcept != null) {
-				if (concept_ == null) {
-					concept_ = codedConcept;
-				} else if (!concept_.equals(codedConcept) && "LOINC".equals(codingSource)) {
-					concept_ = codedConcept;
-				}
+				concept_ = codedConcept;
 			}
 		}
 		
@@ -111,24 +102,14 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		
 		String display = (conceptName == null || conceptName.getName() == null) ? "" : conceptName.getName();
 		coding.setDisplay(display);
-		
-		for (ConceptName name : concept.getNames()) {
-			Extension ext = coding.addExtension().setUrl(FhirConstants.FHIR_EXT_TRANSLATIONS);
-			ext.addExtension("lang", new StringType(name.getLocale().toLanguageTag()));
-			ext.addExtension("content", new StringType(name.getName()));
-		}
 	}
 	
 	private String conceptSourceToURL(String conceptSourceName) {
-		final AtomicReference<String> url = new AtomicReference<>(null);
-		conceptSourceService.getFhirConceptSourceByConceptSourceName(conceptSourceName)
-		        .ifPresent(cs -> url.set(cs.getUrl()));
-		return url.get();
+		return conceptSourceService.getFhirConceptSourceByConceptSourceName(conceptSourceName).map(FhirConceptSource::getUrl)
+		        .orElse(null);
 	}
 	
 	private String conceptURLToSource(String url) {
-		final AtomicReference<String> sourceName = new AtomicReference<>(null);
-		conceptSourceService.getFhirConceptSourceByUrl(url).ifPresent(cs -> sourceName.set(cs.getConceptSource().getName()));
-		return sourceName.get();
+		return conceptSourceService.getFhirConceptSourceByUrl(url).map(cs -> cs.getConceptSource().getName()).orElse(null);
 	}
 }

@@ -26,8 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.EncounterProvider;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirPractitionerService;
-import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
+import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterParticipantTranslatorImplTest {
@@ -37,10 +36,7 @@ public class EncounterParticipantTranslatorImplTest {
 	private static final String PROVIDER_URI = FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID;
 	
 	@Mock
-	FhirPractitionerService practitionerService;
-	
-	@Mock
-	PractitionerTranslator<Provider> practitionerTranslator;
+	FhirPractitionerDao practitionerDao;
 	
 	private EncounterParticipantTranslatorImpl participantTranslator;
 	
@@ -55,8 +51,7 @@ public class EncounterParticipantTranslatorImplTest {
 	@Before
 	public void setUp() {
 		participantTranslator = new EncounterParticipantTranslatorImpl();
-		participantTranslator.setPractitionerTranslator(practitionerTranslator);
-		participantTranslator.setPractitionerService(practitionerService);
+		participantTranslator.setPractitionerDao(practitionerDao);
 		
 		encounterProvider = new EncounterProvider();
 		provider = new Provider();
@@ -95,10 +90,11 @@ public class EncounterParticipantTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateEncounterParticipantToEncounterProviderWithCorrectProvider() {
-		when(practitionerService.get(PROVIDER_UUID)).thenReturn(practitioner);
-		when(practitionerTranslator.toOpenmrsType(practitioner)).thenReturn(provider);
+		when(practitionerDao.get(PROVIDER_UUID)).thenReturn(provider);
+		
 		EncounterProvider encounterProvider = participantTranslator.toOpenmrsType(new EncounterProvider(),
 		    encounterParticipantComponent);
+		
 		assertThat(encounterProvider, notNullValue());
 		assertThat(encounterProvider.getProvider(), notNullValue());
 		assertThat(encounterProvider.getProvider().getUuid(), equalTo(PROVIDER_UUID));
@@ -108,5 +104,4 @@ public class EncounterParticipantTranslatorImplTest {
 	public void shouldThrowExceptionWhenEncounterParticipantIsNull() {
 		participantTranslator.toOpenmrsType(new EncounterProvider(), null);
 	}
-	
 }

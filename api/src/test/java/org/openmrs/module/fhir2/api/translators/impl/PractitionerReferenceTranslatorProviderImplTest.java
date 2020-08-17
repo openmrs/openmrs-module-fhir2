@@ -59,7 +59,7 @@ public class PractitionerReferenceTranslatorProviderImplTest {
 		Reference result = referenceTranslatorProvider.toFhirResource(provider);
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.PRACTITIONER));
-		assertThat(referenceTranslatorProvider.getReferenceId(result), equalTo(PRACTITIONER_UUID));
+		assertThat(referenceTranslatorProvider.getReferenceId(result).orElse(null), equalTo(PRACTITIONER_UUID));
 	}
 	
 	@Test

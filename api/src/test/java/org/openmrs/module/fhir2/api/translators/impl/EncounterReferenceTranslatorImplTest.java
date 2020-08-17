@@ -51,7 +51,7 @@ public class EncounterReferenceTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.ENCOUNTER));
-		assertThat(encounterReferenceTranslator.getReferenceId(result), equalTo(ENCOUNTER_UUID));
+		assertThat(encounterReferenceTranslator.getReferenceId(result).orElse(null), equalTo(ENCOUNTER_UUID));
 	}
 	
 	@Test
@@ -103,7 +103,7 @@ public class EncounterReferenceTranslatorImplTest {
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
-	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsntForEncounter() {
+	public void toOpenmrsType_shouldThrowExceptionIfReferenceIsNotForEncounter() {
 		Reference reference = new Reference().setReference("Unknown" + "/" + ENCOUNTER_UUID).setType("Unknown");
 		
 		encounterReferenceTranslator.toOpenmrsType(reference);

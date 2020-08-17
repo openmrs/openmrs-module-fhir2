@@ -24,7 +24,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
-import org.openmrs.module.fhir2.api.translators.LocationTranslator;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterLocationTranslatorImplTest {
@@ -39,7 +39,7 @@ public class EncounterLocationTranslatorImplTest {
 	FhirLocationService locationService;
 	
 	@Mock
-	LocationTranslator locationTranslator;
+	FhirLocationDao locationDao;
 	
 	private EncounterLocationTranslatorImpl encounterLocationTranslator;
 	
@@ -47,21 +47,15 @@ public class EncounterLocationTranslatorImplTest {
 	
 	private Location location;
 	
-	private org.hl7.fhir.r4.model.Location fhirLocation;
-	
 	@Before
 	public void setUp() {
 		encounterLocationTranslator = new EncounterLocationTranslatorImpl();
 		encounterLocationTranslator.setLocationService(locationService);
-		encounterLocationTranslator.setLocationTranslator(locationTranslator);
+		encounterLocationTranslator.setLocationDao(locationDao);
 		
 		location = new Location();
 		location.setUuid(LOCATION_UUID);
 		location.setName(TEST_LOCATION_NAME);
-		
-		fhirLocation = new org.hl7.fhir.r4.model.Location();
-		fhirLocation.setId(LOCATION_UUID);
-		fhirLocation.setName(TEST_LOCATION_NAME);
 		
 		encounterLocationComponent = new Encounter.EncounterLocationComponent();
 		Reference reference = new Reference(LOCATION_URI);
@@ -78,6 +72,7 @@ public class EncounterLocationTranslatorImplTest {
 	@Test
 	public void shouldTranslateEncounterLocationToFhirTypeWithCorrectLocationReference() {
 		Encounter.EncounterLocationComponent result = encounterLocationTranslator.toFhirResource(location);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getLocation(), notNullValue());
 		assertThat(result.getLocation().getReference(), equalTo(LOCATION_URI));
@@ -85,16 +80,17 @@ public class EncounterLocationTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateEncounterLocationToOpenMrsType() {
-		when(locationService.get(LOCATION_UUID)).thenReturn(fhirLocation);
-		when(locationTranslator.toOpenmrsType(fhirLocation)).thenReturn(location);
+		when(locationDao.get(LOCATION_UUID)).thenReturn(location);
+		
 		assertThat(encounterLocationTranslator.toOpenmrsType(encounterLocationComponent), notNullValue());
 	}
 	
 	@Test
 	public void shouldTranslateEncounterLocationToFhirTypeWithCorrectLocationDetails() {
-		when(locationService.get(LOCATION_UUID)).thenReturn(fhirLocation);
-		when(locationTranslator.toOpenmrsType(fhirLocation)).thenReturn(location);
+		when(locationDao.get(LOCATION_UUID)).thenReturn(location);
+		
 		Location location = encounterLocationTranslator.toOpenmrsType(encounterLocationComponent);
+		
 		assertThat(location, notNullValue());
 		assertThat(location.getUuid(), notNullValue());
 		assertThat(location.getUuid(), equalTo(LOCATION_UUID));

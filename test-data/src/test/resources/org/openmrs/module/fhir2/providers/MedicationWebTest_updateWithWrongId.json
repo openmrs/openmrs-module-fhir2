@@ -18,18 +18,18 @@
   },
   "extension": [
     {
-      "url": "https://fhir.openmrs.org/ext/medicine",
+      "url": "http://fhir.openmrs.org/ext/medicine",
       "extension": [
         {
-          "url": "https://fhir.openmrs.org/ext/medicine#maximumDailyDose",
+          "url": "http://fhir.openmrs.org/ext/medicine#maximumDailyDose",
           "valueString": "3.5"
         },
         {
-          "url": "https://fhir.openmrs.org/ext/medicine#minimumDailyDose",
+          "url": "http://fhir.openmrs.org/ext/medicine#minimumDailyDose",
           "valueString": "3.0"
         },
         {
-          "url": "https://fhir.openmrs.org/ext/medicine#strength",
+          "url": "http://fhir.openmrs.org/ext/medicine#strength",
           "valueString": "1000mg"
         }
       ]

@@ -22,7 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -160,6 +159,10 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		return (IBaseBundle) parser.parseResource(response.getContentAsString());
 	}
 	
+	public IBaseOperationOutcome readOperationOutcome(MockHttpServletResponse response) throws UnsupportedEncodingException {
+		return parser.parseResource(getOperationOutcomeClass(), response.getContentAsString());
+	}
+	
 	public static class FhirMediaTypes {
 		
 		public static final MediaType JSON;
@@ -180,14 +183,7 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		@SneakyThrows
 		@Override
 		protected void describeMismatchSafely(MockHttpServletResponse item, Description mismatchDescription) {
-			FhirContext fhirContext = getFhirContext();
-			IParser parser = fhirContext.newJsonParser();
-			
-			IBaseOperationOutcome operationOutcome = null;
-			try {
-				operationOutcome = parser.parseResource(getOperationOutcomeClass(), item.getContentAsString());
-			}
-			catch (DataFormatException ignored) {}
+			IBaseOperationOutcome operationOutcome = readOperationOutcome(item);
 			
 			mismatchDescription.appendText("response with status code ").appendValue(item.getStatus());
 			

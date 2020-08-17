@@ -46,20 +46,21 @@ public class ObservationBasedOnReferenceTranslatorImpl extends BaseReferenceHand
 			return null;
 		}
 		
-		String type = reference.getType();
-		if (type != null && !type.equals(FhirConstants.SERVICE_REQUEST) && !type.equals(FhirConstants.MEDICATION)) {
+		if (getReferenceType(reference)
+		        .map(ref -> !(ref.equals(FhirConstants.SERVICE_REQUEST) || ref.equals(FhirConstants.MEDICATION_REQUEST)))
+		        .orElse(true)) {
 			throw new IllegalArgumentException("Reference must be to a ServiceRequest or MedicationRequest");
 		}
 		
-		String uuid = getReferenceId(reference);
-		if (uuid == null) {
-			return null;
-		}
-		
-		if (reference.getType().equals(FhirConstants.SERVICE_REQUEST)) {
-			return serviceRequestDao.get(uuid);
-		}
-		
-		return medicationRequestDao.get(uuid);
+		return getReferenceId(reference).map(uuid -> {
+			switch (reference.getType()) {
+				case FhirConstants.MEDICATION_REQUEST:
+					return medicationRequestDao.get(uuid);
+				case FhirConstants.SERVICE_REQUEST:
+					return serviceRequestDao.get(uuid);
+				default:
+					return null;
+			}
+		}).orElse(null);
 	}
 }
