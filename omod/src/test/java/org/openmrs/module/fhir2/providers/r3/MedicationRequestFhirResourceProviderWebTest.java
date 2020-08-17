@@ -86,13 +86,13 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR3Reso
 	
 	private static final String CODE = "d1b98543-10ff-4911-83a2-b7f5fafe2751";
 	
-	private static final String JSON_CREATE_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestResourceWebTest_create.json";
+	private static final String JSON_CREATE_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestWebTest_create.json";
 	
-	private static final String JSON_UPDATE_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestResourceWebTest_update.json";
+	private static final String JSON_UPDATE_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestWebTest_update.json";
 	
-	private static final String JSON_UPDATE_MEDICATION_REQUEST_NO_ID_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestResourceWebTest_updateWithoutId.json";
+	private static final String JSON_UPDATE_MEDICATION_REQUEST_NO_ID_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestWebTest_updateWithoutId.json";
 	
-	private static final String JSON_UPDATE_MEDICATION_REQUEST_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestResourceWebTest_updateWithWrongId.json";
+	private static final String JSON_UPDATE_MEDICATION_REQUEST_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestWebTest_updateWithWrongId.json";
 	
 	@Mock
 	private FhirMedicationRequestService fhirMedicationRequestService;

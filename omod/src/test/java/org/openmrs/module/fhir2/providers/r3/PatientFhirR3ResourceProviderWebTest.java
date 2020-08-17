@@ -78,9 +78,9 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 	
 	private static final String JSON_UPDATE_PATIENT_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_update.json";
 	
-	private static final String JSON_UPDATE_PATIENT_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_UpdateWithoutId.json";
+	private static final String JSON_UPDATE_PATIENT_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_updateWithoutId.json";
 	
-	private static final String JSON_UPDATE_PATIENT_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_UpdateWithWrongId.json";
+	private static final String JSON_UPDATE_PATIENT_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PatientWebTest_updateWithWrongId.json";
 	
 	@Getter(AccessLevel.PUBLIC)
 	private PatientFhirResourceProvider resourceProvider;

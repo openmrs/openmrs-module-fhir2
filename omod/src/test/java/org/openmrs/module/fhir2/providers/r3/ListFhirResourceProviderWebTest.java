@@ -42,13 +42,13 @@ public class ListFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	
 	private static final String UNKNOWN_UUID = "c0b1f314-1691-11df-97a5-7038c432aab99";
 	
-	private static final String JSON_CREATE_LIST_PATH = "org/openmrs/module/fhir2/providers/ListResourceWebTest_create.json";
+	private static final String JSON_CREATE_LIST_PATH = "org/openmrs/module/fhir2/providers/ListWebTest_create.json";
 	
-	private static final String JSON_UPDATE_LIST_PATH = "org/openmrs/module/fhir2/providers/ListResourceWebTest_update.json";
+	private static final String JSON_UPDATE_LIST_PATH = "org/openmrs/module/fhir2/providers/ListWebTest_update.json";
 	
-	private static final String JSON_UPDATE_LIST_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ListResourceWebTest_updateWithoutId.json";
+	private static final String JSON_UPDATE_LIST_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ListWebTest_updateWithoutId.json";
 	
-	private static final String JSON_UPDATE_LIST_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ListResourceWebTest_updateWithWrongId.json";
+	private static final String JSON_UPDATE_LIST_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ListWebTest_updateWithWrongId.json";
 	
 	@Mock
 	private FhirListService<Cohort, org.hl7.fhir.r4.model.ListResource> cohortFhirListService;

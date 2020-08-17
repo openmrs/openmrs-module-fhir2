@@ -103,9 +103,9 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	
 	private static final String JSON_UPDATE_SERVICE_REQUEST_PATH = "org/openmrs/module/fhir2/providers/ServiceRequestWebTest_update.json";
 	
-	private static final String JSON_UPDATE_SERVICE_REQUEST_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ServiceRequestWebTest_UpdateWithoutId.json";
+	private static final String JSON_UPDATE_SERVICE_REQUEST_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ServiceRequestWebTest_updateWithoutId.json";
 	
-	private static final String JSON_UPDATE_SERVICE_REQUEST_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ServiceRequestWebTest_UpdateWithWrongId.json";
+	private static final String JSON_UPDATE_SERVICE_REQUEST_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ServiceRequestWebTest_updateWithWrongId.json";
 	
 	@Before
 	@Override

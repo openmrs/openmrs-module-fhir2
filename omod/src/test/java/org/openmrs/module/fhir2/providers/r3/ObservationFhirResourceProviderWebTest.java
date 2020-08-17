@@ -77,13 +77,13 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 	
 	private static final String URL_ENCODED_CIEL_URN;
 	
-	private static final String JSON_CREATE_OBSERVATION_PATH = "org/openmrs/module/fhir2/providers/ObservationResourceWebTest_create.json";
+	private static final String JSON_CREATE_OBSERVATION_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_create.json";
 	
-	private static final String JSON_UPDATE_OBSERVATION_PATH = "org/openmrs/module/fhir2/providers/ObservationResourceWebTest_update.json";
+	private static final String JSON_UPDATE_OBSERVATION_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_update.json";
 	
-	private static final String JSON_UPDATE_OBSERVATION_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ObservationResourceWebTest_updateWithoutId.json";
+	private static final String JSON_UPDATE_OBSERVATION_NO_ID_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_updateWithoutId.json";
 	
-	private static final String JSON_UPDATE_OBSERVATION_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ObservationResourceWebTest_updateWithWrongId.json";
+	private static final String JSON_UPDATE_OBSERVATION_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_updateWithWrongId.json";
 	
 	static {
 		try {

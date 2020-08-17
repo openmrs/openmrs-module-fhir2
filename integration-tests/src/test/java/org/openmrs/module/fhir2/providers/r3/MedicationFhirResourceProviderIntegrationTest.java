@@ -45,13 +45,13 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 	
 	private static final String MEDICATION_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationDaoImplTest_initial_data.xml";
 	
-	private static final String JSON_CREATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_create.json";
+	private static final String JSON_CREATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_create.json";
 	
 	private static final String XML_CREATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_create.xml";
 	
 	private static final String XML_UPDATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_update.xml";
 	
-	private static final String JSON_UPDATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationResourceWebTest_update.json";
+	private static final String JSON_UPDATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_update.json";
 	
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)

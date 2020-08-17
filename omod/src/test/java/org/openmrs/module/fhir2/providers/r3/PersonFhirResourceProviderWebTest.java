@@ -86,9 +86,9 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 	
 	private static final String JSON_UPDATE_PERSON_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_update.json";
 	
-	private static final String JSON_UPDATE_PERSON_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_UpdateWithoutId.json";
+	private static final String JSON_UPDATE_PERSON_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_updateWithoutId.json";
 	
-	private static final String JSON_UPDATE_PERSON_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_UpdateWithWrongId.json";
+	private static final String JSON_UPDATE_PERSON_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PersonWebTest_updateWithWrongId.json";
 	
 	@Mock
 	private FhirPersonService personService;

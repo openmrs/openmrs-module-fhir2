@@ -78,9 +78,9 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	
 	private static final String JSON_UPDATE_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_update.json";
 	
-	private static final String JSON_UPDATE_WITHOUTID_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_UpdateWithoutId.json";
+	private static final String JSON_UPDATE_WITHOUTID_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_updateWithoutId.json";
 	
-	private static final String JSON_UPDATE_WITH_WRONGID_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_UpdateWithWrongId.json";
+	private static final String JSON_UPDATE_WITH_WRONGID_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_updateWithWrongId.json";
 	
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
 	

@@ -96,13 +96,13 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
 	
-	private static final String JSON_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_Create.json";
+	private static final String JSON_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_create.json";
 	
-	private static final String JSON_UPDATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_Update.json";
+	private static final String JSON_UPDATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_update.json";
 	
-	private static final String JSON_UPDATE_ENCOUNTER_NO_ID_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_UpdateWithoutId.json";
+	private static final String JSON_UPDATE_ENCOUNTER_NO_ID_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_updateWithoutId.json";
 	
-	private static final String JSON_UPDATE_ENCOUNTER_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_UpdateWithWrongId.json";
+	private static final String JSON_UPDATE_ENCOUNTER_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_updateWithWrongId.json";
 	
 	@Mock
 	private FhirEncounterService encounterService;

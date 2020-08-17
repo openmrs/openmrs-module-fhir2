@@ -60,11 +60,11 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	
 	private static final String WRONG_UUID = "9bf0d1ac-62a8-4440-a5a1-eb1015a7cc65";
 	
-	private static final String JSON_DIAGNOSTIC_REPORT_PATH = "org/openmrs/module/fhir2/providers/TestDiagnosticReport_CreateUpdate.json";
+	private static final String JSON_DIAGNOSTIC_REPORT_PATH = "org/openmrs/module/fhir2/providers/TestDiagnosticReport_createUpdate.json";
 	
-	private static final String JSON_DIAGNOSTIC_REPORT_NO_ID_PATH = "org/openmrs/module/fhir2/providers/TestDiagnosticReport_CreateUpdate_NoId.json";
+	private static final String JSON_DIAGNOSTIC_REPORT_NO_ID_PATH = "org/openmrs/module/fhir2/providers/TestDiagnosticReport_createUpdateNoId.json";
 	
-	private static final String JSON_DIAGNOSTIC_REPORT_WRONG_UUID_PATH = "org/openmrs/module/fhir2/providers/TestDiagnosticReport_CreateUpdate_WrongId.json";
+	private static final String JSON_DIAGNOSTIC_REPORT_WRONG_UUID_PATH = "org/openmrs/module/fhir2/providers/TestDiagnosticReport_createUpdateWrongId.json";
 	
 	private static final String ENCOUNTER_UUID = "6519d653-393b-4118-9c83-a3715b82d4ac";
 	

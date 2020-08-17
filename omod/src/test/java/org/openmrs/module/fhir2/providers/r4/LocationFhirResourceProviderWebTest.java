@@ -98,9 +98,9 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	
 	private static final String JSON_UPDATE_LOCATION_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_update.json";
 	
-	private static final String JSON_UPDATE_LOCATION_NO_ID_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_UpdateWithoutId.json";
+	private static final String JSON_UPDATE_LOCATION_NO_ID_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_updateWithoutId.json";
 	
-	private static final String JSON_UPDATE_LOCATION_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_UpdateWithWrongId.json";
+	private static final String JSON_UPDATE_LOCATION_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/LocationWebTest_updateWithWrongId.json";
 	
 	@Mock
 	private FhirLocationService locationService;

@@ -88,9 +88,9 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	
 	private static final String JSON_UPDATE_PRACTITIONER_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_update.json";
 	
-	private static final String JSON_UPDATE_PRACTITIONER_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_UpdateWithoutId.json";
+	private static final String JSON_UPDATE_PRACTITIONER_NO_ID_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_updateWithoutId.json";
 	
-	private static final String JSON_UPDATE_PRACTITIONER_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_UpdateWithWrongId.json";
+	private static final String JSON_UPDATE_PRACTITIONER_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/PractitionerWebTest_updateWithWrongId.json";
 	
 	@Getter(AccessLevel.PUBLIC)
 	private PractitionerFhirResourceProvider resourceProvider;
