@@ -34,6 +34,10 @@
 			<artifactId>hapi-fhir-server</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 		</dependency>
