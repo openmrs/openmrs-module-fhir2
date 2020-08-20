@@ -102,7 +102,7 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private static final int END_INDEX = 10;
 	
 	@Autowired
-	SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator> searchQuery;
+	private SearchQuery<org.openmrs.Location, Location, FhirLocationDao, LocationTranslator> searchQuery;
 	
 	@Autowired
 	private FhirLocationDao fhirLocationDao;

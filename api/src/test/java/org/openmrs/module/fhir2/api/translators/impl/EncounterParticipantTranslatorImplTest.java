@@ -36,7 +36,7 @@ public class EncounterParticipantTranslatorImplTest {
 	private static final String PROVIDER_URI = FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID;
 	
 	@Mock
-	FhirPractitionerDao practitionerDao;
+	private FhirPractitionerDao practitionerDao;
 	
 	private EncounterParticipantTranslatorImpl participantTranslator;
 	

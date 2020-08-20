@@ -99,7 +99,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
 	
-	AllergyIntolerance allergyIntolerance;
+	private AllergyIntolerance allergyIntolerance;
 	
 	@Before
 	@Override

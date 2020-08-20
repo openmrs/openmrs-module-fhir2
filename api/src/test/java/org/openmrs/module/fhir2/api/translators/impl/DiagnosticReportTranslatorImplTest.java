@@ -60,15 +60,11 @@ public class DiagnosticReportTranslatorImplTest {
 	@Mock
 	private ObservationReferenceTranslator observationReferenceTranslator;
 	
-	DiagnosticReportTranslatorImpl translator;
+	private DiagnosticReportTranslatorImpl translator;
 	
-	Obs obsGroup;
+	private Obs obsGroup;
 	
-	Obs childObs;
-	
-	DiagnosticReport diagnosticReport;
-	
-	Reference obsReference;
+	private DiagnosticReport diagnosticReport;
 	
 	@Before
 	public void setup() {
@@ -80,13 +76,13 @@ public class DiagnosticReportTranslatorImplTest {
 		
 		// OpenMRS setup
 		obsGroup = new Obs();
-		childObs = new Obs();
+		Obs childObs = new Obs();
 		childObs.setUuid(CHILD_UUID);
 		obsGroup.setUuid(PARENT_UUID);
 		obsGroup.addGroupMember(childObs);
 		
 		// FHIR setup
-		obsReference = new Reference().setType("Observation").setReference("Observation/" + CHILD_UUID);
+		Reference obsReference = new Reference().setType("Observation").setReference("Observation/" + CHILD_UUID);
 		diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(PARENT_UUID);
 		diagnosticReport.addResult(obsReference);

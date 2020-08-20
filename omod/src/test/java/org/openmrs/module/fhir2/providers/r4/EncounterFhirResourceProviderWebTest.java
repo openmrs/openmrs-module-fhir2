@@ -125,7 +125,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	@Captor
 	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
-	Encounter encounter;
+	private Encounter encounter;
 	
 	@Before
 	@Override

@@ -42,7 +42,7 @@ public class FhirConceptDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Autowired
 	@Qualifier("conceptService")
-	ConceptService conceptService;
+	private ConceptService conceptService;
 	
 	private FhirConceptDaoImpl dao;
 	

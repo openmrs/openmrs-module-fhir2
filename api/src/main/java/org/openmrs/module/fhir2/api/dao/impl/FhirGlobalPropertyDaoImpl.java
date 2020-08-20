@@ -30,7 +30,7 @@ public class FhirGlobalPropertyDaoImpl implements FhirGlobalPropertyDao {
 	
 	@Autowired
 	@Qualifier("sessionFactory")
-	SessionFactory sessionFactory;
+	private SessionFactory sessionFactory;
 	
 	@Override
 	public String getGlobalProperty(String property) throws APIException {

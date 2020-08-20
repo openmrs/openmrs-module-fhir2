@@ -105,7 +105,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	private static final int END_INDEX = 10;
 	
 	@Autowired
-	SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
+	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
 	
 	@Autowired
 	private FhirDiagnosticReportDao dao;

@@ -26,9 +26,9 @@ public class ObservationStatusTranslatorImpl_2_1Test {
 	
 	private static final Obs.Status OBS_STATUS = Obs.Status.FINAL;
 	
-	ObservationStatusTranslatorImpl_2_1 observationStatusTranslator;
+	private ObservationStatusTranslatorImpl_2_1 observationStatusTranslator;
 	
-	Obs obs;
+	private Obs obs;
 	
 	@Before
 	public void setUp() {

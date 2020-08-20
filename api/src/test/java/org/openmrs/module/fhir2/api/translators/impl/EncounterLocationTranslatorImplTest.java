@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -36,10 +35,7 @@ public class EncounterLocationTranslatorImplTest {
 	private static final String TEST_LOCATION_NAME = "test location name";
 	
 	@Mock
-	FhirLocationService locationService;
-	
-	@Mock
-	FhirLocationDao locationDao;
+	private FhirLocationDao locationDao;
 	
 	private EncounterLocationTranslatorImpl encounterLocationTranslator;
 	
@@ -50,7 +46,6 @@ public class EncounterLocationTranslatorImplTest {
 	@Before
 	public void setUp() {
 		encounterLocationTranslator = new EncounterLocationTranslatorImpl();
-		encounterLocationTranslator.setLocationService(locationService);
 		encounterLocationTranslator.setLocationDao(locationDao);
 		
 		location = new Location();

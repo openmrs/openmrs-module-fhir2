@@ -112,7 +112,7 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private EncounterTranslator translator;
 	
 	@Autowired
-	SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
+	private SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
 	
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
