@@ -22,7 +22,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -33,7 +32,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -85,17 +83,6 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	@Create
 	public MethodOutcome createObservationResource(@ResourceParam Observation observation) {
 		return FhirProviderUtils.buildCreate(observationService.create(observation));
-	}
-	
-	@Update
-	public MethodOutcome updateObservationResource(@IdParam IdType id, @ResourceParam Observation observation) {
-		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update resource");
-		}
-		
-		observation.setId(id.getIdPart());
-		
-		return FhirProviderUtils.buildUpdate(observationService.update(id.getIdPart(), observation));
 	}
 	
 	@Delete

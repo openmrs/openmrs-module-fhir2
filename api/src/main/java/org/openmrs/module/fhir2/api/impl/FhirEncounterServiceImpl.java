@@ -34,13 +34,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.openmrs.Encounter> implements FhirEncounterService {
 	
 	@Autowired
-	FhirEncounterDao dao;
+	private FhirEncounterDao dao;
 	
 	@Autowired
-	EncounterTranslator translator;
+	private EncounterTranslator translator;
 	
 	@Autowired
-	SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
+	private SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
 	
 	@Override
 	@Transactional(readOnly = true)

@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -24,13 +26,12 @@ import org.openmrs.Obs;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PACKAGE)
 public abstract class BaseReferenceHandlingTranslator {
@@ -38,9 +39,6 @@ public abstract class BaseReferenceHandlingTranslator {
 	public static final String DRUG_ORDER_TYPE_UUID = "131168f4-15f5-102d-96e4-000c29c2a5d7";
 	
 	public static final String TEST_ORDER_TYPE_UUID = "52a447d3-a64a-11e3-9aeb-50e549534c5e";
-	
-	@Autowired
-	private PatientIdentifierTranslator patientIdentifierTranslator;
 	
 	protected Reference createEncounterReference(@NotNull Encounter encounter) {
 		if (encounter instanceof HibernateProxy) {
@@ -92,14 +90,17 @@ public abstract class BaseReferenceHandlingTranslator {
 		}
 		
 		PatientIdentifier identifier = patient.getPatientIdentifier();
-		if (identifier != null) {
-			reference.setIdentifier(patientIdentifierTranslator.toFhirResource(identifier));
-			try {
-				sb.append("(").append(identifier.getIdentifierType().getName()).append(":")
-				        .append(identifier.getIdentifier()).append(")");
+		if (identifier != null && identifier.getIdentifier() != null) {
+			sb.append(" (");
+			
+			PatientIdentifierType identifierType = identifier.getIdentifierType();
+			if (identifierType != null && identifierType.getName() != null) {
+				sb.append(identifierType.getName()).append(": ");
 			}
-			catch (NullPointerException ignored) {}
+			
+			sb.append(identifier.getIdentifier()).append(")");
 		}
+		
 		reference.setDisplay(sb.toString());
 		
 		return reference;
@@ -140,7 +141,7 @@ public abstract class BaseReferenceHandlingTranslator {
 			
 			if (provider.getIdentifier() != null) {
 				reference.setIdentifier(new Identifier().setValue(provider.getIdentifier()));
-				sb.append("(").append(FhirConstants.IDENTIFIER).append(":").append(provider.getIdentifier()).append(")");
+				sb.append(" (").append(FhirConstants.IDENTIFIER).append(": ").append(provider.getIdentifier()).append(")");
 			}
 			
 			reference.setDisplay(sb.toString());
@@ -169,41 +170,41 @@ public abstract class BaseReferenceHandlingTranslator {
 		}
 	}
 	
-	protected String getReferenceType(Reference reference) {
+	protected Optional<String> getReferenceType(Reference reference) {
 		if (reference.getType() != null) {
-			return reference.getType();
+			return Optional.of(reference.getType());
 		}
 		
 		return referenceToType(reference.getReference());
 	}
 	
-	protected String getReferenceId(Reference reference) {
+	protected Optional<String> getReferenceId(Reference reference) {
 		return referenceToId(reference.getReference());
 	}
 	
-	private String referenceToType(String fhirReference) {
+	private Optional<String> referenceToType(String fhirReference) {
 		if (fhirReference == null) {
-			return null;
+			return Optional.empty();
 		}
 		
 		int split = fhirReference.indexOf('/');
 		if (split < 0) {
-			return null;
+			return Optional.empty();
 		}
 		
-		return StringUtils.trimToNull(fhirReference.substring(0, split));
+		return Optional.ofNullable(StringUtils.trimToNull(fhirReference.substring(0, split)));
 	}
 	
-	private static String referenceToId(String fhirReference) {
+	private Optional<String> referenceToId(String fhirReference) {
 		if (fhirReference == null) {
-			return null;
+			return Optional.empty();
 		}
 		
 		int split = fhirReference.indexOf('/');
 		if (split < 0 || split == fhirReference.length() - 1) {
-			return null;
+			return Optional.empty();
 		}
 		
-		return StringUtils.trimToNull(fhirReference.substring(split + 1));
+		return Optional.ofNullable(StringUtils.trimToNull(fhirReference.substring(split + 1)));
 	}
 }

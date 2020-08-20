@@ -101,16 +101,16 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	private ConditionFhirResourceProvider resourceProvider;
 	
 	@Captor
-	ArgumentCaptor<ReferenceAndListParam> referenceAndListParamArgumentCaptor;
+	private ArgumentCaptor<ReferenceAndListParam> referenceAndListParamArgumentCaptor;
 	
 	@Captor
-	ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
+	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
 	@Captor
-	ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
+	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
 	
 	@Captor
-	ArgumentCaptor<QuantityAndListParam> quantityAndListParamArgumentCaptor;
+	private ArgumentCaptor<QuantityAndListParam> quantityAndListParamArgumentCaptor;
 	
 	@Before
 	@Override

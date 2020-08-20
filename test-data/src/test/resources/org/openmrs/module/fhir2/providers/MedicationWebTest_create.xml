@@ -9,8 +9,8 @@
     graphic logo is a trademark of OpenMRS Inc.
 -->
 <Medication xmlns="http://hl7.org/fhir">
-    <extension url="https://fhir.openmrs.org/ext/medicine">
-        <extension url="https://fhir.openmrs.org/ext/medicine#strength">
+    <extension url="http://fhir.openmrs.org/ext/medicine">
+        <extension url="http://fhir.openmrs.org/ext/medicine#strength">
             <valueString value="200mg" />
         </extension>
     </extension>

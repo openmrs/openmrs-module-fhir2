@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -520,8 +521,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		
 		assertThat(resources, not(empty()));
 		assertThat(resources, hasSize(equalTo(4)));
-		assertThat(resources,
-		    everyItem(hasProperty("subject", hasProperty("identifier", hasProperty("value", equalTo(PATIENT_IDENTIFIER))))));
+		assertThat(resources, everyItem(hasProperty("subject", hasProperty("reference", endsWith(PATIENT_UUID)))));
 	}
 	
 	@Test
@@ -542,8 +542,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(4)));
-		assertThat(resultList,
-		    everyItem(hasProperty("subject", hasProperty("identifier", hasProperty("value", equalTo(PATIENT_IDENTIFIER))))));
+		assertThat(resultList, everyItem(hasProperty("subject", hasProperty("reference", endsWith(PATIENT_UUID)))));
 	}
 	
 	@Test

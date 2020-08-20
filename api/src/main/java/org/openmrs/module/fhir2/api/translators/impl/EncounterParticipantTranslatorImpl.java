@@ -15,10 +15,8 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
-import org.openmrs.Provider;
-import org.openmrs.module.fhir2.api.FhirPractitionerService;
+import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
-import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,10 +25,7 @@ import org.springframework.stereotype.Component;
 public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterParticipantTranslator {
 	
 	@Autowired
-	private FhirPractitionerService practitionerService;
-	
-	@Autowired
-	private PractitionerTranslator<Provider> practitionerTranslator;
+	private FhirPractitionerDao practitionerDao;
 	
 	@Override
 	public Encounter.EncounterParticipantComponent toFhirResource(EncounterProvider encounter) {
@@ -49,9 +44,9 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 		notNull(encounterProvider, "The existing EncounterProvider object should not be null");
 		notNull(encounterParticipantComponent, "The EncounterParticipantComponent object should not be null");
 		
-		String practitionerUuid = getReferenceId(encounterParticipantComponent.getIndividual());
-		Provider provider = practitionerTranslator.toOpenmrsType(practitionerService.get(practitionerUuid));
-		encounterProvider.setProvider(provider);
+		getReferenceId(encounterParticipantComponent.getIndividual())
+		        .map(practitionerUuid -> practitionerDao.get(practitionerUuid)).ifPresent(encounterProvider::setProvider);
+		
 		return encounterProvider;
 	}
 }

@@ -373,63 +373,78 @@ public class PersonAddressTranslatorImplTest {
 	public void addAddressComponent_shouldSetAddressesCorrectly() {
 		PersonAddress personAddress = new PersonAddress();
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address1", ADDRESS_1);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address1",
+		    ADDRESS_1);
 		assertNotNull(personAddress.getAddress1());
 		assertEquals(personAddress.getAddress1(), ADDRESS_1);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address2", ADDRESS_2);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address2",
+		    ADDRESS_2);
 		assertNotNull(personAddress.getAddress2());
 		assertEquals(personAddress.getAddress2(), ADDRESS_2);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address3", ADDRESS_3);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address3",
+		    ADDRESS_3);
 		assertNotNull(personAddress.getAddress3());
 		assertEquals(personAddress.getAddress3(), ADDRESS_3);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address4", ADDRESS_4);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address4",
+		    ADDRESS_4);
 		assertNotNull(personAddress.getAddress4());
 		assertEquals(personAddress.getAddress4(), ADDRESS_4);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address5", ADDRESS_5);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address5",
+		    ADDRESS_5);
 		assertNotNull(personAddress.getAddress5());
 		assertEquals(personAddress.getAddress5(), ADDRESS_5);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address6", ADDRESS_6);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address6",
+		    ADDRESS_6);
 		assertNotNull(personAddress.getAddress6());
 		assertEquals(personAddress.getAddress6(), ADDRESS_6);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address7", ADDRESS_7);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address7",
+		    ADDRESS_7);
 		assertNotNull(personAddress.getAddress7());
 		assertEquals(personAddress.getAddress7(), ADDRESS_7);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address8", ADDRESS_8);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address8",
+		    ADDRESS_8);
 		assertNotNull(personAddress.getAddress8());
 		assertEquals(personAddress.getAddress8(), ADDRESS_8);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address9", ADDRESS_9);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address9",
+		    ADDRESS_9);
 		assertNotNull(personAddress.getAddress9());
 		assertEquals(personAddress.getAddress9(), ADDRESS_9);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address10", ADDRESS_10);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address10",
+		    ADDRESS_10);
 		assertNotNull(personAddress.getAddress10());
 		assertEquals(personAddress.getAddress10(), ADDRESS_10);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address11", ADDRESS_11);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address11",
+		    ADDRESS_11);
 		assertNotNull(personAddress.getAddress11());
 		assertEquals(personAddress.getAddress11(), ADDRESS_11);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address12", ADDRESS_12);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address12",
+		    ADDRESS_12);
 		assertNotNull(personAddress.getAddress12());
 		assertEquals(personAddress.getAddress12(), ADDRESS_12);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address13", ADDRESS_13);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address13",
+		    ADDRESS_13);
 		assertNotNull(personAddress.getAddress13());
 		assertEquals(personAddress.getAddress13(), ADDRESS_13);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address14", ADDRESS_14);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address14",
+		    ADDRESS_14);
 		assertNotNull(personAddress.getAddress14());
 		assertEquals(personAddress.getAddress14(), ADDRESS_14);
 		
-		addressTranslator.addAddressComponent(personAddress, "https://fhir.openmrs.org/ext/address#address15", ADDRESS_15);
+		addressTranslator.addAddressComponent(personAddress, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address15",
+		    ADDRESS_15);
 		assertNotNull(personAddress.getAddress15());
 		assertEquals(personAddress.getAddress15(), ADDRESS_15);
 		

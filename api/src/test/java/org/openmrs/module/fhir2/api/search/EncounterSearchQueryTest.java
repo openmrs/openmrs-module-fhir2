@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -111,7 +112,7 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private EncounterTranslator translator;
 	
 	@Autowired
-	SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
+	private SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
 	
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
@@ -499,8 +500,7 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((Encounter) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
-		    equalTo(PATIENT_IDENTIFIER));
+		assertThat(((Encounter) resultList.iterator().next()).getSubject().getReference(), endsWith(PATIENT_UUID));
 	}
 	
 	@Test
@@ -548,8 +548,7 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(((Encounter) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
-		    equalTo(PATIENT_IDENTIFIER));
+		assertThat(((Encounter) resultList.iterator().next()).getSubject().getReference(), endsWith(PATIENT_UUID));
 	}
 	
 	@Test
@@ -1078,8 +1077,7 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
-		assertThat(((Encounter) resultList.iterator().next()).getSubject().getIdentifier().getValue(),
-		    equalTo(PATIENT_IDENTIFIER));
+		assertThat(((Encounter) resultList.iterator().next()).getSubject().getReference(), endsWith(PATIENT_UUID));
 	}
 	
 	@Test

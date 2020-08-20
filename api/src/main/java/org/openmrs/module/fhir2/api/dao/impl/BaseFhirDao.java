@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -37,8 +38,10 @@ import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
+import org.openmrs.api.ValidationException;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.validator.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,6 +103,14 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	public T createOrUpdate(T newEntry) {
 		if (newEntry.getUuid() == null) {
 			newEntry.setUuid(UUID.randomUUID().toString());
+		}
+		
+		// TODO Improve these messages
+		try {
+			ValidateUtil.validate(newEntry);
+		}
+		catch (ValidationException e) {
+			throw new UnprocessableEntityException(e.getMessage(), e);
 		}
 		
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);

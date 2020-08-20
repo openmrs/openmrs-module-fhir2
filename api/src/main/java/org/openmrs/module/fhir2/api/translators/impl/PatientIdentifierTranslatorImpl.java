@@ -13,22 +13,28 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Type;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.APIException;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-// TODO Map PatientIdentifierType to Type
 // TODO Create proper "System" value
-public class PatientIdentifierTranslatorImpl implements PatientIdentifierTranslator {
+public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTranslator implements PatientIdentifierTranslator {
 	
 	@Autowired
 	private FhirPatientService patientService;
+	
+	@Autowired
+	private FhirLocationDao locationDao;
 	
 	@Override
 	public Identifier toFhirResource(PatientIdentifier identifier) {
@@ -37,6 +43,8 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 		}
 		
 		Identifier patientIdentifier = new Identifier();
+		
+		patientIdentifier.setValue(identifier.getIdentifier()).setId(identifier.getUuid());
 		
 		if (identifier.getPreferred() != null) {
 			if (identifier.getPreferred()) {
@@ -50,7 +58,10 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 			patientIdentifier.setType(new CodeableConcept().setText(identifier.getIdentifierType().getName()));
 		}
 		
-		patientIdentifier.setValue(identifier.getIdentifier()).setId(identifier.getUuid());
+		if (identifier.getLocation() != null) {
+			patientIdentifier.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)
+			        .setValue(createLocationReference(identifier.getLocation()));
+		}
 		
 		return patientIdentifier;
 	}
@@ -71,6 +82,7 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 		}
 		
 		patientIdentifier.setUuid(identifier.getId());
+		
 		patientIdentifier.setIdentifier(identifier.getValue());
 		
 		patientIdentifier.setPreferred(Identifier.IdentifierUse.OFFICIAL.equals(identifier.getUse()));
@@ -82,6 +94,16 @@ public class PatientIdentifierTranslatorImpl implements PatientIdentifierTransla
 		}
 		
 		patientIdentifier.setIdentifierType(type);
+		
+		if (identifier.hasExtension(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)) {
+			Type identifierLocationType = identifier
+			        .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION).getValue();
+			
+			if (identifierLocationType instanceof Reference) {
+				getReferenceId((Reference) identifierLocationType).map(uuid -> locationDao.get(uuid))
+				        .ifPresent(patientIdentifier::setLocation);
+			}
+		}
 		
 		return patientIdentifier;
 	}

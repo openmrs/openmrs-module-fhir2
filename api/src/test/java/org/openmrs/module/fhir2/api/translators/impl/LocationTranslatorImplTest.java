@@ -331,7 +331,7 @@ public class LocationTranslatorImplTest {
 		assertThat(locationReference, notNullValue());
 		assertThat(locationReference.getType(), is(FhirConstants.LOCATION));
 		assertThat(locationReference.getDisplay(), is(PARENT_LOCATION_NAME));
-		assertThat(locationTranslator.getReferenceId(locationReference), equalTo(PARENT_LOCATION_UUID));
+		assertThat(locationTranslator.getReferenceId(locationReference).orElse(null), equalTo(PARENT_LOCATION_UUID));
 	}
 	
 	@Test

@@ -14,7 +14,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -24,9 +23,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -42,7 +41,6 @@ import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.FhirConceptSource;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
@@ -238,6 +236,7 @@ public class ConceptTranslatorImplTest {
 		when(conceptService.get(CONCEPT_UUID)).thenReturn(defaultConcept);
 		
 		Concept loincConcept = new Concept();
+		loincConcept.setUuid(UUID.randomUUID().toString());
 		ConceptMap conceptMap = new ConceptMap();
 		ConceptReferenceTerm conceptReferenceTerm = new ConceptReferenceTerm();
 		ConceptSource loinc = new ConceptSource();
@@ -257,7 +256,7 @@ public class ConceptTranslatorImplTest {
 		        .thenReturn(Optional.of(fhirLoincSource));
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
-		assertThat(result, equalTo(loincConcept));
+		assertThat(result.getUuid(), equalTo(loincConcept.getUuid()));
 	}
 	
 	@Test
@@ -309,57 +308,5 @@ public class ConceptTranslatorImplTest {
 	@Test
 	public void shouldReturnNullWhenCodeableConceptNull() {
 		assertThat(conceptTranslator.toOpenmrsType(null), nullValue());
-	}
-	
-	@Test
-	public void shouldReturnAddTranslationsAsExtensionWithCorrectUrl() {
-		Collection<ConceptMap> conceptMaps = new ArrayList<>();
-		ConceptMap conceptMap = mock(ConceptMap.class);
-		conceptMaps.add(conceptMap);
-		ConceptReferenceTerm conceptReferenceTerm = mock(ConceptReferenceTerm.class);
-		ConceptSource conceptSource = mock(ConceptSource.class);
-		when(conceptMap.getConceptReferenceTerm()).thenReturn(conceptReferenceTerm);
-		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
-		when(conceptReferenceTerm.getCode()).thenReturn("1000-1");
-		when(conceptSource.getName()).thenReturn("LOINC");
-		when(concept.getConceptMappings()).thenReturn(conceptMaps);
-		
-		ConceptName name = new ConceptName();
-		name.setName("Weight");
-		name.setConcept(concept);
-		name.setLocale(Locale.ENGLISH);
-		when(concept.getName(any())).thenReturn(name);
-		when(concept.getNames()).thenReturn(Collections.singletonList(name));
-		
-		FhirConceptSource loinc = new FhirConceptSource();
-		ConceptSource loincConceptSource = new ConceptSource();
-		loincConceptSource.setName("LOINC");
-		loinc.setConceptSource(loincConceptSource);
-		loinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.of(loinc));
-		
-		CodeableConcept result = conceptTranslator.toFhirResource(concept);
-		assertThat(result, notNullValue());
-		assertThat(result.getCoding(), not(empty()));
-		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
-		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1000-1"))));
-		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo("Weight"))));
-		// Testing for extensions
-		assertThat(result.getCodingFirstRep().hasExtension(), is(true));
-		assertThat(result.getCodingFirstRep().hasExtension(FhirConstants.FHIR_EXT_TRANSLATIONS), is(true));
-		assertThat(result.getCodingFirstRep().getExtensionByUrl(FhirConstants.FHIR_EXT_TRANSLATIONS).getUrl(),
-		    equalTo(FhirConstants.FHIR_EXT_TRANSLATIONS));
-		assertThat(result.getCodingFirstRep().getExtensionByUrl(FhirConstants.FHIR_EXT_TRANSLATIONS)
-		        .getExtensionByUrl("lang").getUrl(),
-		    equalTo("lang"));
-		assertThat(result.getCodingFirstRep().getExtensionByUrl(FhirConstants.FHIR_EXT_TRANSLATIONS)
-		        .getExtensionByUrl("lang").getValue().toString(),
-		    equalTo("en"));
-		assertThat(result.getCodingFirstRep().getExtensionByUrl(FhirConstants.FHIR_EXT_TRANSLATIONS)
-		        .getExtensionByUrl("content").getUrl(),
-		    equalTo("content"));
-		assertThat(result.getCodingFirstRep().getExtensionByUrl(FhirConstants.FHIR_EXT_TRANSLATIONS)
-		        .getExtensionByUrl("content").getValue().toString(),
-		    equalTo("Weight"));
 	}
 }

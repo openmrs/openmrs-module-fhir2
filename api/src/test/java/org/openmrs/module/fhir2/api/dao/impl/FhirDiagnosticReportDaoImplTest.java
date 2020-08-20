@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -81,8 +82,6 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 	@Test
 	public void saveObsGroup_shouldSaveNewObsGroup() {
 		Obs newObs = new Obs();
-		
-		newObs.setUuid(NEW_UUID);
 		newObs.setObsDatetime(new Date());
 		newObs.setPerson(patientService.getPatient(7));
 		newObs.setConcept(conceptService.getConcept(5085));
@@ -91,8 +90,10 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 		Obs result = dao.createOrUpdate(newObs);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), equalTo(NEW_UUID));
+		assertThat(result.getPersonId(), equalTo(7));
 		assertThat(result.isObsGrouping(), equalTo(true));
+		assertThat(result.getGroupMembers(), hasSize(equalTo(1)));
+		assertThat(result.getGroupMembers().iterator().next().getUuid(), equalTo(CHILD_UUID));
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
@@ -105,17 +106,22 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 	
 	@Test
 	public void saveObsGroup_shouldUpdateExistingObsGroup() {
-		Obs newMember = new Obs();
-		newMember.setUuid(NEW_UUID);
-		
 		Obs existingObsGroup = dao.get(UUID);
+		
+		Obs newMember = new Obs();
+		newMember.setConcept(conceptService.getConcept(19));
+		newMember.setObsDatetime(new Date());
+		newMember.setEncounter(existingObsGroup.getEncounter());
+		newMember.setPerson(existingObsGroup.getPerson());
+		newMember.setValueText("blah blah blah");
+		
 		existingObsGroup.addGroupMember(newMember);
 		
 		Obs result = dao.createOrUpdate(existingObsGroup);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(UUID));
-		assertThat(result.getGroupMembers().size(), equalTo(2));
+		assertThat(result.getGroupMembers(), hasSize(equalTo(2)));
 	}
 	
 }

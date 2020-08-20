@@ -28,9 +28,9 @@ public class ObservationInterpretationTranslatorImpl_2_1Test {
 	
 	private ObservationInterpretationTranslatorImpl_2_1 observationInterpretationTranslator;
 	
-	Obs obs;
+	private Obs obs;
 	
-	CodeableConcept interpretation;
+	private CodeableConcept interpretation;
 	
 	@Before
 	public void setUp() {

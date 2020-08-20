@@ -119,14 +119,15 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 			if (concept instanceof ConceptNumeric) {
 				obs.setReferenceRange(referenceRangeTranslator.toFhirResource((ConceptNumeric) concept));
 			}
-			
 		}
-		obs.getMeta().setLastUpdated(observation.getDateChanged());
-		obs.addContained(provenanceTranslator.getCreateProvenance(observation));
-		obs.addContained(provenanceTranslator.getUpdateProvenance(observation));
+		
 		obs.setIssued(observation.getDateCreated());
 		obs.setEffective(datetimeTranslator.toFhirResource(observation));
 		obs.addBasedOn(basedOnReferenceTranslator.toFhirResource(observation.getOrder()));
+		
+		obs.getMeta().setLastUpdated(observation.getDateChanged());
+		obs.addContained(provenanceTranslator.getCreateProvenance(observation));
+		obs.addContained(provenanceTranslator.getUpdateProvenance(observation));
 		
 		return obs;
 	}
@@ -142,7 +143,6 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		notNull(existingObs, "The existing Obs object should not be null");
 		notNull(observation, "The Observation object should not be null");
 		
-		existingObs.setUuid(observation.getId());
 		observationStatusTranslator.toOpenmrsType(existingObs, observation.getStatus());
 		
 		existingObs.setEncounter(encounterReferenceTranslator.toOpenmrsType(observation.getEncounter()));
@@ -154,9 +154,12 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 			existingObs.addGroupMember(observationReferenceTranslator.toOpenmrsType(reference));
 		}
 		
+		observationValueTranslator.toOpenmrsType(existingObs, observation.getValue());
+		
 		if (observation.getInterpretation().size() > 0) {
 			interpretationTranslator.toOpenmrsType(existingObs, observation.getInterpretation().get(0));
 		}
+		
 		datetimeTranslator.toOpenmrsType(existingObs, observation.getEffectiveDateTimeType());
 		
 		if (observation.hasBasedOn()) {

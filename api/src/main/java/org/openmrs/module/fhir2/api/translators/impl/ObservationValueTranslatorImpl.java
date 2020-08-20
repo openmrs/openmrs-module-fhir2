@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
@@ -53,7 +54,13 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 		} else if (obs.getValueDatetime() != null) {
 			return new DateTimeType(obs.getValueDatetime());
 		} else if (obs.getValueNumeric() != null) {
-			return new Quantity(obs.getValueNumeric());
+			Quantity result = new Quantity(obs.getValueNumeric());
+			if (obs.getConcept() instanceof ConceptNumeric) {
+				ConceptNumeric cn = (ConceptNumeric) obs.getConcept();
+				result.setUnit(cn.getUnits());
+			}
+			
+			return result;
 		} else if (obs.getValueText() != null) {
 			return new StringType(obs.getValueText());
 		} else if (obs.getValueComplex() != null) {

@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
@@ -348,17 +349,6 @@ public class ObservationTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateIdToUuid() {
-		Observation observation = new Observation();
-		observation.setId(OBS_UUID);
-		
-		Obs result = observationTranslator.toOpenmrsType(new Obs(), observation);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), equalTo(OBS_UUID));
-	}
-	
-	@Test
 	public void toOpenmrsType_shouldTranslateCodeToConcept() {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -373,6 +363,18 @@ public class ObservationTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getConcept(), notNullValue());
 		assertThat(result.getConcept().getUuid(), equalTo(CONCEPT_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertValueToObsValue() {
+		Observation observation = new Observation();
+		observation.setValue(new Quantity(130));
+		
+		observationTranslator.toOpenmrsType(new Obs(), observation);
+		
+		ArgumentCaptor<Quantity> quantityCaptor = ArgumentCaptor.forClass(Quantity.class);
+		verify(observationValueTranslator).toOpenmrsType(any(Obs.class), quantityCaptor.capture());
+		assertThat(quantityCaptor.getValue().getValue(), equalTo(BigDecimal.valueOf(130)));
 	}
 	
 	@Test

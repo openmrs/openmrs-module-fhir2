@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.openmrs.Concept;
 import org.openmrs.ConceptDatatype;
+import org.openmrs.ConceptNumeric;
 import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
@@ -102,6 +103,21 @@ public class ObservationValueTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result, instanceOf(Quantity.class));
 		assertThat(((Quantity) result).getValue().doubleValue(), equalTo(130d));
+	}
+	
+	@Test
+	public void toFhirResource_shouldConvertObsWithNumericValueAndUnitsToQuantityWithUnits() {
+		ConceptNumeric cn = new ConceptNumeric();
+		cn.setUnits("cm");
+		obs.setValueNumeric(130d);
+		obs.setConcept(cn);
+		
+		Type result = obsValueTranslator.toFhirResource(obs);
+		
+		assertThat(result, notNullValue());
+		assertThat(result, instanceOf(Quantity.class));
+		assertThat(((Quantity) result).getValue().doubleValue(), equalTo(130d));
+		assertThat(((Quantity) result).getUnit(), equalTo("cm"));
 	}
 	
 	@Test

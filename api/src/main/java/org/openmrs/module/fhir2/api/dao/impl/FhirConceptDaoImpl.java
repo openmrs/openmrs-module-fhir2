@@ -30,10 +30,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	
 	@Override
 	public Concept get(@NotNull String uuid) {
-		if (conceptService.getConceptByUuid(uuid) != null) {
-			return conceptService.getConceptByUuid(uuid);
-		}
-		return null;
+		return conceptService.getConceptByUuid(uuid);
 	}
 	
 	@Override

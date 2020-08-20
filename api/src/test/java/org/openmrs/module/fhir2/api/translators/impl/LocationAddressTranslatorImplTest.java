@@ -340,63 +340,63 @@ public class LocationAddressTranslatorImplTest {
 	
 	@Test
 	public void addAddressComponent_shouldSetAddressesCorrectly() {
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address1", ADDRESS_1);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address1", ADDRESS_1);
 		assertThat(omrsLocation.getAddress1(), notNullValue());
 		assertThat(omrsLocation.getAddress1(), equalTo(ADDRESS_1));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address2", ADDRESS_2);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address2", ADDRESS_2);
 		assertThat(omrsLocation.getAddress2(), notNullValue());
 		assertThat(omrsLocation.getAddress2(), equalTo(ADDRESS_2));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address3", ADDRESS_3);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address3", ADDRESS_3);
 		assertThat(omrsLocation.getAddress3(), notNullValue());
 		assertThat(omrsLocation.getAddress3(), equalTo(ADDRESS_3));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address4", ADDRESS_4);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address4", ADDRESS_4);
 		assertThat(omrsLocation.getAddress4(), notNullValue());
 		assertThat(omrsLocation.getAddress4(), equalTo(ADDRESS_4));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address5", ADDRESS_5);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address5", ADDRESS_5);
 		assertThat(omrsLocation.getAddress5(), notNullValue());
 		assertThat(omrsLocation.getAddress5(), equalTo(ADDRESS_5));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address6", ADDRESS_6);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address6", ADDRESS_6);
 		assertThat(omrsLocation.getAddress6(), notNullValue());
 		assertThat(omrsLocation.getAddress6(), equalTo(ADDRESS_6));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address7", ADDRESS_7);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address7", ADDRESS_7);
 		assertThat(omrsLocation.getAddress7(), notNullValue());
 		assertThat(omrsLocation.getAddress7(), equalTo(ADDRESS_7));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address8", ADDRESS_8);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address8", ADDRESS_8);
 		assertThat(omrsLocation.getAddress8(), notNullValue());
 		assertThat(omrsLocation.getAddress8(), equalTo(ADDRESS_8));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address9", ADDRESS_9);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address9", ADDRESS_9);
 		assertThat(omrsLocation.getAddress9(), notNullValue());
 		assertThat(omrsLocation.getAddress9(), equalTo(ADDRESS_9));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address10", ADDRESS_10);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address10", ADDRESS_10);
 		assertThat(omrsLocation.getAddress10(), notNullValue());
 		assertThat(omrsLocation.getAddress10(), equalTo(ADDRESS_10));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address11", ADDRESS_11);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address11", ADDRESS_11);
 		assertThat(omrsLocation.getAddress11(), notNullValue());
 		assertThat(omrsLocation.getAddress11(), equalTo(ADDRESS_11));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address12", ADDRESS_12);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address12", ADDRESS_12);
 		assertThat(omrsLocation.getAddress12(), notNullValue());
 		assertThat(omrsLocation.getAddress12(), equalTo(ADDRESS_12));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address13", ADDRESS_13);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address13", ADDRESS_13);
 		assertThat(omrsLocation.getAddress13(), notNullValue());
 		assertThat(omrsLocation.getAddress13(), equalTo(ADDRESS_13));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address14", ADDRESS_14);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address14", ADDRESS_14);
 		assertThat(omrsLocation.getAddress14(), notNullValue());
 		assertThat(omrsLocation.getAddress14(), equalTo(ADDRESS_14));
 		
-		translator.addAddressComponent(omrsLocation, "https://fhir.openmrs.org/ext/address#address15", ADDRESS_15);
+		translator.addAddressComponent(omrsLocation, FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#address15", ADDRESS_15);
 		assertThat(omrsLocation.getAddress15(), notNullValue());
 		assertThat(omrsLocation.getAddress15(), equalTo(ADDRESS_15));
 		

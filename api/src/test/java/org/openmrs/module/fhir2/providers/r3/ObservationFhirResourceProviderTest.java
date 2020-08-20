@@ -26,7 +26,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -40,8 +39,6 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -215,51 +212,6 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
-	}
-	
-	@Test
-	public void updateObservation_shouldUpdateObservation() {
-		when(observationService.update(eq(OBSERVATION_UUID), any(org.hl7.fhir.r4.model.Observation.class)))
-		        .thenReturn(observation);
-		
-		MethodOutcome result = resourceProvider.updateObservationResource(new IdType().setValue(OBSERVATION_UUID),
-		    Observation30_40.convertObservation(observation));
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getResource(), notNullValue());
-		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updateObservation_shouldThrowInvalidRequestForUuidMismatch() {
-		when(observationService.update(eq(WRONG_OBSERVATION_UUID), any(org.hl7.fhir.r4.model.Observation.class)))
-		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID),
-		    Observation30_40.convertObservation(observation));
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updateObservation_shouldThrowInvalidRequestForMissingId() {
-		org.hl7.fhir.r4.model.Observation noIdObservation = new org.hl7.fhir.r4.model.Observation();
-		
-		when(observationService.update(eq(OBSERVATION_UUID), any(org.hl7.fhir.r4.model.Observation.class)))
-		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateObservationResource(new IdType().setValue(OBSERVATION_UUID),
-		    Observation30_40.convertObservation(noIdObservation));
-	}
-	
-	@Test(expected = MethodNotAllowedException.class)
-	public void updateObservation_shouldThrowMethodNotAllowedIfDoesNotExist() {
-		org.hl7.fhir.r4.model.Observation wrongObservation = new org.hl7.fhir.r4.model.Observation();
-		wrongObservation.setId(WRONG_OBSERVATION_UUID);
-		
-		when(observationService.update(eq(WRONG_OBSERVATION_UUID), any(org.hl7.fhir.r4.model.Observation.class)))
-		        .thenThrow(MethodNotAllowedException.class);
-		
-		resourceProvider.updateObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID),
-		    Observation30_40.convertObservation(wrongObservation));
 	}
 	
 	@Test

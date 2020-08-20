@@ -15,9 +15,8 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.Location;
-import org.openmrs.module.fhir2.api.FhirLocationService;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
-import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,10 +25,7 @@ import org.springframework.stereotype.Component;
 public class EncounterLocationTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterLocationTranslator {
 	
 	@Autowired
-	FhirLocationService locationService;
-	
-	@Autowired
-	LocationTranslator locationTranslator;
+	private FhirLocationDao locationDao;
 	
 	@Override
 	public Encounter.EncounterLocationComponent toFhirResource(Location location) {
@@ -37,16 +33,14 @@ public class EncounterLocationTranslatorImpl extends BaseReferenceHandlingTransl
 			return null;
 		}
 		
-		Encounter.EncounterLocationComponent locationComponent = new Encounter.EncounterLocationComponent();
-		locationComponent.setLocation(createLocationReference(location));
-		return locationComponent;
+		return new Encounter.EncounterLocationComponent().setLocation(createLocationReference(location));
 	}
 	
 	@Override
 	public Location toOpenmrsType(Encounter.EncounterLocationComponent encounterLocationComponent) {
 		notNull(encounterLocationComponent, "The EncounterLocationComponent object should not be null");
 		
-		String locationUuid = getReferenceId(encounterLocationComponent.getLocation());
-		return locationTranslator.toOpenmrsType(locationService.get(locationUuid));
+		return getReferenceId(encounterLocationComponent.getLocation()).map(locationUuid -> locationDao.get(locationUuid))
+		        .orElse(null);
 	}
 }

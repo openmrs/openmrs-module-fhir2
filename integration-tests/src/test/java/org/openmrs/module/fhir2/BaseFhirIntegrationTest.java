@@ -24,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -223,14 +222,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		@SneakyThrows
 		@Override
 		protected void describeMismatchSafely(MockHttpServletResponse item, Description mismatchDescription) {
-			FhirContext fhirContext = getFhirContext();
-			IParser parser = fhirContext.newJsonParser();
-			
-			IBaseOperationOutcome operationOutcome = null;
-			try {
-				operationOutcome = parser.parseResource(getOperationOutcomeClass(), item.getContentAsString());
-			}
-			catch (DataFormatException ignored) {}
+			IBaseOperationOutcome operationOutcome = readOperationOutcome(item);
 			
 			mismatchDescription.appendText("response with status code ").appendValue(item.getStatus());
 			

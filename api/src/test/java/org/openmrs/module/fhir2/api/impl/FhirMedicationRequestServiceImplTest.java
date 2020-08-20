@@ -71,7 +71,7 @@ public class FhirMedicationRequestServiceImplTest {
 	private FhirMedicationRequestDao dao;
 	
 	@Mock
-	FhirGlobalPropertyService globalPropertyService;
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
 	private SearchQuery<DrugOrder, MedicationRequest, FhirMedicationRequestDao, MedicationRequestTranslator> searchQuery;
