@@ -13,6 +13,7 @@ import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrBefore;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
@@ -53,6 +54,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -819,7 +821,8 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForObs_shouldReturnObsByMemberReference() {
-		ReferenceParam memberReference = new ReferenceParam().setValue(MEMBER_UUID).setChain("");
+		ReferenceAndListParam memberReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(MEMBER_UUID)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, memberReference);
@@ -838,10 +841,8 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void searchForObs_shouldReturnObsByMemberReferenceConceptId() {
-		ReferenceParam memberReference = new ReferenceParam();
-		
-		memberReference.setValue(VALUE_CONCEPT_ID);
-		memberReference.setChain(Observation.SP_CODE);
+		ReferenceAndListParam memberReference = new ReferenceAndListParam().addAnd(
+		    new ReferenceOrListParam().add(new ReferenceParam().setValue(VALUE_CONCEPT_ID).setChain(Observation.SP_CODE)));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, memberReference);
@@ -1382,6 +1383,99 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		    hasProperty("id", equalTo(returnedObservation.getHasMemberFirstRep().getReferenceElement().getIdPart())))));
 		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
 		    hasProperty("id", equalTo(returnedObservation.getEncounter().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForObs_shouldReverseIncludeObservationsToReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEMBER_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		Include include = new Include("Observation:has-member");
+		revIncludes.add(include);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(resultList.get(1), allOf(is(instanceOf(Observation.class)), hasProperty("hasMember",
+		    hasItem(hasProperty("referenceElement", hasProperty("idPart", equalTo(MEMBER_UUID)))))));
+	}
+	
+	@Test
+	public void searchForObs_shouldReverseIncludeObservationsToReturnedResultsR3() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEMBER_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		Include include = new Include("Observation:related-type");
+		revIncludes.add(include);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(resultList.get(1), allOf(is(instanceOf(Observation.class)), hasProperty("hasMember",
+		    hasItem(hasProperty("referenceElement", hasProperty("idPart", equalTo(MEMBER_UUID)))))));
+	}
+	
+	@Test
+	public void searchForObs_shouldReverseIncludeDiagnosticReportsToReturnedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEMBER_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		Include include = new Include("DiagnosticReport:result");
+		revIncludes.add(include);
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of the result list
+		assertThat(resultList.get(1), allOf(is(instanceOf(DiagnosticReport.class)),
+		    hasProperty("result", hasItem(hasProperty("referenceElement", hasProperty("idPart", equalTo(MEMBER_UUID)))))));
+	}
+	
+	@Test
+	public void searchForObs_shouldHandleMultipleReverseIncludes() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEMBER_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("DiagnosticReport:result"));
+		revIncludes.add(new Include("Observation:has-member"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(3)); // included resources (observation + diagnostic report) added as part of the result list
+		assertThat(resultList.subList(1, 3),
+		    everyItem(anyOf(
+		        allOf(is(instanceOf(DiagnosticReport.class)),
+		            hasProperty("result",
+		                hasItem(hasProperty("referenceElement", hasProperty("idPart", equalTo(MEMBER_UUID)))))),
+		        allOf(is(instanceOf(Observation.class)), hasProperty("hasMember",
+		            hasItem(hasProperty("referenceElement", hasProperty("idPart", equalTo(MEMBER_UUID)))))))));
 	}
 	
 	private IBundleProvider search(SearchParameterMap theParams) {

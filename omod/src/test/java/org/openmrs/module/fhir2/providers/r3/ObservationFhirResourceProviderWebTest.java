@@ -107,7 +107,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 	private ArgumentCaptor<TokenAndListParam> codeCaptor;
 	
 	@Captor
-	private ArgumentCaptor<ReferenceParam> memberCaptor;
+	private ArgumentCaptor<ReferenceAndListParam> memberCaptor;
 	
 	@Captor
 	private ArgumentCaptor<TokenAndListParam> valueCodeCaptor;
@@ -200,7 +200,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject=" + PATIENT_UUID);
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -214,7 +214,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject:Patient=" + PATIENT_UUID);
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -229,7 +229,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject.identifier=M4001-1");
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -244,7 +244,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject.identifier=M4001-1,ABS098,YT56RE,IU23O");
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -263,7 +263,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		    "/Observation?subject.identifier=M4001-1&subject.identifier=ABS098&subject.identifier=YT56RE&subject.identifier=IU23O");
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -279,7 +279,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject.name=Hannibal Lector");
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -294,7 +294,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject.given=Hannibal");
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -309,7 +309,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject.given=Hannibal,Smith");
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -325,7 +325,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject.given=Hannibal&subject.given=Smith");
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -341,7 +341,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject.family=Lector");
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -356,7 +356,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject.family=Lector,Rick,Tom");
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -372,7 +372,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?subject.family=Lector&subject.family=Rick&subject.family=Tom");
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -388,7 +388,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?encounter=c4aa5682-90cf-48e8-87c9-a6066ffd3a3f");
 		
 		verify(observationService).searchForObservations(encounterCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = encounterCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -402,7 +402,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?encounter=c4aa5682-90cf-48e8-87c9-a6066ffd3a3f,c4aa5682-90cf-48e8-87c9-auyt23ffd3a3f");
 		
 		verify(observationService).searchForObservations(encounterCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = encounterCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -418,7 +418,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		    "/Observation?encounter=c4aa5682-90cf-48e8-87c9-a6066ffd3a3f&encounter=c4aa5682-90cf-48e8-87c9-auyt23ffd3a3f");
 		
 		verify(observationService).searchForObservations(encounterCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = encounterCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -433,7 +433,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?code=5098");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(codeCaptor.getValue(), notNullValue());
 		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
 		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
@@ -450,7 +450,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?value-concept=5098");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), valueCodeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(valueCodeCaptor.getValue(), notNullValue());
 		assertThat(valueCodeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
 		assertThat(valueCodeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
@@ -467,7 +467,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?category=laboratory");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(codeCaptor.getValue(), notNullValue());
 		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
 		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
@@ -484,7 +484,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(codeCaptor.getValue(), notNullValue());
 		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
 		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
@@ -501,7 +501,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098," + URL_ENCODED_CIEL_URI + "|5001");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(codeCaptor.getValue(), notNullValue());
 		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
 		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
@@ -520,7 +520,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?value-concept=" + URL_ENCODED_CIEL_URI + "|5098," + URL_ENCODED_CIEL_URI + "|5001");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), valueCodeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		assertThat(valueCodeCaptor.getValue(), notNullValue());
 		assertThat(valueCodeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
 		assertThat(valueCodeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
@@ -539,7 +539,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098&subject:Patient=" + PATIENT_UUID);
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
 		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
@@ -566,11 +566,12 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098&related-type=" + MEMBER_UUID);
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), memberCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		// verify member parameter
 		assertThat(memberCaptor.getValue(), notNullValue());
-		assertThat(memberCaptor.getValue().getIdPart(), equalTo(MEMBER_UUID));
+		assertThat(memberCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getIdPart(),
+		    equalTo(MEMBER_UUID));
 		
 		// verify code parameter
 		assertThat(codeCaptor.getValue(), notNullValue());
@@ -589,11 +590,13 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?related-type.code=5098");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), memberCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(memberCaptor.getValue(), notNullValue());
-		assertThat(memberCaptor.getValue().getChain(), equalTo(Observation.SP_CODE));
-		assertThat(memberCaptor.getValue().getValue(), equalTo("5098"));
+		assertThat(memberCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
+		    equalTo(Observation.SP_CODE));
+		assertThat(memberCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		    equalTo("5098"));
 	}
 	
 	@Test
@@ -601,7 +604,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?value-date=ge1975-02-02");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), valueDateCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
@@ -616,7 +619,8 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?value-quantity=134.0");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    valueQuantityCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    valueQuantityCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull());
 		
 		assertThat(valueQuantityCaptor.getValue(), notNullValue());
 		assertThat(valueQuantityCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -629,7 +633,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?value-string=AFH56");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(stringAndListCaptor.getValue(), notNullValue());
 		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -642,7 +646,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?date=ge1975-02-02");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), dateCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		    isNull(), dateCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
@@ -657,7 +661,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri(String.format("/Observation?_id=%s", OBS_UUID));
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull());
 		
 		assertThat(codeCaptor.getValue(), notNullValue());
 		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -670,7 +674,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri(String.format("/Observation?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), dateCaptor.capture(), isNull(), isNull());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), dateCaptor.capture(), isNull(), isNull(), isNull());
 		
 		assertThat(dateCaptor.getValue(), notNullValue());
 		
@@ -688,7 +692,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?_include=Observation:encounter");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
 		
 		assertThat(includeArgumentCaptor.getValue(), notNullValue());
 		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
@@ -702,7 +706,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?_include=Observation:patient");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
 		
 		assertThat(includeArgumentCaptor.getValue(), notNullValue());
 		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
@@ -716,7 +720,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?_include=Observation:related-type");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
 		
 		assertThat(includeArgumentCaptor.getValue(), notNullValue());
 		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
@@ -730,7 +734,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verifyUri("/Observation?_include=Observation:related-type&_include=Observation:encounter");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
 		
 		assertThat(includeArgumentCaptor.getValue(), notNullValue());
 		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
@@ -743,11 +747,58 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		        hasProperty("paramType", equalTo(FhirConstants.OBSERVATION)))));
 	}
 	
+	@Test
+	public void shouldReverseIncludeObservationsWithReturnedObservations() throws Exception {
+		verifyUri("/Observation?_revinclude=Observation:related-type");
+		
+		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_RELATED_TYPE_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
+	}
+	
+	@Test
+	public void shouldReverseIncludeDiagnosticReportsWithReturnedObservations() throws Exception {
+		verifyUri("/Observation?_revinclude=DiagnosticReport:result");
+		
+		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_RESULT_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		    equalTo(FhirConstants.DIAGNOSTIC_REPORT));
+	}
+	
+	@Test
+	public void shouldHandleMultipleReverseIncludes() throws Exception {
+		verifyUri("/Observation?_revinclude=Observation:related-type&_revinclude=DiagnosticReport:result");
+		
+		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
+		
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_RELATED_TYPE_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.OBSERVATION)))));
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_RESULT_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.DIAGNOSTIC_REPORT)))));
+	}
+	
 	private void verifyUri(String uri) throws Exception {
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
 		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any(), any(), any()))
+		    any(), any(), any(), any(), any()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

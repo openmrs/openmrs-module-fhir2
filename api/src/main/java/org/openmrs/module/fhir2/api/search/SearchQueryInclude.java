@@ -129,6 +129,11 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				case FhirConstants.INCLUDE_PATIENT_PARAM:
 					bundleProvider = handlePatientReverseInclude(referenceParams, revIncludeParam.getParamType());
 					break;
+				case FhirConstants.INCLUDE_HAS_MEMBER_PARAM:
+				case FhirConstants.INCLUDE_RESULT_PARAM:
+				case FhirConstants.INCLUDE_RELATED_TYPE_PARAM:
+					bundleProvider = handleObservationReverseInclude(referenceParams, revIncludeParam.getParamType());
+					break;
 			}
 			
 			if (bundleProvider != null) {
@@ -196,11 +201,24 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
+	private IBundleProvider handleObservationReverseInclude(ReferenceAndListParam params, String targetType) {
+		switch (targetType) {
+			case FhirConstants.OBSERVATION:
+				return observationService.searchForObservations(null, null, params, null, null, null, null, null, null, null,
+				    null, null, null, null, null);
+			case FhirConstants.DIAGNOSTIC_REPORT:
+				return diagnosticReportService.searchForDiagnosticReports(null, null, null, null, params, null, null, null,
+				    null);
+		}
+		
+		return null;
+	}
+	
 	private IBundleProvider handleEncounterReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
 				return observationService.searchForObservations(params, null, null, null, null, null, null, null, null, null,
-				    null, null, null, null);
+				    null, null, null, null, null);
 			case FhirConstants.DIAGNOSTIC_REPORT:
 				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
 				    null);
@@ -229,7 +247,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
 				return observationService.searchForObservations(null, params, null, null, null, null, null, null, null, null,
-				    null, null, null, null);
+				    null, null, null, null, null);
 			case FhirConstants.DIAGNOSTIC_REPORT:
 				return diagnosticReportService.searchForDiagnosticReports(null, params, null, null, null, null, null, null,
 				    null);

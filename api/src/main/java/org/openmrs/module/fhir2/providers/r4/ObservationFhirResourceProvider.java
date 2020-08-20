@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -40,6 +39,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -107,7 +107,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	                Patient.SP_FAMILY,
 	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
 	        @OptionalParam(name = Observation.SP_HAS_MEMBER, chainWhitelist = { "",
-	                Observation.SP_CODE }, targetTypes = Observation.class) ReferenceParam hasMemberReference,
+	                Observation.SP_CODE }, targetTypes = Observation.class) ReferenceAndListParam hasMemberReference,
 	        @OptionalParam(name = Observation.SP_VALUE_CONCEPT) TokenAndListParam valueConcept,
 	        @OptionalParam(name = Observation.SP_VALUE_DATE) DateRangeParam valueDateParam,
 	        @OptionalParam(name = Observation.SP_VALUE_QUANTITY) QuantityAndListParam valueQuantityParam,
@@ -120,7 +120,9 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Observation.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientParam,
 	        @IncludeParam(allow = { "Observation:" + Observation.SP_ENCOUNTER, "Observation:" + Observation.SP_PATIENT,
-	                "Observation:" + Observation.SP_HAS_MEMBER }) HashSet<Include> includes) {
+	                "Observation:" + Observation.SP_HAS_MEMBER }) HashSet<Include> includes,
+	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_HAS_MEMBER,
+	                "DiagnosticReport:" + DiagnosticReport.SP_RESULT }) HashSet<Include> revIncludes) {
 		if (patientParam != null) {
 			patientReference = patientParam;
 		}
@@ -129,8 +131,12 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			includes = null;
 		}
 		
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
+		}
+		
 		return observationService.searchForObservations(encounterReference, patientReference, hasMemberReference,
 		    valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date, code, category, id, lastUpdated, sort,
-		    includes);
+		    includes, revIncludes);
 	}
 }

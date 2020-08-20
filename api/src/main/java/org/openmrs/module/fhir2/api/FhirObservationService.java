@@ -19,7 +19,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Observation;
@@ -30,8 +29,8 @@ public interface FhirObservationService extends FhirService<Observation> {
 	Observation get(@Nonnull String uuid);
 	
 	IBundleProvider searchForObservations(ReferenceAndListParam encounterReference, ReferenceAndListParam patientReference,
-	        ReferenceParam hasMemberReference, TokenAndListParam valueConcept, DateRangeParam valueDateParam,
+	        ReferenceAndListParam hasMemberReference, TokenAndListParam valueConcept, DateRangeParam valueDateParam,
 	        QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam, DateRangeParam date,
 	        TokenAndListParam code, TokenAndListParam category, TokenAndListParam id, DateRangeParam lastUpdated,
-	        SortSpec sort, HashSet<Include> includes);
+	        SortSpec sort, HashSet<Include> includes, HashSet<Include> revIncludes);
 }

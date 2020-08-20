@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
@@ -57,10 +56,10 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForObservations(ReferenceAndListParam encounterReference,
-	        ReferenceAndListParam patientReference, ReferenceParam hasMemberReference, TokenAndListParam valueConcept,
+	        ReferenceAndListParam patientReference, ReferenceAndListParam hasMemberReference, TokenAndListParam valueConcept,
 	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
 	        DateRangeParam date, TokenAndListParam code, TokenAndListParam category, TokenAndListParam id,
-	        DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes) {
+	        DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes, HashSet<Include> revIncludes) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
@@ -75,7 +74,8 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "valueDatetime", valueDateParam)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sort);
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes).setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
