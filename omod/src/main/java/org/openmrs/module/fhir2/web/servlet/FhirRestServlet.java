@@ -69,10 +69,10 @@ public class FhirRestServlet extends RestfulServer {
 		String[] narrativePropertiesFiles;
 		if (narrativesOverridePropertyFile != null) {
 			narrativePropertiesFiles = new String[] { narrativesOverridePropertyFile,
-			        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE, FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE };
+			        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE, FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE };
 		} else {
-			narrativePropertiesFiles = new String[] { FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE,
-			        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE };
+			narrativePropertiesFiles = new String[] { FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE,
+			        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE };
 		}
 		
 		getFhirContext().setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(narrativePropertiesFiles));

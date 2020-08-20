@@ -1,0 +1,118 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <table class="hapiPropertyTable" th:if="${not resource.empty}">
+        <tbody>
+        <tr th:if="${resource.id}">
+            <td>Id:</td>
+            <td th:text="${resource.id}"></td>
+        </tr>
+        <th:block th:if="${fhirVersion} eq 'R4'">
+            <tr th:if="${not resource.identifier.empty}">
+                <td>Identifier:</td>
+                <td>
+                    <th:block th:each="identifier: ${resource.identifier}">
+                        <div th:narrative="${identifier}"></div>
+                    </th:block>
+                </td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.code.empty}">
+            <td>Code:</td>
+            <td th:narrative="${resource.code}"></td>
+        </tr>
+        <tr th:if="${resource.status}">
+            <td>Status:</td>
+            <td th:text="${resource.status}"></td>
+        </tr>
+        <tr th:if="${not resource.manufacturer.empty}">
+            <td>Manufacturer:</td>
+            <td th:narrative="${resource.manufacturer}"></td>
+        </tr>
+        <tr th:if="${not resource.form.empty}">
+            <td>Form:</td>
+            <td th:narrative="${resource.form}"></td>
+        </tr>
+        <th:block th:if="${fhirVersion} eq 'R4'">
+            <tr th:if="${not resource.amount.empty}">
+                <td>Amount:</td>
+                <td th:narrative="${resource.amount}"></td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.ingredient.empty}">
+            <td>Ingredients:</td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th>Item</th>
+                        <th>Is Active</th>
+                        <th:block th:if="${fhirVersion} eq 'R4'">
+                            <th>Strength</th>
+                        </th:block>
+                    </tr>
+                    <tr th:each="ingredient, ingredientItr: ${resource.ingredient}">
+                        <td th:text="${ingredientItr.count}"></td>
+                        <td th:narrative="${ingredient.item}"></td>
+                        <td>
+                            <th:block th:if="${ingredient.isActive}" th:text="${ingredient.isActive}"></th:block>
+                        </td>
+                        <th:block th:if="${fhirVersion} eq 'R4'">
+                            <td>
+                                <th:block th:if="${ingredient.strength}"
+                                          th:narrative="${ingredient.strength}"></th:block>
+                            </td>
+                        </th:block>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <th:block th:if="${fhirVersion} eq 'R4'">
+            <tr th:if="${not resource.batch.empty}">
+                <td>Batches:</td>
+                <td>
+                    <table class="subPropertyTable">
+                        <tbody>
+                        <tr>
+                            <th>-</th>
+                            <th>Lot Number</th>
+                            <th>Expiration Date</th>
+                        </tr>
+                        <tr th:each="batch, batchItr: ${resource.batch}">
+                            <td th:text="${batchItr.count}"></td>
+                            <td>
+                                <th:block th:if="${batch.lotNumber}" th:text="${batch.lotNumber}"></th:block>
+                            </td>
+                            <td>
+                                <th:block th:if="${batch.expirationDate}"
+                                          th:text="${#dates.format(batch.expirationDate,'dd/MM/yyyy')}"></th:block>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </th:block>
+        </tbody>
+    </table>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->

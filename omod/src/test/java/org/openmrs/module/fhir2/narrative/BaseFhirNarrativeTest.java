@@ -37,8 +37,8 @@ public class BaseFhirNarrativeTest {
 	
 	@Before
 	public void setup() {
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE,
-		        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
+		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE,
+		        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE));
 		parser = ctx.newJsonParser();
 	}
 	
