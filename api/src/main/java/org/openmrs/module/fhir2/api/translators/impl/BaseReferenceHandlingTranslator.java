@@ -20,9 +20,9 @@ import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Drug;
-import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Obs;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -40,7 +40,7 @@ public abstract class BaseReferenceHandlingTranslator {
 	
 	public static final String TEST_ORDER_TYPE_UUID = "52a447d3-a64a-11e3-9aeb-50e549534c5e";
 	
-	protected Reference createEncounterReference(@NotNull Encounter encounter) {
+	protected Reference createEncounterReference(@NotNull OpenmrsObject encounter) {
 		if (encounter instanceof HibernateProxy) {
 			encounter = HibernateUtil.getRealObjectFromProxy(encounter);
 		}
