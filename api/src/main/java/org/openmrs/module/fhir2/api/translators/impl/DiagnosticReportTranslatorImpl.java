@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslator {
 	
 	@Autowired
-	private EncounterReferenceTranslator encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;

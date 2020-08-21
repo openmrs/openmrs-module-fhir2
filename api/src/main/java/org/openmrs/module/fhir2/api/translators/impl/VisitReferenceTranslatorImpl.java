@@ -12,40 +12,40 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
-import org.openmrs.Encounter;
+import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
+import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterReferenceTranslator<Encounter> {
+public class VisitReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterReferenceTranslator<Visit> {
 	
 	@Autowired
-	private FhirEncounterDao encounterDao;
+	private FhirVisitDao dao;
 	
 	@Override
-	public Reference toFhirResource(Encounter encounter) {
-		if (encounter == null) {
+	public Reference toFhirResource(Visit visit) {
+		if (visit == null) {
 			return null;
 		}
 		
-		return createEncounterReference(encounter);
+		return createEncounterReference(visit);
 	}
 	
 	@Override
-	public Encounter toOpenmrsType(Reference encounter) {
-		if (encounter == null) {
+	public Visit toOpenmrsType(Reference reference) {
+		if (reference == null) {
 			return null;
 		}
 		
-		if (getReferenceType(encounter).map(ref -> !ref.equals(FhirConstants.ENCOUNTER)).orElse(true)) {
+		if (getReferenceType(reference).map(ref -> !ref.equals(FhirConstants.ENCOUNTER)).orElse(true)) {
 			throw new IllegalArgumentException(
-			        "Reference must be to an Encounter not a " + getReferenceType(encounter).orElse(""));
+			        "Reference must be to an Encounter not a " + getReferenceType(reference).orElse(""));
 		}
 		
-		return getReferenceId(encounter).map(uuid -> encounterDao.get(uuid)).orElse(null);
+		return getReferenceId(reference).map(uuid -> dao.get(uuid)).orElse(null);
 	}
 }
