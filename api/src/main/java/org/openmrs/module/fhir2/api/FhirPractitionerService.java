@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import java.util.HashSet;
+
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -19,6 +22,6 @@ public interface FhirPractitionerService extends FhirService<Practitioner> {
 	
 	IBundleProvider searchForPractitioners(TokenAndListParam identifier, StringAndListParam name, StringAndListParam given,
 	        StringAndListParam family, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
-	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated);
+	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated, HashSet<Include> revIncludes);
 	
 }

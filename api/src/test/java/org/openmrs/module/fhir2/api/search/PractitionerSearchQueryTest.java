@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
@@ -17,14 +19,17 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.openmrs.module.fhir2.FhirConstants.NAME_PROPERTY;
 import static org.openmrs.module.fhir2.FhirConstants.NAME_SEARCH_HANDLER;
 
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -34,7 +39,10 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Provider;
@@ -551,6 +559,119 @@ public class PractitionerSearchQueryTest extends BaseModuleContextSensitiveTest 
 		
 		assertThat(results, notNullValue());
 		assertThat(resultList, empty());
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldAddEncountersToRelatedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("Encounter:participant"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(5))); // included resources added as part of result list
+		assertThat(resultList.subList(1, 5),
+		    everyItem(allOf(is(instanceOf(Encounter.class)), hasProperty("participantFirstRep", hasProperty("individual",
+		        hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID))))))));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldAddMedicationRequestsToRelatedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("MedicationRequest:requester"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(11))); // included resources added as part of result list
+		assertThat(resultList.subList(1, 11), everyItem(allOf(is(instanceOf(MedicationRequest.class)),
+		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID)))))));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldAddServiceRequestsToRelatedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("ServiceRequest:requester"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(4))); // included resources added as part of result list
+		assertThat(resultList.subList(1, 4), everyItem(allOf(is(instanceOf(ServiceRequest.class)),
+		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID)))))));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldAddProcedureRequestsToRelatedResults() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("ProcedureRequest:requester"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(4))); // included resources added as part of result list
+		assertThat(resultList.subList(1, 4), everyItem(allOf(is(instanceOf(ServiceRequest.class)),
+		    hasProperty("requester", hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID)))))));
+	}
+	
+	@Test
+	public void searchForPractitioners_shouldHandleMultipleReverseIncludes() {
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
+		HashSet<Include> revIncludes = new HashSet<>();
+		revIncludes.add(new Include("ServiceRequest:requester"));
+		revIncludes.add(new Include("Encounter:participant"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(8))); // included resources (4 encounters + 3 service requests) added as part of result list
+		assertThat(resultList.subList(1, 8),
+		    everyItem(anyOf(
+		        allOf(is(instanceOf(Encounter.class)),
+		            hasProperty("participantFirstRep",
+		                hasProperty("individual",
+		                    hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID)))))),
+		        allOf(is(instanceOf(ServiceRequest.class)), hasProperty("requester",
+		            hasProperty("referenceElement", hasProperty("idPart", equalTo(PRACTITIONER_UUID))))))));
 	}
 	
 }

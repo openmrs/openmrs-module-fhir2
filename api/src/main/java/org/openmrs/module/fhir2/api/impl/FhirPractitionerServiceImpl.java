@@ -11,29 +11,30 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
 
-import java.util.List;
+import java.util.HashSet;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.TwoSearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,9 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	
 	@Autowired
 	private SearchQueryInclude<Practitioner> searchQueryInclude;
+	
+	@Autowired
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Autowired
 	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>, SearchQueryInclude<Practitioner>> searchQuery;
@@ -84,7 +88,8 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	@Override
 	public IBundleProvider searchForPractitioners(TokenAndListParam identifier, StringAndListParam name,
 	        StringAndListParam given, StringAndListParam family, StringAndListParam city, StringAndListParam state,
-	        StringAndListParam postalCode, StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated) {
+	        StringAndListParam postalCode, StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated,
+	        HashSet<Include> revIncludes) {
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier)
 		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.NAME_PROPERTY, name)
@@ -95,20 +100,14 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, postalCode)
 		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
 		
 		IBundleProvider providerBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 		IBundleProvider userBundle = userService.searchForUsers(theParams);
 		
 		if (!providerBundle.isEmpty() && !userBundle.isEmpty()) {
-			final Integer providerBundleSize = providerBundle.size();
-			List<IBaseResource> theResource = providerBundle.getResources(0,
-			    providerBundleSize == null ? Integer.MAX_VALUE : providerBundleSize);
-			
-			final Integer userBundleSize = userBundle.size();
-			theResource.addAll(userBundle.getResources(0, userBundleSize == null ? Integer.MAX_VALUE : userBundleSize));
-			
-			return new SimpleBundleProvider(theResource);
+			return new TwoSearchQueryBundleProvider(providerBundle, userBundle, globalPropertyService);
 		} else if (providerBundle.isEmpty() && !userBundle.isEmpty()) {
 			return userBundle;
 		}

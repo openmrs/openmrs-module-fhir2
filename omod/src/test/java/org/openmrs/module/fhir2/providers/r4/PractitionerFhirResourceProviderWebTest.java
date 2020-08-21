@@ -10,9 +10,12 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -30,8 +33,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Objects;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -107,6 +112,9 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
 	
+	@Captor
+	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	
 	@Before
 	@Override
 	public void setup() throws ServletException {
@@ -141,7 +149,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		verifyUri(String.format("/Practitioner?name=%s", NAME));
 		
 		verify(practitionerService).searchForPractitioners(any(), stringAndListParamArgumentCaptor.capture(), any(), any(),
-		    any(), any(), any(), any(), any(), any());
+		    any(), any(), any(), any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -155,7 +163,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		verifyUri(String.format("/Practitioner?identifier=%s", PRACTITIONER_IDENTIFIER));
 		
 		verify(practitionerService).searchForPractitioners(tokenAndListParamArgumentCaptor.capture(), any(), any(), any(),
-		    any(), any(), any(), any(), any(), any());
+		    any(), any(), any(), any(), any(), any(), any());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -169,7 +177,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		verifyUri(String.format("/Practitioner?given=%s", PRACTITIONER_GIVEN_NAME));
 		
 		verify(practitionerService).searchForPractitioners(any(), any(), stringAndListParamArgumentCaptor.capture(), any(),
-		    any(), any(), any(), any(), any(), any());
+		    any(), any(), any(), any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -183,7 +191,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		verifyUri(String.format("/Practitioner?family=%s", PRACTITIONER_FAMILY_NAME));
 		
 		verify(practitionerService).searchForPractitioners(any(), any(), any(), stringAndListParamArgumentCaptor.capture(),
-		    any(), any(), any(), any(), any(), any());
+		    any(), any(), any(), any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -197,7 +205,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		verifyUri(String.format("/Practitioner?address-city=%s", CITY));
 		
 		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(),
-		    stringAndListParamArgumentCaptor.capture(), any(), any(), any(), any(), any());
+		    stringAndListParamArgumentCaptor.capture(), any(), any(), any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -211,7 +219,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		verifyUri(String.format("/Practitioner?address-state=%s", STATE));
 		
 		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(),
-		    stringAndListParamArgumentCaptor.capture(), any(), any(), any(), any());
+		    stringAndListParamArgumentCaptor.capture(), any(), any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -225,7 +233,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		verifyUri(String.format("/Practitioner?address-postalcode=%s", POSTAL_CODE));
 		
 		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(),
-		    stringAndListParamArgumentCaptor.capture(), any(), any(), any());
+		    stringAndListParamArgumentCaptor.capture(), any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -239,7 +247,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		verifyUri(String.format("/Practitioner?address-country=%s", COUNTRY));
 		
 		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(), any(),
-		    stringAndListParamArgumentCaptor.capture(), any(), any());
+		    stringAndListParamArgumentCaptor.capture(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -253,7 +261,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		verifyUri(String.format("/Practitioner?_id=%s", PRACTITIONER_UUID));
 		
 		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(), any(), any(),
-		    tokenAndListParamArgumentCaptor.capture(), any());
+		    tokenAndListParamArgumentCaptor.capture(), any(), any());
 		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -267,7 +275,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		verifyUri(String.format("/Practitioner?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
 		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    dateRangeParamArgumentCaptor.capture());
+		    dateRangeParamArgumentCaptor.capture(), any());
 		
 		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
 		
@@ -281,11 +289,72 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	}
 	
 	@Test
+	public void findPractitioners_shouldReverseIncludeEncounters() throws Exception {
+		verifyUri("/Practitioner?_revinclude=Encounter:participant");
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		    any(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_PARTICIPANT_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.ENCOUNTER));
+	}
+	
+	@Test
+	public void findPractitioners_shouldReverseIncludeMedicationRequests() throws Exception {
+		verifyUri("/Practitioner?_revinclude=MedicationRequest:requester");
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		    any(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_REQUESTER_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		    equalTo(FhirConstants.MEDICATION_REQUEST));
+	}
+	
+	@Test
+	public void findPractitioners_shouldReverseIncludeServiceRequests() throws Exception {
+		verifyUri("/Practitioner?_revinclude=ServiceRequest:requester");
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		    any(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
+		    equalTo(FhirConstants.INCLUDE_REQUESTER_PARAM));
+		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
+		    equalTo(FhirConstants.SERVICE_REQUEST));
+	}
+	
+	@Test
+	public void findPractitioners_shouldHandleMultipleReverseIncludes() throws Exception {
+		verifyUri("/Practitioner?_revinclude=ServiceRequest:requester&_revinclude=Encounter:participant");
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		    any(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_REQUESTER_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.SERVICE_REQUEST)))));
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PARTICIPANT_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.ENCOUNTER)))));
+	}
+	
+	@Test
 	public void findPractitioners_shouldHandleComplexQuery() throws Exception {
 		verifyUri(String.format("/Practitioner?identifier=%s&name=%s", PRACTITIONER_IDENTIFIER, NAME));
 		
 		verify(practitionerService).searchForPractitioners(tokenAndListParamArgumentCaptor.capture(),
-		    stringAndListParamArgumentCaptor.capture(), any(), any(), any(), any(), any(), any(), any(), any());
+		    stringAndListParamArgumentCaptor.capture(), any(), any(), any(), any(), any(), any(), any(), any(), any());
 		
 		assertThat(stringAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(stringAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
@@ -370,9 +439,8 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	private void verifyUri(String uri) throws Exception {
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
-		when(
-		    practitionerService.searchForPractitioners(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(practitioner), 10, 1));
+		when(practitionerService.searchForPractitioners(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(practitioner), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
