@@ -210,7 +210,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(identifier, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, identifier, null, null, null, null, null,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -228,7 +228,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(identifier, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, identifier, null, null, null, null, null,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -244,7 +244,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, givenName, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, givenName, null, null, null, null,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -261,7 +261,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, givenName, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, givenName, null, null, null, null,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -277,7 +277,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, familyName, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, familyName, null, null, null,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -294,7 +294,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, familyName, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, familyName, null, null, null,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -310,7 +310,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), isNull(), isNull())).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, city, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, city, null, null, null,
 		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -327,7 +327,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, city, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, city, null, null, null,
 		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -343,7 +343,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), isNull(), isNull())).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, state, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, state, null, null,
 		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -360,7 +360,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, state, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, state, null, null,
 		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -376,7 +376,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    argThat(is(postalCode)), isNull(), isNull(), isNull())).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, postalCode,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, postalCode,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -393,7 +393,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    argThat(is(postalCode)), isNull(), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, postalCode,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, postalCode,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -409,8 +409,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    argThat(is(country)), isNull(), isNull())).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null,
-		    country, null, null);
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, country,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -426,8 +426,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    argThat(is(country)), isNull(), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null,
-		    country, null, null);
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, country,
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -442,7 +442,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), argThat(is(uuid)), isNull())).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, null,
 		    uuid, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -459,7 +459,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), argThat(is(uuid)), isNull()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, null,
 		    uuid, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -475,7 +475,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), argThat(is(lastUpdated)))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, null,
 		    null, lastUpdated);
 		
 		List<IBaseResource> resultList = get(results);
@@ -493,7 +493,7 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		    isNull(), isNull(), argThat(is(lastUpdated))))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = practitionerService.searchForPractitioners(null, null, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, null,
 		    null, lastUpdated);
 		
 		List<IBaseResource> resultList = get(results);
