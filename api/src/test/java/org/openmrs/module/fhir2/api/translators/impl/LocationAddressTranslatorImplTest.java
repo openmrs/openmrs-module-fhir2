@@ -125,7 +125,9 @@ public class LocationAddressTranslatorImplTest {
 	public void shouldTranslateAddressCityToLocationCity() {
 		org.hl7.fhir.r4.model.Address address = new Address();
 		address.setCity(CITY);
-		omrsLocation = translator.toOpenmrsType(address);
+		
+		omrsLocation = translator.toOpenmrsType(new Location(), address);
+		
 		assertThat(omrsLocation, notNullValue());
 		assertThat(omrsLocation.getCityVillage(), notNullValue());
 		assertThat(omrsLocation.getCityVillage(), equalTo(CITY));
@@ -135,7 +137,9 @@ public class LocationAddressTranslatorImplTest {
 	public void shouldTranslateAddressStateToLocationState() {
 		org.hl7.fhir.r4.model.Address address = new Address();
 		address.setState(STATE_PROVINCE);
-		omrsLocation = translator.toOpenmrsType(address);
+		
+		omrsLocation = translator.toOpenmrsType(new Location(), address);
+		
 		assertThat(omrsLocation, notNullValue());
 		assertThat(omrsLocation.getStateProvince(), notNullValue());
 		assertThat(omrsLocation.getStateProvince(), equalTo(STATE_PROVINCE));
@@ -145,7 +149,9 @@ public class LocationAddressTranslatorImplTest {
 	public void shouldTranslateAddressCountryToLocationCountry() {
 		org.hl7.fhir.r4.model.Address address = new Address();
 		address.setCountry(COUNTRY);
-		omrsLocation = translator.toOpenmrsType(address);
+		
+		omrsLocation = translator.toOpenmrsType(new Location(), address);
+		
 		assertThat(omrsLocation, notNullValue());
 		assertThat(omrsLocation.getCountry(), notNullValue());
 		assertThat(omrsLocation.getCountry(), equalTo(COUNTRY));
@@ -155,7 +161,9 @@ public class LocationAddressTranslatorImplTest {
 	public void shouldTranslateAddressPostalCodeToLocationPostalCode() {
 		org.hl7.fhir.r4.model.Address address = new Address();
 		address.setPostalCode(POSTAL_CODE);
-		omrsLocation = translator.toOpenmrsType(address);
+		
+		omrsLocation = translator.toOpenmrsType(new Location(), address);
+		
 		assertThat(omrsLocation, notNullValue());
 		assertThat(omrsLocation.getPostalCode(), notNullValue());
 		assertThat(omrsLocation.getPostalCode(), equalTo(POSTAL_CODE));

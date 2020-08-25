@@ -44,8 +44,8 @@ public class AllergyIntoleranceCriticalityTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateNULLSeverityToNULLCriticality() {
+	public void shouldTranslateNULLSeverityToUNABLETOACCESSCriticality() {
 		assertThat(criticalityTranslator.toFhirResource(AllergyIntolerance.AllergyIntoleranceSeverity.NULL),
-		    equalTo(AllergyIntolerance.AllergyIntoleranceCriticality.NULL));
+		    equalTo(AllergyIntolerance.AllergyIntoleranceCriticality.UNABLETOASSESS));
 	}
 }

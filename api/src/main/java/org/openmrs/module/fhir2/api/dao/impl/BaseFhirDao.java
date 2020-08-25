@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -30,10 +31,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
+import org.hibernate.proxy.HibernateProxy;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
@@ -96,7 +99,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			}
 		}
 		
-		return result;
+		return deproxyObject(result);
 	}
 	
 	@Override
@@ -114,6 +117,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		}
 		
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
+		
 		return newEntry;
 	}
 	
@@ -156,6 +160,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		
 		criteria.add(propertyIn("uuid", detachedCriteria));
 		criteria.setProjection(Projections.groupProperty("uuid"));
+		
 		return criteria.list();
 	}
 	
@@ -170,7 +175,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		
 		results.sort(Comparator.comparingInt(r -> selectedResources.indexOf(r.getUuid())));
 		
-		return results;
+		return results.stream().map(this::deproxyObject).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -261,5 +266,16 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 */
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		
+	}
+	
+	protected T deproxyObject(T result) {
+		if (result instanceof HibernateProxy) {
+			Hibernate.initialize(result);
+			@SuppressWarnings("unchecked")
+			T theResult = (T) ((HibernateProxy) result).getHibernateLazyInitializer().getImplementation();
+			return theResult;
+		}
+		
+		return result;
 	}
 }

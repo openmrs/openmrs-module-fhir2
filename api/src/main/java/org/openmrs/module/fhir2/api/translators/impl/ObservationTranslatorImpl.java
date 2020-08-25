@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Concept;
 import org.openmrs.ConceptNumeric;
+import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
@@ -60,7 +61,7 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	private ObservationCategoryTranslator categoryTranslator;
 	
 	@Autowired
-	private EncounterReferenceTranslator encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -106,7 +107,9 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		if (observation.isObsGrouping()) {
 			for (Obs groupObs : observation.getGroupMembers()) {
-				obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
+				if (!groupObs.getVoided()) {
+					obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
+				}
 			}
 		}
 		

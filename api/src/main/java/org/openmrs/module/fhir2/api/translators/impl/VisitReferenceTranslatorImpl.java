@@ -12,38 +12,40 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
-import org.openmrs.Provider;
+import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
-import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
+import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class PractitionerReferenceTranslatorProviderImpl extends BaseReferenceHandlingTranslator implements PractitionerReferenceTranslator<Provider> {
+public class VisitReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterReferenceTranslator<Visit> {
 	
 	@Autowired
-	private FhirPractitionerDao practitionerDao;
+	private FhirVisitDao dao;
 	
 	@Override
-	public Reference toFhirResource(Provider provider) {
-		if (provider == null) {
+	public Reference toFhirResource(Visit visit) {
+		if (visit == null) {
 			return null;
 		}
-		return createPractitionerReference(provider);
+		
+		return createEncounterReference(visit);
 	}
 	
 	@Override
-	public Provider toOpenmrsType(Reference reference) {
+	public Visit toOpenmrsType(Reference reference) {
 		if (reference == null) {
 			return null;
 		}
 		
-		if (getReferenceType(reference).map(ref -> !ref.equals(FhirConstants.PRACTITIONER)).orElse(false)) {
-			throw new IllegalArgumentException("Reference must be to an Provider not a " + getReferenceType(reference));
+		if (getReferenceType(reference).map(ref -> !ref.equals(FhirConstants.ENCOUNTER)).orElse(true)) {
+			throw new IllegalArgumentException(
+			        "Reference must be to an Encounter not a " + getReferenceType(reference).orElse(""));
 		}
 		
-		return getReferenceId(reference).map(uuid -> practitionerDao.get(uuid)).orElse(null);
+		return getReferenceId(reference).map(uuid -> dao.get(uuid)).orElse(null);
 	}
 }

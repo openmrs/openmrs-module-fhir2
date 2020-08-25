@@ -81,7 +81,7 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.serviceType.empty}">
                 <td th:text="(#{narrative.propertyName.serviceType} ?: 'Service Type') + ':'"></td>
                 <td th:narrative="${resource.serviceType}"></td>
@@ -104,7 +104,7 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.basedOn.empty}">
                 <td th:text="(#{narrative.propertyName.basedOn} ?: 'Based On') + ':'"></td>
                 <td>
@@ -115,7 +115,7 @@ a browser.
                 </td>
             </tr>
         </th:block>
-        <th:block th:unless="${fhirVersion} eq 'R4'">
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.incomingReferral.empty}">
                 <td th:text="(#{narrative.propertyName.incomingReferral} ?: 'Incoming Referral') + ':'"></td>
                 <td>
@@ -177,7 +177,7 @@ a browser.
             <td th:text="(#{narrative.propertyName.length} ?: 'Length') + ':'"></td>
             <td th:narrative="${resource.length}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.reasonCode.empty}">
                 <td th:text="(#{narrative.propertyName.reasonCode} ?: 'Reason Code') + ':'"></td>
                 <td>
@@ -205,7 +205,7 @@ a browser.
                     <tr>
                         <th>-</th>
                         <th th:text="(#{narrative.propertyName.condition} ?: 'Condition')"></th>
-                        <th:block th:if="${fhirVersion} eq 'R4'">
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                             <th th:text="(#{narrative.propertyName.use} ?: 'Use')"></th>
                         </th:block>
                         <th th:text="(#{narrative.propertyName.rank} ?: 'Rank')"></th>
@@ -213,7 +213,7 @@ a browser.
                     <tr th:each="diagnosis, diagnosisItr: ${resource.diagnosis}">
                         <td th:text="${diagnosisItr.count}"></td>
                         <td th:narrative="${diagnosis.condition}"></td>
-                        <th:block th:if="${fhirVersion} eq 'R4'">
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                             <td>
                                 <th:block th:if="${diagnosis.use}" th:narrative="${diagnosis.use}"></th:block>
                             </td>
@@ -304,7 +304,7 @@ a browser.
                         <th>-</th>
                         <th th:text="(#{narrative.propertyName.location} ?: 'Location')"></th>
                         <th th:text="(#{narrative.propertyName.status} ?: 'Status')"></th>
-                        <th:block th:if="${fhirVersion} eq 'R4'">
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                             <th th:text="(#{narrative.propertyName.physicalType} ?: 'Physical Type')"></th>
                         </th:block>
                         <th th:text="(#{narrative.propertyName.period} ?: 'Period')"></th>
@@ -315,7 +315,7 @@ a browser.
                         <td>
                             <th:block th:if="${location.status}" th:text="${location.status}"></th:block>
                         </td>
-                        <th:block th:if="${fhirVersion} eq 'R4'">
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                             <td>
                                 <th:block th:if="${location.physicalType}"
                                           th:narrative="${location.physicalType}"></th:block>

@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslator {
 	
 	@Autowired
-	private EncounterReferenceTranslator encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -133,12 +133,13 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		
 		// DiagnosticReport.result
 		for (Obs obs : obsGroup.getGroupMembers()) {
-			diagnosticReport.addResult(observationReferenceTranslator.toFhirResource(obs));
+			if (!obs.getVoided()) {
+				diagnosticReport.addResult(observationReferenceTranslator.toFhirResource(obs));
+			}
 		}
 	}
 	
 	private void setOpenmrsFields(DiagnosticReport diagnosticReport, Obs translatedObs) {
-		
 		// DiagnosticReport.id
 		if (translatedObs.getUuid() != null) {
 			translatedObs.setUuid(diagnosticReport.getId());
@@ -167,10 +168,5 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		for (Reference observationReference : diagnosticReport.getResult()) {
 			translatedObs.addGroupMember(observationReferenceTranslator.toOpenmrsType(observationReference));
 		}
-		
-		// Tag as diagnostic report
-		// TODO: distinguish between DianosticReport and Observation mapping for a given Obs
-		translatedObs.setComment("mapped DiagnosticReport");
-		
 	}
 }

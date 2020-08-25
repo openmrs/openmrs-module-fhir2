@@ -84,7 +84,7 @@ a browser.
             <td th:text="(#{narrative.propertyName.period} ?: 'Period') + ':'"></td>
             <td th:narrative="${resource.period}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.communication.empty}">
                 <td th:text="(#{narrative.propertyName.communication} ?: 'Communication') + ':'"></td>
                 <td>

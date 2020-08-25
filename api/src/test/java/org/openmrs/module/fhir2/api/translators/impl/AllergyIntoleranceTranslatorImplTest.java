@@ -512,20 +512,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateAllergySubstanceTextToNonCodedAllergen() {
-		AllergyIntolerance allergy = new AllergyIntolerance();
-		
-		CodeableConcept code = new CodeableConcept().addCoding(new Coding("", "", ""));
-		code.setText("Non coded allergen");
-		allergy.setCode(code);
-		omrsAllergy.setAllergen(null);
-		
-		allergyIntoleranceTranslator.toOpenmrsType(omrsAllergy, allergy);
-		assertThat(omrsAllergy, notNullValue());
-		assertThat(omrsAllergy.getAllergen().getNonCodedAllergen(), equalTo("Non coded allergen"));
-	}
-	
-	@Test
 	public void toOpenmrsType_shouldReturnNullReactionIfFhirReactionIsNull() {
 		AllergyIntolerance allergy = new AllergyIntolerance();
 		allergy.setReaction(null);

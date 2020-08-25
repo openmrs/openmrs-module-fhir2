@@ -36,7 +36,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<EncounterFhirResourceProvider, Encounter> {
 	
-	private static final String ENCOUNTER_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml";
+	private static final String[] ENCOUNTER_DATA_XML = {
+	        "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml",
+	        "org/openmrs/module/fhir2/api/dao/impl/FhirVisitDaoImplTest_initial_data.xml" };
 	
 	private static final String ENCOUNTER_UUID = "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9";
 	
@@ -48,6 +50,10 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	
 	private static final String PATIENT_GIVEN_NAME = "John";
 	
+	private static final String VISIT_UUID = "65aefd46-973d-4526-89de-93842c80ad11";
+	
+	private static final String BAD_VISIT_UUID = "78aefd46-883d-4526-00de-93842c80ad86";
+	
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
 	private EncounterFhirResourceProvider resourceProvider;
@@ -56,7 +62,10 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	@Override
 	public void setup() throws Exception {
 		super.setup();
-		executeDataSet(ENCOUNTER_DATA_XML);
+		
+		for (String encounterData : ENCOUNTER_DATA_XML) {
+			executeDataSet(encounterData);
+		}
 	}
 	
 	@Test
@@ -75,8 +84,32 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
+	public void shouldReturnExistingEncounterFromOpenMrsVisitAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + VISIT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Encounter encounter = readResponse(response);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getIdElement().getIdPart(), equalTo(VISIT_UUID));
+		assertThat(encounter, validResource());
+	}
+	
+	@Test
 	public void shouldThrow404ForNonExistingEncounterAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Encounter/" + BAD_ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+	}
+	
+	@Test
+	public void shouldThrow404ForNonExistingVisitAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + BAD_VISIT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -99,8 +132,32 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
+	public void shouldReturnExistingEncounterFromOpenMrsVisitAsXML() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + VISIT_UUID).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Encounter encounter = readResponse(response);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getIdElement().getIdPart(), equalTo(VISIT_UUID));
+		assertThat(encounter, validResource());
+	}
+	
+	@Test
 	public void shouldThrow404ForNonExistingEncounterAsXML() throws Exception {
 		MockHttpServletResponse response = get("/Encounter/" + BAD_ENCOUNTER_UUID).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+	}
+	
+	@Test
+	public void shouldThrow404ForNonExistingVisitAsXML() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + BAD_VISIT_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

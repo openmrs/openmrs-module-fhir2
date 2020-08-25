@@ -28,7 +28,7 @@ public class ObservationReferenceTranslatorImpl extends BaseReferenceHandlingTra
 	
 	@Override
 	public Reference toFhirResource(Obs obs) {
-		if (obs == null) {
+		if (obs == null || obs.getVoided()) {
 			return null;
 		}
 		

@@ -57,7 +57,7 @@ a browser.
             <td th:text="(#{narrative.propertyName.subject} ?: 'Subject') + ':'"></td>
             <td th:narrative="${resource.subject}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.encounter.empty}">
                 <td th:text="(#{narrative.propertyName.encounter} ?: 'Encounter') + ':'"></td>
                 <td th:narrative="${resource.encounter}"></td>
@@ -71,7 +71,7 @@ a browser.
             <td th:text="(#{narrative.propertyName.issued} ?: 'Issued') + ':'"></td>
             <td th:text="${resource.issued}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.performer.empty}">
                 <td th:text="(#{narrative.propertyName.performer} ?: 'Performer') + ':'"></td>
                 <td>
@@ -118,7 +118,7 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.media.empty}">
                 <td th:text="(#{narrative.propertyName.media} ?: 'Media') + ':'"></td>
                 <td>
@@ -143,7 +143,7 @@ a browser.
                 </td>
             </tr>
         </th:block>
-        <th:block th:unless="${fhirVersion} eq 'R4'">
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.image.empty}">
                 <td th:text="(#{narrative.propertyName.image} ?: 'Image') + ':'"></td>
                 <td>
@@ -172,7 +172,7 @@ a browser.
             <td th:text="(#{narrative.propertyName.conclusion} ?: 'Conclusion') + ':'"></td>
             <td th:text="${resource.conclusion}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.conclusionCode.empty}">
                 <td th:text="(#{narrative.propertyName.conclusionCode} ?: 'Conclusion Code') + ':'"></td>
                 <td>
@@ -183,7 +183,7 @@ a browser.
                 </td>
             </tr>
         </th:block>
-        <th:block th:unless="${fhirVersion} eq 'R4'">
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.codedDiagnosis.empty}">
                 <td th:text="(#{narrative.propertyName.codedDiagnosis} ?: 'Coded Diagnosis') + ':'"></td>
                 <td>

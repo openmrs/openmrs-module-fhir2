@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.openmrs.Encounter;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
@@ -38,7 +39,7 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Autowired
-	private EncounterReferenceTranslator encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
 	@Autowired
 	private PractitionerReferenceTranslator<Provider> providerReferenceTranslator;

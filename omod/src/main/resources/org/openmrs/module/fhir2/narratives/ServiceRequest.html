@@ -72,7 +72,7 @@ a browser.
         </tr>
         <tr th:if="${resource.doNotPerform}">
             <td th:text="(#{narrative.propertyName.doNotPerform} ?: 'Do Not Perform') + ':'"></td>
-            <td th:narrative="${resource.doNotPerform}"></td>
+            <td th:text="${resource.doNotPerform}"></td>
         </tr>
         <tr th:if="${not resource.code.empty}">
             <td th:text="(#{narrative.propertyName.code} ?: 'Code') + ':'"></td>

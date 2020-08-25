@@ -31,7 +31,7 @@ a browser.
             <td th:text="(#{narrative.propertyName.status} ?: 'Status') + ':'"></td>
             <td th:text="${resource.status}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.statusReason.empty}">
                 <td th:text="(#{narrative.propertyName.statusReason} ?: 'Status Reason') + ':'"></td>
                 <td th:narrative="${resource.statusReason}"></td>
@@ -53,10 +53,10 @@ a browser.
             <td th:text="(#{narrative.propertyName.priority} ?: 'Priority') + ':'"></td>
             <td th:text="${resource.priority}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.doNotPerform}">
                 <td th:text="(#{narrative.propertyName.doNotPerform} ?: 'Do Not Perform') + ':'"></td>
-                <td th:narrative="${resource.doNotPerform}"></td>
+                <td th:text="${resource.doNotPerform}"></td>
             </tr>
             <tr th:if="${resource.reported}">
                 <td th:text="(#{narrative.propertyName.reported} ?: 'Reported') + ':'"></td>
@@ -71,7 +71,7 @@ a browser.
             <td th:text="(#{narrative.propertyName.subject} ?: 'Subject') + ':'"></td>
             <td th:narrative="${resource.subject}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.encounter.empty}">
                 <td th:text="(#{narrative.propertyName.encounter} ?: 'Encounter') + ':'"></td>
                 <td th:narrative="${resource.encounter}"></td>
@@ -89,11 +89,13 @@ a browser.
             <td th:text="(#{narrative.propertyName.authoredOn} ?: 'Authored On') + ':'"></td>
             <td th:text="${#dates.format(resource.authoredOn,'dd/MM/yyyy')}"></td>
         </tr>
-        <tr th:if="${not resource.requester.empty}">
-            <td th:text="(#{narrative.propertyName.requester} ?: 'Requester') + ':'"></td>
-            <td th:narrative="${resource.requester}"></td>
-        </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.requester.empty}">
+                <td th:text="(#{narrative.propertyName.requester} ?: 'Requester') + ':'"></td>
+                <td th:narrative="${resource.requester}"></td>
+            </tr>
+        </th:block>
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.performer.empty}">
                 <td th:text="(#{narrative.propertyName.performer} ?: 'Performer') + ':'"></td>
                 <td th:narrative="${resource.performer}"></td>
@@ -135,7 +137,7 @@ a browser.
             <td th:text="(#{narrative.propertyName.groupIdentifier} ?: 'Group Identifier') + ':'"></td>
             <td th:text="${resource.groupIdentifier.value} + ' (' + ${resource.groupIdentifier.use} + ')'"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.courseOfTherapyType.empty}">
                 <td th:text="(#{narrative.propertyName.courseOfTherapyType} ?: 'Course of Therapy Type') + ':'"></td>
                 <td th:narrative="${resource.courseOfTherapyType}"></td>
@@ -170,10 +172,10 @@ a browser.
                     <tbody>
                     <tr>
                         <th>-</th>
-                        <th:block th:if="${fhirVersion} eq 'R4'">
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                             <th th:text="(#{narrative.propertyName.initialFill} ?: 'Initial Fill')"></th>
                         </th:block>
-                        <th:block th:if="${fhirVersion} eq 'R4'">
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                             <th th:text="(#{narrative.propertyName.dispenseInterval} ?: 'Dispense Interval')"></th>
                         </th:block>
                         <th th:text="(#{narrative.propertyName.validityPeriod} ?: 'Validity Period')"></th>
@@ -185,7 +187,7 @@ a browser.
                     <tr>
                         <td>*</td>
                         <td>
-                            <th:block th:if="${fhirVersion} eq 'R4'">
+                            <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                                 <th:block th:if="${resource.dispenseRequest.initialFill}">
                                     <div th:if="${resource.dispenseRequest.initialFill.quantity}">
                                         <th:block th:text="(#{narrative.propertyName.quantity} ?: 'Quantity') + ':'"></th:block>
@@ -242,8 +244,14 @@ a browser.
                     <tr>
                         <td>*</td>
                         <td>
-                            <th:block th:if="${resource.substitution.allowed}"
-                                      th:narrative="${resource.substitution.allowed}"></th:block>
+                            <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+                                <th:block th:if="${resource.substitution.allowed}"
+                                          th:narrative="${resource.substitution.allowed}"></th:block>
+                            </th:block>
+                            <th:block th:if="${fhirVersion} eq 'DSTU3'">
+                                <th:block th:if="${resource.substitution.allowed}"
+                                          th:text="${resource.substitution.allowed}"></th:block>
+                            </th:block>
                         </td>
                         <td>
                             <th:block th:if="${resource.substitution.reason}"

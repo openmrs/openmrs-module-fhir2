@@ -27,7 +27,7 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.instantiatesCanonical}">
                 <td th:text="(#{narrative.propertyName.instantiatesCanonical} ?: 'Instantiates Canonical') + ':'"></td>
                 <td th:text="${resource.instantiatesCanonical}"></td>
@@ -95,7 +95,7 @@ a browser.
             <td th:text="(#{narrative.propertyName.for} ?: 'For') + ':'"></td>
             <td th:narrative="${resource.for}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.encounter.empty}">
                 <td th:text="(#{narrative.propertyName.encounter} ?: 'Encounter') + ':'"></td>
                 <td th:narrative="${resource.encounter}"></td>
@@ -130,7 +130,7 @@ a browser.
             <td th:text="(#{narrative.propertyName.owner} ?: 'Owner') + ':'"></td>
             <td th:narrative="${resource.owner}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.location.empty}">
                 <td th:text="(#{narrative.propertyName.location} ?: 'Location') + ':'"></td>
                 <td th:narrative="${resource.location}"></td>

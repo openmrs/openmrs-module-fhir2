@@ -17,14 +17,12 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
-import org.openmrs.Location;
-import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
+import org.openmrs.Visit;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
@@ -33,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterTranslatorImpl implements EncounterTranslator {
+public class EncounterTranslatorImpl extends BaseEncounterTranslator implements EncounterTranslator<org.openmrs.Encounter> {
 	
 	@Autowired
 	private EncounterParticipantTranslator participantTranslator;
@@ -48,22 +46,7 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 	private ProvenanceTranslator<org.openmrs.Encounter> provenanceTranslator;
 	
 	@Autowired
-	private EncounterClassMap encounterClassMap;
-	
-	private Coding mapLocationToClass(Location location) {
-		Coding coding = new Coding();
-		coding.setSystem(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI);
-		// The default code for anything that cannot be matched with FHIR codes.
-		coding.setCode("AMB");
-		if (location == null) {
-			return coding;
-		}
-		String classCode = encounterClassMap.getFhirClass(location.getUuid());
-		if (classCode != null) {
-			coding.setCode(classCode);
-		}
-		return coding;
-	}
+	private EncounterReferenceTranslator<Visit> encounterReferenceTranslator;
 	
 	@Override
 	public Encounter toFhirResource(org.openmrs.Encounter openMrsEncounter) {
@@ -76,6 +59,9 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		encounter.setSubject(patientReferenceTranslator.toFhirResource(openMrsEncounter.getPatient()));
 		encounter.setParticipant(openMrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource)
 		        .collect(Collectors.toList()));
+		
+		// add visit as part of encounter
+		encounter.setPartOf(encounterReferenceTranslator.toFhirResource(openMrsEncounter.getVisit()));
 		
 		if (openMrsEncounter.getLocation() != null) {
 			encounter.setLocation(
@@ -108,7 +94,9 @@ public class EncounterTranslatorImpl implements EncounterTranslator {
 		        .getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
 		                .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
 		        .collect(Collectors.toCollection(LinkedHashSet::new)));
+		
 		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
+		existingEncounter.setVisit(encounterReferenceTranslator.toOpenmrsType(encounter.getPartOf()));
 		
 		return existingEncounter;
 	}
