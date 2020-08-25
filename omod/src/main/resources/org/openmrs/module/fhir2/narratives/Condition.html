@@ -27,7 +27,7 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.clinicalStatus.empty}">
                 <td>Clinical Status:</td>
                 <td th:narrative="${resource.clinicalStatus}"></td>
@@ -37,14 +37,14 @@ a browser.
                 <td th:narrative="${resource.verificationStatus}"></td>
             </tr>
         </th:block>
-        <th:block th:unless="${fhirVersion} eq 'R4'">
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.clinicalStatus}">
                 <td>Clinical Status:</td>
-                <td th:narrative="${resource.clinicalStatus}"></td>
+                <td th:text="${resource.clinicalStatus}"></td>
             </tr>
             <tr th:if="${resource.verificationStatus}">
                 <td>Verification Status:</td>
-                <td th:narrative="${resource.verificationStatus}"></td>
+                <td th:text="${resource.verificationStatus}"></td>
             </tr>
         </th:block>
         <tr th:if="${not resource.category.empty}">
@@ -75,7 +75,7 @@ a browser.
             <td>Subject:</td>
             <td th:narrative="${resource.subject}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.encounter.empty}">
                 <td>Encounter:</td>
                 <td th:narrative="${resource.encounter}"></td>
@@ -101,7 +101,7 @@ a browser.
                 <td th:text="${#dates.format(resource.recordedDate,'dd/MM/yyyy')}"></td>
             </tr>
         </th:block>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.recorder.empty}">
                 <td>Recorder:</td>
                 <td th:narrative="${resource.recorder}"></td>
@@ -120,7 +120,7 @@ a browser.
                         <th>-</th>
                         <th>Summary</th>
                         <th>Assessment</th>
-                        <th:block th:if="${fhirVersion} eq 'R4'">
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                             <th>Type</th>
                         </th:block>
                     </tr>
@@ -134,7 +134,7 @@ a browser.
                                 <div th:narrative="${assessment}"></div>
                             </th:block>
                         </td>
-                        <th:block th:if="${fhirVersion} eq 'R4'">
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                             <td>
                                 <th:block th:if="${stage.type}" th:narrative="${stage.type}"></th:block>
                             </td>

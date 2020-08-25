@@ -31,7 +31,7 @@ a browser.
             <td>Status:</td>
             <td th:text="${resource.status}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.statusReason.empty}">
                 <td>Status Reason:</td>
                 <td th:narrative="${resource.statusReason}"></td>
@@ -53,10 +53,10 @@ a browser.
             <td>Priority:</td>
             <td th:text="${resource.priority}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.doNotPerform}">
                 <td>Do Not Perform:</td>
-                <td th:narrative="${resource.doNotPerform}"></td>
+                <td th:text="${resource.doNotPerform}"></td>
             </tr>
             <tr th:if="${resource.reported}">
                 <td>Reported:</td>
@@ -71,7 +71,7 @@ a browser.
             <td>Subject:</td>
             <td th:narrative="${resource.subject}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.encounter.empty}">
                 <td>Encounter:</td>
                 <td th:narrative="${resource.encounter}"></td>
@@ -89,11 +89,13 @@ a browser.
             <td>Authored On:</td>
             <td th:text="${#dates.format(resource.authoredOn,'dd/MM/yyyy')}"></td>
         </tr>
-        <tr th:if="${not resource.requester.empty}">
-            <td>Requester:</td>
-            <td th:narrative="${resource.requester}"></td>
-        </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.requester.empty}">
+                <td>Requester:</td>
+                <td th:narrative="${resource.requester}"></td>
+            </tr>
+        </th:block>
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.performer.empty}">
                 <td>Performer:</td>
                 <td th:narrative="${resource.performer}"></td>
@@ -135,7 +137,7 @@ a browser.
             <td>Group Identifier:</td>
             <td th:text="${resource.groupIdentifier.value} + ' (' + ${resource.groupIdentifier.use} + ')'"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.courseOfTherapyType.empty}">
                 <td>Course of Therapy Type:</td>
                 <td th:narrative="${resource.courseOfTherapyType}"></td>
@@ -170,10 +172,10 @@ a browser.
                     <tbody>
                     <tr>
                         <th>-</th>
-                        <th:block th:if="${fhirVersion} eq 'R4'">
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                             <th>Initial Fill</th>
                         </th:block>
-                        <th:block th:if="${fhirVersion} eq 'R4'">
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                             <th>Dispense Interval</th>
                         </th:block>
                         <th>Validity Period</th>
@@ -185,7 +187,7 @@ a browser.
                     <tr>
                         <td>*</td>
                         <td>
-                            <th:block th:if="${fhirVersion} eq 'R4'">
+                            <th:block th:unless="${fhirVersion} eq 'DSTU3'">
                                 <th:block th:if="${resource.dispenseRequest.initialFill}">
                                     <div th:if="${resource.dispenseRequest.initialFill.quantity}">
                                         Quantity:
@@ -242,8 +244,14 @@ a browser.
                     <tr>
                         <td>*</td>
                         <td>
-                            <th:block th:if="${resource.substitution.allowed}"
-                                      th:narrative="${resource.substitution.allowed}"></th:block>
+                            <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+                                <th:block th:if="${resource.substitution.allowed}"
+                                          th:narrative="${resource.substitution.allowed}"></th:block>
+                            </th:block>
+                            <th:block th:if="${fhirVersion} eq 'DSTU3'">
+                                <th:block th:if="${resource.substitution.allowed}"
+                                          th:text="${resource.substitution.allowed}"></th:block>
+                            </th:block>
                         </td>
                         <td>
                             <th:block th:if="${resource.substitution.reason}"

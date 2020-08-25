@@ -27,7 +27,7 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.clinicalStatus.empty}">
                 <td>Clinical Status:</td>
                 <td th:narrative="${resource.clinicalStatus}"></td>
@@ -37,25 +37,25 @@ a browser.
                 <td th:narrative="${resource.verificationStatus}"></td>
             </tr>
         </th:block>
-        <th:block th:unless="${fhirVersion} eq 'R4'">
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.clinicalStatus}">
                 <td>Clinical Status:</td>
-                <td th:narrative="${resource.clinicalStatus}"></td>
+                <td th:text="${resource.clinicalStatus}"></td>
             </tr>
             <tr th:if="${resource.verificationStatus}">
                 <td>Verification Status:</td>
-                <td th:narrative="${resource.verificationStatus}"></td>
+                <td th:text="${resource.verificationStatus}"></td>
             </tr>
         </th:block>
         <tr th:if="${resource.type}">
             <td>Type:</td>
-            <td th:text="${resource.type.display}"></td>
+            <td th:text="${resource.type}"></td>
         </tr>
         <tr th:if="${not resource.category.empty}">
             <td>Category:</td>
             <td>
                 <th:block th:each="category: ${resource.category}">
-                    <th:block th:text="${category.code}"></th:block>
+                    <th:block th:text="${category}"></th:block>
                 </th:block>
             </td>
         </tr>
@@ -71,7 +71,7 @@ a browser.
             <td>Patient:</td>
             <td th:narrative="${resource.patient}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.encounter.empty}">
                 <td>Encounter:</td>
                 <td th:narrative="${resource.encounter}"></td>
