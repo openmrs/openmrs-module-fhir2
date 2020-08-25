@@ -25,8 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirUserService;
-import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
+import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PractitionerReferenceTranslatorUserImplTest {
@@ -36,18 +35,14 @@ public class PractitionerReferenceTranslatorUserImplTest {
 	private static final String PRACTITIONER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
 	
 	@Mock
-	private FhirUserService userService;
-	
-	@Mock
-	private PractitionerTranslator<User> userTranslator;
+	private FhirUserDao userDao;
 	
 	private PractitionerReferenceTranslatorUserImpl practitionerReferenceTranslatorUser;
 	
 	@Before
 	public void setup() {
 		practitionerReferenceTranslatorUser = new PractitionerReferenceTranslatorUserImpl();
-		practitionerReferenceTranslatorUser.setUserService(userService);
-		practitionerReferenceTranslatorUser.setPractitionerTranslator(userTranslator);
+		practitionerReferenceTranslatorUser.setUserDao(userDao);
 		
 	}
 	
@@ -77,8 +72,7 @@ public class PractitionerReferenceTranslatorUserImplTest {
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
 		
-		when(userService.get(USER_UUID)).thenReturn(practitioner);
-		when(userTranslator.toOpenmrsType(practitioner)).thenReturn(user);
+		when(userDao.get(USER_UUID)).thenReturn(user);
 		
 		User result = practitionerReferenceTranslatorUser.toOpenmrsType(creatorReference);
 		

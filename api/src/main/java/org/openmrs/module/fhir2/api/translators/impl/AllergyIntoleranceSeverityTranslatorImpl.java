@@ -50,7 +50,7 @@ public class AllergyIntoleranceSeverityTranslatorImpl implements AllergyIntolera
 		} else if (concept.getUuid().equals(conceptUUIDs.get(FhirConstants.GLOBAL_PROPERTY_SEVERE))) {
 			return AllergyIntolerance.AllergyIntoleranceSeverity.SEVERE;
 		} else {
-			return AllergyIntolerance.AllergyIntoleranceSeverity.NULL;
+			return null;
 		}
 	}
 	
@@ -71,7 +71,6 @@ public class AllergyIntoleranceSeverityTranslatorImpl implements AllergyIntolera
 				return conceptService.get(conceptUUIDs.get(FhirConstants.GLOBAL_PROPERTY_MODERATE));
 			case SEVERE:
 				return conceptService.get(conceptUUIDs.get(FhirConstants.GLOBAL_PROPERTY_SEVERE));
-			case NULL:
 			default:
 				return conceptService.get(conceptUUIDs.get(FhirConstants.GLOBAL_PROPERTY_OTHER));
 		}

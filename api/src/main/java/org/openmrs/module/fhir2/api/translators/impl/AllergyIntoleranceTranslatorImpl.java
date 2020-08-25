@@ -72,6 +72,8 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 			allergy.addCategory(categoryTranslator.toFhirResource(omrsAllergy.getAllergen().getAllergenType()));
 		}
 		allergy.setClinicalStatus(setClinicalStatus(omrsAllergy.getVoided()));
+		allergy.setVerificationStatus(new CodeableConcept().setText("Confirmed")
+		        .addCoding(new Coding(FhirConstants.ALLERGY_VERIFICATION_STATUS_VALUE_SET_URI, "confirmed", "Confirmed")));
 		allergy.setPatient(patientReferenceTranslator.toFhirResource(omrsAllergy.getPatient()));
 		allergy.setRecorder(practitionerReferenceTranslator.toFhirResource(omrsAllergy.getCreator()));
 		allergy.setRecordedDate(omrsAllergy.getDateCreated());
@@ -106,9 +108,7 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		if (fhirAllergy.hasCode()) {
 			if (allergy.getAllergen() == null) {
 				Allergen allergen = new Allergen();
-				
 				allergen.setCodedAllergen(conceptTranslator.toOpenmrsType(fhirAllergy.getCode()));
-				allergen.setNonCodedAllergen(fhirAllergy.getCode().getText());
 				
 				allergy.setAllergen(allergen);
 			}
