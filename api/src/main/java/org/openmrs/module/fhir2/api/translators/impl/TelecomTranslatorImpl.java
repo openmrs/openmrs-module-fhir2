@@ -72,7 +72,7 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 	
 	@Override
 	public ContactPoint toFhirResource(BaseOpenmrsData attribute) {
-		if (attribute == null) {
+		if (attribute == null || attribute.getVoided()) {
 			return null;
 		}
 		

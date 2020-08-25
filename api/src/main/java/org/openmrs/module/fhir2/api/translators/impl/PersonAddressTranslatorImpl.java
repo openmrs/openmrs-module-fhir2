@@ -20,7 +20,7 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslatorImpl imple
 	
 	@Override
 	public Address toFhirResource(PersonAddress address) {
-		if (address == null) {
+		if (address == null || address.getVoided()) {
 			return null;
 		}
 		

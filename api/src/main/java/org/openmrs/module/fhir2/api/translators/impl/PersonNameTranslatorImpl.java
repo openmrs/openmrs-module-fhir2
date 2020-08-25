@@ -27,7 +27,7 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 	
 	@Override
 	public HumanName toFhirResource(PersonName name) {
-		if (name == null) {
+		if (name == null || name.getVoided()) {
 			return null;
 		}
 		

@@ -107,7 +107,9 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		if (observation.isObsGrouping()) {
 			for (Obs groupObs : observation.getGroupMembers()) {
-				obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
+				if (!groupObs.getVoided()) {
+					obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
+				}
 			}
 		}
 		

@@ -28,13 +28,13 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 	private FhirPractitionerDao practitionerDao;
 	
 	@Override
-	public Encounter.EncounterParticipantComponent toFhirResource(EncounterProvider encounter) {
-		if (encounter == null) {
+	public Encounter.EncounterParticipantComponent toFhirResource(EncounterProvider encounterProvider) {
+		if (encounterProvider == null || encounterProvider.getVoided()) {
 			return null;
 		}
 		
 		Encounter.EncounterParticipantComponent participantComponent = new Encounter.EncounterParticipantComponent();
-		participantComponent.setIndividual(createPractitionerReference(encounter.getProvider()));
+		participantComponent.setIndividual(createPractitionerReference(encounterProvider.getProvider()));
 		return participantComponent;
 	}
 	
