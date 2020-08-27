@@ -80,7 +80,7 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	 * latter resource is referenced by FocusOn. For example, based on a ServiceRequest (= BasedOn), a
 	 * task is created to fulfill a procedureRequest ( = FocusOn ) to collect a specimen from a patient.
 	 */
-	@OneToMany
+	@OneToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "fhir_task_based_on_reference", joinColumns = @JoinColumn(name = "task_id"), inverseJoinColumns = @JoinColumn(name = "reference_id"))
 	private Set<FhirReference> basedOnReferences;
 	
