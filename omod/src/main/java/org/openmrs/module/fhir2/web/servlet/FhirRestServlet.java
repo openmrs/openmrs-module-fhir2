@@ -27,6 +27,7 @@ import org.openmrs.module.fhir2.narrative.OpenMRSThymeleafNarrativeGenerator;
 import org.openmrs.module.fhir2.web.util.NarrativeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
@@ -42,6 +43,8 @@ public class FhirRestServlet extends RestfulServer {
 	@Autowired
 	@Qualifier("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
+	
+	private MessageSource messageSource;
 	
 	@Override
 	protected void initialize() {
@@ -75,7 +78,8 @@ public class FhirRestServlet extends RestfulServer {
 			        FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE };
 		}
 		
-		getFhirContext().setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(narrativePropertiesFiles));
+		getFhirContext()
+		        .setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(messageSource, narrativePropertiesFiles));
 	}
 	
 	@Override
@@ -107,5 +111,10 @@ public class FhirRestServlet extends RestfulServer {
 	@Autowired
 	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
 		super.setServerAddressStrategy(theServerAddressStrategy);
+	}
+	
+	@Autowired
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
 	}
 }

@@ -16,11 +16,11 @@ a browser.
     <table class="hapiPropertyTable" th:if="${not resource.empty}">
         <tbody>
         <tr th:if="${resource.id}">
-            <td>Id:</td>
+            <td th:text="(#{narrative.propertyName.id} ?: 'Id') + ':'"></td>
             <td th:text="${resource.id}"></td>
         </tr>
         <tr th:if="${not resource.identifier.empty}">
-            <td>Identifier:</td>
+            <td th:text="(#{narrative.propertyName.identifier} ?: 'Identifier') + ':'"></td>
             <td>
                 <th:block th:each="identifier: ${resource.identifier}">
                     <div th:narrative="${identifier}"></div>
@@ -29,16 +29,16 @@ a browser.
         </tr>
         <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.instantiatesCanonical}">
-                <td>Instantiates Canonical:</td>
+                <td th:text="(#{narrative.propertyName.instantiatesCanonical} ?: 'Instantiates Canonical') + ':'"></td>
                 <td th:text="${resource.instantiatesCanonical}"></td>
             </tr>
             <tr th:if="${resource.instantiatesUri}">
-                <td>Instantiates Uri:</td>
+                <td th:text="(#{narrative.propertyName.instantiatesUri} ?: 'Instantiates Uri') + ':'"></td>
                 <td th:text="${resource.instantiatesUri}"></td>
             </tr>
         </th:block>
         <tr th:if="${not resource.basedOn.empty}">
-            <td>Based On:</td>
+            <td th:text="(#{narrative.propertyName.basedOn} ?: 'Based On') + ':'"></td>
             <td>
                 <th:block th:each="basedOn, basedOnItr: ${resource.basedOn}">
                     <th:block th:if="${basedOnItr.index}">,</th:block>
@@ -47,11 +47,11 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.groupIdentifier.empty}">
-            <td>Group Identifier:</td>
+            <td th:text="(#{narrative.propertyName.groupIdentifier} ?: 'Group Identifier') + ':'"></td>
             <td th:narrative="${resource.groupIdentifier}"></td>
         </tr>
         <tr th:if="${not resource.partOf.empty}">
-            <td>Part Of:</td>
+            <td th:text="(#{narrative.propertyName.partOf} ?: 'Part Of') + ':'"></td>
             <td>
                 <th:block th:each="partOf, partOfItr: ${resource.partOf}">
                     <th:block th:if="${partOfItr.index}">,</th:block>
@@ -60,65 +60,65 @@ a browser.
             </td>
         </tr>
         <tr th:if="${resource.status}">
-            <td>Status:</td>
+            <td th:text="(#{narrative.propertyName.status} ?: 'Status') + ':'"></td>
             <td th:text="${resource.status}"></td>
         </tr>
         <tr th:if="${not resource.statusReason.empty}">
-            <td>Status Reason:</td>
+            <td th:text="(#{narrative.propertyName.statusReason} ?: 'Status Reason') + ':'"></td>
             <td th:narrative="${resource.statusReason}"></td>
         </tr>
         <tr th:if="${not resource.businessStatus.empty}">
-            <td>Business Status:</td>
+            <td th:text="(#{narrative.propertyName.businessStatus} ?: 'Business Status') + ':'"></td>
             <td th:narrative="${resource.businessStatus}"></td>
         </tr>
         <tr th:if="${resource.intent}">
-            <td>Intent:</td>
+            <td th:text="(#{narrative.propertyName.intent} ?: 'Intent') + ':'"></td>
             <td th:text="${resource.intent}"></td>
         </tr>
         <tr th:if="${resource.priority}">
-            <td>Priority:</td>
+            <td th:text="(#{narrative.propertyName.priority} ?: 'Priority') + ':'"></td>
             <td th:text="${resource.priority}"></td>
         </tr>
         <tr th:if="${not resource.code.empty}">
-            <td>Code:</td>
+            <td th:text="(#{narrative.propertyName.code} ?: 'Code') + ':'"></td>
             <td th:narrative="${resource.code}"></td>
         </tr>
         <tr th:if="${resource.description}">
-            <td>Description:</td>
+            <td th:text="(#{narrative.propertyName.description} ?: 'Description') + ':'"></td>
             <td th:text="${resource.description}"></td>
         </tr>
         <tr th:if="${not resource.focus.empty}">
-            <td>Focus:</td>
+            <td th:text="(#{narrative.propertyName.focus} ?: 'Focus') + ':'"></td>
             <td th:narrative="${resource.focus}"></td>
         </tr>
         <tr th:if="${not resource.for.empty}">
-            <td>For:</td>
+            <td th:text="(#{narrative.propertyName.for} ?: 'For') + ':'"></td>
             <td th:narrative="${resource.for}"></td>
         </tr>
         <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.encounter.empty}">
-                <td>Encounter:</td>
+                <td th:text="(#{narrative.propertyName.encounter} ?: 'Encounter') + ':'"></td>
                 <td th:narrative="${resource.encounter}"></td>
             </tr>
         </th:block>
         <tr th:if="${not resource.executionPeriod.empty}">
-            <td>Execution Period:</td>
+            <td th:text="(#{narrative.propertyName.executionPeriod} ?: 'Execution Period') + ':'"></td>
             <td th:narrative="${resource.executionPeriod}"></td>
         </tr>
         <tr th:if="${resource.authoredOn}">
-            <td>Authored On:</td>
+            <td th:text="(#{narrative.propertyName.authoredOn} ?: 'Authored On') + ':'"></td>
             <td th:text="${#dates.format(resource.authoredOn,'dd/MM/yyyy')}"></td>
         </tr>
         <tr th:if="${resource.lastModified}">
-            <td>Last Modified:</td>
+            <td th:text="(#{narrative.propertyName.lastModified} ?: 'Last Modified') + ':'"></td>
             <td th:text="${#dates.format(resource.lastModified,'dd/MM/yyyy')}"></td>
         </tr>
         <tr th:if="${not resource.requester.empty}">
-            <td>Requester:</td>
+            <td th:text="(#{narrative.propertyName.requester} ?: 'Requester') + ':'"></td>
             <td th:narrative="${resource.requester}"></td>
         </tr>
         <tr th:if="${not resource.performerType.empty}">
-            <td>Performer Type:</td>
+            <td th:text="(#{narrative.propertyName.performerType} ?: 'Performer Type') + ':'"></td>
             <td>
                 <th:block th:each="performerType, performerTypeItr: ${resource.performerType}">
                     <th:block th:if="${performerTypeItr.index}">,</th:block>
@@ -127,24 +127,24 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.owner.empty}">
-            <td>Owner:</td>
+            <td th:text="(#{narrative.propertyName.owner} ?: 'Owner') + ':'"></td>
             <td th:narrative="${resource.owner}"></td>
         </tr>
         <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.location.empty}">
-                <td>Location:</td>
+                <td th:text="(#{narrative.propertyName.location} ?: 'Location') + ':'"></td>
                 <td th:narrative="${resource.location}"></td>
             </tr>
             <tr th:if="${not resource.reasonCode.empty}">
-                <td>Reason Code:</td>
+                <td th:text="(#{narrative.propertyName.reasonCode} ?: 'Reason Code') + ':'"></td>
                 <td th:narrative="${resource.reasonCode}"></td>
             </tr>
             <tr th:if="${not resource.reasonReference.empty}">
-                <td>Reason Reference:</td>
+                <td th:text="(#{narrative.propertyName.reasonReference} ?: 'Reason Reference') + ':'"></td>
                 <td th:narrative="${resource.reasonReference}"></td>
             </tr>
             <tr th:if="${not resource.insurance.empty}">
-                <td>Insurance:</td>
+                <td th:text="(#{narrative.propertyName.insurance} ?: 'Insurance') + ':'"></td>
                 <td>
                     <th:block th:each="insurance, insuranceItr: ${resource.insurance}">
                         <th:block th:if="${insuranceItr.index}">,</th:block>
@@ -154,13 +154,13 @@ a browser.
             </tr>
         </th:block>
         <tr th:if="${not resource.note.empty}">
-            <td>Note:</td>
+            <td th:text="(#{narrative.propertyName.note} ?: 'Note') + ':'"></td>
             <td>
                 <div th:each="note: ${resource.note}" th:text="${note.text}"></div>
             </td>
         </tr>
         <tr th:if="${not resource.relevantHistory.empty}">
-            <td>Relevant History:</td>
+            <td th:text="(#{narrative.propertyName.relevantHistory} ?: 'Relevant History') + ':'"></td>
             <td>
                 <th:block th:each="relevantHistory, relevantHistoryItr: ${resource.relevantHistory}">
                     <th:block th:if="${relevantHistoryItr.index}">,</th:block>
@@ -169,15 +169,15 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.restriction.empty}">
-            <td>Restriction:</td>
+            <td th:text="(#{narrative.propertyName.restriction} ?: 'Restriction') + ':'"></td>
             <td>
                 <table class="subPropertyTable">
                     <tbody>
                     <tr>
                         <th>-</th>
-                        <th>Repetitions</th>
-                        <th>Period</th>
-                        <th>Recipient</th>
+                        <th th:text="(#{narrative.propertyName.repetitions} ?: 'Repetitions')"></th>
+                        <th th:text="(#{narrative.propertyName.period} ?: 'Period')"></th>
+                        <th th:text="(#{narrative.propertyName.recipient} ?: 'Recipient')"></th>
                     </tr>
                     <tr>
                         <td>*</td>

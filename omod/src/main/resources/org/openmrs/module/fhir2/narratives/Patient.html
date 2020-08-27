@@ -16,11 +16,11 @@ a browser.
     <table class="hapiPropertyTable" th:if="${not resource.empty}">
         <tbody>
         <tr th:if="${resource.id}">
-            <td>Id:</td>
+            <td th:text="(#{narrative.propertyName.id} ?: 'Id') + ':'"></td>
             <td th:text="${resource.id}"></td>
         </tr>
         <tr th:if="${not resource.identifier.empty}">
-            <td>Identifier:</td>
+            <td th:text="(#{narrative.propertyName.identifier} ?: 'Identifier') + ':'"></td>
             <td>
                 <th:block th:each="identifier: ${resource.identifier}">
                     <div th:narrative="${identifier}"></div>
@@ -28,11 +28,11 @@ a browser.
             </td>
         </tr>
         <tr th:if="${resource.active}">
-            <td>Active:</td>
+            <td th:text="(#{narrative.propertyName.active} ?: 'Active') + ':'"></td>
             <td th:text="${resource.active}"></td>
         </tr>
         <tr th:if="${not resource.name.empty}">
-            <td>Name:</td>
+            <td th:text="(#{narrative.propertyName.name} ?: 'Name') + ':'"></td>
             <td>
                 <th:block th:each="name, nameItr: ${resource.name}">
                     <th:block th:if="${nameItr.index}">,</th:block>
@@ -41,7 +41,7 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.telecom.empty}">
-            <td>Telecom:</td>
+            <td th:text="(#{narrative.propertyName.telecom} ?: 'Telecom') + ':'"></td>
             <td>
                 <th:block th:each="telecom, telecomItr: ${resource.telecom}">
                     <th:block th:if="${telecomItr.index}">,</th:block>
@@ -50,49 +50,49 @@ a browser.
             </td>
         </tr>
         <tr th:if="${resource.gender}">
-            <td>Gender:</td>
+            <td th:text="(#{narrative.propertyName.gender} ?: 'Gender') + ':'"></td>
             <td th:text="${resource.gender}"></td>
         </tr>
         <tr th:if="${resource.birthDate}">
-            <td>Birth Date:</td>
+            <td th:text="(#{narrative.propertyName.birthDate} ?: 'Birth Date') + ':'"></td>
             <td th:text="${#dates.format(resource.birthDate,'dd/MM/yyyy')}"></td>
         </tr>
         <tr th:if="${resource.deceased}">
-            <td>Deceased:</td>
+            <td th:text="(#{narrative.propertyName.deceased} ?: 'Deceased') + ':'"></td>
             <td th:narrative="${resource.deceased}"></td>
         </tr>
         <tr th:if="${not resource.addressFirstRep.empty}">
-            <td>Address:</td>
+            <td th:text="(#{narrative.propertyName.address} ?: 'Address') + ':'"></td>
             <td th:narrative="${resource.addressFirstRep}"></td>
         </tr>
         <tr th:if="${not resource.maritalStatus.empty}">
-            <td>Marital Status:</td>
+            <td th:text="(#{narrative.propertyName.maritalStatus} ?: 'Marital Status') + ':'"></td>
             <td th:narrative="${resource.maritalStatus}"></td>
         </tr>
         <tr th:if="${resource.multipleBirth}">
-            <td>Multiple Birth:</td>
+            <td th:text="(#{narrative.propertyName.multipleBirth} ?: 'Multiple Birth') + ':'"></td>
             <td th:text="${resource.multipleBirth}"></td>
         </tr>
         <th:block th:if="resource.photo">
             <tr th:if="${resource.photoFirstRep.url}">
-                <td>Photo:</td>
+                <td th:text="(#{narrative.propertyName.photo} ?: 'Photo') + ':'"></td>
                 <td><img src="${resource.photoFirstRep.url}"/></td>
             </tr>
         </th:block>
         <tr th:if="${not resource.contact.empty}">
-            <td>Contacts:</td>
+            <td th:text="(#{narrative.propertyName.contact.multiple} ?: 'Contacts') + ':'"></td>
             <td>
                 <table class="subPropertyTable">
                     <tbody>
                     <tr>
                         <th>-</th>
-                        <th>Relationship</th>
-                        <th>Name</th>
-                        <th>Telecom</th>
-                        <th>Address</th>
-                        <th>Gender</th>
-                        <th>Organization</th>
-                        <th>Period</th>
+                        <th th:text="(#{narrative.propertyName.relationship} ?: 'Relationship')"></th>
+                        <th th:text="(#{narrative.propertyName.name} ?: 'Name')"></th>
+                        <th th:text="(#{narrative.propertyName.telecom} ?: 'Telecom')"></th>
+                        <th th:text="(#{narrative.propertyName.address} ?: 'Address')"></th>
+                        <th th:text="(#{narrative.propertyName.gender} ?: 'Gender')"></th>
+                        <th th:text="(#{narrative.propertyName.organization} ?: 'Organization')"></th>
+                        <th th:text="(#{narrative.propertyName.period} ?: 'Period')"></th>
                     </tr>
                     <tr th:each="contact, contactItr: ${resource.contact}">
                         <td th:text="${contactItr.count}"></td>
@@ -129,17 +129,18 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.communication.empty}">
-            <td>Communication:</td>
+            <td th:text="(#{narrative.propertyName.communication} ?: 'Communication') + ':'"></td>
             <td>
                 <th:block th:each="communication, communicationItr: ${resource.communication}">
                     <th:block th:if="${communicationItr.index}">,</th:block>
                     <th:block th:narrative="${communication.language}"></th:block>
-                    <th:block th:if="${communication.preferred}">(PREFERRED)</th:block>
+                    <th:block th:if="${communication.preferred}"
+                              th:text="'('+(#{narrative.text.preferred} ?: 'PREFERRED')+')'"></th:block>
                 </th:block>
             </td>
         </tr>
         <tr th:if="${not resource.generalPractitioner.empty}">
-            <td>General Practitioner:</td>
+            <td th:text="(#{narrative.propertyName.generalPractitioner} ?: 'General Practitioner') + ':'"></td>
             <td>
                 <th:block th:each="generalPractitioner, generalPractitionerItr: ${resource.generalPractitioner}">
                     <th:block th:if="${generalPractitionerItr.index}">,</th:block>
@@ -148,11 +149,11 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.managingOrganization.empty}">
-            <td>Managing Organization:</td>
+            <td th:text="(#{narrative.propertyName.managingOrganization} ?: 'Managing Organization') + ':'"></td>
             <td th:narrative="${resource.managingOrganization}"></td>
         </tr>
         <tr th:if="${not resource.link.empty}">
-            <td>Link:</td>
+            <td th:text="(#{narrative.propertyName.link} ?: 'Link') + ':'"></td>
             <td>
                 <th:block th:each="link, linkItr: ${resource.link}">
                     <th:block th:if="${linkItr.index}">,</th:block>

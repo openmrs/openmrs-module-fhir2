@@ -16,11 +16,11 @@ a browser.
     <table class="hapiPropertyTable" th:if="${not resource.empty}">
         <tbody>
         <tr th:if="${resource.id}">
-            <td>Id:</td>
+            <td th:text="(#{narrative.propertyName.id} ?: 'Id') + ':'"></td>
             <td th:text="${resource.id}"></td>
         </tr>
         <tr th:if="${not resource.identifier.empty}">
-            <td>Identifier:</td>
+            <td th:text="(#{narrative.propertyName.identifier} ?: 'Identifier') + ':'"></td>
             <td>
                 <th:block th:each="identifier: ${resource.identifier}">
                     <div th:narrative="${identifier}"></div>
@@ -28,23 +28,23 @@ a browser.
             </td>
         </tr>
         <tr th:if="${resource.active}">
-            <td>Active:</td>
+            <td th:text="(#{narrative.propertyName.active} ?: 'Active') + ':'"></td>
             <td th:text="${resource.active}"></td>
         </tr>
         <tr th:if="${not resource.period.empty}">
-            <td>Period:</td>
+            <td th:text="(#{narrative.propertyName.period} ?: 'Period') + ':'"></td>
             <td th:narrative="${resource.period}"></td>
         </tr>
         <tr th:if="${not resource.practitioner.empty}">
-            <td>Practitioner:</td>
+            <td th:text="(#{narrative.propertyName.practitioner} ?: 'Practitioner') + ':'"></td>
             <td th:narrative="${resource.practitioner}"></td>
         </tr>
         <tr th:if="${not resource.organization.empty}">
-            <td>Organization:</td>
+            <td th:text="(#{narrative.propertyName.organization} ?: 'Organization') + ':'"></td>
             <td th:narrative="${resource.organization}"></td>
         </tr>
         <tr th:if="${not resource.code.empty}">
-            <td>Code:</td>
+            <td th:text="(#{narrative.propertyName.code} ?: 'Code') + ':'"></td>
             <td>
                 <th:block th:each="code, codeItr: ${resource.code}">
                     <th:block th:if="${codeItr.index}">,</th:block>
@@ -53,7 +53,7 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.specialty.empty}">
-            <td>Specialty:</td>
+            <td th:text="(#{narrative.propertyName.speciality} ?: 'Speciality') + ':'"></td>
             <td>
                 <th:block th:each="specialty, specialtyItr: ${resource.specialty}">
                     <th:block th:if="${specialtyItr.index}">,</th:block>
@@ -62,7 +62,7 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.location.empty}">
-            <td>Location:</td>
+            <td th:text="(#{narrative.propertyName.location} ?: 'Location') + ':'"></td>
             <td>
                 <th:block th:each="location, locationItr: ${resource.location}">
                     <th:block th:if="${locationItr.index}">,</th:block>
@@ -71,7 +71,7 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.healthcareService.empty}">
-            <td>Healthcare Service:</td>
+            <td th:text="(#{narrative.propertyName.healthcareService} ?: 'Healthcare Service') + ':'"></td>
             <td>
                 <th:block th:each="healthcareService, healthcareServiceItr: ${resource.healthcareService}">
                     <th:block th:if="${healthcareServiceItr.index}">,</th:block>
@@ -80,7 +80,7 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.telecom.empty}">
-            <td>Telecom:</td>
+            <td th:text="(#{narrative.propertyName.telecom} ?: 'Telecom') + ':'"></td>
             <td>
                 <th:block th:each="telecom, telecomItr: ${resource.telecom}">
                     <th:block th:if="${telecomItr.index}">,</th:block>
@@ -89,16 +89,16 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.availableTime.empty}">
-            <td>Available Time:</td>
+            <td th:text="(#{narrative.propertyName.availableTime} ?: 'Available Time') + ':'"></td>
             <td>
                 <table class="subPropertyTable">
                     <tbody>
                     <tr>
                         <th>-</th>
-                        <th>Days of Week</th>
-                        <th>All Day</th>
-                        <th>Available Start Time</th>
-                        <th>Available End Time</th>
+                        <th th:text="(#{narrative.propertyName.daysOfWeek} ?: 'Days Of Week')"></th>
+                        <th th:text="(#{narrative.propertyName.allDay} ?: 'All Day')"></th>
+                        <th th:text="(#{narrative.propertyName.availableStartTime} ?: 'Available Start Time')"></th>
+                        <th th:text="(#{narrative.propertyName.availableEndTime} ?: 'Available End Time')"></th>
                     </tr>
                     <tr th:each="availableTime, availableTimeItr: ${resource.availableTime}">
                         <td th:text="${availableTimeItr.count}"></td>
@@ -125,14 +125,14 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.notAvailable.empty}">
-            <td>Not Available:</td>
+            <td th:text="(#{narrative.propertyName.notAvailable} ?: 'Not Available') + ':'"></td>
             <td>
                 <table class="subPropertyTable">
                     <tbody>
                     <tr>
                         <th>-</th>
-                        <th>Description</th>
-                        <th>During</th>
+                        <th th:text="(#{narrative.propertyName.description} ?: 'Description')"></th>
+                        <th th:text="(#{narrative.propertyName.during} ?: 'During')"></th>
                     </tr>
                     <tr th:each="notAvailable, notAvailableItr: ${resource.notAvailable}">
                         <td th:text="${notAvailableItr.count}"></td>
@@ -150,11 +150,11 @@ a browser.
             </td>
         </tr>
         <tr th:if="${resource.availabilityExceptions}">
-            <td>Availability Exceptions:</td>
+            <td th:text="(#{narrative.propertyName.availabilityExceptions} ?: 'Availability Exceptions') + ':'"></td>
             <td th:text="${resource.availabilityExceptions}"></td>
         </tr>
         <tr th:if="${not resource.endpoint.empty}">
-            <td>Endpoint:</td>
+            <td th:text="(#{narrative.propertyName.endpoint} ?: 'Endpoint') + ':'"></td>
             <td>
                 <th:block th:each="endpoint, endpointItr: ${resource.endpoint}">
                     <th:block th:if="${endpointItr.index}">,</th:block>

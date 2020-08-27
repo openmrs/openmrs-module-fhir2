@@ -16,12 +16,12 @@ a browser.
     <table class="hapiPropertyTable" th:if="${not resource.empty}">
         <tbody>
         <tr th:if="${resource.id}">
-            <td>Id:</td>
+            <td th:text="(#{narrative.propertyName.id} ?: 'Id') + ':'"></td>
             <td th:text="${resource.id}"></td>
         </tr>
         <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.identifier.empty}">
-                <td>Identifier:</td>
+                <td th:text="(#{narrative.propertyName.identifier} ?: 'Identifier') + ':'"></td>
                 <td>
                     <th:block th:each="identifier: ${resource.identifier}">
                         <div th:narrative="${identifier}"></div>
@@ -30,38 +30,38 @@ a browser.
             </tr>
         </th:block>
         <tr th:if="${not resource.code.empty}">
-            <td>Code:</td>
+            <td th:text="(#{narrative.propertyName.code} ?: 'Code') + ':'"></td>
             <td th:narrative="${resource.code}"></td>
         </tr>
         <tr th:if="${resource.status}">
-            <td>Status:</td>
+            <td th:text="(#{narrative.propertyName.status} ?: 'Status') + ':'"></td>
             <td th:text="${resource.status}"></td>
         </tr>
         <tr th:if="${not resource.manufacturer.empty}">
-            <td>Manufacturer:</td>
+            <td th:text="(#{narrative.propertyName.manufacturer} ?: 'Manufacturer') + ':'"></td>
             <td th:narrative="${resource.manufacturer}"></td>
         </tr>
         <tr th:if="${not resource.form.empty}">
-            <td>Form:</td>
+            <td th:text="(#{narrative.propertyName.form} ?: 'Form') + ':'"></td>
             <td th:narrative="${resource.form}"></td>
         </tr>
         <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.amount.empty}">
-                <td>Amount:</td>
+                <td th:text="(#{narrative.propertyName.amount} ?: 'Amount') + ':'"></td>
                 <td th:narrative="${resource.amount}"></td>
             </tr>
         </th:block>
         <tr th:if="${not resource.ingredient.empty}">
-            <td>Ingredients:</td>
+            <td th:text="(#{narrative.propertyName.ingredient.multiple} ?: 'Ingredients') + ':'"></td>
             <td>
                 <table class="subPropertyTable">
                     <tbody>
                     <tr>
                         <th>-</th>
-                        <th>Item</th>
-                        <th>Is Active</th>
+                        <th th:text="(#{narrative.propertyName.item} ?: 'Item')"></th>
+                        <th th:text="(#{narrative.propertyName.isActive} ?: 'Is Active')"></th>
                         <th:block th:unless="${fhirVersion} eq 'DSTU3'">
-                            <th>Strength</th>
+                            <th th:text="(#{narrative.propertyName.strength} ?: 'Strength')"></th>
                         </th:block>
                     </tr>
                     <tr th:each="ingredient, ingredientItr: ${resource.ingredient}">
@@ -83,14 +83,14 @@ a browser.
         </tr>
         <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.batch.empty}">
-                <td>Batches:</td>
+                <td th:text="(#{narrative.propertyName.batch.multiple} ?: 'Batches') + ':'"></td>
                 <td>
                     <table class="subPropertyTable">
                         <tbody>
                         <tr>
                             <th>-</th>
-                            <th>Lot Number</th>
-                            <th>Expiration Date</th>
+                            <th th:text="(#{narrative.propertyName.lotNumber} ?: 'Lot Number')"></th>
+                            <th th:text="(#{narrative.propertyName.expirationDate} ?: 'Expiration Date')"></th>
                         </tr>
                         <tr th:each="batch, batchItr: ${resource.batch}">
                             <td th:text="${batchItr.count}"></td>
