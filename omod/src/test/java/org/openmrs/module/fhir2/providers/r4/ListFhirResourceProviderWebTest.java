@@ -50,7 +50,7 @@ public class ListFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	
 	private static final String JSON_UPDATE_LIST_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/ListWebTest_updateWithWrongId.json";
 	
-	ListResource listResource;
+	private ListResource listResource;
 	
 	@Mock
 	private FhirListService<Cohort, ListResource> cohortFhirListService;

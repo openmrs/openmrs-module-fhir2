@@ -30,6 +30,7 @@ import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.context.MessageSource;
 
 /**
  * Class for carrying out the task of narrative generation
@@ -45,9 +46,10 @@ public class OpenMRSThymeleafNarrativeGenerator extends ThymeleafNarrativeGenera
 	 * 
 	 * @param thePropertyFile
 	 */
-	public OpenMRSThymeleafNarrativeGenerator(String... thePropertyFile) {
+	public OpenMRSThymeleafNarrativeGenerator(MessageSource messageSource, String... propertyFile) {
 		super();
-		setPropertyFile(thePropertyFile);
+		setMessageResolver(new OpenmrsMessageResolver(messageSource));
+		setPropertyFile(propertyFile);
 	}
 	
 	/**

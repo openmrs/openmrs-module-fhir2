@@ -31,7 +31,7 @@ public class FhirPatientDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String BAD_PATIENT_UUID = "282390a6-3608-496d-9025-aecbc1235670";
 	
 	private static final String[] PATIENT_SEARCH_DATA_FILES = {
-	        "org/openmrs/api/include/PatientServiceTest-findPatients.xml",
+	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_initial_data.xml",
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_address_data.xml" };
 	
 	private FhirPatientDaoImpl dao;

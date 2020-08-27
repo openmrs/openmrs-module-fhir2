@@ -1,0 +1,118 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <table class="hapiPropertyTable" th:if="${not resource.empty}">
+        <tbody>
+        <tr th:if="${resource.id}">
+            <td th:text="(#{narrative.propertyName.id} ?: 'Id') + ':'"></td>
+            <td th:text="${resource.id}"></td>
+        </tr>
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.identifier.empty}">
+                <td th:text="(#{narrative.propertyName.identifier} ?: 'Identifier') + ':'"></td>
+                <td>
+                    <th:block th:each="identifier: ${resource.identifier}">
+                        <div th:narrative="${identifier}"></div>
+                    </th:block>
+                </td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.code.empty}">
+            <td th:text="(#{narrative.propertyName.code} ?: 'Code') + ':'"></td>
+            <td th:narrative="${resource.code}"></td>
+        </tr>
+        <tr th:if="${resource.status}">
+            <td th:text="(#{narrative.propertyName.status} ?: 'Status') + ':'"></td>
+            <td th:text="${resource.status}"></td>
+        </tr>
+        <tr th:if="${not resource.manufacturer.empty}">
+            <td th:text="(#{narrative.propertyName.manufacturer} ?: 'Manufacturer') + ':'"></td>
+            <td th:narrative="${resource.manufacturer}"></td>
+        </tr>
+        <tr th:if="${not resource.form.empty}">
+            <td th:text="(#{narrative.propertyName.form} ?: 'Form') + ':'"></td>
+            <td th:narrative="${resource.form}"></td>
+        </tr>
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.amount.empty}">
+                <td th:text="(#{narrative.propertyName.amount} ?: 'Amount') + ':'"></td>
+                <td th:narrative="${resource.amount}"></td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.ingredient.empty}">
+            <td th:text="(#{narrative.propertyName.ingredient.multiple} ?: 'Ingredients') + ':'"></td>
+            <td>
+                <table class="subPropertyTable">
+                    <tbody>
+                    <tr>
+                        <th>-</th>
+                        <th th:text="(#{narrative.propertyName.item} ?: 'Item')"></th>
+                        <th th:text="(#{narrative.propertyName.isActive} ?: 'Is Active')"></th>
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+                            <th th:text="(#{narrative.propertyName.strength} ?: 'Strength')"></th>
+                        </th:block>
+                    </tr>
+                    <tr th:each="ingredient, ingredientItr: ${resource.ingredient}">
+                        <td th:text="${ingredientItr.count}"></td>
+                        <td th:narrative="${ingredient.item}"></td>
+                        <td>
+                            <th:block th:if="${ingredient.isActive}" th:text="${ingredient.isActive}"></th:block>
+                        </td>
+                        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+                            <td>
+                                <th:block th:if="${ingredient.strength}"
+                                          th:narrative="${ingredient.strength}"></th:block>
+                            </td>
+                        </th:block>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.batch.empty}">
+                <td th:text="(#{narrative.propertyName.batch.multiple} ?: 'Batches') + ':'"></td>
+                <td>
+                    <table class="subPropertyTable">
+                        <tbody>
+                        <tr>
+                            <th>-</th>
+                            <th th:text="(#{narrative.propertyName.lotNumber} ?: 'Lot Number')"></th>
+                            <th th:text="(#{narrative.propertyName.expirationDate} ?: 'Expiration Date')"></th>
+                        </tr>
+                        <tr th:each="batch, batchItr: ${resource.batch}">
+                            <td th:text="${batchItr.count}"></td>
+                            <td>
+                                <th:block th:if="${batch.lotNumber}" th:text="${batch.lotNumber}"></th:block>
+                            </td>
+                            <td>
+                                <th:block th:if="${batch.expirationDate}"
+                                          th:text="${#dates.format(batch.expirationDate,'dd/MM/yyyy')}"></th:block>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </th:block>
+        </tbody>
+    </table>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->

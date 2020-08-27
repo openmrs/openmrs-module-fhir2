@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Concept;
 import org.openmrs.ConceptNumeric;
+import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
@@ -60,7 +61,7 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 	private ObservationCategoryTranslator categoryTranslator;
 	
 	@Autowired
-	private EncounterReferenceTranslator encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -106,7 +107,9 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		
 		if (observation.isObsGrouping()) {
 			for (Obs groupObs : observation.getGroupMembers()) {
-				obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
+				if (!groupObs.getVoided()) {
+					obs.addHasMember(observationReferenceTranslator.toFhirResource(groupObs));
+				}
 			}
 		}
 		
@@ -119,14 +122,15 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 			if (concept instanceof ConceptNumeric) {
 				obs.setReferenceRange(referenceRangeTranslator.toFhirResource((ConceptNumeric) concept));
 			}
-			
 		}
-		obs.getMeta().setLastUpdated(observation.getDateChanged());
-		obs.addContained(provenanceTranslator.getCreateProvenance(observation));
-		obs.addContained(provenanceTranslator.getUpdateProvenance(observation));
+		
 		obs.setIssued(observation.getDateCreated());
 		obs.setEffective(datetimeTranslator.toFhirResource(observation));
 		obs.addBasedOn(basedOnReferenceTranslator.toFhirResource(observation.getOrder()));
+		
+		obs.getMeta().setLastUpdated(observation.getDateChanged());
+		obs.addContained(provenanceTranslator.getCreateProvenance(observation));
+		obs.addContained(provenanceTranslator.getUpdateProvenance(observation));
 		
 		return obs;
 	}
@@ -142,7 +146,6 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 		notNull(existingObs, "The existing Obs object should not be null");
 		notNull(observation, "The Observation object should not be null");
 		
-		existingObs.setUuid(observation.getId());
 		observationStatusTranslator.toOpenmrsType(existingObs, observation.getStatus());
 		
 		existingObs.setEncounter(encounterReferenceTranslator.toOpenmrsType(observation.getEncounter()));
@@ -154,9 +157,12 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 			existingObs.addGroupMember(observationReferenceTranslator.toOpenmrsType(reference));
 		}
 		
+		observationValueTranslator.toOpenmrsType(existingObs, observation.getValue());
+		
 		if (observation.getInterpretation().size() > 0) {
 			interpretationTranslator.toOpenmrsType(existingObs, observation.getInterpretation().get(0));
 		}
+		
 		datetimeTranslator.toOpenmrsType(existingObs, observation.getEffectiveDateTimeType());
 		
 		if (observation.hasBasedOn()) {

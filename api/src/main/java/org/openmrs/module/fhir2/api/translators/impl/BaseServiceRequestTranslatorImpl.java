@@ -25,7 +25,7 @@ import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PROTECTED)
-public class BaseServiceRequestTranslatorImpl {
+public abstract class BaseServiceRequestTranslatorImpl {
 	
 	private static final int START_INDEX = 0;
 	

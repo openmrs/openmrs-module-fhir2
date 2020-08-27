@@ -9,16 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
@@ -30,7 +29,6 @@ import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseReferenceHandlingTranslatorTest {
@@ -47,7 +45,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	private static final String TEST_IDENTIFIER_TYPE_NAME = "Test IdentifierType Name";
 	
-	private static final String NAME_DISPLAY = "Ricky Morty(" + TEST_IDENTIFIER_TYPE_NAME + ":34ty5jsd-u)";
+	private static final String NAME_DISPLAY = "Ricky Morty (" + TEST_IDENTIFIER_TYPE_NAME + ": 34ty5jsd-u)";
 	
 	private static final String PROVIDER_UUID = "234hj34-34ty34-324k5-6uh034";
 	
@@ -59,8 +57,8 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	private static final String PROVIDER_URI = FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID;
 	
-	private static final String PROVIDER_DISPLAY = "Ricky Morty(" + FhirConstants.IDENTIFIER + ":" + PROVIDER_TEST_IDENTIFIER
-	        + ")";
+	private static final String PROVIDER_DISPLAY = "Ricky Morty (" + FhirConstants.IDENTIFIER + ": "
+	        + PROVIDER_TEST_IDENTIFIER + ")";
 	
 	private static final String LOCATION_UUID = "2321gh23-kj34h45-34jk3-34k34k";
 	
@@ -86,15 +84,11 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	private org.openmrs.Encounter encounter;
 	
-	@Mock
-	private PatientIdentifierTranslator patientIdentifierTranslator;
-	
 	private BaseReferenceHandlingTranslator referenceHandlingTranslator;
 	
 	@Before
 	public void setUp() {
 		referenceHandlingTranslator = new BaseReferenceHandlingTranslator() {};
-		referenceHandlingTranslator.setPatientIdentifierTranslator(patientIdentifierTranslator);
 		
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
@@ -135,51 +129,55 @@ public class BaseReferenceHandlingTranslatorTest {
 	
 	@Test
 	public void shouldExtractIdFromReference() {
-		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(PATIENT_URI)),
+		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(PATIENT_URI)).orElse(null),
 		    equalTo(PATIENT_UUID));
 	}
 	
 	@Test
 	public void shouldReturnNullIdForNullReference() {
-		assertThat(referenceHandlingTranslator.getReferenceId(new Reference()), nullValue());
+		assertThat(referenceHandlingTranslator.getReferenceId(new Reference()).orElse(null), nullValue());
 	}
 	
 	@Test
 	public void shouldNotExtractIdWhenIdMissingFromReference() {
-		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(FhirConstants.PATIENT + "/")),
+		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(FhirConstants.PATIENT + "/"))
+		        .orElse(null),
 		    nullValue());
 	}
 	
 	@Test
 	public void shouldReturnNullIdWhenNoSlashFound() {
-		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(PATIENT_UUID)), nullValue());
+		assertThat(referenceHandlingTranslator.getReferenceId(new Reference().setReference(PATIENT_UUID)).orElse(null),
+		    nullValue());
 	}
 	
 	@Test
 	public void shouldExtractReferenceTypeFromReference() {
-		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setReference(PATIENT_URI)),
+		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setReference(PATIENT_URI)).orElse(null),
 		    equalTo(FhirConstants.PATIENT));
 	}
 	
 	@Test
 	public void shouldReturnNullTypeForNullReference() {
-		assertThat(referenceHandlingTranslator.getReferenceType(new Reference()), nullValue());
+		assertThat(referenceHandlingTranslator.getReferenceType(new Reference()).orElse(null), nullValue());
 	}
 	
 	@Test
 	public void shouldReturnNullTypeWhenTypeMissing() {
-		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setReference("/" + PATIENT_UUID)),
+		assertThat(
+		    referenceHandlingTranslator.getReferenceType(new Reference().setReference("/" + PATIENT_UUID)).orElse(null),
 		    nullValue());
 	}
 	
 	@Test
 	public void shouldReturnNullTypeWhenNoSlashFound() {
-		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setReference(PATIENT_UUID)), nullValue());
+		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setReference(PATIENT_UUID)).orElse(null),
+		    nullValue());
 	}
 	
 	@Test
 	public void shouldUseExplicitType() {
-		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setType(FhirConstants.PATIENT)),
+		assertThat(referenceHandlingTranslator.getReferenceType(new Reference().setType(FhirConstants.PATIENT)).orElse(null),
 		    equalTo(FhirConstants.PATIENT));
 	}
 	

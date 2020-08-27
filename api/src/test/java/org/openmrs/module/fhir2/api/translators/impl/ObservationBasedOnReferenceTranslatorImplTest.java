@@ -128,9 +128,9 @@ public class ObservationBasedOnReferenceTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldConvertMedicationReferenceToOrder() {
-		Reference orderReference = new Reference().setReference(FhirConstants.MEDICATION + "/" + ORDER_UUID)
-		        .setType(FhirConstants.MEDICATION).setIdentifier(new Identifier().setValue(ORDER_UUID));
+	public void toOpenmrsType_shouldConvertMedicationRequestReferenceToOrder() {
+		Reference orderReference = new Reference().setReference(FhirConstants.MEDICATION_REQUEST + "/" + ORDER_UUID)
+		        .setType(FhirConstants.MEDICATION_REQUEST).setIdentifier(new Identifier().setValue(ORDER_UUID));
 		
 		DrugOrder order = new DrugOrder();
 		order.setUuid(ORDER_UUID);

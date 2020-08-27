@@ -1,5 +1,19 @@
 {
   "resourceType": "Patient",
+  "identifier": {
+    "extension": [{
+      "url": "http://fhir.openmrs.org/ext/patient/identifier#location",
+      "valueReference": {
+        "reference": "Location/92ab9667-4686-49af-8be8-65a4b58fc49c",
+        "type": "Location"
+      }
+    }],
+    "use": "official",
+    "type": {
+      "text": "Test Identifier Type"
+    },
+    "value": "4444-6"
+  },
   "name": [
     {
       "given": [

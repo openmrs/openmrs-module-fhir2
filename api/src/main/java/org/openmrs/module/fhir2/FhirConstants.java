@@ -38,6 +38,9 @@ public class FhirConstants {
 	public static final String CONDITION_VERIFICATION_STATUS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX
 	        + "/condition-ver-status";
 	
+	public static final String ALLERGY_VERIFICATION_STATUS_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
+	        + "/allergyintolerance-verification";
+	
 	public static final String CONDITION_CLINICAL_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/condition-clinical ";
 	
 	public static final String CLINICAL_FINDINGS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/clinical-findings";
@@ -65,7 +68,7 @@ public class FhirConstants {
 	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	
-	public static final String OPENMRS_FHIR_PREFIX = "https://fhir.openmrs.org";
+	public static final String OPENMRS_FHIR_PREFIX = "http://fhir.openmrs.org";
 	
 	public static final String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
 	
@@ -77,14 +80,6 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_MEDICINE = OPENMRS_FHIR_EXT_PREFIX + "/medicine";
 	
-	public static final String FHIR_STRUCTURE_DEF_PREFIX = "http://hl7.org/fhir/StructureDefinition";
-	
-	public static final String FHIR_EXT_TRANSLATIONS = FHIR_STRUCTURE_DEF_PREFIX + "/translation";
-	
-	public static final String RELATED_PERSON = "RelatedPerson";
-	
-	public static final String PERSON = "Person";
-	
 	public static final String OPENMRS_FHIR_EXT_USER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/user/identifier";
 	
 	public static final String OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/provider/identifier";
@@ -93,37 +88,44 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_VS_INTERPRETATION = OPENMRS_FHIR_EXT_PREFIX + "/obs/interpretations";
 	
+	public static final String OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION = OPENMRS_FHIR_EXT_PREFIX
+	        + "/patient/identifier#location";
+	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
 	public static final String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
 	
 	public static final String ALLERGY_INTOLERANCE = "AllergyIntolerance";
 	
+	public static final String CONDITION = "Condition";
+	
+	public static final String DIAGNOSTIC_REPORT = "DiagnosticReport";
+	
 	public static final String ENCOUNTER = "Encounter";
 	
-	public static final String CONDITION = "Condition";
+	public static final String IDENTIFIER = "Identifier";
+	
+	public static final String LOCATION = "Location";
+	
+	public static final String MEDICATION = "Medication";
+	
+	public static final String MEDICATION_REQUEST = "MedicationRequest";
 	
 	public static final String OBSERVATION = "Observation";
 	
 	public static final String ORGANIZATION = "Organization";
 	
-	public static final String LOCATION = "Location";
-	
 	public static final String PATIENT = "Patient";
+	
+	public static final String PERSON = "Person";
 	
 	public static final String PRACTITIONER = "Practitioner";
 	
-	public static final String IDENTIFIER = "identifier";
-	
-	public static final String DIAGNOSTIC_REPORT = "DiagnosticReport";
+	public static final String RELATED_PERSON = "RelatedPerson";;
 	
 	public static final String SERVICE_REQUEST = "ServiceRequest";
 	
-	public static final String MEDICATION_REQUEST = "MedicationRequest";
-	
 	public static final String TASK = "Task";
-	
-	public static final String MEDICATION = "Medication";
 	
 	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
 	

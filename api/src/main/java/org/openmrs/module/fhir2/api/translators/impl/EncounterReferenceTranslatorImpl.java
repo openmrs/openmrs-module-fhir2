@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Encounter;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterReferenceTranslator {
+public class EncounterReferenceTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterReferenceTranslator<Encounter> {
 	
 	@Autowired
 	private FhirEncounterDao encounterDao;
@@ -40,16 +41,11 @@ public class EncounterReferenceTranslatorImpl extends BaseReferenceHandlingTrans
 			return null;
 		}
 		
-		String type = encounter.getType();
-		if (type != null && !type.equals("Encounter")) {
-			throw new IllegalArgumentException("Reference must be to an Encounter not a " + type);
+		if (getReferenceType(encounter).map(ref -> !ref.equals(FhirConstants.ENCOUNTER)).orElse(true)) {
+			throw new IllegalArgumentException(
+			        "Reference must be to an Encounter not a " + getReferenceType(encounter).orElse(""));
 		}
 		
-		String uuid = getReferenceId(encounter);
-		if (uuid == null) {
-			return null;
-		}
-		
-		return encounterDao.get(uuid);
+		return getReferenceId(encounter).map(uuid -> encounterDao.get(uuid)).orElse(null);
 	}
 }

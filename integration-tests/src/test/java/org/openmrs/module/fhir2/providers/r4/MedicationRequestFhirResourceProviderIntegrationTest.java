@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -36,6 +37,8 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 	private static final String MEDICATION_REQUEST_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
 	
 	private static final String WRONG_MEDICATION_REQUEST_UUID = "6d0ae116-0000-4629-9850-f15206e63ab0";
+	
+	private static final String PATIENT_UUID = "86526ed5-3c11-11de-a0ba-001e3766667a";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -135,8 +138,8 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		
 		entries = results.getEntry();
 		
-		assertThat(entries, everyItem(
-		    hasResource(hasProperty("subject", hasProperty("identifier", hasProperty("value", equalTo("MO-2")))))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
@@ -175,8 +178,8 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		
 		entries = results.getEntry();
 		
-		assertThat(entries, everyItem(
-		    hasResource(hasProperty("subject", hasProperty("identifier", hasProperty("value", equalTo("MO-2")))))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 }

@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -99,12 +100,11 @@ public class AllergyIntoleranceSeverityTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateAllergyReactionToNULLAllergyIntoleranceSeverity() {
+	public void shouldTranslateAllergyReactionToNullAllergyIntoleranceSeverity() {
 		Concept otherConcept = new Concept();
 		otherConcept.setUuid(GLOBAL_PROPERTY_OTHER_VALUE);
 		AllergyIntolerance.AllergyIntoleranceSeverity severity = severityTranslator.toFhirResource(otherConcept);
-		assertThat(severity, notNullValue());
-		assertThat(severity, equalTo(AllergyIntolerance.AllergyIntoleranceSeverity.NULL));
+		assertThat(severity, nullValue());
 	}
 	
 	@Test

@@ -45,7 +45,7 @@ public class NarrativeGeneratorTest {
 	@Test
 	public void shouldThrowIOExcpetionWhenNoValidPrefixInPath() {
 		String givenPath = "some/random/path/without/prefix.properties";
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(givenPath));
+		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(null, givenPath));
 		
 		String expectedErrorMessage = "Invalid resource name: '" + givenPath
 		        + "' (must start with classpath: or file: or openmrs:)";
@@ -61,7 +61,7 @@ public class NarrativeGeneratorTest {
 	@Test
 	public void shouldThrowIOExcpetionForIncorrectClassPath() {
 		String givenPath = "classpath:some/random/class/path.properties";
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(givenPath));
+		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(null, givenPath));
 		
 		String expectedErrorMessage = "Can not find '" + givenPath.substring("classpath:".length()) + "' on classpath";
 		
@@ -76,7 +76,7 @@ public class NarrativeGeneratorTest {
 	@Test
 	public void shouldThrowIOExcpetionForIncorrectFilePath() {
 		String givenPath = "file:some/random/file/path.properties";
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(givenPath));
+		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(null, givenPath));
 		
 		File file = new File(givenPath.substring("file:".length()));
 		String expectedErrorMessage = "File not found: " + file.getAbsolutePath();
@@ -92,7 +92,7 @@ public class NarrativeGeneratorTest {
 	@Test
 	public void shouldThrowIOExcpetionForIncorrectOpenmrsPath() {
 		String givenPath = "openmrs:some/random/openmrs/path.properties";
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(givenPath));
+		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(null, givenPath));
 		
 		File file = new File(OpenmrsUtil.getApplicationDataDirectory(), givenPath.substring("openmrs:".length()));
 		String expectedErrorMessage = "File not found: " + file.getAbsolutePath();

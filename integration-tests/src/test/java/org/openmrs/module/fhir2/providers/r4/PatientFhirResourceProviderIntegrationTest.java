@@ -47,14 +47,14 @@ import org.springframework.mock.web.MockHttpServletResponse;
 public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<PatientFhirResourceProvider, Patient> {
 	
 	private static final String[] PATIENT_SEARCH_DATA_FILES = {
-	        "org/openmrs/api/include/PatientServiceTest-findPatients.xml",
+	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_initial_data.xml",
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_address_data.xml" };
 	
 	private static final String JSON_CREATE_PATIENT_DOCUMENT = "org/openmrs/module/fhir2/providers/PatientWebTest_create.json";
 	
 	private static final String XML_CREATE_PATIENT_DOCUMENT = "org/openmrs/module/fhir2/providers/PatientWebTest_create.xml";
 	
-	private static final String PATIENT_UUID = "256ccf6d-6b41-455c-9be2-51ff4386ae76";
+	private static final String PATIENT_UUID = "30e2aa2a-4ed1-415d-84c5-ba29016c14b7";
 	
 	private static final String WRONG_PATIENT_UUID = "f090747b-459b-4a13-8c1b-c0567d8aeb63";
 	

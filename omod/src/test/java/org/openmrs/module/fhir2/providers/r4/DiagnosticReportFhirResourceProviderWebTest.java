@@ -89,10 +89,10 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	private DiagnosticReportFhirResourceProvider resourceProvider;
 	
 	@Captor
-	ArgumentCaptor<TokenAndListParam> tokenAndListParamCaptor;
+	private ArgumentCaptor<TokenAndListParam> tokenAndListParamCaptor;
 	
 	@Captor
-	ArgumentCaptor<ReferenceAndListParam> referenceAndListParamCaptor;
+	private ArgumentCaptor<ReferenceAndListParam> referenceAndListParamCaptor;
 	
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;

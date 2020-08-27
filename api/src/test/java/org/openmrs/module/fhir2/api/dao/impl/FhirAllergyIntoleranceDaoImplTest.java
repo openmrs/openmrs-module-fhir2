@@ -18,6 +18,8 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.openmrs.Allergen;
+import org.openmrs.AllergenType;
 import org.openmrs.Allergy;
 import org.openmrs.AllergyReaction;
 import org.openmrs.Concept;
@@ -50,7 +52,7 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	private FhirAllergyIntoleranceDaoImpl allergyDao;
 	
 	@Autowired
-	private FhirConceptDao fhirConceptDao;
+	private FhirConceptDao conceptDao;
 	
 	@Before
 	public void setup() throws Exception {
@@ -77,9 +79,16 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 	@Test
 	public void saveAllergy_shouldSaveAllergyCorrectly() {
 		Allergy existing = allergyDao.get(ALLERGY_UUID);
+		
 		Allergy newAllergy = new Allergy();
+		
 		newAllergy.setPatient(existing.getPatient());
-		newAllergy.setAllergen(existing.getAllergen());
+		
+		Allergen allergen = new Allergen();
+		allergen.setAllergenType(AllergenType.ENVIRONMENT);
+		allergen.setCodedAllergen(conceptDao.get("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+		
+		newAllergy.setAllergen(allergen);
 		newAllergy.setUuid(NEW_ALLERGY_UUID);
 		
 		Allergy result = allergyDao.createOrUpdate(newAllergy);
@@ -92,10 +101,15 @@ public class FhirAllergyIntoleranceDaoImplTest extends BaseModuleContextSensitiv
 		Allergy existing = allergyDao.get(ALLERGY_UUID);
 		Allergy newAllergy = new Allergy();
 		newAllergy.setPatient(existing.getPatient());
-		newAllergy.setAllergen(existing.getAllergen());
+		
+		Allergen allergen = new Allergen();
+		allergen.setAllergenType(AllergenType.ENVIRONMENT);
+		allergen.setCodedAllergen(conceptDao.get("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+		
+		newAllergy.setAllergen(allergen);
 		newAllergy.setUuid(NEW_ALLERGY_UUID);
 		
-		Concept codedReaction = fhirConceptDao.get(CODED_REACTION_UUID);
+		Concept codedReaction = conceptDao.get(CODED_REACTION_UUID);
 		
 		AllergyReaction reaction = new AllergyReaction(newAllergy, codedReaction, "Test Reaction");
 		newAllergy.addReaction(reaction);

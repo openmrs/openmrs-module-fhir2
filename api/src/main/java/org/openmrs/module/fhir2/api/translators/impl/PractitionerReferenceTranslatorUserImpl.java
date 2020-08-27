@@ -13,9 +13,9 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.User;
-import org.openmrs.module.fhir2.api.FhirUserService;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,10 +24,7 @@ import org.springframework.stereotype.Component;
 public class PractitionerReferenceTranslatorUserImpl extends BaseReferenceHandlingTranslator implements PractitionerReferenceTranslator<User> {
 	
 	@Autowired
-	private FhirUserService userService;
-	
-	@Autowired
-	private PractitionerTranslator<User> practitionerTranslator;
+	private FhirUserDao userDao;
 	
 	@Override
 	public Reference toFhirResource(User user) {
@@ -43,15 +40,11 @@ public class PractitionerReferenceTranslatorUserImpl extends BaseReferenceHandli
 			return null;
 		}
 		
-		String type = reference.getType();
-		if (type != null && !type.equals("Practitioner")) {
-			throw new IllegalArgumentException("Reference must be to an User not a " + type);
+		if (getReferenceType(reference).map(ref -> !ref.equals(FhirConstants.PRACTITIONER)).orElse(false)) {
+			throw new IllegalArgumentException(
+			        "Reference must be to an User not a " + getReferenceType(reference).orElse(""));
 		}
 		
-		String uuid = getReferenceId(reference);
-		if (uuid == null) {
-			return null;
-		}
-		return practitionerTranslator.toOpenmrsType(userService.get(uuid));
+		return getReferenceId(reference).map(uuid -> userDao.get(uuid)).orElse(null);
 	}
 }

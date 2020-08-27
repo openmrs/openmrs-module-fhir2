@@ -43,9 +43,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Encounter;
+import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
+import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -74,13 +76,19 @@ public class FhirEncounterServiceImplTest {
 	private FhirEncounterDao dao;
 	
 	@Mock
-	private EncounterTranslator encounterTranslator;
+	private FhirVisitDao visitDao;
+	
+	@Mock
+	private EncounterTranslator<Encounter> encounterTranslator;
+	
+	@Mock
+	private EncounterTranslator<Visit> visitTranslator;
 	
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQuery<Encounter, org.hl7.fhir.r4.model.Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
+	private SearchQuery<Encounter, org.hl7.fhir.r4.model.Encounter, FhirEncounterDao, EncounterTranslator<Encounter>> searchQuery;
 	
 	private FhirEncounterServiceImpl encounterService;
 	
@@ -92,7 +100,9 @@ public class FhirEncounterServiceImplTest {
 	public void setUp() {
 		encounterService = new FhirEncounterServiceImpl();
 		encounterService.setDao(dao);
+		encounterService.setVisitDao(visitDao);
 		encounterService.setTranslator(encounterTranslator);
+		encounterService.setVisitTranslator(visitTranslator);
 		encounterService.setSearchQuery(searchQuery);
 		
 		openMrsEncounter = new Encounter();
@@ -107,7 +117,17 @@ public class FhirEncounterServiceImplTest {
 	}
 	
 	@Test
-	public void shouldGetEncounterByUuid() {
+	public void get_shouldGetEncounterByUuid() {
+		when(dao.get(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
+		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.get(ENCOUNTER_UUID);
+		assertThat(fhirEncounter, notNullValue());
+		assertThat(fhirEncounter.getId(), notNullValue());
+		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void get_shouldGetEncounterByUuidFromOpenMrsVisit() {
 		when(dao.get(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.get(ENCOUNTER_UUID);

@@ -176,11 +176,6 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 			throw new IllegalArgumentException("Reference must be to a Location not a " + location.getType());
 		}
 		
-		String uuid = getReferenceId(location);
-		if (uuid == null) {
-			return null;
-		}
-		
-		return fhirLocationDao.get(uuid);
+		return getReferenceId(location).map(uuid -> fhirLocationDao.get(uuid)).orElse(null);
 	}
 }

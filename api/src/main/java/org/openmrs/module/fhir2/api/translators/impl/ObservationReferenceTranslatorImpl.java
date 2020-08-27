@@ -28,7 +28,7 @@ public class ObservationReferenceTranslatorImpl extends BaseReferenceHandlingTra
 	
 	@Override
 	public Reference toFhirResource(Obs obs) {
-		if (obs == null) {
+		if (obs == null || obs.getVoided()) {
 			return null;
 		}
 		
@@ -41,16 +41,11 @@ public class ObservationReferenceTranslatorImpl extends BaseReferenceHandlingTra
 			return null;
 		}
 		
-		String type = obsReference.getType();
-		if (type != null && !type.equals(FhirConstants.OBSERVATION)) {
-			throw new IllegalArgumentException("Reference must be to an Observation not a " + type);
+		if (getReferenceType(obsReference).map(ref -> !ref.equals(FhirConstants.OBSERVATION)).orElse(true)) {
+			throw new IllegalArgumentException(
+			        "Reference must be to an Observation not a " + getReferenceType(obsReference).orElse(""));
 		}
 		
-		String uuid = getReferenceId(obsReference);
-		if (uuid == null) {
-			return null;
-		}
-		
-		return observationDao.get(uuid);
+		return getReferenceId(obsReference).map(uuid -> observationDao.get(uuid)).orElse(null);
 	}
 }

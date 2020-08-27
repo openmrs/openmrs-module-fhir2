@@ -29,8 +29,6 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -191,43 +189,6 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), equalTo(observation));
-	}
-	
-	@Test
-	public void updateObservation_shouldUpdateObservation() {
-		when(observationService.update(OBSERVATION_UUID, observation)).thenReturn(observation);
-		
-		MethodOutcome result = resourceProvider.updateObservationResource(new IdType().setValue(OBSERVATION_UUID),
-		    observation);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getResource(), equalTo(observation));
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updateObservation_shouldThrowInvalidRequestForUuidMismatch() {
-		when(observationService.update(WRONG_OBSERVATION_UUID, observation)).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID), observation);
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updateObservation_shouldThrowInvalidRequestForMissingId() {
-		Observation noIdObservation = new Observation();
-		
-		when(observationService.update(OBSERVATION_UUID, noIdObservation)).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateObservationResource(new IdType().setValue(OBSERVATION_UUID), noIdObservation);
-	}
-	
-	@Test(expected = MethodNotAllowedException.class)
-	public void updateObservation_shouldThrowMethodNotAllowedIfDoesNotExist() {
-		Observation wrongObservation = new Observation();
-		wrongObservation.setId(WRONG_OBSERVATION_UUID);
-		
-		when(observationService.update(WRONG_OBSERVATION_UUID, wrongObservation)).thenThrow(MethodNotAllowedException.class);
-		
-		resourceProvider.updateObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID), wrongObservation);
 	}
 	
 	@Test

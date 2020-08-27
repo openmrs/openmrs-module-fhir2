@@ -40,16 +40,11 @@ public class MedicationReferenceTranslatorImpl extends BaseReferenceHandlingTran
 			return null;
 		}
 		
-		String type = reference.getType();
-		if (type != null && !type.equals(FhirConstants.MEDICATION)) {
-			throw new IllegalArgumentException("Reference must be a Medication not a " + type);
+		if (getReferenceType(reference).map(ref -> !ref.equals(FhirConstants.MEDICATION)).orElse(true)) {
+			throw new IllegalArgumentException(
+			        "Reference must be a Medication not a " + getReferenceType(reference).orElse(""));
 		}
 		
-		String uuid = getReferenceId(reference);
-		if (uuid == null) {
-			return null;
-		}
-		
-		return medicationDao.get(uuid);
+		return getReferenceId(reference).map(uuid -> medicationDao.get(uuid)).orElse(null);
 	}
 }

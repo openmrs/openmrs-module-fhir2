@@ -9,9 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import org.openmrs.Encounter;
-
-public interface EncounterTranslator extends OpenmrsFhirUpdatableTranslator<Encounter, org.hl7.fhir.r4.model.Encounter> {
+public interface EncounterTranslator<T> extends OpenmrsFhirUpdatableTranslator<T, org.hl7.fhir.r4.model.Encounter> {
 	
 	/**
 	 * Maps {@link org.openmrs.Encounter} to a {@link org.hl7.fhir.r4.model.Encounter} resource
@@ -20,7 +18,7 @@ public interface EncounterTranslator extends OpenmrsFhirUpdatableTranslator<Enco
 	 * @return the corresponding FHIR Encounter resource
 	 */
 	@Override
-	org.hl7.fhir.r4.model.Encounter toFhirResource(Encounter encounter);
+	org.hl7.fhir.r4.model.Encounter toFhirResource(T encounter);
 	
 	/**
 	 * Maps {@link org.hl7.fhir.r4.model.Encounter} to {@link org.openmrs.Encounter}
@@ -29,7 +27,7 @@ public interface EncounterTranslator extends OpenmrsFhirUpdatableTranslator<Enco
 	 * @return the corresponding OpenMRS Encounter
 	 */
 	@Override
-	Encounter toOpenmrsType(org.hl7.fhir.r4.model.Encounter encounter);
+	T toOpenmrsType(org.hl7.fhir.r4.model.Encounter encounter);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Encounter} to an existing {@link org.openmrs.Encounter}
@@ -39,5 +37,5 @@ public interface EncounterTranslator extends OpenmrsFhirUpdatableTranslator<Enco
 	 * @return an updated version of the existingEncounter
 	 */
 	@Override
-	Encounter toOpenmrsType(Encounter existingEncounter, org.hl7.fhir.r4.model.Encounter encounter);
+	T toOpenmrsType(T existingEncounter, org.hl7.fhir.r4.model.Encounter encounter);
 }

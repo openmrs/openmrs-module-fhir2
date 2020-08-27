@@ -16,11 +16,11 @@ a browser.
     <table class="hapiPropertyTable" th:if="${not resource.empty}">
         <tbody>
         <tr th:if="${resource.id}">
-            <td>Id:</td>
+            <td th:text="(#{narrative.propertyName.id} ?: 'Id') + ':'"></td>
             <td th:text="${resource.id}"></td>
         </tr>
         <tr th:if="${not resource.identifier.empty}">
-            <td>Identifier:</td>
+            <td th:text="(#{narrative.propertyName.identifier} ?: 'Identifier') + ':'"></td>
             <td>
                 <th:block th:each="identifier: ${resource.identifier}">
                     <div th:narrative="${identifier}"></div>
@@ -28,7 +28,7 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.basedOn.empty}">
-            <td>Based On:</td>
+            <td th:text="(#{narrative.propertyName.basedOn} ?: 'Based On') + ':'"></td>
             <td>
                 <th:block th:each="basedOn, basedOnItr: ${resource.basedOn}">
                     <th:block th:if="${basedOnItr.index}">,</th:block>
@@ -36,9 +36,9 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.partOf.empty}">
-                <td>Part Of:</td>
+                <td th:text="(#{narrative.propertyName.partOf} ?: 'Part Of') + ':'"></td>
                 <td>
                     <th:block th:each="partOf, partOfItr: ${resource.partOf}">
                         <th:block th:if="${partOfItr.index}">,</th:block>
@@ -48,11 +48,11 @@ a browser.
             </tr>
         </th:block>
         <tr th:if="${resource.status}">
-            <td>Status:</td>
+            <td th:text="(#{narrative.propertyName.status} ?: 'Status') + ':'"></td>
             <td th:text="${resource.status}"></td>
         </tr>
         <tr th:if="${not resource.category.empty}">
-            <td>Category:</td>
+            <td th:text="(#{narrative.propertyName.category} ?: 'Category') + ':'"></td>
             <td>
                 <th:block th:each="category, categoryItr: ${resource.category}">
                     <th:block th:if="${categoryItr.index}">,</th:block>
@@ -61,16 +61,16 @@ a browser.
             </td>
         </tr>
         <tr th:if="${not resource.code.empty}">
-            <td>Code:</td>
+            <td th:text="(#{narrative.propertyName.code} ?: 'Code') + ':'"></td>
             <td th:narrative="${resource.code}"></td>
         </tr>
         <tr th:if="${not resource.subject.empty}">
-            <td>Subject:</td>
+            <td th:text="(#{narrative.propertyName.subject} ?: 'Subject') + ':'"></td>
             <td th:narrative="${resource.subject}"></td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.focus.empty}">
-                <td>Focus:</td>
+                <td th:text="(#{narrative.propertyName.focus} ?: 'Focus') + ':'"></td>
                 <td>
                     <th:block th:each="focus, focusItr: ${resource.focus}">
                         <th:block th:if="${focusItr.index}">,</th:block>
@@ -79,28 +79,28 @@ a browser.
                 </td>
             </tr>
         </th:block>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.encounter.empty}">
-                <td>Encounter:</td>
+                <td th:text="(#{narrative.propertyName.encounter} ?: 'Encounter') + ':'"></td>
                 <td th:narrative="${resource.encounter}"></td>
             </tr>
         </th:block>
-        <th:block th:unless="${fhirVersion} eq 'R4'">
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.context}">
-                <td>Context:</td>
+                <td th:text="(#{narrative.propertyName.context} ?: 'Context') + ':'"></td>
                 <td th:narrative="${resource.context}"></td>
             </tr>
         </th:block>
         <tr th:if="${resource.effective}">
-            <td>Effective:</td>
+            <td th:text="(#{narrative.propertyName.effective} ?: 'Effective') + ':'"></td>
             <td th:narrative="${resource.effective}"></td>
         </tr>
         <tr th:if="${resource.issued}">
-            <td>Issued:</td>
+            <td th:text="(#{narrative.propertyName.issued} ?: 'Issued') + ':'"></td>
             <td th:text="${#dates.format(resource.issued,'dd/MM/yyyy hh:mm:ss a')}"></td>
         </tr>
         <tr th:if="${not resource.performer.empty}">
-            <td>Performer:</td>
+            <td th:text="(#{narrative.propertyName.performer} ?: 'Performer') + ':'"></td>
             <td>
                 <th:block th:each="performer, performerItr: ${resource.performer}">
                     <th:block th:if="${performerItr.index}">,</th:block>
@@ -109,15 +109,15 @@ a browser.
             </td>
         </tr>
         <tr th:if="${resource.value}">
-            <td>Value:</td>
+            <td th:text="(#{narrative.propertyName.value} ?: 'Value') + ':'"></td>
             <td th:narrative="${resource.value}"></td>
         </tr>
         <tr th:if="${not resource.dataAbsentReason.empty}">
-            <td>Data Absent Reason:</td>
+            <td th:text="(#{narrative.propertyName.dataAbsentReason} ?: 'Data Absent Reason') + ':'"></td>
             <td th:narrative="${resource.dataAbsentReason}"></td>
         </tr>
         <tr th:if="${not resource.interpretation.empty}">
-            <td>Interpretation:</td>
+            <td th:text="(#{narrative.propertyName.interpretation} ?: 'Interpretation') + ':'"></td>
             <td>
                 <th:block th:each="interpretation, interpretationItr: ${resource.interpretation}">
                     <th:block th:if="${interpretationItr.index}">,</th:block>
@@ -125,48 +125,48 @@ a browser.
                 </th:block>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.note.empty}">
-                <td>Note:</td>
+                <td th:text="(#{narrative.propertyName.note} ?: 'Note') + ':'"></td>
                 <td>
                     <div th:each="note: ${resource.note}" th:text="${note.text}"></div>
                 </td>
             </tr>
         </th:block>
-        <th:block th:unless="${fhirVersion} eq 'R4'">
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${resource.comment}">
-                <td>Comment:</td>
-                <td th:narrative="${resource.comment}"></td>
+                <td th:text="(#{narrative.propertyName.comment} ?: 'Comment') + ':'"></td>
+                <td th:text="${resource.comment}"></td>
             </tr>
         </th:block>
         <tr th:if="${not resource.bodySite.empty}">
-            <td>Body Site:</td>
+            <td th:text="(#{narrative.propertyName.bodySite} ?: 'Body Site') + ':'"></td>
             <td th:narrative="${resource.bodySite}"></td>
         </tr>
         <tr th:if="${not resource.method.empty}">
-            <td>Method:</td>
+            <td th:text="(#{narrative.propertyName.method} ?: 'Method') + ':'"></td>
             <td th:narrative="${resource.method}"></td>
         </tr>
         <tr th:if="${not resource.specimen.empty}">
-            <td>Specimen:</td>
+            <td th:text="(#{narrative.propertyName.specimen} ?: 'Specimen') + ':'"></td>
             <td th:narrative="${resource.specimen}"></td>
         </tr>
         <tr th:if="${not resource.device.empty}">
-            <td>Device:</td>
+            <td th:text="(#{narrative.propertyName.device} ?: 'Device') + ':'"></td>
             <td th:narrative="${resource.device}"></td>
         </tr>
         <tr th:if="${not resource.referenceRange.empty}">
-            <td>Reference Ranges:</td>
+            <td th:text="(#{narrative.propertyName.referenceRange.multiple} ?: 'Reference Ranges') + ':'"></td>
             <td>
                 <table class="subPropertyTable">
                     <tbody>
                     <tr>
                         <th>-</th>
-                        <th>Low</th>
-                        <th>High</th>
-                        <th>Type</th>
-                        <th>Applies To</th>
-                        <th>Age</th>
+                        <th th:text="(#{narrative.propertyName.low} ?: 'Low')"></th>
+                        <th th:text="(#{narrative.propertyName.high} ?: 'High')"></th>
+                        <th th:text="(#{narrative.propertyName.type} ?: 'Type')"></th>
+                        <th th:text="(#{narrative.propertyName.appliesTo} ?: 'Applies To')"></th>
+                        <th th:text="(#{narrative.propertyName.age} ?: 'Age')"></th>
                     </tr>
                     <tr th:each="refRange, refRangeItr: ${resource.referenceRange}">
                         <td th:text="${refRangeItr.count}"></td>
@@ -185,9 +185,9 @@ a browser.
                 </table>
             </td>
         </tr>
-        <th:block th:if="${fhirVersion} eq 'R4'">
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
             <tr th:if="${not resource.hasMember.empty}">
-                <td>Has Member:</td>
+                <td th:text="(#{narrative.propertyName.hasMember} ?: 'Has Member') + ':'"></td>
                 <td>
                     <th:block th:each="hasMember: ${resource.hasMember}">
                         <div th:narrative="${hasMember}"></div>
@@ -195,7 +195,7 @@ a browser.
                 </td>
             </tr>
             <tr th:if="${not resource.derivedFrom.empty}">
-                <td>Derived From:</td>
+                <td th:text="(#{narrative.propertyName.derivedFrom} ?: 'Derived From') + ':'"></td>
                 <td>
                     <th:block th:each="derivedFrom: ${resource.derivedFrom}">
                         <div th:narrative="${derivedFrom}"></div>
@@ -204,16 +204,16 @@ a browser.
             </tr>
         </th:block>
         <tr th:if="${not resource.component.empty}">
-            <td>Components:</td>
+            <td th:text="(#{narrative.propertyName.component.multiple} ?: 'Components') + ':'"></td>
             <td>
                 <table class="subPropertyTable">
                     <tbody>
                     <tr>
                         <th>-</th>
-                        <th>Code</th>
-                        <th>Value</th>
-                        <th>Data Absent Reason</th>
-                        <th>Interpretation</th>
+                        <th th:text="(#{narrative.propertyName.code} ?: 'Code')"></th>
+                        <th th:text="(#{narrative.propertyName.value} ?: 'Value')"></th>
+                        <th th:text="(#{narrative.propertyName.dataAbsentReason} ?: 'Data Absent Reason')"></th>
+                        <th th:text="(#{narrative.propertyName.interpretation} ?: 'Interpretation')"></th>
                     </tr>
                     <tr th:each="component, componentItr: ${resource.component}">
                         <td th:text="${componentItr.count}"></td>

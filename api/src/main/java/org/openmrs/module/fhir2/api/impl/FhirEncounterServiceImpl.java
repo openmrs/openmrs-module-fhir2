@@ -9,10 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +23,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
+import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
@@ -34,13 +38,33 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.openmrs.Encounter> implements FhirEncounterService {
 	
 	@Autowired
-	FhirEncounterDao dao;
+	private FhirEncounterDao dao;
 	
 	@Autowired
-	EncounterTranslator translator;
+	private FhirVisitDao visitDao;
 	
 	@Autowired
-	SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator> searchQuery;
+	private EncounterTranslator<org.openmrs.Encounter> translator;
+	
+	@Autowired
+	private EncounterTranslator<org.openmrs.Visit> visitTranslator;
+	
+	@Autowired
+	private SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator<org.openmrs.Encounter>> searchQuery;
+	
+	@Override
+	public Encounter get(String uuid) {
+		if (uuid == null) {
+			throw new InvalidRequestException("Uuid cannot be null.");
+		}
+		org.openmrs.Encounter encounter = dao.get(uuid);
+		org.openmrs.Visit visit = visitDao.get(uuid);
+		if (visit == null && encounter == null) {
+			throw new ResourceNotFoundException(resourceClass, new IdDt(uuid));
+		}
+		
+		return encounter != null ? translator.toFhirResource(encounter) : visitTranslator.toFhirResource(visit);
+	}
 	
 	@Override
 	@Transactional(readOnly = true)

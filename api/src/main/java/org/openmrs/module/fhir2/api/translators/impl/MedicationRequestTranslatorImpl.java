@@ -16,6 +16,7 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
+import org.openmrs.Encounter;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
@@ -46,7 +47,7 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 	private MedicationReferenceTranslator medicationReferenceTranslator;
 	
 	@Autowired
-	private EncounterReferenceTranslator encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;

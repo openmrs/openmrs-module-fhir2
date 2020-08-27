@@ -22,7 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -39,6 +38,7 @@ import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.impl.FhirGlobalPropertyServiceImpl;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -104,6 +104,9 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		});
 		
 		servlet.setResourceProviders(getResourceProvider());
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+		messageSource.setBasename("classpath:messages");
+		servlet.setMessageSource(messageSource);
 		servlet.init(servletConfig);
 	}
 	
@@ -160,6 +163,10 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		return (IBaseBundle) parser.parseResource(response.getContentAsString());
 	}
 	
+	public IBaseOperationOutcome readOperationOutcome(MockHttpServletResponse response) throws UnsupportedEncodingException {
+		return parser.parseResource(getOperationOutcomeClass(), response.getContentAsString());
+	}
+	
 	public static class FhirMediaTypes {
 		
 		public static final MediaType JSON;
@@ -180,14 +187,7 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		@SneakyThrows
 		@Override
 		protected void describeMismatchSafely(MockHttpServletResponse item, Description mismatchDescription) {
-			FhirContext fhirContext = getFhirContext();
-			IParser parser = fhirContext.newJsonParser();
-			
-			IBaseOperationOutcome operationOutcome = null;
-			try {
-				operationOutcome = parser.parseResource(getOperationOutcomeClass(), item.getContentAsString());
-			}
-			catch (DataFormatException ignored) {}
+			IBaseOperationOutcome operationOutcome = readOperationOutcome(item);
 			
 			mismatchDescription.appendText("response with status code ").appendValue(item.getStatus());
 			

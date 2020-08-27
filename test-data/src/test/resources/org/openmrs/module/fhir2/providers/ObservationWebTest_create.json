@@ -1,38 +1,22 @@
 {
   "resourceType": "Observation",
-  "id": "39fb7f47-e80a-4056-9285-bd798be13c63",
-  "identifier": [
-    {
-      "value": "23974652"
-    }
-  ],
   "status": "preliminary",
   "code": {
     "coding": [
       {
-        "code": "be472ea0-1691-11df-97a5-7038c432aabf"
+        "code": "5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
       }
     ]
   },
   "subject": {
-    "reference": "Patient/90f7f0b4-06a8-4a97-9678-e7a977f4b518",
-    "type": "Patient",
-    "identifier": {
-      "id": "21bb350c-799b-4837-9496-2ad213e058a4",
-      "use": "official",
-      "system": "OpenMRS ID",
-      "value": "10010W"
-    },
-    "display": "John Taylor(OpenMRS ID:10010W)"
+    "reference": "Patient/5946f880-b197-400b-9caa-a3c661d23041"
   },
   "encounter": {
-    "reference": "Encounter/f201"
+    "reference": "Encounter/6519d653-393b-4118-9c83-a3715b82d4ac"
   },
   "effectiveDateTime": "2014-11-25T22:17:00+11:00",
   "valueQuantity": {
-    "value": 6.2,
-    "unit": "kPa",
-    "system": "http://unitsofmeasure.org",
-    "code": "kPa"
+    "value": 156,
+    "unit": "cm"
   }
 }

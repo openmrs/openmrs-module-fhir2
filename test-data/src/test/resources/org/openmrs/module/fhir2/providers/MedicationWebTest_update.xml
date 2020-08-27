@@ -10,11 +10,11 @@
 -->
 <Medication xmlns="http://hl7.org/fhir">
     <id value="1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
-    <extension url="https://fhir.openmrs.org/ext/medicine">
-        <extension url="https://fhir.openmrs.org/ext/medicine#maximumDailyDose">
+    <extension url="http://fhir.openmrs.org/ext/medicine">
+        <extension url="http://fhir.openmrs.org/ext/medicine#maximumDailyDose">
             <valueString value="3.5" />
         </extension>
-        <extension url="https://fhir.openmrs.org/ext/medicine#strength">
+        <extension url="http://fhir.openmrs.org/ext/medicine#strength">
             <valueString value="800mg" />
         </extension>
     </extension>

@@ -52,7 +52,7 @@ import org.springframework.stereotype.Component;
 public class LocationFhirResourceProvider implements IResourceProvider {
 	
 	@Autowired
-	FhirLocationService fhirLocationService;
+	private FhirLocationService fhirLocationService;
 	
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {

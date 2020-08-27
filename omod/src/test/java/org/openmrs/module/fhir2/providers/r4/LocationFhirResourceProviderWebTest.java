@@ -109,13 +109,13 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	private LocationFhirResourceProvider locationProvider;
 	
 	@Captor
-	ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
+	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
 	
 	@Captor
-	ArgumentCaptor<StringAndListParam> stringAndListParamCaptor;
+	private ArgumentCaptor<StringAndListParam> stringAndListParamCaptor;
 	
 	@Captor
-	ArgumentCaptor<ReferenceAndListParam> referenceAndListParamCaptor;
+	private ArgumentCaptor<ReferenceAndListParam> referenceAndListParamCaptor;
 	
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;

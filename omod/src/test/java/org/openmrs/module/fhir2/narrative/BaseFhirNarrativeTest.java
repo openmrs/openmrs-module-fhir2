@@ -20,6 +20,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 /**
  * Base class for narrative generation tests
@@ -32,7 +33,9 @@ public class BaseFhirNarrativeTest {
 	
 	protected IParser parser;
 	
-	/**
+	protected ReloadableResourceBundleMessageSource messageSource;
+	
+  /**
 	 * Setup a common timezone before all the tests to avoid assertion errors in narrative generation
 	 * tests due to timezone mismatch
 	 */
@@ -48,8 +51,11 @@ public class BaseFhirNarrativeTest {
 	 */
 	@Before
 	public void setup() {
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE,
-		        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE));
+		messageSource = new ReloadableResourceBundleMessageSource();
+		messageSource.setBasename("classpath:messages");
+		
+		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(messageSource,
+		        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE, FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE));
 		parser = ctx.newJsonParser();
 	}
 	

@@ -48,10 +48,6 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.exparity</groupId>
-			<artifactId>hamcrest-date</artifactId>
-		</dependency>
     </dependencies>
 
 	<build>

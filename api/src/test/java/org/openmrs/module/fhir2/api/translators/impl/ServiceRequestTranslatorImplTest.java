@@ -83,7 +83,7 @@ public class ServiceRequestTranslatorImplTest {
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Mock
-	private EncounterReferenceTranslator encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
 	@Mock
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;

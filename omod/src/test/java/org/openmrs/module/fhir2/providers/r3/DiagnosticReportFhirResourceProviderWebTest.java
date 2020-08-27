@@ -84,10 +84,10 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
 	
 	@Captor
-	ArgumentCaptor<TokenAndListParam> tokenAndListParamCaptor;
+	private ArgumentCaptor<TokenAndListParam> tokenAndListParamCaptor;
 	
 	@Captor
-	ArgumentCaptor<ReferenceAndListParam> referenceAndListParamCaptor;
+	private ArgumentCaptor<ReferenceAndListParam> referenceAndListParamCaptor;
 	
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;

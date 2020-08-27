@@ -1,0 +1,221 @@
+<!--/*
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in
+a browser.
+-->
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+
+<body>
+<!--*/-->
+
+<div>
+    <table class="hapiPropertyTable" th:if="${not resource.empty}">
+        <tbody>
+        <tr th:if="${resource.id}">
+            <td th:text="(#{narrative.propertyName.id} ?: 'Id') + ':'"></td>
+            <td th:text="${resource.id}"></td>
+        </tr>
+        <tr th:if="${not resource.identifier.empty}">
+            <td th:text="(#{narrative.propertyName.identifier} ?: 'Identifier') + ':'"></td>
+            <td>
+                <th:block th:each="identifier: ${resource.identifier}">
+                    <div th:narrative="${identifier}"></div>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.basedOn.empty}">
+            <td th:text="(#{narrative.propertyName.basedOn} ?: 'Based On') + ':'"></td>
+            <td>
+                <th:block th:each="basedOn, basedOnItr: ${resource.basedOn}">
+                    <th:block th:if="${basedOnItr.index}">,</th:block>
+                    <th:block th:narrative="${basedOn}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${resource.status}">
+            <td th:text="(#{narrative.propertyName.status} ?: 'Status') + ':'"></td>
+            <td th:text="${resource.status}"></td>
+        </tr>
+        <tr th:if="${not resource.category.empty}">
+            <td th:text="(#{narrative.propertyName.category} ?: 'Category') + ':'"></td>
+            <td>
+                <th:block th:each="category, categoryItr: ${resource.category}">
+                    <th:block th:if="${categoryItr.index}">,</th:block>
+                    <th:block th:narrative="${category}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.code.empty}">
+            <td th:text="(#{narrative.propertyName.code} ?: 'Code') + ':'"></td>
+            <td th:narrative="${resource.code}"></td>
+        </tr>
+        <tr th:if="${not resource.subject.empty}">
+            <td th:text="(#{narrative.propertyName.subject} ?: 'Subject') + ':'"></td>
+            <td th:narrative="${resource.subject}"></td>
+        </tr>
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.encounter.empty}">
+                <td th:text="(#{narrative.propertyName.encounter} ?: 'Encounter') + ':'"></td>
+                <td th:narrative="${resource.encounter}"></td>
+            </tr>
+        </th:block>
+        <tr th:if="${resource.effective}">
+            <td th:text="(#{narrative.propertyName.effective} ?: 'Effective') + ':'"></td>
+            <td th:narrative="${resource.effective}"></td>
+        </tr>
+        <tr th:if="${resource.issued}">
+            <td th:text="(#{narrative.propertyName.issued} ?: 'Issued') + ':'"></td>
+            <td th:text="${resource.issued}"></td>
+        </tr>
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.performer.empty}">
+                <td th:text="(#{narrative.propertyName.performer} ?: 'Performer') + ':'"></td>
+                <td>
+                    <th:block th:each="performer, performerItr: ${resource.performer}">
+                        <th:block th:if="${performerItr.index}">,</th:block>
+                        <th:block th:narrative="${performer}"></th:block>
+                    </th:block>
+                </td>
+            </tr>
+            <tr th:if="${not resource.resultsInterpreter.empty}">
+                <td th:text="(#{narrative.propertyName.resultsInterpreter} ?: 'Results Interpreter') + ':'"></td>
+                <td>
+                    <th:block th:each="resultsInterpreter, resultsInterpreterItr: ${resource.resultsInterpreter}">
+                        <th:block th:if="${resultsInterpreterItr.index}">,</th:block>
+                        <th:block th:narrative="${resultsInterpreter}"></th:block>
+                    </th:block>
+                </td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.specimen.empty}">
+            <td th:text="(#{narrative.propertyName.specimen} ?: 'Specimen') + ':'"></td>
+            <td>
+                <th:block th:each="specimen, specimenItr: ${resource.specimen}">
+                    <th:block th:if="${specimenItr.index}">,</th:block>
+                    <th:block th:narrative="${specimen}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.result.empty}">
+            <td th:text="(#{narrative.propertyName.result} ?: 'Result') + ':'"></td>
+            <td>
+                <th:block th:each="result, resultItr: ${resource.result}">
+                    <th:block th:if="${resultItr.index}">,</th:block>
+                    <th:block th:narrative="${result}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <tr th:if="${not resource.imagingStudy.empty}">
+            <td th:text="(#{narrative.propertyName.imagingStudy} ?: 'Imaging Study') + ':'"></td>
+            <td>
+                <th:block th:each="imagingStudy, imagingStudyItr: ${resource.imagingStudy}">
+                    <th:block th:if="${imagingStudyItr.index}">,</th:block>
+                    <th:block th:narrative="${imagingStudy}"></th:block>
+                </th:block>
+            </td>
+        </tr>
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.media.empty}">
+                <td th:text="(#{narrative.propertyName.media} ?: 'Media') + ':'"></td>
+                <td>
+                    <table class="subPropertyTable">
+                        <tbody>
+                        <tr>
+                            <th>-</th>
+                            <th th:text="(#{narrative.propertyName.comment} ?: 'Comment')"></th>
+                            <th th:text="(#{narrative.propertyName.link} ?: 'Link')"></th>
+                        </tr>
+                        <tr th:each="media, mediaItr: ${resource.media}">
+                            <td th:text="${mediaItr.count}"></td>
+                            <td>
+                                <th:block th:if="${media.comment}" th:text="${media.comment}"></th:block>
+                            </td>
+                            <td>
+                                <th:block th:if="${media.link}" th:narrative="${media.link}"></th:block>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </th:block>
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.image.empty}">
+                <td th:text="(#{narrative.propertyName.image} ?: 'Image') + ':'"></td>
+                <td>
+                    <table class="subPropertyTable">
+                        <tbody>
+                        <tr>
+                            <th>-</th>
+                            <th th:text="(#{narrative.propertyName.comment} ?: 'Comment')"></th>
+                            <th th:text="(#{narrative.propertyName.link} ?: 'Link')"></th>
+                        </tr>
+                        <tr th:each="image, imageItr: ${resource.image}">
+                            <td th:text="${imageItr.count}"></td>
+                            <td>
+                                <th:block th:if="${image.comment}" th:text="${image.comment}"></th:block>
+                            </td>
+                            <td>
+                                <th:block th:if="${image.link}" th:narrative="${image.link}"></th:block>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </th:block>
+        <tr th:if="${resource.conclusion}">
+            <td th:text="(#{narrative.propertyName.conclusion} ?: 'Conclusion') + ':'"></td>
+            <td th:text="${resource.conclusion}"></td>
+        </tr>
+        <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.conclusionCode.empty}">
+                <td th:text="(#{narrative.propertyName.conclusionCode} ?: 'Conclusion Code') + ':'"></td>
+                <td>
+                    <th:block th:each="conclusionCode, conclusionCodeItr: ${resource.conclusionCode}">
+                        <th:block th:if="${conclusionCodeItr.index}">,</th:block>
+                        <th:block th:narrative="${conclusionCode}"></th:block>
+                    </th:block>
+                </td>
+            </tr>
+        </th:block>
+        <th:block th:if="${fhirVersion} eq 'DSTU3'">
+            <tr th:if="${not resource.codedDiagnosis.empty}">
+                <td th:text="(#{narrative.propertyName.codedDiagnosis} ?: 'Coded Diagnosis') + ':'"></td>
+                <td>
+                    <th:block th:each="codedDiagnosis, codedDiagnosisItr: ${resource.codedDiagnosis}">
+                        <th:block th:if="${codedDiagnosisItr.index}">,</th:block>
+                        <th:block th:narrative="${codedDiagnosis}"></th:block>
+                    </th:block>
+                </td>
+            </tr>
+        </th:block>
+        <tr th:if="${not resource.presentedForm.empty}">
+            <td th:text="(#{narrative.propertyName.presentedForm} ?: 'Presented Form') + ':'"></td>
+            <td>
+                <th:block th:each="presentedForm, presentedFormItr: ${resource.presentedForm}">
+                    <th:block th:if="${presentedForm.url}">
+                        <th:block th:if="${presentedFormItr.index}">,</th:block>
+                        <th:block th:if="{presentedForm.title}">
+                            <a th:text="${presentedForm.title}" th:href="${presentedForm.url}"></a>
+                        </th:block>
+                        <th:block th:unless="{presentedForm.title}">
+                            <a th:text="${presentedForm.url}" th:href="${presentedForm.url}"></a>
+                        </th:block>
+                    </th:block>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--/*-->
+</body>
+
+</html>
+<!--*/-->

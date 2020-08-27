@@ -51,7 +51,7 @@ public class ObservationReferenceTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(FhirConstants.OBSERVATION));
-		assertThat(observationReferenceTranslator.getReferenceId(result), equalTo(UUID));
+		assertThat(observationReferenceTranslator.getReferenceId(result).orElse(null), equalTo(UUID));
 	}
 	
 	@Test
