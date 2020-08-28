@@ -11,14 +11,11 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import javax.validation.constraints.NotNull;
 
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -69,7 +66,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		return MedicationRequest30_40.convertMedicationRequest(medicationRequest);
 	}
 	
-	@Create
 	public MethodOutcome createMedicationRequest(@ResourceParam MedicationRequest mRequest) {
 		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestService
 		        .create(MedicationRequest30_40.convertMedicationRequest(mRequest));
@@ -77,7 +73,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		return FhirProviderUtils.buildCreate(MedicationRequest30_40.convertMedicationRequest(medicationRequest));
 	}
 	
-	@Update
 	public MethodOutcome updateMedicationRequest(@IdParam IdType id, @ResourceParam MedicationRequest mRequest) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update resource");
@@ -91,7 +86,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		return FhirProviderUtils.buildUpdate(MedicationRequest30_40.convertMedicationRequest(medicationRequest));
 	}
 	
-	@Delete
 	public OperationOutcome deleteMedicationRequest(@IdParam IdType id) {
 		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestService.delete(id.getIdPart());
 		if (medicationRequest == null) {

@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -20,26 +19,20 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.MedicationRequest;
@@ -559,111 +552,4 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR3Reso
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
 	}
-	
-	@Test
-	public void createMedicationRequest_shouldCreateNewMedicationRequest() throws Exception {
-		String medicationRequestJson;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_MEDICATION_REQUEST_PATH)) {
-			Objects.requireNonNull(is);
-			medicationRequestJson = IOUtils.toString(is, StandardCharsets.UTF_8);
-		}
-		
-		when(fhirMedicationRequestService.create(any(org.hl7.fhir.r4.model.MedicationRequest.class)))
-		        .thenReturn(medicationRequest);
-		
-		MockHttpServletResponse response = post("/MedicationRequest").jsonContent(medicationRequestJson)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isCreated());
-	}
-	
-	@Test
-	public void updateMedicationRequest_shouldUpdateExistingMedicationRequest() throws Exception {
-		String medicationRequestJson;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_REQUEST_PATH)) {
-			Objects.requireNonNull(is);
-			medicationRequestJson = IOUtils.toString(is, StandardCharsets.UTF_8);
-		}
-		
-		when(fhirMedicationRequestService.update(anyString(), any(org.hl7.fhir.r4.model.MedicationRequest.class)))
-		        .thenReturn(medicationRequest);
-		
-		MockHttpServletResponse response = put("/MedicationRequest/" + MEDICATION_REQUEST_UUID)
-		        .jsonContent(medicationRequestJson).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-	}
-	
-	@Test
-	public void updateMedicationRequest_shouldThrowErrorForIdMismatch() throws Exception {
-		String medicationRequestJson;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_REQUEST_PATH)) {
-			Objects.requireNonNull(is);
-			medicationRequestJson = IOUtils.toString(is, StandardCharsets.UTF_8);
-		}
-		
-		MockHttpServletResponse response = put("/MedicationRequest/" + WRONG_MEDICATION_REQUEST_UUID)
-		        .jsonContent(medicationRequestJson).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isBadRequest());
-		assertThat(response.getContentAsString(),
-		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
-	}
-	
-	@Test
-	public void updateMedicationRequest_shouldThrowErrorForNoId() throws Exception {
-		String medicationRequestJson;
-		try (InputStream is = this.getClass().getClassLoader()
-		        .getResourceAsStream(JSON_UPDATE_MEDICATION_REQUEST_NO_ID_PATH)) {
-			Objects.requireNonNull(is);
-			medicationRequestJson = IOUtils.toString(is, StandardCharsets.UTF_8);
-		}
-		
-		MockHttpServletResponse response = put("/MedicationRequest/" + MEDICATION_REQUEST_UUID)
-		        .jsonContent(medicationRequestJson).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isBadRequest());
-		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
-	}
-	
-	@Test
-	public void updateMedicationRequest_shouldThrowErrorForNonExistentMedicationRequest() throws Exception {
-		String medicationRequestJson;
-		try (InputStream is = this.getClass().getClassLoader()
-		        .getResourceAsStream(JSON_UPDATE_MEDICATION_REQUEST_WRONG_ID_PATH)) {
-			Objects.requireNonNull(is);
-			medicationRequestJson = IOUtils.toString(is, StandardCharsets.UTF_8);
-		}
-		
-		when(fhirMedicationRequestService.update(anyString(), any(org.hl7.fhir.r4.model.MedicationRequest.class))).thenThrow(
-		    new MethodNotAllowedException("Medication Request " + WRONG_MEDICATION_REQUEST_UUID + " does not exist"));
-		
-		MockHttpServletResponse response = put("/MedicationRequest/" + WRONG_MEDICATION_REQUEST_UUID)
-		        .jsonContent(medicationRequestJson).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isMethodNotAllowed());
-	}
-	
-	@Test
-	public void deleteMedicationRequest_shouldDeleteMedicationRequest() throws Exception {
-		when(fhirMedicationRequestService.delete(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
-		
-		MockHttpServletResponse response = delete("/MedicationRequest/" + MEDICATION_REQUEST_UUID)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-	}
-	
-	@Test
-	public void deleteMedicationRequest_shouldReturn404ForNonExistingMedicationRequest() throws Exception {
-		when(fhirMedicationRequestService.delete(WRONG_MEDICATION_REQUEST_UUID)).thenReturn(null);
-		
-		MockHttpServletResponse response = delete("/MedicationRequest/" + WRONG_MEDICATION_REQUEST_UUID)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isNotFound());
-		assertThat(response.getStatus(), equalTo(404));
-	}
-	
 }
