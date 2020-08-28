@@ -1,0 +1,6 @@
+<Task xmlns="http://hl7.org/fhir">
+	<id value="55616228-dc6d-446f-ab50-4ec711ea9243"/>
+	<status value="accepted"/>
+	<intent value="order"/>
+	<authoredOn value="2016-10-31T08:25:05+10:00"/>
+</Task>
