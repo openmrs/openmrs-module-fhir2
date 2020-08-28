@@ -30,11 +30,13 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @Slf4j
@@ -244,6 +246,50 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	}
 	
 	@Test
+	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchMedicationIdAsJson() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
+		Medication medication = readResponse(response);
+		
+		// update the existing record
+		medication.setId(WRONG_MEDICATION_UUID);
+		
+		// send the update to the server
+		response = put("/Medication/" + MEDICATION_UUID).jsonContent(toJson(medication)).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldReturnNotFoundWhenUpdatingNonExistentMedicationAsJson() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
+		Medication medication = readResponse(response);
+		
+		// update the existing record
+		medication.setId(WRONG_MEDICATION_UUID);
+		
+		// send the update to the server
+		response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(toJson(medication)).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
 	public void shouldUpdateExistingMedicationAsXml() throws Exception {
 		//Before update
 		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID)
@@ -299,6 +345,75 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(updatedMedication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
 		assertThat(strengthExtension.getValue().toString(), equalTo("800mg"));
 		
+	}
+	
+	@Test
+	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchMedicationIdAsXML() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.XML).go();
+		Medication medication = readResponse(response);
+		
+		// update the existing record
+		medication.setId(WRONG_MEDICATION_UUID);
+		
+		// send the update to the server
+		response = put("/Medication/" + MEDICATION_UUID).xmlContext(toXML(medication)).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldReturnNotFoundWhenUpdatingNonExistentMedicationAsXML() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.XML).go();
+		Medication medication = readResponse(response);
+		
+		// update the existing record
+		medication.setId(WRONG_MEDICATION_UUID);
+		
+		// send the update to the server
+		response = put("/Medication/" + WRONG_MEDICATION_UUID).xmlContext(toXML(medication)).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldDeleteExistingMedication() throws Exception {
+		MockHttpServletResponse response = delete("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, statusEquals(HttpStatus.GONE));
+	}
+	
+	@Test
+	public void shouldReturnNotFoundWhenDeletingNonExistentMedication() throws Exception {
+		MockHttpServletResponse response = delete("/Medication/" + WRONG_MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
 	}
 	
 	@Test
