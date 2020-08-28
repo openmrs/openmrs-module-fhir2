@@ -38,7 +38,7 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 	
 	@Override
 	public Identifier toFhirResource(PatientIdentifier identifier) {
-		if (identifier == null) {
+		if (identifier == null || identifier.getVoided()) {
 			return null;
 		}
 		
