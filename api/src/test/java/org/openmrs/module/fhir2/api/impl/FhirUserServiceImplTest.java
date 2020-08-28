@@ -152,7 +152,7 @@ public class FhirUserServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
 		
-		IBundleProvider results = userService.searchForUsers(null, name, null, null, null, null, null, null, null, null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -170,7 +170,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		
-		IBundleProvider results = userService.searchForUsers(null, name, null, null, null, null, null, null, null, null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -190,8 +190,7 @@ public class FhirUserServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
 		
-		IBundleProvider results = userService.searchForUsers(identifier, null, null, null, null, null, null, null, null,
-		    null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -210,8 +209,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		
-		IBundleProvider results = userService.searchForUsers(identifier, null, null, null, null, null, null, null, null,
-		    null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -230,7 +228,7 @@ public class FhirUserServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, city, null, null, null, null, null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -249,7 +247,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, city, null, null, null, null, null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -268,7 +266,7 @@ public class FhirUserServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, null, state, null, null, null, null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -287,7 +285,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, null, state, null, null, null, null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -307,8 +305,7 @@ public class FhirUserServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, null, null, postalCode, null, null,
-		    null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -327,8 +324,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, null, null, postalCode, null, null,
-		    null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -337,7 +333,7 @@ public class FhirUserServiceImplTest {
 	}
 	
 	@Test
-	public void shouldsearchForUsersByAddressCountry() {
+	public void shouldSearchForUsersByAddressCountry() {
 		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(COUNTRY));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(ADDRESS_SEARCH_HANDLER, COUNTRY_PROPERTY,
 		    country);
@@ -348,7 +344,7 @@ public class FhirUserServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, null, null, null, country, null, null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -367,7 +363,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, null, null, null, country, null, null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -387,7 +383,7 @@ public class FhirUserServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, null, null, null, null, uuid, null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -407,7 +403,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, null, null, null, null, uuid, null);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -428,8 +424,7 @@ public class FhirUserServiceImplTest {
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		when(translator.toFhirResource(user)).thenReturn(practitioner);
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, null, null, null, null, null,
-		    lastUpdated);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -450,8 +445,7 @@ public class FhirUserServiceImplTest {
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		
-		IBundleProvider results = userService.searchForUsers(null, null, null, null, null, null, null, null, null,
-		    lastUpdated);
+		IBundleProvider results = userService.searchForUsers(theParams);
 		
 		List<IBaseResource> resultList = get(results);
 		

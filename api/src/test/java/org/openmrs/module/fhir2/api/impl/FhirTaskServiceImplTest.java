@@ -81,7 +81,12 @@ public class FhirTaskServiceImplTest {
 	
 	@Before
 	public void setUp() {
-		fhirTaskService = new FhirTaskServiceImpl();
+		fhirTaskService = new FhirTaskServiceImpl() {
+			
+			@Override
+			protected void validateObject(FhirTask object) {
+			}
+		};
 		fhirTaskService.setDao(dao);
 		fhirTaskService.setTranslator(translator);
 		fhirTaskService.setSearchQuery(searchQuery);

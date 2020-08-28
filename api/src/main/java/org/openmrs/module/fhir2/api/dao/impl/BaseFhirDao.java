@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -41,10 +39,8 @@ import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
-import org.openmrs.api.ValidationException;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.validator.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,12 +89,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			return null;
 		}
 		
-		if (isVoidable || isRetireable) {
-			if (isVoided(result) || isRetired(result)) {
-				throw new ResourceGoneException(uuid);
-			}
-		}
-		
 		return deproxyObject(result);
 	}
 	
@@ -106,14 +96,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	public T createOrUpdate(T newEntry) {
 		if (newEntry.getUuid() == null) {
 			newEntry.setUuid(UUID.randomUUID().toString());
-		}
-		
-		// TODO Improve these messages
-		try {
-			ValidateUtil.validate(newEntry);
-		}
-		catch (ValidationException e) {
-			throw new UnprocessableEntityException(e.getMessage(), e);
 		}
 		
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
@@ -124,6 +106,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	public T delete(String uuid) {
 		T existing = get(uuid);
+		
 		if (existing == null) {
 			return null;
 		}
@@ -209,26 +192,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 */
 	protected void handleRetireable(Criteria criteria) {
 		criteria.add(eq("retired", false));
-	}
-	
-	/**
-	 * Determines whether the object is voided
-	 *
-	 * @param object an object implementing the Voidable interface
-	 * @return true if the object is voided, false otherwise
-	 */
-	protected boolean isVoided(T object) {
-		return object instanceof Voidable && ((Voidable) object).getVoided();
-	}
-	
-	/**
-	 * Determines whether the object is retired
-	 *
-	 * @param object an object implementing the Retireable interface
-	 * @return true if the object is retired, false otherwise
-	 */
-	protected boolean isRetired(T object) {
-		return object instanceof Retireable && ((Retireable) object).getRetired();
 	}
 	
 	/**

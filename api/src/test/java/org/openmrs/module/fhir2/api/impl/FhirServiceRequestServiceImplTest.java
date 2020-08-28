@@ -96,7 +96,13 @@ public class FhirServiceRequestServiceImplTest {
 	
 	@Before
 	public void setUp() {
-		serviceRequestService = new FhirServiceRequestServiceImpl();
+		serviceRequestService = new FhirServiceRequestServiceImpl() {
+			
+			@Override
+			protected void validateObject(TestOrder object) {
+			}
+		};
+		
 		serviceRequestService.setDao(dao);
 		serviceRequestService.setTranslator(translator);
 		serviceRequestService.setSearchQuery(searchQuery);

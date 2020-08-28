@@ -72,7 +72,13 @@ public class FhirDiagnosticReportServiceImplTest {
 	
 	@Before
 	public void setUp() {
-		service = new FhirDiagnosticReportServiceImpl();
+		service = new FhirDiagnosticReportServiceImpl() {
+			
+			@Override
+			protected void validateObject(Obs object) {
+			}
+		};
+		
 		service.setTranslator(translator);
 		service.setDao(dao);
 		service.setSearchQuery(searchQuery);

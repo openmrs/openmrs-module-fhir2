@@ -67,7 +67,13 @@ public class FhirObservationServiceImplTest {
 	
 	@Before
 	public void setup() {
-		fhirObservationService = new FhirObservationServiceImpl();
+		fhirObservationService = new FhirObservationServiceImpl() {
+			
+			@Override
+			protected void validateObject(Obs object) {
+			}
+		};
+		
 		fhirObservationService.setDao(dao);
 		fhirObservationService.setSearchQuery(searchQuery);
 		fhirObservationService.setTranslator(translator);

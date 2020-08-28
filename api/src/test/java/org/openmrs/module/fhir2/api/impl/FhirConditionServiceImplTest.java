@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.api.exceptions.FhirNotImplementedException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -31,7 +32,12 @@ public class FhirConditionServiceImplTest {
 	@Before
 	@SuppressWarnings("rawtypes")
 	public void setup() {
-		conditionService = new FhirConditionServiceImpl();
+		conditionService = new FhirConditionServiceImpl() {
+			
+			@Override
+			protected void validateObject(OpenmrsObject object) {
+			}
+		};
 		
 		condition = new Condition();
 		condition.setId(BAD_CONDITION_UUID);

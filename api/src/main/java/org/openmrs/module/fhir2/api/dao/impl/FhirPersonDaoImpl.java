@@ -88,11 +88,6 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	}
 	
 	@Override
-	protected boolean isVoided(Person object) {
-		return object.getPersonVoided();
-	}
-	
-	@Override
 	protected Person voidObject(Person object) {
 		object.setPersonVoided(true);
 		object.setPersonVoidReason("Voided via FHIR API");

@@ -83,7 +83,13 @@ public class FhirMedicationServiceImplTest {
 	
 	@Before
 	public void setup() {
-		fhirMedicationService = new FhirMedicationServiceImpl();
+		fhirMedicationService = new FhirMedicationServiceImpl() {
+			
+			@Override
+			protected void validateObject(Drug object) {
+			}
+		};
+		
 		fhirMedicationService.setTranslator(medicationTranslator);
 		fhirMedicationService.setDao(medicationDao);
 		fhirMedicationService.setSearchQuery(searchQuery);

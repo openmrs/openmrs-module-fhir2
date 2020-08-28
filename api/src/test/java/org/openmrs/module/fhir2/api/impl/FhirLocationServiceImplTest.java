@@ -89,7 +89,13 @@ public class FhirLocationServiceImplTest {
 	
 	@Before
 	public void setUp() {
-		fhirLocationService = new FhirLocationServiceImpl();
+		fhirLocationService = new FhirLocationServiceImpl() {
+			
+			@Override
+			protected void validateObject(org.openmrs.Location object) {
+			}
+		};
+		
 		fhirLocationService.setDao(locationDao);
 		fhirLocationService.setTranslator(locationTranslator);
 		fhirLocationService.setSearchQuery(searchQuery);

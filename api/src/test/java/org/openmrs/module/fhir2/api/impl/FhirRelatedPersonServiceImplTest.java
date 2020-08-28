@@ -129,7 +129,13 @@ public class FhirRelatedPersonServiceImplTest {
 	
 	@Before
 	public void setup() {
-		relatedPersonService = new FhirRelatedPersonServiceImpl();
+		relatedPersonService = new FhirRelatedPersonServiceImpl() {
+			
+			@Override
+			protected void validateObject(Relationship object) {
+			}
+		};
+		
 		relatedPersonService.setDao(dao);
 		relatedPersonService.setTranslator(translator);
 		relatedPersonService.setSearchQuery(searchQuery);

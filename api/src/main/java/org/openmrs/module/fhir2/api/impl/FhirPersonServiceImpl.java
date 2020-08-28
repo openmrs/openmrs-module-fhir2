@@ -63,4 +63,8 @@ public class FhirPersonServiceImpl extends BaseFhirService<Person, org.openmrs.P
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
 	
+	@Override
+	protected boolean isVoided(org.openmrs.Person person) {
+		return person.getPersonVoided();
+	}
 }

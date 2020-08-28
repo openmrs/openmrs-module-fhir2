@@ -43,11 +43,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Encounter;
-import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
-import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -76,13 +74,10 @@ public class FhirEncounterServiceImplTest {
 	private FhirEncounterDao dao;
 	
 	@Mock
-	private FhirVisitDao visitDao;
-	
-	@Mock
 	private EncounterTranslator<Encounter> encounterTranslator;
 	
 	@Mock
-	private EncounterTranslator<Visit> visitTranslator;
+	private FhirVisitServiceImpl visitService;
 	
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
@@ -100,9 +95,8 @@ public class FhirEncounterServiceImplTest {
 	public void setUp() {
 		encounterService = new FhirEncounterServiceImpl();
 		encounterService.setDao(dao);
-		encounterService.setVisitDao(visitDao);
 		encounterService.setTranslator(encounterTranslator);
-		encounterService.setVisitTranslator(visitTranslator);
+		encounterService.setVisitService(visitService);
 		encounterService.setSearchQuery(searchQuery);
 		
 		openMrsEncounter = new Encounter();

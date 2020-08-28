@@ -84,7 +84,12 @@ public class FhirMedicationRequestServiceImplTest {
 	
 	@Before
 	public void setup() {
-		medicationRequestService = new FhirMedicationRequestServiceImpl();
+		medicationRequestService = new FhirMedicationRequestServiceImpl() {
+			
+			@Override
+			protected void validateObject(DrugOrder object) {
+			}
+		};
 		medicationRequestService.setDao(dao);
 		medicationRequestService.setTranslator(medicationRequestTranslator);
 		medicationRequestService.setSearchQuery(searchQuery);

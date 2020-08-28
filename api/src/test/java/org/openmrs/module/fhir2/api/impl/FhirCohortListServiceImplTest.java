@@ -55,7 +55,13 @@ public class FhirCohortListServiceImplTest {
 	
 	@Before
 	public void setup() {
-		fhirCohortListService = new FhirCohortListServiceImpl();
+		fhirCohortListService = new FhirCohortListServiceImpl() {
+			
+			@Override
+			protected void validateObject(Cohort object) {
+			}
+		};
+		;
 		fhirCohortListService.setTranslator(listTranslator);
 		fhirCohortListService.setDao(listDao);
 		

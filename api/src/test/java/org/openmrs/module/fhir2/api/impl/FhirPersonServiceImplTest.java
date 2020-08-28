@@ -117,7 +117,13 @@ public class FhirPersonServiceImplTest {
 	
 	@Before
 	public void setUp() {
-		personService = new FhirPersonServiceImpl();
+		personService = new FhirPersonServiceImpl() {
+			
+			@Override
+			protected void validateObject(org.openmrs.Person object) {
+			}
+		};
+		
 		personService.setDao(dao);
 		personService.setTranslator(personTranslator);
 		personService.setSearchQuery(searchQuery);

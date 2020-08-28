@@ -16,16 +16,20 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.Provider;
+import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
+import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
@@ -49,15 +53,26 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	private SearchQuery<Provider, Practitioner, FhirPractitionerDao, PractitionerTranslator<Provider>> searchQuery;
 	
 	@Autowired
+	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>> userSearchQuery;
+	
+	@Autowired
 	private FhirUserService userService;
 	
 	@Override
 	public Practitioner get(String uuid) {
-		Practitioner practitioner = translator.toFhirResource(getDao().get(uuid));
-		if (practitioner == null) {
-			practitioner = userService.get(uuid);
+		if (uuid == null) {
+			throw new InvalidRequestException("Uuid cannot be null.");
 		}
-		return practitioner;
+		
+		Practitioner result;
+		try {
+			result = super.get(uuid);
+		}
+		catch (ResourceNotFoundException e) {
+			result = userService.get(uuid);
+		}
+		
+		return result;
 	}
 	
 	@Override
@@ -77,8 +92,7 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
 		IBundleProvider providerBundle = searchQuery.getQueryResults(theParams, dao, translator);
-		IBundleProvider userBundle = userService.searchForUsers(identifier, name, given, family, city, state, postalCode,
-		    country, id, lastUpdated);
+		IBundleProvider userBundle = userService.searchForUsers(theParams);
 		
 		if (!providerBundle.isEmpty() && !userBundle.isEmpty()) {
 			final Integer providerBundleSize = providerBundle.size();

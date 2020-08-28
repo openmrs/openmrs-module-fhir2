@@ -116,7 +116,13 @@ public class FhirPatientServiceImplTest {
 	
 	@Before
 	public void setUp() {
-		patientService = new FhirPatientServiceImpl();
+		patientService = new FhirPatientServiceImpl() {
+			
+			@Override
+			protected void validateObject(Patient object) {
+			}
+		};
+		
 		patientService.setDao(dao);
 		patientService.setTranslator(patientTranslator);
 		patientService.setSearchQuery(searchQuery);

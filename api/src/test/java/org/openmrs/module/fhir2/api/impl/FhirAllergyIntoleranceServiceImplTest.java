@@ -90,7 +90,13 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	
 	@Before
 	public void setup() {
-		service = new FhirAllergyIntoleranceServiceImpl();
+		service = new FhirAllergyIntoleranceServiceImpl() {
+			
+			@Override
+			protected void validateObject(Allergy object) {
+			}
+		};
+		
 		service.setTranslator(translator);
 		service.setDao(allergyIntoleranceDao);
 		service.setSearchQuery(searchQuery);

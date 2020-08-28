@@ -10,15 +10,11 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.User;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirUserService;
 import org.openmrs.module.fhir2.api.dao.FhirUserDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -44,22 +40,7 @@ public class FhirUserServiceImpl extends BaseFhirService<Practitioner, User> imp
 	private SearchQuery<User, Practitioner, FhirUserDao, PractitionerTranslator<User>> searchQuery;
 	
 	@Override
-	public IBundleProvider searchForUsers(TokenAndListParam identifier, StringAndListParam name, StringAndListParam given,
-	        StringAndListParam family, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
-	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated) {
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier)
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.NAME_PROPERTY, name)
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY, given)
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY, family)
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, state)
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, postalCode)
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		
+	public IBundleProvider searchForUsers(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator);
 	}
-	
 }
