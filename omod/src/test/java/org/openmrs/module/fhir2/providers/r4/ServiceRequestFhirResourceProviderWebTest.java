@@ -10,32 +10,25 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -517,116 +510,5 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 		assertThat(results.getEntry(), not(empty()));
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
-	}
-	
-	@Test
-	public void createServiceRequest_shouldCreateServiceRequest() throws Exception {
-		String jsonServiceRequest;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_SERVICE_REQUEST_PATH)) {
-			Objects.requireNonNull(is);
-			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
-		}
-		
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setId(SERVICE_REQUEST_UUID);
-		
-		when(service.create(any(ServiceRequest.class))).thenReturn(serviceRequest);
-		
-		MockHttpServletResponse response = post("/ServiceRequest").jsonContent(jsonServiceRequest)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isCreated());
-	}
-	
-	@Test
-	public void updateServiceRequest_shouldUpdateExistingServiceRequest() throws Exception {
-		String jsonServiceRequest;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_PATH)) {
-			Objects.requireNonNull(is);
-			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
-		}
-		
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setId(SERVICE_REQUEST_UUID);
-		
-		when(service.update(anyString(), any(ServiceRequest.class))).thenReturn(serviceRequest);
-		
-		MockHttpServletResponse response = put("/ServiceRequest/" + SERVICE_REQUEST_UUID).jsonContent(jsonServiceRequest)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-	}
-	
-	@Test
-	public void updateServiceRequest_shouldRaiseExceptionForNoId() throws Exception {
-		String jsonServiceRequest;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_NO_ID_PATH)) {
-			Objects.requireNonNull(is);
-			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
-		}
-		
-		MockHttpServletResponse response = put("/ServiceRequest/" + SERVICE_REQUEST_UUID).jsonContent(jsonServiceRequest)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isBadRequest());
-		assertThat(response.getContentAsString(), containsStringIgnoringCase("body must contain an ID element for update"));
-	}
-	
-	@Test
-	public void updateServiceRequest_shouldRaiseExceptionForIdMismatch() throws Exception {
-		String jsonServiceRequest;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_PATH)) {
-			Objects.requireNonNull(is);
-			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
-		}
-		
-		MockHttpServletResponse response = put("/ServiceRequest/" + WRONG_SERVICE_REQUEST_UUID)
-		        .jsonContent(jsonServiceRequest).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isBadRequest());
-		assertThat(response.getContentAsString(),
-		    containsStringIgnoringCase("body must contain an ID element which matches the request URL"));
-	}
-	
-	@Test
-	public void updateServiceRequest_shouldThrowErrorForNonExistentServiceRequest() throws Exception {
-		String jsonServiceRequest;
-		try (InputStream is = this.getClass().getClassLoader()
-		        .getResourceAsStream(JSON_UPDATE_SERVICE_REQUEST_WRONG_ID_PATH)) {
-			Objects.requireNonNull(is);
-			jsonServiceRequest = IOUtils.toString(is, StandardCharsets.UTF_8);
-		}
-		
-		when(service.update(anyString(), any(ServiceRequest.class))).thenThrow(
-		    new MethodNotAllowedException("ServiceRequest " + WRONG_SERVICE_REQUEST_UUID + " does not exist"));
-		
-		MockHttpServletResponse response = put("/ServiceRequest/" + WRONG_SERVICE_REQUEST_UUID)
-		        .jsonContent(jsonServiceRequest).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isMethodNotAllowed());
-	}
-	
-	@Test
-	public void deleteServiceRequest_shouldDeleteServiceRequest() throws Exception {
-		ServiceRequest serviceRequest = new ServiceRequest();
-		serviceRequest.setId(SERVICE_REQUEST_UUID);
-		
-		when(service.delete(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);
-		
-		MockHttpServletResponse response = delete("/ServiceRequest/" + SERVICE_REQUEST_UUID).accept(FhirMediaTypes.JSON)
-		        .go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-	}
-	
-	@Test
-	public void deleteServiceRequestByWrongUuid_shouldReturn404() throws Exception {
-		when(service.delete(WRONG_SERVICE_REQUEST_UUID)).thenReturn(null);
-		
-		MockHttpServletResponse response = delete("/ServiceRequest/" + WRONG_SERVICE_REQUEST_UUID)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isNotFound());
 	}
 }
