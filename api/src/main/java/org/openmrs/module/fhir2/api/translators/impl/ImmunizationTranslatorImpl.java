@@ -20,7 +20,6 @@ import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationProtocolAppliedComponent;
@@ -36,11 +35,11 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
-import org.openmrs.api.ProviderService;
 import org.openmrs.module.fhir2.FhirActivator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,13 +66,13 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	private EncounterReferenceTranslator<Visit> visitReferenceTranslator;
 	
 	@Autowired
-	private ProviderService providerService;
-	
-	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
 	@Autowired
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
+	
+	@Autowired
+	private ObservationValueTranslator observationValueTranslator;
 	
 	@Override
 	public Obs toOpenmrsType(Immunization fhirImmunization) {
@@ -96,8 +95,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		}
 		ImmunizationPerformerComponent performer = performers.get(0);
 		
-		//      Provider provider = practitionerReferenceTranslator.toOpenmrsType(performer.getActor());
-		Provider provider = providerService.getProviderByUuid(helper.getProviderUuid(performer));
+		Provider provider = practitionerReferenceTranslator.toOpenmrsType(performer.getActor());
 		
 		Visit visit = visitReferenceTranslator.toOpenmrsType(fhirImmunization.getEncounter());
 		Location location = visit.getLocation();
@@ -179,7 +177,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		Map<String, Obs> members = helper.getObsMembersMap(openMrsImmunization);
 		
 		immunization.setVaccineCode(conceptTranslator.toFhirResource(members.get(ciel984).getValueCoded()));
-		immunization.setOccurrence(new DateTimeType(members.get(ciel1410).getValueDatetime()));
+		immunization.setOccurrence(observationValueTranslator.toFhirResource(members.get(ciel1410)));
 		immunization.addProtocolApplied(new ImmunizationProtocolAppliedComponent(
 		        new PositiveIntType((long) members.get(ciel1418).getValueNumeric().doubleValue())));
 		immunization.setManufacturer(new Reference().setDisplay(members.get(ciel1419).getValueText()));
