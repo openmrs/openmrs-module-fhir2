@@ -23,7 +23,6 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Immunization;
@@ -42,8 +41,8 @@ import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ProviderService;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirActivator;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -72,6 +71,9 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	@Autowired
 	private ProviderService providerService;
+	
+	@Autowired
+	private ConceptTranslator conceptTranslator;
 	
 	@Override
 	public Obs toOpenmrsType(Immunization fhirImmunization) {
@@ -178,12 +180,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		
 		Map<String, Obs> members = helper.getObsMembersMap(openMrsImmunization);
 		
-		CodeableConcept codeableConcept = new CodeableConcept();
-		Coding coding = new Coding();
-		coding.setCode(members.get(ciel984).getValueCoded().getUuid());
-		coding.setDisplay(members.get(ciel984).getValueCoded().getName(Context.getLocale()).getName());
-		codeableConcept.addCoding(coding);
-		immunization.setVaccineCode(codeableConcept);
+		immunization.setVaccineCode(conceptTranslator.toFhirResource(members.get(ciel984).getValueCoded()));
 		immunization.setOccurrence(new DateTimeType(members.get(ciel1410).getValueDatetime()));
 		immunization.addProtocolApplied(new ImmunizationProtocolAppliedComponent(
 		        new PositiveIntType((long) members.get(ciel1418).getValueNumeric().doubleValue())));
