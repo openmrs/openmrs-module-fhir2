@@ -35,17 +35,13 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.FhirActivator;
 
 @Setter(AccessLevel.PACKAGE)
-public class BaseImmunizationTranslator {
+public class ImmunizationObsGroupHelper {
 	
-	private ConceptService conceptService;
-	
-	public BaseImmunizationTranslator(ConceptService conceptService) {
+	public ImmunizationObsGroupHelper(ConceptService conceptService) {
 		this.conceptService = conceptService;
 	}
 	
-	public ConceptService getConceptService() {
-		return conceptService;
-	}
+	private ConceptService conceptService;
 	
 	public Concept concept(String refTerm) throws IllegalStateException, APIException {
 		String[] mapping = refTerm.split(":");

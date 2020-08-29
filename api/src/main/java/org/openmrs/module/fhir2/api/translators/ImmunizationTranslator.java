@@ -9,10 +9,26 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import org.openmrs.Concept;
 import org.openmrs.Obs;
 
 public interface ImmunizationTranslator extends OpenmrsFhirUpdatableTranslator<Obs, org.hl7.fhir.r4.model.Immunization> {
+	
+	public static final String immunizationGroupingConcept = "CIEL:1421";
+	
+	public static final String[] immunizationConcepts = { "CIEL:984", "CIEL:1410", "CIEL:1418", "CIEL:1419", "CIEL:1420",
+	        "CIEL:165907" };
+	
+	public static final String ciel984 = immunizationConcepts[0];
+	
+	public static final String ciel1410 = immunizationConcepts[1];
+	
+	public static final String ciel1418 = immunizationConcepts[2];
+	
+	public static final String ciel1419 = immunizationConcepts[3];
+	
+	public static final String ciel1420 = immunizationConcepts[4];
+	
+	public static final String ciel165907 = immunizationConcepts[5];
 	
 	/**
 	 * Maps an OpenMRS immunization obs construct to a {@link org.hl7.fhir.r4.model.Immunization}
@@ -31,11 +47,4 @@ public interface ImmunizationTranslator extends OpenmrsFhirUpdatableTranslator<O
 	 */
 	@Override
 	Obs toOpenmrsType(org.hl7.fhir.r4.model.Immunization fhirImmunization);
-	
-	/**
-	 * Fetches the OpenMRS concept used to capture immunization obs groups.
-	 * 
-	 * @return The OpenMRS immunization concept.
-	 */
-	Concept getOpenmrsImmunizationConcept();
 }

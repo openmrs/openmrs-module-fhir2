@@ -57,7 +57,7 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	public Immunization getImmunizationByUuid(@IdParam @NotNull IdType id) {
-		Immunization immunization = immunizationService.getImmunizationByUuid(id.getIdPart());
+		Immunization immunization = immunizationService.get(id.getIdPart());
 		if (immunization == null) {
 			throw new ResourceNotFoundException("Could not find Immunization with Id " + id.getIdPart());
 		}
@@ -67,7 +67,7 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 	@History
 	@SuppressWarnings("unused")
 	public List<Resource> getImmunizationHistoryById(@IdParam @NotNull IdType id) {
-		Immunization immunization = immunizationService.getImmunizationByUuid(id.getIdPart());
+		Immunization immunization = immunizationService.get(id.getIdPart());
 		if (immunization == null) {
 			throw new ResourceNotFoundException("Could not find Immunization with Id " + id.getIdPart());
 		}
@@ -77,7 +77,7 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createImmunization(@ResourceParam Immunization newImmunization) {
-		return FhirProviderUtils.buildCreate(immunizationService.createImmunization(newImmunization));
+		return FhirProviderUtils.buildCreate(immunizationService.create(newImmunization));
 	}
 	
 	@Update
@@ -88,14 +88,14 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 		
 		existingImmunization.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(immunizationService.updateImmunization(id.getIdPart(), existingImmunization));
+		return FhirProviderUtils.buildUpdate(immunizationService.update(id.getIdPart(), existingImmunization));
 	}
 	
 	@Search
 	@SuppressWarnings("unused")
 	public Collection<Immunization> searchImmunizations(@OptionalParam(name = Immunization.SP_PATIENT, chainWhitelist = { "",
-	        Patient.SP_IDENTIFIER }) ReferenceAndListParam patienParam, @Sort SortSpec sort) {
-		return immunizationService.searchImmunizations(patienParam, sort);
+	        Patient.SP_IDENTIFIER }) ReferenceAndListParam patientParam, @Sort SortSpec sort) {
+		return immunizationService.searchImmunizations(patientParam, sort);
 	}
 	
 }

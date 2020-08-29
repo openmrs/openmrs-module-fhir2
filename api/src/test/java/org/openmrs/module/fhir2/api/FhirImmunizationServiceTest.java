@@ -50,7 +50,7 @@ import org.openmrs.api.ObsService;
 import org.openmrs.module.fhir2.FhirActivator;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.translators.impl.BaseImmunizationTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.ImmunizationObsGroupHelper;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -132,12 +132,12 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		        + "  ]\n" + "}");
 		
 		// replay
-		Immunization savedImmunization = service.createImmunization(newImmunization);
+		Immunization savedImmunization = service.create(newImmunization);
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
 		
 		// verify
-		BaseImmunizationTranslator translator = new BaseImmunizationTranslator(conceptService);
-		translator.validateImmunizationObsGroup(obs);
+		ImmunizationObsGroupHelper helper = new ImmunizationObsGroupHelper(conceptService);
+		helper.validateImmunizationObsGroup(obs);
 		assertObsCommons(obs, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 		    "f9badd80-ab76-11e2-9e96-0800200c9a66");
 		
@@ -146,7 +146,7 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 			    "f9badd80-ab76-11e2-9e96-0800200c9a66");
 		});
 		
-		Map<String, Obs> members = translator.getObsMembersMap(obs);
+		Map<String, Obs> members = helper.getObsMembersMap(obs);
 		assertThat(members.get(ciel984).getValueCoded().getUuid(), is("15f83cd6-64e9-4e06-a5f9-364d3b14a43d"));
 		assertThat(members.get(ciel1410).getValueDatetime(),
 		    equalTo(new DateTimeType("2020-07-08T18:30:00.000Z").getValue()));
@@ -181,13 +181,12 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		            + "}");
 		
 		// replay
-		Immunization savedImmunization = service.updateImmunization("9353776b-dead-4588-8723-d687197d8438",
-		    updatedImmunization);
+		Immunization savedImmunization = service.update("9353776b-dead-4588-8723-d687197d8438", updatedImmunization);
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
 		
 		// verify
-		BaseImmunizationTranslator translator = new BaseImmunizationTranslator(conceptService);
-		translator.validateImmunizationObsGroup(obs);
+		ImmunizationObsGroupHelper helper = new ImmunizationObsGroupHelper(conceptService);
+		helper.validateImmunizationObsGroup(obs);
 		assertObsCommons(obs, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 		    "f9badd80-ab76-11e2-9e96-0800200c9a66");
 		
@@ -196,7 +195,7 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 			    "f9badd80-ab76-11e2-9e96-0800200c9a66");
 		});
 		
-		Map<String, Obs> members = translator.getObsMembersMap(obs);
+		Map<String, Obs> members = helper.getObsMembersMap(obs);
 		assertThat(members.get(ciel984).getValueCoded().getUuid(), is("d144d24f-6913-4b63-9660-a9108c2bebef"));
 		assertThat(members.get(ciel1410).getValueDatetime(),
 		    equalTo(new DateTimeType("2020-07-08T20:30:00+02:00").getValue()));

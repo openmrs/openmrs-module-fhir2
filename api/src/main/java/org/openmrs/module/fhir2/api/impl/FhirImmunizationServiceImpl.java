@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
+import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.immunizationGroupingConcept;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,13 +22,16 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.Immunization;
+import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
+import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.api.FhirImmunizationService;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
+import org.openmrs.module.fhir2.api.translators.impl.ImmunizationObsGroupHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,19 +49,26 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	
 	private PatientService patientService;
 	
+	private ImmunizationObsGroupHelper helper;
+	
 	@Autowired
 	public void setPatientService(PatientService patientService) {
 		this.patientService = patientService;
 	}
 	
+	@Autowired
+	public void setImmunizationHelper(ConceptService conceptService) {
+		this.helper = new ImmunizationObsGroupHelper(conceptService);
+	}
+	
 	@Override
-	public Immunization getImmunizationByUuid(String uuid) {
+	public Immunization get(String uuid) {
 		Obs obs = obsService.getObsByUuid(uuid);
 		return translator.toFhirResource(obs);
 	}
 	
 	@Override
-	public Immunization createImmunization(Immunization newImmunization) {
+	public Immunization create(Immunization newImmunization) {
 		Obs obs = translator.toOpenmrsType(newImmunization);
 		if (obs.getEncounter().getId() == null) {
 			encounterService.saveEncounter(obs.getEncounter());
@@ -68,11 +79,22 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	}
 	
 	@Override
-	public Immunization updateImmunization(String uuid, Immunization updatedImmunization) {
+	public Immunization update(String uuid, Immunization updatedImmunization) {
 		Obs existingObs = obsService.getObsByUuid(uuid);
 		Obs obs = translator.toOpenmrsType(existingObs, updatedImmunization);
 		obs = obsService.saveObs(obs, "Updated when translating a FHIR Immunization resource.");
 		return translator.toFhirResource(obs);
+	}
+	
+	@Override
+	public Immunization delete(String uuid) {
+		// TODO Simply void the underlying obs
+		throw new UnsupportedOperationException("Deleting a FHIR Immunization resource is currently not supported.");
+	}
+	
+	@Override
+	public Concept getOpenmrsImmunizationConcept() {
+		return helper.concept(immunizationGroupingConcept);
 	}
 	
 	public Patient getPatient(ReferenceAndListParam patientParam) {
@@ -124,7 +146,7 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 		final Patient patient = getPatient(patientParam);
 		return obsService
 		        .getObservations(Collections.singletonList(patient.getPerson()), null,
-		            Collections.singletonList(translator.getOpenmrsImmunizationConcept()), null, null, null,
+		            Collections.singletonList(getOpenmrsImmunizationConcept()), null, null, null,
 		            Collections.singletonList("obsDatetime"), null, null, null, null, false)
 		        .stream().map(obs -> translator.toFhirResource(obs)).collect(Collectors.toList());
 	}

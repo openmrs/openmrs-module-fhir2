@@ -9,22 +9,23 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.validation.constraints.NotNull;
-
 import java.util.Collection;
 
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import org.hl7.fhir.r4.model.Immunization;
+import org.openmrs.Concept;
 
-public interface FhirImmunizationService {
+public interface FhirImmunizationService extends FhirService<Immunization> {
 	
-	Immunization getImmunizationByUuid(@NotNull String uuid);
-	
-	Immunization createImmunization(@NotNull Immunization newImmunization);
-	
-	Immunization updateImmunization(@NotNull String uuid, @NotNull Immunization updatedImmunization);
+	/**
+	 * Fetches the OpenMRS concept used to capture immunization obs groups.
+	 * 
+	 * @return The OpenMRS immunization concept.
+	 */
+	Concept getOpenmrsImmunizationConcept();
 	
 	Collection<Immunization> searchImmunizations(ReferenceAndListParam patientParam, @Sort SortSpec sort);
+	
 }

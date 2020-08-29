@@ -32,7 +32,6 @@ import org.hl7.fhir.r4.model.Immunization.ImmunizationProtocolAppliedComponent;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationStatus;
 import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Reference;
-import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
@@ -53,29 +52,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator implements ImmunizationTranslator {
+public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
+	
+	private ConceptService conceptService;
 	
 	@Autowired
 	public ImmunizationTranslatorImpl(ConceptService conceptService) {
-		super(conceptService);
+		this.conceptService = conceptService;
+		this.helper = new ImmunizationObsGroupHelper(conceptService);
 	}
 	
-	public static final String immunizationGroupingConcept = "CIEL:1421";
-	
-	public static final String[] immunizationConcepts = { "CIEL:984", "CIEL:1410", "CIEL:1418", "CIEL:1419", "CIEL:1420",
-	        "CIEL:165907" };
-	
-	public static final String ciel984 = immunizationConcepts[0];
-	
-	public static final String ciel1410 = immunizationConcepts[1];
-	
-	public static final String ciel1418 = immunizationConcepts[2];
-	
-	public static final String ciel1419 = immunizationConcepts[3];
-	
-	public static final String ciel1420 = immunizationConcepts[4];
-	
-	public static final String ciel165907 = immunizationConcepts[5];
+	private ImmunizationObsGroupHelper helper;
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -88,14 +75,14 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 	
 	@Override
 	public Obs toOpenmrsType(Immunization fhirImmunization) {
-		return toOpenmrsType(newImmunizationObsGroup(), fhirImmunization);
+		return toOpenmrsType(helper.newImmunizationObsGroup(), fhirImmunization);
 	}
 	
 	@Override
 	public Obs toOpenmrsType(Obs openMrsImmunization, Immunization fhirImmunization) {
 		
 		if (openMrsImmunization.getId() != null) {
-			validateImmunizationObsGroup(openMrsImmunization);
+			helper.validateImmunizationObsGroup(openMrsImmunization);
 		}
 		
 		Patient patient = patientReferenceTranslator.toOpenmrsType(fhirImmunization.getPatient());
@@ -108,7 +95,7 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 		ImmunizationPerformerComponent performer = performers.get(0);
 		
 		//      Provider provider = practitionerReferenceTranslator.toOpenmrsType(performer.getActor());
-		Provider provider = providerService.getProviderByUuid(getProviderUuid(performer));
+		Provider provider = providerService.getProviderByUuid(helper.getProviderUuid(performer));
 		
 		Visit visit = visitReferenceTranslator.toOpenmrsType(fhirImmunization.getEncounter());
 		Location location = visit.getLocation();
@@ -147,7 +134,7 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 			obs.setEncounter(encounter.orElse(newEncounter));
 		});
 		
-		Map<String, Obs> members = getObsMembersMap(openMrsImmunization);
+		Map<String, Obs> members = helper.getObsMembersMap(openMrsImmunization);
 		
 		Coding coding = fhirImmunization.getVaccineCode().getCoding().stream()
 		        .filter(code -> StringUtils.isEmpty(code.getSystem())).reduce((code1, code2) -> {
@@ -155,7 +142,7 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 			                + code1.getCode() + " and " + code2.getCode()
 			                + ". No unique system concept could be identified as the coded answer.");
 		        }).get();
-		members.get(ciel984).setValueCoded(getConceptService().getConceptByUuid(coding.getCode()));
+		members.get(ciel984).setValueCoded(conceptService.getConceptByUuid(coding.getCode()));
 		
 		members.get(ciel1410).setValueDatetime(fhirImmunization.getOccurrenceDateTimeType().getValue());
 		
@@ -177,7 +164,7 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 	
 	@Override
 	public Immunization toFhirResource(Obs openMrsImmunization) {
-		validateImmunizationObsGroup(openMrsImmunization);
+		helper.validateImmunizationObsGroup(openMrsImmunization);
 		
 		Immunization immunization = new Immunization();
 		immunization.setId(openMrsImmunization.getUuid());
@@ -187,9 +174,9 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 		immunization.setEncounter(new Reference().setType(ENCOUNTER)
 		        .setReference(ENCOUNTER + "/" + openMrsImmunization.getEncounter().getVisit().getUuid()));
 		immunization.setPerformer(Arrays.asList(new ImmunizationPerformerComponent(new Reference().setType(PRACTITIONER)
-		        .setReference(PRACTITIONER + "/" + getAdministeringProvider(openMrsImmunization).getUuid()))));
+		        .setReference(PRACTITIONER + "/" + helper.getAdministeringProvider(openMrsImmunization).getUuid()))));
 		
-		Map<String, Obs> members = getObsMembersMap(openMrsImmunization);
+		Map<String, Obs> members = helper.getObsMembersMap(openMrsImmunization);
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding coding = new Coding();
@@ -206,10 +193,4 @@ public class ImmunizationTranslatorImpl extends BaseImmunizationTranslator imple
 		
 		return immunization;
 	}
-	
-	@Override
-	public Concept getOpenmrsImmunizationConcept() {
-		return concept(immunizationGroupingConcept);
-	}
-	
 }
