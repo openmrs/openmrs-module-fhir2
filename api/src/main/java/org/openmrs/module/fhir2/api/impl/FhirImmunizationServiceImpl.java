@@ -10,7 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
-import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.immunizationGroupingConcept;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationGroupingConcept;
 
 import java.util.Collection;
 import java.util.Collections;

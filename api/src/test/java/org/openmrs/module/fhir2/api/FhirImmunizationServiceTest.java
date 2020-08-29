@@ -16,12 +16,12 @@ import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER;
 import static org.openmrs.module.fhir2.FhirConstants.PATIENT;
 import static org.openmrs.module.fhir2.FhirConstants.PRACTITIONER;
-import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel1410;
-import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel1418;
-import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel1419;
-import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel1420;
-import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel165907;
-import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel984;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1410;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1418;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1419;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1420;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel165907;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel984;
 
 import java.text.ParseException;
 import java.util.ArrayList;
