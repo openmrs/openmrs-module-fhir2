@@ -16,12 +16,12 @@ import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER;
 import static org.openmrs.module.fhir2.FhirConstants.PATIENT;
 import static org.openmrs.module.fhir2.FhirConstants.PRACTITIONER;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1410;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1418;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1419;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1420;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel165907;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel984;
+import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel1410;
+import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel1418;
+import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel1419;
+import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel1420;
+import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel165907;
+import static org.openmrs.module.fhir2.api.translators.ImmunizationTranslator.ciel984;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -31,8 +31,6 @@ import java.util.Set;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -208,12 +206,9 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void searchImmunizations_shouldFetchImmunizationsByPatientIdentifier() throws ParseException {
 		
-		// setup
-		ReferenceAndListParam param = new ReferenceAndListParam();
-		param.addValue(new ReferenceOrListParam().add(new ReferenceParam(SP_IDENTIFIER, "12345K")));
-		
 		// replay
-		List<Immunization> immunizations = new ArrayList<Immunization>(service.searchImmunizations(param, null));
+		List<Immunization> immunizations = new ArrayList<Immunization>(
+		        service.searchImmunizations(new ReferenceParam(SP_IDENTIFIER, "12345K"), null));
 		
 		// verify (in anti-chronological order)
 		assertThat(immunizations.size(), is(2));

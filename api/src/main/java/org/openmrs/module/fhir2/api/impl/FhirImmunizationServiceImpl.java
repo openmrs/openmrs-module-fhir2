@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.Immunization;
@@ -97,40 +97,25 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 		return helper.concept(immunizationGroupingConcept);
 	}
 	
-	public Patient getPatient(ReferenceAndListParam patientParam) {
-		
-		String[] ids = new String[2]; // an array of two: [patient identifier, patient UUID]
-		
-		patientParam.getValuesAsQueryTokens().stream()
-		        .forEach(refOrListParam -> refOrListParam.getValuesAsQueryTokens().stream().forEach(refParam -> {
-			        
-			        if (StringUtils.equals(refParam.getChain(), SP_IDENTIFIER)) {
-				        ids[0] = refParam.getValue();
-			        }
-			        if (StringUtils.isEmpty(refParam.getChain())) {
-				        ids[1] = refParam.getValue();
-			        }
-			        
-		        }));
-		
-		final String identifier = ids[0];
-		final String uuid = ids[1];
+	public Patient getPatient(ReferenceParam patientParam) {
 		
 		Patient patient = null;
 		
-		if (!StringUtils.isEmpty(identifier)) {
+		if (StringUtils.equals(patientParam.getChain(), SP_IDENTIFIER)) {
+			final String identifier = patientParam.getValue();
 			
 			List<Patient> patients = patientService.getPatients(identifier, false, 0, 1);
 			if (CollectionUtils.isEmpty(patients)) {
 				throw new IllegalArgumentException(
 				        "No patient could be found for the following OpenMRS identifier: '" + identifier + "'.");
 			}
-			patient = patients.get(0);
-			if (!StringUtils.isEmpty(uuid) && !uuid.equals(patient.getUuid())) {
+			if (CollectionUtils.size(patients) > 1) {
 				throw new IllegalArgumentException(
-				        "The provided UUID '" + uuid + "' is not that of the patient identified by '" + identifier + "'.");
+				        "Multiple patients were found for the following OpenMRS identifier: '" + identifier + "'.");
 			}
-		} else if (!StringUtils.isEmpty(uuid)) {
+			patient = patients.get(0);
+		} else if (StringUtils.isEmpty(patientParam.getChain())) {
+			final String uuid = patientParam.getValue();
 			patient = patientService.getPatientByUuid(uuid);
 			if (patient == null) {
 				throw new IllegalArgumentException(
@@ -142,7 +127,7 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	}
 	
 	@Override
-	public Collection<Immunization> searchImmunizations(ReferenceAndListParam patientParam, SortSpec sort) {
+	public Collection<Immunization> searchImmunizations(ReferenceParam patientParam, SortSpec sort) {
 		final Patient patient = getPatient(patientParam);
 		return obsService
 		        .getObservations(Collections.singletonList(patient.getPerson()), null,

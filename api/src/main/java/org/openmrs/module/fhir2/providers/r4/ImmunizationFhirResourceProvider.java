@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -94,7 +94,7 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 	@Search
 	@SuppressWarnings("unused")
 	public Collection<Immunization> searchImmunizations(@OptionalParam(name = Immunization.SP_PATIENT, chainWhitelist = { "",
-	        Patient.SP_IDENTIFIER }) ReferenceAndListParam patientParam, @Sort SortSpec sort) {
+	        Patient.SP_IDENTIFIER }) ReferenceParam patientParam, @Sort SortSpec sort) {
 		return immunizationService.searchImmunizations(patientParam, sort);
 	}
 	
