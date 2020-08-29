@@ -9,10 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER;
-import static org.openmrs.module.fhir2.FhirConstants.PATIENT;
-import static org.openmrs.module.fhir2.FhirConstants.PRACTITIONER;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -46,6 +42,7 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -74,6 +71,9 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
+	
+	@Autowired
+	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
 	@Override
 	public Obs toOpenmrsType(Immunization fhirImmunization) {
@@ -171,12 +171,10 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		Immunization immunization = new Immunization();
 		immunization.setId(openMrsImmunization.getUuid());
 		immunization.setStatus(ImmunizationStatus.COMPLETED);
-		immunization.setPatient(
-		    new Reference().setType(PATIENT).setReference(PATIENT + "/" + openMrsImmunization.getPerson().getUuid()));
-		immunization.setEncounter(new Reference().setType(ENCOUNTER)
-		        .setReference(ENCOUNTER + "/" + openMrsImmunization.getEncounter().getVisit().getUuid()));
-		immunization.setPerformer(Arrays.asList(new ImmunizationPerformerComponent(new Reference().setType(PRACTITIONER)
-		        .setReference(PRACTITIONER + "/" + helper.getAdministeringProvider(openMrsImmunization).getUuid()))));
+		immunization.setPatient(patientReferenceTranslator.toFhirResource(new Patient(openMrsImmunization.getPerson())));
+		immunization.setEncounter(visitReferenceTranslator.toFhirResource(openMrsImmunization.getEncounter().getVisit()));
+		immunization.setPerformer(Arrays.asList(new ImmunizationPerformerComponent(
+		        practitionerReferenceTranslator.toFhirResource(helper.getAdministeringProvider(openMrsImmunization)))));
 		
 		Map<String, Obs> members = helper.getObsMembersMap(openMrsImmunization);
 		
