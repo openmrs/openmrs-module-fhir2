@@ -275,7 +275,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR4Integrati
 		task.setId(WRONG_TASK_UUID);
 		
 		// send the update to the server
-		response = put("/Task/" + TASK_UUID).xmlContext(toXML(task)).go();
+		response = put("/Task/" + WRONG_TASK_UUID).xmlContext(toXML(task)).go();
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
@@ -286,10 +286,30 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR4Integrati
 		assertThat(operationOutcome.hasIssue(), is(true));
 		
 	}
+ @Test
+ public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchTaskIdAsJSON() throws Exception {
+    MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
+    Task task = readResponse(response);
+    
+    // update the existing record
+    task.setId(WRONG_TASK_UUID);
+    
+    // send the update to the server
+    response = put("/Task/" + WRONG_TASK_UUID).jsonContent(toJson(task)).jsonContent(toJson(task)).go();
+    
+    assertThat(response, isBadRequest());
+    assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+    assertThat(response.getContentAsString(), notNullValue());
+    
+    org.hl7.fhir.r4.model.OperationOutcome operationOutcome = readOperationOutcome(response);
+    
+    assertThat(operationOutcome, notNullValue());
+    assertThat(operationOutcome.hasIssue(), is(true));
+    
+ }
 	
 	@Test
 	public void shouldReturnNotFoundWhenUpdatingNonExistentTaskAsXML() throws Exception {
-		// get the existing record
 		// get the existing record
 		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.XML).go();
 		Task task = readResponse(response);
@@ -309,6 +329,28 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR4Integrati
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 		
+	}
+	
+	@Test
+ public void shouldReturnNotFoundWhenUpdatingNonExistentTaskAsJSON() throws Exception {
+	// get the existing record
+	   MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
+	   Task task = readResponse(response);
+	   
+	   // update the existing record
+	   task.setId(WRONG_TASK_UUID);
+	   
+	   // send the update to the server
+	   response = put("/Task/" + WRONG_TASK_UUID).jsonContent(toJson(task)).jsonContent(toJson(task)).go();
+	   
+	   assertThat(response, isNotFound());
+	   assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+	   assertThat(response.getContentAsString(), notNullValue());
+	   
+	   org.hl7.fhir.r4.model.OperationOutcome operationOutcome = readOperationOutcome(response);
+	   
+	   assertThat(operationOutcome, notNullValue());
+	   assertThat(operationOutcome.hasIssue(), is(true));
 	}
 	
 	@Test
