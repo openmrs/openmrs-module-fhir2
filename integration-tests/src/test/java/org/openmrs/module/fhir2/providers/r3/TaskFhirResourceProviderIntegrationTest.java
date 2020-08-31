@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -52,8 +54,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR3Integrati
 	private static final String XML_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/TestTask_create.xml";
 	
 	private static final String WRONG_TASK_UUID = "df34a1c1-f57b-4c33-bee5-e501b56b9d5b";
-	
-	private static final String XML_UPDATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/TestTask_update.xml";
+
 	
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
@@ -78,7 +79,6 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR3Integrati
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
-		
 		assertThat(task, notNullValue());
 		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
 		assertThat(task, validResource());
@@ -110,7 +110,6 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR3Integrati
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
@@ -121,9 +120,97 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR3Integrati
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
+
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
 	}
 	
+	@Test
+ public void shouldReturnNotFoundWhenUpdatingNonExistentTaskAsJSON() throws Exception {
+  // get the existing record
+  MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
+  Task task = readResponse(response);
+  
+  // update the existing record
+  task.setId(WRONG_TASK_UUID);
+  
+  // send the update to the server
+  response = put("/Task/" + WRONG_TASK_UUID).jsonContent(toJson(task)).go();
+  
+  assertThat(response, isNotFound());
+  assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+  assertThat(response.getContentAsString(), notNullValue());
+  
+  OperationOutcome operationOutcome = readOperationOutcome(response);
+  
+  assertThat(operationOutcome, notNullValue());
+  assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+ @Test
+ public void shouldReturnNotFoundWhenUpdatingNonExistentTaskAsXML() throws Exception {
+  // get the existing record
+  MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.XML).go();
+  Task task = readResponse(response);
+  
+  // update the existing record
+  task.setId(WRONG_TASK_UUID);
+  
+  // send the update to the server
+  response = put("/Task/" + TASK_UUID).xmlContext(toXML(task)).go();
+  
+  assertThat(response, isNotFound());
+  assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+  assertThat(response.getContentAsString(), notNullValue());
+  
+  OperationOutcome operationOutcome = readOperationOutcome(response);
+  
+  assertThat(operationOutcome, notNullValue());
+  assertThat(operationOutcome.hasIssue(), is(true));
+ }
+ 
+ @Test
+ public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchTaskIdAsXML() throws Exception {
+  // get the existing record
+  MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.XML).go();
+  Task task = readResponse(response);
+  
+  // update the existing record
+  task.setId(WRONG_TASK_UUID);
+  
+  // send the update to the server
+  response = put("/Task/" + TASK_UUID).xmlContext(toXML(task)).go();
+  assertThat(response, isBadRequest());
+  assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+  assertThat(response.getContentAsString(), notNullValue());
+  
+  OperationOutcome operationOutcome = readOperationOutcome(response);
+  assertThat(operationOutcome, notNullValue());
+  assertThat(operationOutcome.hasIssue(), is(true));
+  
+ }
+ 
+ @Test
+ public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchTaskIdAsJSON() throws Exception {
+  // get the existing record
+  MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
+  Task task = readResponse(response);
+  
+  // update the existing record
+  task.setId(WRONG_TASK_UUID);
+  // send the update to the server
+  response = put("/Task/" + WRONG_TASK_UUID).jsonContent(toJson(task)).go();
+  assertThat(response, isBadRequest());
+  assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+  assertThat(response.getContentAsString(), notNullValue());
+  
+  OperationOutcome operationOutcome = readOperationOutcome(response);
+  
+  assertThat(operationOutcome, notNullValue());
+  assertThat(operationOutcome.hasIssue(), is(true));
+ }
+ 
 	@Test
 	public void shouldCreateNewTaskAsJson() throws Exception {
 		String jsonTask;
@@ -139,7 +226,6 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR3Integrati
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
-		
 		assertThat(task, notNullValue());
 		assertThat(task.getIdElement().getIdPart(), notNullValue());
 		assertThat(task.getAuthoredOn(), equalTo("2016-10-31T08:25:05+10:00"));
@@ -210,7 +296,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR3Integrati
 		task.setAuthoredOn(authoredOn);
 		
 		// send the update to the server
-		response = put("/Task/" + TASK_UUID).jsonContent(toJson(task)).jsonContent(toJson(task)).go();
+		response = put("/Task/" + TASK_UUID).jsonContent(toJson(task)).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -233,7 +319,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR3Integrati
 	
 	@Test
 	public void shouldUpdateExistingTaskAsXml() throws Exception {
-		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.XML).go();
 		Task task = readResponse(response);
 		
 		// update the existing record
@@ -256,103 +342,14 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR3Integrati
 		assertThat(task, validResource());
 		
 		// double-check the record returned via get
-		response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
+		response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.XML).go();
 		Task reReadTask = readResponse(response);
 		
 		assertThat(reReadTask.getAuthoredOn(), equalTo(authoredOn));
 		assertThat(updatedTask.getStatus(), is(Task.TaskStatus.ACCEPTED));
-		
 	}
 	
-	@Test
-	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchTaskIdAsXML() throws Exception {
-		// get the existing record
-		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.XML).go();
-		Task task = readResponse(response);
-		
-		// update the existing record
-		task.setId(WRONG_TASK_UUID);
-		
-		// send the update to the server
-		response = put("/Task/" + WRONG_TASK_UUID).xmlContext(toXML(task)).go();
-		assertThat(response, isBadRequest());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
-		assertThat(operationOutcome, notNullValue());
-		assertThat(operationOutcome.hasIssue(), is(true));
-		
-	}
-	
- @Test
- public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchTaskIdAsJSON() throws Exception {
-  // get the existing record
-  MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
-  Task task = readResponse(response);
-  
-  // update the existing record
-  task.setId(WRONG_TASK_UUID);
-  
-  // send the update to the server
-  response = put("/Task/" + WRONG_TASK_UUID).jsonContent(toJson(task)).jsonContent(toJson(task)).go();
-  assertThat(response, isBadRequest());
-  assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
-  assertThat(response.getContentAsString(), notNullValue());
-  
-  OperationOutcome operationOutcome = readOperationOutcome(response);
-  
-  assertThat(operationOutcome, notNullValue());
-  assertThat(operationOutcome.hasIssue(), is(true));
- }
- 
-  
-	@Test
-	public void shouldReturnNotFoundWhenUpdatingNonExistentTaskAsXML() throws Exception {
-		// get the existing record
-		MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.XML).go();
-		Task task = readResponse(response);
-		
-		// update the existing record
-		task.setId(WRONG_TASK_UUID);
-		
-		// send the update to the server
-		response = put("/Task/" + TASK_UUID).xmlContext(toXML(task)).go();
-		
-		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
-		assertThat(operationOutcome, notNullValue());
-		assertThat(operationOutcome.hasIssue(), is(true));
-		
-	}
- @Test
- public void shouldReturnNotFoundWhenUpdatingNonExistentTaskAsJSON() throws Exception {
-  // get the existing record
-    MockHttpServletResponse response = get("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
-    Task task = readResponse(response);
-    
-    // update the existing record
-    task.setId(WRONG_TASK_UUID);
-    
-    // send the update to the server
-    response = put("/Task/" + WRONG_TASK_UUID).jsonContent(toJson(task)).jsonContent(toJson(task)).go();
-    
-    assertThat(response, isNotFound());
-    assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-    assertThat(response.getContentAsString(), notNullValue());
-    
-    OperationOutcome operationOutcome = readOperationOutcome(response);
-    
-    assertThat(operationOutcome, notNullValue());
-    assertThat(operationOutcome.hasIssue(), is(true));
- }
-	
-	@Test
+		@Test
 	public void shouldDeleteExistingTask() throws Exception {
 		MockHttpServletResponse response = delete("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -365,7 +362,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR3Integrati
 	
 	@Test
 	public void shouldReturnNotFoundWhenDeletingNonExistentTask() throws Exception {
-		MockHttpServletResponse response = delete("/Patient/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = delete("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -419,5 +416,53 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR3Integrati
 		assertThat(entries, everyItem(hasResource(validResource())));
 		
 	}
+	
+	@Test
+ public void shouldReturnSortedAndFilteredSearchResultsForTaskAsJson() throws Exception {
+	   MockHttpServletResponse response = get("/Task/?status=accepted&_sort=_lastUpdated").accept(FhirMediaTypes.JSON).go();
+	   
+	   assertThat(response, isOk());
+	   assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+	   assertThat(response.getContentAsString(), notNullValue());
+	   
+	   Bundle results = readBundleResponse(response);
+	   
+	   assertThat(results, notNullValue());
+	   assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+	   assertThat(results.hasEntry(), is(true));
+	   
+	   List<Bundle.BundleEntryComponent> entries = results.getEntry();
+	   
+	   assertThat(entries, everyItem(hasResource(hasProperty("lastUpdated", hasProperty("status", startsWith("accepted"))))));
+	   assertThat(entries,
+	         containsInRelativeOrder(
+	             hasResource(hasProperty("lastUpdated", hasProperty("givenAsSingleString", containsString("accepted")))),
+	             hasResource(hasProperty("lastUpdated", hasProperty("givenAsSingleString", containsString("rejected"))))));
+	     assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+ @Test
+ public void shouldReturnSortedAndFilteredSearchResultsForTaskAsXML() throws Exception {
+  MockHttpServletResponse response = get("/Task/?status=accepted&_sort=_lastUpdated").accept(FhirMediaTypes.XML).go();
+    
+    assertThat(response, isOk());
+    assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+    assertThat(response.getContentAsString(), notNullValue());
+    
+    Bundle results = readBundleResponse(response);
+    
+    assertThat(results, notNullValue());
+    assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+    assertThat(results.hasEntry(), is(true));
+    
+    List<Bundle.BundleEntryComponent> entries = results.getEntry();
+    
+    assertThat(entries, everyItem(hasResource(hasProperty("lastUpdated", hasProperty("status", startsWith("accepted"))))));
+    assertThat(entries,
+          containsInRelativeOrder(
+              hasResource(hasProperty("lastUpdated", hasProperty("givenAsSingleString", containsString("accepted")))),
+              hasResource(hasProperty("lastUpdated", hasProperty("givenAsSingleString", containsString("rejected"))))));
+      assertThat(entries, everyItem(hasResource(validResource())));
+ }
 	
 }
