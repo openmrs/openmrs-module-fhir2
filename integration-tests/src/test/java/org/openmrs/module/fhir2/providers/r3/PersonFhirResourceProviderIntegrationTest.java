@@ -46,14 +46,13 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<PersonFhirResourceProvider, Person> {
 	
-	private static final String[] PERSON_SEARCH_DATA_FILES = {
-	        "org/openmrs/module/fhir2/api/dao/impl/FhirPersonDaoImplTest_initial_data.xml" };
+	private static final String PERSON_SEARCH_DATA_FILES = "org/openmrs/module/fhir2/api/dao/impl/FhirPersonDaoImplTest_initial_data.xml";
 	
 	private static final String JSON_CREATE_PERSON = "org/openmrs/module/fhir2/providers/PersonWebTest_create.json";
 	
 	private static final String XML_CREATE_PERSON = "org/openmrs/module/fhir2/providers/PersonWebTest_create.xml";
 	
-	private static final String PERSON_UUID = "61b38324-e2fd-4feb-95b7-9e9a2a4400df";
+	private static final String PERSON_UUID = "5c521595-4e12-46b0-8248-b8f2d3697766";
 	
 	private static final String WRONG_PERSON_UUID = "f090747b-459b-4a13-8c1b-c0567d8aeb63";
 	
@@ -65,10 +64,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 	@Override
 	public void setup() throws Exception {
 		super.setup();
-		
-		for (String search_data : PERSON_SEARCH_DATA_FILES) {
-			executeDataSet(search_data);
-		}
+		executeDataSet(PERSON_SEARCH_DATA_FILES);
 	}
 	
 	@Test
@@ -385,7 +381,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 	
 	@Test
 	public void shouldReturnSortedAndFilteredSearchResultsForPersonsAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Person?family=Doe&_sort=given").accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/Person?name=voided&_sort=given").accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -399,11 +395,10 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("Doe"))))));
 		assertThat(entries,
-		    containsInRelativeOrder(
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("Jean")))),
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("John"))))));
+		    everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("voided"))))));
+		assertThat(entries, containsInRelativeOrder(
+		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("I"))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
@@ -430,7 +425,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 	
 	@Test
 	public void shouldReturnSortedAndFilteredSearchResultsForPersonsAsXML() throws Exception {
-		MockHttpServletResponse response = get("/Person?family=Doe&_sort=given").accept(FhirMediaTypes.XML).go();
+		MockHttpServletResponse response = get("/Person?name=voided&_sort=given").accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -444,11 +439,10 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("Doe"))))));
 		assertThat(entries,
-		    containsInRelativeOrder(
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("Jean")))),
-		        hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("John"))))));
+		    everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("voided"))))));
+		assertThat(entries, containsInRelativeOrder(
+		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("I"))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
