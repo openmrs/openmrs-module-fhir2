@@ -395,8 +395,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries,
-		    everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("voided"))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("voided"))))));
 		assertThat(entries, containsInRelativeOrder(
 		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("I"))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
@@ -439,8 +438,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries,
-		    everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("voided"))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("voided"))))));
 		assertThat(entries, containsInRelativeOrder(
 		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("I"))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
