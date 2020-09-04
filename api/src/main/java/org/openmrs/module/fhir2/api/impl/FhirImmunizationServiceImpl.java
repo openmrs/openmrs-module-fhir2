@@ -9,27 +9,26 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
+import static org.openmrs.module.fhir2.FhirConstants.CODED_SEARCH_HANDLER;
+import static org.openmrs.module.fhir2.FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationGroupingConcept;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Immunization;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
-import org.openmrs.Patient;
-import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
-import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.api.FhirImmunizationService;
+import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
 import org.openmrs.module.fhir2.api.translators.impl.ImmunizationObsGroupHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,29 +41,20 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	private ImmunizationTranslator translator;
 	
 	@Autowired
+	private FhirObservationDao obsDao;
+	
+	@Autowired
 	private ObsService obsService;
 	
 	@Autowired
 	private EncounterService encounterService;
 	
-	private PatientService patientService;
-	
+	@Autowired
 	private ImmunizationObsGroupHelper helper;
-	
-	@Autowired
-	public void setPatientService(PatientService patientService) {
-		this.patientService = patientService;
-	}
-	
-	@Autowired
-	public void setImmunizationHelper(ConceptService conceptService) {
-		this.helper = new ImmunizationObsGroupHelper(conceptService);
-	}
 	
 	@Override
 	public Immunization get(String uuid) {
-		Obs obs = obsService.getObsByUuid(uuid);
-		return translator.toFhirResource(obs);
+		return translator.toFhirResource(obsDao.get(uuid));
 	}
 	
 	@Override
@@ -73,16 +63,15 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 		if (obs.getEncounter().getId() == null) {
 			encounterService.saveEncounter(obs.getEncounter());
 		}
-		obs = obsService.saveObs(obs, "Created when translating a FHIR Immunization resource.");
-		newImmunization = translator.toFhirResource(obs);
-		return newImmunization;
+		obs = obsDao.createOrUpdate(obs);
+		return translator.toFhirResource(obs);
 	}
 	
 	@Override
 	public Immunization update(String uuid, Immunization updatedImmunization) {
-		Obs existingObs = obsService.getObsByUuid(uuid);
-		Obs obs = translator.toOpenmrsType(existingObs, updatedImmunization);
+		Obs obs = translator.toOpenmrsType(obsDao.get(uuid), updatedImmunization);
 		obs = obsService.saveObs(obs, "Updated when translating a FHIR Immunization resource.");
+		//		obs = obsDao.createOrUpdate(obs);
 		return translator.toFhirResource(obs);
 	}
 	
@@ -97,43 +86,21 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 		return helper.concept(immunizationGroupingConcept);
 	}
 	
-	public Patient getPatient(ReferenceParam patientParam) {
-		
-		Patient patient = null;
-		
-		if (StringUtils.equals(patientParam.getChain(), SP_IDENTIFIER)) {
-			final String identifier = patientParam.getValue();
-			
-			List<Patient> patients = patientService.getPatients(identifier, false, 0, 1);
-			if (CollectionUtils.isEmpty(patients)) {
-				throw new IllegalArgumentException(
-				        "No patient could be found for the following OpenMRS identifier: '" + identifier + "'.");
-			}
-			if (CollectionUtils.size(patients) > 1) {
-				throw new IllegalArgumentException(
-				        "Multiple patients were found for the following OpenMRS identifier: '" + identifier + "'.");
-			}
-			patient = patients.get(0);
-		} else if (StringUtils.isEmpty(patientParam.getChain())) {
-			final String uuid = patientParam.getValue();
-			patient = patientService.getPatientByUuid(uuid);
-			if (patient == null) {
-				throw new IllegalArgumentException(
-				        "No patient could be found for the following OpenMRS UUID: '" + uuid + "'.");
-			}
-		}
-		
-		return patient;
-	}
-	
 	@Override
-	public Collection<Immunization> searchImmunizations(ReferenceParam patientParam, SortSpec sort) {
-		final Patient patient = getPatient(patientParam);
-		return obsService
-		        .getObservations(Collections.singletonList(patient.getPerson()), null,
-		            Collections.singletonList(getOpenmrsImmunizationConcept()), null, null, null,
-		            Collections.singletonList("obsDatetime"), null, null, null, null, false)
-		        .stream().map(obs -> translator.toFhirResource(obs)).collect(Collectors.toList());
+	public Collection<Immunization> searchImmunizations(ReferenceAndListParam patientParam, SortSpec sort) {
+		
+		SearchParameterMap searchParams = new SearchParameterMap();
+		searchParams.addParameter(PATIENT_REFERENCE_SEARCH_HANDLER, patientParam);
+		TokenAndListParam conceptParam = new TokenAndListParam();
+		TokenParam token = new TokenParam();
+		token.setValue(getOpenmrsImmunizationConcept().getId().toString());
+		conceptParam.addAnd(token);
+		searchParams.addParameter(CODED_SEARCH_HANDLER, conceptParam);
+		
+		List<String> matchingResourceUuids = obsDao.getSearchResultUuids(searchParams);
+		Collection<Obs> obs = obsDao.getSearchResults(searchParams, matchingResourceUuids);
+		
+		return obs.stream().map(o -> translator.toFhirResource(o)).collect(Collectors.toList());
 	}
 	
 }

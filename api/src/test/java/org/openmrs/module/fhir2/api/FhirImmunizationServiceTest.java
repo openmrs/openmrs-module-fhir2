@@ -31,6 +31,8 @@ import java.util.Set;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -205,35 +207,17 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 	
 	@Test
 	public void searchImmunizations_shouldFetchImmunizationsByPatientIdentifier() throws ParseException {
+		// setup
+		ReferenceAndListParam param = new ReferenceAndListParam();
+		param.addValue(new ReferenceOrListParam().add(new ReferenceParam(SP_IDENTIFIER, "12345K")));
 		
 		// replay
-		List<Immunization> immunizations = new ArrayList<Immunization>(
-		        service.searchImmunizations(new ReferenceParam(SP_IDENTIFIER, "12345K"), null));
+		List<Immunization> immunizations = new ArrayList<Immunization>(service.searchImmunizations(param, null));
 		
-		// verify (in anti-chronological order)
+		// verify (in chronological order)
 		assertThat(immunizations.size(), is(2));
 		{
 			Immunization immunization = immunizations.get(0);
-			Coding coding = immunization.getVaccineCode().getCoding().get(0);
-			assertThat(coding.getDisplay(), is("COUGH SYRUP"));
-			assertThat(coding.getCode(), is("0cbe2ed3-cd5f-4f46-9459-26127c9265ab"));
-			assertThat(immunization.getPatient().getReference(), is("Patient/a7e04421-525f-442f-8138-05b619d16def"));
-			assertThat(immunization.getPatient().getType(), is(PATIENT));
-			assertThat(immunization.getEncounter().getReference(), is("Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc"));
-			assertThat(immunization.getEncounter().getType(), is(ENCOUNTER));
-			assertThat(immunization.getOccurrenceDateTimeType().getValue().toString(), is("2020-06-08 20:30:00.0"));
-			assertThat(immunization.getManufacturer().getDisplay(), is("Biotech Ltd"));
-			assertThat(immunization.getLotNumber(), is("WV654XU"));
-			assertThat(immunization.getExpirationDate().toString(), is("2023-01-01 12:00:00.0"));
-			assertThat(immunization.getPerformer().size(), is(1));
-			assertThat(immunization.getPerformer().get(0).getActor().getReference(),
-			    is("Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66"));
-			assertThat(immunization.getPerformer().get(0).getActor().getType(), is(PRACTITIONER));
-			assertThat(immunization.getProtocolApplied().size(), is(1));
-			assertThat(immunization.getProtocolApplied().get(0).getDoseNumberPositiveIntType().getValue(), is(11));
-		}
-		{
-			Immunization immunization = immunizations.get(1);
 			Coding coding = immunization.getVaccineCode().getCoding().get(0);
 			assertThat(coding.getDisplay(), is("STAVUDINE LAMIVUDINE AND NEVIRAPINE"));
 			assertThat(coding.getCode(), is("d144d24f-6913-4b63-9660-a9108c2bebef"));
@@ -251,6 +235,26 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 			assertThat(immunization.getPerformer().get(0).getActor().getType(), is(PRACTITIONER));
 			assertThat(immunization.getProtocolApplied().size(), is(1));
 			assertThat(immunization.getProtocolApplied().get(0).getDoseNumberPositiveIntType().getValue(), is(3));
+		}
+		{
+			Immunization immunization = immunizations.get(1);
+			Coding coding = immunization.getVaccineCode().getCoding().get(0);
+			assertThat(coding.getDisplay(), is("COUGH SYRUP"));
+			assertThat(coding.getCode(), is("0cbe2ed3-cd5f-4f46-9459-26127c9265ab"));
+			assertThat(immunization.getPatient().getReference(), is("Patient/a7e04421-525f-442f-8138-05b619d16def"));
+			assertThat(immunization.getPatient().getType(), is(PATIENT));
+			assertThat(immunization.getEncounter().getReference(), is("Encounter/7d8c1980-6b78-11e0-93c3-18a905e044dc"));
+			assertThat(immunization.getEncounter().getType(), is(ENCOUNTER));
+			assertThat(immunization.getOccurrenceDateTimeType().getValue().toString(), is("2020-06-08 20:30:00.0"));
+			assertThat(immunization.getManufacturer().getDisplay(), is("Biotech Ltd"));
+			assertThat(immunization.getLotNumber(), is("WV654XU"));
+			assertThat(immunization.getExpirationDate().toString(), is("2023-01-01 12:00:00.0"));
+			assertThat(immunization.getPerformer().size(), is(1));
+			assertThat(immunization.getPerformer().get(0).getActor().getReference(),
+			    is("Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66"));
+			assertThat(immunization.getPerformer().get(0).getActor().getType(), is(PRACTITIONER));
+			assertThat(immunization.getProtocolApplied().size(), is(1));
+			assertThat(immunization.getProtocolApplied().get(0).getDoseNumberPositiveIntType().getValue(), is(11));
 		}
 		
 	}

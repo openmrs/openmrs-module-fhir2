@@ -33,10 +33,14 @@ import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.FhirActivator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 @Setter(AccessLevel.PACKAGE)
 public class ImmunizationObsGroupHelper {
 	
+	@Autowired
 	public ImmunizationObsGroupHelper(ConceptService conceptService) {
 		this.conceptService = conceptService;
 	}
