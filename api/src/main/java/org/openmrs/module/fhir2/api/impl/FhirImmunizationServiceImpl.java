@@ -64,8 +64,8 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 		if (obs.getEncounter().getId() == null) {
 			encounterService.saveEncounter(obs.getEncounter());
 		}
-		//		obs = obsService.saveObs(obs, "Created when translating a FHIR Immunization resource.");
-		obs = obsDao.createOrUpdate(obs);
+		obs = obsService.saveObs(obs, "Created when translating a FHIR Immunization resource.");
+		//		obs = obsDao.createOrUpdate(obs);
 		return translator.toFhirResource(obs);
 	}
 	
