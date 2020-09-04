@@ -21,10 +21,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Sets;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
 import org.openmrs.Concept;
 import org.openmrs.EncounterRole;
@@ -84,11 +84,15 @@ public class ImmunizationObsGroupHelper {
 			        + immunizationGroupingConcept + ".");
 		}
 		
-		final Set<String> refConcepts = Sets.newHashSet(immunizationConcepts);
+		final Set<String> refConcepts = Arrays.asList(immunizationConcepts).stream()
+		        .map(m -> conceptService.getConceptByMapping(m.split(":")[1], m.split(":")[0])).map(c -> c.getUuid())
+		        .collect(Collectors.toSet());
+		
 		// filtering the obs' concepts that are immunization concepts (but there could be others)
 		List<String> obsConcepts = obs.getGroupMembers().stream().map(o -> o.getConcept().getUuid())
 		        .filter(uuid -> refConcepts.contains(uuid)).collect(Collectors.toList());
 		
+		Validate.notEmpty(obsConcepts);
 		// each immunization concept should define only one obs of the group
 		obsConcepts.stream().forEach(uuid -> {
 			if (refConcepts.contains(uuid)) {
@@ -98,6 +102,7 @@ public class ImmunizationObsGroupHelper {
 				        + " is found multiple times in the immunization obs group.");
 			}
 		});
+		Validate.isTrue(refConcepts.size() == 0);
 	}
 	
 	/**

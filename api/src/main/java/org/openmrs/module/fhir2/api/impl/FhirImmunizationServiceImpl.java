@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.r4.model.Immunization;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
@@ -63,6 +64,7 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 		if (obs.getEncounter().getId() == null) {
 			encounterService.saveEncounter(obs.getEncounter());
 		}
+		//		obs = obsService.saveObs(obs, "Created when translating a FHIR Immunization resource.");
 		obs = obsDao.createOrUpdate(obs);
 		return translator.toFhirResource(obs);
 	}
@@ -98,7 +100,8 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 		searchParams.addParameter(CODED_SEARCH_HANDLER, conceptParam);
 		
 		List<String> matchingResourceUuids = obsDao.getSearchResultUuids(searchParams);
-		Collection<Obs> obs = obsDao.getSearchResults(searchParams, matchingResourceUuids);
+		Collection<Obs> obs = CollectionUtils.isEmpty(matchingResourceUuids) ? CollectionUtils.EMPTY_COLLECTION
+		        : obsDao.getSearchResults(searchParams, matchingResourceUuids);
 		
 		return obs.stream().map(o -> translator.toFhirResource(o)).collect(Collectors.toList());
 	}
