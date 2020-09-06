@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang.Validate.notEmpty;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.validation.constraints.NotNull;
@@ -19,11 +20,13 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.apache.commons.lang.Validate;
+import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
@@ -72,9 +75,25 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 		
 		existingProvider.setUuid(practitioner.getId());
 		
-		Validate.notEmpty(practitioner.getIdentifier(), "Practitioner Identifier cannot be empty");
+		notEmpty(practitioner.getIdentifier(), "Practitioner Identifier cannot be empty");
 		existingProvider.setIdentifier(practitioner.getIdentifier().get(0).getValue());
 		
+		if (existingProvider.getPerson() == null) {
+			existingProvider.setPerson(new Person());
+		}
+		existingProvider.getPerson().setBirthdate(practitioner.getBirthDate());
+		
+		for (HumanName name : practitioner.getName()) {
+			existingProvider.getPerson().addName(nameTranslator.toOpenmrsType(name));
+		}
+		
+		if (practitioner.hasGender()) {
+			existingProvider.getPerson().setGender(genderTranslator.toOpenmrsType(practitioner.getGender()));
+		}
+		
+		for (Address address : practitioner.getAddress()) {
+			existingProvider.getPerson().addAddress(addressTranslator.toOpenmrsType(address));
+		}
 		practitioner.getTelecom().stream().map(
 		    contactPoint -> (ProviderAttribute) telecomTranslator.toOpenmrsType(new ProviderAttribute(), contactPoint))
 		        .filter(Objects::nonNull).forEach(existingProvider::addAttribute);

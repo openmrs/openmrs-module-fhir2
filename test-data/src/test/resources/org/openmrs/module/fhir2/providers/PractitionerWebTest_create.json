@@ -1,29 +1,38 @@
 {
   "resourceType": "Practitioner",
-  "name": {
-    "family": "Careful",
-    "given": [
-      "Adam"
-    ],
-    "prefix": [
-      "Dr"
-    ]
+  "identifier": {
+    "extension": [{
+      "url": "http://fhir.openmrs.org/ext/name",
+      "valueReference": {
+        "reference": "Name/92ab9667-4686-49af-8be8-65a4b58fc49c",
+        "type": "Name"
+      }
+    }],
+    "use": "official",
+    "type": {
+      "text": "Test Identifier Type"
+    },
+    "value": "4444-6"
   },
-  "organization": {
-    "reference": "Organization/1"
-  },
-  "role": [
+  "active": true,
+  "name": [
     {
-      "coding": [
-        {
-          "system": "http://hl7.org/fhir/v2/0286",
-          "code": "RP"
-        }
+      "given": [
+        "Adam"
+      ],
+      "family": "John",
+      "prefix": [
+        "Dr"
       ]
     }
   ],
-  "period": {
-    "start": "2020-07-13",
-    "end": "2012-07-13"
-  }
+  "gender": "male",
+  "birthDate": "2004-08-12",
+  "address": [
+    {
+      "state": "Mukono",
+      "city": "Kampala",
+      "country": "Uganda"
+    }
+  ]
 }
