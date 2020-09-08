@@ -22,6 +22,17 @@
             </list>
         </property>
     </bean>
-    <bean name="fhirR3" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3"/>
-    <bean name="fhirR4" class="ca.uhn.fhir.context.FhirContext" factory-method="forR4"/>
+
+    <bean name="restfulClientFactoryR3" class="ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory">
+        <property name="fhirContext" ref="fhirR3"/>
+    </bean>
+    <bean name="restfulClientFactoryR4" class="ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory">
+        <property name="fhirContext" ref="fhirR4"/>
+    </bean>
+    <bean name="fhirR3" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3">
+        <property name="restfulClientFactory" ref="restfulClientFactoryR3"/>
+    </bean>
+    <bean name="fhirR4" class="ca.uhn.fhir.context.FhirContext" factory-method="forR4">
+        <property name="restfulClientFactory" ref="restfulClientFactoryR4"/>
+    </bean>
 </beans>
