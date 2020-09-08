@@ -1,0 +1,449 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.fhir2.providers.r4;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
+
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Person;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
+
+public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<PersonFhirResourceProvider, Person> {
+	
+	private static final String PERSON_SEARCH_DATA_FILES = "org/openmrs/module/fhir2/api/dao/impl/FhirPersonDaoImplTest_initial_data.xml";
+	
+	private static final String JSON_CREATE_PERSON = "org/openmrs/module/fhir2/providers/PersonWebTest_create.json";
+	
+	private static final String XML_CREATE_PERSON = "org/openmrs/module/fhir2/providers/PersonWebTest_create.xml";
+	
+	private static final String PERSON_UUID = "5c521595-4e12-46b0-8248-b8f2d3697766";
+	
+	private static final String WRONG_PERSON_UUID = "f090747b-459b-4a13-8c1b-c0567d8aeb63";
+	
+	@Getter(AccessLevel.PUBLIC)
+	@Autowired
+	private PersonFhirResourceProvider resourceProvider;
+	
+	@Before
+	@Override
+	public void setup() throws Exception {
+		super.setup();
+		executeDataSet(PERSON_SEARCH_DATA_FILES);
+	}
+	
+	@Test
+	public void shouldReturnExistingPersonAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Person person = readResponse(response);
+		
+		assertThat(person, notNullValue());
+		assertThat(person.getIdElement().getIdPart(), equalTo(PERSON_UUID));
+		assertThat(person, validResource());
+	}
+	
+	@Test
+	public void shouldThrow404ForNonExistingPersonAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+	}
+	
+	@Test
+	public void shouldReturnExistingPersonAsXML() throws Exception {
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Person person = readResponse(response);
+		
+		assertThat(person, notNullValue());
+		assertThat(person.getIdElement().getIdPart(), equalTo(PERSON_UUID));
+		assertThat(person, validResource());
+	}
+	
+	@Test
+	public void shouldThrow404ForNonExistingPersonAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+	}
+	
+	@Test
+	public void shouldCreateNewPersonAsJson() throws Exception {
+		// read JSON record
+		String jsonPerson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PERSON)) {
+			Objects.requireNonNull(is);
+			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		// create person
+		MockHttpServletResponse response = post("/Person").accept(FhirMediaTypes.JSON).jsonContent(jsonPerson).go();
+		
+		// verify created correctly
+		assertThat(response, isCreated());
+		assertThat(response.getHeader("Location"), containsString("/Person/"));
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Person person = readResponse(response);
+		
+		assertThat(person, notNullValue());
+		assertThat(person.getIdElement().getIdPart(), notNullValue());
+		assertThat(person.getName().get(0).getGiven().get(0).toString(), equalToIgnoringCase("Adam"));
+		assertThat(person.getName().get(0).getFamily(), equalToIgnoringCase("John"));
+		assertThat(person.getGender(), equalTo(Enumerations.AdministrativeGender.MALE));
+		
+		Date birthDate = Date.from(LocalDate.of(2004, 8, 12).atStartOfDay(ZoneId.systemDefault()).toInstant());
+		assertThat(person.getBirthDate(), equalTo(birthDate));
+		
+		assertThat(person.getAddress().get(0).getCity(), equalTo("Kampala"));
+		assertThat(person.getAddress().get(0).getState(), equalTo("Mukono"));
+		assertThat(person.getAddress().get(0).getCountry(), equalTo("Uganda"));
+		assertThat(person, validResource());
+		
+		// try to get new person
+		response = get("/Person/" + person.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Person newPerson = readResponse(response);
+		
+		assertThat(newPerson.getId(), equalTo(person.getId()));
+	}
+	
+	@Test
+	public void shouldCreateNewPersonAsXML() throws Exception {
+		// read XML record
+		String xmlPerson;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_PERSON)) {
+			Objects.requireNonNull(is);
+			xmlPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		// create person
+		MockHttpServletResponse response = post("/Person").accept(FhirMediaTypes.XML).xmlContext(xmlPerson).go();
+		
+		// verify created correctly
+		assertThat(response, isCreated());
+		assertThat(response.getHeader("Location"), containsString("/Person/"));
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Person person = readResponse(response);
+		
+		assertThat(person, notNullValue());
+		assertThat(person.getIdElement().getIdPart(), notNullValue());
+		assertThat(person.getName().get(0).getGiven().get(0).toString(), equalToIgnoringCase("Adam"));
+		assertThat(person.getName().get(0).getFamily(), equalToIgnoringCase("John"));
+		assertThat(person.getGender(), equalTo(Enumerations.AdministrativeGender.MALE));
+		
+		Date birthDate = Date.from(LocalDate.of(2004, 8, 12).atStartOfDay(ZoneId.systemDefault()).toInstant());
+		assertThat(person.getBirthDate(), equalTo(birthDate));
+		
+		assertThat(person.getAddress().get(0).getCity(), equalTo("Kampala"));
+		assertThat(person.getAddress().get(0).getState(), equalTo("Mukono"));
+		assertThat(person.getAddress().get(0).getCountry(), equalTo("Uganda"));
+		assertThat(person, validResource());
+		
+		// try to get new person
+		response = get("/Person/" + person.getIdElement().getIdPart()).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		
+		Person newPerson = readResponse(response);
+		
+		assertThat(newPerson.getId(), equalTo(person.getId()));
+	}
+	
+	@Test
+	public void shouldUpdateExistingPersonAsJson() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		Person person = readResponse(response);
+		
+		// update the existing record
+		Date birthDate = DateUtils.truncate(new Date(), Calendar.DATE);
+		person.setBirthDate(birthDate);
+		
+		// send the update to the server
+		response = put("/Person/" + PERSON_UUID).jsonContent(toJson(person)).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		// read the updated record
+		Person updatedPerson = readResponse(response);
+		
+		assertThat(updatedPerson, notNullValue());
+		assertThat(updatedPerson.getIdElement().getIdPart(), equalTo(PERSON_UUID));
+		assertThat(updatedPerson.getBirthDate(), equalTo(birthDate));
+		assertThat(person, validResource());
+		
+		// double-check the record returned via get
+		response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		Person reReadPerson = readResponse(response);
+		
+		assertThat(reReadPerson.getBirthDate(), equalTo(birthDate));
+	}
+	
+	@Test
+	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchPersonIdAsJson() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		Person person = readResponse(response);
+		
+		// update the existing record
+		person.setId(WRONG_PERSON_UUID);
+		
+		// send the update to the server
+		response = put("/Person/" + PERSON_UUID).jsonContent(toJson(person)).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldReturnNotFoundWhenUpdatingNonExistentPersonAsJson() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		Person person = readResponse(response);
+		
+		// update the existing record
+		person.setId(WRONG_PERSON_UUID);
+		
+		// send the update to the server
+		response = put("/Person/" + WRONG_PERSON_UUID).jsonContent(toJson(person)).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldUpdateExistingPersonAsXML() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.XML).go();
+		Person person = readResponse(response);
+		
+		// update the existing record
+		Date birthDate = DateUtils.truncate(new Date(), Calendar.DATE);
+		person.setBirthDate(birthDate);
+		
+		// send the update to the server
+		response = put("/Person/" + PERSON_UUID).xmlContext(toXML(person)).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		// read the updated record
+		Person updatedPerson = readResponse(response);
+		
+		assertThat(updatedPerson, notNullValue());
+		assertThat(updatedPerson.getIdElement().getIdPart(), equalTo(PERSON_UUID));
+		assertThat(updatedPerson.getBirthDate(), equalTo(birthDate));
+		assertThat(person, validResource());
+		
+		// double-check the record returned via get
+		response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.XML).go();
+		Person reReadPerson = readResponse(response);
+		
+		assertThat(reReadPerson.getBirthDate(), equalTo(birthDate));
+	}
+	
+	@Test
+	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchPersonIdAsXML() throws Exception {
+		// get the existing record
+		MockHttpServletResponse response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.XML).go();
+		Person person = readResponse(response);
+		
+		// update the existing record
+		person.setId(WRONG_PERSON_UUID);
+		
+		// send the update to the server
+		response = put("/Person/" + PERSON_UUID).xmlContext(toXML(person)).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldDeleteExistingPerson() throws Exception {
+		MockHttpServletResponse response = delete("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		response = get("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, statusEquals(HttpStatus.GONE));
+	}
+	
+	@Test
+	public void shouldReturnNotFoundWhenDeletingNonExistentPerson() throws Exception {
+		MockHttpServletResponse response = delete("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldSearchForAllPersonsAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Person").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Person/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Person.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+	@Test
+	public void shouldReturnSortedAndFilteredSearchResultsForPersonsAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Person?name=voided&_sort=given").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("voided"))))));
+		assertThat(entries, containsInRelativeOrder(
+		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("I"))))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+	@Test
+	public void shouldSearchForAllPersonsAsXML() throws Exception {
+		MockHttpServletResponse response = get("/Person").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Person/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Person.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+	@Test
+	public void shouldReturnSortedAndFilteredSearchResultsForPersonsAsXML() throws Exception {
+		MockHttpServletResponse response = get("/Person?name=voided&_sort=given").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("nameFirstRep", hasProperty("family", startsWith("voided"))))));
+		assertThat(entries, containsInRelativeOrder(
+		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("I"))))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+}
