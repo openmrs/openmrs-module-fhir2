@@ -26,7 +26,7 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
       - name: Build with Maven
-        run: mvn package --batch-mode -P integration-test --file pom.xml
+        run: mvn verify --batch-mode -P integration-test --file pom.xml
       - name: Send data to Codecov
         uses: codecov/codecov-action@v1
         with:
