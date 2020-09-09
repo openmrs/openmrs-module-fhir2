@@ -266,7 +266,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR4Integrati
 		MockHttpServletResponse response = post("/Task").accept(FhirMediaTypes.XML).xmlContext(xmlTask).go();
 		
 		// verify created correctly
-		//		assertThat(response, isCreated());
+		assertThat(response, isCreated());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
@@ -376,7 +376,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR4Integrati
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		org.hl7.fhir.r4.model.OperationOutcome operationOutcome = readOperationOutcome(response);
+		OperationOutcome operationOutcome = readOperationOutcome(response);
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
@@ -390,7 +390,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR4Integrati
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		org.hl7.fhir.r4.model.Bundle results = readBundleResponse(response);
+	    Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
@@ -398,7 +398,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR4Integrati
 		
 		List<BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Task/"))));
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Task/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Task.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
@@ -411,7 +411,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR4Integrati
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		org.hl7.fhir.r4.model.Bundle results = readBundleResponse(response);
+		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
@@ -419,7 +419,7 @@ public class TaskFhirResourceProviderIntegrationTest extends BaseFhirR4Integrati
 		
 		List<BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Task/"))));
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Task/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Task.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		
