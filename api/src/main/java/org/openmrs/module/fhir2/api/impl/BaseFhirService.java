@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -31,18 +29,14 @@ import org.openmrs.validator.ValidateUtil;
 @SuppressWarnings("UnstableApiUsage")
 public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsObject & Auditable> implements FhirService<T> {
 	
-	protected final Class<? extends IResource> resourceClass;
+	protected final Class<? super T> resourceClass;
 	
 	protected BaseFhirService() {
 		// @formatter:off
 		TypeToken<T> resourceTypeToken = new TypeToken<T>(getClass()) {};
 		// @formatter:on
 		
-		// this doesn't seem like it should work but does?
-		@SuppressWarnings("unchecked")
-		Class<? extends IResource> resourceClass = (Class<? extends IResource>) resourceTypeToken.getRawType();
-		
-		this.resourceClass = resourceClass;
+		this.resourceClass = resourceTypeToken.getRawType();
 	}
 	
 	@Override
@@ -56,7 +50,8 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		if (openmrsObj == null) {
 			throw resourceNotFound(uuid);
 		} else if (isVoided(openmrsObj) || isRetired(openmrsObj)) {
-			throw new ResourceGoneException(resourceClass, new IdDt(uuid));
+			throw new ResourceGoneException(
+			        "Resource of type " + resourceClass.getSimpleName() + " with ID " + uuid + " is gone/deleted");
 		}
 		
 		return getTranslator().toFhirResource(openmrsObj);
@@ -181,6 +176,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	private ResourceNotFoundException resourceNotFound(String uuid) {
-		return new ResourceNotFoundException(resourceClass, new IdDt(uuid));
+		return new ResourceNotFoundException(
+		        "Resource of type " + resourceClass.getSimpleName() + " with ID " + uuid + " is not known");
 	}
 }
