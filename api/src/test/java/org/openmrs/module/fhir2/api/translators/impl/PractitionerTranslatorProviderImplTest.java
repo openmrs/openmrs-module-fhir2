@@ -78,6 +78,10 @@ public class PractitionerTranslatorProviderImplTest {
 	
 	private static final String PERSON_ATTRIBUTE_TYPE_UUID = "FF89DD99-OOX78-KKG89D-XX89CC8";
 	
+	private static final String ADDRESS_UUID = "135791-xxxxxx-135791";
+	
+	private static final String ADDRESS_CITY = "Eldoret";
+	
 	@Mock
 	private GenderTranslator genderTranslator;
 	
@@ -254,6 +258,82 @@ public class PractitionerTranslatorProviderImplTest {
 		Practitioner result = practitionerTranslator.toFhirResource(provider);
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getLastUpdated(), sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateFhirPractitionerToOpenmrsProvider() {
+		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
+		practitioner.addIdentifier(new Identifier().setValue("349023n23b-t"));
+		
+		Provider result = practitionerTranslator.toOpenmrsType(practitioner);
+		
+		assertThat(result, notNullValue());
+	}
+	
+	@Test
+	public void shouldTranslateFhirPractitionerIdToUuid() {
+		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
+		practitioner.setId(PRACTITIONER_UUID);
+		practitioner.addIdentifier(new Identifier().setValue("349023n23b-t"));
+		
+		Provider result = practitionerTranslator.toOpenmrsType(practitioner);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(PRACTITIONER_UUID));
+	}
+	
+	@Test
+	public void shouldTranslateFhirGenderToOpenmrsGender() {
+		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
+		practitioner.addIdentifier(new Identifier().setValue("349023n23b-t"));
+		practitioner.setGender(Enumerations.AdministrativeGender.MALE);
+		when(genderTranslator.toOpenmrsType(Enumerations.AdministrativeGender.MALE)).thenReturn("M");
+		
+		Provider result = practitionerTranslator.toOpenmrsType(practitioner);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPerson().getGender(), equalTo("M"));
+	}
+	
+	@Test
+	public void shouldTranslateFhirNameToPersonName() {
+		PersonName personName = new PersonName();
+		personName.setGivenName(GIVEN_NAME);
+		personName.setFamilyName(FAMILY_NAME);
+		
+		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
+		practitioner.addIdentifier(new Identifier().setValue("349023n23b-t"));
+		HumanName name = practitioner.addName();
+		name.addGiven(GIVEN_NAME);
+		name.setFamily(FAMILY_NAME);
+		when(nameTranslator.toOpenmrsType(name)).thenReturn(personName);
+		
+		Provider result = practitionerTranslator.toOpenmrsType(practitioner);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPerson().getGivenName(), equalTo(GIVEN_NAME));
+		assertThat(result.getPerson().getFamilyName(), equalTo(FAMILY_NAME));
+	}
+	
+	@Test
+	public void shouldTranslateFhirAddressToPersonAddress() {
+		PersonAddress personAddress = new PersonAddress();
+		personAddress.setUuid(ADDRESS_UUID);
+		personAddress.setCityVillage(ADDRESS_CITY);
+		
+		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
+		practitioner.addIdentifier(new Identifier().setValue("349023n23b-t"));
+		Address address = practitioner.addAddress();
+		address.setId(ADDRESS_UUID);
+		address.setCity(ADDRESS_CITY);
+		when(addressTranslator.toOpenmrsType(address)).thenReturn(personAddress);
+		
+		Provider result = practitionerTranslator.toOpenmrsType(practitioner);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPerson().getPersonAddress(), notNullValue());
+		assertThat(result.getPerson().getPersonAddress().getUuid(), equalTo(ADDRESS_UUID));
+		assertThat(result.getPerson().getPersonAddress().getCityVillage(), equalTo(ADDRESS_CITY));
 	}
 	
 	@Test

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<Practitioner xmlns="http://hl7.org/fhir">
+    <identifier>
+        <extension url="http://fhir.openmrs.org/ext/name">
+            <valueReference>
+                <reference value="Name/92ab9667-4686-49af-8be8-65a4b58fc49c"/>
+                <type value="Name"/>
+            </valueReference>
+        </extension>
+        <use value="official"/>
+        <type><text value="Test Identifier Type"/></type>
+        <value value="4444-6"/>
+    </identifier>
+    <name>
+        <family value="John"/>
+        <given value="Adam"/>
+        <prefix value="Dr"/>
+    </name>
+    <gender value="male"/>
+    <active value="true"/>
+    <birthDate value="2004-08-12"/>
+    <address>
+        <city value="Kampala"/>
+        <state value="Mukono"/>
+        <country value="Uganda"/>
+    </address>
+</Practitioner>
