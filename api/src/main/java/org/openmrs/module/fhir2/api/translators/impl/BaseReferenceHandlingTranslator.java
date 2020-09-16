@@ -83,7 +83,7 @@ public abstract class BaseReferenceHandlingTranslator {
 		
 		return reference;
 	}
-
+	
 	protected Reference createPractitionerReference(@NotNull User user) {
 		Reference reference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + user.getUuid())
 		        .setType(FhirConstants.PRACTITIONER);
