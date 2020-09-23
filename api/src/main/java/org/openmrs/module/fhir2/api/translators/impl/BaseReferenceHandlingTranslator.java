@@ -15,7 +15,6 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Drug;
@@ -30,6 +29,7 @@ import org.openmrs.Person;
 import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @Setter(AccessLevel.PACKAGE)
 public abstract class BaseReferenceHandlingTranslator {
@@ -137,40 +137,10 @@ public abstract class BaseReferenceHandlingTranslator {
 	}
 	
 	protected Optional<String> getReferenceType(Reference reference) {
-		if (reference.getType() != null) {
-			return Optional.of(reference.getType());
-		}
-		
-		return referenceToType(reference.getReference());
+		return FhirUtils.getReferenceType(reference);
 	}
 	
 	protected Optional<String> getReferenceId(Reference reference) {
-		return referenceToId(reference.getReference());
-	}
-	
-	private Optional<String> referenceToType(String fhirReference) {
-		if (fhirReference == null) {
-			return Optional.empty();
-		}
-		
-		int split = fhirReference.indexOf('/');
-		if (split < 0) {
-			return Optional.empty();
-		}
-		
-		return Optional.ofNullable(StringUtils.trimToNull(fhirReference.substring(0, split)));
-	}
-	
-	private Optional<String> referenceToId(String fhirReference) {
-		if (fhirReference == null) {
-			return Optional.empty();
-		}
-		
-		int split = fhirReference.indexOf('/');
-		if (split < 0 || split == fhirReference.length() - 1) {
-			return Optional.empty();
-		}
-		
-		return Optional.ofNullable(StringUtils.trimToNull(fhirReference.substring(split + 1)));
+		return FhirUtils.referenceToId(reference.getReference());
 	}
 }

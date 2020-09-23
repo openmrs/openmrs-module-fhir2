@@ -82,7 +82,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 			        String.format("%s resource is missing id.", updatedResource.getClass().getSimpleName()));
 		}
 		
-		if (!updatedResource.getId().equals(uuid)) {
+		if (!updatedResource.getIdElement().getIdPart().equals(uuid)) {
 			throw new InvalidRequestException(
 			        String.format("%s id does not match resource id.", updatedResource.getClass().getSimpleName()));
 		}

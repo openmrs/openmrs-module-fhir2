@@ -53,7 +53,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
-	public static final String LOCATION_UUID = "c0938432-1691-11df-2222-8038u432aabd";
+	public static final String LOCATION_UUID = "5db6ae3c-867e-45a0-a1ce-f86219b64e1c";
 	
 	private static final String LOCATION_NAME = "Test location 7";
 	
@@ -85,7 +85,7 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String LOCATION_PARENT_STATE = "province";
 	
-	private static final String LOCATION_PARENT_ID = "c0938432-1691-11df-2222-7038c432aabd";
+	private static final String LOCATION_PARENT_UUID = "dc80983f-8b2c-4524-bdbd-b5e825e263a0";
 	
 	private static final String LOCATION_PARENT_NAME = "Test location 5";
 	
@@ -300,7 +300,7 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForLocations_shouldReturnCorrectLocationByParentUUID() {
 		ReferenceAndListParam parentLocation = new ReferenceAndListParam()
-		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(LOCATION_PARENT_ID).setChain(null)));
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(LOCATION_PARENT_UUID).setChain(null)));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER,
 		    parentLocation);

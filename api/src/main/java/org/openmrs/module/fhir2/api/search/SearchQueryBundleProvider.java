@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -32,6 +31,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ToFhirTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U extends IBaseResource> implements IBundleProvider, Serializable {
@@ -64,7 +64,7 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 		this.published = InstantDt.withCurrentTime();
 		this.searchParameterMap = searchParameterMap;
 		this.translator = translator;
-		this.uuid = UUID.randomUUID().toString();
+		this.uuid = FhirUtils.newUuid();
 		this.globalPropertyService = globalPropertyService;
 	}
 	

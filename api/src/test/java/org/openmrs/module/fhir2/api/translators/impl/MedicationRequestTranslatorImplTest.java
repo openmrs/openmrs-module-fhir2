@@ -57,9 +57,9 @@ public class MedicationRequestTranslatorImplTest {
 	
 	private static final String PRACTITIONER_UUID = "88fdc8ad-fe4d-499b-93a8-8a991c1d477d";
 	
-	private static final String PATIENT_UUID = "c0938432-1691-11df-9pa5-7038c432aaba";
+	private static final String PATIENT_UUID = "3fe9b1dc-5385-40a4-9f79-67e54a8f3c27";
 	
-	private static final String ENCOUNTER_UUID = "12345-abcde-54321";
+	private static final String ENCOUNTER_UUID = "5beacff1-de27-49b2-8672-14b646517826";
 	
 	private static final String COMMENT_TO_THE_FULL_FILLER = "comment to the full filler";
 	
@@ -78,7 +78,7 @@ public class MedicationRequestTranslatorImplTest {
 	private MedicationReferenceTranslator medicationReferenceTranslator;
 	
 	@Mock
-	private EncounterReferenceTranslator encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;

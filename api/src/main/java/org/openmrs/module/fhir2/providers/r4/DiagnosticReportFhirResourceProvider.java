@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -73,12 +74,11 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	
 	@Update
 	public MethodOutcome updateDiagnosticReport(@IdParam IdType id, @ResourceParam DiagnosticReport diagnosticReport) {
-		String idPart = null;
-		
-		if (id != null) {
-			idPart = id.getIdPart();
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
 		}
-		return FhirProviderUtils.buildUpdate(service.update(idPart, diagnosticReport));
+		
+		return FhirProviderUtils.buildUpdate(service.update(id.getIdPart(), diagnosticReport));
 	}
 	
 	@Delete

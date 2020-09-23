@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<DiagnosticReport xmlns="http://hl7.org/fhir">
+    <id value="8a849d5e-6011-4279-a124-40ada5a687de"/>
+    <status value="final"/>
+    <category>
+        <coding>
+            <system value="http://terminology.hl7.org/CodeSystem/v2-0074"/>
+            <code value="LAB"/>
+        </coding>
+    </category>
+    <code>
+        <coding>
+            <system value="http://loinc.org"/>
+            <code value="8480-6"/>
+            <display value="Systolic blood pressure"/>
+        </coding>
+        <coding>
+            <code value="5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+            <display value="Systolic blood pressure"/>
+        </coding>
+        <text value="Systolic Blood Pressure"/>
+    </code>
+    <subject>
+        <reference value="Patient/5946f880-b197-400b-9caa-a3c661d23041"/>
+    </subject>
+    <encounter>
+        <reference value="Encounter/6519d653-393b-4118-9c83-a3715b82d4ac"/>
+    </encounter>
+    <issued value="2011-03-04T11:45:33+11:00"/>
+    <result>
+        <reference value="Observation/6f16bb57-12bc-4077-9f49-ceaa9b928669"/>
+    </result>
+    <result>
+        <reference value="Observation/dc386962-1c42-49ea-bed2-97650c66f742"/>
+    </result>
+</DiagnosticReport>

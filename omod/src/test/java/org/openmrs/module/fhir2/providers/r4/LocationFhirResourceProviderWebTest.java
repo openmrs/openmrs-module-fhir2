@@ -64,9 +64,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderWebTest<LocationFhirResourceProvider, Location> {
 	
-	private static final String LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String LOCATION_UUID = "9e0d2e27-541f-435d-aebd-81eed8acc56b";
 	
-	private static final String WRONG_LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432aabd";
+	private static final String WRONG_LOCATION_UUID = "bac45a1f-a4c6-4d56-9743-f407c8ef27b7";
 	
 	private static final String LOCATION_NAME = "Ngeria";
 	
@@ -82,7 +82,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	
 	private static final String PARENT_LOCATION_NAME = "Test parent location";
 	
-	private static final String PARENT_LOCATION_ID = "c0938432-1691-11df-97a5-7038c432aabe";
+	private static final String PARENT_LOCATION_ID = "6bdfdc53-f828-4c7d-b127-e9b49574ef24";
 	
 	private static final String PARENT_LOCATION_CITY = "Test parent city";
 	
@@ -387,7 +387,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	@Test
 	public void shouldGetLocationHistoryById() throws IOException, ServletException {
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(new Date());
 		provenance.setActivity(new CodeableConcept().addCoding(
 		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));

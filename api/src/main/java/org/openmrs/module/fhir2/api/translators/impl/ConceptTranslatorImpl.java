@@ -84,8 +84,10 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			Concept codedConcept = coding.getCode() != null
 			        ? conceptService.getConceptBySourceNameAndCode(codingSource, coding.getCode()).orElse(null)
 			        : null;
+			
 			if (codedConcept != null) {
 				concept_ = codedConcept;
+				break;
 			}
 		}
 		

@@ -110,20 +110,20 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	@Override
-	protected String paramToProp(@NotNull String paramName) {
-		switch (paramName) {
-			case "name":
+	protected String paramToProp(@NotNull String param) {
+		switch (param) {
+			case org.hl7.fhir.r4.model.Location.SP_NAME:
 				return "name";
-			case "address-city":
+			case org.hl7.fhir.r4.model.Location.SP_ADDRESS_CITY:
 				return "cityVillage";
-			case "address-state":
+			case org.hl7.fhir.r4.model.Location.SP_ADDRESS_STATE:
 				return "stateProvince";
-			case "address-country":
+			case org.hl7.fhir.r4.model.Location.SP_ADDRESS_COUNTRY:
 				return "country";
-			case "address-postalCode":
+			case org.hl7.fhir.r4.model.Location.SP_ADDRESS_POSTALCODE:
 				return "postalCode";
 			default:
-				return null;
+				return super.paramToProp(param);
 		}
 	}
 	

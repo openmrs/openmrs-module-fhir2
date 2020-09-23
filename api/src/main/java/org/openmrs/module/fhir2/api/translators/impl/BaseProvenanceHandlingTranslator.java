@@ -39,7 +39,7 @@ public abstract class BaseProvenanceHandlingTranslator<T extends OpenmrsObject &
 	
 	public Provenance getCreateProvenance(T openMrsObject) {
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(openMrsObject.getDateCreated());
 		provenance.setActivity(createActivity());
 		provenance.addAgent(createAgentComponent(openMrsObject.getCreator()));
@@ -51,7 +51,7 @@ public abstract class BaseProvenanceHandlingTranslator<T extends OpenmrsObject &
 			return null;
 		}
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(openMrsObject.getDateChanged());
 		provenance.setActivity(updateActivity());
 		provenance.addAgent(createAgentComponent(openMrsObject.getChangedBy()));

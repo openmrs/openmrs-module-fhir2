@@ -36,6 +36,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Obs;
+import org.openmrs.module.fhir2.FhirDiagnosticReport;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -66,7 +67,7 @@ public class FhirDiagnosticReportServiceImplTest {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
+	private SearchQuery<FhirDiagnosticReport, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
 	
 	private FhirDiagnosticReportServiceImpl service;
 	
@@ -75,7 +76,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		service = new FhirDiagnosticReportServiceImpl() {
 			
 			@Override
-			protected void validateObject(Obs object) {
+			protected void validateObject(FhirDiagnosticReport object) {
 			}
 		};
 		
@@ -90,14 +91,14 @@ public class FhirDiagnosticReportServiceImplTest {
 	
 	@Test
 	public void getDiagnosticReportByUuid_shouldRetrieveDiagnosticReportByUuid() {
-		Obs obsGroup = new Obs();
+		FhirDiagnosticReport fhirDiagnosticReport = new FhirDiagnosticReport();
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		
-		obsGroup.setUuid(UUID);
+		fhirDiagnosticReport.setUuid(UUID);
 		diagnosticReport.setId(UUID);
 		
-		when(dao.get(UUID)).thenReturn(obsGroup);
-		when(translator.toFhirResource(obsGroup)).thenReturn(diagnosticReport);
+		when(dao.get(UUID)).thenReturn(fhirDiagnosticReport);
+		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		
 		DiagnosticReport result = service.get(UUID);
 		
@@ -111,16 +112,15 @@ public class FhirDiagnosticReportServiceImplTest {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 		
-		Obs obsGroup = new Obs();
-		Obs childObs = new Obs();
-		childObs.setUuid(CHILD_UUID);
-		obsGroup.setUuid(UUID);
+		FhirDiagnosticReport fhirDiagnosticReport = new FhirDiagnosticReport();
+		Obs obsResult = new Obs();
+		obsResult.setUuid(CHILD_UUID);
+		fhirDiagnosticReport.getResults().add(obsResult);
+		fhirDiagnosticReport.setUuid(UUID);
 		
-		obsGroup.addGroupMember(childObs);
-		
-		when(translator.toOpenmrsType(diagnosticReport)).thenReturn(obsGroup);
-		when(dao.createOrUpdate(obsGroup)).thenReturn(obsGroup);
-		when(translator.toFhirResource(obsGroup)).thenReturn(diagnosticReport);
+		when(translator.toOpenmrsType(diagnosticReport)).thenReturn(fhirDiagnosticReport);
+		when(dao.createOrUpdate(fhirDiagnosticReport)).thenReturn(fhirDiagnosticReport);
+		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		
 		DiagnosticReport result = service.create(diagnosticReport);
 		
@@ -135,21 +135,21 @@ public class FhirDiagnosticReportServiceImplTest {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 		
-		Obs obsGroup = new Obs();
-		Obs updatedObsGroup = new Obs();
-		Obs childObs = new Obs();
-		obsGroup.setUuid(UUID);
-		updatedObsGroup.setUuid(UUID);
-		updatedObsGroup.setDateCreated(currentDate);
-		childObs.setUuid(CHILD_UUID);
+		FhirDiagnosticReport fhirDiagnosticReport = new FhirDiagnosticReport();
+		FhirDiagnosticReport updatedFhirDiagnosticReport = new FhirDiagnosticReport();
+		Obs obsResult = new Obs();
+		obsResult.setUuid(CHILD_UUID);
+		fhirDiagnosticReport.setUuid(UUID);
+		updatedFhirDiagnosticReport.setUuid(UUID);
+		updatedFhirDiagnosticReport.setDateCreated(currentDate);
 		
-		obsGroup.addGroupMember(childObs);
-		updatedObsGroup.addGroupMember(childObs);
+		fhirDiagnosticReport.getResults().add(obsResult);
+		updatedFhirDiagnosticReport.getResults().add(obsResult);
 		
-		when(translator.toOpenmrsType(obsGroup, diagnosticReport)).thenReturn(updatedObsGroup);
-		when(dao.createOrUpdate(updatedObsGroup)).thenReturn(updatedObsGroup);
-		when(dao.get(UUID)).thenReturn(obsGroup);
-		when(translator.toFhirResource(updatedObsGroup)).thenReturn(diagnosticReport);
+		when(translator.toOpenmrsType(fhirDiagnosticReport, diagnosticReport)).thenReturn(updatedFhirDiagnosticReport);
+		when(dao.createOrUpdate(updatedFhirDiagnosticReport)).thenReturn(updatedFhirDiagnosticReport);
+		when(dao.get(UUID)).thenReturn(fhirDiagnosticReport);
+		when(translator.toFhirResource(updatedFhirDiagnosticReport)).thenReturn(diagnosticReport);
 		
 		DiagnosticReport result = service.update(UUID, diagnosticReport);
 		
@@ -184,20 +184,20 @@ public class FhirDiagnosticReportServiceImplTest {
 	
 	@Test
 	public void searchForDiagnosticReports_shouldReturnCollectionOfDiagnosticReportsByParameters() {
-		Obs obs = new Obs();
-		obs.setUuid(UUID);
+		FhirDiagnosticReport fhirDiagnosticReport = new FhirDiagnosticReport();
+		fhirDiagnosticReport.setUuid(UUID);
 		
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		diagnosticReport.setId(UUID);
 		
-		List<Obs> obsList = new ArrayList<>();
-		obsList.add(obs);
+		List<FhirDiagnosticReport> fhirDiagnosticReports = new ArrayList<>();
+		fhirDiagnosticReports.add(fhirDiagnosticReport);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(obsList);
+		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(fhirDiagnosticReports);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
-		when(translator.toFhirResource(obs)).thenReturn(diagnosticReport);
+		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any()))
 		        .thenReturn(new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService));
 		

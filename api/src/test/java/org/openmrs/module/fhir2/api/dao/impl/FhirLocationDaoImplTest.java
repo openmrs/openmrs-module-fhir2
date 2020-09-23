@@ -30,11 +30,11 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirLocationDaoImplTest extends BaseModuleContextSensitiveTest {
 	
-	private static final String LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432";
 	
-	private static final String UNKNOWN_LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432aabz";
+	private static final String UNKNOWN_LOCATION_UUID = "8516d594-9c31-4bd3-bfec-b42b2f8a8444";
 	
-	private static final String LOCATION_ATTRIBUTE_TYPE_UUID = "abcde432-1691-11df-97a5-7038c432abcd";
+	private static final String LOCATION_ATTRIBUTE_TYPE_UUID = "cb5703b1-0d1e-47e5-9d5b-d3ab77bccb9d";
 	
 	private static final String LOCATION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirLocationDaoImplTest_initial_data.xml";
 	

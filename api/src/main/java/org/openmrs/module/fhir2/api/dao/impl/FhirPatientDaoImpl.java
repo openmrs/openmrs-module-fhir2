@@ -125,7 +125,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	
 	@Override
 	protected String paramToProp(String param) {
-		if (param.equalsIgnoreCase(SP_DEATH_DATE)) {
+		if (SP_DEATH_DATE.equalsIgnoreCase(param)) {
 			return "deathDate";
 		}
 		

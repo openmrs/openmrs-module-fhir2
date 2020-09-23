@@ -40,7 +40,7 @@ import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class CohortListEntryTranslatorImpl_2_1Test {
 	
-	private static final String PATIENT_UUID = "c0938432-1691-11df-9pa5-7038c432aaba";
+	private static final String PATIENT_UUID = "975ddabf-6d1b-4678-95b7-a77e94e3e704";
 	
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;

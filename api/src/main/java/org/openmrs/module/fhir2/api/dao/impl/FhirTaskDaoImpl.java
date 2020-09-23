@@ -12,8 +12,6 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.validation.constraints.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -71,16 +69,6 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 		getSessionFactory().getCurrentSession().saveOrUpdate(task);
 		
 		return task;
-	}
-	
-	@Override
-	protected String paramToProp(@NotNull String paramName) {
-		switch (paramName) {
-			case "date":
-				return "dateChanged";
-			default:
-				return null;
-		}
 	}
 	
 	private Boolean validReferenceParam(ReferenceParam ref) {

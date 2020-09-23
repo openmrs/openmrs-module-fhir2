@@ -28,7 +28,7 @@ import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationReferenceTranslatorImplTest {
 	
-	private static final String MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String MEDICATION_UUID = "12cc917e-920f-4118-aab5-4d6e5e780ad4";
 	
 	@Mock
 	private FhirMedicationDao dao;

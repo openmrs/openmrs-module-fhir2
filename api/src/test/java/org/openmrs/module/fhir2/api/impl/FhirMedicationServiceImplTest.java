@@ -51,9 +51,9 @@ import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirMedicationServiceImplTest {
 	
-	private static final String MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String MEDICATION_UUID = "1359f03d-55d9-4961-b8f8-9a59eddc1f59";
 	
-	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97aa-7038c432aaba";
+	private static final String WRONG_MEDICATION_UUID = "02ed36f0-6167-4372-a641-d27b92f7deae";
 	
 	private static final String CODE = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	

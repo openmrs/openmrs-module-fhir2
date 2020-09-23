@@ -50,9 +50,9 @@ import org.openmrs.module.fhir2.api.FhirMedicationService;
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationFhirResourceProviderTest {
 	
-	private static final String MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String MEDICATION_UUID = "ce8bfad7-c87e-4af0-80cd-c2015c7dff93";
 	
-	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String WRONG_MEDICATION_UUID = "51f069dc-e204-40f4-90d6-080385bed91f";
 	
 	private static final String CODE = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	

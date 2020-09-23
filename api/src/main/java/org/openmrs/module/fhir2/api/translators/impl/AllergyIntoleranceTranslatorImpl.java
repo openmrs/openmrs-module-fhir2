@@ -72,8 +72,8 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 			allergy.addCategory(categoryTranslator.toFhirResource(omrsAllergy.getAllergen().getAllergenType()));
 		}
 		allergy.setClinicalStatus(setClinicalStatus(omrsAllergy.getVoided()));
-		allergy.setVerificationStatus(new CodeableConcept().setText("Confirmed")
-		        .addCoding(new Coding(FhirConstants.ALLERGY_VERIFICATION_STATUS_VALUE_SET_URI, "confirmed", "Confirmed")));
+		allergy.setVerificationStatus(new CodeableConcept().setText("Confirmed").addCoding(
+		    new Coding(FhirConstants.ALLERGY_INTOLERANCE_VERIFICATION_STATUS_SYSTEM_URI, "confirmed", "Confirmed")));
 		allergy.setPatient(patientReferenceTranslator.toFhirResource(omrsAllergy.getPatient()));
 		allergy.setRecorder(practitionerReferenceTranslator.toFhirResource(omrsAllergy.getCreator()));
 		allergy.setRecordedDate(omrsAllergy.getDateCreated());
@@ -138,10 +138,10 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		if (voided) {
 			status.setText("Inactive");
 			status.addCoding(
-			    new Coding(FhirConstants.ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET, "inactive", "Inactive"));
+			    new Coding(FhirConstants.ALLERGY_INTOLERANCE_CLINICAL_STATUS_SYSTEM_URI, "inactive", "Inactive"));
 		} else {
 			status.setText("Active");
-			status.addCoding(new Coding(FhirConstants.ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET, "active", "Active"));
+			status.addCoding(new Coding(FhirConstants.ALLERGY_INTOLERANCE_CLINICAL_STATUS_SYSTEM_URI, "active", "Active"));
 		}
 		
 		return status;
@@ -153,7 +153,7 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		}
 		
 		return status.getCoding().stream()
-		        .filter(c -> FhirConstants.ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET.equals(c.getSystem()))
+		        .filter(c -> FhirConstants.ALLERGY_INTOLERANCE_CLINICAL_STATUS_SYSTEM_URI.equals(c.getSystem()))
 		        .anyMatch(c -> "inactive".equals(c.getCode()));
 	}
 }

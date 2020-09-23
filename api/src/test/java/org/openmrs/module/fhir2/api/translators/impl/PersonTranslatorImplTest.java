@@ -416,7 +416,7 @@ public class PersonTranslatorImplTest {
 	@Test
 	public void shouldAddProvenanceResources() {
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		when(provenanceTranslator.getCreateProvenance(personMock)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(personMock)).thenReturn(provenance);
 		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(personMock);
@@ -431,7 +431,7 @@ public class PersonTranslatorImplTest {
 	@Test
 	public void shouldNotAddUpdateProvenanceIfDateChangedAndChangedByAreBothNull() {
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		personMock.setDateChanged(null);
 		personMock.setChangedBy(null);
 		when(provenanceTranslator.getCreateProvenance(personMock)).thenReturn(provenance);

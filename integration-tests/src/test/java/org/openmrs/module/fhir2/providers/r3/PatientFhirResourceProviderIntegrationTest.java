@@ -229,7 +229,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		patient.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Patient/" + PATIENT_UUID).jsonContent(toJson(patient)).go();
+		response = put("/Patient/" + PATIENT_UUID).jsonContent(toJson(patient)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -260,7 +260,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		// send the update to the server
-		response = put("/Patient/" + PATIENT_UUID).jsonContent(toJson(patient)).go();
+		response = put("/Patient/" + PATIENT_UUID).jsonContent(toJson(patient)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -282,7 +282,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		// send the update to the server
-		response = put("/Patient/" + WRONG_PATIENT_UUID).jsonContent(toJson(patient)).go();
+		response = put("/Patient/" + WRONG_PATIENT_UUID).jsonContent(toJson(patient)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -305,7 +305,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		patient.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).go();
+		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -336,7 +336,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		// send the update to the server
-		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).go();
+		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -358,10 +358,10 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		// send the update to the server
-		response = put("/Patient/" + WRONG_PATIENT_UUID).jsonContent(toJson(patient)).go();
+		response = put("/Patient/" + WRONG_PATIENT_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);

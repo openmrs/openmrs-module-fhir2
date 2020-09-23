@@ -268,7 +268,6 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		FhirReference nullTypeRef = new FhirReference();
 		nullTypeRef.setType(null);
 		nullTypeRef.setReference(BASED_ON_ORDER_UUID);
-		nullTypeRef.setName();
 		
 		toUpdate.setOwnerReference(nullTypeRef);
 		toUpdate.setBasedOnReferences(Collections.singleton(nullTypeRef));

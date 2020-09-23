@@ -1,0 +1,42 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "8a849d5e-6011-4279-a124-40ada5a687de",
+  "status": "final",
+  "category": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+        "code": "LAB"
+      }
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "8480-6",
+        "display": "Systolic blood pressure"
+      },
+      {
+        "code": "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "display": "Systolic blood pressure"
+      }
+    ],
+    "text": "Systolic Blood Pressure"
+  },
+  "subject": {
+    "reference": "Patient/5946f880-b197-400b-9caa-a3c661d23041"
+  },
+  "context": {
+    "reference": "Encounter/6519d653-393b-4118-9c83-a3715b82d4ac"
+  },
+  "issued": "2011-03-04T11:45:33+11:00",
+  "result": [
+    {
+      "reference": "Observation/6f16bb57-12bc-4077-9f49-ceaa9b928669"
+    },
+    {
+      "reference": "Observation/dc386962-1c42-49ea-bed2-97650c66f742"
+    }
+  ]
+}

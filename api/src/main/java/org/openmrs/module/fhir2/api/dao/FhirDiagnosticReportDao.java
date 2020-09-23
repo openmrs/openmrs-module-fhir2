@@ -11,24 +11,24 @@ package org.openmrs.module.fhir2.api.dao;
 
 import java.util.List;
 
-import org.openmrs.Obs;
 import org.openmrs.annotation.Authorized;
+import org.openmrs.module.fhir2.FhirDiagnosticReport;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
-public interface FhirDiagnosticReportDao extends FhirDao<Obs> {
+public interface FhirDiagnosticReportDao extends FhirDao<FhirDiagnosticReport> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	Obs get(String uuid);
+	FhirDiagnosticReport get(String uuid);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.ADD_OBS, PrivilegeConstants.EDIT_OBS })
-	Obs createOrUpdate(Obs newEntry);
+	FhirDiagnosticReport createOrUpdate(FhirDiagnosticReport newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.PURGE_OBS)
-	Obs delete(String uuid);
+	FhirDiagnosticReport delete(String uuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
@@ -36,6 +36,6 @@ public interface FhirDiagnosticReportDao extends FhirDao<Obs> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	List<Obs> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<FhirDiagnosticReport> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

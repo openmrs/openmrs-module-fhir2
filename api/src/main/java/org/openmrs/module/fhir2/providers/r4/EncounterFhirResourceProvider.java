@@ -81,8 +81,6 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
-		encounter.setId(id.getIdPart());
-		
 		return FhirProviderUtils.buildUpdate(encounterService.update(id.getIdPart(), encounter));
 	}
 	

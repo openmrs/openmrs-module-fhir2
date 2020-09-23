@@ -227,13 +227,13 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		AllergyIntolerance allergy = readResponse(response);
 		
 		// update the existing record
-		Enumeration<AllergyIntolerance.AllergyIntoleranceCategory> category = new Enumeration(
+		Enumeration<AllergyIntolerance.AllergyIntoleranceCategory> category = new Enumeration<>(
 		        new AllergyIntolerance.AllergyIntoleranceCategoryEnumFactory());
 		category.setValue(AllergyIntolerance.AllergyIntoleranceCategory.ENVIRONMENT);
 		allergy.getCategory().set(0, category);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + ALLERGY_UUID).jsonContent(toJson(allergy)).go();
+		response = put("/AllergyIntolerance/" + ALLERGY_UUID).jsonContent(toJson(allergy)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -264,7 +264,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		allergy.setId(UNKNOWN_ALLERGY_UUID);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + ALLERGY_UUID).jsonContent(toJson(allergy)).go();
+		response = put("/AllergyIntolerance/" + ALLERGY_UUID).jsonContent(toJson(allergy)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -286,7 +286,8 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		allergy.setId(UNKNOWN_ALLERGY_UUID);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + UNKNOWN_ALLERGY_UUID).jsonContent(toJson(allergy)).go();
+		response = put("/AllergyIntolerance/" + UNKNOWN_ALLERGY_UUID).jsonContent(toJson(allergy))
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -305,13 +306,13 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		AllergyIntolerance allergy = readResponse(response);
 		
 		// update the existing record
-		Enumeration<AllergyIntolerance.AllergyIntoleranceCategory> category = new Enumeration(
+		Enumeration<AllergyIntolerance.AllergyIntoleranceCategory> category = new Enumeration<>(
 		        new AllergyIntolerance.AllergyIntoleranceCategoryEnumFactory());
 		category.setValue(AllergyIntolerance.AllergyIntoleranceCategory.ENVIRONMENT);
 		allergy.getCategory().set(0, category);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContext(toXML(allergy)).go();
+		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContext(toXML(allergy)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -342,7 +343,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		allergy.setId(UNKNOWN_ALLERGY_UUID);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContext(toXML(allergy)).go();
+		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContext(toXML(allergy)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -364,7 +365,8 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		allergy.setId(UNKNOWN_ALLERGY_UUID);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + UNKNOWN_ALLERGY_UUID).xmlContext(toXML(allergy)).go();
+		response = put("/AllergyIntolerance/" + UNKNOWN_ALLERGY_UUID).xmlContext(toXML(allergy)).accept(FhirMediaTypes.XML)
+		        .go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -466,8 +468,10 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(entries, everyItem(hasResource(hasProperty("patient",
 		    hasProperty("referenceElement", hasProperty("idPart", equalTo("8d703ff2-c3e2-4070-9737-73e713d5a50d")))))));
 		assertThat(entries,
-		    containsInRelativeOrder(hasResource(hasProperty("criticality", hasProperty("display", equalTo("Low Risk")))), // mild
-		        hasResource(hasProperty("criticality", hasProperty("display", equalTo("Unable to Assess Risk")))), // moderate
+		    containsInRelativeOrder(hasResource(hasProperty("criticality", hasProperty("display", equalTo("Low Risk")))),
+		        // mild
+		        hasResource(hasProperty("criticality", hasProperty("display", equalTo("Unable to Assess Risk")))),
+		        // moderate
 		        hasResource(hasProperty("criticality", hasProperty("display", equalTo("High Risk")))), // severe
 		        hasResource(hasProperty("criticality", equalTo(null))))); // null
 		assertThat(entries, everyItem(hasResource(validResource())));
@@ -512,8 +516,10 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(entries, everyItem(hasResource(hasProperty("patient",
 		    hasProperty("referenceElement", hasProperty("idPart", equalTo("8d703ff2-c3e2-4070-9737-73e713d5a50d")))))));
 		assertThat(entries,
-		    containsInRelativeOrder(hasResource(hasProperty("criticality", hasProperty("display", equalTo("Low Risk")))), // mild
-		        hasResource(hasProperty("criticality", hasProperty("display", equalTo("Unable to Assess Risk")))), // moderate
+		    containsInRelativeOrder(hasResource(hasProperty("criticality", hasProperty("display", equalTo("Low Risk")))),
+		        // mild
+		        hasResource(hasProperty("criticality", hasProperty("display", equalTo("Unable to Assess Risk")))),
+		        // moderate
 		        hasResource(hasProperty("criticality", hasProperty("display", equalTo("High Risk")))), // severe
 		        hasResource(hasProperty("criticality", equalTo(null))))); // null
 		assertThat(entries, everyItem(hasResource(validResource())));

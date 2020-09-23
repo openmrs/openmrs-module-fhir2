@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
@@ -224,12 +225,15 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
 		Patient patient = readResponse(response);
 		
-		// update the existing record
+		// verify condition we will change
 		Date birthDate = DateUtils.truncate(new Date(), Calendar.DATE);
+		assertThat(patient.getBirthDate(), not(equalTo(birthDate)));
+		
+		// update the existing record
 		patient.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Patient/" + PATIENT_UUID).jsonContent(toJson(patient)).go();
+		response = put("/Patient/" + PATIENT_UUID).jsonContent(toJson(patient)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -260,7 +264,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		// send the update to the server
-		response = put("/Patient/" + PATIENT_UUID).jsonContent(toJson(patient)).go();
+		response = put("/Patient/" + PATIENT_UUID).jsonContent(toJson(patient)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -282,7 +286,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		// send the update to the server
-		response = put("/Patient/" + WRONG_PATIENT_UUID).jsonContent(toJson(patient)).go();
+		response = put("/Patient/" + WRONG_PATIENT_UUID).jsonContent(toJson(patient)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -300,12 +304,15 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.XML).go();
 		Patient patient = readResponse(response);
 		
-		// update the existing record
+		// verify condition we will change
 		Date birthDate = DateUtils.truncate(new Date(), Calendar.DATE);
+		assertThat(patient.getBirthDate(), not(equalTo(birthDate)));
+		
+		// update the existing record
 		patient.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).go();
+		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -336,7 +343,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		// send the update to the server
-		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).go();
+		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -351,17 +358,17 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 	@Test
 	public void shouldReturnNotFoundWhenUpdatingNonExistentPatientAsXML() throws Exception {
 		// get the existing record
-		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.XML).go();
 		Patient patient = readResponse(response);
 		
 		// update the existing record
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		// send the update to the server
-		response = put("/Patient/" + WRONG_PATIENT_UUID).jsonContent(toJson(patient)).go();
+		response = put("/Patient/" + WRONG_PATIENT_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		OperationOutcome operationOutcome = readOperationOutcome(response);

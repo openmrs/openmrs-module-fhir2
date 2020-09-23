@@ -62,7 +62,7 @@
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
 
-    <changeSet id="add_loinc_fhir_concept_source_20200221" author="ibacher" dbms="mysql">
+    <changeSet id="add_loinc_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
         <preConditions onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source"/>
@@ -79,7 +79,7 @@
         ]]></sql>
     </changeSet>
 
-    <changeSet id="add_ciel_fhir_concept_source_20200221" author="ibacher" dbms="mysql">
+    <changeSet id="add_ciel_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
         <preConditions onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source"/>
@@ -376,5 +376,136 @@
                                  constraintName="input_task_fk"
                                  referencedTableName="fhir_task"
                                  referencedColumnNames="task_id"/>
+    </changeSet>
+
+    <changeSet id="add_target_uuid_to_fhir_reference_202020917" author="ibacher" dbms="mysql,mariadb,postgresql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="fhir_reference"/>
+            <not>
+                <columnExists tableName="fhir_reference" columnName="target_uuid"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="fhir_reference">
+            <column name="target_uuid" type="char(32)">
+                <constraints unique="true"/>
+            </column>
+        </addColumn>
+        <sql>
+            update fhir_reference
+            set target_uuid = substring(reference from position('/' in reference) + 1)
+        </sql>
+    </changeSet>
+    
+    <changeSet id="add_fhir_diagnostic_report_20200917" author="ibacher">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="fhir_diagnostic_report"/>
+            </not>
+        </preConditions>
+        <comment>Create the table for storing Diagnostic Reports</comment>
+        <createTable tableName="fhir_diagnostic_report">
+            <column name="diagnostic_report_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="concept_id" type="int"/>
+            <column name="subject_id" type="int"/>
+            <column name="encounter_id" type="int"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_creator"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_changed_by"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_voided_by"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="voided_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_code"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="concept_id"
+                                 referencedTableName="concept" referencedColumnNames="concept_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_subject"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="subject_id"
+                                 referencedTableName="patient" referencedColumnNames="patient_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_encounter"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="encounter_id"
+                                 referencedTableName="encounter" referencedColumnNames="encounter_id"/>
+    </changeSet>
+
+    <changeSet id="add_fhir_diagnostic_report_performers_20200917" author="ibacher">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="fhir_diagnostic_report_performers"/>
+            </not>
+            <tableExists tableName="fhir_diagnostic_report"/>
+            <tableExists tableName="fhir_reference"/>
+        </preConditions>
+        <createTable tableName="fhir_diagnostic_report_performers">
+            <column name="diagnostic_report_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="provider_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_performers_diagnostic_report"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="diagnostic_report_id"
+                                 referencedTableName="fhir_diagnostic_report_performers"
+                                 referencedColumnNames="diagnostic_report_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_performers_reference"
+                                 baseTableName="providers" baseColumnNames="provider_id"
+                                 referencedTableName="fhir_diagnostic_report_performers"
+                                 referencedColumnNames="provider_id"/>
+    </changeSet>
+
+    <changeSet id="add_fhir_diagnostic_report_results_20200917" author="ibacher">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="fhir_diagnostic_report_results"/>
+            </not>
+            <tableExists tableName="fhir_diagnostic_report"/>
+            <tableExists tableName="fhir_reference"/>
+        </preConditions>
+        <createTable tableName="fhir_diagnostic_report_performers">
+            <column name="diagnostic_report_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="obs_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_results_diagnostic_report"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="diagnostic_report_id"
+                                 referencedTableName="fhir_diagnostic_report_performers"
+                                 referencedColumnNames="diagnostic_report_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_results_reference"
+                                 baseTableName="obs" baseColumnNames="obs_id"
+                                 referencedTableName="fhir_diagnostic_report_performers"
+                                 referencedColumnNames="obs_id"/>
     </changeSet>
 </databaseChangeLog>

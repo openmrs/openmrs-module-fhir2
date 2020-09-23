@@ -10,16 +10,16 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import lombok.Getter;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 public class MockIBundleProvider<U extends IBaseResource> implements IBundleProvider {
 	
@@ -27,15 +27,16 @@ public class MockIBundleProvider<U extends IBaseResource> implements IBundleProv
 	
 	private final List<U> mockResultList;
 	
-	private final UUID uuid;
+	@Getter
+	private final String uuid;
 	
-	private final int count;
+	private final Integer size;
 	
-	private final int preferredPageSize;
+	private final Integer preferredPageSize;
 	
-	public MockIBundleProvider(List<U> mockResultList, int preferredPageSize, int count) {
-		this.count = count;
-		this.uuid = UUID.randomUUID();
+	public MockIBundleProvider(List<U> mockResultList, Integer preferredPageSize, Integer count) {
+		this.size = count;
+		this.uuid = FhirUtils.newUuid();
 		this.datePublished = new Date();
 		this.mockResultList = mockResultList;
 		this.preferredPageSize = preferredPageSize;
@@ -53,20 +54,13 @@ public class MockIBundleProvider<U extends IBaseResource> implements IBundleProv
 		return (List<IBaseResource>) this.mockResultList;
 	}
 	
-	@Nullable
-	@Override
-	public String getUuid() {
-		return String.valueOf(this.uuid);
-	}
-	
 	@Override
 	public Integer preferredPageSize() {
-		return this.preferredPageSize;
+		return preferredPageSize;
 	}
 	
-	@Nullable
 	@Override
 	public Integer size() {
-		return this.count;
+		return size;
 	}
 }

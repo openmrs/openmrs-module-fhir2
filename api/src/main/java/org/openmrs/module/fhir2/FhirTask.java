@@ -30,9 +30,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.openmrs.BaseOpenmrsMetadata;
 
-@Data(staticConstructor = "of")
+@Data
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
 @Table(name = "fhir_task")
 public class FhirTask extends BaseOpenmrsMetadata {

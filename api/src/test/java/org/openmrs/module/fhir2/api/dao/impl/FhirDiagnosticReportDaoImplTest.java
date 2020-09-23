@@ -13,7 +13,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 
 import java.util.Date;
 
@@ -24,6 +23,7 @@ import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.PatientService;
+import org.openmrs.module.fhir2.FhirDiagnosticReport;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +35,9 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 	
 	private static final String DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirDiagnosticReportDaoImplTest_initial_data.xml";
 	
-	private static final String UUID = "d899333c-5bd4-45cc-b1e7-2f9542dbcbf6";
+	private static final String DIAGNOSTIC_REPORT_UUID = "1e589127-f391-4d0c-8e98-e0a158b2be22";
 	
-	private static final String NEW_UUID = "655b64a2-1513-4f07-9d1c-0da7fa80840a";
-	
-	private static final String CHILD_UUID = "dc386962-1c42-49ea-bed2-97650c66f742";
+	private static final String OBS_UUID = "dc386962-1c42-49ea-bed2-97650c66f742";
 	
 	private FhirDiagnosticReportDaoImpl dao;
 	
@@ -66,62 +64,47 @@ public class FhirDiagnosticReportDaoImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void getObsGroupByUuid_shouldGetObsGroupByUuid() {
-		Obs result = dao.get(UUID);
+	public void get_shouldGetFhirDiagnosticReportByUuid() {
+		FhirDiagnosticReport result = dao.get(DIAGNOSTIC_REPORT_UUID);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), equalTo(UUID));
+		assertThat(result.getUuid(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
 	
 	@Test
-	public void getObsGroupByUuid_shouldReturnNullForObsNotHavingGroupMembers() {
-		Obs result = dao.get(CHILD_UUID);
-		assertThat(result, nullValue());
-	}
-	
-	@Test
-	public void saveObsGroup_shouldSaveNewObsGroup() {
-		Obs newObs = new Obs();
-		newObs.setObsDatetime(new Date());
-		newObs.setPerson(patientService.getPatient(7));
-		newObs.setConcept(conceptService.getConcept(5085));
-		newObs.addGroupMember(obsService.getObsByUuid(CHILD_UUID));
+	public void saveOrUpdate_shouldSaveNewFhirDiagnosticReport() {
+		FhirDiagnosticReport newDiagnosticReport = new FhirDiagnosticReport();
+		newDiagnosticReport.setStatus(FhirDiagnosticReport.DiagnosticReportStatus.UNKNOWN);
+		newDiagnosticReport.setIssued(new Date());
+		newDiagnosticReport.setSubject(patientService.getPatient(7));
+		newDiagnosticReport.setCode(conceptService.getConcept(5085));
+		newDiagnosticReport.getResults().add(obsService.getObsByUuid(OBS_UUID));
 		
-		Obs result = dao.createOrUpdate(newObs);
+		FhirDiagnosticReport result = dao.createOrUpdate(newDiagnosticReport);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getPersonId(), equalTo(7));
-		assertThat(result.isObsGrouping(), equalTo(true));
-		assertThat(result.getGroupMembers(), hasSize(equalTo(1)));
-		assertThat(result.getGroupMembers().iterator().next().getUuid(), equalTo(CHILD_UUID));
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void saveObsGroup_shouldNotSaveObsWithNoGroupMembers() {
-		Obs newObs = new Obs();
-		newObs.setUuid(NEW_UUID);
-		
-		dao.createOrUpdate(newObs);
+		assertThat(result.getSubject().getId(), equalTo(7));
+		assertThat(result.getResults(), hasSize(equalTo(1)));
+		assertThat(result.getResults().iterator().next().getUuid(), equalTo(OBS_UUID));
 	}
 	
 	@Test
-	public void saveObsGroup_shouldUpdateExistingObsGroup() {
-		Obs existingObsGroup = dao.get(UUID);
+	public void saveOrUpdate_shouldUpdateExistingFhirDiagnosticReport() {
+		FhirDiagnosticReport existingObsGroup = dao.get(DIAGNOSTIC_REPORT_UUID);
 		
 		Obs newMember = new Obs();
 		newMember.setConcept(conceptService.getConcept(19));
 		newMember.setObsDatetime(new Date());
 		newMember.setEncounter(existingObsGroup.getEncounter());
-		newMember.setPerson(existingObsGroup.getPerson());
+		newMember.setPerson(existingObsGroup.getSubject());
 		newMember.setValueText("blah blah blah");
 		
-		existingObsGroup.addGroupMember(newMember);
+		existingObsGroup.getResults().add(newMember);
 		
-		Obs result = dao.createOrUpdate(existingObsGroup);
+		FhirDiagnosticReport result = dao.createOrUpdate(existingObsGroup);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), equalTo(UUID));
-		assertThat(result.getGroupMembers(), hasSize(equalTo(2)));
+		assertThat(result.getUuid(), equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(result.getResults(), hasSize(equalTo(3)));
 	}
-	
 }

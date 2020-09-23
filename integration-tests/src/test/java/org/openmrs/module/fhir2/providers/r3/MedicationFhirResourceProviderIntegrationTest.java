@@ -41,7 +41,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 	
 	private static final String MEDICATION_UUID = "1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String WRONG_MEDICATION_UUID = "5c9d032b-6092-4052-93d2-a04202b98462";
 	
 	private static final String MEDICATION_CODE_UUID = "5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -243,7 +243,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 		medication.setId(WRONG_MEDICATION_UUID);
 		
 		// send the update to the server
-		response = put("/Medication/" + MEDICATION_UUID).jsonContent(toJson(medication)).go();
+		response = put("/Medication/" + MEDICATION_UUID).jsonContent(toJson(medication)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -265,7 +265,8 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 		medication.setId(WRONG_MEDICATION_UUID);
 		
 		// send the update to the server
-		response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(toJson(medication)).go();
+		response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(toJson(medication)).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -338,7 +339,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 		medication.setId(WRONG_MEDICATION_UUID);
 		
 		// send the update to the server
-		response = put("/Medication/" + MEDICATION_UUID).xmlContext(toXML(medication)).go();
+		response = put("/Medication/" + MEDICATION_UUID).xmlContext(toXML(medication)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -360,7 +361,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 		medication.setId(WRONG_MEDICATION_UUID);
 		
 		// send the update to the server
-		response = put("/Medication/" + WRONG_MEDICATION_UUID).xmlContext(toXML(medication)).go();
+		response = put("/Medication/" + WRONG_MEDICATION_UUID).xmlContext(toXML(medication)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

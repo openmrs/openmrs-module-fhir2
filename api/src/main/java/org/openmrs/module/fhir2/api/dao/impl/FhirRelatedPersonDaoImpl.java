@@ -151,7 +151,7 @@ public class FhirRelatedPersonDaoImpl extends BaseFhirDao<Relationship> implemen
 			case SP_ADDRESS_COUNTRY:
 				return "pad.country";
 			default:
-				return null;
+				return super.paramToProp(param);
 		}
 	}
 	

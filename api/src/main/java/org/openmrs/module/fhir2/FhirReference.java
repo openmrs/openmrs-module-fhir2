@@ -16,22 +16,27 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import java.util.Optional;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import org.openmrs.BaseOpenmrsMetadata;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 /**
  * FHIR Reference - https://www.hl7.org/fhir/references.html
  */
-@Data(staticConstructor = "of")
-@NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
 @Table(name = "fhir_reference")
 public class FhirReference extends BaseOpenmrsMetadata {
 	
 	private static final long serialVersionUID = 1L;
+	
+	public FhirReference() {
+		setName("");
+	}
 	
 	@EqualsAndHashCode.Include
 	@Id
@@ -42,10 +47,21 @@ public class FhirReference extends BaseOpenmrsMetadata {
 	@Column(name = "target_type")
 	private String type;
 	
+	@Column(name = "target_uuid")
+	private String targetUuid;
+	
 	@Column(name = "reference")
 	private String reference;
 	
-	public void setName() {
-		this.setName(id + "/" + type);
+	public void setReference(String reference) {
+		this.reference = reference;
+		
+		if (type == null) {
+			Optional<String> possibleType = FhirUtils.referenceToType(reference);
+			possibleType.ifPresent(t -> type = t);
+		}
+		
+		Optional<String> possibleUuid = FhirUtils.referenceToId(reference);
+		possibleUuid.ifPresent(uuid -> targetUuid = uuid);
 	}
 }
