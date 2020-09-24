@@ -61,7 +61,7 @@ public class FhirCohortListServiceImplTest {
 			protected void validateObject(Cohort object) {
 			}
 		};
-		;
+		
 		fhirCohortListService.setTranslator(listTranslator);
 		fhirCohortListService.setDao(listDao);
 		

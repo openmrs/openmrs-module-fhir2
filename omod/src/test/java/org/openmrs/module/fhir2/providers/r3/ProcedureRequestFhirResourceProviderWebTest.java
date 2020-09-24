@@ -99,14 +99,12 @@ public class ProcedureRequestFhirResourceProviderWebTest extends BaseFhirR3Resou
 	@Captor
 	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
 	
-	private ServiceRequest procedureRequest;
-	
 	@Before
 	@Override
 	public void setup() throws ServletException {
 		resourceProvider = new ProcedureRequestFhirResourceProvider();
 		resourceProvider.setServiceRequestService(service);
-		procedureRequest = new ServiceRequest();
+		ServiceRequest procedureRequest = new ServiceRequest();
 		procedureRequest.setId(SERVICE_REQUEST_UUID);
 		super.setup();
 	}

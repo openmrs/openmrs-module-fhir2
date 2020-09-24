@@ -14,7 +14,7 @@ import static org.junit.Assert.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -98,7 +98,7 @@ public class NarrativeGeneratorTest {
 		String expectedNarrative = "<div>testNarrativeContent</div>";
 		
 		OpenMRSNarrativeTemplateManifest manifest = OpenMRSNarrativeTemplateManifest
-		        .forManifestFileLocation(Arrays.asList(testNarrativePropFile));
+		        .forManifestFileLocation(Collections.singletonList(testNarrativePropFile));
 		INarrativeTemplate template = manifest.getTemplateByName(ctx, EnumSet.of(TemplateTypeEnum.THYMELEAF), "testRes")
 		        .get(0);
 		
@@ -116,8 +116,8 @@ public class NarrativeGeneratorTest {
 		        + " - the key must end in one of the expected extensions "
 		        + "'.profile', '.resourceType', '.dataType', '.style', '.contextPath', '.narrative', '.title'";
 		
-		Throwable e = assertThrows(ConfigurationException.class,
-		    () -> OpenMRSNarrativeTemplateManifest.forManifestFileLocation(Arrays.asList(testNarrativePropFile)));
+		Throwable e = assertThrows(ConfigurationException.class, () -> OpenMRSNarrativeTemplateManifest
+		        .forManifestFileLocation(Collections.singletonList(testNarrativePropFile)));
 		assertEquals(e.getMessage(), expectedErrorMessage);
 	}
 }

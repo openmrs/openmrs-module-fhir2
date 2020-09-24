@@ -28,8 +28,6 @@ import org.thymeleaf.context.ITemplateContext;
 @RunWith(MockitoJUnitRunner.class)
 public class MessageResolverTest {
 	
-	private ReloadableResourceBundleMessageSource messageSource;
-	
 	private OpenmrsMessageResolver messageResolver;
 	
 	@Mock
@@ -37,7 +35,7 @@ public class MessageResolverTest {
 	
 	@Before
 	public void setup() {
-		messageSource = new ReloadableResourceBundleMessageSource();
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setBasename("classpath:testMessages");
 		messageResolver = new OpenmrsMessageResolver(messageSource);
 	}

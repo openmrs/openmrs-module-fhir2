@@ -46,8 +46,6 @@ public class EncounterParticipantTranslatorImplTest {
 	
 	private Provider provider;
 	
-	private Practitioner practitioner;
-	
 	@Before
 	public void setUp() {
 		participantTranslator = new EncounterParticipantTranslatorImpl();
@@ -62,7 +60,7 @@ public class EncounterParticipantTranslatorImplTest {
 		Reference reference = new Reference(PROVIDER_URI);
 		encounterParticipantComponent.setIndividual(reference);
 		
-		practitioner = new Practitioner();
+		Practitioner practitioner = new Practitioner();
 		practitioner.setId(PROVIDER_UUID);
 	}
 	

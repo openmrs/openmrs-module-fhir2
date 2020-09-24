@@ -35,11 +35,11 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 	
 	private String contextPath;
 	
-	private Set<String> appliesToProfiles = new HashSet<>();
+	private final Set<String> appliesToProfiles = new HashSet<>();
 	
-	private Set<String> appliesToResourceTypes = new HashSet<>();
+	private final Set<String> appliesToResourceTypes = new HashSet<>();
 	
-	private Set<Class<? extends IBase>> appliesToResourceClasses = new HashSet<>();
+	private final Set<Class<? extends IBase>> appliesToResourceClasses = new HashSet<>();
 	
 	private TemplateTypeEnum templateType = TemplateTypeEnum.THYMELEAF;
 	
@@ -47,7 +47,7 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 	
 	private String templateFilename;
 	
-	private Set<String> appliesToDatatypes = new HashSet<>();
+	private final Set<String> appliesToDatatypes = new HashSet<>();
 	
 	@Override
 	public String getContextPath() {

@@ -16,6 +16,7 @@ import static org.hibernate.criterion.Restrictions.or;
 import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import javax.annotation.Nonnull;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;

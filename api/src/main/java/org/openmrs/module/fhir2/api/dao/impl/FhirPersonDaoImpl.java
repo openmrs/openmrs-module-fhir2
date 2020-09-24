@@ -15,6 +15,7 @@ import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;

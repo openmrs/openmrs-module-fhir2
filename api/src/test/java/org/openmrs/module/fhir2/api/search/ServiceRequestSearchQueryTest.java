@@ -152,7 +152,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		assertThat(results.size(), equalTo(4));
 		
 		// TODO -> to be removed
-		List<ServiceRequest> resultList = get(results).stream().map(p -> (ServiceRequest) p).collect(Collectors.toList());
+		List<ServiceRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), equalTo(4));

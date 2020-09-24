@@ -151,12 +151,12 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 				}
 			} else if (nextKey.endsWith(".resourceType")) {
 				String resourceType = file.getProperty(nextKey);
-				Arrays.stream(resourceType.split(",")).map(t -> t.trim()).filter(t -> isNotBlank(t))
-				        .forEach(t -> nextTemplate.addAppliesToResourceType(t));
+				Arrays.stream(resourceType.split(",")).map(String::trim).filter(StringUtils::isNotBlank)
+				        .forEach(nextTemplate::addAppliesToResourceType);
 			} else if (nextKey.endsWith(".dataType")) {
 				String dataType = file.getProperty(nextKey);
-				Arrays.stream(dataType.split(",")).map(t -> t.trim()).filter(t -> isNotBlank(t))
-				        .forEach(t -> nextTemplate.addAppliesToDatatype(t));
+				Arrays.stream(dataType.split(",")).map(String::trim).filter(StringUtils::isNotBlank)
+				        .forEach(nextTemplate::addAppliesToDatatype);
 			} else if (nextKey.endsWith(".style")) {
 				String templateTypeName = file.getProperty(nextKey).toUpperCase();
 				TemplateTypeEnum templateType = TemplateTypeEnum.valueOf(templateTypeName);

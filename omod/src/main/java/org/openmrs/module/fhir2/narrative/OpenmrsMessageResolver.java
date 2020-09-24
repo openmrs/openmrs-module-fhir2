@@ -10,7 +10,6 @@
 package org.openmrs.module.fhir2.narrative;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.thymeleaf.context.ITemplateContext;
@@ -24,7 +23,6 @@ public class OpenmrsMessageResolver extends AbstractMessageResolver {
 	
 	private final MessageSource messageSource;
 	
-	@Autowired
 	public OpenmrsMessageResolver(MessageSource messageSource) {
 		this.messageSource = messageSource;
 	}
