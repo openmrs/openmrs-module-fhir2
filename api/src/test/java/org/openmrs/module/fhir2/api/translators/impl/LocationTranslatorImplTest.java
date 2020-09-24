@@ -55,7 +55,7 @@ import org.openmrs.module.fhir2.api.util.FhirUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class LocationTranslatorImplTest {
 	
-	private static final String LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432";
 	
 	private static final String LOCATION_NAME = "Test location 1";
 	
@@ -65,15 +65,15 @@ public class LocationTranslatorImplTest {
 	
 	private static final String LOCATION_LONGITUDE = "25.5";
 	
-	private static final String CONTACT_POINT_ID = "c0938432-1691-11df-97a5-7038c432aabf";
+	private static final String CONTACT_POINT_ID = "787e12bd-314e-4cc4-9b4d-1cdff9be9545";
 	
 	private static final String CONTACT_POINT_VALUE = "Pipeline";
 	
-	private static final String LOCATION_ATTRIBUTE_UUID = "c0938432-1691-11df-97a5-7038c432abcd";
+	private static final String LOCATION_ATTRIBUTE_UUID = "b1aaf1e6-28e9-4736-a5a1-52960e282700";
 	
 	private static final String LOCATION_ATTRIBUTE_VALUE = "Neiya street";
 	
-	private static final String LOCATION_ATTRIBUTE_TYPE_UUID = "abcde432-1691-11df-97a5-7038c432abcd";
+	private static final String LOCATION_ATTRIBUTE_TYPE_UUID = "6a5766a2-e3c3-4edc-ae88-2aafcf5bcb34";
 	
 	private static final String LOCATION_ATTRIBUTE_TYPE_NAME = "street name";
 	
@@ -85,7 +85,7 @@ public class LocationTranslatorImplTest {
 	
 	private static final String LAB_TAG_DESCRIPTION = "Used to identify lab locations";
 	
-	private static final String PARENT_LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432u4e6";
+	private static final String PARENT_LOCATION_UUID = "23e9cdce-7ffa-4261-862d-4b75bef6e7f3";
 	
 	private static final String PARENT_LOCATION_NAME = "Parent Location";
 	
@@ -405,7 +405,7 @@ public class LocationTranslatorImplTest {
 		Location location = new Location();
 		location.setUuid(LOCATION_UUID);
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		when(provenanceTranslator.getCreateProvenance(location)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(location)).thenReturn(provenance);
 		org.hl7.fhir.r4.model.Location result = locationTranslator.toFhirResource(location);
@@ -420,7 +420,7 @@ public class LocationTranslatorImplTest {
 	@Test
 	public void shouldNotAddUpdateProvenanceIfDateChangedAndChangedByAreBothNull() {
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		
 		org.openmrs.Location location = new org.openmrs.Location();
 		location.setUuid(LOCATION_UUID);

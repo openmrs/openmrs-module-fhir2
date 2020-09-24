@@ -99,7 +99,7 @@ public class ObservationTranslatorImplTest {
 	private ObservationCategoryTranslator categoryTranslator;
 	
 	@Mock
-	private EncounterReferenceTranslator encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Encounter> encounterReferenceTranslator;
 	
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -454,7 +454,7 @@ public class ObservationTranslatorImplTest {
 		Obs obs = new Obs();
 		obs.setUuid(OBS_UUID);
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		when(provenanceTranslator.getCreateProvenance(obs)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(obs)).thenReturn(provenance);
 		org.hl7.fhir.r4.model.Observation result = observationTranslator.toFhirResource(obs);

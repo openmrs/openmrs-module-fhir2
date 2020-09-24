@@ -21,53 +21,19 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Subqueries;
 import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.openmrs.Obs;
-import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.FhirDiagnosticReport;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<Obs> implements FhirDiagnosticReportDao {
-	
-	@Override
-	public Obs createOrUpdate(Obs newObs) throws DAOException {
-		if (!newObs.isObsGrouping()) {
-			throw new IllegalArgumentException("Provided Obs must be an Obs grouping.");
-		}
-		
-		return super.createOrUpdate(newObs);
-	}
-	
-	@Override
-	@Transactional(readOnly = true)
-	public Obs get(String uuid) {
-		Obs returnedObs = super.get(uuid);
-		
-		if (returnedObs.isObsGrouping()) {
-			return returnedObs;
-		}
-		
-		return null;
-	}
+public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticReport> implements FhirDiagnosticReportDao {
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		if (lacksAlias(criteria, "gm")) {
-			criteria.createAlias("groupMembers", "gm");
-		}
-		
-		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(org.openmrs.Obs.class, "groupMembers");
-		criteria.add(Subqueries.exists(detachedCriteria.setProjection(Projections.property("groupMembers.id"))));
-		
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
@@ -76,14 +42,14 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<Obs> implements Fhi
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam(), "person"));
+					    param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam(), "subject"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleCodedConcept(criteria, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
 					entry.getValue().forEach(
-					    param -> handleDateRange("dateCreated", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
+					    param -> handleDateRange("issued", (DateRangeParam) param.getParam()).ifPresent(criteria::add));
 					break;
 				case FhirConstants.RESULT_SEARCH_HANDLER:
 					entry.getValue().forEach(
@@ -96,15 +62,10 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<Obs> implements Fhi
 		});
 	}
 	
-	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
-		return super.handleLastUpdatedImmutable(param);
-	}
-	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			if (lacksAlias(criteria, "c")) {
-				criteria.createAlias("concept", "c");
+				criteria.createAlias("code", "c");
 			}
 			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
 		}
@@ -112,21 +73,21 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<Obs> implements Fhi
 	
 	private void handleObservationReference(Criteria criteria, ReferenceAndListParam result) {
 		if (result != null) {
-			if (lacksAlias(criteria, "gm")) {
-				criteria.createAlias("groupMembers", "gm");
+			if (lacksAlias(criteria, "obs")) {
+				criteria.createAlias("results", "obs");
 			}
-			handleAndListParam(result, token -> Optional.of(eq("gm.uuid", token.getIdPart()))).ifPresent(criteria::add);
+			
+			handleAndListParam(result, token -> Optional.of(eq("obs.uuid", token.getIdPart()))).ifPresent(criteria::add);
 		}
 	}
 	
 	@Override
-	protected String paramToProp(@NotNull String paramName) {
-		switch (paramName) {
-			case DiagnosticReport.SP_ISSUED:
-				return "dateCreated";
-			default:
-				return null;
+	protected String paramToProp(@NotNull String param) {
+		if (DiagnosticReport.SP_ISSUED.equals(param)) {
+			return "issued";
 		}
+		
+		return super.paramToProp(param);
 	}
 	
 }

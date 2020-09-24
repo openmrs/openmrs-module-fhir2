@@ -160,12 +160,11 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected String paramToProp(@NotNull String paramName) {
-		switch (paramName) {
-			case AllergyIntolerance.SP_SEVERITY:
-				return "severity";
-			default:
-				return null;
+	protected String paramToProp(@NotNull String param) {
+		if (AllergyIntolerance.SP_SEVERITY.equals(param)) {
+			return "severity";
 		}
+		
+		return super.paramToProp(param);
 	}
 }

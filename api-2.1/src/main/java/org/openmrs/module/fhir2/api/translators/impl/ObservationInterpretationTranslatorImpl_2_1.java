@@ -173,7 +173,7 @@ public class ObservationInterpretationTranslatorImpl_2_1 extends ObservationInte
 	
 	private Coding addInterpretationCoding(String code, Obs.Interpretation display) {
 		Coding coding = new Coding();
-		coding.setSystem(FhirConstants.INTERPRETATION_VALUE_SET_URI);
+		coding.setSystem(FhirConstants.INTERPRETATION_SYSTEM_URI);
 		coding.setCode(code);
 		coding.setDisplay(WordUtils.capitalizeFully(display.toString().replaceAll("_", " ")));
 		return coding;

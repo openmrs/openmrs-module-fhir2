@@ -224,7 +224,8 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		practitioner.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Practitioner/" + PRACTITIONER_UUID).jsonContent(toJson(practitioner)).go();
+		response = put("/Practitioner/" + PRACTITIONER_UUID).jsonContent(toJson(practitioner)).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -255,7 +256,8 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		practitioner.setId(WRONG_PRACTITIONER_UUID);
 		
 		// send the update to the server
-		response = put("/Practitioner/" + PRACTITIONER_UUID).jsonContent(toJson(practitioner)).go();
+		response = put("/Practitioner/" + PRACTITIONER_UUID).jsonContent(toJson(practitioner)).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -277,7 +279,8 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		practitioner.setId(WRONG_PRACTITIONER_UUID);
 		
 		// send the update to the server
-		response = put("/Practitioner/" + WRONG_PRACTITIONER_UUID).jsonContent(toJson(practitioner)).go();
+		response = put("/Practitioner/" + WRONG_PRACTITIONER_UUID).jsonContent(toJson(practitioner))
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -300,7 +303,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		practitioner.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Practitioner/" + PRACTITIONER_UUID).xmlContext(toXML(practitioner)).go();
+		response = put("/Practitioner/" + PRACTITIONER_UUID).xmlContext(toXML(practitioner)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -331,7 +334,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		practitioner.setId(WRONG_PRACTITIONER_UUID);
 		
 		// send the update to the server
-		response = put("/Practitioner/" + PRACTITIONER_UUID).xmlContext(toXML(practitioner)).go();
+		response = put("/Practitioner/" + PRACTITIONER_UUID).xmlContext(toXML(practitioner)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -353,7 +356,8 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		practitioner.setId(WRONG_PRACTITIONER_UUID);
 		
 		// send the update to the server
-		response = put("/Practitioner/" + WRONG_PRACTITIONER_UUID).xmlContext(toXML(practitioner)).go();
+		response = put("/Practitioner/" + WRONG_PRACTITIONER_UUID).xmlContext(toXML(practitioner)).accept(FhirMediaTypes.XML)
+		        .go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

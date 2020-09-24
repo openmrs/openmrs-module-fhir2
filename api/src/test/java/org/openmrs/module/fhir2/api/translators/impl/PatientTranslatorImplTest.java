@@ -381,7 +381,7 @@ public class PatientTranslatorImplTest {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setUuid(PATIENT_UUID);
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		when(provenanceTranslator.getCreateProvenance(patient)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(patient)).thenReturn(provenance);
 		org.hl7.fhir.r4.model.Patient result = patientTranslator.toFhirResource(patient);
@@ -396,7 +396,7 @@ public class PatientTranslatorImplTest {
 	@Test
 	public void shouldNotAddUpdateProvenanceIfDateChangedAndChangedByAreBothNull() {
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setUuid(PATIENT_UUID);

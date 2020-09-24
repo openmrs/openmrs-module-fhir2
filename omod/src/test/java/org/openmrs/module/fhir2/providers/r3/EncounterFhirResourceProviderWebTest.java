@@ -571,7 +571,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	@Test
 	public void shouldGetEncounterHistoryById() throws IOException, ServletException {
 		org.hl7.fhir.r4.model.Provenance provenance = new org.hl7.fhir.r4.model.Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(new Date());
 		provenance.setActivity(new CodeableConcept().addCoding(
 		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));

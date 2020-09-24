@@ -18,8 +18,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.FhirDiagnosticReport;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
-public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticReport, Obs> implements FhirDiagnosticReportService {
+public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticReport, FhirDiagnosticReport> implements FhirDiagnosticReportService {
 	
 	@Autowired
 	private FhirDiagnosticReportDao dao;
@@ -42,7 +42,7 @@ public class FhirDiagnosticReportServiceImpl extends BaseFhirService<DiagnosticR
 	private DiagnosticReportTranslator translator;
 	
 	@Autowired
-	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
+	private SearchQuery<FhirDiagnosticReport, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
 	
 	@Override
 	public IBundleProvider searchForDiagnosticReports(ReferenceAndListParam encounterReference,

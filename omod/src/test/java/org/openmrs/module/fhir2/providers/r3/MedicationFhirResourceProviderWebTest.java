@@ -17,7 +17,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,7 +34,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -56,7 +54,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	private static final String MEDICATION_UUID = "1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String WRONG_MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String WRONG_MEDICATION_UUID = "8eaa7db6-5da5-49d2-a63b-93abf4feb7d0";
 	
 	private static final String CODE = "5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -285,13 +283,10 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		when(fhirMedicationService.update(eq(WRONG_MEDICATION_UUID), any(org.hl7.fhir.r4.model.Medication.class)))
-		        .thenThrow(new MethodNotAllowedException("Medication " + WRONG_MEDICATION_UUID + " does not exist"));
-		
 		MockHttpServletResponse response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(medicationJson)
 		        .accept(FhirMediaTypes.JSON).go();
 		
-		assertThat(response, isMethodNotAllowed());
+		assertThat(response, isBadRequest());
 	}
 	
 	@Test

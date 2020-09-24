@@ -9,15 +9,11 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import java.util.Optional;
-
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
@@ -56,11 +52,6 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					break;
 			}
 		});
-	}
-	
-	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
-		return super.handleLastUpdatedImmutable(param);
 	}
 	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {

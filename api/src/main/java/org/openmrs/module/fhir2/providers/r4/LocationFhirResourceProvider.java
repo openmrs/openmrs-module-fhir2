@@ -81,8 +81,6 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
-		location.setId(id.getIdPart());
-		
 		return FhirProviderUtils.buildUpdate(fhirLocationService.update(id.getIdPart(), location));
 	}
 	

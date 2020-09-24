@@ -51,9 +51,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderWebTest<MedicationRequestFhirResourceProvider, MedicationRequest> {
 	
-	private static final String MEDICATION_REQUEST_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String MEDICATION_REQUEST_UUID = "294face4-a498-4ba3-89a1-ffc505837026";
 	
-	private static final String WRONG_MEDICATION_REQUEST_UUID = "c0938432-1691-11df-97a5-7038fd32aaba";
+	private static final String WRONG_MEDICATION_REQUEST_UUID = "391deb85-94a7-4596-84fa-bc178efa9918";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
 	
@@ -78,14 +78,6 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	private static final String MEDICATION_UUID = "c36006e5-9fbb-4f20-866b-0ece245615a1";
 	
 	private static final String CODE = "d1b98543-10ff-4911-83a2-b7f5fafe2751";
-	
-	private static final String JSON_CREATE_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestWebTest_create.json";
-	
-	private static final String JSON_UPDATE_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestWebTest_update.json";
-	
-	private static final String JSON_UPDATE_MEDICATION_REQUEST_NO_ID_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestWebTest_updateWithoutId.json";
-	
-	private static final String JSON_UPDATE_MEDICATION_REQUEST_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestWebTest_updateWithWrongId.json";
 	
 	@Mock
 	private FhirMedicationRequestService fhirMedicationRequestService;

@@ -52,7 +52,7 @@ public class TelecomTranslatorImplTest {
 	
 	private static final String NEW_PERSON_ATTRIBUTE_VALUE = "0722 934 389";
 	
-	private static final String LOCATION_ATTRIBUTE_UUID = "c0938432-1691-11df-97a5-7038c432abcd";
+	private static final String LOCATION_ATTRIBUTE_UUID = "aa5986a9-1f40-4428-8214-aeae58fabac4";
 	
 	private static final String LOCATION_ATTRIBUTE_VALUE = "Neiya street";
 	
@@ -60,7 +60,7 @@ public class TelecomTranslatorImplTest {
 	
 	private static final String LOCATION_ATTRIBUTE_TYPE_NAME = "street name";
 	
-	private static final String TEST_LOCATION_ATTRIBUTE_UUID = "c0938432-1691-1111-97a5-7038c432abcd";
+	private static final String TEST_LOCATION_ATTRIBUTE_UUID = "0aaa1a7b-38f9-4a85-aa86-e02fc8fdab78";
 	
 	private static final String TEST_LOCATION_ATTRIBUTE_VALUE = "Ngeria street";
 	

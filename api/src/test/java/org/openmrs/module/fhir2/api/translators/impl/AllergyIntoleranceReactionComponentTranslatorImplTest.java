@@ -57,7 +57,7 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 	
 	private static final String GLOBAL_PROPERTY_OTHER_VALUE = "402553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String ALLERGY_REACTION_UUID = "c0938432-1691-11df-97a5-7038c432r679";
+	private static final String ALLERGY_REACTION_UUID = "f984ceea-fb7f-48fd-af98-532149f5d240";
 	
 	private static final String CONCEPT_UUID = "162553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -275,7 +275,7 @@ public class AllergyIntoleranceReactionComponentTranslatorImplTest {
 		reactionComponent.setSeverity(AllergyIntolerance.AllergyIntoleranceSeverity.MODERATE);
 		
 		CodeableConcept manifestation = new CodeableConcept()
-		        .addCoding(new Coding(FhirConstants.CLINICAL_FINDINGS_VALUE_SET_URI, CONCEPT_UUID, "Test Reaction"));
+		        .addCoding(new Coding(FhirConstants.CLINICAL_FINDINGS_SYSTEM_URI, CONCEPT_UUID, "Test Reaction"));
 		reactionComponent.addManifestation(manifestation);
 		
 		Concept codedReaction = new Concept();

@@ -40,9 +40,11 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 	
 	private static final String LOCATION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirLocationDaoImplTest_initial_data.xml";
 	
-	private static final String LOCATION_UUID = "c0938432-1691-11df-2222-8038u432aabd";
+	private static final String LOCATION_UUID = "c0938432-1691-11df-97a5-7038c432";
 	
-	private static final String UNKNOWN_LOCATION_UUID = "c0938432-0000-11df-2222-8038u432aabd";
+	private static final String UNKNOWN_LOCATION_UUID = "8516d594-9c31-4bd3-bfec-b42b2f8a8444";
+	
+	private static final String PARENT_LOCATION_UUID = "76cd2d30-2411-44ef-84ea-8b7473256a6a";
 	
 	private static final String JSON_CREATE_LOCATION_DOCUMENT = "org/openmrs/module/fhir2/providers/LocationWebTest_create.json";
 	
@@ -201,7 +203,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		location.getAddress().setCountry("France");
 		
 		// send the update to the server
-		response = put("/Location/" + LOCATION_UUID).jsonContent(toJson(location)).go();
+		response = put("/Location/" + LOCATION_UUID).jsonContent(toJson(location)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -232,7 +234,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		location.setId(UNKNOWN_LOCATION_UUID);
 		
 		// send the update to the server
-		response = put("/Location/" + LOCATION_UUID).jsonContent(toJson(location)).go();
+		response = put("/Location/" + LOCATION_UUID).jsonContent(toJson(location)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -254,7 +256,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		location.setId(UNKNOWN_LOCATION_UUID);
 		
 		// send the update to the server
-		response = put("/Location/" + UNKNOWN_LOCATION_UUID).jsonContent(toJson(location)).go();
+		response = put("/Location/" + UNKNOWN_LOCATION_UUID).jsonContent(toJson(location)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -276,7 +278,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		location.getAddress().setCountry("France");
 		
 		// send the update to the server
-		response = put("/Location/" + LOCATION_UUID).xmlContext(toXML(location)).go();
+		response = put("/Location/" + LOCATION_UUID).xmlContext(toXML(location)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -307,7 +309,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		location.setId(UNKNOWN_LOCATION_UUID);
 		
 		// send the update to the server
-		response = put("/Location/" + LOCATION_UUID).xmlContext(toXML(location)).go();
+		response = put("/Location/" + LOCATION_UUID).xmlContext(toXML(location)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -329,7 +331,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		location.setId(UNKNOWN_LOCATION_UUID);
 		
 		// send the update to the server
-		response = put("/Location/" + UNKNOWN_LOCATION_UUID).xmlContext(toXML(location)).go();
+		response = put("/Location/" + UNKNOWN_LOCATION_UUID).xmlContext(toXML(location)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -411,7 +413,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		assertThat(entries, everyItem(hasResource(instanceOf(Location.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		
-		response = get("/Location?address-city=Kerio&partof=c0938432-1691-11df-97a5-7038c432aabd&_sort=name")
+		response = get("/Location?address-city=Kerio&partof=" + PARENT_LOCATION_UUID + "&_sort=name")
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -427,8 +429,8 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		entries = results.getEntry();
 		
 		assertThat(entries, everyItem(hasResource(hasProperty("address", hasProperty("city", equalTo("Kerio"))))));
-		assertThat(entries, everyItem(hasResource(hasProperty("partOf",
-		    hasProperty("referenceElement", hasProperty("idPart", equalTo("c0938432-1691-11df-97a5-7038c432aabd")))))));
+		assertThat(entries, everyItem(hasResource(
+		    hasProperty("partOf", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARENT_LOCATION_UUID)))))));
 		assertThat(entries, containsInRelativeOrder(hasResource(hasProperty("name", equalTo("Test location 6"))),
 		    hasResource(hasProperty("name", equalTo("Test location 8")))));
 		assertThat(entries, everyItem(hasResource(validResource())));
@@ -454,7 +456,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		assertThat(entries, everyItem(hasResource(instanceOf(Location.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		
-		response = get("/Location?address-city=Kerio&partof=c0938432-1691-11df-97a5-7038c432aabd&_sort=name")
+		response = get("/Location?address-city=Kerio&partof=" + PARENT_LOCATION_UUID + "&_sort=name")
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
@@ -470,8 +472,8 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		entries = results.getEntry();
 		
 		assertThat(entries, everyItem(hasResource(hasProperty("address", hasProperty("city", equalTo("Kerio"))))));
-		assertThat(entries, everyItem(hasResource(hasProperty("partOf",
-		    hasProperty("referenceElement", hasProperty("idPart", equalTo("c0938432-1691-11df-97a5-7038c432aabd")))))));
+		assertThat(entries, everyItem(hasResource(
+		    hasProperty("partOf", hasProperty("referenceElement", hasProperty("idPart", equalTo(PARENT_LOCATION_UUID)))))));
 		assertThat(entries, containsInRelativeOrder(hasResource(hasProperty("name", equalTo("Test location 6"))),
 		    hasResource(hasProperty("name", equalTo("Test location 8")))));
 		assertThat(entries, everyItem(hasResource(validResource())));

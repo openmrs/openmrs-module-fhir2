@@ -214,7 +214,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		person.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Person/" + PERSON_UUID).jsonContent(toJson(person)).go();
+		response = put("/Person/" + PERSON_UUID).jsonContent(toJson(person)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -245,7 +245,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		person.setId(WRONG_PERSON_UUID);
 		
 		// send the update to the server
-		response = put("/Person/" + PERSON_UUID).jsonContent(toJson(person)).go();
+		response = put("/Person/" + PERSON_UUID).jsonContent(toJson(person)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -267,7 +267,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		person.setId(WRONG_PERSON_UUID);
 		
 		// send the update to the server
-		response = put("/Person/" + WRONG_PERSON_UUID).jsonContent(toJson(person)).go();
+		response = put("/Person/" + WRONG_PERSON_UUID).jsonContent(toJson(person)).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -290,7 +290,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		person.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Person/" + PERSON_UUID).xmlContext(toXML(person)).go();
+		response = put("/Person/" + PERSON_UUID).xmlContext(toXML(person)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -321,7 +321,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		person.setId(WRONG_PERSON_UUID);
 		
 		// send the update to the server
-		response = put("/Person/" + PERSON_UUID).xmlContext(toXML(person)).go();
+		response = put("/Person/" + PERSON_UUID).xmlContext(toXML(person)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

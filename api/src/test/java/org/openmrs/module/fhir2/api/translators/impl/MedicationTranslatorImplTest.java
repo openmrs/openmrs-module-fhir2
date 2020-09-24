@@ -38,7 +38,7 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationTranslatorImplTest {
 	
-	private static final String MEDICATION_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String MEDICATION_UUID = "aa47108b-9720-45d4-8be3-ba75e4cea8ac";
 	
 	private static final String DOSAGE_FORM_CONCEPT_UUID = "162553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -169,8 +169,7 @@ public class MedicationTranslatorImplTest {
 	@Test
 	public void toOpenmrsType_shouldTranslateMedicationCodeToConcept() {
 		Medication medication = new Medication();
-		medication.setCode(new CodeableConcept()
-		        .addCoding(new Coding(FhirConstants.MEDICATION_CODES_VALUE_SET_URI, DRUG_CONCEPT_UUID, "")));
+		medication.setCode(new CodeableConcept().addCoding(new Coding(null, DRUG_CONCEPT_UUID, "")));
 		
 		Concept drugConcept = new Concept();
 		drugConcept.setUuid(DRUG_CONCEPT_UUID);
@@ -195,8 +194,7 @@ public class MedicationTranslatorImplTest {
 	@Test
 	public void toOpenmrsType_shouldTranslateFormToDrugDosageForm() {
 		Medication medication = new Medication();
-		medication.setForm(new CodeableConcept()
-		        .addCoding(new Coding(FhirConstants.MEDICATION_FORM_VALUE_SET_URI, DOSAGE_FORM_CONCEPT_UUID, "")));
+		medication.setForm(new CodeableConcept().addCoding(new Coding(null, DOSAGE_FORM_CONCEPT_UUID, "")));
 		
 		Concept dosageConcept = new Concept();
 		dosageConcept.setUuid(DOSAGE_FORM_CONCEPT_UUID);

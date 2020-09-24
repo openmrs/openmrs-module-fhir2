@@ -52,9 +52,9 @@ import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestFhirResourceProviderTest {
 	
-	private static final String MEDICATION_REQUEST_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String MEDICATION_REQUEST_UUID = "d7f5a4dd-019e-4221-85fa-e084505b9695";
 	
-	private static final String WRONG_MEDICATION_REQUEST_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String WRONG_MEDICATION_REQUEST_UUID = "862e20a1-e73c-4c92-a4e8-9f922e0cd7f4";
 	
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
 	

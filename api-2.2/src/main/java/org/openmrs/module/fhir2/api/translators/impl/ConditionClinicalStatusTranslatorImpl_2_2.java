@@ -33,13 +33,13 @@ public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClini
 		switch (clinicalStatus) {
 			case ACTIVE:
 				codeableConcept.addCoding().setCode(clinicalStatus.toString().toLowerCase()).setDisplay("Active")
-				        .setSystem(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI);
+				        .setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI);
 			case INACTIVE:
 				codeableConcept.addCoding().setCode(clinicalStatus.toString().toLowerCase()).setDisplay("Inactive")
-				        .setSystem(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI);
+				        .setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI);
 			default:
 				codeableConcept.addCoding().setCode("inactive").setDisplay("Inactive")
-				        .setSystem(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI);
+				        .setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI);
 		}
 		
 		return codeableConcept;
@@ -52,7 +52,7 @@ public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClini
 		}
 		
 		return codeableConcept.getCoding().stream()
-		        .filter(coding -> coding.getSystem().equals(FhirConstants.CONDITION_CLINICAL_VALUE_SET_URI))
+		        .filter(coding -> coding.getSystem().equals(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI))
 		        .map(this::getClinicalStatus).findFirst().orElse(null);
 	}
 	

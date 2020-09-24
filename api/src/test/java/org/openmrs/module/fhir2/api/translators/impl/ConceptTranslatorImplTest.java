@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -45,6 +44,7 @@ import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.FhirUserDefaultProperties;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConceptTranslatorImplTest {
@@ -223,7 +223,7 @@ public class ConceptTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldFavorLOINCMappedConceptOverOtherConcept() {
+	public void shouldFavorConceptWithMatchingSystemOverUUID() {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding baseCoding = codeableConcept.addCoding();
 		baseCoding.setCode(CONCEPT_UUID);
@@ -236,7 +236,7 @@ public class ConceptTranslatorImplTest {
 		when(conceptService.get(CONCEPT_UUID)).thenReturn(defaultConcept);
 		
 		Concept loincConcept = new Concept();
-		loincConcept.setUuid(UUID.randomUUID().toString());
+		loincConcept.setUuid(FhirUtils.newUuid());
 		ConceptMap conceptMap = new ConceptMap();
 		ConceptReferenceTerm conceptReferenceTerm = new ConceptReferenceTerm();
 		ConceptSource loinc = new ConceptSource();

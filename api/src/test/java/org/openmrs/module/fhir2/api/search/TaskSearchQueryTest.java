@@ -406,7 +406,7 @@ public class TaskSearchQueryTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void searchForTasks_shouldSortTasksAsRequested() {
 		SortSpec sort = new SortSpec();
-		sort.setParamName("date");
+		sort.setParamName(FhirConstants.SP_LAST_UPDATED);
 		sort.setOrder(SortOrderEnum.ASC);
 		
 		SearchParameterMap theParams = new SearchParameterMap().setSortSpec(sort);

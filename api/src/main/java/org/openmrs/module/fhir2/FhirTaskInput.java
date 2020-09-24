@@ -23,9 +23,9 @@ import lombok.NoArgsConstructor;
 /**
  * FHIR Task.input - https://www.hl7.org/fhir/task-definitions.html#Task.input
  */
-@Data(staticConstructor = "of")
+@Data
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
 @Table(name = "fhir_task_input")
 public class FhirTaskInput extends FhirTaskParam {

@@ -16,10 +16,11 @@ import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.or;
 import static org.hibernate.criterion.Subqueries.propertyIn;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,12 +36,17 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.proxy.HibernateProxy;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.openmrs.Auditable;
+import org.openmrs.Obs;
 import org.openmrs.OpenmrsObject;
+import org.openmrs.Order;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,14 +60,16 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <T> the {@link OpenmrsObject} managed by this Dao
  */
 @Transactional
-@SuppressWarnings("UnstableApiUsage")
 public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends BaseDao implements FhirDao<T> {
 	
+	@SuppressWarnings("UnstableApiUsage")
 	protected final TypeToken<T> typeToken;
 	
 	private final boolean isRetireable;
 	
 	private final boolean isVoidable;
+	
+	private final boolean isImmutable;
 	
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
@@ -69,19 +77,22 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
+	@SuppressWarnings("UnstableApiUsage")
 	protected BaseFhirDao() {
-		typeToken = new TypeToken<T>(getClass()) {
-			
-		};
+		// @formatter:off
+		typeToken = new TypeToken<T>(getClass()) {};
+		// @formatter:on
 		
 		this.isRetireable = Retireable.class.isAssignableFrom(typeToken.getRawType());
 		this.isVoidable = Voidable.class.isAssignableFrom(typeToken.getRawType());
+		this.isImmutable = Order.class.isAssignableFrom(typeToken.getRawType())
+		        || Obs.class.isAssignableFrom(typeToken.getRawType());
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
-	@SuppressWarnings("unchecked")
 	public T get(String uuid) {
+		@SuppressWarnings("unchecked")
 		T result = (T) sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType()).add(eq("uuid", uuid))
 		        .uniqueResult();
 		
@@ -95,7 +106,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	public T createOrUpdate(T newEntry) {
 		if (newEntry.getUuid() == null) {
-			newEntry.setUuid(UUID.randomUUID().toString());
+			newEntry.setUuid(FhirUtils.newUuid());
 		}
 		
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
@@ -123,7 +134,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<String> getSearchResultUuids(SearchParameterMap theParams) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
 		
@@ -144,15 +154,18 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		criteria.add(propertyIn("uuid", detachedCriteria));
 		criteria.setProjection(Projections.groupProperty("uuid"));
 		
-		return criteria.list();
+		@SuppressWarnings("unchecked")
+		List<String> results = criteria.list();
+		
+		return results;
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<T> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
 	        int lastResult) {
 		List<String> selectedResources = matchingResourceUuids.subList(firstResult, lastResult);
 		
+		@SuppressWarnings("unchecked")
 		List<T> results = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType())
 		        .add(in("uuid", selectedResources)).list();
 		
@@ -163,6 +176,14 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
+		if (isImmutable) {
+			return handleLastUpdatedImmutable(param);
+		}
+		
+		return handleLastUpdatedMutable(param);
+	}
+	
+	protected Optional<Criterion> handleLastUpdatedMutable(DateRangeParam param) {
 		// @formatter:off
 		return Optional.of(or(toCriteriaArray(handleDateRange("dateChanged", param), Optional.of(
 		    and(toCriteriaArray(Stream.of(Optional.of(isNull("dateChanged")), handleDateRange("dateCreated", param))))))));
@@ -229,6 +250,40 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 */
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		
+	}
+	
+	@Override
+	protected Collection<org.hibernate.criterion.Order> paramToProps(SortState sortState) {
+		String param = sortState.getParameter();
+		
+		if (FhirConstants.SP_LAST_UPDATED.equalsIgnoreCase(param)) {
+			if (isImmutable) {
+				switch (sortState.getSortOrder()) {
+					case ASC:
+						return Collections.singletonList(org.hibernate.criterion.Order.asc("dateCreated"));
+					case DESC:
+						return Collections.singletonList(org.hibernate.criterion.Order.desc("dateCreated"));
+				}
+			}
+			
+			switch (sortState.getSortOrder()) {
+				case ASC:
+					return Collections.singletonList(CoalescedOrder.asc("dateChanged", "dateCreated"));
+				case DESC:
+					return Collections.singletonList(CoalescedOrder.desc("dateChanged", "dateCreated"));
+			}
+		}
+		
+		return super.paramToProps(sortState);
+	}
+	
+	@Override
+	protected String paramToProp(String param) {
+		if (DomainResource.SP_RES_ID.equals(param)) {
+			return "uuid";
+		}
+		
+		return super.paramToProp(param);
 	}
 	
 	protected T deproxyObject(T result) {

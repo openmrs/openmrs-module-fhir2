@@ -342,7 +342,7 @@ public class PractitionerTranslatorProviderImplTest {
 		provider.setUuid(PRACTITIONER_UUID);
 		
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		
 		when(provenanceTranslator.getCreateProvenance(provider)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(provider)).thenReturn(provenance);

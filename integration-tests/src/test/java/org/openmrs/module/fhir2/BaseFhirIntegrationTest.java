@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import lombok.SneakyThrows;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -166,11 +168,42 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	@SuppressWarnings("unchecked")
 	public U readResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
-		if (mediaType.isCompatibleWith(FhirMediaTypes.XML) || mediaType.isCompatibleWith(MediaType.APPLICATION_XML)
-		        || mediaType.isCompatibleWith(MediaType.TEXT_XML)) {
-			return (U) xmlParser.parseResource(getResourceProvider().getResourceType(), response.getContentAsString());
-		} else {
-			return (U) jsonParser.parseResource(getResourceProvider().getResourceType(), response.getContentAsString());
+		try {
+			if (mediaType.isCompatibleWith(FhirMediaTypes.XML) || mediaType.isCompatibleWith(MediaType.APPLICATION_XML)
+			        || mediaType.isCompatibleWith(MediaType.TEXT_XML)) {
+				return (U) xmlParser.parseResource(getResourceProvider().getResourceType(), response.getContentAsString());
+			} else {
+				return (U) jsonParser.parseResource(getResourceProvider().getResourceType(), response.getContentAsString());
+			}
+		}
+		catch (DataFormatException e) {
+			// DataFormatException usually indicates that you've requested the parser parse the wrong resource type, but
+			// the most common reason for having the wrong resource type here is that the response contained an
+			// OperationOutcome rather than the expected resource, so here we try to do something useful with the
+			// OperationOutcome
+			while (e.getCause() != null && e.getCause() instanceof DataFormatException) {
+				e = (DataFormatException) e.getCause();
+			}
+			
+			if (e.getMessage() == null || !e.getMessage().contains("OperationOutcome")) {
+				throw e;
+			}
+			
+			// in case we cannot parse the OperationOutcome or there isn't actually one, just return the original exception
+			IBaseOperationOutcome operationOutcome;
+			try {
+				operationOutcome = readOperationOutcome(response);
+			}
+			catch (Exception ignored) {
+				throw e;
+			}
+			
+			Description errorDescription = new StringDescription();
+			errorDescription.appendText("Received unexpected OperationOutcome");
+			
+			describeOperationOutcome(errorDescription, operationOutcome);
+			
+			throw new RuntimeException(errorDescription.toString());
 		}
 	}
 	

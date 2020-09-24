@@ -388,7 +388,7 @@ public class EncounterTranslatorImplTest {
 		org.openmrs.Encounter encounter = new org.openmrs.Encounter();
 		encounter.setUuid(ENCOUNTER_UUID);
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(new Date());
 		when(provenanceTranslator.getCreateProvenance(encounter)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(encounter)).thenReturn(provenance);

@@ -58,15 +58,15 @@ import org.openmrs.module.fhir2.api.util.FhirUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class AllergyIntoleranceTranslatorImplTest {
 	
-	private static final String ALLERGY_UUID = "c0938432-1691-11df-97a5-7038c432aaba";
+	private static final String ALLERGY_UUID = "42311bd3-9dcd-4df7-bbc6-b66920944854";
 	
 	private static final String ALLERGY_INTOLERANCE_CLINICAL_STATUC_ACTIVE = "active";
 	
 	private static final String ALLERGY_INTOLERANCE_CLINICAL_STATUC_INACTIVE = "inactive";
 	
-	private static final String PATIENT_UUID = "c0938432-1691-11df-9pa5-7038c432aaba";
+	private static final String PATIENT_UUID = "a925aa0a-49ab-48e2-9f7d-f7ce7ede1143";
 	
-	private static final String CREATOR_UUID = "c1038432-1691-11df-9pa5-7038c432aaba";
+	private static final String CREATOR_UUID = "15e2089a-fa44-41a3-86ff-ca5560855316";
 	
 	private static final String CONCEPT_UUID = "162553AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
@@ -553,7 +553,7 @@ public class AllergyIntoleranceTranslatorImplTest {
 		
 		allergy.setAllergen(allergen);
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(new Date());
 		when(provenanceTranslator.getCreateProvenance(allergy)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(allergy)).thenReturn(provenance);

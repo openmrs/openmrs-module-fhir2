@@ -62,11 +62,6 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 		});
 	}
 	
-	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
-		return super.handleLastUpdatedImmutable(param);
-	}
-	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			if (lacksAlias(criteria, "c")) {

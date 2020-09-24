@@ -45,8 +45,8 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.FhirDiagnosticReport;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirDiagnosticReportDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -60,52 +60,53 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	
 	private static final String DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirDiagnosticReportDaoImplTest_initial_data.xml";
 	
-	private static final String DIAGNOSTIC_REPORT_UUID = "dchf6962-1c42-49ea-bed2-97650c66f246";
+	private static final String DIAGNOSTIC_REPORT_UUID = "1e589127-f391-4d0c-8e98-e0a158b2be22";
 	
-	private static final String ENCOUNTER_UUID = "y403fafb-e5e4-42d0-9d11-4f52e89d123r";
+	private static final String ENCOUNTER_UUID = "6519d653-393b-4118-9c83-a3715b82d4ac";
 	
-	private static final String WRONG_ENCOUNTER_UUID = "6519d653-393b-4118-9c83-a3715b82d4az";
+	private static final String WRONG_ENCOUNTER_UUID = "3bcc0c30-743c-4a81-9035-636f58efcdbe";
 	
-	private static final String PATIENT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
+	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
 	
 	private static final String WRONG_PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23043";
 	
-	private static final String PATIENT_GIVEN_NAME = "Horatio";
+	private static final String PATIENT_GIVEN_NAME = "Collet";
 	
 	private static final String WRONG_PATIENT_GIVEN_NAME = "Colletas";
 	
-	private static final String PATIENT_FAMILY_NAME = "Hornblower";
+	private static final String PATIENT_FAMILY_NAME = "Chebaskwony";
 	
 	private static final String WRONG_PATIENT_FAMILY_NAME = "Chebaskwonyop";
 	
-	private static final String DIAGNOSTIC_REPORT_DATETIME = "2018-08-18T14:09:35.0";
+	private static final String DIAGNOSTIC_REPORT_DATETIME = "2008-07-01T00:00:00.0";
 	
 	private static final String DIAGNOSTIC_REPORT_WRONG_DATETIME = "2008-08-18T14:11:15.0";
 	
-	private static final String DIAGNOSTIC_REPORT_DATE = "2018-08-18 14:09:35.0";
+	private static final String DIAGNOSTIC_REPORT_DATE = "2008-07-01 00:00:00.0";
 	
-	private static final String DIAGNOSTIC_REPORT_CODE = "23";
+	// yes, it's silly that we use the same code for the report as the observation
+	private static final String DIAGNOSTIC_REPORT_CODE = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String CODEABLE_CONCEPT_UUID = "0f97e14e-cdc2-49ac-9255-b5126f8a5147";
+	private static final String CONCEPT_UUID = "5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String DIAGNOSTIC_REPORT_WRONG_CODE = "5499";
+	private static final String DIAGNOSTIC_REPORT_WRONG_CODE = "5092AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	private static final String PATIENT_IDENTIFIER = "101-6";
+	private static final String PATIENT_IDENTIFIER = "6TS-4";
 	
-	private static final String WRONG_PATIENT_IDENTIFIER = "6TS-3";
+	private static final String WRONG_PATIENT_IDENTIFIER = "101-6";
 	
-	private static final String DATE_CREATED = "2018-08-18";
+	private static final String DATE_CREATED = "2008-08-18";
 	
-	private static final String WRONG_DATE_CREATED = "2008-08-18";
+	private static final String WRONG_DATE_CREATED = "2018-08-18";
 	
-	private static final String OBS_RESULT_UUID = "dc386962-1c42-49ea-bed2-97650c66sd46";
+	private static final String OBS_RESULT_UUID = "6f16bb57-12bc-4077-9f49-ceaa9b928669";
 	
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
 	
 	@Autowired
-	private SearchQuery<Obs, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
+	private SearchQuery<FhirDiagnosticReport, DiagnosticReport, FhirDiagnosticReportDao, DiagnosticReportTranslator> searchQuery;
 	
 	@Autowired
 	private FhirDiagnosticReportDao dao;
@@ -128,7 +129,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldReturnCorrectObsByEncounterUUID() {
+	public void searchForDiagnosticReports_shouldReturnDiagnosticReportByEncounterUUID() {
 		ReferenceAndListParam encounterReference = new ReferenceAndListParam()
 		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID).setChain(null)));
 		
@@ -161,7 +162,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientUUID() {
+	public void searchForDiagnosticReports_shouldReturnDiagnosticReportByPatientUUID() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam()
 		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_UUID).setChain(null)));
 		
@@ -247,7 +248,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientIdentifier() {
+	public void searchForDiagnosticReports_shouldReturnDiagnosticReportByPatientIdentifier() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(new ReferenceOrListParam()
 		        .add(new ReferenceParam().setValue(PATIENT_IDENTIFIER).setChain(Patient.SP_IDENTIFIER)));
 		
@@ -341,7 +342,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientName() {
+	public void searchForDiagnosticReports_shouldReturnDiagnosticReportByPatientName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
 		
@@ -357,25 +358,6 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
-	}
-	
-	@Test
-	public void searchForDiagnosticReports_shouldSearchForUniqueObsByPatientName() {
-		ReferenceParam patientReference = new ReferenceParam(Patient.SP_NAME, "Horatio Hornblower");
-		ReferenceAndListParam patientList = new ReferenceAndListParam();
-		patientList.addValue(new ReferenceOrListParam().add(patientReference));
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
-		    patientList);
-		
-		IBundleProvider results = search(theParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
-		
-		List<String> resultSet = dao.getSearchResultUuids(theParams);
-		
-		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
 	}
 	
 	@Test
@@ -453,7 +435,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientGivenName() {
+	public void searchForDiagnosticReports_shouldReturnDiagnosticReportByPatientGivenName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_GIVEN)));
 		
@@ -469,25 +451,6 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
-	}
-	
-	@Test
-	public void searchForDiagnosticReports_shouldSearchForUniqueObsByPatientGivenName() {
-		ReferenceParam patientReference = new ReferenceParam(Patient.SP_GIVEN, "Horatio");
-		ReferenceAndListParam patientList = new ReferenceAndListParam();
-		patientList.addValue(new ReferenceOrListParam().add(patientReference));
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
-		    patientList);
-		
-		IBundleProvider results = search(theParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
-		
-		List<String> resultSet = dao.getSearchResultUuids(theParams);
-		
-		assertThat(resultSet.size(), equalTo(1)); // 2 with repetitions
 	}
 	
 	@Test
@@ -536,7 +499,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldReturnObsHavingGroupMembers() {
+	public void searchForDiagnosticReports_shouldReturnDiagnosticReports() {
 		SearchParameterMap theParams = new SearchParameterMap();
 		IBundleProvider results = search(theParams);
 		
@@ -573,7 +536,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldReturnCorrectObsByPatientFamilyName() {
+	public void searchForDiagnosticReports_shouldReturnDiagnosticReportByPatientFamilyName() {
 		ReferenceAndListParam patientReference = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_FAMILY_NAME).setChain(Patient.SP_FAMILY)));
 		
@@ -589,25 +552,6 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
-	}
-	
-	@Test
-	public void searchForDiagnosticReports_shouldSearchForUniqueObsByPatientFamilyName() {
-		ReferenceParam patientReference = new ReferenceParam(Patient.SP_FAMILY, "Hornblower");
-		ReferenceAndListParam patientList = new ReferenceAndListParam();
-		patientList.addValue(new ReferenceOrListParam().add(patientReference));
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
-		    patientList);
-		
-		IBundleProvider results = search(theParams);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(1));
-		
-		List<String> resultSet = dao.getSearchResultUuids(theParams);
-		
-		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
 	}
 	
 	@Test
@@ -685,7 +629,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldReturnCorrectObsByIssueDate() {
+	public void searchForDiagnosticReports_shouldReturnDiagnosticReportByIssueDate() {
 		DateRangeParam issueDate = new DateRangeParam(new DateParam(DIAGNOSTIC_REPORT_DATETIME));
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
@@ -718,7 +662,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldReturnCorrectObsByCode() {
+	public void searchForDiagnosticReports_shouldReturnDiagnosticReportByCode() {
 		TokenAndListParam code = new TokenAndListParam()
 		        .addAnd(new TokenOrListParam().add(new TokenParam(DIAGNOSTIC_REPORT_CODE)));
 		
@@ -732,7 +676,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		List<DiagnosticReport> resultList = get(diagnosticReports);
 		
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
-		assertThat(resultList.get(0).getCode().getCodingFirstRep().getCode(), equalTo(CODEABLE_CONCEPT_UUID));
+		assertThat(resultList.get(0).getCode().getCodingFirstRep().getCode(), equalTo(CONCEPT_UUID));
 	}
 	
 	@Test
@@ -753,7 +697,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldReturnCorrectObsByResult() {
+	public void searchForDiagnosticReports_shouldReturnDiagnosticReportByResult() {
 		ReferenceAndListParam param = new ReferenceAndListParam()
 		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam(OBS_RESULT_UUID)));
 		
@@ -809,7 +753,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldSearchForObsByLastUpdatedDateCreated() {
+	public void searchForDiagnosticReports_shouldSearchForDiagnosticReportByLastUpdatedDateCreated() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
@@ -826,7 +770,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 	}
 	
 	@Test
-	public void searchForDiagnosticReports_shouldSearchForObsByMatchingUuidAndLastUpdated() {
+	public void searchForDiagnosticReports_shouldSearchForDiagnosticReportByMatchingUuidAndLastUpdated() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(DIAGNOSTIC_REPORT_UUID));
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(DATE_CREATED).setLowerBound(DATE_CREATED);
 		
@@ -886,7 +830,7 @@ public class DiagnosticReportSearchQueryTest extends BaseModuleContextSensitiveT
 		
 		DiagnosticReport diagnosticReport = resultList.get(0);
 		
-		assertThat(diagnosticReport.getCode().getCodingFirstRep().getCode(), equalTo(CODEABLE_CONCEPT_UUID));
+		assertThat(diagnosticReport.getCode().getCodingFirstRep().getCode(), equalTo(CONCEPT_UUID));
 		assertThat(diagnosticReport.getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
 	}
 	

@@ -381,7 +381,7 @@ public class AllergyIntoleranceFhirR3ResourceProviderWebTest extends BaseFhirR3R
 	@Test
 	public void shouldGetAllergyIntoleranceHistoryById() throws IOException, ServletException {
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(new Date());
 		provenance.setActivity(new CodeableConcept().addCoding(
 		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));

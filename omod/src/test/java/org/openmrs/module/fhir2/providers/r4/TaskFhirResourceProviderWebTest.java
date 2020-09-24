@@ -69,11 +69,11 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	
 	private static final String WRONG_TASK_UUID = "df34a1c1-f57b-4c33-bee5-e601b56b9d5b";
 	
-	private static final String JSON_TASK_PATH = "org/openmrs/module/fhir2/providers/TestTask_createUpdate.json";
+	private static final String JSON_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_create.json";
 	
-	private static final String JSON_TASK_NO_ID_PATH = "org/openmrs/module/fhir2/providers/TestTask_createUpdateNoId.json";
+	private static final String JSON_TASK_NO_ID_PATH = "org/openmrs/module/fhir2/providers/Task_create_no_id.json";
 	
-	private static final String JSON_TASK_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/TestTask_createUpdateWrongId.json";
+	private static final String JSON_TASK_WRONG_ID_PATH = "org/openmrs/module/fhir2/providers/Task_create_wrong_id.json";
 	
 	private static final String BASED_ON_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
 	
@@ -139,7 +139,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	@Test
 	public void getTaskHistoryByIdRequest_shouldGetTaskHistoryById() throws IOException, ServletException {
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(new Date());
 		provenance.setActivity(new CodeableConcept().addCoding(
 		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));

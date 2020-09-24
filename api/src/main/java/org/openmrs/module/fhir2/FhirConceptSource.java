@@ -26,7 +26,7 @@ import org.openmrs.ConceptSource;
 
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
 @Table(name = "fhir_concept_source")
 public class FhirConceptSource extends BaseOpenmrsMetadata {

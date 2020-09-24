@@ -87,11 +87,6 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		});
 	}
 	
-	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
-		return super.handleLastUpdatedImmutable(param);
-	}
-	
 	private void handleHasMemberReference(Criteria criteria, ReferenceParam hasMemberReference) {
 		if (hasMemberReference != null) {
 			criteria.createAlias("groupMembers", "gm");
@@ -161,7 +156,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	@Override
 	protected String paramToProp(String paramName) {
-		if ("date".equals(paramName)) {
+		if (Observation.SP_DATE.equals(paramName)) {
 			return "obsDatetime";
 		}
 		

@@ -707,7 +707,7 @@ public class FhirTaskTranslatorImplTest {
 		FhirTask task = new FhirTask();
 		task.setUuid(TASK_UUID);
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		when(provenanceTranslator.getCreateProvenance(task)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(task)).thenReturn(provenance);
 		org.hl7.fhir.r4.model.Task result = taskTranslator.toFhirResource(task);

@@ -51,7 +51,7 @@ public class ObservationReferenceRangeTranslatorImpl implements ObservationRefer
 		        .setHigh(new Quantity().setValue(hiValue)).setLow(new Quantity().setValue(lowValue));
 		
 		CodeableConcept referenceRangeType = new CodeableConcept();
-		referenceRangeType.addCoding().setCode(code).setSystem(FhirConstants.OBSERVATION_REFERENCE_RANGE_VALUE_SET_URI);
+		referenceRangeType.addCoding().setCode(code).setSystem(FhirConstants.OBSERVATION_REFERENCE_RANGE_SYSTEM_URI);
 		component.setType(referenceRangeType);
 		
 		return component;

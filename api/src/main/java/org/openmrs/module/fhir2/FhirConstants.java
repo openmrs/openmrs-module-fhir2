@@ -19,8 +19,6 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_URI = "http://openmrs.org";
 	
-	public static final String HL7_FHIR_VALUE_SET_PREFIX = "http://hl7.org/fhir/ValueSet";
-	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX = "http://terminology.hl7.org/CodeSystem";
 	
 	public static final String FHIR_TERMINOLOGY_DATA_OPERATION = HL7_FHIR_CODE_SYSTEM_PREFIX + "v3-DataOperation";
@@ -30,38 +28,33 @@ public class FhirConstants {
 	
 	public static final String FHIR_TERMINOLOGY_PARTICIPATION_TYPE = HL7_FHIR_CODE_SYSTEM_PREFIX + "v3-ParticipationType";
 	
-	public static final String DIAGNOSTIC_SERVICE_SECTIONS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX
-	        + "/diagnostic-service-sections";
+	public static final String DIAGNOSTIC_REPORT_SERVICE_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v2-0074";
 	
-	public static final String INTERPRETATION_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/observation-interpretation";
+	public static final String INTERPRETATION_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v3-ObservationInterpretation";
 	
-	public static final String CONDITION_VERIFICATION_STATUS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX
+	public static final String CONDITION_VERIFICATION_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/condition-ver-status";
 	
-	public static final String ALLERGY_VERIFICATION_STATUS_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
-	        + "/allergyintolerance-verification";
-	
-	public static final String CONDITION_CLINICAL_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/condition-clinical ";
-	
-	public static final String CLINICAL_FINDINGS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/clinical-findings";
-	
-	public static final String MEDICATION_CODES_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/medication-codes";
-	
-	public static final String MEDICATION_FORM_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/medication-form-codes";
-	
-	public static final String ALLERGY_INTOLERANCE_CLINICAL_STATUS_VALUE_SET = HL7_FHIR_CODE_SYSTEM_PREFIX
+	public static final String ALLERGY_INTOLERANCE_CLINICAL_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/allergyintolerance-clinical";
 	
-	public static final String TASK_STATUS_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/task-status";
+	public static final String ALLERGY_INTOLERANCE_VERIFICATION_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
+	        + "/allergyintolerance-verification";
 	
-	public static final String OBSERVATION_REFERENCE_RANGE_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
+	public static final String CONDITION_CLINICAL_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-clinical ";
+	
+	public static final String CLINICAL_FINDINGS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/clinical-findings";
+	
+	public static final String TASK_STATUS_VALUE_SET_URI = "http://hl7.org/fhir/task-status";
+	
+	public static final String OBSERVATION_REFERENCE_RANGE_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/referencerange-meaning";
 	
 	public static final String OBSERVATION_REFERENCE_NORMAL = "normal";
 	
 	public static final String OBSERVATION_REFERENCE_TREATMENT = "treatment";
 	
-	public static final String OBSERVATION_CATEGORY_VALUE_SET_URI = HL7_FHIR_VALUE_SET_PREFIX + "/observation-category";
+	public static final String OBSERVATION_CATEGORY_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/observation-category";
 	
 	public static final String ENCOUNTER_CLASS_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v3-ActCode";
 	
@@ -236,6 +229,8 @@ public class FhirConstants {
 	public static final String ID_PROPERTY = "_id.property";
 	
 	public static final String LAST_UPDATED_PROPERTY = "_lastUpdated.property";
+	
+	public static final String SP_LAST_UPDATED = "_lastUpdated";
 	
 	public static final String SERVLET_PATH_R4 = "/ms/fhir2Servlet";
 	

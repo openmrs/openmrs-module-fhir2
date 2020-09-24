@@ -382,7 +382,7 @@ public class ConditionTranslatorImpl_2_2Test {
 	@Test
 	public void shouldAddProvenanceToConditionResource() {
 		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.uniqueUuid()));
+		provenance.setId(new IdType(FhirUtils.newUuid()));
 		when(provenanceTranslator.getCreateProvenance(openmrsCondition)).thenReturn(provenance);
 		when(provenanceTranslator.getUpdateProvenance(openmrsCondition)).thenReturn(provenance);
 		
