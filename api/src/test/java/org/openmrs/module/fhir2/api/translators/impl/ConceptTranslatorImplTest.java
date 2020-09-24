@@ -39,12 +39,12 @@ import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSource;
-import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.FhirUserDefaultProperties;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConceptTranslatorImplTest {

@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Obs;
-import org.openmrs.module.fhir2.FhirDiagnosticReport;
+import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 
 public interface DiagnosticReportTranslator extends OpenmrsFhirUpdatableTranslator<FhirDiagnosticReport, DiagnosticReport> {
 	

@@ -28,9 +28,9 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.openmrs.api.db.DAOException;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.api.dao.FhirTaskDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.model.FhirTask;
 import org.springframework.stereotype.Component;
 
 @Component

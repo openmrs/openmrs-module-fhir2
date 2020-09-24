@@ -10,7 +10,7 @@
 package org.openmrs.module.fhir2.api.validators;
 
 import org.openmrs.annotation.Handler;
-import org.openmrs.module.fhir2.FhirDiagnosticReport;
+import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 

@@ -16,9 +16,9 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

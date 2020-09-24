@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Condition;
@@ -24,7 +25,6 @@ import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
-import org.openmrs.module.fhir2.api.exceptions.FhirNotImplementedException;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.springframework.stereotype.Component;
 
@@ -36,28 +36,28 @@ public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> exten
 	
 	@Override
 	public Condition get(@Nonnull String uuid) {
-		throw new FhirNotImplementedException(MESSAGE);
+		throw new NotImplementedOperationException(MESSAGE);
 	}
 	
 	@Override
 	protected FhirDao<U> getDao() {
-		throw new FhirNotImplementedException(MESSAGE);
+		throw new NotImplementedOperationException(MESSAGE);
 	}
 	
 	@Override
 	protected OpenmrsFhirTranslator<U, Condition> getTranslator() {
-		throw new FhirNotImplementedException(MESSAGE);
+		throw new NotImplementedOperationException(MESSAGE);
 	}
 	
 	@Override
 	public IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
 	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
 	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort) {
-		throw new FhirNotImplementedException(MESSAGE);
+		throw new NotImplementedOperationException(MESSAGE);
 	}
 	
 	@Override
 	public Condition saveCondition(@Nonnull Condition condition) {
-		throw new FhirNotImplementedException(MESSAGE);
+		throw new NotImplementedOperationException(MESSAGE);
 	}
 }

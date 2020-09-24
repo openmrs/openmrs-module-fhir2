@@ -31,8 +31,8 @@ import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.FhirTask;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.openmrs.module.fhir2.model.FhirTask;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProvenanceTranslatorImplTest {

@@ -7,42 +7,34 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2;
+package org.openmrs.module.fhir2.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.openmrs.BaseOpenmrsMetadata;
-import org.openmrs.ConceptSource;
 
+/**
+ * FHIR Task.output - https://www.hl7.org/fhir/task-definitions.html#Task.output
+ */
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
-@Table(name = "fhir_concept_source")
-public class FhirConceptSource extends BaseOpenmrsMetadata {
+@Table(name = "fhir_task_output")
+public class FhirTaskOutput extends FhirTaskParam {
 	
-	private static final long serialVersionUID = 1742113L;
+	private static final long serialVersionUID = 1L;
 	
 	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "fhir_concept_source_id")
+	@Column(name = "task_output_id")
 	private Integer id;
-	
-	@OneToOne
-	@JoinColumn(name = "concept_source_id")
-	private ConceptSource conceptSource;
-	
-	@Column(nullable = false)
-	private String url;
 }

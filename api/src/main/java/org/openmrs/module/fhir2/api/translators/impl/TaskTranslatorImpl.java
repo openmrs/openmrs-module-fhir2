@@ -23,14 +23,14 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.FhirReference;
-import org.openmrs.module.fhir2.FhirTask;
-import org.openmrs.module.fhir2.FhirTaskInput;
-import org.openmrs.module.fhir2.FhirTaskOutput;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.ReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
+import org.openmrs.module.fhir2.model.FhirReference;
+import org.openmrs.module.fhir2.model.FhirTask;
+import org.openmrs.module.fhir2.model.FhirTaskInput;
+import org.openmrs.module.fhir2.model.FhirTaskOutput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

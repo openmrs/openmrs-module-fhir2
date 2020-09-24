@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.openmrs.module.fhir2.FhirConceptSource;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
 
 public interface FhirConceptSourceService {
 	

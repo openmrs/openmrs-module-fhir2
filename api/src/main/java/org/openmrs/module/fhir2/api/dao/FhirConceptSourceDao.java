@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.openmrs.annotation.Authorized;
-import org.openmrs.module.fhir2.FhirConceptSource;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirConceptSourceDao {

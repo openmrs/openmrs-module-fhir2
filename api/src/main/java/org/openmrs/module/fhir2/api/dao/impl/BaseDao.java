@@ -78,9 +78,9 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
-import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
 
 /**
  * <p>

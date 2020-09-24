@@ -20,11 +20,11 @@ import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
-import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.FhirUserDefaultProperties;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

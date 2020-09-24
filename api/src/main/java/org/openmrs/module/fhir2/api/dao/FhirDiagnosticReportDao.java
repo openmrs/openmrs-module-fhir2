@@ -14,8 +14,8 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 import org.openmrs.annotation.Authorized;
-import org.openmrs.module.fhir2.FhirDiagnosticReport;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirDiagnosticReportDao extends FhirDao<FhirDiagnosticReport> {

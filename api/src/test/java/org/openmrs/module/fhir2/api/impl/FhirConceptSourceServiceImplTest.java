@@ -27,8 +27,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.module.fhir2.FhirConceptSource;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConceptSourceServiceImplTest {

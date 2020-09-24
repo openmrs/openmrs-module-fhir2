@@ -14,8 +14,8 @@ import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
-import org.openmrs.module.fhir2.FhirReference;
 import org.openmrs.module.fhir2.api.translators.ReferenceTranslator;
+import org.openmrs.module.fhir2.model.FhirReference;
 import org.springframework.stereotype.Component;
 
 @Component

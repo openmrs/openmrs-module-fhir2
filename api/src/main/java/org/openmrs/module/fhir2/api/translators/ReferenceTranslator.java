@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Task;
-import org.openmrs.module.fhir2.FhirReference;
+import org.openmrs.module.fhir2.model.FhirReference;
 
 public interface ReferenceTranslator extends OpenmrsFhirUpdatableTranslator<FhirReference, Reference> {
 	

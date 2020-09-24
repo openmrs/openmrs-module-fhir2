@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators;
 import javax.annotation.Nonnull;
 
 import org.hl7.fhir.r4.model.Task;
-import org.openmrs.module.fhir2.FhirTask;
+import org.openmrs.module.fhir2.model.FhirTask;
 
 public interface TaskTranslator extends OpenmrsFhirUpdatableTranslator<FhirTask, Task> {
 	

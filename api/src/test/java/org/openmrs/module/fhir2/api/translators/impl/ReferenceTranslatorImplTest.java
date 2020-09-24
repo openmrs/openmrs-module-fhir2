@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.FhirReference;
+import org.openmrs.module.fhir2.model.FhirReference;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReferenceTranslatorImplTest {
