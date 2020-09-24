@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -47,7 +47,7 @@ public class RelatedPersonFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Read
-	public RelatedPerson getRelatedPersonById(@IdParam @NotNull IdType id) {
+	public RelatedPerson getRelatedPersonById(@IdParam @Nonnull IdType id) {
 		RelatedPerson relatedPerson = relatedPersonService.get(id.getIdPart());
 		if (relatedPerson == null) {
 			throw new ResourceNotFoundException("Could not find related person with Id " + id.getIdPart());

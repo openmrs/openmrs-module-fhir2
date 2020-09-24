@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.DrugOrder;
 import org.openmrs.OrderFrequency;
@@ -19,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class MedicationRequestTimingComponentTranslatorImpl implements MedicationRequestTimingComponentTranslator {
 	
 	@Override
-	public Timing.TimingRepeatComponent toFhirResource(DrugOrder drugOrder) {
+	public Timing.TimingRepeatComponent toFhirResource(@Nonnull DrugOrder drugOrder) {
 		if (drugOrder == null) {
 			return null;
 		}

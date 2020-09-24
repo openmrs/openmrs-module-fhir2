@@ -16,6 +16,8 @@ import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.or;
 import static org.hibernate.criterion.Subqueries.propertyIn;
 
+import javax.annotation.Nonnull;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -91,7 +93,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	@Transactional(readOnly = true)
-	public T get(String uuid) {
+	public T get(@Nonnull String uuid) {
 		@SuppressWarnings("unchecked")
 		T result = (T) sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType()).add(eq("uuid", uuid))
 		        .uniqueResult();
@@ -104,7 +106,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	public T createOrUpdate(T newEntry) {
+	public T createOrUpdate(@Nonnull T newEntry) {
 		if (newEntry.getUuid() == null) {
 			newEntry.setUuid(FhirUtils.newUuid());
 		}
@@ -115,7 +117,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	public T delete(String uuid) {
+	public T delete(@Nonnull String uuid) {
 		T existing = get(uuid);
 		
 		if (existing == null) {
@@ -134,7 +136,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	public List<String> getSearchResultUuids(SearchParameterMap theParams) {
+	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
 		
 		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(typeToken.getRawType());
@@ -161,8 +163,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	public List<T> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult) {
+	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult) {
 		List<String> selectedResources = matchingResourceUuids.subList(firstResult, lastResult);
 		
 		@SuppressWarnings("unchecked")
@@ -253,7 +255,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	protected Collection<org.hibernate.criterion.Order> paramToProps(SortState sortState) {
+	protected Collection<org.hibernate.criterion.Order> paramToProps(@Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
 		if (FhirConstants.SP_LAST_UPDATED.equalsIgnoreCase(param)) {
@@ -278,7 +280,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	protected String paramToProp(String param) {
+	protected String paramToProp(@Nonnull String param) {
 		if (DomainResource.SP_RES_ID.equals(param)) {
 			return "uuid";
 		}

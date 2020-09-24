@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.io.Serializable;
 import java.util.List;
@@ -23,18 +23,18 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
  */
 public interface FhirDao<T extends OpenmrsObject & Auditable> extends Serializable {
 	
-	T get(@NotNull String uuid);
+	T get(@Nonnull String uuid);
 	
-	T createOrUpdate(T newEntry);
+	T createOrUpdate(@Nonnull T newEntry);
 	
-	T delete(@NotNull String uuid);
+	T delete(@Nonnull String uuid);
 	
-	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
-	default List<T> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids) {
+	default List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids) {
 		return getSearchResults(theParams, matchingResourceUuids, 0, matchingResourceUuids.size());
 	}
 	
-	List<T> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

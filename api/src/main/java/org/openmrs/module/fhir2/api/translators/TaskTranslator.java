@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.FhirTask;
 
@@ -20,7 +22,7 @@ public interface TaskTranslator extends OpenmrsFhirUpdatableTranslator<FhirTask,
 	 * @param openmrsTask the Task to translate
 	 * @return the corresponding FHIR Task
 	 */
-	Task toFhirResource(FhirTask openmrsTask);
+	Task toFhirResource(@Nonnull FhirTask openmrsTask);
 	
 	/**
 	 * Maps a {@link Task} to a {@link FhirTask}
@@ -28,7 +30,7 @@ public interface TaskTranslator extends OpenmrsFhirUpdatableTranslator<FhirTask,
 	 * @param fhirTask the FHIR Task to map
 	 * @return the corresponding OpenMRS Task
 	 */
-	FhirTask toOpenmrsType(Task fhirTask);
+	FhirTask toOpenmrsType(@Nonnull Task fhirTask);
 	
 	/**
 	 * Maps a {@link Task} to an existing {@link FhirTask}
@@ -37,5 +39,5 @@ public interface TaskTranslator extends OpenmrsFhirUpdatableTranslator<FhirTask,
 	 * @param fhirTask the FHIR patient to map
 	 * @return the updated OpenMRS Task
 	 */
-	FhirTask toOpenmrsType(FhirTask currentTask, Task fhirTask);
+	FhirTask toOpenmrsType(@Nonnull FhirTask currentTask, @Nonnull Task fhirTask);
 }

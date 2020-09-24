@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -23,26 +23,26 @@ public interface FhirPersonDao extends FhirDao<Person> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PERSONS)
-	Person get(String uuid);
+	Person get(@Nonnull String uuid);
 	
 	@Authorized(PrivilegeConstants.GET_PERSONS)
-	List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@NotNull Person person,
-	        @NotNull String personAttributeTypeUuid);
+	List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@Nonnull Person person,
+	        @Nonnull String personAttributeTypeUuid);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.ADD_PERSONS, PrivilegeConstants.EDIT_PERSONS })
-	Person createOrUpdate(Person newEntry);
+	Person createOrUpdate(@Nonnull Person newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.DELETE_PERSONS)
-	Person delete(String uuid);
+	Person delete(@Nonnull String uuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PERSONS)
-	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PERSONS)
-	List<Person> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<Person> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

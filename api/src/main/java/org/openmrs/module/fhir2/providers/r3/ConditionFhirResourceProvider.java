@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -59,7 +59,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Read
-	public Condition getConditionById(@IdParam @NotNull IdType id) {
+	public Condition getConditionById(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Condition condition = conditionService.get(id.getIdPart());
 		if (condition == null) {
 			throw new ResourceNotFoundException("Could not find condition with Id " + id.getIdPart());
@@ -69,7 +69,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@History
-	public List<Resource> getConditionHistoryById(@IdParam @NotNull IdType id) {
+	public List<Resource> getConditionHistoryById(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Condition condition = conditionService.get(id.getIdPart());
 		if (condition == null) {
 			throw new ResourceNotFoundException("Could not find condition with Id " + id.getIdPart());

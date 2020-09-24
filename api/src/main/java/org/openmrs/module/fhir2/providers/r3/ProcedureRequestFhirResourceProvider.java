@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -57,7 +57,7 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	@SuppressWarnings("unused")
-	public ProcedureRequest getProcedureRequestById(@IdParam @NotNull IdType id) {
+	public ProcedureRequest getProcedureRequestById(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.ServiceRequest serviceRequest = serviceRequestService.get(id.getIdPart());
 		if (serviceRequest == null) {
 			throw new ResourceNotFoundException("Could not find serviceRequest with Id " + id.getIdPart());
@@ -83,7 +83,7 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 		            (ServiceRequest) VersionConvertor_30_40.convertResource(procedureRequest, false)), false));
 	}
 	
-	public OperationOutcome deleteProcedureRequest(@IdParam @NotNull IdType id) {
+	public OperationOutcome deleteProcedureRequest(@IdParam @Nonnull IdType id) {
 		ServiceRequest serviceRequest = serviceRequestService.delete(id.getIdPart());
 		if (serviceRequest == null) {
 			throw new ResourceNotFoundException("Could not find procedure request to delete with id " + id.getIdPart());

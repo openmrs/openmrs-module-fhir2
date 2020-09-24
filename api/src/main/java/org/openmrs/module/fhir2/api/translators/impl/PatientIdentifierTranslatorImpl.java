@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -37,7 +39,7 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 	private FhirLocationDao locationDao;
 	
 	@Override
-	public Identifier toFhirResource(PatientIdentifier identifier) {
+	public Identifier toFhirResource(@Nonnull PatientIdentifier identifier) {
 		if (identifier == null || identifier.getVoided()) {
 			return null;
 		}
@@ -67,7 +69,7 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 	}
 	
 	@Override
-	public PatientIdentifier toOpenmrsType(Identifier identifier) {
+	public PatientIdentifier toOpenmrsType(@Nonnull Identifier identifier) {
 		if (identifier == null) {
 			return null;
 		}
@@ -76,7 +78,7 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 	}
 	
 	@Override
-	public PatientIdentifier toOpenmrsType(PatientIdentifier patientIdentifier, Identifier identifier) {
+	public PatientIdentifier toOpenmrsType(@Nonnull PatientIdentifier patientIdentifier, @Nonnull Identifier identifier) {
 		if (patientIdentifier == null || identifier == null) {
 			return patientIdentifier;
 		}

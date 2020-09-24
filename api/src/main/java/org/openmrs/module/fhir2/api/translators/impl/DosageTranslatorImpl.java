@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -31,7 +33,7 @@ public class DosageTranslatorImpl implements DosageTranslator {
 	private MedicationRequestTimingTranslator timingTranslator;
 	
 	@Override
-	public Dosage toFhirResource(DrugOrder drugOrder) {
+	public Dosage toFhirResource(@Nonnull DrugOrder drugOrder) {
 		if (drugOrder == null) {
 			return null;
 		}

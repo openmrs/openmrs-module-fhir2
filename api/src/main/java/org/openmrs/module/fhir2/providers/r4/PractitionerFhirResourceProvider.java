@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	@SuppressWarnings("unused")
-	public Practitioner getPractitionerById(@IdParam @NotNull IdType id) {
+	public Practitioner getPractitionerById(@IdParam @Nonnull IdType id) {
 		Practitioner practitioner = practitionerService.get(id.getIdPart());
 		if (practitioner == null) {
 			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
@@ -85,7 +85,7 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	@SuppressWarnings("unused")
-	public OperationOutcome deletePractitioner(@IdParam @NotNull IdType id) {
+	public OperationOutcome deletePractitioner(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Practitioner practitioner = practitionerService.delete(id.getIdPart());
 		if (practitioner == null) {
 			throw new ResourceNotFoundException("Could not find practitioner to delete with id " + id.getIdPart());
@@ -95,7 +95,7 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	
 	@History
 	@SuppressWarnings("unused")
-	public List<Resource> getPractitionerHistoryById(@IdParam @NotNull IdType id) {
+	public List<Resource> getPractitionerHistoryById(@IdParam @Nonnull IdType id) {
 		Practitioner practitioner = practitionerService.get(id.getIdPart());
 		if (practitioner == null) {
 			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());

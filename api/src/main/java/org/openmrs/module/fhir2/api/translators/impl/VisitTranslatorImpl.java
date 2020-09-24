@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
@@ -36,7 +38,7 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 	private ProvenanceTranslator<org.openmrs.Visit> provenanceTranslator;
 	
 	@Override
-	public Encounter toFhirResource(Visit visit) {
+	public Encounter toFhirResource(@Nonnull Visit visit) {
 		notNull(visit, "The OpenMrs Visit object should not be null");
 		
 		Encounter encounter = new Encounter();
@@ -57,12 +59,12 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 	}
 	
 	@Override
-	public Visit toOpenmrsType(Encounter encounter) {
+	public Visit toOpenmrsType(@Nonnull Encounter encounter) {
 		return toOpenmrsType(new Visit(), encounter);
 	}
 	
 	@Override
-	public Visit toOpenmrsType(Visit existingVisit, Encounter encounter) {
+	public Visit toOpenmrsType(@Nonnull Visit existingVisit, @Nonnull Encounter encounter) {
 		notNull(existingVisit, "The existingVisit object should not be null");
 		notNull(encounter, "The Encounter object should not be null");
 		

@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -26,5 +26,5 @@ public interface FhirConditionService extends FhirService<Condition> {
 	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
 	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, @Sort SortSpec sort);
 	
-	Condition saveCondition(@NotNull Condition condition);
+	Condition saveCondition(@Nonnull Condition condition);
 }

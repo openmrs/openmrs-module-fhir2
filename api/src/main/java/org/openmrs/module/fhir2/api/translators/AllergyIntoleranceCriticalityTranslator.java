@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 
 public interface AllergyIntoleranceCriticalityTranslator extends ToFhirTranslator<AllergyIntolerance.AllergyIntoleranceSeverity, AllergyIntolerance.AllergyIntoleranceCriticality> {
@@ -23,5 +25,5 @@ public interface AllergyIntoleranceCriticalityTranslator extends ToFhirTranslato
 	 */
 	@Override
 	AllergyIntolerance.AllergyIntoleranceCriticality toFhirResource(
-	        AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity);
+	        @Nonnull AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity);
 }

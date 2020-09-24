@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 	private ConceptTranslator conceptTranslator;
 	
 	@Override
-	public AllergyIntolerance.AllergyIntoleranceReactionComponent toFhirResource(Allergy allergy) {
+	public AllergyIntolerance.AllergyIntoleranceReactionComponent toFhirResource(@Nonnull Allergy allergy) {
 		if (allergy == null) {
 			return null;
 		}
@@ -51,7 +53,8 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 	}
 	
 	@Override
-	public Allergy toOpenmrsType(Allergy allergy, AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent) {
+	public Allergy toOpenmrsType(@Nonnull Allergy allergy,
+	        @Nonnull AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent) {
 		notNull(allergy, "The existing Allergy should not be null");
 		notNull(reactionComponent, "The ReactionComponent object should not be null");
 		
@@ -72,7 +75,7 @@ public class AllergyIntoleranceReactionComponentTranslatorImpl implements Allerg
 	}
 	
 	@Override
-	public Allergy toOpenmrsType(AllergyIntolerance.AllergyIntoleranceReactionComponent resource) {
+	public Allergy toOpenmrsType(@Nonnull AllergyIntolerance.AllergyIntoleranceReactionComponent resource) {
 		notNull(resource, "The ReactionComponent object should not be null");
 		return toOpenmrsType(new Allergy(), resource);
 	}

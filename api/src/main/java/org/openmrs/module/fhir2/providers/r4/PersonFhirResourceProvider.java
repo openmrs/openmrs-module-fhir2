@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -87,7 +87,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	@SuppressWarnings("unused")
-	public OperationOutcome deletePerson(@IdParam @NotNull IdType id) {
+	public OperationOutcome deletePerson(@IdParam @Nonnull IdType id) {
 		Person person = fhirPersonService.delete(id.getIdPart());
 		if (person == null) {
 			throw new ResourceNotFoundException("Could not find person to delete with id " + id.getIdPart());
@@ -97,7 +97,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	
 	@History
 	@SuppressWarnings("unused")
-	public List<Resource> getPersonHistoryById(@IdParam @NotNull IdType id) {
+	public List<Resource> getPersonHistoryById(@IdParam @Nonnull IdType id) {
 		Person person = fhirPersonService.get(id.getIdPart());
 		if (person == null) {
 			throw new ResourceNotFoundException("Could not find person with Id " + id.getIdPart());

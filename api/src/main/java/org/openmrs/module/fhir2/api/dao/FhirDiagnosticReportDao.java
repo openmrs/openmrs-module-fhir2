@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import javax.annotation.Nonnull;
+
 import java.util.List;
 
 import org.openmrs.annotation.Authorized;
@@ -20,22 +22,22 @@ public interface FhirDiagnosticReportDao extends FhirDao<FhirDiagnosticReport> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	FhirDiagnosticReport get(String uuid);
+	FhirDiagnosticReport get(@Nonnull String uuid);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.ADD_OBS, PrivilegeConstants.EDIT_OBS })
-	FhirDiagnosticReport createOrUpdate(FhirDiagnosticReport newEntry);
+	FhirDiagnosticReport createOrUpdate(@Nonnull FhirDiagnosticReport newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.PURGE_OBS)
-	FhirDiagnosticReport delete(String uuid);
+	FhirDiagnosticReport delete(@Nonnull String uuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	List<FhirDiagnosticReport> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids,
-	        int firstResult, int lastResult);
+	List<FhirDiagnosticReport> getSearchResults(@Nonnull SearchParameterMap theParams,
+	        @Nonnull List<String> matchingResourceUuids, int firstResult, int lastResult);
 }

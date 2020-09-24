@@ -25,7 +25,7 @@ import static org.hibernate.criterion.Restrictions.not;
 import static org.hibernate.criterion.Restrictions.or;
 import static org.hibernate.criterion.Subqueries.propertyEq;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -213,7 +213,7 @@ public abstract class BaseDao {
 	 * @param alias the alias to look for
 	 * @return true if the alias exists in this criteria object, false otherwise
 	 */
-	protected boolean lacksAlias(@NotNull Criteria criteria, @NotNull String alias) {
+	protected boolean lacksAlias(@Nonnull Criteria criteria, @Nonnull String alias) {
 		Optional<Iterator<CriteriaImpl.Subcriteria>> subcriteria = asImpl(criteria).map(CriteriaImpl::iterateSubcriteria);
 		
 		return subcriteria.filter(subcriteriaIterator -> containsAlias(subcriteriaIterator, alias)).isPresent();
@@ -228,7 +228,7 @@ public abstract class BaseDao {
 	 * @param alias the alias to look for
 	 * @return true if any of the given subcriteria use the specified alias, false otherwise
 	 */
-	protected boolean containsAlias(Iterator<CriteriaImpl.Subcriteria> subcriteriaIterator, @NotNull String alias) {
+	protected boolean containsAlias(Iterator<CriteriaImpl.Subcriteria> subcriteriaIterator, @Nonnull String alias) {
 		return stream(subcriteriaIterator).noneMatch(sc -> sc.getAlias().equals(alias));
 	}
 	
@@ -473,7 +473,7 @@ public abstract class BaseDao {
 		return Optional.empty();
 	}
 	
-	protected Optional<Criterion> handleQuantity(@NotNull String propertyName, QuantityAndListParam quantityAndListParam) {
+	protected Optional<Criterion> handleQuantity(@Nonnull String propertyName, QuantityAndListParam quantityAndListParam) {
 		if (quantityAndListParam == null) {
 			return Optional.empty();
 		}
@@ -481,7 +481,7 @@ public abstract class BaseDao {
 		return handleAndListParam(quantityAndListParam, quantityParam -> handleQuantity(propertyName, quantityParam));
 	}
 	
-	protected Optional<Criterion> handleEncounterReference(@NotNull String encounterAlias,
+	protected Optional<Criterion> handleEncounterReference(@Nonnull String encounterAlias,
 	        ReferenceAndListParam encounterReference) {
 		if (encounterReference == null) {
 			return Optional.empty();
@@ -491,7 +491,7 @@ public abstract class BaseDao {
 		    token -> Optional.of(eq(String.format("%s.uuid", encounterAlias), token.getIdPart())));
 	}
 	
-	protected Optional<Criterion> handleGender(@NotNull String propertyName, TokenAndListParam gender) {
+	protected Optional<Criterion> handleGender(@Nonnull String propertyName, TokenAndListParam gender) {
 		if (gender == null) {
 			return Optional.empty();
 		}
@@ -521,7 +521,7 @@ public abstract class BaseDao {
 		});
 	}
 	
-	protected Optional<Criterion> handleLocationReference(@NotNull String locationAlias,
+	protected Optional<Criterion> handleLocationReference(@Nonnull String locationAlias,
 	        ReferenceAndListParam locationReference) {
 		if (locationReference == null) {
 			return Optional.empty();
@@ -651,7 +651,7 @@ public abstract class BaseDao {
 	}
 	
 	protected Optional<Criterion> handleCodeableConcept(Criteria criteria, TokenAndListParam concepts,
-	        @NotNull String conceptAlias, @NotNull String conceptMapAlias, @NotNull String conceptReferenceTermAlias) {
+	        @Nonnull String conceptAlias, @Nonnull String conceptMapAlias, @Nonnull String conceptReferenceTermAlias) {
 		if (concepts == null) {
 			return Optional.empty();
 		}
@@ -821,7 +821,7 @@ public abstract class BaseDao {
 		return Optional.of(and(toCriteriaArray(criterionList.stream())));
 	}
 	
-	protected Optional<Criterion> handleMedicationReference(@NotNull String medicationAlias,
+	protected Optional<Criterion> handleMedicationReference(@Nonnull String medicationAlias,
 	        ReferenceAndListParam medicationReference) {
 		if (medicationReference == null) {
 			return Optional.empty();
@@ -913,7 +913,7 @@ public abstract class BaseDao {
 	 * @param sortState a {@link SortState} object describing the current sort state
 	 * @return the corresponding ordering(s) needed for this property
 	 */
-	protected Collection<Order> paramToProps(@NotNull SortState sortState) {
+	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
 		Collection<String> prop = paramToProps(sortState.getParameter());
 		
 		if (prop != null) {
@@ -935,7 +935,7 @@ public abstract class BaseDao {
 	 * @param param the FHIR parameter to map
 	 * @return the name of the corresponding property from the current query
 	 */
-	protected Collection<String> paramToProps(@NotNull String param) {
+	protected Collection<String> paramToProps(@Nonnull String param) {
 		String prop = paramToProp(param);
 		
 		if (prop != null) {
@@ -952,11 +952,11 @@ public abstract class BaseDao {
 	 * @param param the FHIR parameter to map
 	 * @return the name of the corresponding property from the current query
 	 */
-	protected String paramToProp(@NotNull String param) {
+	protected String paramToProp(@Nonnull String param) {
 		return null;
 	}
 	
-	protected Optional<Criterion> propertyLike(@NotNull String propertyName, String value) {
+	protected Optional<Criterion> propertyLike(@Nonnull String propertyName, String value) {
 		if (value == null) {
 			return Optional.empty();
 		}
@@ -964,7 +964,7 @@ public abstract class BaseDao {
 		return propertyLike(propertyName, new StringParam(value));
 	}
 	
-	protected Optional<Criterion> propertyLike(@NotNull String propertyName, StringParam param) {
+	protected Optional<Criterion> propertyLike(@Nonnull String propertyName, StringParam param) {
 		if (param == null) {
 			return Optional.empty();
 		}
@@ -996,7 +996,7 @@ public abstract class BaseDao {
 		return tokens.stream().map(TokenParam::getValue);
 	}
 	
-	private String groupBySystem(@NotNull TokenParam token) {
+	private String groupBySystem(@Nonnull TokenParam token) {
 		return StringUtils.trimToEmpty(token.getSystem());
 	}
 	

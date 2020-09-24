@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -38,7 +38,7 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 	private ConceptTranslator conceptTranslator;
 	
 	@Override
-	public Medication toFhirResource(Drug drug) {
+	public Medication toFhirResource(@Nonnull Drug drug) {
 		notNull(drug, "The Drug object should not be null");
 		
 		Medication medication = new Medication();
@@ -72,13 +72,13 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 	}
 	
 	@Override
-	public Drug toOpenmrsType(Medication medication) {
+	public Drug toOpenmrsType(@Nonnull Medication medication) {
 		notNull(medication, "The Medication object should not be null");
 		return toOpenmrsType(new Drug(), medication);
 	}
 	
 	@Override
-	public Drug toOpenmrsType(Drug existingDrug, Medication med) {
+	public Drug toOpenmrsType(@Nonnull Drug existingDrug, @Nonnull Medication med) {
 		notNull(existingDrug, "The existing Drug object should not be null");
 		notNull(med, "The Medication object should not be null");
 		
@@ -112,7 +112,7 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		return existingDrug;
 	}
 	
-	public void addMedicineComponent(@NotNull Drug drug, @NotNull String url, @NotNull String value) {
+	public void addMedicineComponent(@Nonnull Drug drug, @Nonnull String url, @Nonnull String value) {
 		if (value == null || url == null || !url.startsWith(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#")) {
 			return;
 		}
@@ -132,8 +132,8 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		}
 	}
 	
-	private void addMedicineExtension(@NotNull Medication medication, @NotNull java.lang.String extensionProperty,
-	        @NotNull String value) {
+	private void addMedicineExtension(@Nonnull Medication medication, @Nonnull java.lang.String extensionProperty,
+	        @Nonnull String value) {
 		if (value == null) {
 			return;
 		}
@@ -143,7 +143,7 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		        .addExtension(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#" + extensionProperty, new StringType(value));
 	}
 	
-	private Optional<Extension> getOpenmrsMedicineExtension(@NotNull Medication medication) {
+	private Optional<Extension> getOpenmrsMedicineExtension(@Nonnull Medication medication) {
 		return Optional.ofNullable(medication.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE));
 		
 	}

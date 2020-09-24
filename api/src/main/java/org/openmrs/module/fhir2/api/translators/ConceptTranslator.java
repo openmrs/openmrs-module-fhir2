@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Concept;
 
@@ -21,7 +23,7 @@ public interface ConceptTranslator extends OpenmrsFhirTranslator<Concept, Codeab
 	 * @return the corresponding codeable concept
 	 */
 	@Override
-	CodeableConcept toFhirResource(Concept concept);
+	CodeableConcept toFhirResource(@Nonnull Concept concept);
 	
 	/**
 	 * Maps a FHIR resource to an OpenMRS data element
@@ -30,5 +32,5 @@ public interface ConceptTranslator extends OpenmrsFhirTranslator<Concept, Codeab
 	 * @return the corresponding concept
 	 */
 	@Override
-	Concept toOpenmrsType(CodeableConcept concept);
+	Concept toOpenmrsType(@Nonnull CodeableConcept concept);
 }

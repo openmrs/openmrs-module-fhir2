@@ -12,9 +12,9 @@ package org.openmrs.module.fhir2.providers;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -138,19 +138,19 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		return statusEquals(status.value());
 	}
 	
-	public FhirRequestBuilder get(@NotNull String uri) throws MalformedURLException {
+	public FhirRequestBuilder get(@Nonnull String uri) throws MalformedURLException {
 		return new FhirRequestBuilder(RequestTypeEnum.GET, "http://localhost:8080/" + getServletName() + uri);
 	}
 	
-	public FhirRequestBuilder post(@NotNull String uri) throws MalformedURLException {
+	public FhirRequestBuilder post(@Nonnull String uri) throws MalformedURLException {
 		return new FhirRequestBuilder(RequestTypeEnum.POST, "http://localhost:8080/" + getServletName() + uri);
 	}
 	
-	public FhirRequestBuilder put(@NotNull String uri) throws MalformedURLException {
+	public FhirRequestBuilder put(@Nonnull String uri) throws MalformedURLException {
 		return new FhirRequestBuilder(RequestTypeEnum.PUT, "http://localhost:8080/" + getServletName() + uri);
 	}
 	
-	public FhirRequestBuilder delete(@NotNull String uri) throws MalformedURLException {
+	public FhirRequestBuilder delete(@Nonnull String uri) throws MalformedURLException {
 		return new FhirRequestBuilder(RequestTypeEnum.DELETE, "http://localhost:8080/" + getServletName() + uri);
 	}
 	
@@ -242,12 +242,12 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 			request.setQueryString(url.getQuery());
 		}
 		
-		public FhirRequestBuilder accept(@NotNull MediaType mediaType) {
+		public FhirRequestBuilder accept(@Nonnull MediaType mediaType) {
 			request.addHeader(ACCEPT, mediaType.toString());
 			return this;
 		}
 		
-		public FhirRequestBuilder jsonContent(@NotNull String json) {
+		public FhirRequestBuilder jsonContent(@Nonnull String json) {
 			request.addHeader(CONTENT_TYPE, FhirMediaTypes.JSON.toString());
 			request.setContent(json.getBytes());
 			return this;

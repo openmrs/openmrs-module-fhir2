@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Enumerations;
 
 public interface GenderTranslator extends OpenmrsFhirTranslator<String, Enumerations.AdministrativeGender> {
@@ -20,7 +22,7 @@ public interface GenderTranslator extends OpenmrsFhirTranslator<String, Enumerat
 	 * @return the corresponding FHIR gender
 	 */
 	@Override
-	Enumerations.AdministrativeGender toFhirResource(String gender);
+	Enumerations.AdministrativeGender toFhirResource(@Nonnull String gender);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.Enumerations.AdministrativeGender} to an OpenMRS gender code
@@ -29,5 +31,5 @@ public interface GenderTranslator extends OpenmrsFhirTranslator<String, Enumerat
 	 * @return the corresponding OpenMRS gender code
 	 */
 	@Override
-	String toOpenmrsType(Enumerations.AdministrativeGender gender);
+	String toOpenmrsType(@Nonnull Enumerations.AdministrativeGender gender);
 }

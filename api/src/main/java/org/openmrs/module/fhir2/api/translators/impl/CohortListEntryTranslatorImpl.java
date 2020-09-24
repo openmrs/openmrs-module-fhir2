@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import java.util.List;
 
 import org.hl7.fhir.r4.model.ListResource;
@@ -20,12 +22,12 @@ import org.springframework.stereotype.Component;
 public class CohortListEntryTranslatorImpl implements ListEntryTranslator<Cohort> {
 	
 	@Override
-	public List<ListResource.ListEntryComponent> toFhirResource(Cohort cohort) {
+	public List<ListResource.ListEntryComponent> toFhirResource(@Nonnull Cohort cohort) {
 		return null;
 	}
 	
 	@Override
-	public Cohort toOpenmrsType(Cohort existingCohort, List<ListResource.ListEntryComponent> resource) {
+	public Cohort toOpenmrsType(@Nonnull Cohort existingCohort, @Nonnull List<ListResource.ListEntryComponent> resource) {
 		return existingCohort;
 	}
 }

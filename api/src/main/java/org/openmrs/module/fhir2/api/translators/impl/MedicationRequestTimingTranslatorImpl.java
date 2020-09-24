@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Timing;
@@ -26,7 +28,7 @@ public class MedicationRequestTimingTranslatorImpl implements MedicationRequestT
 	private MedicationRequestTimingComponentTranslator timingComponentTranslator;
 	
 	@Override
-	public Timing toFhirResource(DrugOrder drugOrder) {
+	public Timing toFhirResource(@Nonnull DrugOrder drugOrder) {
 		if (drugOrder == null) {
 			return null;
 		}

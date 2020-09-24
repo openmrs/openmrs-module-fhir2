@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Concept;
@@ -25,7 +27,7 @@ public class ObservationCategoryTranslatorImpl implements ObservationCategoryTra
 	private ObservationCategoryMap categoryMap;
 	
 	@Override
-	public CodeableConcept toFhirResource(Concept concept) {
+	public CodeableConcept toFhirResource(@Nonnull Concept concept) {
 		if (concept == null || concept.getConceptClass() == null) {
 			return null;
 		}

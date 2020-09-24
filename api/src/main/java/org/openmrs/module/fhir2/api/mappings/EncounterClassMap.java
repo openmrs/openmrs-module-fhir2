@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.mappings;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class EncounterClassMap extends BaseMapping {
 		super("encounterClassMap.properties");
 	}
 	
-	public String getFhirClass(@NotNull String locationUuid) {
+	public String getFhirClass(@Nonnull String locationUuid) {
 		return getValue(locationUuid).orElse(null);
 	}
 }

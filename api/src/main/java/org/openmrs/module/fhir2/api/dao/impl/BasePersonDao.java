@@ -23,6 +23,7 @@ import static org.hl7.fhir.r4.model.Person.SP_ADDRESS_STATE;
 import static org.hl7.fhir.r4.model.Person.SP_BIRTHDATE;
 import static org.hl7.fhir.r4.model.Person.SP_NAME;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -77,7 +78,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected Collection<Order> paramToProps(SortState sortState) {
+	protected Collection<Order> paramToProps(@Nonnull SortState sortState) {
 		String param = sortState.getParameter();
 		
 		if (param == null) {
@@ -137,7 +138,7 @@ public abstract class BasePersonDao<T extends OpenmrsObject & Auditable> extends
 	}
 	
 	@Override
-	protected String paramToProp(String param) {
+	protected String paramToProp(@Nonnull String param) {
 		switch (param) {
 			case SP_BIRTHDATE:
 				return "birthdate";

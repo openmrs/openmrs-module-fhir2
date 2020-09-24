@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -27,7 +29,7 @@ public class MedicationReferenceTranslatorImpl extends BaseReferenceHandlingTran
 	private FhirMedicationDao medicationDao;
 	
 	@Override
-	public Reference toFhirResource(Drug drug) {
+	public Reference toFhirResource(@Nonnull Drug drug) {
 		if (drug == null) {
 			return null;
 		}
@@ -35,7 +37,7 @@ public class MedicationReferenceTranslatorImpl extends BaseReferenceHandlingTran
 	}
 	
 	@Override
-	public Drug toOpenmrsType(Reference reference) {
+	public Drug toOpenmrsType(@Nonnull Reference reference) {
 		if (reference == null) {
 			return null;
 		}

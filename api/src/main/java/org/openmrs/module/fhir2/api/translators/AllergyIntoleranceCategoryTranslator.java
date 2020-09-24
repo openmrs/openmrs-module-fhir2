@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.AllergenType;
 
@@ -23,7 +25,7 @@ public interface AllergyIntoleranceCategoryTranslator extends ToFhirTranslator<A
 	 *         {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory}
 	 */
 	@Override
-	AllergyIntolerance.AllergyIntoleranceCategory toFhirResource(AllergenType allergenType);
+	AllergyIntolerance.AllergyIntoleranceCategory toFhirResource(@Nonnull AllergenType allergenType);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory} to a
@@ -33,5 +35,5 @@ public interface AllergyIntoleranceCategoryTranslator extends ToFhirTranslator<A
 	 * @return the corresponding {@link org.openmrs.AllergenType}
 	 */
 	@Override
-	AllergenType toOpenmrsType(AllergyIntolerance.AllergyIntoleranceCategory allergyIntoleranceCategory);
+	AllergenType toOpenmrsType(@Nonnull AllergyIntolerance.AllergyIntoleranceCategory allergyIntoleranceCategory);
 }

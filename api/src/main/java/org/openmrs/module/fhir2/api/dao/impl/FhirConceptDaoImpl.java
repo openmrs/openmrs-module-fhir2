@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	private ConceptService conceptService;
 	
 	@Override
-	public Concept get(@NotNull String uuid) {
+	public Concept get(@Nonnull String uuid) {
 		return conceptService.getConceptByUuid(uuid);
 	}
 	

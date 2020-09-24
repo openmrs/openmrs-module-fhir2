@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Address;
 import org.openmrs.PersonAddress;
 
@@ -21,7 +23,7 @@ public interface PersonAddressTranslator extends OpenmrsFhirUpdatableTranslator<
 	 * @return the corresponding FHIR address
 	 */
 	@Override
-	Address toFhirResource(PersonAddress address);
+	Address toFhirResource(@Nonnull PersonAddress address);
 	
 	/**
 	 * Maps an {@link Address} to an {@link org.openmrs.Address}
@@ -30,7 +32,7 @@ public interface PersonAddressTranslator extends OpenmrsFhirUpdatableTranslator<
 	 * @return the corresponding OpenMRS address
 	 */
 	@Override
-	PersonAddress toOpenmrsType(Address address);
+	PersonAddress toOpenmrsType(@Nonnull Address address);
 	
 	/**
 	 * Maps an {@link Address} to an existing {@link org.openmrs.Address}
@@ -40,5 +42,5 @@ public interface PersonAddressTranslator extends OpenmrsFhirUpdatableTranslator<
 	 * @return the updated OpenMRS address
 	 */
 	@Override
-	PersonAddress toOpenmrsType(PersonAddress personAddress, Address address);
+	PersonAddress toOpenmrsType(@Nonnull PersonAddress personAddress, @Nonnull Address address);
 }

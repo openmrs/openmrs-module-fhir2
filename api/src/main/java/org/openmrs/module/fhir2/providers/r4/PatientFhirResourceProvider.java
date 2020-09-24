@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	@SuppressWarnings("unused")
-	public Patient getPatientById(@IdParam @NotNull IdType id) {
+	public Patient getPatientById(@IdParam @Nonnull IdType id) {
 		Patient patient = patientService.get(id.getIdPart());
 		if (patient == null) {
 			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
@@ -87,7 +87,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	@SuppressWarnings("unused")
-	public OperationOutcome deletePatient(@IdParam @NotNull IdType id) {
+	public OperationOutcome deletePatient(@IdParam @Nonnull IdType id) {
 		Patient patient = patientService.delete(id.getIdPart());
 		if (patient == null) {
 			throw new ResourceNotFoundException("Could not find patient to delete with id " + id.getIdPart());
@@ -97,7 +97,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	
 	@History
 	@SuppressWarnings("unused")
-	public List<Resource> getPatientResourceHistory(@IdParam @NotNull IdType id) {
+	public List<Resource> getPatientResourceHistory(@IdParam @Nonnull IdType id) {
 		Patient patient = patientService.get(id.getIdPart());
 		if (patient == null) {
 			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -27,7 +29,7 @@ public class ObservationReferenceTranslatorImpl extends BaseReferenceHandlingTra
 	private FhirObservationDao observationDao;
 	
 	@Override
-	public Reference toFhirResource(Obs obs) {
+	public Reference toFhirResource(@Nonnull Obs obs) {
 		if (obs == null || obs.getVoided()) {
 			return null;
 		}
@@ -36,7 +38,7 @@ public class ObservationReferenceTranslatorImpl extends BaseReferenceHandlingTra
 	}
 	
 	@Override
-	public Obs toOpenmrsType(Reference obsReference) {
+	public Obs toOpenmrsType(@Nonnull Reference obsReference) {
 		if (obsReference == null) {
 			return null;
 		}

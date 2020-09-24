@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 public interface EncounterTranslator<T> extends OpenmrsFhirUpdatableTranslator<T, org.hl7.fhir.r4.model.Encounter> {
 	
 	/**
@@ -18,7 +20,7 @@ public interface EncounterTranslator<T> extends OpenmrsFhirUpdatableTranslator<T
 	 * @return the corresponding FHIR Encounter resource
 	 */
 	@Override
-	org.hl7.fhir.r4.model.Encounter toFhirResource(T encounter);
+	org.hl7.fhir.r4.model.Encounter toFhirResource(@Nonnull T encounter);
 	
 	/**
 	 * Maps {@link org.hl7.fhir.r4.model.Encounter} to {@link org.openmrs.Encounter}
@@ -27,7 +29,7 @@ public interface EncounterTranslator<T> extends OpenmrsFhirUpdatableTranslator<T
 	 * @return the corresponding OpenMRS Encounter
 	 */
 	@Override
-	T toOpenmrsType(org.hl7.fhir.r4.model.Encounter encounter);
+	T toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Encounter encounter);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Encounter} to an existing {@link org.openmrs.Encounter}
@@ -37,5 +39,5 @@ public interface EncounterTranslator<T> extends OpenmrsFhirUpdatableTranslator<T
 	 * @return an updated version of the existingEncounter
 	 */
 	@Override
-	T toOpenmrsType(T existingEncounter, org.hl7.fhir.r4.model.Encounter encounter);
+	T toOpenmrsType(@Nonnull T existingEncounter, @Nonnull org.hl7.fhir.r4.model.Encounter encounter);
 }

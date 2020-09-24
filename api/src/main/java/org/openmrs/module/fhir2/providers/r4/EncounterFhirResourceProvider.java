@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Read
-	public Encounter getEncounterByUuid(@IdParam @NotNull IdType id) {
+	public Encounter getEncounterByUuid(@IdParam @Nonnull IdType id) {
 		Encounter encounter = encounterService.get(id.getIdPart());
 		if (encounter == null) {
 			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());
@@ -86,7 +86,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	@SuppressWarnings("unused")
-	public OperationOutcome deleteEncounter(@IdParam @NotNull IdType id) {
+	public OperationOutcome deleteEncounter(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Encounter encounter = encounterService.delete(id.getIdPart());
 		if (encounter == null) {
 			throw new ResourceNotFoundException("Could not find encounter to delete with id " + id.getIdPart());
@@ -96,7 +96,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	
 	@History
 	@SuppressWarnings("unused")
-	public List<Resource> getEncounterHistoryById(@IdParam @NotNull IdType id) {
+	public List<Resource> getEncounterHistoryById(@IdParam @Nonnull IdType id) {
 		Encounter encounter = encounterService.get(id.getIdPart());
 		if (encounter == null) {
 			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());

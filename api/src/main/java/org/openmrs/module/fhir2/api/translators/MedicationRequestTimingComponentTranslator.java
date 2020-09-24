@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.DrugOrder;
 
@@ -21,5 +23,5 @@ public interface MedicationRequestTimingComponentTranslator extends ToFhirTransl
 	 * @return the corresponding TimingRepeatComponent FHIR resource
 	 */
 	@Override
-	Timing.TimingRepeatComponent toFhirResource(DrugOrder drugOrder);
+	Timing.TimingRepeatComponent toFhirResource(@Nonnull DrugOrder drugOrder);
 }

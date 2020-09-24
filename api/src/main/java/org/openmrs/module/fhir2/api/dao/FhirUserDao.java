@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import javax.annotation.Nonnull;
+
 import java.util.List;
 
 import org.openmrs.User;
@@ -20,25 +22,25 @@ public interface FhirUserDao extends FhirDao<User> {
 	
 	@Authorized(PrivilegeConstants.GET_USERS)
 	@Override
-	User get(String uuid);
+	User get(@Nonnull String uuid);
 	
 	@Authorized(PrivilegeConstants.GET_USERS)
 	User getUserByUserName(String clientName);
 	
 	@Authorized({ PrivilegeConstants.ADD_USERS, PrivilegeConstants.EDIT_USERS })
 	@Override
-	User createOrUpdate(User newEntry);
+	User createOrUpdate(@Nonnull User newEntry);
 	
 	@Authorized(PrivilegeConstants.DELETE_USERS)
 	@Override
-	User delete(String uuid);
+	User delete(@Nonnull String uuid);
 	
 	@Authorized(PrivilegeConstants.GET_USERS)
 	@Override
-	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Authorized(PrivilegeConstants.GET_USERS)
 	@Override
-	List<User> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<User> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

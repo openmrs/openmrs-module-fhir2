@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Observation;
@@ -17,5 +19,5 @@ import org.openmrs.ConceptNumeric;
 public interface ObservationReferenceRangeTranslator extends ToFhirTranslator<ConceptNumeric, List<Observation.ObservationReferenceRangeComponent>> {
 	
 	@Override
-	List<Observation.ObservationReferenceRangeComponent> toFhirResource(ConceptNumeric concept);
+	List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull ConceptNumeric concept);
 }

@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
@@ -20,11 +20,11 @@ import org.openmrs.module.fhir2.FhirConstants;
 
 public abstract class BaseAddressTranslatorImpl {
 	
-	protected Optional<Extension> getOpenmrsAddressExtension(@NotNull Address address) {
+	protected Optional<Extension> getOpenmrsAddressExtension(@Nonnull Address address) {
 		return Optional.ofNullable(address.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS));
 	}
 	
-	protected void addAddressExtension(@NotNull Address address, @NotNull String extensionProperty, @NotNull String value) {
+	protected void addAddressExtension(@Nonnull Address address, @Nonnull String extensionProperty, @Nonnull String value) {
 		if (value == null) {
 			return;
 		}
@@ -34,8 +34,8 @@ public abstract class BaseAddressTranslatorImpl {
 		        .addExtension(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#" + extensionProperty, new StringType(value));
 	}
 	
-	protected void addAddressComponent(@NotNull org.openmrs.Address addressOfResource, @NotNull String url,
-	        @NotNull String value) {
+	protected void addAddressComponent(@Nonnull org.openmrs.Address addressOfResource, @Nonnull String url,
+	        @Nonnull String value) {
 		if (value == null || url == null || !url.startsWith(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS + "#")) {
 			return;
 		}

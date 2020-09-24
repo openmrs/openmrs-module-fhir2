@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import javax.annotation.Nonnull;
+
 import java.util.List;
 
 import org.openmrs.Relationship;
@@ -20,23 +22,23 @@ public interface FhirRelatedPersonDao extends FhirDao<Relationship> {
 	
 	@Override
 	@Authorized({ PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS })
-	Relationship get(String uuid);
+	Relationship get(@Nonnull String uuid);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.ADD_PERSONS, PrivilegeConstants.EDIT_PERSONS, PrivilegeConstants.ADD_RELATIONSHIPS,
 	        PrivilegeConstants.EDIT_RELATIONSHIPS })
-	Relationship createOrUpdate(Relationship newEntry);
+	Relationship createOrUpdate(@Nonnull Relationship newEntry);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.DELETE_PERSONS, PrivilegeConstants.DELETE_RELATIONSHIPS })
-	Relationship delete(String uuid);
+	Relationship delete(@Nonnull String uuid);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS })
-	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS })
-	List<Relationship> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<Relationship> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

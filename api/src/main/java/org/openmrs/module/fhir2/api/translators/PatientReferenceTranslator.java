@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Patient;
 
@@ -21,7 +23,7 @@ public interface PatientReferenceTranslator extends OpenmrsFhirTranslator<Patien
 	 * @return the corresponding FHIR reference
 	 */
 	@Override
-	Reference toFhirResource(Patient patient);
+	Reference toFhirResource(@Nonnull Patient patient);
 	
 	/**
 	 * Maps a FHIR reference to an {@link Patient}
@@ -30,5 +32,5 @@ public interface PatientReferenceTranslator extends OpenmrsFhirTranslator<Patien
 	 * @return the corresponding OpenMRS patient
 	 */
 	@Override
-	Patient toOpenmrsType(Reference patient);
+	Patient toOpenmrsType(@Nonnull Reference patient);
 }

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.HumanName;
 import org.openmrs.PersonName;
 
@@ -21,7 +23,7 @@ public interface PersonNameTranslator extends OpenmrsFhirUpdatableTranslator<org
 	 * @return the corresponding FHIR name
 	 */
 	@Override
-	HumanName toFhirResource(PersonName name);
+	HumanName toFhirResource(@Nonnull PersonName name);
 	
 	/**
 	 * Maps a {@link HumanName} to a {@link PersonName}
@@ -30,7 +32,7 @@ public interface PersonNameTranslator extends OpenmrsFhirUpdatableTranslator<org
 	 * @return the corresponding OpenMRS name
 	 */
 	@Override
-	PersonName toOpenmrsType(HumanName name);
+	PersonName toOpenmrsType(@Nonnull HumanName name);
 	
 	/**
 	 * Maps a {@link HumanName} to an existing {@link PersonName}
@@ -40,5 +42,5 @@ public interface PersonNameTranslator extends OpenmrsFhirUpdatableTranslator<org
 	 * @return the updated person name
 	 */
 	@Override
-	PersonName toOpenmrsType(PersonName personName, HumanName name);
+	PersonName toOpenmrsType(@Nonnull PersonName personName, @Nonnull HumanName name);
 }

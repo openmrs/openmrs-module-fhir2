@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -63,7 +63,7 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	@SuppressWarnings("unused")
-	public Location getLocationById(@IdParam @NotNull IdType id) {
+	public Location getLocationById(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Location location = locationService.get(id.getIdPart());
 		if (location == null) {
 			throw new ResourceNotFoundException("Could not find location with Id " + id.getIdPart());
@@ -93,7 +93,7 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	@SuppressWarnings("unused")
-	public OperationOutcome deleteLocation(@IdParam @NotNull IdType id) {
+	public OperationOutcome deleteLocation(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Location location = locationService.delete(id.getIdPart());
 		if (location == null) {
 			throw new ResourceNotFoundException("Could not find location to delete with id " + id.getIdPart());
@@ -103,7 +103,7 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	
 	@History
 	@SuppressWarnings("unused")
-	public List<Resource> getLocationHistoryById(@IdParam @NotNull IdType id) {
+	public List<Resource> getLocationHistoryById(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Location location = locationService.get(id.getIdPart());
 		if (location == null) {
 			throw new ResourceNotFoundException("Could not find location with Id " + id.getIdPart());

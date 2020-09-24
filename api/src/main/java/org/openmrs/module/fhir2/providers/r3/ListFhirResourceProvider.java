@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -50,7 +50,7 @@ public class ListFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	@SuppressWarnings("unused")
-	public ListResource getListById(@IdParam @NotNull IdType id) {
+	public ListResource getListById(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.ListResource listResource = listService.get(id.getIdPart());
 		if (listResource == null) {
 			throw new ResourceNotFoundException("Could not find list with Id " + id.getIdPart());
@@ -80,7 +80,7 @@ public class ListFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	@SuppressWarnings("unused")
-	public OperationOutcome deleteListResource(@IdParam @NotNull IdType id) {
+	public OperationOutcome deleteListResource(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.ListResource listResource = listService.delete(id.getIdPart());
 		if (listResource == null) {
 			throw new ResourceNotFoundException("Could not find list to delete with id " + id.getIdPart());

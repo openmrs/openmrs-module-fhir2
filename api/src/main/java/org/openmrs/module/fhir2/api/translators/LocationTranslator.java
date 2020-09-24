@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Location;
 
 public interface LocationTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Location, Location> {
@@ -20,7 +22,7 @@ public interface LocationTranslator extends OpenmrsFhirUpdatableTranslator<org.o
 	 * @return the corresponding FHIR location resource
 	 */
 	@Override
-	Location toFhirResource(org.openmrs.Location openmrsLocation);
+	Location toFhirResource(@Nonnull org.openmrs.Location openmrsLocation);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Location} to an {@link org.openmrs.Location}
@@ -29,7 +31,7 @@ public interface LocationTranslator extends OpenmrsFhirUpdatableTranslator<org.o
 	 * @return the corresponding OpenMRS location
 	 */
 	@Override
-	org.openmrs.Location toOpenmrsType(Location fhirLocation);
+	org.openmrs.Location toOpenmrsType(@Nonnull Location fhirLocation);
 	
 	/**
 	 * Maps a {@link Location} to an existing {@link org.openmrs.Location}
@@ -39,5 +41,5 @@ public interface LocationTranslator extends OpenmrsFhirUpdatableTranslator<org.o
 	 * @return the updated OpenMRS location
 	 */
 	@Override
-	org.openmrs.Location toOpenmrsType(org.openmrs.Location existingLocation, Location fhirLocation);
+	org.openmrs.Location toOpenmrsType(@Nonnull org.openmrs.Location existingLocation, @Nonnull Location fhirLocation);
 }

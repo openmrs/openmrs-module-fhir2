@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 /**
  * Generic interface for a translator between OpenMRS data and FHIR resources
  * 
@@ -23,5 +25,5 @@ public interface ToOpenmrsTranslator<T, U> {
 	 * @param resource the FHIR resource to translate
 	 * @return the corresponding OpenMRS data element
 	 */
-	T toOpenmrsType(U resource);
+	T toOpenmrsType(@Nonnull U resource);
 }

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import javax.annotation.Nonnull;
+
 import org.openmrs.Visit;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.util.PrivilegeConstants;
@@ -17,6 +19,6 @@ public interface FhirVisitDao extends FhirDao<Visit> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_VISITS)
-	Visit get(String uuid);
+	Visit get(@Nonnull String uuid);
 	
 }

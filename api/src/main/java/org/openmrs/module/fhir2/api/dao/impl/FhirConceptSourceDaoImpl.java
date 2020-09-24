@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -40,13 +41,13 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
-	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(String url) {
+	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
 		return Optional.ofNullable((FhirConceptSource) sessionFactory.getCurrentSession()
 		        .createCriteria(FhirConceptSource.class).add(eq("url", url)).add(eq("retired", false)).uniqueResult());
 	}
 	
 	@Override
-	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(String sourceName) {
+	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
 		return Optional
 		        .ofNullable((FhirConceptSource) sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class)
 		                .createAlias("conceptSource", "conceptSource").add(eq("conceptSource.name", sourceName))

@@ -9,17 +9,17 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface FhirService<T extends IAnyResource> {
 	
-	T get(@NotNull String uuid);
+	T get(@Nonnull String uuid);
 	
-	T create(T newResource);
+	T create(@Nonnull T newResource);
 	
-	T update(String uuid, T updatedResource);
+	T update(@Nonnull String uuid, @Nonnull T updatedResource);
 	
-	T delete(@NotNull String uuid);
+	T delete(@Nonnull String uuid);
 }

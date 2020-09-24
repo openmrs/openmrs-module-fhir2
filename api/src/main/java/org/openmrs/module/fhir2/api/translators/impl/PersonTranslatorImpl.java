@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.Objects;
 
@@ -61,7 +61,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	private FhirPatientDao patientDao;
 	
 	@Override
-	public org.hl7.fhir.r4.model.Person toFhirResource(@NotNull Person openmrsPerson) {
+	public org.hl7.fhir.r4.model.Person toFhirResource(@Nonnull Person openmrsPerson) {
 		notNull(openmrsPerson, "The Openmrs Person object should not be null");
 		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
@@ -95,13 +95,13 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	}
 	
 	@Override
-	public Person toOpenmrsType(org.hl7.fhir.r4.model.Person person) {
+	public Person toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Person person) {
 		notNull(person, "The Person object should not be null");
 		return toOpenmrsType(new Person(), person);
 	}
 	
 	@Override
-	public Person toOpenmrsType(Person openmrsPerson, org.hl7.fhir.r4.model.Person person) {
+	public Person toOpenmrsType(@Nonnull Person openmrsPerson, @Nonnull org.hl7.fhir.r4.model.Person person) {
 		notNull(openmrsPerson, "The existing Openmrs Person object should not be null");
 		notNull(person, "The Person object should not be null");
 		

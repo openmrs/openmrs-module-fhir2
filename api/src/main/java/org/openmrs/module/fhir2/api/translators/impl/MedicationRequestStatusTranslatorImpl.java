@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
@@ -18,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class MedicationRequestStatusTranslatorImpl implements MedicationRequestStatusTranslator {
 	
 	@Override
-	public MedicationRequest.MedicationRequestStatus toFhirResource(DrugOrder drugOrder) {
+	public MedicationRequest.MedicationRequestStatus toFhirResource(@Nonnull DrugOrder drugOrder) {
 		if (drugOrder == null) {
 			return null;
 		}

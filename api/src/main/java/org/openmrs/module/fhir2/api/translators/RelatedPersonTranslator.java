@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.openmrs.Relationship;
 
@@ -22,5 +24,5 @@ public interface RelatedPersonTranslator extends OpenmrsFhirTranslator<Relations
 	 * @return the corresponding {@link org.hl7.fhir.r4.model.RelatedPerson} resource
 	 */
 	@Override
-	RelatedPerson toFhirResource(Relationship relationship);
+	RelatedPerson toFhirResource(@Nonnull Relationship relationship);
 }

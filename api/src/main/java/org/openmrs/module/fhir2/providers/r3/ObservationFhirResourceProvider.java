@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -64,7 +64,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	@SuppressWarnings("unused")
-	public Observation getObservationById(@IdParam @NotNull IdType id) {
+	public Observation getObservationById(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Observation observation = observationService.get(id.getIdPart());
 		if (observation == null) {
 			throw new ResourceNotFoundException("Could not find observation with Id " + id.getIdPart());
@@ -74,7 +74,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@History
-	public List<Resource> getObservationHistoryById(@IdParam @NotNull IdType id) {
+	public List<Resource> getObservationHistoryById(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Observation observation = observationService.get(id.getIdPart());
 		if (observation == null) {
 			throw new ResourceNotFoundException("Could not find Observation with Id " + id.getIdPart());
@@ -89,7 +89,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Delete
-	public OperationOutcome deleteObservationResource(@IdParam @NotNull IdType id) {
+	public OperationOutcome deleteObservationResource(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Observation observation = observationService.delete(id.getIdPart());
 		if (observation == null) {
 			throw new ResourceNotFoundException("Could not find observation to delete with id" + id.getIdPart());

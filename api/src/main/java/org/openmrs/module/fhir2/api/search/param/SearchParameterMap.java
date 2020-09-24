@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.search.param;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class SearchParameterMap implements Serializable {
 	 * @param param Parameter to be added
 	 * @return {@link org.openmrs.module.fhir2.api.search.param.SearchParameterMap}
 	 */
-	public SearchParameterMap addParameter(@NotNull String key, @NotNull Serializable param) {
+	public SearchParameterMap addParameter(@Nonnull String key, @Nonnull Serializable param) {
 		return addParameter(key, null, param);
 	}
 	
@@ -55,7 +55,7 @@ public class SearchParameterMap implements Serializable {
 	 * @param param Parameter to be added
 	 * @return {@link org.openmrs.module.fhir2.api.search.param.SearchParameterMap}
 	 */
-	public SearchParameterMap addParameter(@NotNull String key, String propertyName, @NotNull Serializable param) {
+	public SearchParameterMap addParameter(@Nonnull String key, String propertyName, @Nonnull Serializable param) {
 		if (key == null || param == null) {
 			return this;
 		}
@@ -82,7 +82,7 @@ public class SearchParameterMap implements Serializable {
 	 * @return A {@link java.util.List} of {@link org.openmrs.module.fhir2.api.search.param.PropParam}
 	 *         parameters
 	 */
-	public List<PropParam<?>> getParameters(@NotNull String key) {
+	public List<PropParam<?>> getParameters(@Nonnull String key) {
 		return this.params.getOrDefault(key, new ArrayList<>());
 	}
 	

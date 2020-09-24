@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.ConditionClinicalStatus;
@@ -24,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClinicalStatusTranslator<ConditionClinicalStatus> {
 	
 	@Override
-	public CodeableConcept toFhirResource(ConditionClinicalStatus clinicalStatus) {
+	public CodeableConcept toFhirResource(@Nonnull ConditionClinicalStatus clinicalStatus) {
 		if (clinicalStatus == null) {
 			return null;
 		}
@@ -46,7 +48,7 @@ public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClini
 	}
 	
 	@Override
-	public ConditionClinicalStatus toOpenmrsType(CodeableConcept codeableConcept) {
+	public ConditionClinicalStatus toOpenmrsType(@Nonnull CodeableConcept codeableConcept) {
 		if (codeableConcept == null) {
 			return null;
 		}

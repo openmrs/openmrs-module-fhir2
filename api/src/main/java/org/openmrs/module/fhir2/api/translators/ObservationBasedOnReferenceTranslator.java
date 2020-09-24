@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Order;
 
@@ -21,7 +23,7 @@ public interface ObservationBasedOnReferenceTranslator extends OpenmrsFhirTransl
 	 * @return a FHIR reference to the order which prompted this observation
 	 */
 	@Override
-	Reference toFhirResource(Order order);
+	Reference toFhirResource(@Nonnull Order order);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.Reference} to an {@link Order}
@@ -30,5 +32,5 @@ public interface ObservationBasedOnReferenceTranslator extends OpenmrsFhirTransl
 	 * @return the OpenMRS order matched by this reference
 	 */
 	@Override
-	Order toOpenmrsType(Reference reference);
+	Order toOpenmrsType(@Nonnull Reference reference);
 }

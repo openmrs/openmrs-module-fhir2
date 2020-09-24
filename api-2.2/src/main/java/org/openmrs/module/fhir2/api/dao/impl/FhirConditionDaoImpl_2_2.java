@@ -15,7 +15,7 @@ import static org.hibernate.criterion.Restrictions.ge;
 import static org.hibernate.criterion.Restrictions.le;
 import static org.hibernate.criterion.Restrictions.not;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -63,32 +63,32 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONDITIONS)
-	public Condition get(String uuid) {
+	public Condition get(@Nonnull String uuid) {
 		return super.get(uuid);
 	}
 	
 	@Override
 	@Authorized(PrivilegeConstants.EDIT_CONDITIONS)
-	public Condition createOrUpdate(Condition newEntry) {
+	public Condition createOrUpdate(@Nonnull Condition newEntry) {
 		return super.createOrUpdate(newEntry);
 	}
 	
 	@Override
 	@Authorized(PrivilegeConstants.DELETE_CONDITIONS)
-	public Condition delete(String uuid) {
+	public Condition delete(@Nonnull String uuid) {
 		return super.delete(uuid);
 	}
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONDITIONS)
-	public List<String> getSearchResultUuids(SearchParameterMap theParams) {
+	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		return super.getSearchResultUuids(theParams);
 	}
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONDITIONS)
-	public List<Condition> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids,
-	        int firstResult, int lastResult) {
+	public List<Condition> getSearchResults(@Nonnull SearchParameterMap theParams,
+	        @Nonnull List<String> matchingResourceUuids, int firstResult, int lastResult) {
 		return super.getSearchResults(theParams, matchingResourceUuids, firstResult, lastResult);
 	}
 	
@@ -105,7 +105,7 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 		return ConditionClinicalStatus.HISTORY_OF;
 	}
 	
-	private Optional<Criterion> handleAgeByDateProperty(@NotNull String datePropertyName, @NotNull QuantityParam age) {
+	private Optional<Criterion> handleAgeByDateProperty(@Nonnull String datePropertyName, @Nonnull QuantityParam age) {
 		BigDecimal value = age.getValue();
 		if (value == null) {
 			throw new IllegalArgumentException("Age value should be provided in " + age);

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Type;
 import org.openmrs.Obs;
 
@@ -21,7 +23,7 @@ public interface ObservationEffectiveDatetimeTranslator extends ToFhirTranslator
 	 * @return the corresponding FHIR type
 	 */
 	@Override
-	Type toFhirResource(Obs obs);
+	Type toFhirResource(@Nonnull Obs obs);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.Type} to a existing {@link org.openmrs.Obs}
@@ -31,5 +33,5 @@ public interface ObservationEffectiveDatetimeTranslator extends ToFhirTranslator
 	 * @return an updated version of the obs
 	 */
 	@Override
-	Obs toOpenmrsType(Obs obs, Type resource);
+	Obs toOpenmrsType(@Nonnull Obs obs, @Nonnull Type resource);
 }

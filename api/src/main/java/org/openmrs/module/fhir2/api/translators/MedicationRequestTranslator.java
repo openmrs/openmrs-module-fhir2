@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 
@@ -22,7 +24,7 @@ public interface MedicationRequestTranslator extends ToFhirTranslator<DrugOrder,
 	 * @return the corresponding FHIR MedicationRequest resource
 	 */
 	@Override
-	MedicationRequest toFhirResource(DrugOrder drugOrder);
+	MedicationRequest toFhirResource(@Nonnull DrugOrder drugOrder);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.MedicationRequest} medicationRequest to an existing
@@ -33,7 +35,7 @@ public interface MedicationRequestTranslator extends ToFhirTranslator<DrugOrder,
 	 * @return an updated version of the existingDrugOrder
 	 */
 	@Override
-	DrugOrder toOpenmrsType(DrugOrder existingDrugOrder, MedicationRequest medicationRequest);
+	DrugOrder toOpenmrsType(@Nonnull DrugOrder existingDrugOrder, @Nonnull MedicationRequest medicationRequest);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.MedicationRequest} medicationRequest to an existing
@@ -43,6 +45,6 @@ public interface MedicationRequestTranslator extends ToFhirTranslator<DrugOrder,
 	 * @return an updated version of the existingDrugOrder
 	 */
 	@Override
-	DrugOrder toOpenmrsType(MedicationRequest medicationRequest);
+	DrugOrder toOpenmrsType(@Nonnull MedicationRequest medicationRequest);
 	
 }

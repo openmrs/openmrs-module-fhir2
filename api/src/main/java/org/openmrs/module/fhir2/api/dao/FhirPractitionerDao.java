@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -22,26 +22,26 @@ import org.openmrs.util.PrivilegeConstants;
 public interface FhirPractitionerDao extends FhirDao<Provider> {
 	
 	@Override
-	Provider get(String uuid);
+	Provider get(@Nonnull String uuid);
 	
 	@Authorized(PrivilegeConstants.GET_PROVIDERS)
-	List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(@NotNull Provider provider,
-	        @NotNull String providerAttributeTypeUuid);
+	List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(@Nonnull Provider provider,
+	        @Nonnull String providerAttributeTypeUuid);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.MANAGE_PROVIDERS })
-	Provider createOrUpdate(Provider newEntry);
+	Provider createOrUpdate(@Nonnull Provider newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.MANAGE_PROVIDERS)
-	Provider delete(String uuid);
+	Provider delete(@Nonnull String uuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PROVIDERS)
-	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PROVIDERS)
-	List<Provider> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<Provider> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

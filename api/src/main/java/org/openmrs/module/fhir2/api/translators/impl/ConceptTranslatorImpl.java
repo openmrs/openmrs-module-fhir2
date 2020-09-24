@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +43,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	private FhirUserDefaultProperties userDefaultProperties;
 	
 	@Override
-	public CodeableConcept toFhirResource(Concept concept) {
+	public CodeableConcept toFhirResource(@Nonnull Concept concept) {
 		if (concept == null) {
 			return null;
 		}
@@ -63,7 +65,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	}
 	
 	@Override
-	public Concept toOpenmrsType(CodeableConcept concept) {
+	public Concept toOpenmrsType(@Nonnull CodeableConcept concept) {
 		if (concept == null) {
 			return null;
 		}

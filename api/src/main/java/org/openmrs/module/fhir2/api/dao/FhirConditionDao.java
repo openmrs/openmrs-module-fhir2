@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import javax.annotation.Nonnull;
+
 import java.util.List;
 
 import org.openmrs.Auditable;
@@ -18,18 +20,18 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 public interface FhirConditionDao<T extends OpenmrsObject & Auditable> extends FhirDao<T> {
 	
 	@Override
-	T get(String uuid);
+	T get(@Nonnull String uuid);
 	
 	@Override
-	T createOrUpdate(T newEntry);
+	T createOrUpdate(@Nonnull T newEntry);
 	
 	@Override
-	T delete(String uuid);
+	T delete(@Nonnull String uuid);
 	
 	@Override
-	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Override
-	List<T> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -60,7 +62,7 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 	private ProvenanceTranslator<Condition> provenanceTranslator;
 	
 	@Override
-	public org.hl7.fhir.r4.model.Condition toFhirResource(Condition condition) {
+	public org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Condition condition) {
 		notNull(condition, "The Openmrs Condition object should not be null");
 		
 		org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
@@ -91,13 +93,14 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 	}
 	
 	@Override
-	public Condition toOpenmrsType(org.hl7.fhir.r4.model.Condition condition) {
+	public Condition toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Condition condition) {
 		notNull(condition, "The Condition object should not be null");
 		return this.toOpenmrsType(new Condition(), condition);
 	}
 	
 	@Override
-	public Condition toOpenmrsType(Condition existingCondition, org.hl7.fhir.r4.model.Condition condition) {
+	public Condition toOpenmrsType(@Nonnull Condition existingCondition,
+	        @Nonnull org.hl7.fhir.r4.model.Condition condition) {
 		notNull(existingCondition, "The existing Openmrs Condition object should not be null");
 		notNull(condition, "The Condition object should not be null");
 		

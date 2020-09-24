@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -46,7 +48,7 @@ public class TaskTranslatorImpl implements TaskTranslator {
 	private ConceptTranslator conceptTranslator;
 	
 	@Override
-	public Task toFhirResource(FhirTask openmrsTask) {
+	public Task toFhirResource(@Nonnull FhirTask openmrsTask) {
 		notNull(openmrsTask, "The openmrsTask object should not be null");
 		
 		Task fhirTask = new Task();
@@ -58,7 +60,7 @@ public class TaskTranslatorImpl implements TaskTranslator {
 	}
 	
 	@Override
-	public FhirTask toOpenmrsType(Task fhirTask) {
+	public FhirTask toOpenmrsType(@Nonnull Task fhirTask) {
 		notNull(fhirTask, "The Task object should not be null");
 		
 		FhirTask openmrsTask = new FhirTask();
@@ -68,7 +70,7 @@ public class TaskTranslatorImpl implements TaskTranslator {
 	}
 	
 	@Override
-	public FhirTask toOpenmrsType(FhirTask openmrsTask, Task fhirTask) {
+	public FhirTask toOpenmrsType(@Nonnull FhirTask openmrsTask, @Nonnull Task fhirTask) {
 		notNull(openmrsTask, "The existing openmrsTask object should not be null");
 		notNull(fhirTask, "The Task object should not be null");
 		

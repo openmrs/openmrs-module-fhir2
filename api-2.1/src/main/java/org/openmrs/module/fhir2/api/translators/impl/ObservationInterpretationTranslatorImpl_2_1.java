@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang.WordUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -24,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class ObservationInterpretationTranslatorImpl_2_1 extends ObservationInterpretationTranslatorImpl {
 	
 	@Override
-	public CodeableConcept toFhirResource(Obs obs) {
+	public CodeableConcept toFhirResource(@Nonnull Obs obs) {
 		if (obs.getInterpretation() == null) {
 			return null;
 		}
@@ -108,7 +110,7 @@ public class ObservationInterpretationTranslatorImpl_2_1 extends ObservationInte
 	}
 	
 	@Override
-	public Obs toOpenmrsType(Obs openmrsObs, CodeableConcept interpretation) {
+	public Obs toOpenmrsType(@Nonnull Obs openmrsObs, @Nonnull CodeableConcept interpretation) {
 		if (interpretation.getCoding().size() == 0) {
 			return null;
 		}

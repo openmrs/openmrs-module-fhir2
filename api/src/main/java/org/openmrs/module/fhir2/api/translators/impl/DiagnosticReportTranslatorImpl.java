@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import java.util.Date;
 import java.util.stream.Collectors;
 
@@ -48,7 +50,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 	private ConceptTranslator conceptTranslator;
 	
 	@Override
-	public DiagnosticReport toFhirResource(FhirDiagnosticReport fhirDiagnosticReport) {
+	public DiagnosticReport toFhirResource(@Nonnull FhirDiagnosticReport fhirDiagnosticReport) {
 		notNull(fhirDiagnosticReport, "The diagnostic report should not be null");
 		
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
@@ -94,13 +96,13 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 	}
 	
 	@Override
-	public FhirDiagnosticReport toOpenmrsType(DiagnosticReport diagnosticReport) {
+	public FhirDiagnosticReport toOpenmrsType(@Nonnull DiagnosticReport diagnosticReport) {
 		return toOpenmrsType(new FhirDiagnosticReport(), diagnosticReport);
 	}
 	
 	@Override
-	public FhirDiagnosticReport toOpenmrsType(FhirDiagnosticReport existingDiagnosticReport,
-	        DiagnosticReport diagnosticReport) {
+	public FhirDiagnosticReport toOpenmrsType(@Nonnull FhirDiagnosticReport existingDiagnosticReport,
+	        @Nonnull DiagnosticReport diagnosticReport) {
 		notNull(existingDiagnosticReport, "The existing Obs should not be null");
 		notNull(diagnosticReport, "The DiagnosticReport object should not be null");
 		

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirDiagnosticReport;
@@ -22,7 +24,7 @@ public interface DiagnosticReportTranslator extends OpenmrsFhirUpdatableTranslat
 	 * @return the corresponding FHIR DiagnosticReport
 	 */
 	@Override
-	DiagnosticReport toFhirResource(FhirDiagnosticReport fhirDiagnosticReport);
+	DiagnosticReport toFhirResource(@Nonnull FhirDiagnosticReport fhirDiagnosticReport);
 	
 	/**
 	 * Maps {@link DiagnosticReport} to {@link FhirDiagnosticReport}
@@ -31,7 +33,7 @@ public interface DiagnosticReportTranslator extends OpenmrsFhirUpdatableTranslat
 	 * @return the corresponding OpenMRS FhirDiagnosticReport
 	 */
 	@Override
-	FhirDiagnosticReport toOpenmrsType(DiagnosticReport diagnosticReport);
+	FhirDiagnosticReport toOpenmrsType(@Nonnull DiagnosticReport diagnosticReport);
 	
 	/**
 	 * Maps a {@link DiagnosticReport} to an existing {@link FhirDiagnosticReport}
@@ -41,5 +43,6 @@ public interface DiagnosticReportTranslator extends OpenmrsFhirUpdatableTranslat
 	 * @return an updated version of the existingObs
 	 */
 	@Override
-	FhirDiagnosticReport toOpenmrsType(FhirDiagnosticReport existingDiagnosticReport, DiagnosticReport diagnosticReport);
+	FhirDiagnosticReport toOpenmrsType(@Nonnull FhirDiagnosticReport existingDiagnosticReport,
+	        @Nonnull DiagnosticReport diagnosticReport);
 }

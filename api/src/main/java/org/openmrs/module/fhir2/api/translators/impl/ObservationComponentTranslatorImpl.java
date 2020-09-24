@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
@@ -32,7 +34,7 @@ public class ObservationComponentTranslatorImpl implements ObservationComponentT
 	private ConceptTranslator conceptTranslator;
 	
 	@Override
-	public Observation.ObservationComponentComponent toFhirResource(Obs obs) {
+	public Observation.ObservationComponentComponent toFhirResource(@Nonnull Obs obs) {
 		if (obs == null) {
 			return null;
 		}
@@ -46,7 +48,7 @@ public class ObservationComponentTranslatorImpl implements ObservationComponentT
 	}
 	
 	@Override
-	public Obs toOpenmrsType(Obs obs, Observation.ObservationComponentComponent observationComponent) {
+	public Obs toOpenmrsType(@Nonnull Obs obs, @Nonnull Observation.ObservationComponentComponent observationComponent) {
 		notNull(obs, "The existing Obs object should not be null");
 		notNull(observationComponent, "The ObservationComponentComponent object should not be null");
 		

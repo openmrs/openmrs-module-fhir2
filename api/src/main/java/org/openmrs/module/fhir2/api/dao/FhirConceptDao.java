@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,21 +23,21 @@ public interface FhirConceptDao extends FhirDao<Concept> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	Concept get(@NotNull String uuid);
+	Concept get(@Nonnull String uuid);
 	
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
 	Optional<Concept> getConceptBySourceNameAndCode(String sourceName, String code);
 	
 	@Override
 	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
-	Concept createOrUpdate(Concept newEntry);
+	Concept createOrUpdate(@Nonnull Concept newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)
-	Concept delete(String uuid);
+	Concept delete(@Nonnull String uuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	List<Concept> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<Concept> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

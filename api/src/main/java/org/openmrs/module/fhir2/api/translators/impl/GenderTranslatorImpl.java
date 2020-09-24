@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Enumerations;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.springframework.stereotype.Component;
@@ -17,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class GenderTranslatorImpl implements GenderTranslator {
 	
 	@Override
-	public Enumerations.AdministrativeGender toFhirResource(String gender) {
+	public Enumerations.AdministrativeGender toFhirResource(@Nonnull String gender) {
 		if (gender == null) {
 			return Enumerations.AdministrativeGender.NULL;
 		}
@@ -37,7 +39,7 @@ public class GenderTranslatorImpl implements GenderTranslator {
 	}
 	
 	@Override
-	public String toOpenmrsType(Enumerations.AdministrativeGender gender) {
+	public String toOpenmrsType(@Nonnull Enumerations.AdministrativeGender gender) {
 		if (gender == null) {
 			return null;
 		}

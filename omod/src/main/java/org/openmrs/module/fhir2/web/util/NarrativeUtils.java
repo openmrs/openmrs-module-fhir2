@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.web.util;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +34,7 @@ public class NarrativeUtils {
 		return null;
 	}
 	
-	private static boolean validatePropertiesFilePath(@NotNull String path) {
+	private static boolean validatePropertiesFilePath(@Nonnull String path) {
 		if (path.startsWith("file:")) {
 			String filepath = path.substring("file:".length());
 			

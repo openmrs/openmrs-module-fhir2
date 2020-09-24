@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 
@@ -22,7 +24,7 @@ public interface MedicationRequestPriorityTranslator extends ToFhirTranslator<Dr
 	 * @return the corresponding FHIR medicationRequestPriority
 	 */
 	@Override
-	MedicationRequest.MedicationRequestPriority toFhirResource(DrugOrder.Urgency urgency);
+	MedicationRequest.MedicationRequestPriority toFhirResource(@Nonnull DrugOrder.Urgency urgency);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestPriority} to an OpenMRS
@@ -32,5 +34,5 @@ public interface MedicationRequestPriorityTranslator extends ToFhirTranslator<Dr
 	 * @return the corresponding OpenMRS drugOrder urgency
 	 */
 	@Override
-	DrugOrder.Urgency toOpenmrsType(MedicationRequest.MedicationRequestPriority medicationRequestPriority);
+	DrugOrder.Urgency toOpenmrsType(@Nonnull MedicationRequest.MedicationRequestPriority medicationRequestPriority);
 }

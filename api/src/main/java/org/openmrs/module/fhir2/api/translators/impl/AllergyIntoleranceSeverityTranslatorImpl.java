@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import java.util.Map;
 
 import lombok.AccessLevel;
@@ -33,7 +35,7 @@ public class AllergyIntoleranceSeverityTranslatorImpl implements AllergyIntolera
 	private FhirConceptService conceptService;
 	
 	@Override
-	public AllergyIntolerance.AllergyIntoleranceSeverity toFhirResource(Concept concept) {
+	public AllergyIntolerance.AllergyIntoleranceSeverity toFhirResource(@Nonnull Concept concept) {
 		if (concept == null) {
 			return null;
 		}
@@ -55,7 +57,7 @@ public class AllergyIntoleranceSeverityTranslatorImpl implements AllergyIntolera
 	}
 	
 	@Override
-	public Concept toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity) {
+	public Concept toOpenmrsType(@Nonnull AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity) {
 		if (allergyIntoleranceSeverity == null) {
 			return null;
 		}

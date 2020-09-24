@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import java.util.List;
 
 import org.hl7.fhir.r4.model.ListResource;
@@ -22,7 +24,7 @@ public interface ListEntryTranslator<T> extends ToFhirTranslator<T, List<ListRes
 	 * @return the corresponding FHIR list entries
 	 */
 	@Override
-	List<ListResource.ListEntryComponent> toFhirResource(T data);
+	List<ListResource.ListEntryComponent> toFhirResource(@Nonnull T data);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.ListResource} to an OpenMRS data object
@@ -32,5 +34,5 @@ public interface ListEntryTranslator<T> extends ToFhirTranslator<T, List<ListRes
 	 * @return the corresponding OpenMRS object
 	 */
 	@Override
-	T toOpenmrsType(T existingObject, List<ListResource.ListEntryComponent> resource);
+	T toOpenmrsType(@Nonnull T existingObject, @Nonnull List<ListResource.ListEntryComponent> resource);
 }

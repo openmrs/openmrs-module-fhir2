@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import java.util.Date;
 
 import lombok.AccessLevel;
@@ -55,7 +57,7 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 	 * @see org.openmrs.module.fhir2.api.translators.RelatedPersonTranslator#toFhirResource(org.openmrs.Relationship)
 	 */
 	@Override
-	public RelatedPerson toFhirResource(Relationship relationship) {
+	public RelatedPerson toFhirResource(@Nonnull Relationship relationship) {
 		notNull(relationship, "The Relationship object should not be null");
 		
 		Person omrsRelatedPerson = relationship.getPersonA();
@@ -103,7 +105,7 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 	}
 	
 	@Override
-	public Relationship toOpenmrsType(RelatedPerson resource) {
+	public Relationship toOpenmrsType(@Nonnull RelatedPerson resource) {
 		throw new UnsupportedOperationException();
 	}
 }

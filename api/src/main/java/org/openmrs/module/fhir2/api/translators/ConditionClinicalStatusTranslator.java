@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 
 public interface ConditionClinicalStatusTranslator<T> extends ToFhirTranslator<T, CodeableConcept>, ToOpenmrsTranslator<T, CodeableConcept> {
@@ -21,7 +23,7 @@ public interface ConditionClinicalStatusTranslator<T> extends ToFhirTranslator<T
 	 * @return the corresponding CodeableConcept FHIR resource
 	 */
 	@Override
-	CodeableConcept toFhirResource(T clinicalStatus);
+	CodeableConcept toFhirResource(@Nonnull T clinicalStatus);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.CodeableConcept} to an OpenMRS <T> generic type
@@ -30,5 +32,5 @@ public interface ConditionClinicalStatusTranslator<T> extends ToFhirTranslator<T
 	 * @return the corresponding OpenMRS <T> generic type
 	 */
 	@Override
-	T toOpenmrsType(CodeableConcept codeableConcept);
+	T toOpenmrsType(@Nonnull CodeableConcept codeableConcept);
 }

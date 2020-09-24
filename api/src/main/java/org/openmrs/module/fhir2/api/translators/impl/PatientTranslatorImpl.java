@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.Objects;
@@ -74,7 +74,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	private ProvenanceTranslator<org.openmrs.Patient> provenanceTranslator;
 	
 	@Override
-	public Patient toFhirResource(org.openmrs.Patient openmrsPatient) {
+	public Patient toFhirResource(@Nonnull org.openmrs.Patient openmrsPatient) {
 		notNull(openmrsPatient, "The Openmrs Patient object should not be null");
 		
 		Patient patient = new Patient();
@@ -115,7 +115,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		return patient;
 	}
 	
-	public List<ContactPoint> getPatientContactDetails(@NotNull org.openmrs.Patient patient) {
+	public List<ContactPoint> getPatientContactDetails(@Nonnull org.openmrs.Patient patient) {
 		return fhirPersonDao
 		        .getActiveAttributesByPersonAndAttributeTypeUuid(patient,
 		            globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_ATTRIBUTE_TYPE))
@@ -123,13 +123,13 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	}
 	
 	@Override
-	public org.openmrs.Patient toOpenmrsType(Patient fhirPatient) {
+	public org.openmrs.Patient toOpenmrsType(@Nonnull Patient fhirPatient) {
 		notNull(fhirPatient, "The Patient object should not be null");
 		return toOpenmrsType(new org.openmrs.Patient(), fhirPatient);
 	}
 	
 	@Override
-	public org.openmrs.Patient toOpenmrsType(org.openmrs.Patient currentPatient, Patient patient) {
+	public org.openmrs.Patient toOpenmrsType(@Nonnull org.openmrs.Patient currentPatient, @Nonnull Patient patient) {
 		notNull(currentPatient, "The existing Openmrs Patient object should not be null");
 		notNull(patient, "The Patient object should not be null");
 		

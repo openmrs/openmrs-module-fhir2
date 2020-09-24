@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Concept;
 
@@ -24,5 +26,5 @@ public interface ObservationCategoryTranslator extends ToFhirTranslator<Concept,
 	 * @return a codeable concept appropriate to be added to the Observation.category field
 	 */
 	@Override
-	CodeableConcept toFhirResource(Concept concept);
+	CodeableConcept toFhirResource(@Nonnull Concept concept);
 }

@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class PersonNameTranslatorImpl implements PersonNameTranslator {
 	
 	@Override
-	public HumanName toFhirResource(PersonName name) {
+	public HumanName toFhirResource(@Nonnull PersonName name) {
 		if (name == null || name.getVoided()) {
 			return null;
 		}
@@ -55,7 +55,7 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 	}
 	
 	@Override
-	public PersonName toOpenmrsType(HumanName name) {
+	public PersonName toOpenmrsType(@Nonnull HumanName name) {
 		if (name == null) {
 			return null;
 		}
@@ -64,7 +64,7 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 	}
 	
 	@Override
-	public PersonName toOpenmrsType(PersonName personName, HumanName name) {
+	public PersonName toOpenmrsType(@Nonnull PersonName personName, @Nonnull HumanName name) {
 		if (personName == null || name == null) {
 			return personName;
 		}
@@ -96,7 +96,7 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 		return personName;
 	}
 	
-	private void addNameExtension(@NotNull HumanName name, @NotNull String extensionProperty, @NotNull String value) {
+	private void addNameExtension(@Nonnull HumanName name, @Nonnull String extensionProperty, @Nonnull String value) {
 		if (value == null) {
 			return;
 		}
@@ -105,7 +105,7 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 		        .addExtension(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#" + extensionProperty, new StringType(value));
 	}
 	
-	private void addNameComponent(@NotNull PersonName name, @NotNull String url, @NotNull String value) {
+	private void addNameComponent(@Nonnull PersonName name, @Nonnull String url, @Nonnull String value) {
 		if (value == null || url == null || !url.startsWith(FhirConstants.OPENMRS_FHIR_EXT_NAME + "#")) {
 			return;
 		}
@@ -130,7 +130,7 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 		}
 	}
 	
-	private Optional<Extension> getOpenmrsNameExtension(@NotNull HumanName name) {
+	private Optional<Extension> getOpenmrsNameExtension(@Nonnull HumanName name) {
 		return Optional.ofNullable(name.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_NAME));
 	}
 }

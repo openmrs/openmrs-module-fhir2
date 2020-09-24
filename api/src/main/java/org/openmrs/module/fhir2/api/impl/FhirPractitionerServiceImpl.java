@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.annotation.Nonnull;
+
 import java.util.List;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -59,7 +61,7 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 	private FhirUserService userService;
 	
 	@Override
-	public Practitioner get(String uuid) {
+	public Practitioner get(@Nonnull String uuid) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}

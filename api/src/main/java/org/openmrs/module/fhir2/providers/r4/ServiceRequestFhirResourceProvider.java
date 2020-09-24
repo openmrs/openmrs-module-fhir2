@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -54,7 +54,7 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	@SuppressWarnings("unused")
-	public ServiceRequest getServiceRequestById(@IdParam @NotNull IdType id) {
+	public ServiceRequest getServiceRequestById(@IdParam @Nonnull IdType id) {
 		ServiceRequest serviceRequest = serviceRequestService.get(id.getIdPart());
 		
 		if (serviceRequest == null) {
@@ -80,7 +80,7 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@SuppressWarnings("unused")
-	public OperationOutcome deleteServiceRequest(@IdParam @NotNull IdType id) {
+	public OperationOutcome deleteServiceRequest(@IdParam @Nonnull IdType id) {
 		ServiceRequest serviceRequest = serviceRequestService.delete(id.getIdPart());
 		if (serviceRequest == null) {
 			throw new ResourceNotFoundException("Could not find serviceRequest to delete with id " + id.getIdPart());

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Drug;
 
@@ -21,7 +23,7 @@ public interface MedicationReferenceTranslator extends OpenmrsFhirTranslator<Dru
 	 * @return the corresponding FHIR reference
 	 */
 	@Override
-	Reference toFhirResource(Drug drug);
+	Reference toFhirResource(@Nonnull Drug drug);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Reference} to an {@link org.openmrs.Drug}
@@ -30,5 +32,5 @@ public interface MedicationReferenceTranslator extends OpenmrsFhirTranslator<Dru
 	 * @return the corresponding medication
 	 */
 	@Override
-	Drug toOpenmrsType(Reference reference);
+	Drug toOpenmrsType(@Nonnull Reference reference);
 }

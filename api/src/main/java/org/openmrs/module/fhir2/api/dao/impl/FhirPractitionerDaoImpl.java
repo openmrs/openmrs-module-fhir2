@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,8 +36,8 @@ public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> imple
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(Provider provider,
-	        String providerAttributeTypeUuid) {
+	public List<ProviderAttribute> getActiveAttributesByPractitionerAndAttributeTypeUuid(@Nonnull Provider provider,
+	        @Nonnull String providerAttributeTypeUuid) {
 		return (List<ProviderAttribute>) getSessionFactory().getCurrentSession().createCriteria(ProviderAttribute.class)
 		        .createAlias("provider", "p", JoinType.INNER_JOIN, eq("p.id", provider.getId()))
 		        .createAlias("attributeType", "pat").add(eq("pat.uuid", providerAttributeTypeUuid)).add(eq("voided", false))

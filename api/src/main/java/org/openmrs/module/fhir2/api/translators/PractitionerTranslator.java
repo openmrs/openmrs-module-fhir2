@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Practitioner;
 
 public interface PractitionerTranslator<T> extends OpenmrsFhirUpdatableTranslator<T, Practitioner> {
@@ -22,7 +24,7 @@ public interface PractitionerTranslator<T> extends OpenmrsFhirUpdatableTranslato
 	 * @return an updated version of the OpenMrs existingUserOrProvider
 	 */
 	@Override
-	T toOpenmrsType(T existingUserOrProvider, Practitioner practitioner);
+	T toOpenmrsType(@Nonnull T existingUserOrProvider, @Nonnull Practitioner practitioner);
 	
 	/**
 	 * Maps {@link org.openmrs.Provider} or {@link org.openmrs.User} to a
@@ -32,7 +34,7 @@ public interface PractitionerTranslator<T> extends OpenmrsFhirUpdatableTranslato
 	 * @return the corresponding FHIR practitioner resource
 	 */
 	@Override
-	Practitioner toFhirResource(T userOrProvider);
+	Practitioner toFhirResource(@Nonnull T userOrProvider);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Practitioner} to {@link org.openmrs.Provider} or
@@ -42,5 +44,5 @@ public interface PractitionerTranslator<T> extends OpenmrsFhirUpdatableTranslato
 	 * @return the corresponding OpenMrs provider
 	 */
 	@Override
-	T toOpenmrsType(Practitioner practitioner);
+	T toOpenmrsType(@Nonnull Practitioner practitioner);
 }

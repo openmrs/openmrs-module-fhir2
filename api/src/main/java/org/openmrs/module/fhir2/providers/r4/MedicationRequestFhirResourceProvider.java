@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -55,7 +55,7 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	
 	@Read
 	@SuppressWarnings("unused")
-	public MedicationRequest getMedicationRequestByUuid(@IdParam @NotNull IdType id) {
+	public MedicationRequest getMedicationRequestByUuid(@IdParam @Nonnull IdType id) {
 		MedicationRequest medicationRequest = fhirMedicationRequestService.get(id.getIdPart());
 		if (medicationRequest == null) {
 			throw new ResourceNotFoundException("Could not find medicationRequest with Id " + id.getIdPart());

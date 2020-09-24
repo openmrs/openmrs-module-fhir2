@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.ConditionVerificationStatus;
@@ -22,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class ConditionVerificationStatusTranslatorImpl_2_2 implements ConditionVerificationStatusTranslator<ConditionVerificationStatus> {
 	
 	@Override
-	public CodeableConcept toFhirResource(ConditionVerificationStatus verificationStatus) {
+	public CodeableConcept toFhirResource(@Nonnull ConditionVerificationStatus verificationStatus) {
 		if (verificationStatus == null) {
 			return null;
 		}
@@ -30,7 +32,7 @@ public class ConditionVerificationStatusTranslatorImpl_2_2 implements ConditionV
 	}
 	
 	@Override
-	public ConditionVerificationStatus toOpenmrsType(CodeableConcept codeableConcept) {
+	public ConditionVerificationStatus toOpenmrsType(@Nonnull CodeableConcept codeableConcept) {
 		if (codeableConcept == null || codeableConcept.getCoding().isEmpty()) {
 			return null;
 		}

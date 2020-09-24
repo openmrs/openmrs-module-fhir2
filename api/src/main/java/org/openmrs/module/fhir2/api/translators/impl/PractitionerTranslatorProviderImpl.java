@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.apache.commons.lang.Validate.notEmpty;
 import static org.apache.commons.lang3.Validate.notNull;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.Objects;
@@ -69,7 +69,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	private ProvenanceTranslator<Provider> provenanceTranslator;
 	
 	@Override
-	public Provider toOpenmrsType(Provider existingProvider, Practitioner practitioner) {
+	public Provider toOpenmrsType(@Nonnull Provider existingProvider, @Nonnull Practitioner practitioner) {
 		notNull(existingProvider, "The existing Provider object should not be null");
 		notNull(practitioner, "The Practitioner object should not be null");
 		
@@ -102,7 +102,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	}
 	
 	@Override
-	public Practitioner toFhirResource(Provider provider) {
+	public Practitioner toFhirResource(@Nonnull Provider provider) {
 		notNull(provider, "The Provider object should not be null");
 		
 		Practitioner practitioner = new Practitioner();
@@ -135,7 +135,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 		return practitioner;
 	}
 	
-	public List<ContactPoint> getProviderContactDetails(@NotNull Provider provider) {
+	public List<ContactPoint> getProviderContactDetails(@Nonnull Provider provider) {
 		return fhirPractitionerDao
 		        .getActiveAttributesByPractitionerAndAttributeTypeUuid(provider,
 		            globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_ATTRIBUTE_TYPE))
@@ -143,7 +143,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	}
 	
 	@Override
-	public Provider toOpenmrsType(Practitioner practitioner) {
+	public Provider toOpenmrsType(@Nonnull Practitioner practitioner) {
 		notNull(practitioner, "The Practitioner object should not be null");
 		return toOpenmrsType(new org.openmrs.Provider(), practitioner);
 	}

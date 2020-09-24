@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
@@ -82,7 +82,7 @@ public class FhirDiagnosticReportDaoImpl extends BaseFhirDao<FhirDiagnosticRepor
 	}
 	
 	@Override
-	protected String paramToProp(@NotNull String param) {
+	protected String paramToProp(@Nonnull String param) {
 		if (DiagnosticReport.SP_ISSUED.equals(param)) {
 			return "issued";
 		}

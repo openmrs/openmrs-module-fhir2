@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.Concept;
 
@@ -23,7 +25,7 @@ public interface AllergyIntoleranceSeverityTranslator extends ToFhirTranslator<C
 	 *         {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceSeverity}
 	 */
 	@Override
-	AllergyIntolerance.AllergyIntoleranceSeverity toFhirResource(Concept concept);
+	AllergyIntolerance.AllergyIntoleranceSeverity toFhirResource(@Nonnull Concept concept);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceSeverity} to a
@@ -33,5 +35,5 @@ public interface AllergyIntoleranceSeverityTranslator extends ToFhirTranslator<C
 	 * @return the corresponding {@link org.openmrs.Concept}
 	 */
 	@Override
-	Concept toOpenmrsType(AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity);
+	Concept toOpenmrsType(@Nonnull AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity);
 }

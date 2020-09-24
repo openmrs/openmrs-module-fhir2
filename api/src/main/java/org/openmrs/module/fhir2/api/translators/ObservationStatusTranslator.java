@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 
@@ -21,7 +23,7 @@ public interface ObservationStatusTranslator extends ToFhirTranslator<Obs, Obser
 	 * @return the corresponding observation status
 	 */
 	@Override
-	Observation.ObservationStatus toFhirResource(Obs observation);
+	Observation.ObservationStatus toFhirResource(@Nonnull Obs observation);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.Observation.ObservationStatus} to an {@link Obs}
@@ -31,5 +33,5 @@ public interface ObservationStatusTranslator extends ToFhirTranslator<Obs, Obser
 	 * @return the corresponding observation status
 	 */
 	@Override
-	Obs toOpenmrsType(Obs observation, Observation.ObservationStatus observationStatus);
+	Obs toOpenmrsType(@Nonnull Obs observation, @Nonnull Observation.ObservationStatus observationStatus);
 }

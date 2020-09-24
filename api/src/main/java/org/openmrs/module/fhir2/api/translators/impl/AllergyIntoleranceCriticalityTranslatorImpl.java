@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceCriticalityTranslator;
 import org.springframework.stereotype.Component;
@@ -18,7 +20,7 @@ public class AllergyIntoleranceCriticalityTranslatorImpl implements AllergyIntol
 	
 	@Override
 	public AllergyIntolerance.AllergyIntoleranceCriticality toFhirResource(
-	        AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity) {
+	        @Nonnull AllergyIntolerance.AllergyIntoleranceSeverity allergyIntoleranceSeverity) {
 		if (allergyIntoleranceSeverity == null) {
 			return null;
 		}

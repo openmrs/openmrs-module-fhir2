@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -62,7 +62,7 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	
 	@Read
 	@SuppressWarnings("unused")
-	public AllergyIntolerance getAllergyIntoleranceByUuid(@IdParam @NotNull IdType id) {
+	public AllergyIntolerance getAllergyIntoleranceByUuid(@IdParam @Nonnull IdType id) {
 		AllergyIntolerance allergy = fhirAllergyIntoleranceService.get(id.getIdPart());
 		if (allergy == null) {
 			throw new ResourceNotFoundException("Could not find allergy with Id " + id.getIdPart());
@@ -72,7 +72,7 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	
 	@History
 	@SuppressWarnings("unused")
-	public List<Resource> getAllergyIntoleranceHistoryById(@IdParam @NotNull IdType id) {
+	public List<Resource> getAllergyIntoleranceHistoryById(@IdParam @Nonnull IdType id) {
 		AllergyIntolerance allergy = fhirAllergyIntoleranceService.get(id.getIdPart());
 		if (allergy == null) {
 			throw new ResourceNotFoundException("Could not find allergy with Id " + id.getIdPart());
@@ -123,7 +123,7 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	
 	@Delete
 	@SuppressWarnings("unused")
-	public OperationOutcome deleteAllergy(@IdParam @NotNull IdType id) {
+	public OperationOutcome deleteAllergy(@IdParam @Nonnull IdType id) {
 		AllergyIntolerance allergyIntolerance = fhirAllergyIntoleranceService.delete(id.getIdPart());
 		if (allergyIntolerance == null) {
 			throw new ResourceNotFoundException("Could not find allergy to delete with id " + id.getIdPart());

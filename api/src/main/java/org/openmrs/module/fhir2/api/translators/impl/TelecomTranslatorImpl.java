@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -42,7 +44,7 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
-	public BaseOpenmrsData toOpenmrsType(BaseOpenmrsData attribute, ContactPoint contactPoint) {
+	public BaseOpenmrsData toOpenmrsType(@Nonnull BaseOpenmrsData attribute, @Nonnull ContactPoint contactPoint) {
 		if (attribute == null || contactPoint == null) {
 			return attribute;
 		}
@@ -71,7 +73,7 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 	}
 	
 	@Override
-	public ContactPoint toFhirResource(BaseOpenmrsData attribute) {
+	public ContactPoint toFhirResource(@Nonnull BaseOpenmrsData attribute) {
 		if (attribute == null || attribute.getVoided()) {
 			return null;
 		}

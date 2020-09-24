@@ -14,6 +14,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.or;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -38,8 +39,8 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(Person person,
-	        String personAttributeTypeUuid) {
+	public List<PersonAttribute> getActiveAttributesByPersonAndAttributeTypeUuid(@Nonnull Person person,
+	        @Nonnull String personAttributeTypeUuid) {
 		return (List<PersonAttribute>) getSessionFactory().getCurrentSession().createCriteria(PersonAttribute.class)
 		        .createAlias("person", "p", JoinType.INNER_JOIN, eq("p.id", person.getId()))
 		        .createAlias("attributeType", "pat").add(eq("pat.uuid", personAttributeTypeUuid)).add(eq("voided", false))

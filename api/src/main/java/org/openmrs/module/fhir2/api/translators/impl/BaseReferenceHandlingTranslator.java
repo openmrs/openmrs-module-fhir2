@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
@@ -18,6 +18,7 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Drug;
+import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Obs;
 import org.openmrs.OpenmrsObject;
@@ -28,6 +29,7 @@ import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.Provider;
 import org.openmrs.User;
+import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 
@@ -38,27 +40,35 @@ public abstract class BaseReferenceHandlingTranslator {
 	
 	public static final String TEST_ORDER_TYPE_UUID = "52a447d3-a64a-11e3-9aeb-50e549534c5e";
 	
-	protected Reference createEncounterReference(@NotNull OpenmrsObject encounter) {
+	protected Reference createEncounterReference(@Nonnull Encounter encounter) {
+		return createEncounterReference((OpenmrsObject) encounter);
+	}
+	
+	protected Reference createEncounterReference(@Nonnull Visit visit) {
+		return createEncounterReference((OpenmrsObject) visit);
+	}
+	
+	private Reference createEncounterReference(@Nonnull OpenmrsObject encounter) {
 		return new Reference().setReference(FhirConstants.ENCOUNTER + "/" + encounter.getUuid())
 		        .setType(FhirConstants.ENCOUNTER);
 	}
 	
-	protected Reference createMedicationReference(@NotNull Drug drug) {
+	protected Reference createMedicationReference(@Nonnull Drug drug) {
 		return new Reference().setReference(FhirConstants.MEDICATION + "/" + drug.getUuid())
 		        .setType(FhirConstants.MEDICATION);
 	}
 	
-	protected Reference createObservationReference(@NotNull Obs obs) {
+	protected Reference createObservationReference(@Nonnull Obs obs) {
 		return new Reference().setReference(FhirConstants.OBSERVATION + "/" + obs.getUuid())
 		        .setType(FhirConstants.OBSERVATION);
 	}
 	
-	protected Reference createLocationReference(@NotNull Location location) {
+	protected Reference createLocationReference(@Nonnull Location location) {
 		return new Reference().setReference(FhirConstants.LOCATION + "/" + location.getUuid())
 		        .setType(FhirConstants.LOCATION).setDisplay(location.getName());
 	}
 	
-	protected Reference createPatientReference(@NotNull Patient patient) {
+	protected Reference createPatientReference(@Nonnull Patient patient) {
 		Reference reference = new Reference().setReference(FhirConstants.PATIENT + "/" + patient.getUuid())
 		        .setType(FhirConstants.PATIENT);
 		
@@ -84,7 +94,7 @@ public abstract class BaseReferenceHandlingTranslator {
 		return reference;
 	}
 	
-	protected Reference createPractitionerReference(@NotNull User user) {
+	protected Reference createPractitionerReference(@Nonnull User user) {
 		Reference reference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + user.getUuid())
 		        .setType(FhirConstants.PRACTITIONER);
 		
@@ -97,7 +107,7 @@ public abstract class BaseReferenceHandlingTranslator {
 		return reference;
 	}
 	
-	protected Reference createPractitionerReference(@NotNull Provider provider) {
+	protected Reference createPractitionerReference(@Nonnull Provider provider) {
 		Reference reference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + provider.getUuid())
 		        .setType(FhirConstants.PRACTITIONER);
 		
@@ -120,7 +130,7 @@ public abstract class BaseReferenceHandlingTranslator {
 		return reference;
 	}
 	
-	protected Reference createOrderReference(@NotNull Order order) {
+	protected Reference createOrderReference(@Nonnull Order order) {
 		if (order.getOrderType() == null) {
 			return null;
 		}

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -48,7 +50,7 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	private SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator<org.openmrs.Encounter>> searchQuery;
 	
 	@Override
-	public Encounter get(String uuid) {
+	public Encounter get(@Nonnull String uuid) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}

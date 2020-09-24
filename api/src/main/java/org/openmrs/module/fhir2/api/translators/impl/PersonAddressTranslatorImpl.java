@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.PersonAddress;
@@ -19,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class PersonAddressTranslatorImpl extends BaseAddressTranslatorImpl implements PersonAddressTranslator {
 	
 	@Override
-	public Address toFhirResource(PersonAddress address) {
+	public Address toFhirResource(@Nonnull PersonAddress address) {
 		if (address == null || address.getVoided()) {
 			return null;
 		}
@@ -46,7 +48,7 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslatorImpl imple
 	}
 	
 	@Override
-	public PersonAddress toOpenmrsType(Address address) {
+	public PersonAddress toOpenmrsType(@Nonnull Address address) {
 		if (address == null) {
 			return null;
 		}
@@ -55,7 +57,7 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslatorImpl imple
 	}
 	
 	@Override
-	public PersonAddress toOpenmrsType(PersonAddress personAddress, Address address) {
+	public PersonAddress toOpenmrsType(@Nonnull PersonAddress personAddress, @Nonnull Address address) {
 		if (personAddress == null || address == null) {
 			return personAddress;
 		}

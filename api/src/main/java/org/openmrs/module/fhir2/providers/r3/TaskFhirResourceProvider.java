@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Read
-	public Task getTaskById(@IdParam @NotNull IdType id) {
+	public Task getTaskById(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Task task = fhirTaskService.get(id.getIdPart());
 		if (task == null) {
 			throw new ResourceNotFoundException("Could not find task with Id " + id.getIdPart());

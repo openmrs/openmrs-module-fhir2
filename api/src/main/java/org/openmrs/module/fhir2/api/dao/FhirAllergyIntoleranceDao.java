@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import javax.annotation.Nonnull;
+
 import java.util.List;
 
 import org.openmrs.Allergy;
@@ -20,18 +22,18 @@ public interface FhirAllergyIntoleranceDao extends FhirDao<Allergy> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ALLERGIES)
-	Allergy get(String uuid);
+	Allergy get(@Nonnull String uuid);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.ADD_ALLERGIES, PrivilegeConstants.EDIT_ALLERGIES })
-	Allergy createOrUpdate(Allergy newEntry);
+	Allergy createOrUpdate(@Nonnull Allergy newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.DELETE_ALLERGIES)
-	Allergy delete(String uuid);
+	Allergy delete(@Nonnull String uuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ALLERGIES)
-	List<Allergy> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<Allergy> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

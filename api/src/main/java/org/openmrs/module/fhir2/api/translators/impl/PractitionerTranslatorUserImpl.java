@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Identifier;
@@ -40,7 +42,7 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 	private GenderTranslator genderTranslator;
 	
 	@Override
-	public Practitioner toFhirResource(User user) {
+	public Practitioner toFhirResource(@Nonnull User user) {
 		notNull(user, "The User object should not be null");
 		
 		Practitioner practitioner = new Practitioner();
@@ -67,7 +69,7 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 	}
 	
 	@Override
-	public User toOpenmrsType(User user, Practitioner practitioner) {
+	public User toOpenmrsType(@Nonnull User user, @Nonnull Practitioner practitioner) {
 		notNull(user, "The existing User object should not be null");
 		notNull(practitioner, "The Practitioner object should not be null");
 		
@@ -79,7 +81,7 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 	}
 	
 	@Override
-	public User toOpenmrsType(Practitioner practitioner) {
+	public User toOpenmrsType(@Nonnull Practitioner practitioner) {
 		notNull(practitioner, "The Practitioner object should not be null");
 		return this.toOpenmrsType(new User(), practitioner);
 	}

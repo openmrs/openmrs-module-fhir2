@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
@@ -28,7 +30,7 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 	private FhirPractitionerDao practitionerDao;
 	
 	@Override
-	public Encounter.EncounterParticipantComponent toFhirResource(EncounterProvider encounterProvider) {
+	public Encounter.EncounterParticipantComponent toFhirResource(@Nonnull EncounterProvider encounterProvider) {
 		if (encounterProvider == null || encounterProvider.getVoided()) {
 			return null;
 		}
@@ -39,8 +41,8 @@ public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTra
 	}
 	
 	@Override
-	public EncounterProvider toOpenmrsType(EncounterProvider encounterProvider,
-	        Encounter.EncounterParticipantComponent encounterParticipantComponent) {
+	public EncounterProvider toOpenmrsType(@Nonnull EncounterProvider encounterProvider,
+	        @Nonnull Encounter.EncounterParticipantComponent encounterParticipantComponent) {
 		notNull(encounterProvider, "The existing EncounterProvider object should not be null");
 		notNull(encounterParticipantComponent, "The EncounterParticipantComponent object should not be null");
 		

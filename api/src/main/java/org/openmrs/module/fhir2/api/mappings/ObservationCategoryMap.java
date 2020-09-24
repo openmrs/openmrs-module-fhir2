@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.mappings;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.Collection;
 
@@ -24,7 +24,7 @@ public class ObservationCategoryMap extends BaseMapping {
 		super("observationCategoryMap.properties");
 	}
 	
-	public String getCategory(@NotNull String conceptClassUuid) {
+	public String getCategory(@Nonnull String conceptClassUuid) {
 		Collection<String> categories = getKey(conceptClassUuid);
 		if (categories.isEmpty()) {
 			return null;
@@ -35,7 +35,7 @@ public class ObservationCategoryMap extends BaseMapping {
 		return categories.iterator().next();
 	}
 	
-	public String getConceptClassUuid(@NotNull String category) {
+	public String getConceptClassUuid(@Nonnull String category) {
 		return getValue(category).orElse(null);
 	}
 }

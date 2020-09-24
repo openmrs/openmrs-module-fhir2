@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
+import javax.annotation.Nonnull;
+
 import java.util.List;
 
 import org.openmrs.Encounter;
@@ -20,22 +22,22 @@ public interface FhirEncounterDao extends FhirDao<Encounter> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	Encounter get(String uuid);
+	Encounter get(@Nonnull String uuid);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.ADD_ENCOUNTERS, PrivilegeConstants.EDIT_ENCOUNTERS })
-	Encounter createOrUpdate(Encounter newEntry);
+	Encounter createOrUpdate(@Nonnull Encounter newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.DELETE_ENCOUNTERS)
-	Encounter delete(String uuid);
+	Encounter delete(@Nonnull String uuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	List<Encounter> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<Encounter> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

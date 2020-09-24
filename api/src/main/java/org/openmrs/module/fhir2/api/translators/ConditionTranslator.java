@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 public interface ConditionTranslator<T> extends OpenmrsFhirUpdatableTranslator<T, org.hl7.fhir.r4.model.Condition> {
 	
 	/**
@@ -18,7 +20,7 @@ public interface ConditionTranslator<T> extends OpenmrsFhirUpdatableTranslator<T
 	 * @return the corresponding FHIR condition resource
 	 */
 	@Override
-	org.hl7.fhir.r4.model.Condition toFhirResource(T condition);
+	org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull T condition);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Condition} to an <T> an openMrs condition
@@ -27,7 +29,7 @@ public interface ConditionTranslator<T> extends OpenmrsFhirUpdatableTranslator<T
 	 * @return the corresponding OpenMRS condition
 	 */
 	@Override
-	T toOpenmrsType(org.hl7.fhir.r4.model.Condition condition);
+	T toOpenmrsType(@Nonnull org.hl7.fhir.r4.model.Condition condition);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Condition} to an existing <T> an openMrs condition
@@ -37,5 +39,5 @@ public interface ConditionTranslator<T> extends OpenmrsFhirUpdatableTranslator<T
 	 * @return an updated version of the existingCondition
 	 */
 	@Override
-	T toOpenmrsType(T existingCondition, org.hl7.fhir.r4.model.Condition condition);
+	T toOpenmrsType(@Nonnull T existingCondition, @Nonnull org.hl7.fhir.r4.model.Condition condition);
 }

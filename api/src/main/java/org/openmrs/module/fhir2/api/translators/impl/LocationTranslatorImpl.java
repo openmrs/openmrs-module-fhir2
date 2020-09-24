@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.Objects;
@@ -60,7 +60,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	 * @see org.openmrs.module.fhir2.api.translators.LocationTranslator#toFhirResource(org.openmrs.Location)
 	 */
 	@Override
-	public Location toFhirResource(org.openmrs.Location openmrsLocation) {
+	public Location toFhirResource(@Nonnull org.openmrs.Location openmrsLocation) {
 		notNull(openmrsLocation, "The Openmrs Location object should not be null");
 		
 		Location fhirLocation = new Location();
@@ -109,7 +109,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		return fhirLocation;
 	}
 	
-	protected List<ContactPoint> getLocationContactDetails(@NotNull org.openmrs.Location location) {
+	protected List<ContactPoint> getLocationContactDetails(@Nonnull org.openmrs.Location location) {
 		return fhirLocationDao
 		        .getActiveAttributesByLocationAndAttributeTypeUuid(location,
 		            propertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_ATTRIBUTE_TYPE))
@@ -120,7 +120,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	 * @see org.openmrs.module.fhir2.api.translators.LocationTranslator#toOpenmrsType(org.hl7.fhir.r4.model.Location)
 	 */
 	@Override
-	public org.openmrs.Location toOpenmrsType(Location fhirLocation) {
+	public org.openmrs.Location toOpenmrsType(@Nonnull Location fhirLocation) {
 		notNull(fhirLocation, "The Location object should not be null");
 		return toOpenmrsType(new org.openmrs.Location(), fhirLocation);
 	}
@@ -130,7 +130,8 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	 *      org.hl7.fhir.r4.model.Location)
 	 */
 	@Override
-	public org.openmrs.Location toOpenmrsType(org.openmrs.Location openmrsLocation, Location fhirLocation) {
+	public org.openmrs.Location toOpenmrsType(@Nonnull org.openmrs.Location openmrsLocation,
+	        @Nonnull Location fhirLocation) {
 		notNull(openmrsLocation, "The existing Openmrs location should not be null");
 		notNull(fhirLocation, "The Location object should not be null");
 		

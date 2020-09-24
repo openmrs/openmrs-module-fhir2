@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -40,7 +42,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	@Override
-	public T get(String uuid) {
+	public T get(@Nonnull String uuid) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
@@ -58,7 +60,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	@Override
-	public T create(T newResource) {
+	public T create(@Nonnull T newResource) {
 		if (newResource == null) {
 			throw new InvalidRequestException("A resource of type " + resourceClass.getSimpleName() + " must be supplied");
 		}
@@ -72,7 +74,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public T update(String uuid, T updatedResource) {
+	public T update(@Nonnull String uuid, @Nonnull T updatedResource) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
@@ -109,7 +111,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	@Override
-	public T delete(String uuid) {
+	public T delete(@Nonnull String uuid) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}

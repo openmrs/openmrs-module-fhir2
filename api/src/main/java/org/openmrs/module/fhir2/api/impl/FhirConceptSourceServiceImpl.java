@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.annotation.Nonnull;
+
 import java.util.Collection;
 import java.util.Optional;
 
@@ -37,13 +39,13 @@ public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(String url) {
+	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
 		return dao.getFhirConceptSourceByUrl(url);
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(String sourceName) {
+	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
 		return dao.getFhirConceptSourceByConceptSourceName(sourceName);
 	}
 }

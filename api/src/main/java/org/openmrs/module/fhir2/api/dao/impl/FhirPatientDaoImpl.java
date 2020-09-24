@@ -15,6 +15,7 @@ import static org.hibernate.criterion.Restrictions.in;
 import static org.hibernate.criterion.Restrictions.or;
 import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -37,7 +38,7 @@ import org.springframework.stereotype.Component;
 public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPatientDao {
 	
 	@Override
-	public Patient getPatientById(Integer id) {
+	public Patient getPatientById(@Nonnull Integer id) {
 		return (Patient) getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(eq("patientId", id))
 		        .uniqueResult();
 	}
@@ -124,7 +125,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	}
 	
 	@Override
-	protected String paramToProp(String param) {
+	protected String paramToProp(@Nonnull String param) {
 		if (SP_DEATH_DATE.equalsIgnoreCase(param)) {
 			return "deathDate";
 		}

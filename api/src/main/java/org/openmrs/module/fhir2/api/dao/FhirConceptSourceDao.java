@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -24,8 +24,8 @@ public interface FhirConceptSourceDao {
 	Collection<FhirConceptSource> getFhirConceptSources();
 	
 	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
-	Optional<FhirConceptSource> getFhirConceptSourceByUrl(@NotNull String url);
+	Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url);
 	
 	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
-	Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@NotNull String sourceName);
+	Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName);
 }

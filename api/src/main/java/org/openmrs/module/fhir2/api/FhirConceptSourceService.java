@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -20,7 +20,7 @@ public interface FhirConceptSourceService {
 	
 	Collection<FhirConceptSource> getFhirConceptSources();
 	
-	Optional<FhirConceptSource> getFhirConceptSourceByUrl(@NotNull String url);
+	Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url);
 	
-	Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@NotNull String sourceName);
+	Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName);
 }

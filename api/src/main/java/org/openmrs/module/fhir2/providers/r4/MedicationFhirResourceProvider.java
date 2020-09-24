@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -53,7 +53,7 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	
 	@Read
 	@SuppressWarnings("unused")
-	public Medication getMedicationByUuid(@IdParam @NotNull IdType id) {
+	public Medication getMedicationByUuid(@IdParam @Nonnull IdType id) {
 		Medication medication = fhirMedicationService.get(id.getIdPart());
 		if (medication == null) {
 			throw new ResourceNotFoundException("Could not find medication with Id " + id.getIdPart());
@@ -81,7 +81,7 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	@SuppressWarnings("unused")
-	public OperationOutcome deleteMedication(@IdParam @NotNull IdType id) {
+	public OperationOutcome deleteMedication(@IdParam @Nonnull IdType id) {
 		Medication medication = fhirMedicationService.delete(id.getIdPart());
 		if (medication == null) {
 			throw new ResourceNotFoundException("Could not find medication to update with id " + id.getIdPart());

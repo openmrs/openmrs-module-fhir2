@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.ContactPoint;
 
 public interface TelecomTranslator<T> extends ToFhirTranslator<T, ContactPoint>, UpdatableOpenmrsTranslator<T, ContactPoint> {
@@ -20,7 +22,7 @@ public interface TelecomTranslator<T> extends ToFhirTranslator<T, ContactPoint>,
 	 * @return the corresponding FHIR ContactPoint resource
 	 */
 	@Override
-	ContactPoint toFhirResource(T attribute);
+	ContactPoint toFhirResource(@Nonnull T attribute);
 	
 	/**
 	 * Maps a FHIR {@link ContactPoint} to a corresponding Openmrs attribute
@@ -30,5 +32,5 @@ public interface TelecomTranslator<T> extends ToFhirTranslator<T, ContactPoint>,
 	 * @return an updated or mapped version of the openMrs attribute
 	 */
 	@Override
-	T toOpenmrsType(T existingAttribute, ContactPoint contactPoint);
+	T toOpenmrsType(@Nonnull T existingAttribute, @Nonnull ContactPoint contactPoint);
 }

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Dosage;
 import org.openmrs.DrugOrder;
 
@@ -21,5 +23,5 @@ public interface DosageTranslator extends ToFhirTranslator<DrugOrder, Dosage> {
 	 * @return the corresponding Dosage FHIR resource
 	 */
 	@Override
-	Dosage toFhirResource(DrugOrder drugOrder);
+	Dosage toFhirResource(@Nonnull DrugOrder drugOrder);
 }

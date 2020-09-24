@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Medication;
 import org.openmrs.Drug;
 
@@ -21,7 +23,7 @@ public interface MedicationTranslator extends ToFhirTranslator<Drug, Medication>
 	 * @return the corresponding FHIR Medication resource
 	 */
 	@Override
-	Medication toFhirResource(Drug drug);
+	Medication toFhirResource(@Nonnull Drug drug);
 	
 	/**
 	 * Maps {@link org.hl7.fhir.r4.model.Medication} to {@link org.openmrs.Drug}
@@ -30,7 +32,7 @@ public interface MedicationTranslator extends ToFhirTranslator<Drug, Medication>
 	 * @return the corresponding OpenMrs Drug object
 	 */
 	@Override
-	Drug toOpenmrsType(Medication medication);
+	Drug toOpenmrsType(@Nonnull Medication medication);
 	
 	/**
 	 * Maps {@link org.hl7.fhir.r4.model.Medication} to {@link org.openmrs.Drug}
@@ -40,5 +42,5 @@ public interface MedicationTranslator extends ToFhirTranslator<Drug, Medication>
 	 * @return the updated OpenMrs Drug object
 	 */
 	@Override
-	Drug toOpenmrsType(Drug existingDrug, Medication medication);
+	Drug toOpenmrsType(@Nonnull Drug existingDrug, @Nonnull Medication medication);
 }

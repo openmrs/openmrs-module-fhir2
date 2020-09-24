@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
@@ -18,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class MedicationRequestPriorityTranslatorImpl implements MedicationRequestPriorityTranslator {
 	
 	@Override
-	public MedicationRequest.MedicationRequestPriority toFhirResource(DrugOrder.Urgency urgency) {
+	public MedicationRequest.MedicationRequestPriority toFhirResource(@Nonnull DrugOrder.Urgency urgency) {
 		switch (urgency) {
 			case ROUTINE:
 			case ON_SCHEDULED_DATE:
@@ -31,7 +33,7 @@ public class MedicationRequestPriorityTranslatorImpl implements MedicationReques
 	}
 	
 	@Override
-	public DrugOrder.Urgency toOpenmrsType(MedicationRequest.MedicationRequestPriority medicationRequestPriority) {
+	public DrugOrder.Urgency toOpenmrsType(@Nonnull MedicationRequest.MedicationRequestPriority medicationRequestPriority) {
 		switch (medicationRequestPriority) {
 			case ROUTINE:
 				return DrugOrder.Urgency.ROUTINE;

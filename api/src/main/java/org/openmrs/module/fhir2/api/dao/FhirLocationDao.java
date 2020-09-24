@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -23,26 +23,26 @@ public interface FhirLocationDao extends FhirDao<Location> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
-	Location get(String uuid);
+	Location get(@Nonnull String uuid);
 	
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
-	List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@NotNull Location location,
-	        @NotNull String locationAttributeTypeUuid);
+	List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@Nonnull Location location,
+	        @Nonnull String locationAttributeTypeUuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.MANAGE_LOCATIONS)
-	Location createOrUpdate(Location newEntry);
+	Location createOrUpdate(@Nonnull Location newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.MANAGE_LOCATIONS)
-	Location delete(String uuid);
+	Location delete(@Nonnull String uuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
-	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
-	List<Location> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<Location> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

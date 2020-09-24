@@ -12,6 +12,8 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 
+import javax.annotation.Nonnull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +62,7 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	}
 	
 	@Override
-	public FhirTask createOrUpdate(FhirTask task) throws DAOException {
+	public FhirTask createOrUpdate(@Nonnull FhirTask task) throws DAOException {
 		// TODO: Refactor - and figure out why CascadeType.ALL does not take care of this.
 		if (task.getOwnerReference() != null && task.getOwnerReference().getReference() != null) {
 			getSessionFactory().getCurrentSession().saveOrUpdate(task.getOwnerReference());

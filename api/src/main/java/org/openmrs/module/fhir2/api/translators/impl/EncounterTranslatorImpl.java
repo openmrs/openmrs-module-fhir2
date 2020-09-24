@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
@@ -49,7 +51,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	private EncounterReferenceTranslator<Visit> encounterReferenceTranslator;
 	
 	@Override
-	public Encounter toFhirResource(org.openmrs.Encounter openMrsEncounter) {
+	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openMrsEncounter) {
 		notNull(openMrsEncounter, "The Openmrs Encounter object should not be null");
 		
 		Encounter encounter = new Encounter();
@@ -77,13 +79,14 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	}
 	
 	@Override
-	public org.openmrs.Encounter toOpenmrsType(Encounter fhirEncounter) {
+	public org.openmrs.Encounter toOpenmrsType(@Nonnull Encounter fhirEncounter) {
 		notNull(fhirEncounter, "The Encounter object should not be null");
 		return this.toOpenmrsType(new org.openmrs.Encounter(), fhirEncounter);
 	}
 	
 	@Override
-	public org.openmrs.Encounter toOpenmrsType(org.openmrs.Encounter existingEncounter, Encounter encounter) {
+	public org.openmrs.Encounter toOpenmrsType(@Nonnull org.openmrs.Encounter existingEncounter,
+	        @Nonnull Encounter encounter) {
 		notNull(existingEncounter, "The existing Openmrs Encounter object should not be null");
 		notNull(encounter, "The Encounter object should not be null");
 		

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Patient;
 
 public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.openmrs.Patient, Patient> {
@@ -20,7 +22,7 @@ public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.op
 	 * @return the corresponding FHIR patient
 	 */
 	@Override
-	Patient toFhirResource(org.openmrs.Patient patient);
+	Patient toFhirResource(@Nonnull org.openmrs.Patient patient);
 	
 	/**
 	 * Maps a {@link Patient} to a {@link org.openmrs.Patient}
@@ -29,7 +31,7 @@ public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.op
 	 * @return the corresponding OpenMRS patient
 	 */
 	@Override
-	org.openmrs.Patient toOpenmrsType(Patient patient);
+	org.openmrs.Patient toOpenmrsType(@Nonnull Patient patient);
 	
 	/**
 	 * Maps a {@link Patient} to an existing {@link org.openmrs.Patient}
@@ -39,6 +41,6 @@ public interface PatientTranslator extends OpenmrsFhirUpdatableTranslator<org.op
 	 * @return the updated OpenMRS patient
 	 */
 	@Override
-	org.openmrs.Patient toOpenmrsType(org.openmrs.Patient currentPatient, Patient patient);
+	org.openmrs.Patient toOpenmrsType(@Nonnull org.openmrs.Patient currentPatient, @Nonnull Patient patient);
 	
 }

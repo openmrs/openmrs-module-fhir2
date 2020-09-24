@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 public interface FhirMedicationRequestService extends FhirService<MedicationRequest> {
 	
 	@Override
-	MedicationRequest get(@NotNull String uuid);
+	MedicationRequest get(@Nonnull String uuid);
 	
 	IBundleProvider searchForMedicationRequests(ReferenceAndListParam patientReference,
 	        ReferenceAndListParam encounterReference, TokenAndListParam code, ReferenceAndListParam participantReference,

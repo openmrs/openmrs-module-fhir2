@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,7 +40,7 @@ public class CohortListEntryTranslatorImpl_2_1 extends CohortListEntryTranslator
 	private FhirPatientDao patientDao;
 	
 	@Override
-	public List<ListResource.ListEntryComponent> toFhirResource(Cohort cohort) {
+	public List<ListResource.ListEntryComponent> toFhirResource(@Nonnull Cohort cohort) {
 		if (cohort == null) {
 			return null;
 		}
@@ -57,7 +59,7 @@ public class CohortListEntryTranslatorImpl_2_1 extends CohortListEntryTranslator
 	}
 	
 	@Override
-	public Cohort toOpenmrsType(Cohort existingCohort, List<ListResource.ListEntryComponent> cohortList) {
+	public Cohort toOpenmrsType(@Nonnull Cohort existingCohort, @Nonnull List<ListResource.ListEntryComponent> cohortList) {
 		if (cohortList == null || cohortList.isEmpty()) {
 			return existingCohort;
 		}

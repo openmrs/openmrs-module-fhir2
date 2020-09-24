@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -22,29 +22,29 @@ import org.openmrs.util.PrivilegeConstants;
 public interface FhirPatientDao extends FhirDao<Patient> {
 	
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
-	Patient getPatientById(@NotNull Integer id);
+	Patient getPatientById(@Nonnull Integer id);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
-	Patient get(String uuid);
+	Patient get(@Nonnull String uuid);
 	
 	@Authorized(PrivilegeConstants.GET_PATIENT_IDENTIFIERS)
 	PatientIdentifierType getPatientIdentifierTypeByNameOrUuid(String name, String uuid);
 	
 	@Override
 	@Authorized({ PrivilegeConstants.ADD_PATIENTS, PrivilegeConstants.EDIT_PATIENTS })
-	Patient createOrUpdate(Patient newEntry);
+	Patient createOrUpdate(@Nonnull Patient newEntry);
 	
 	@Override
 	@Authorized(PrivilegeConstants.DELETE_PATIENTS)
-	Patient delete(String uuid);
+	Patient delete(@Nonnull String uuid);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
-	List<String> getSearchResultUuids(SearchParameterMap theParams);
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
-	List<Patient> getSearchResults(SearchParameterMap theParams, List<String> matchingResourceUuids, int firstResult,
-	        int lastResult);
+	List<Patient> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult);
 }

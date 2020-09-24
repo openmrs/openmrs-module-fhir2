@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -33,7 +35,7 @@ public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> exten
 	private static final String MESSAGE = "";
 	
 	@Override
-	public Condition get(String uuid) {
+	public Condition get(@Nonnull String uuid) {
 		throw new FhirNotImplementedException(MESSAGE);
 	}
 	
@@ -55,7 +57,7 @@ public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> exten
 	}
 	
 	@Override
-	public Condition saveCondition(Condition condition) {
+	public Condition saveCondition(@Nonnull Condition condition) {
 		throw new FhirNotImplementedException(MESSAGE);
 	}
 }

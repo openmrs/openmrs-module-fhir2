@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -23,7 +23,7 @@ import org.openmrs.PatientIdentifierType;
 public interface FhirPatientService extends FhirService<Patient> {
 	
 	@Override
-	Patient get(@NotNull String uuid);
+	Patient get(@Nonnull String uuid);
 	
 	PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier);
 	

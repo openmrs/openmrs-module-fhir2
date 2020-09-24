@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Identifier;
 import org.openmrs.PatientIdentifier;
 
@@ -21,7 +23,7 @@ public interface PatientIdentifierTranslator extends OpenmrsFhirUpdatableTransla
 	 * @return the corresponding FHIR identifier
 	 */
 	@Override
-	Identifier toFhirResource(PatientIdentifier identifier);
+	Identifier toFhirResource(@Nonnull PatientIdentifier identifier);
 	
 	/**
 	 * Maps a {@link Identifier} to a {@link PatientIdentifier}
@@ -30,7 +32,7 @@ public interface PatientIdentifierTranslator extends OpenmrsFhirUpdatableTransla
 	 * @return the corresponding OpenMRS patient identifier
 	 */
 	@Override
-	PatientIdentifier toOpenmrsType(Identifier identifier);
+	PatientIdentifier toOpenmrsType(@Nonnull Identifier identifier);
 	
 	/**
 	 * Maps a {@link Identifier} to an existing {@link PatientIdentifier}
@@ -40,5 +42,5 @@ public interface PatientIdentifierTranslator extends OpenmrsFhirUpdatableTransla
 	 * @return the updated patient identifier
 	 */
 	@Override
-	PatientIdentifier toOpenmrsType(PatientIdentifier patientIdentifier, Identifier identifier);
+	PatientIdentifier toOpenmrsType(@Nonnull PatientIdentifier patientIdentifier, @Nonnull Identifier identifier);
 }

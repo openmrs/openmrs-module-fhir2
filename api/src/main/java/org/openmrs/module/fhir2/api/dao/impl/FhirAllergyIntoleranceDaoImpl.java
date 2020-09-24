@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.Map;
 import java.util.Optional;
@@ -42,7 +42,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
-	public Allergy createOrUpdate(Allergy allergy) {
+	public Allergy createOrUpdate(@Nonnull Allergy allergy) {
 		Allergy savedAllergy = super.createOrUpdate(allergy);
 		
 		for (AllergyReaction reaction : allergy.getReactions()) {
@@ -160,7 +160,7 @@ public class FhirAllergyIntoleranceDaoImpl extends BaseFhirDao<Allergy> implemen
 	}
 	
 	@Override
-	protected String paramToProp(@NotNull String param) {
+	protected String paramToProp(@Nonnull String param) {
 		if (AllergyIntolerance.SP_SEVERITY.equals(param)) {
 			return "severity";
 		}

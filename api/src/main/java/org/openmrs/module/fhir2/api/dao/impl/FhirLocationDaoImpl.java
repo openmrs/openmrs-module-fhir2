@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,8 +69,8 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(Location location,
-	        String locationAttributeTypeUuid) {
+	public List<LocationAttribute> getActiveAttributesByLocationAndAttributeTypeUuid(@Nonnull Location location,
+	        @Nonnull String locationAttributeTypeUuid) {
 		return (List<LocationAttribute>) getSessionFactory().getCurrentSession().createCriteria(LocationAttribute.class)
 		        .createAlias("location", "l", JoinType.INNER_JOIN, eq("l.id", location.getId()))
 		        .createAlias("attributeType", "lat").add(eq("lat.uuid", locationAttributeTypeUuid)).add(eq("voided", false))
@@ -110,7 +110,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	@Override
-	protected String paramToProp(@NotNull String param) {
+	protected String paramToProp(@Nonnull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Location.SP_NAME:
 				return "name";

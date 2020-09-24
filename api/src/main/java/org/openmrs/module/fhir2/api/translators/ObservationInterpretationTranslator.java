@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Obs;
 
@@ -21,7 +23,7 @@ public interface ObservationInterpretationTranslator extends ToFhirTranslator<Ob
 	 * @return a FHIR CodeableConcept representing the interpretation of this Observation if any
 	 */
 	@Override
-	CodeableConcept toFhirResource(Obs obs);
+	CodeableConcept toFhirResource(@Nonnull Obs obs);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.CodeableConcept} to an {@link Obs}
@@ -31,5 +33,5 @@ public interface ObservationInterpretationTranslator extends ToFhirTranslator<Ob
 	 * @return the OpenMRS observation with the interpretation updated
 	 */
 	@Override
-	Obs toOpenmrsType(Obs existingObs, CodeableConcept resource);
+	Obs toOpenmrsType(@Nonnull Obs existingObs, @Nonnull CodeableConcept resource);
 }

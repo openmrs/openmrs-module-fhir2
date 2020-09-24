@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.Observation;
 public interface FhirObservationService extends FhirService<Observation> {
 	
 	@Override
-	Observation get(@NotNull String uuid);
+	Observation get(@Nonnull String uuid);
 	
 	IBundleProvider searchForObservations(ReferenceAndListParam encounterReference, ReferenceAndListParam patientReference,
 	        ReferenceParam hasMemberReference, TokenAndListParam valueConcept, DateRangeParam valueDateParam,

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.Location;
 
@@ -22,7 +24,7 @@ public interface EncounterLocationTranslator extends ToFhirTranslator<Location, 
 	 * @return the corresponding FHIR Encounter.EncounterLocationComponent resource
 	 */
 	@Override
-	Encounter.EncounterLocationComponent toFhirResource(Location location);
+	Encounter.EncounterLocationComponent toFhirResource(@Nonnull Location location);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent} to an existing
@@ -32,5 +34,5 @@ public interface EncounterLocationTranslator extends ToFhirTranslator<Location, 
 	 * @return an updated version of the location
 	 */
 	@Override
-	Location toOpenmrsType(Encounter.EncounterLocationComponent encounterLocationComponent);
+	Location toOpenmrsType(@Nonnull Encounter.EncounterLocationComponent encounterLocationComponent);
 }

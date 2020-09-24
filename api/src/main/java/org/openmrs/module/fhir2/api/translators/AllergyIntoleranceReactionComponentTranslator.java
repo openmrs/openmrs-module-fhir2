@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.openmrs.Allergy;
 
@@ -23,7 +25,7 @@ public interface AllergyIntoleranceReactionComponentTranslator extends ToFhirTra
 	 *         {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent}
 	 */
 	@Override
-	AllergyIntolerance.AllergyIntoleranceReactionComponent toFhirResource(Allergy allergy);
+	AllergyIntolerance.AllergyIntoleranceReactionComponent toFhirResource(@Nonnull Allergy allergy);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent} to a
@@ -33,5 +35,6 @@ public interface AllergyIntoleranceReactionComponentTranslator extends ToFhirTra
 	 * @return the updated {@link org.openmrs.Allergy} object
 	 */
 	@Override
-	Allergy toOpenmrsType(Allergy allergy, AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent);
+	Allergy toOpenmrsType(@Nonnull Allergy allergy,
+	        @Nonnull AllergyIntolerance.AllergyIntoleranceReactionComponent reactionComponent);
 }

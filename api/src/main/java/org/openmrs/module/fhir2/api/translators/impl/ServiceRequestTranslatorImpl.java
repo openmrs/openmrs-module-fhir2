@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import javax.annotation.Nonnull;
+
 import java.util.Collections;
 
 import lombok.AccessLevel;
@@ -45,7 +47,7 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 	private PractitionerReferenceTranslator<Provider> providerReferenceTranslator;
 	
 	@Override
-	public ServiceRequest toFhirResource(TestOrder order) {
+	public ServiceRequest toFhirResource(@Nonnull TestOrder order) {
 		notNull(order, "The TestOrder object should not be null");
 		
 		ServiceRequest serviceRequest = new ServiceRequest();
@@ -75,7 +77,7 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 	}
 	
 	@Override
-	public TestOrder toOpenmrsType(ServiceRequest resource) {
+	public TestOrder toOpenmrsType(@Nonnull ServiceRequest resource) {
 		throw new UnsupportedOperationException();
 	}
 }

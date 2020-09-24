@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
@@ -21,7 +23,7 @@ import org.springframework.stereotype.Component;
 public class ReferenceTranslatorImpl implements ReferenceTranslator {
 	
 	@Override
-	public Reference toFhirResource(FhirReference openmrsTask) {
+	public Reference toFhirResource(@Nonnull FhirReference openmrsTask) {
 		Reference fhirReference = null;
 		
 		if (openmrsTask != null) {
@@ -34,7 +36,7 @@ public class ReferenceTranslatorImpl implements ReferenceTranslator {
 	}
 	
 	@Override
-	public FhirReference toOpenmrsType(Reference fhirReference) {
+	public FhirReference toOpenmrsType(@Nonnull Reference fhirReference) {
 		FhirReference openmrsReference = null;
 		
 		if (fhirReference != null) {
@@ -48,7 +50,7 @@ public class ReferenceTranslatorImpl implements ReferenceTranslator {
 	}
 	
 	@Override
-	public FhirReference toOpenmrsType(FhirReference openmrsReference, Reference fhirReference) {
+	public FhirReference toOpenmrsType(@Nonnull FhirReference openmrsReference, @Nonnull Reference fhirReference) {
 		if (fhirReference != null) {
 			if (openmrsReference == null) {
 				openmrsReference = new FhirReference();

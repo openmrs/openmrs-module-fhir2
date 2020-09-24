@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class ObservationReferenceRangeTranslatorImpl implements ObservationReferenceRangeTranslator {
 	
 	@Override
-	public List<Observation.ObservationReferenceRangeComponent> toFhirResource(ConceptNumeric conceptNumeric) {
+	public List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull ConceptNumeric conceptNumeric) {
 		if (conceptNumeric != null) {
 			List<Observation.ObservationReferenceRangeComponent> observationReferenceRangeComponentList = new ArrayList<>();
 			if (conceptNumeric.getHiNormal() != null && conceptNumeric.getLowNormal() != null) {
