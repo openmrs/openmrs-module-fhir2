@@ -13,7 +13,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
     <changeSet id="add_fhir_concept_source_20200105" author="ibacher">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <not>
                 <tableExists tableName="fhir_concept_source"/>
             </not>
@@ -63,11 +63,14 @@
     </changeSet>
 
     <changeSet id="add_loinc_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
-        <preConditions onError="WARN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source"/>
                 <tableExists tableName="concept_reference_source"/>
                 <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='LOINC' and retired = 0
+                </sqlCheck>
+                <sqlCheck expectedResult="0">select count(*) from fhir_concept_source where uuid =
+                    '249b13c8-72fa-4b96-8d3d-b200efed985e'
                 </sqlCheck>
             </and>
         </preConditions>
@@ -80,11 +83,14 @@
     </changeSet>
 
     <changeSet id="add_ciel_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
-        <preConditions onError="WARN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source"/>
                 <tableExists tableName="concept_reference_source"/>
                 <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='CIEL' and retired = 0
+                </sqlCheck>
+                <sqlCheck expectedResult="0">select count(*) from fhir_concept_source where uuid =
+                    '2b3c1ff8-768a-102f-83f4-12313b04a615'
                 </sqlCheck>
             </and>
         </preConditions>
@@ -106,8 +112,9 @@
             where url = 'urn:oid:2.16.840.1.113883.3.7201'
         ]]></sql>
     </changeSet>
+
     <changeSet id="add_fhir_task_20200311" author="pmanko">
-        <preConditions onFail="WARN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <not>
                 <tableExists tableName="fhir_task"/>
             </not>
@@ -165,13 +172,12 @@
     </changeSet>
 
     <changeSet id="add_fhir_reference_20200311" author="pmanko">
-        <preConditions onFail="WARN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <not>
                 <tableExists tableName="fhir_reference"/>
             </not>
             <tableExists tableName="fhir_task"/>
         </preConditions>
-
         <createTable tableName="fhir_reference">
             <column name="reference_id" type="int" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -213,7 +219,6 @@
         <addForeignKeyConstraint baseTableName="fhir_reference" baseColumnNames="retired_by"
                                  constraintName="fhir_reference_retired_by_fk"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
-
         <addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="owner_reference_id"
                                  constraintName="task_owner_reference_fk"
                                  referencedTableName="fhir_reference"
@@ -229,14 +234,13 @@
     </changeSet>
 
     <changeSet id="add_based_on_reference_join_table_20200311" author="pmanko">
-        <preConditions onFail="WARN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <not>
                 <tableExists tableName="fhir_task_based_on_reference"/>
             </not>
             <tableExists tableName="fhir_task"/>
             <tableExists tableName="fhir_reference"/>
         </preConditions>
-
         <createTable tableName="fhir_task_based_on_reference">
             <column name="task_id" type="int">
                 <constraints nullable="false"/>
@@ -245,7 +249,6 @@
                 <constraints nullable="false" unique="true"/>
             </column>
         </createTable>
-
         <addForeignKeyConstraint baseTableName="fhir_task_based_on_reference" baseColumnNames="task_id"
                                  constraintName="task_based_on_fk"
                                  referencedTableName="fhir_task"
@@ -258,14 +261,13 @@
 
 
     <changeSet id="add_fhir_task_output_20200311" author="pmanko">
-        <preConditions onFail="WARN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <not>
                 <tableExists tableName="fhir_task_output"/>
             </not>
             <tableExists tableName="fhir_task"/>
             <tableExists tableName="fhir_reference"/>
         </preConditions>
-
         <createTable tableName="fhir_task_output">
             <column name="task_output_id" type="int" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -300,7 +302,6 @@
                 <constraints nullable="false" unique="true"/>
             </column>
         </createTable>
-
         <addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="creator"
                                  constraintName="fhir_task_output_creator_fk"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
@@ -314,7 +315,6 @@
                                  constraintName="output_type_fk"
                                  referencedTableName="concept"
                                  referencedColumnNames="concept_id"/>
-
         <addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="value_reference_id"
                                  constraintName="output_reference_fk"
                                  referencedTableName="fhir_reference"
@@ -326,12 +326,11 @@
     </changeSet>
 
     <changeSet id="add_fhir_task_input_20200308" author="pmanko">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <not>
                 <tableExists tableName="fhir_task_input"/>
             </not>
         </preConditions>
-
         <createTable tableName="fhir_task_input">
             <column name="task_input_id" type="int" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -389,7 +388,7 @@
     </changeSet>
 
     <changeSet id="add_target_uuid_to_fhir_reference_202020917" author="ibacher" dbms="mysql,mariadb,postgresql">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <tableExists tableName="fhir_reference"/>
             <not>
                 <columnExists tableName="fhir_reference" columnName="target_uuid"/>
@@ -405,9 +404,9 @@
             set target_uuid = substring(reference from position('/' in reference) + 1)
         </sql>
     </changeSet>
-    
+
     <changeSet id="add_fhir_diagnostic_report_20200917" author="ibacher">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <not>
                 <tableExists tableName="fhir_diagnostic_report"/>
             </not>
@@ -444,7 +443,6 @@
                 <constraints nullable="false" unique="true"/>
             </column>
         </createTable>
-
         <addForeignKeyConstraint constraintName="fhir_diagnostic_report_creator"
                                  baseTableName="fhir_diagnostic_report" baseColumnNames="creator"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
@@ -466,7 +464,7 @@
     </changeSet>
 
     <changeSet id="add_fhir_diagnostic_report_performers_20200917" author="ibacher">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="MARK_RAN" onError="WARN">
             <not>
                 <tableExists tableName="fhir_diagnostic_report_performers"/>
             </not>
