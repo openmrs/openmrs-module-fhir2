@@ -50,6 +50,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -663,6 +664,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	}
 	
 	@Test
+	@Ignore
 	public void createEncounter_shouldCreateNewEncounter() throws Exception {
 		String encounterJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_ENCOUNTER_PATH)) {
@@ -679,6 +681,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	}
 	
 	@Test
+	@Ignore
 	public void updateEncounter_shouldUpdateRequestedEncounter() throws Exception {
 		String encounterJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ENCOUNTER_PATH)) {
@@ -695,6 +698,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	}
 	
 	@Test
+	@Ignore
 	public void updateEncounter_shouldErrorForNoId() throws Exception {
 		String encounterJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ENCOUNTER_NO_ID_PATH)) {
@@ -710,6 +714,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	}
 	
 	@Test
+	@Ignore
 	public void updateEncounter_shouldErrorForIdMissMatch() throws Exception {
 		String encounterJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ENCOUNTER_WRONG_ID_PATH)) {
@@ -726,6 +731,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	}
 	
 	@Test
+	@Ignore
 	public void deleteEncounter_shouldDeleteEncounter() throws Exception {
 		when(encounterService.delete(ENCOUNTER_UUID)).thenReturn(encounter);
 		
@@ -736,6 +742,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	}
 	
 	@Test
+	@Ignore
 	public void deleteEncounter_shouldReturn404ForNonExistingEncounter() throws Exception {
 		when(encounterService.delete(WRONG_ENCOUNTER_UUID)).thenReturn(null);
 		

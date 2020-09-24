@@ -13,15 +13,12 @@ import javax.annotation.Nonnull;
 
 import java.util.List;
 
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -68,13 +65,11 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		return encounter;
 	}
 	
-	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createEncounter(@ResourceParam Encounter encounter) {
 		return FhirProviderUtils.buildCreate(encounterService.create(encounter));
 	}
 	
-	@Update
 	@SuppressWarnings("unused")
 	public MethodOutcome updateEncounter(@IdParam IdType id, @ResourceParam Encounter encounter) {
 		if (id == null || id.getIdPart() == null) {
@@ -84,7 +79,6 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildUpdate(encounterService.update(id.getIdPart(), encounter));
 	}
 	
-	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteEncounter(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Encounter encounter = encounterService.delete(id.getIdPart());

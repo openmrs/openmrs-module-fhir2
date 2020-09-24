@@ -27,11 +27,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<EncounterFhirResourceProvider, Encounter> {
@@ -318,30 +316,5 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		    hasItems(hasProperty("location", hasProperty("reference", equalTo("Location/" + LOCATION_UUID))))))));
 		assertThat(entries, everyItem(hasResource(
 		    hasProperty("location", hasItems(hasProperty("location", hasProperty("display", equalTo("Test Location"))))))));
-	}
-	
-	@Test
-	public void shouldDeleteExistingEncounter() throws Exception {
-		MockHttpServletResponse response = delete("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		
-		response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, statusEquals(HttpStatus.GONE));
-	}
-	
-	@Test
-	public void shouldReturnNotFoundWhenDeletingNonExistentEncounter() throws Exception {
-		MockHttpServletResponse response = delete("/Encounter/" + BAD_ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		OperationOutcome operationOutcome = readOperationOutcome(response);
-		
-		assertThat(operationOutcome, notNullValue());
-		assertThat(operationOutcome.hasIssue(), is(true));
 	}
 }
