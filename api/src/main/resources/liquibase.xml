@@ -96,6 +96,16 @@
         ]]></sql>
     </changeSet>
 
+    <changeSet id="change_ciel_url_fhir_concept_source_20200820" author="ibacher" dbms="mysql,mariadb,postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <sqlCheck expectedResult="1">select 1 from fhir_concept_source where url = 'urn:oid:2.16.840.1.113883.3.7201'
+            </sqlCheck>
+        </preConditions>
+        <sql><![CDATA[
+            update fhir_concept_source set url = 'https://openconceptlab.org/orgs/CIEL/sources/CIEL/'
+            where url = 'urn:oid:2.16.840.1.113883.3.7201'
+        ]]></sql>
+    </changeSet>
     <changeSet id="add_fhir_task_20200311" author="pmanko">
         <preConditions onFail="WARN">
             <not>
