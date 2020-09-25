@@ -19,7 +19,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Type;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
-import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
@@ -92,7 +91,7 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 		PatientIdentifierType type = patientService.getPatientIdentifierTypeByIdentifier(identifier);
 		if (type == null && patientIdentifier.getIdentifierType() == null) {
 			// TODO implement error handling
-			throw new APIException("cannot find identifier type for " + identifier.getId());
+			throw new UnsupportedOperationException("cannot find identifier type for " + identifier.getId());
 		}
 		
 		patientIdentifier.setIdentifierType(type);
