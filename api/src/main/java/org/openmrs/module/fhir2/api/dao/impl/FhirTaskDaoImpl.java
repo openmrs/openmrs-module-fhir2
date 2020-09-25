@@ -80,7 +80,12 @@ public class FhirTaskDaoImpl extends BaseFhirDao<FhirTask> implements FhirTaskDa
 	private Optional<Criterion> handleStatus(TokenAndListParam tokenAndListParam) {
 		return handleAndListParam(tokenAndListParam, token -> {
 			if (token.getValue() != null) {
-				return Optional.of(eq("status", FhirTask.TaskStatus.valueOf(token.getValue())));
+				try {
+					return Optional.of(eq("status", FhirTask.TaskStatus.valueOf(token.getValue().toUpperCase())));
+				}
+				catch (IllegalArgumentException e) {
+					return Optional.empty();
+				}
 			}
 			
 			return Optional.empty();

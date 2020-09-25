@@ -7,7 +7,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>integration-tests</artifactId>
+    <artifactId>fhir2-integration-tests</artifactId>
     <name>FHIR2 Integration Tests</name>
     <description>Integration Tests for the FHIR2 Module</description>
 
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>org.openmrs.web</groupId>
             <artifactId>openmrs-web</artifactId>
-            <version>${openmrsPlatformToolsVersion}</version>
+            <version>${openmrsPlatformVersion}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

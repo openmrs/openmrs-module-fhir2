@@ -118,7 +118,11 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		
 		fhirTask.setAuthoredOn(openmrsTask.getDateCreated());
 		
-		fhirTask.setLastModified(openmrsTask.getDateChanged());
+		if (openmrsTask.getDateChanged() != null) {
+			fhirTask.setLastModified(openmrsTask.getDateChanged());
+		} else {
+			fhirTask.setLastModified(openmrsTask.getDateCreated());
+		}
 		
 		fhirTask.getMeta().setLastUpdated(openmrsTask.getDateChanged());
 	}

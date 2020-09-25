@@ -165,56 +165,72 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		return new FhirRequestBuilder(RequestTypeEnum.DELETE, "http://localhost:8080/ms/" + getServletName() + uri);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public U readResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
 		try {
 			if (mediaType.isCompatibleWith(FhirMediaTypes.XML) || mediaType.isCompatibleWith(MediaType.APPLICATION_XML)
 			        || mediaType.isCompatibleWith(MediaType.TEXT_XML)) {
-				return (U) xmlParser.parseResource(getResourceProvider().getResourceType(), response.getContentAsString());
+				@SuppressWarnings("unchecked")
+				U result = (U) xmlParser.parseResource(getResourceProvider().getResourceType(),
+				    response.getContentAsString());
+				return result;
 			} else {
-				return (U) jsonParser.parseResource(getResourceProvider().getResourceType(), response.getContentAsString());
+				@SuppressWarnings("unchecked")
+				U result = (U) jsonParser.parseResource(getResourceProvider().getResourceType(),
+				    response.getContentAsString());
+				return result;
 			}
 		}
 		catch (DataFormatException e) {
-			// DataFormatException usually indicates that you've requested the parser parse the wrong resource type, but
-			// the most common reason for having the wrong resource type here is that the response contained an
-			// OperationOutcome rather than the expected resource, so here we try to do something useful with the
-			// OperationOutcome
-			while (e.getCause() != null && e.getCause() instanceof DataFormatException) {
-				e = (DataFormatException) e.getCause();
-			}
-			
-			if (e.getMessage() == null || !e.getMessage().contains("OperationOutcome")) {
-				throw e;
-			}
-			
-			// in case we cannot parse the OperationOutcome or there isn't actually one, just return the original exception
-			IBaseOperationOutcome operationOutcome;
-			try {
-				operationOutcome = readOperationOutcome(response);
-			}
-			catch (Exception ignored) {
-				throw e;
-			}
-			
-			Description errorDescription = new StringDescription();
-			errorDescription.appendText("Received unexpected OperationOutcome");
-			
-			describeOperationOutcome(errorDescription, operationOutcome);
-			
-			throw new RuntimeException(errorDescription.toString());
+			handleDataFormatException(response, e);
+			throw e;
 		}
 	}
 	
 	public IBaseBundle readBundleResponse(MockHttpServletResponse response) throws UnsupportedEncodingException {
 		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
-		if (mediaType.isCompatibleWith(FhirMediaTypes.XML) || mediaType.isCompatibleWith(MediaType.APPLICATION_XML)
-		        || mediaType.isCompatibleWith(MediaType.TEXT_XML)) {
-			return (IBaseBundle) xmlParser.parseResource(response.getContentAsString());
-		} else {
-			return (IBaseBundle) jsonParser.parseResource(response.getContentAsString());
+		try {
+			if (mediaType.isCompatibleWith(FhirMediaTypes.XML) || mediaType.isCompatibleWith(MediaType.APPLICATION_XML)
+			        || mediaType.isCompatibleWith(MediaType.TEXT_XML)) {
+				return (IBaseBundle) xmlParser.parseResource(response.getContentAsString());
+			} else {
+				return (IBaseBundle) jsonParser.parseResource(response.getContentAsString());
+			}
 		}
+		catch (DataFormatException e) {
+			handleDataFormatException(response, e);
+			throw e;
+		}
+	}
+	
+	private void handleDataFormatException(MockHttpServletResponse response, DataFormatException e) {
+		// DataFormatException usually indicates that you've requested the parser parse the wrong resource type, but
+		// the most common reason for having the wrong resource type here is that the response contained an
+		// OperationOutcome rather than the expected resource, so here we try to do something useful with the
+		// OperationOutcome
+		while (e.getCause() != null && e.getCause() instanceof DataFormatException) {
+			e = (DataFormatException) e.getCause();
+		}
+		
+		if (e.getMessage() == null || !e.getMessage().contains("OperationOutcome")) {
+			return;
+		}
+		
+		// in case we cannot parse the OperationOutcome or there isn't actually one, just return the original exception
+		IBaseOperationOutcome operationOutcome;
+		try {
+			operationOutcome = readOperationOutcome(response);
+		}
+		catch (Exception ignored) {
+			return;
+		}
+		
+		Description errorDescription = new StringDescription();
+		errorDescription.appendText("Received unexpected OperationOutcome");
+		
+		describeOperationOutcome(errorDescription, operationOutcome);
+		
+		throw new RuntimeException(errorDescription.toString());
 	}
 	
 	public IBaseOperationOutcome readOperationOutcome(MockHttpServletResponse response) throws UnsupportedEncodingException {
