@@ -118,7 +118,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	public List<ContactPoint> getPatientContactDetails(@Nonnull org.openmrs.Patient patient) {
 		return fhirPersonDao
 		        .getActiveAttributesByPersonAndAttributeTypeUuid(patient,
-		            globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_ATTRIBUTE_TYPE))
+		            globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	

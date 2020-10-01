@@ -138,7 +138,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	public List<ContactPoint> getProviderContactDetails(@Nonnull Provider provider) {
 		return fhirPractitionerDao
 		        .getActiveAttributesByPractitionerAndAttributeTypeUuid(provider,
-		            globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_ATTRIBUTE_TYPE))
+		            globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	

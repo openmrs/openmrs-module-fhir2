@@ -130,11 +130,11 @@ public class FhirConstants {
 	
 	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
 	
-	public static final String PERSON_CONTACT_ATTRIBUTE_TYPE = "fhir2.personAttributeTypeUuid";
+	public static final String PERSON_CONTACT_POINT_ATTRIBUTE_TYPE = "fhir2.personContactPointAttributeTypeUuid";
 	
-	public static final String LOCATION_CONTACT_ATTRIBUTE_TYPE = "fhir2.locationAttributeTypeUuid";
+	public static final String LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE = "fhir2.locationContactPointAttributeTypeUuid";
 	
-	public static final String PROVIDER_CONTACT_ATTRIBUTE_TYPE = "fhir2.providerAttributeTypeUuid";
+	public static final String PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE = "fhir2.providerContactPointAttributeTypeUuid";
 	
 	public static final String GLOBAL_PROPERTY_MILD = "allergy.concept.severity.mild";
 	

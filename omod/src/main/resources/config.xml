@@ -103,12 +103,6 @@
 	</globalProperty>
 
 	<globalProperty>
-		<property>${project.parent.artifactId}.personAttributeTypeUuid</property>
-		<defaultValue>14d4f066-15f5-102d-96e4-000c29c2a5d7</defaultValue>
-		<description>Set person attribute type uuid</description>
-	</globalProperty>
-
-	<globalProperty>
 		<property>${project.parent.artifactId}.paging.default</property>
 		<defaultValue>10</defaultValue>
 		<description>Set default page size</description>
@@ -121,20 +115,25 @@
 	</globalProperty>
 
 	<globalProperty>
-		<property>${project.parent.artifactId}.locationAttributeTypeUuid</property>
+		<property>${project.parent.artifactId}.personContactPointAttributeTypeUuid</property>
+		<defaultValue>14d4f066-15f5-102d-96e4-000c29c2a5d7</defaultValue>
+		<description>Set person attribute type uuid</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.locationContactPointAttributeTypeUuid</property>
 		<defaultValue>abcde432-1691-11df-97a5-7038c432abcd</defaultValue>
 		<description>Set location attribute type uuid</description>
 	</globalProperty>
 
 	<globalProperty>
-		<property>${project.parent.artifactId}.providerAttributeTypeUuid</property>
+		<property>${project.parent.artifactId}.providerContactPointAttributeTypeUuid</property>
 		<defaultValue>5021b1a1-e7f6-44b4-ba02-da2f2bcf8718</defaultValue>
 		<description>Set provider attribute type uuid</description>
 	</globalProperty>
 
 	<globalProperty>
 		<property>${project.parent.artifactId}.narrativesOverridePropertyFile</property>
-		<defaultValue></defaultValue>
 		<description>Path of narrative override properties file</description>
 	</globalProperty>
 

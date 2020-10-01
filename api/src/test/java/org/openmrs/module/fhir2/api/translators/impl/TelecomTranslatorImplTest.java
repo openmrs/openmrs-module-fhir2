@@ -184,7 +184,7 @@ public class TelecomTranslatorImplTest {
 		contactPoint.setId(NEW_PERSON_ATTRIBUTE_UUID);
 		contactPoint.setValue(NEW_PERSON_ATTRIBUTE_VALUE);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_ATTRIBUTE_TYPE))
+		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .thenReturn(PERSON_ATTRIBUTE_TYPE_UUID);
 		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
@@ -203,7 +203,7 @@ public class TelecomTranslatorImplTest {
 		attributeType.setName(ATTRIBUTE_TYPE_NAME);
 		attributeType.setUuid(PERSON_ATTRIBUTE_TYPE_UUID);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_ATTRIBUTE_TYPE))
+		when(globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .thenReturn(PERSON_ATTRIBUTE_TYPE_UUID);
 		when(personService.getPersonAttributeTypeByUuid(PERSON_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
@@ -300,7 +300,7 @@ public class TelecomTranslatorImplTest {
 		contactPoint.setId(TEST_LOCATION_ATTRIBUTE_UUID);
 		contactPoint.setValue(TEST_LOCATION_ATTRIBUTE_VALUE);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_ATTRIBUTE_TYPE))
+		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .thenReturn(LOCATION_ATTRIBUTE_TYPE_UUID);
 		when(locationService.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
@@ -321,7 +321,7 @@ public class TelecomTranslatorImplTest {
 		attributeType.setUuid(LOCATION_ATTRIBUTE_TYPE_UUID);
 		attributeType.setName(LOCATION_ATTRIBUTE_TYPE_NAME);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_ATTRIBUTE_TYPE))
+		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .thenReturn(LOCATION_ATTRIBUTE_TYPE_UUID);
 		when(locationService.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
@@ -412,7 +412,7 @@ public class TelecomTranslatorImplTest {
 		contactPoint.setId(NEW_PERSON_ATTRIBUTE_UUID);
 		contactPoint.setValue(NEW_PERSON_ATTRIBUTE_VALUE);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_ATTRIBUTE_TYPE))
+		when(globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .thenReturn(PROVIDER_ATTRIBUTE_TYPE_UUID);
 		when(providerService.getProviderAttributeTypeByUuid(PROVIDER_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		
@@ -431,7 +431,7 @@ public class TelecomTranslatorImplTest {
 		attributeType.setName(PROVIDER_ATTRIBUTE_TYPE_NAME);
 		attributeType.setUuid(PROVIDER_ATTRIBUTE_TYPE_UUID);
 		
-		when(globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_ATTRIBUTE_TYPE))
+		when(globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .thenReturn(PROVIDER_ATTRIBUTE_TYPE_UUID);
 		when(providerService.getProviderAttributeTypeByUuid(PROVIDER_ATTRIBUTE_TYPE_UUID)).thenReturn(attributeType);
 		

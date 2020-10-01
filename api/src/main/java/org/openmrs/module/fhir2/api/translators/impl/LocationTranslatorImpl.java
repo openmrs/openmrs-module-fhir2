@@ -112,7 +112,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	protected List<ContactPoint> getLocationContactDetails(@Nonnull org.openmrs.Location location) {
 		return fhirLocationDao
 		        .getActiveAttributesByLocationAndAttributeTypeUuid(location,
-		            propertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_ATTRIBUTE_TYPE))
+		            propertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
 	}
 	
