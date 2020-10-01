@@ -9,21 +9,38 @@
  */
 package org.openmrs.module.fhir2.api.mappings;
 
+import static org.hibernate.criterion.Restrictions.eq;
+
 import javax.annotation.Nonnull;
 
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.HibernateException;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Projections;
+import org.openmrs.module.fhir2.model.FhirEncounterClassMap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-// A class for mapping OpenMRS location names to FHIR Encounter classes. In the properties file the
-// location names are keys and FHIR class names are values; it is a many to one map. Note going from
-// FHIR classes to OpenMRS locations is not well-defined hence we do not expose the inverse map.
+// A class for mapping OpenMRS locations to FHIR encounter classes
 @Component
-public class EncounterClassMap extends BaseMapping {
+@Slf4j
+public class EncounterClassMap {
 	
-	public EncounterClassMap() {
-		super("encounterClassMap.properties");
-	}
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
 	public String getFhirClass(@Nonnull String locationUuid) {
-		return getValue(locationUuid).orElse(null);
+		try {
+			return (String) sessionFactory.getCurrentSession().createCriteria(FhirEncounterClassMap.class)
+			        .createAlias("location", "l").add(eq("l.uuid", locationUuid))
+			        .setProjection(Projections.property("encounterClass")).uniqueResult();
+		}
+		catch (HibernateException e) {
+			log.error("Exception caught while trying to load encounter type for location '{}'", locationUuid);
+		}
+		
+		return null;
 	}
 }

@@ -514,4 +514,186 @@
                                  referencedTableName="obs"
                                  referencedColumnNames="obs_id"/>
     </changeSet>
+
+    <changeSet id="add_fhir_encounter_class_map_20200930" author="ibacher">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_encounter_class_map"/>
+            </not>
+        </preConditions>
+        <createTable tableName="fhir_encounter_class_map">
+            <column name="encounter_class_map_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="location_id" type="int"/>
+            <column name="encounter_class" type="varchar(255)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retired_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="char(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fhir_encounter_class_map_creator"
+                                 baseTableName="fhir_encounter_class_map" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_encounter_class_map_changed_by"
+                                 baseTableName="fhir_encounter_class_map" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_encounter_class_map_retired_by"
+                                 baseTableName="fhir_encounter_class_map" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_encounter_class_map_location"
+                                 baseTableName="fhir_encounter_class_map" baseColumnNames="location_id"
+                                 referencedTableName="location" referencedColumnNames="location_id"/>
+    </changeSet>
+
+    <changeSet id="add_fhir_observation_category_map_20200930" author="ibacher">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_observation_category_map"/>
+            </not>
+        </preConditions>
+        <createTable tableName="fhir_observation_category_map">
+            <column name="observation_category_map_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="concept_class_id" type="int"/>
+            <column name="observation_category" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retired_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="char(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fhir_observation_category_map_creator"
+                                 baseTableName="fhir_observation_category_map" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_observation_category_map_changed_by"
+                                 baseTableName="fhir_observation_category_map" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_observation_category_map_retired_by"
+                                 baseTableName="fhir_observation_category_map" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_observation_category_map_concept_class"
+                                 baseTableName="fhir_observation_category_map" baseColumnNames="concept_class_id"
+                                 referencedTableName="concept_class" referencedColumnNames="concept_class_id"/>
+        <createIndex tableName="fhir_observation_category_map" indexName="fhir_observation_category_map_observation_category">
+            <column name="observation_category"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="add_default_observation_categories_20200930" author="ibacher" dbms="mysql,mariadb">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <and>
+                <tableExists tableName="fhir_observation_category_map"/>
+                <sqlCheck expectedResult="0">
+                    select count(*) from fhir_observation_category_map
+                </sqlCheck>
+                <!-- default UUID for Test -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d4907b2-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+                <!-- default UUID for Procedure -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d490bf4-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+                <!-- default UUID for Finding -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <sql><![CDATA[
+            insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
+            select concept_class_id, 'laboratory', 1, now(), uuid()
+            from concept_class
+            where uuid = '8d4907b2-c2cc-11de-8d13-0010c6dffd0f'
+        ]]>
+        </sql>
+        <sql><![CDATA[
+            insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
+            select concept_class_id, 'procedure', 1, now(), uuid()
+            from concept_class
+            where uuid = '8d490bf4-c2cc-11de-8d13-0010c6dffd0f'
+        ]]>
+        </sql>
+        <sql><![CDATA[
+            insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
+            select concept_class_id, 'exam', 1, now(), uuid()
+            from concept_class
+            where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
+        ]]>
+        </sql>
+    </changeSet>
+
+    <changeSet id="add_default_observation_categories_20200930" author="ibacher" dbms="postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <and>
+                <tableExists tableName="fhir_observation_category_map"/>
+                <sqlCheck expectedResult="0">
+                    select count(*) from fhir_observation_category_map
+                </sqlCheck>
+                <!-- default UUID for Test -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d4907b2-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+                <!-- default UUID for Procedure -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d490bf4-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+                <!-- default UUID for Finding -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <!-- UUID function taken from here: https://stackoverflow.com/a/21327318 -->
+        <sql><![CDATA[
+            insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
+            select concept_class_id, 'laboratory', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept_class
+            where uuid = '8d4907b2-c2cc-11de-8d13-0010c6dffd0f'
+        ]]>
+        </sql>
+        <sql><![CDATA[
+            insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
+            select concept_class_id, 'procedure', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept_class
+            where uuid = '8d490bf4-c2cc-11de-8d13-0010c6dffd0f'
+        ]]>
+        </sql>
+        <sql><![CDATA[
+            insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
+            select concept_class_id, 'exam', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept_class
+            where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
+        ]]>
+        </sql>
+    </changeSet>
 </databaseChangeLog>

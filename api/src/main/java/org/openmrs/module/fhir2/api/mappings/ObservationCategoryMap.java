@@ -9,33 +9,50 @@
  */
 package org.openmrs.module.fhir2.api.mappings;
 
+import static org.hibernate.criterion.Restrictions.eq;
+
 import javax.annotation.Nonnull;
 
-import java.util.Collection;
-
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.HibernateException;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Projections;
+import org.openmrs.module.fhir2.model.FhirObservationCategoryMap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class ObservationCategoryMap extends BaseMapping {
+public class ObservationCategoryMap {
 	
-	public ObservationCategoryMap() {
-		super("observationCategoryMap.properties");
-	}
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 	
 	public String getCategory(@Nonnull String conceptClassUuid) {
-		Collection<String> categories = getKey(conceptClassUuid);
-		if (categories.isEmpty()) {
-			return null;
+		try {
+			return (String) sessionFactory.getCurrentSession().createCriteria(FhirObservationCategoryMap.class)
+			        .createAlias("conceptClass", "cc").add(eq("cc.uuid", conceptClassUuid))
+			        .setProjection(Projections.property("observationCategory")).uniqueResult();
 		}
-		if (categories.size() > 1) {
-			log.warn("Multiple categories found for concept " + conceptClassUuid);
+		catch (HibernateException e) {
+			log.error("Exception caught while trying to load category for concept class '{}'", conceptClassUuid, e);
 		}
-		return categories.iterator().next();
+		
+		return null;
 	}
 	
 	public String getConceptClassUuid(@Nonnull String category) {
-		return getValue(category).orElse(null);
+		try {
+			return (String) sessionFactory.getCurrentSession().createCriteria(FhirObservationCategoryMap.class)
+			        .createAlias("conceptClass", "cc").add(eq("observationCategory", category))
+			        .setProjection(Projections.property("cc.uuid")).uniqueResult();
+		}
+		catch (HibernateException e) {
+			log.error("Exception caught while trying to load concept class for category '{}'", category, e);
+		}
+		
+		return null;
 	}
 }
