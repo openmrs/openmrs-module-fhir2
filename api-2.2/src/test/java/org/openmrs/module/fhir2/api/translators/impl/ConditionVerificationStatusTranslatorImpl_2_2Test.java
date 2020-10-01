@@ -24,11 +24,11 @@ import org.openmrs.module.fhir2.FhirConstants;
 
 public class ConditionVerificationStatusTranslatorImpl_2_2Test {
 	
-	private static final String CONFIRMED = "CONFIRMED";
+	private static final String FHIR_CONFIRMED = "confirmed";
 	
-	private static final String PROVISIONAL = "PROVISIONAL";
+	private static final String FHIR_PROVISIONAL = "provisional";
 	
-	private static final String ENTERED_IN_ERROR = "ENTERED_IN_ERROR";
+	private static final String FHIR_ENTERED_IN_ERROR = "entered-in-error";
 	
 	private ConditionVerificationStatusTranslatorImpl_2_2 verificationStatusTranslator;
 	
@@ -40,9 +40,10 @@ public class ConditionVerificationStatusTranslatorImpl_2_2Test {
 	@Test
 	public void shouldTranslateConfirmedVerificationStatusToFhirType() {
 		CodeableConcept codeableConcept = verificationStatusTranslator.toFhirResource(ConditionVerificationStatus.CONFIRMED);
+		
 		assertThat(codeableConcept, notNullValue());
 		assertThat(codeableConcept.getCoding().isEmpty(), is(false));
-		assertThat(codeableConcept.getCoding().get(0).getCode().toUpperCase(), equalTo(CONFIRMED));
+		assertThat(codeableConcept.getCoding().get(0).getCode(), equalTo(FHIR_CONFIRMED));
 		assertThat(codeableConcept.getCoding().get(0).getSystem(),
 		    equalTo(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI));
 	}
@@ -51,9 +52,10 @@ public class ConditionVerificationStatusTranslatorImpl_2_2Test {
 	public void shouldTranslateProvisionalVerificationStatusToFhirType() {
 		CodeableConcept codeableConcept = verificationStatusTranslator
 		        .toFhirResource(ConditionVerificationStatus.PROVISIONAL);
+		
 		assertThat(codeableConcept, notNullValue());
 		assertThat(codeableConcept.getCoding().isEmpty(), is(false));
-		assertThat(codeableConcept.getCoding().get(0).getCode().toUpperCase(), equalTo(PROVISIONAL));
+		assertThat(codeableConcept.getCoding().get(0).getCode(), equalTo(FHIR_PROVISIONAL));
 		assertThat(codeableConcept.getCoding().get(0).getSystem(),
 		    equalTo(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI));
 	}
@@ -62,7 +64,8 @@ public class ConditionVerificationStatusTranslatorImpl_2_2Test {
 	public void shouldTranslateProvisionalVerificationStatusToOpenMrsType() {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(
-		    new Coding().setCode(CONFIRMED).setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI));
+		    new Coding().setCode(FHIR_CONFIRMED).setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI));
+		
 		assertThat(verificationStatusTranslator.toOpenmrsType(codeableConcept),
 		    equalTo(ConditionVerificationStatus.CONFIRMED));
 	}
@@ -71,7 +74,8 @@ public class ConditionVerificationStatusTranslatorImpl_2_2Test {
 	public void shouldTranslateConfirmedVerificationStatusToOpenMrsType() {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(
-		    new Coding().setCode(PROVISIONAL).setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI));
+		    new Coding().setCode(FHIR_PROVISIONAL).setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI));
+		
 		assertThat(verificationStatusTranslator.toOpenmrsType(codeableConcept),
 		    equalTo(ConditionVerificationStatus.PROVISIONAL));
 	}
@@ -82,10 +86,11 @@ public class ConditionVerificationStatusTranslatorImpl_2_2Test {
 	}
 	
 	@Test
-	public void shouldReturnNullIfVerStatusIsNotProvisionalOrConfirmed() {
+	public void shouldReturnNullIfVerificationStatusIsNotProvisionalOrConfirmed() {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(
-		    new Coding().setCode(ENTERED_IN_ERROR).setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI));
+		    new Coding().setCode(FHIR_ENTERED_IN_ERROR).setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI));
+		
 		assertThat(verificationStatusTranslator.toOpenmrsType(codeableConcept), nullValue());
 	}
 	

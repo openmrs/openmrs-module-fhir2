@@ -234,11 +234,6 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 		});
 	}
 	
-	@Override
-	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
-		return super.handleLastUpdatedImmutable(param);
-	}
-	
 	private void handleCode(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
 			criteria.createAlias("condition.coded", "cd");
@@ -254,5 +249,22 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 	private void handleOnsetAge(Criteria criteria, QuantityAndListParam onsetAge) {
 		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("onsetDate", onsetAgeParam))
 		        .ifPresent(criteria::add);
+	}
+	
+	@Override
+	protected Optional<Criterion> handleLastUpdated(DateRangeParam param) {
+		return super.handleLastUpdatedImmutable(param);
+	}
+	
+	@Override
+	protected String paramToProp(@Nonnull String param) {
+		switch (param) {
+			case org.hl7.fhir.r4.model.Condition.SP_ONSET_DATE:
+				return "onsetDate";
+			case org.hl7.fhir.r4.model.Condition.SP_RECORDED_DATE:
+				return "dateCreated";
+		}
+		
+		return super.paramToProp(param);
 	}
 }

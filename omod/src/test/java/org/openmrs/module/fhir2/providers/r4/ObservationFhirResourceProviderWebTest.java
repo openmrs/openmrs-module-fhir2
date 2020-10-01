@@ -68,17 +68,17 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	
 	private static final String MEMBER_UUID = "d9bc6c12-6adc-4ca6-8bde-441ec1a1c344";
 	
-	private static final String CIEL_URN = "urn:oid:2.16.840.1.113883.3.7201";
+	private static final String CIEL_URI = "https://openconceptlab.org/orgs/CIEL/sources/CIEL";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
 	
-	private static final String URL_ENCODED_CIEL_URN;
+	private static final String URL_ENCODED_CIEL_URI;
 	
 	private static final String JSON_CREATE_OBSERVATION_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_create.json";
 	
 	static {
 		try {
-			URL_ENCODED_CIEL_URN = URLEncoder.encode(CIEL_URN, "utf-8");
+			URL_ENCODED_CIEL_URI = URLEncoder.encode(CIEL_URI, "utf-8");
 		}
 		catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
@@ -460,7 +460,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	
 	@Test
 	public void shouldGetObservationsByConceptAndSystem() throws Exception {
-		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URN + "|5098");
+		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull());
@@ -471,13 +471,13 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URN));
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5098"));
 	}
 	
 	@Test
 	public void shouldGetObservationsByConceptsAndSystem() throws Exception {
-		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URN + "|5098," + URL_ENCODED_CIEL_URN + "|5001");
+		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098," + URL_ENCODED_CIEL_URI + "|5001");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull());
@@ -488,15 +488,15 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(2));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URN));
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5098"));
-		assertThat(orListParam.getValuesAsQueryTokens().get(1).getSystem(), equalTo(CIEL_URN));
+		assertThat(orListParam.getValuesAsQueryTokens().get(1).getSystem(), equalTo(CIEL_URI));
 		assertThat(orListParam.getValuesAsQueryTokens().get(1).getValue(), equalTo("5001"));
 	}
 	
 	@Test
 	public void shouldGetObservationsByPatientAndConcept() throws Exception {
-		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URN + "|5098&subject:Patient=" + PATIENT_UUID);
+		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098&subject:Patient=" + PATIENT_UUID);
 		
 		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull());
@@ -517,13 +517,13 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URN));
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5098"));
 	}
 	
 	@Test
 	public void shouldGetObservationsByMemberAndConcept() throws Exception {
-		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URN + "|5098&has-member=" + MEMBER_UUID);
+		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098&has-member=" + MEMBER_UUID);
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), memberCaptor.capture(), isNull(), isNull(),
 		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull());
@@ -540,7 +540,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URN));
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5098"));
 	}
 	
@@ -631,7 +631,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	
 	@Test
 	public void shouldGetObservationsByValueConceptsAndSystem() throws Exception {
-		verifyUri("/Observation?value-concept=" + URL_ENCODED_CIEL_URN + "|5098," + URL_ENCODED_CIEL_URN + "|5001");
+		verifyUri("/Observation?value-concept=" + URL_ENCODED_CIEL_URI + "|5098," + URL_ENCODED_CIEL_URI + "|5001");
 		
 		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), valueCodeCaptor.capture(), isNull(),
 		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
@@ -642,9 +642,9 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		TokenOrListParam orListParam = valueCodeCaptor.getValue().getValuesAsQueryTokens().get(0);
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(2));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URN));
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5098"));
-		assertThat(orListParam.getValuesAsQueryTokens().get(1).getSystem(), equalTo(CIEL_URN));
+		assertThat(orListParam.getValuesAsQueryTokens().get(1).getSystem(), equalTo(CIEL_URI));
 		assertThat(orListParam.getValuesAsQueryTokens().get(1).getValue(), equalTo("5001"));
 	}
 	

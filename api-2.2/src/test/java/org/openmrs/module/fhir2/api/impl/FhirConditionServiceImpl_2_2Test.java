@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -86,7 +87,12 @@ public class FhirConditionServiceImpl_2_2Test {
 	
 	@Before
 	public void setup() {
-		conditionService = new FhirConditionServiceImpl_2_2();
+		conditionService = new FhirConditionServiceImpl_2_2() {
+			
+			@Override
+			protected void validateObject(Condition object) {
+			}
+		};
 		conditionService.setDao(dao);
 		conditionService.setTranslator(conditionTranslator);
 		conditionService.setSearchQuery(searchQuery);
@@ -106,7 +112,9 @@ public class FhirConditionServiceImpl_2_2Test {
 	public void shouldGetConditionByUuid() {
 		when(dao.get(CONDITION_UUID)).thenReturn(openmrsCondition);
 		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
+		
 		org.hl7.fhir.r4.model.Condition condition = conditionService.get(CONDITION_UUID);
+		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getId(), notNullValue());
 		assertThat(condition.getId(), equalTo(CONDITION_UUID));
@@ -118,7 +126,7 @@ public class FhirConditionServiceImpl_2_2Test {
 	}
 	
 	@Test
-	public void saveCondition_shouldSaveNewCondition() {
+	public void create_shouldCreateNewCondition() {
 		Condition openMrsCondition = new Condition();
 		openMrsCondition.setUuid(CONDITION_UUID);
 		
@@ -129,10 +137,80 @@ public class FhirConditionServiceImpl_2_2Test {
 		when(dao.createOrUpdate(openMrsCondition)).thenReturn(openMrsCondition);
 		when(conditionTranslator.toOpenmrsType(condition)).thenReturn(openMrsCondition);
 		
-		org.hl7.fhir.r4.model.Condition result = conditionService.saveCondition(condition);
+		org.hl7.fhir.r4.model.Condition result = conditionService.create(condition);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void update_shouldUpdateExistingCondition() {
+		Condition openmrsCondition = new Condition();
+		openmrsCondition.setUuid(CONDITION_UUID);
+		
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		condition.setId(CONDITION_UUID);
+		
+		when(dao.get(CONDITION_UUID)).thenReturn(openmrsCondition);
+		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(condition);
+		when(dao.createOrUpdate(openmrsCondition)).thenReturn(openmrsCondition);
+		when(conditionTranslator.toOpenmrsType(any(Condition.class), any(org.hl7.fhir.r4.model.Condition.class)))
+		        .thenReturn(openmrsCondition);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.update(CONDITION_UUID, condition);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void update_shouldThrowExceptionWhenIdIsNull() {
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		
+		assertThrows(InvalidRequestException.class, () -> conditionService.update(null, condition));
+	}
+	
+	@Test
+	public void update_shouldThrowExceptionWhenConditionIsNull() {
+		assertThrows(InvalidRequestException.class, () -> conditionService.update(CONDITION_UUID, null));
+	}
+	
+	@Test
+	public void update_shouldThrowExceptionWhenConditionIdIsNull() {
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		
+		assertThrows(InvalidRequestException.class, () -> conditionService.update(CONDITION_UUID, condition));
+	}
+	
+	@Test
+	public void update_shouldThrowExceptionWhenConditionIdDoesNotMatchCurrentId() {
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		condition.setId(WRONG_CONDITION_UUID);
+		
+		assertThrows(InvalidRequestException.class, () -> conditionService.update(CONDITION_UUID, condition));
+	}
+	
+	@Test
+	public void delete_shouldDeleteExistingCondition() {
+		Condition openmrsCondition = new Condition();
+		openmrsCondition.setUuid(CONDITION_UUID);
+		
+		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
+		condition.setId(CONDITION_UUID);
+		
+		when(dao.delete(CONDITION_UUID)).thenReturn(openmrsCondition);
+		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(condition);
+		
+		org.hl7.fhir.r4.model.Condition result = conditionService.delete(CONDITION_UUID);
+		
+		assertThat(result, notNullValue());
+	}
+	
+	@Test
+	public void delete_shouldThrowExceptionWhenIdIsNull() {
+		assertThrows(InvalidRequestException.class, () -> conditionService.delete(null));
 	}
 	
 	@Test

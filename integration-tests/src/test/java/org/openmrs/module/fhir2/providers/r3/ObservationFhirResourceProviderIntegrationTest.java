@@ -60,7 +60,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	
 	private static final String OBS_CONCEPT_DISPLAY_NAME = "Weight";
 	
-	private static final String CIEL_SYSTEM_URN = "urn:oid:2.16.840.1.113883.3.7201";
+	private static final String CIEL_SYSTEM_URI = "https://openconceptlab.org/orgs/CIEL/sources/CIEL";
 	
 	private static final String OBS_CONCEPT_CIEL_ID = "5089";
 	
@@ -101,7 +101,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getCode().getCoding(),
 		    hasItem(allOf(hasProperty("system", nullValue()), hasProperty("code", equalTo(OBS_CONCEPT_UUID)))));
 		assertThat(observation.getCode().getCoding(), hasItem(
-		    allOf(hasProperty("system", equalTo(CIEL_SYSTEM_URN)), hasProperty("code", equalTo(OBS_CONCEPT_CIEL_ID)))));
+		    allOf(hasProperty("system", equalTo(CIEL_SYSTEM_URI)), hasProperty("code", equalTo(OBS_CONCEPT_CIEL_ID)))));
 		assertThat(observation.getCode().getCodingFirstRep().getDisplay(), equalTo(OBS_CONCEPT_DISPLAY_NAME));
 		
 		// verify expected value
@@ -153,7 +153,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getCode().getCoding(),
 		    hasItem(allOf(hasProperty("system", nullValue()), hasProperty("code", equalTo(OBS_CONCEPT_UUID)))));
 		assertThat(observation.getCode().getCoding(), hasItem(
-		    allOf(hasProperty("system", equalTo(CIEL_SYSTEM_URN)), hasProperty("code", equalTo(OBS_CONCEPT_CIEL_ID)))));
+		    allOf(hasProperty("system", equalTo(CIEL_SYSTEM_URI)), hasProperty("code", equalTo(OBS_CONCEPT_CIEL_ID)))));
 		assertThat(observation.getCode().getCodingFirstRep().getDisplay(), equalTo(OBS_CONCEPT_DISPLAY_NAME));
 		
 		// verify expected value

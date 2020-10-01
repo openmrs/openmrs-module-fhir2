@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<Condition xmlns="http://hl7.org/fhir">
+    <clinicalStatus>
+        <coding>
+            <system value="http://terminology.hl7.org/CodeSystem/condition-clinical"/>
+            <code value="active"/>
+            <display value="Active"/>
+        </coding>
+    </clinicalStatus>
+    <code>
+        <coding>
+            <code value="116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+        </coding>
+        <coding>
+            <system value="https://openconceptlab.org/orgs/CIEL/sources/CIEL"/>
+            <code value="116128"/>
+        </coding>
+    </code>
+    <subject>
+        <reference value="Patient/da7f524f-27ce-4bb2-86d6-6d1d05312bd5"/>
+        <identifier>
+            <use value="official"/>
+            <value value="101-6"/>
+        </identifier>
+        <display value="Horatio Hornblower (OpenMRS ID:101-6)"/>
+    </subject>
+    <recordedDate value="2019-06-18T06:37:26+03:00"/>
+</Condition>

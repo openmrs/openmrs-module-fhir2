@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 @Getter(AccessLevel.PROTECTED)
 public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> extends BaseFhirService<Condition, U> implements FhirConditionService {
 	
-	private static final String MESSAGE = "";
+	private static final String MESSAGE = "Condition is not implemented for this version of OpenMRS";
 	
 	@Override
 	public Condition get(@Nonnull String uuid) {
@@ -45,6 +45,21 @@ public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> exten
 	}
 	
 	@Override
+	public Condition create(@Nonnull Condition newResource) {
+		throw new NotImplementedOperationException(MESSAGE);
+	}
+	
+	@Override
+	public Condition update(@Nonnull String uuid, @Nonnull Condition updatedResource) {
+		throw new NotImplementedOperationException(MESSAGE);
+	}
+	
+	@Override
+	public Condition delete(@Nonnull String uuid) {
+		throw new NotImplementedOperationException(MESSAGE);
+	}
+	
+	@Override
 	protected OpenmrsFhirTranslator<U, Condition> getTranslator() {
 		throw new NotImplementedOperationException(MESSAGE);
 	}
@@ -53,11 +68,6 @@ public class FhirConditionServiceImpl<U extends OpenmrsObject & Auditable> exten
 	public IBundleProvider searchConditions(ReferenceAndListParam patientParam, TokenAndListParam code,
 	        TokenAndListParam clinicalStatus, DateRangeParam onsetDate, QuantityAndListParam onsetAge,
 	        DateRangeParam recordedDate, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort) {
-		throw new NotImplementedOperationException(MESSAGE);
-	}
-	
-	@Override
-	public Condition saveCondition(@Nonnull Condition condition) {
 		throw new NotImplementedOperationException(MESSAGE);
 	}
 }

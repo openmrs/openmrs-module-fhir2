@@ -104,7 +104,7 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		notNull(existingCondition, "The existing Openmrs Condition object should not be null");
 		notNull(condition, "The Condition object should not be null");
 		
-		existingCondition.setUuid(condition.getId());
+		existingCondition.setUuid(condition.getIdElement().getIdPart());
 		existingCondition.setPatient(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));
 		existingCondition.setClinicalStatus(clinicalStatusTranslator.toOpenmrsType(condition.getClinicalStatus()));
 		existingCondition

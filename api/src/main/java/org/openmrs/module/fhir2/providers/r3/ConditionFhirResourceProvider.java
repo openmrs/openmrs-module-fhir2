@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -21,6 +22,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -29,12 +31,14 @@ import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.convertors.conv30_40.Condition30_40;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -81,7 +85,28 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	@SuppressWarnings("unused")
 	public MethodOutcome createCondition(@ResourceParam Condition newCondition) {
 		return FhirProviderUtils.buildCreate(
-		    Condition30_40.convertCondition(conditionService.saveCondition(Condition30_40.convertCondition(newCondition))));
+		    Condition30_40.convertCondition(conditionService.create(Condition30_40.convertCondition(newCondition))));
+	}
+	
+	@Update
+	public MethodOutcome updateCondition(@IdParam IdType id, @ResourceParam Condition updatedCondition) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+		
+		updatedCondition.setId(id);
+		
+		return FhirProviderUtils.buildUpdate(Condition30_40.convertCondition(
+		    conditionService.update(id.getIdPart(), Condition30_40.convertCondition(updatedCondition))));
+	}
+	
+	@Delete
+	public OperationOutcome deleteCondition(@IdParam IdType id) {
+		org.hl7.fhir.r4.model.Condition condition = conditionService.delete(id.getIdPart());
+		if (condition == null) {
+			throw new ResourceNotFoundException("Could not find condition to delete with id " + id.getIdPart());
+		}
+		return FhirProviderUtils.buildDelete(Condition30_40.convertCondition(condition));
 	}
 	
 	@Search

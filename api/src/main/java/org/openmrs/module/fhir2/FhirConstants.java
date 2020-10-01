@@ -21,6 +21,8 @@ public class FhirConstants {
 	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX = "http://terminology.hl7.org/CodeSystem";
 	
+	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX_R3 = "http://hl7.org/fhir";
+	
 	public static final String FHIR_TERMINOLOGY_DATA_OPERATION = HL7_FHIR_CODE_SYSTEM_PREFIX + "v3-DataOperation";
 	
 	public static final String FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE = HL7_FHIR_CODE_SYSTEM_PREFIX
@@ -32,16 +34,22 @@ public class FhirConstants {
 	
 	public static final String INTERPRETATION_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v3-ObservationInterpretation";
 	
-	public static final String CONDITION_VERIFICATION_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
-	        + "/condition-ver-status";
-	
 	public static final String ALLERGY_INTOLERANCE_CLINICAL_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/allergyintolerance-clinical";
 	
 	public static final String ALLERGY_INTOLERANCE_VERIFICATION_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
 	        + "/allergyintolerance-verification";
 	
-	public static final String CONDITION_CLINICAL_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-clinical ";
+	public static final String CONDITION_CLINICAL_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/condition-clinical";
+	
+	public static final String CONDITION_CLINICAL_STATUS_SYSTEM_URI_R3 = HL7_FHIR_CODE_SYSTEM_PREFIX_R3
+	        + "/condition-clinical";
+	
+	public static final String CONDITION_VERIFICATION_STATUS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
+	        + "/condition-ver-status";
+	
+	public static final String CONDITION_VERIFICATION_STATUS_SYSTEM_URI_R3 = HL7_FHIR_CODE_SYSTEM_PREFIX_R3
+	        + "/condition-ver-status";
 	
 	public static final String CLINICAL_FINDINGS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/clinical-findings";
 	

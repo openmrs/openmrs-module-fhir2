@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Optional;
+
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.ConditionVerificationStatus;
@@ -28,6 +30,7 @@ public class ConditionVerificationStatusTranslatorImpl_2_2 implements ConditionV
 		if (verificationStatus == null) {
 			return null;
 		}
+		
 		return new CodeableConcept().addCoding(addVerificationStatusCoding(verificationStatus.toString()));
 	}
 	
@@ -36,10 +39,20 @@ public class ConditionVerificationStatusTranslatorImpl_2_2 implements ConditionV
 		if (codeableConcept == null || codeableConcept.getCoding().isEmpty()) {
 			return null;
 		}
-		switch (codeableConcept.getCoding().get(0).getCode().toUpperCase()) {
-			case "CONFIRMED":
+		
+		Optional<Coding> verificationStatus = codeableConcept.getCoding().stream()
+		        .filter(c -> c.getSystem().equals(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI)).findFirst();
+		
+		Coding verificationStatusCode = verificationStatus.orElse(null);
+		
+		if (verificationStatusCode == null) {
+			return null;
+		}
+		
+		switch (verificationStatusCode.getCode()) {
+			case "confirmed":
 				return ConditionVerificationStatus.CONFIRMED;
-			case "PROVISIONAL":
+			case "provisional":
 				return ConditionVerificationStatus.PROVISIONAL;
 			default:
 				return null;
@@ -48,9 +61,9 @@ public class ConditionVerificationStatusTranslatorImpl_2_2 implements ConditionV
 	
 	private Coding addVerificationStatusCoding(String verificationStatus) {
 		Coding coding = new Coding();
-		coding.setCode(verificationStatus);
-		coding.setDisplay(verificationStatus.replaceAll("_", " ").toUpperCase());
 		coding.setSystem(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI);
+		coding.setCode(verificationStatus.toLowerCase());
+		coding.setDisplay(verificationStatus.replaceAll("_", "-").toUpperCase());
 		return coding;
 	}
 }

@@ -18,7 +18,9 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -43,6 +45,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.convertors.conv30_40.Condition30_40;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.hl7.fhir.dstu3.model.Resource;
@@ -141,7 +144,7 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 	
 	@Test
 	public void createCondition_shouldCreateNewCondition() {
-		when(conditionService.saveCondition(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
+		when(conditionService.create(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
 		
 		MethodOutcome result = resourceProvider.createCondition(Condition30_40.convertCondition(condition));
 		
@@ -149,6 +152,38 @@ public class ConditionFhirR3ResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void updateCondition_shouldUpdateRequestedCondition() {
+		when(conditionService.update(anyString(), any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
+		
+		MethodOutcome result = resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID),
+		    Condition30_40.convertCondition(condition));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(CONDITION_UUID));
+	}
+	
+	@Test
+	public void deleteCondition_shouldDeleteCondition() {
+		when(conditionService.delete(CONDITION_UUID)).thenReturn(condition);
+		
+		OperationOutcome result = resourceProvider.deleteCondition(new IdType().setValue(CONDITION_UUID));
+		
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), Matchers.equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), Matchers.equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    Matchers.equalTo("This resource has been deleted"));
+	}
+	
+	@Test
+	public void deleteCondition_shouldThrowResourceNotFoundExceptionWhenConditionNotFound() {
+		when(conditionService.delete(WRONG_CONDITION_UUID)).thenReturn(null);
+		
+		assertThrows(ResourceNotFoundException.class,
+		    () -> resourceProvider.deleteCondition(new IdType().setValue(WRONG_CONDITION_UUID)));
 	}
 	
 	@Test

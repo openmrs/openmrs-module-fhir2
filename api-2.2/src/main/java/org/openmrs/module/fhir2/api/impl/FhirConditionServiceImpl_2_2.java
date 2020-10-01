@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -68,10 +66,5 @@ public class FhirConditionServiceImpl_2_2 extends BaseFhirService<Condition, org
 		        .setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator);
-	}
-	
-	@Override
-	public Condition saveCondition(@Nonnull Condition condition) {
-		return translator.toFhirResource(dao.createOrUpdate(translator.toOpenmrsType(condition)));
 	}
 }

@@ -16,6 +16,9 @@
     file that is loaded in the base test class.
 -->
 <dataset>
+	<concept concept_id="116128" retired="false" datatype_id="4" class_id="4" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept_description concept_description_id="116128" concept_id="116128" description="Malaria" locale="en_GB" creator="1" date_created="2008-08-15 15:27:51.0" uuid="4639FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"/>
+	<concept_name concept_name_id="116128" concept_id="116128" name="Malaria" locale="en_GB" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" creator="1" date_created="2008-08-15 15:27:51.0" uuid="16603BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"/>
 	<conditions condition_id="1" patient_id="2" clinical_status="INACTIVE" creator="1" date_created="2015-01-12 00:00:00"
 			   voided="false" onset_date="2017-01-12 00:00:00" end_date="2017-01-15 00:00:00" verification_status="PROVISIONAL" 
 			   uuid="2cc6880e-2c46-15e4-9038-a6c5e4d22fb7"/>

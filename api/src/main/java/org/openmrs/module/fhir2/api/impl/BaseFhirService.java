@@ -79,6 +79,10 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
 		
+		if (updatedResource == null) {
+			throw new InvalidRequestException("Resource cannot be null.");
+		}
+		
 		if (updatedResource.getId() == null) {
 			throw new InvalidRequestException(
 			        String.format("%s resource is missing id.", updatedResource.getClass().getSimpleName()));

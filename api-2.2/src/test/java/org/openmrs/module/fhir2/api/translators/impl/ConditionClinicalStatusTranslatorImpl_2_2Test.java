@@ -40,7 +40,8 @@ public class ConditionClinicalStatusTranslatorImpl_2_2Test {
 		assertThat(codeableConcept, notNullValue());
 		assertThat(codeableConcept.getCodingFirstRep().getCode(), equalTo(ACTIVE));
 		assertThat(codeableConcept.getCodingFirstRep().getDisplay(), equalTo("Active"));
-		assertThat(codeableConcept.getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI));
+		assertThat(codeableConcept.getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
 	}
 	
 	@Test
@@ -49,7 +50,8 @@ public class ConditionClinicalStatusTranslatorImpl_2_2Test {
 		assertThat(codeableConcept, notNullValue());
 		assertThat(codeableConcept.getCodingFirstRep().getCode(), equalTo(INACTIVE));
 		assertThat(codeableConcept.getCodingFirstRep().getDisplay(), equalTo("Inactive"));
-		assertThat(codeableConcept.getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI));
+		assertThat(codeableConcept.getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
 	}
 	
 	@Test
@@ -57,7 +59,8 @@ public class ConditionClinicalStatusTranslatorImpl_2_2Test {
 		CodeableConcept codeableConcept = clinicalStatusTranslator.toFhirResource(ConditionClinicalStatus.HISTORY_OF);
 		assertThat(codeableConcept, notNullValue());
 		assertThat(codeableConcept.getCodingFirstRep().getCode(), equalTo(INACTIVE));
-		assertThat(codeableConcept.getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI));
+		assertThat(codeableConcept.getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
 	}
 	
 	@Test
@@ -65,7 +68,7 @@ public class ConditionClinicalStatusTranslatorImpl_2_2Test {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding coding = new Coding();
 		coding.setCode(ACTIVE);
-		coding.setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI);
+		coding.setSystem(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI);
 		codeableConcept.addCoding(coding);
 		assertThat(clinicalStatusTranslator.toOpenmrsType(codeableConcept), is(ConditionClinicalStatus.ACTIVE));
 	}
@@ -75,7 +78,7 @@ public class ConditionClinicalStatusTranslatorImpl_2_2Test {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding coding = new Coding();
 		coding.setCode(INACTIVE);
-		coding.setSystem(FhirConstants.CONDITION_CLINICAL_SYSTEM_URI);
+		coding.setSystem(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI);
 		codeableConcept.addCoding(coding);
 		assertThat(clinicalStatusTranslator.toOpenmrsType(codeableConcept), is(ConditionClinicalStatus.INACTIVE));
 	}

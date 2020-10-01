@@ -142,6 +142,104 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	}
 	
 	@Test
+	public void getPatientResourceHistory_shouldReturnListOfResource() {
+		IdType id = new IdType();
+		id.setValue(PATIENT_UUID);
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
+		
+		List<Resource> resources = resourceProvider.getPatientResourceHistory(id);
+		assertThat(resources, notNullValue());
+		assertThat(resources, not(empty()));
+		assertThat(resources.size(), equalTo(2));
+	}
+	
+	@Test
+	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
+		IdType id = new IdType();
+		id.setValue(PATIENT_UUID);
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
+		
+		List<Resource> resources = resourceProvider.getPatientResourceHistory(id);
+		assertThat(resources, not(empty()));
+		assertThat(resources.stream().findAny().isPresent(), is(true));
+		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
+		IdType idType = new IdType();
+		idType.setValue(WRONG_PATIENT_UUID);
+		
+		assertThat(resourceProvider.getPatientResourceHistory(idType).isEmpty(), is(true));
+		assertThat(resourceProvider.getPatientResourceHistory(idType).size(), equalTo(0));
+	}
+	
+	@Test
+	public void createPatient_shouldCreateNewPatient() {
+		when(patientService.create(patient)).thenReturn(patient);
+		
+		MethodOutcome result = resourceProvider.createPatient(patient);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(patient));
+	}
+	
+	@Test
+	public void updatePatient_shouldUpdateRequestedPatient() {
+		when(patientService.update(PATIENT_UUID, patient)).thenReturn(patient);
+		
+		MethodOutcome result = resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), patient);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(patient));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePatient_shouldThrowInvalidRequestExceptionForUuidMismatch() {
+		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePatient_shouldThrowInvalidRequestExceptionForMissingId() {
+		Patient noIdPatient = new Patient();
+		
+		when(patientService.update(PATIENT_UUID, noIdPatient)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), noIdPatient);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updatePatient_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		patient.setId(WRONG_PATIENT_UUID);
+		
+		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
+	}
+	
+	@Test
+	public void deletePatient_shouldDeleteRequestedPatient() {
+		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
+		
+		OperationOutcome result = resourceProvider.deletePatient(new IdType().setValue(PATIENT_UUID));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deletePatient_shouldThrowResourceNotFoundException() {
+		when(patientService.delete(WRONG_PATIENT_UUID)).thenReturn(null);
+		
+		resourceProvider.deletePatient(new IdType().setValue(WRONG_PATIENT_UUID));
+	}
+	
+	@Test
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByName() {
 		StringAndListParam nameParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(NAME)));
 		when(patientService.searchForPatients(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
@@ -385,104 +483,7 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
 	
-	@Test
-	public void getPatientResourceHistory_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(PATIENT_UUID);
-		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
-		
-		List<Resource> resources = resourceProvider.getPatientResourceHistory(id);
-		assertThat(resources, notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(2));
-	}
-	
-	@Test
-	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(PATIENT_UUID);
-		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
-		
-		List<Resource> resources = resourceProvider.getPatientResourceHistory(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_PATIENT_UUID);
-		assertThat(resourceProvider.getPatientResourceHistory(idType).isEmpty(), is(true));
-		assertThat(resourceProvider.getPatientResourceHistory(idType).size(), equalTo(0));
-	}
-	
 	private List<IBaseResource> getResources(IBundleProvider result) {
 		return result.getResources(0, 10);
-	}
-	
-	@Test
-	public void updatePatient_shouldUpdateRequestedPatient() {
-		
-		when(patientService.update(PATIENT_UUID, patient)).thenReturn(patient);
-		
-		MethodOutcome result = resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), patient);
-		assertThat(result, notNullValue());
-		assertThat(result.getResource(), equalTo(patient));
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updatePatient_shouldThrowInvalidRequestExceptionForUuidMismatch() {
-		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updatePatient_shouldThrowInvalidRequestExceptionForMissingId() {
-		Patient noIdPatient = new Patient();
-		
-		when(patientService.update(PATIENT_UUID, noIdPatient)).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID), noIdPatient);
-	}
-	
-	@Test(expected = MethodNotAllowedException.class)
-	public void updatePatientShouldThrowMethodNotAllowedIfDoesNotExist() {
-		patient.setId(WRONG_PATIENT_UUID);
-		
-		when(patientService.update(WRONG_PATIENT_UUID, patient)).thenThrow(MethodNotAllowedException.class);
-		
-		resourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID), patient);
-	}
-	
-	@Test
-	public void deletePatient_shouldDeleteRequestedPatient() {
-		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
-		
-		OperationOutcome result = resourceProvider.deletePatient(new IdType().setValue(PATIENT_UUID));
-		assertThat(result, notNullValue());
-		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
-		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
-		    equalTo("This resource has been deleted"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deletePatient_shouldThrowResourceNotFoundException() {
-		
-		when(patientService.delete(WRONG_PATIENT_UUID)).thenReturn(null);
-		
-		resourceProvider.deletePatient(new IdType().setValue(WRONG_PATIENT_UUID));
-	}
-	
-	@Test
-	public void createPatient_shouldCreateNewPatient() {
-		when(patientService.create(patient)).thenReturn(patient);
-		
-		MethodOutcome result = resourceProvider.createPatient(patient);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getResource(), equalTo(patient));
 	}
 }

@@ -13,7 +13,7 @@ public class FhirTestConstants {
 	
 	public static final String LOINC_SYSTEM_URL = "http://loinc.org";
 	
-	public static final String CIEL_SYSTEM_URN = "urn:oid:2.16.840.1.113883.3.7201";
+	public static final String CIEL_SYSTEM_URN = "https://openconceptlab.org/orgs/CIEL/sources/CIEL";
 	
 	public static final String PATIENT = "Patient";
 	

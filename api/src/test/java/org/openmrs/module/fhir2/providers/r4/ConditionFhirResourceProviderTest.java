@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -41,6 +42,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
@@ -137,13 +139,45 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	}
 	
 	@Test
-	public void shouldCreateNewCondition() {
-		when(conditionService.saveCondition(condition)).thenReturn(condition);
+	public void createCondition_shouldCreateNewCondition() {
+		when(conditionService.create(condition)).thenReturn(condition);
 		
 		MethodOutcome result = resourceProvider.createCondition(condition);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), equalTo(condition));
+	}
+	
+	@Test
+	public void updateCondition_shouldUpdateRequestedCondition() {
+		when(conditionService.update(CONDITION_UUID, condition)).thenReturn(condition);
+		
+		MethodOutcome result = resourceProvider.updateCondition(new IdType().setValue(CONDITION_UUID), condition);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(condition));
+	}
+	
+	@Test
+	public void deleteCondition_shouldDeleteCondition() {
+		when(conditionService.delete(CONDITION_UUID)).thenReturn(condition);
+		
+		OperationOutcome result = resourceProvider.deleteCondition(new IdType().setValue(CONDITION_UUID));
+		
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), Matchers.equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), Matchers.equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    Matchers.equalTo("This resource has been deleted"));
+	}
+	
+	@Test
+	public void deleteCondition_shouldThrowResourceNotFoundExceptionWhenConditionNotFound() {
+		when(conditionService.delete(WRONG_CONDITION_UUID)).thenReturn(null);
+		
+		assertThrows(ResourceNotFoundException.class,
+		    () -> resourceProvider.deleteCondition(new IdType().setValue(WRONG_CONDITION_UUID)));
 	}
 	
 	@Test

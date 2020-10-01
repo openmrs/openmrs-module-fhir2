@@ -8,7 +8,7 @@
     Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
     graphic logo is a trademark of OpenMRS Inc.
 -->
-<DiagnosticReport xmlns="http://hl7.org/fhir/R3">
+<DiagnosticReport xmlns="http://hl7.org/fhir">
     <id value="8a849d5e-6011-4279-a124-40ada5a687de"/>
     <status value="final"/>
     <category>

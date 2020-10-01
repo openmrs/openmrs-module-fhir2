@@ -64,7 +64,7 @@ public class ConditionTranslatorImpl_2_2Test {
 	
 	private static final String ACTIVE = "active";
 	
-	private static final String SYSTEM = "urn:oid:2.16.840.1.113883.3.7201";
+	private static final String SYSTEM = "https://openconceptlab.org/orgs/CIEL/sources/CIEL";
 	
 	private static final Integer CODE = 102309;
 	

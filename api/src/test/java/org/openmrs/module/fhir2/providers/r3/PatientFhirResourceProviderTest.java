@@ -144,6 +144,121 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 	}
 	
 	@Test
+	public void getPatientResourceHistory_shouldReturnListOfResource() {
+		IdType id = new IdType();
+		id.setValue(PATIENT_UUID);
+		
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
+		
+		List<Resource> resources = patientFhirResourceProvider.getPatientHistoryById(id);
+		
+		assertThat(resources, notNullValue());
+		assertThat(resources, not(empty()));
+		assertThat(resources.size(), equalTo(2));
+	}
+	
+	@Test
+	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
+		IdType id = new IdType();
+		id.setValue(PATIENT_UUID);
+		
+		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
+		
+		List<Resource> resources = patientFhirResourceProvider.getPatientHistoryById(id);
+		
+		assertThat(resources, not(empty()));
+		assertThat(resources.stream().findAny().isPresent(), is(true));
+		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
+		IdType idType = new IdType();
+		idType.setValue(WRONG_PATIENT_UUID);
+		
+		assertThat(patientFhirResourceProvider.getPatientHistoryById(idType).isEmpty(), is(true));
+		assertThat(patientFhirResourceProvider.getPatientHistoryById(idType).size(), equalTo(0));
+	}
+	
+	@Test
+	public void createPatient_shouldCreateNewPatient() {
+		when(patientService.create(any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
+		
+		MethodOutcome result = patientFhirResourceProvider.createPatient(Patient30_40.convertPatient(patient));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void updatePatient_shouldUpdateRequestedPatient() {
+		when(patientService.update(eq(PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
+		
+		MethodOutcome result = patientFhirResourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID),
+		    Patient30_40.convertPatient(patient));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePatient_shouldThrowInvalidRequestForUuidMismatch() {
+		when(patientService.update(eq(WRONG_PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		patientFhirResourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID),
+		    Patient30_40.convertPatient(patient));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updatePatient_shouldThrowInvalidRequestForMissingId() {
+		org.hl7.fhir.r4.model.Patient noIdPatient = new org.hl7.fhir.r4.model.Patient();
+		
+		when(patientService.update(eq(PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		patientFhirResourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID),
+		    Patient30_40.convertPatient(noIdPatient));
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updatePatient_shouldThrowMethodNotAllowedIfDoesNotExist() {
+		org.hl7.fhir.r4.model.Patient wrongPatient = new org.hl7.fhir.r4.model.Patient();
+		wrongPatient.setId(WRONG_PATIENT_UUID);
+		
+		when(patientService.update(eq(WRONG_PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class)))
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		patientFhirResourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID),
+		    Patient30_40.convertPatient(wrongPatient));
+	}
+	
+	@Test
+	public void deletePatient_shouldDeleteRequestedPatient() {
+		
+		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
+		
+		OperationOutcome result = patientFhirResourceProvider.deletePatient(new IdType().setValue(PATIENT_UUID));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deletePatient_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentPatient() {
+		when(patientService.delete(WRONG_PATIENT_UUID)).thenReturn(null);
+		
+		patientFhirResourceProvider.deletePatient(new IdType().setValue(WRONG_PATIENT_UUID));
+	}
+	
+	@Test
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByName() {
 		StringAndListParam nameParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(NAME)));
 		when(patientService.searchForPatients(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
@@ -389,120 +504,5 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 	
 	private List<IBaseResource> getResources(IBundleProvider result) {
 		return result.getResources(0, 10);
-	}
-	
-	@Test
-	public void getPatientResourceHistory_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(PATIENT_UUID);
-		
-		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
-		
-		List<Resource> resources = patientFhirResourceProvider.getPatientHistoryById(id);
-		
-		assertThat(resources, notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(2));
-	}
-	
-	@Test
-	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(PATIENT_UUID);
-		
-		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
-		
-		List<Resource> resources = patientFhirResourceProvider.getPatientHistoryById(id);
-		
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_PATIENT_UUID);
-		
-		assertThat(patientFhirResourceProvider.getPatientHistoryById(idType).isEmpty(), is(true));
-		assertThat(patientFhirResourceProvider.getPatientHistoryById(idType).size(), equalTo(0));
-	}
-	
-	@Test
-	public void createPatient_shouldCreateNewPatient() {
-		when(patientService.create(any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
-		
-		MethodOutcome result = patientFhirResourceProvider.createPatient(Patient30_40.convertPatient(patient));
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource(), notNullValue());
-		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PATIENT_UUID));
-	}
-	
-	@Test
-	public void deletePatient_shouldDeleteRequestedPatient() {
-		
-		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
-		
-		OperationOutcome result = patientFhirResourceProvider.deletePatient(new IdType().setValue(PATIENT_UUID));
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getIssue(), notNullValue());
-		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
-		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
-		    equalTo("This resource has been deleted"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deletePatient_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentPatient() {
-		when(patientService.delete(WRONG_PATIENT_UUID)).thenReturn(null);
-		
-		patientFhirResourceProvider.deletePatient(new IdType().setValue(WRONG_PATIENT_UUID));
-	}
-	
-	@Test
-	public void updatePatient_shouldUpdateRequestedPatient() {
-		when(patientService.update(eq(PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class))).thenReturn(patient);
-		
-		MethodOutcome result = patientFhirResourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID),
-		    Patient30_40.convertPatient(patient));
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getResource(), notNullValue());
-		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PATIENT_UUID));
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updatePatient_shouldThrowInvalidRequestForUuidMismatch() {
-		when(patientService.update(eq(WRONG_PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class)))
-		        .thenThrow(InvalidRequestException.class);
-		
-		patientFhirResourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID),
-		    Patient30_40.convertPatient(patient));
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updatePatient_shouldThrowInvalidRequestForMissingId() {
-		org.hl7.fhir.r4.model.Patient noIdPatient = new org.hl7.fhir.r4.model.Patient();
-		
-		when(patientService.update(eq(PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class)))
-		        .thenThrow(InvalidRequestException.class);
-		
-		patientFhirResourceProvider.updatePatient(new IdType().setValue(PATIENT_UUID),
-		    Patient30_40.convertPatient(noIdPatient));
-	}
-	
-	@Test(expected = MethodNotAllowedException.class)
-	public void updatePatient_shouldThrowMethodNotAllowedIfDoesNotExist() {
-		org.hl7.fhir.r4.model.Patient wrongPatient = new org.hl7.fhir.r4.model.Patient();
-		wrongPatient.setId(WRONG_PATIENT_UUID);
-		
-		when(patientService.update(eq(WRONG_PATIENT_UUID), any(org.hl7.fhir.r4.model.Patient.class)))
-		        .thenThrow(MethodNotAllowedException.class);
-		
-		patientFhirResourceProvider.updatePatient(new IdType().setValue(WRONG_PATIENT_UUID),
-		    Patient30_40.convertPatient(wrongPatient));
 	}
 }

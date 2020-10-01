@@ -108,7 +108,7 @@
             </sqlCheck>
         </preConditions>
         <sql><![CDATA[
-            update fhir_concept_source set url = 'https://openconceptlab.org/orgs/CIEL/sources/CIEL/'
+            update fhir_concept_source set url = 'https://openconceptlab.org/orgs/CIEL/sources/CIEL'
             where url = 'urn:oid:2.16.840.1.113883.3.7201'
         ]]></sql>
     </changeSet>

@@ -220,7 +220,7 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		when(conditionService.saveCondition(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
+		when(conditionService.create(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);
 		
 		MockHttpServletResponse response = post("/Condition").jsonContent(conditionJson).accept(FhirMediaTypes.JSON).go();
 		

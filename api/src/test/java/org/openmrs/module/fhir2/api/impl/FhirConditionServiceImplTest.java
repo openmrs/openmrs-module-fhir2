@@ -9,8 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThrows;
 
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.r4.model.Condition;
@@ -43,19 +42,29 @@ public class FhirConditionServiceImplTest {
 		condition.setId(BAD_CONDITION_UUID);
 	}
 	
-	@Test(expected = NotImplementedOperationException.class)
-	public void getConditionByUuid_shouldThrowFhirException() {
-		assertThat(conditionService.get(BAD_CONDITION_UUID), nullValue());
+	@Test
+	public void get_shouldThrowNotImplementedOperationException() {
+		assertThrows(NotImplementedOperationException.class, () -> conditionService.get(BAD_CONDITION_UUID));
 	}
 	
-	@Test(expected = NotImplementedOperationException.class)
-	public void searchConditions_shouldThrowFhirException() {
-		assertThat(conditionService.searchConditions(null, null, null, null, null, null, null, null, null), nullValue());
+	@Test
+	public void create_shouldThrowNotImplementedOperationException() {
+		assertThrows(NotImplementedOperationException.class, () -> conditionService.create(condition));
 	}
 	
-	@Test(expected = NotImplementedOperationException.class)
-	public void saveCondition_shouldThrowFhirException() {
-		assertThat(conditionService.saveCondition(condition), nullValue());
+	@Test
+	public void update_shouldThrowNotImplementedOperationException() {
+		assertThrows(NotImplementedOperationException.class, () -> conditionService.update(BAD_CONDITION_UUID, condition));
 	}
 	
+	@Test
+	public void delete_shouldThrowNotImplementedOperationException() {
+		assertThrows(NotImplementedOperationException.class, () -> conditionService.delete(BAD_CONDITION_UUID));
+	}
+	
+	@Test
+	public void searchConditions_shouldThrowNotImplementedOperationException() {
+		assertThrows(NotImplementedOperationException.class,
+		    () -> conditionService.searchConditions(null, null, null, null, null, null, null, null, null));
+	}
 }

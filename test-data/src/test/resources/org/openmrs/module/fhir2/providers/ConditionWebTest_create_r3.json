@@ -1,15 +1,7 @@
 {
   "resourceType": "Condition",
   "id": "a6867095-e2b1-4a68-9aaa-0d161a37ce9c",
-  "clinicalStatus": {
-    "coding": [
-      {
-        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
-        "code": "active",
-        "display": "Active"
-      }
-    ]
-  },
+  "clinicalStatus": "active",
   "code": {
     "coding": [
       {

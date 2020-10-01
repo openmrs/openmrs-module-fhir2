@@ -213,7 +213,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(diagnosticReport.getCode().getCoding().get(0).getSystem(), nullValue());
 		assertThat(diagnosticReport.getCode().getCoding().get(0).getCode(), equalTo("5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		assertThat(diagnosticReport.getCode().getCoding().get(1).getSystem(),
-		    equalTo("https://openconceptlab.org/orgs/CIEL/sources/CIEL/"));
+		    equalTo("https://openconceptlab.org/orgs/CIEL/sources/CIEL"));
 		assertThat(diagnosticReport.getCode().getCoding().get(1).getCode(), equalTo("5085"));
 		
 		assertThat(diagnosticReport.getSubject().getReference(), equalTo("Patient/5946f880-b197-400b-9caa-a3c661d23041"));
@@ -256,7 +256,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(diagnosticReport.getCode().getCoding().get(0).getSystem(), nullValue());
 		assertThat(diagnosticReport.getCode().getCoding().get(0).getCode(), equalTo("5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		assertThat(diagnosticReport.getCode().getCoding().get(1).getSystem(),
-		    equalTo("https://openconceptlab.org/orgs/CIEL/sources/CIEL/"));
+		    equalTo("https://openconceptlab.org/orgs/CIEL/sources/CIEL"));
 		assertThat(diagnosticReport.getCode().getCoding().get(1).getCode(), equalTo("5085"));
 		
 		assertThat(diagnosticReport.getSubject().getReference(), equalTo("Patient/5946f880-b197-400b-9caa-a3c661d23041"));

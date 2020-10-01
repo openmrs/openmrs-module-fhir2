@@ -59,7 +59,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 	
 	private static final String OBS_CONCEPT_DISPLAY_NAME = "Weight";
 	
-	private static final String CIEL_SYSTEM_URN = "urn:oid:2.16.840.1.113883.3.7201";
+	private static final String CIEL_SYSTEM_URN = "https://openconceptlab.org/orgs/CIEL/sources/CIEL";
 	
 	private static final String OBS_CONCEPT_CIEL_ID = "5089";
 	
