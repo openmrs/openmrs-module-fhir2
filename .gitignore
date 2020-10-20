@@ -52,6 +52,7 @@ tmp/
 .metadata
 .classpath
 .project
+.factorypath
 *.tmp
 *.bak
 *.swp

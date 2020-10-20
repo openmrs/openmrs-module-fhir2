@@ -489,7 +489,7 @@
                                  referencedColumnNames="provider_id"/>
     </changeSet>
 
-    <changeSet id="add_fhir_diagnostic_report_results_20200917" author="ibacher">
+    <changeSet id="add_fhir_diagnostic_report_results_20201020" author="ibacher">
         <preConditions onFail="MARK_RAN" onError="WARN">
             <not>
                 <tableExists tableName="fhir_diagnostic_report_results"/>
@@ -510,7 +510,7 @@
                                  referencedTableName="fhir_diagnostic_report"
                                  referencedColumnNames="diagnostic_report_id"/>
         <addForeignKeyConstraint constraintName="fhir_diagnostic_report_results_reference"
-                                 baseTableName="fhir_diagnostic_report_performers" baseColumnNames="obs_id"
+                                 baseTableName="fhir_diagnostic_report_results" baseColumnNames="obs_id"
                                  referencedTableName="obs"
                                  referencedColumnNames="obs_id"/>
     </changeSet>
