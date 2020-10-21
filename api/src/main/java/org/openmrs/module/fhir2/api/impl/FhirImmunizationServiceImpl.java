@@ -18,10 +18,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.r4.model.Immunization;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
@@ -29,6 +29,8 @@ import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
 import org.openmrs.module.fhir2.api.FhirImmunizationService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
 import org.openmrs.module.fhir2.api.translators.impl.ImmunizationObsGroupHelper;
@@ -52,6 +54,12 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	
 	@Autowired
 	private ImmunizationObsGroupHelper helper;
+	
+	@Autowired
+	private SearchQueryInclude<Immunization> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<org.openmrs.Obs, Immunization, FhirObservationDao, ImmunizationTranslator, SearchQueryInclude<Immunization>> searchQuery;
 	
 	@Override
 	public Immunization get(String uuid) {
@@ -84,8 +92,9 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	
 	@Override
 	public Immunization delete(String uuid) {
-		// TODO Simply void the underlying obs
-		throw new UnsupportedOperationException("Deleting a FHIR Immunization resource is currently not supported.");
+		Obs obs = translator.toOpenmrsType(get(uuid));
+		obs = obsService.voidObs(obs, "Voided through deleting via the FHIR Immunization resource.");
+		return translator.toFhirResource(obs);
 	}
 	
 	@Override
@@ -94,21 +103,17 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	}
 	
 	@Override
-	public Collection<Immunization> searchImmunizations(ReferenceAndListParam patientParam, SortSpec sort) {
+	public IBundleProvider searchImmunizations(ReferenceAndListParam patientParam, SortSpec sort) {
 		
-		SearchParameterMap searchParams = new SearchParameterMap();
-		searchParams.addParameter(PATIENT_REFERENCE_SEARCH_HANDLER, patientParam);
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(PATIENT_REFERENCE_SEARCH_HANDLER, patientParam);
 		TokenAndListParam conceptParam = new TokenAndListParam();
 		TokenParam token = new TokenParam();
-		token.setValue(getOpenmrsImmunizationConcept().getId().toString());
+		token.setValue(Integer.toString(getOpenmrsImmunizationConcept().getId()));
 		conceptParam.addAnd(token);
-		searchParams.addParameter(CODED_SEARCH_HANDLER, conceptParam);
+		theParams.addParameter(CODED_SEARCH_HANDLER, conceptParam);
 		
-		List<String> matchingResourceUuids = obsDao.getSearchResultUuids(searchParams);
-		Collection<Obs> obs = CollectionUtils.isEmpty(matchingResourceUuids) ? CollectionUtils.EMPTY_COLLECTION
-		        : obsDao.getSearchResults(searchParams, matchingResourceUuids);
-		
-		return obs.stream().map(o -> translator.toFhirResource(o)).collect(Collectors.toList());
+		return searchQuery.getQueryResults(theParams, obsDao, translator, searchQueryInclude);
 	}
 	
 }

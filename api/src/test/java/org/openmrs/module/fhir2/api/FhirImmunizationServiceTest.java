@@ -24,13 +24,14 @@ import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslat
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel984;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -79,6 +80,11 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 	private EncounterRole administeringRole = null;
 	
 	private EncounterType immunizationEncounterType = null;
+	
+	private List<Immunization> get(IBundleProvider results) {
+		return results.getResources(0, results.size()).stream().filter(it -> it instanceof Immunization)
+		        .map(it -> (Immunization) it).collect(Collectors.toList());
+	}
 	
 	@Before
 	public void setup() throws Exception {
@@ -212,7 +218,7 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		param.addValue(new ReferenceOrListParam().add(new ReferenceParam(SP_IDENTIFIER, "12345K")));
 		
 		// replay
-		List<Immunization> immunizations = new ArrayList<Immunization>(service.searchImmunizations(param, null));
+		List<Immunization> immunizations = get(service.searchImmunizations(param, null));
 		
 		// verify (in chronological order)
 		assertThat(immunizations.size(), is(2));

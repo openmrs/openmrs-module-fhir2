@@ -11,7 +11,6 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 
 import ca.uhn.fhir.rest.annotation.Create;
@@ -25,6 +24,7 @@ import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -93,7 +93,7 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	@SuppressWarnings("unused")
-	public Collection<Immunization> searchImmunizations(@OptionalParam(name = Immunization.SP_PATIENT, chainWhitelist = { "",
+	public IBundleProvider searchImmunizations(@OptionalParam(name = Immunization.SP_PATIENT, chainWhitelist = { "",
 	        Patient.SP_IDENTIFIER }) ReferenceAndListParam patientParam, @Sort SortSpec sort) {
 		return immunizationService.searchImmunizations(patientParam, sort);
 	}
