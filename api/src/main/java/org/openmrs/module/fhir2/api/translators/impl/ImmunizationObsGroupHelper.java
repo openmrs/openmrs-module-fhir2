@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationConcepts;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationGroupingConcept;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +58,7 @@ public class ImmunizationObsGroupHelper {
 		obs.setConcept(concept(immunizationGroupingConcept));
 		obs.setObsDatetime(new Date());
 		
-		Arrays.asList(immunizationConcepts).stream().forEach(refTerm -> {
+		immunizationConcepts.stream().forEach(refTerm -> {
 			Obs o = new Obs();
 			o.setConcept(concept(refTerm));
 			o.setObsDatetime(obs.getObsDatetime());
@@ -84,7 +83,7 @@ public class ImmunizationObsGroupHelper {
 			        + immunizationGroupingConcept + ".");
 		}
 		
-		final Set<String> refConcepts = Arrays.asList(immunizationConcepts).stream()
+		final Set<String> refConcepts = immunizationConcepts.stream()
 		        .map(m -> conceptService.getConceptByMapping(m.split(":")[1], m.split(":")[0])).map(c -> c.getUuid())
 		        .collect(Collectors.toSet());
 		
@@ -112,7 +111,7 @@ public class ImmunizationObsGroupHelper {
 	public Map<String, Obs> getObsMembersMap(Obs obs) {
 		Map<String, Obs> members = new HashMap<String, Obs>();
 		obs.getGroupMembers().stream().forEach(o -> {
-			Arrays.asList(immunizationConcepts).stream().forEach(refTerm -> {
+			immunizationConcepts.stream().forEach(refTerm -> {
 				if (o.getConcept().equals(concept(refTerm))) {
 					members.put(refTerm, o);
 				}

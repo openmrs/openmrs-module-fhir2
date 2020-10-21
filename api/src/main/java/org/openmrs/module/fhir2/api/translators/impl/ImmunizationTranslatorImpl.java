@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -51,20 +52,20 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	public static final String immunizationGroupingConcept = "CIEL:1421";
 	
-	public static final String[] immunizationConcepts = { "CIEL:984", "CIEL:1410", "CIEL:1418", "CIEL:1419", "CIEL:1420",
-	        "CIEL:165907" };
+	public static final List<String> immunizationConcepts = Collections.unmodifiableList(
+	    Arrays.asList(new String[] { "CIEL:984", "CIEL:1410", "CIEL:1418", "CIEL:1419", "CIEL:1420", "CIEL:165907" }));
 	
-	public static final String ciel984 = immunizationConcepts[0];
+	public static final String ciel984 = immunizationConcepts.get(0);
 	
-	public static final String ciel1410 = immunizationConcepts[1];
+	public static final String ciel1410 = immunizationConcepts.get(1);
 	
-	public static final String ciel1418 = immunizationConcepts[2];
+	public static final String ciel1418 = immunizationConcepts.get(2);
 	
-	public static final String ciel1419 = immunizationConcepts[3];
+	public static final String ciel1419 = immunizationConcepts.get(3);
 	
-	public static final String ciel1420 = immunizationConcepts[4];
+	public static final String ciel1420 = immunizationConcepts.get(4);
 	
-	public static final String ciel165907 = immunizationConcepts[5];
+	public static final String ciel165907 = immunizationConcepts.get(5);
 	
 	private ConceptService conceptService;
 	
