@@ -100,19 +100,28 @@ public class ImmunizationObsGroupHelper {
 		return obs;
 	}
 	
-	public Provider getAdministeringProvider(Obs obs) throws IllegalArgumentException {
+	public Provider getAdministeringProvider(Obs obs) throws InvalidRequestException {
 		EncounterRole role = getAdministeringEncounterRole();
+		OperationOutcome errorOutcome = createExceptionErrorOperationOutcome(
+		    "The Immunization resource is required to be attached to an OpenMRS encounter involving a single encounter provider with the role '"
+		            + role.getName() + "'. This is not the case for immunization '" + obs.getUuid()
+		            + "' attached to encounter '" + obs.getEncounter().getUuid() + "'.");
 		return obs.getEncounter().getProvidersByRole(role).stream().findFirst()
-		        .orElseThrow(() -> new IllegalArgumentException(
+		        .orElseThrow(() -> new InvalidRequestException(
 		                "The immunization obs group should involve a single encounter provider with the role: "
-		                        + role.getName() + "."));
+		                        + role.getName() + ".",
+		                errorOutcome));
 	}
 	
-	public void validateImmunizationObsGroup(Obs obs) throws IllegalArgumentException {
+	public void validateImmunizationObsGroup(Obs obs) throws InvalidRequestException {
 		
 		if (!concept(immunizationGroupingConcept).equals(obs.getConcept())) {
-			throw new IllegalArgumentException("The immunization obs group should be defined by a concept mapped as same as "
-			        + immunizationGroupingConcept + ".");
+			OperationOutcome errorOutcome = createExceptionErrorOperationOutcome(
+			    "The Immunization resource requires the underlying OpenMRS immunization obs group to be defined by a concept mapped as same as "
+			            + immunizationGroupingConcept + ". That is not the case for obs '" + obs.getUuid()
+			            + "' that is defined by the concept named '" + obs.getConcept().getName().toString() + "'.");
+			throw new InvalidRequestException("The immunization obs group should be defined by a concept mapped as same as "
+			        + immunizationGroupingConcept + ".", errorOutcome);
 		}
 		
 		final Set<String> refConcepts = immunizationConcepts.stream()
