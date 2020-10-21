@@ -13,6 +13,7 @@ import static org.openmrs.module.fhir2.FhirConstants.ADMINISTERING_ENCOUNTER_ROL
 import static org.openmrs.module.fhir2.FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationConcepts;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationGroupingConcept;
+import static org.openmrs.module.fhir2.api.util.FhirUtils.createExceptionErrorOperationOutcome;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -22,17 +23,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.openmrs.Concept;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
 import org.openmrs.Obs;
 import org.openmrs.Provider;
-import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.EncounterService;
@@ -52,23 +54,35 @@ public class ImmunizationObsGroupHelper {
 	@Autowired
 	private AdministrationService adminService;
 	
-	public EncounterType getImmunizationsEncounterType() {
+	public EncounterType getImmunizationsEncounterType() throws InvalidRequestException {
+		OperationOutcome errorOutcome = createExceptionErrorOperationOutcome(
+		    "The Immunization resource requires an immunizations encounter type to be defined in the global property '"
+		            + IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY
+		            + "', but no immunizations encounter type is defined for this instance.");
 		String uuid = adminService.getGlobalProperty(IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY);
 		return Optional.of(encounterService.getEncounterTypeByUuid(uuid))
-		        .orElseThrow(() -> new IllegalStateException("No immunizations encounter type is defined."));
+		        .orElseThrow(() -> new InvalidRequestException("No immunizations encounter type is defined.", errorOutcome));
 	}
 	
-	public EncounterRole getAdministeringEncounterRole() {
+	public EncounterRole getAdministeringEncounterRole() throws InvalidRequestException {
+		OperationOutcome errorOutcome = createExceptionErrorOperationOutcome(
+		    "The Immunization resource requires an immunizations administering encounter role to be defined in the global property '"
+		            + ADMINISTERING_ENCOUNTER_ROLE_PROPERTY
+		            + "', but no immunizations administering encounter role is defined for this instance.");
 		String uuid = adminService.getGlobalProperty(ADMINISTERING_ENCOUNTER_ROLE_PROPERTY);
-		return Optional.of(encounterService.getEncounterRoleByUuid(uuid))
-		        .orElseThrow(() -> new IllegalStateException("No immunizations administering encounter role is defined."));
+		return Optional.of(encounterService.getEncounterRoleByUuid(uuid)).orElseThrow(
+		    () -> new InvalidRequestException("No immunizations administering encounter role is defined.", errorOutcome));
 	}
 	
-	public Concept concept(String refTerm) throws IllegalStateException, APIException {
+	public Concept concept(String refTerm) throws InvalidRequestException {
+		OperationOutcome errorOutcome = createExceptionErrorOperationOutcome(
+		    "The Immunization resource requires a concept mapped to '" + refTerm
+		            + "', however either multiple concepts are mapped to that term or not concepts are mapped to that term.");
 		String[] mapping = refTerm.split(":");
-		return Optional.of(conceptService.getConceptByMapping(mapping[1], mapping[0])).orElseThrow(
-		    () -> new IllegalStateException(
-		            "The reference term '" + refTerm + "' is either mapped to no concepts or to more than one concept."));
+		return Optional.of(conceptService.getConceptByMapping(mapping[1], mapping[0]))
+		        .orElseThrow(() -> new InvalidRequestException(
+		                "The reference term '" + refTerm + "' is either mapped to no concepts or to more than one concept.",
+		                errorOutcome));
 	}
 	
 	public Obs newImmunizationObsGroup() {

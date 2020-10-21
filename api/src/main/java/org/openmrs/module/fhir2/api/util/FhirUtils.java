@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Reference;
 
 public class FhirUtils {
@@ -89,5 +90,14 @@ public class FhirUtils {
 		}
 		
 		return Optional.empty();
+	}
+	
+	public static OperationOutcome createExceptionErrorOperationOutcome(String diagnostics) {
+		OperationOutcome outcome = new OperationOutcome();
+		OperationOutcome.OperationOutcomeIssueComponent issue = outcome.addIssue();
+		issue.setCode(OperationOutcome.IssueType.EXCEPTION);
+		issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+		issue.setDiagnostics(diagnostics);
+		return outcome;
 	}
 }
