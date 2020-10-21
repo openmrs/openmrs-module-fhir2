@@ -36,7 +36,6 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
-import org.openmrs.module.fhir2.FhirActivator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
@@ -67,14 +66,10 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	public static final String ciel165907 = immunizationConcepts.get(5);
 	
+	@Autowired
 	private ConceptService conceptService;
 	
 	@Autowired
-	public ImmunizationTranslatorImpl(ConceptService conceptService) {
-		this.conceptService = conceptService;
-		this.helper = new ImmunizationObsGroupHelper(conceptService);
-	}
-	
 	private ImmunizationObsGroupHelper helper;
 	
 	@Autowired
@@ -123,8 +118,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 			        "The visit '" + visit.getUuid() + "' does not belong to patient '" + patient.getUuid() + "'.");
 		}
 		
-		EncounterType encounterType = FhirActivator.getImmunizationsEncounterTypeOrCreateIfMissing();
-		EncounterRole encounterRole = FhirActivator.getAdministeringEncounterRoleOrCreateIfMissing();
+		EncounterType encounterType = helper.getImmunizationsEncounterType();
+		EncounterRole encounterRole = helper.getAdministeringEncounterRole();
 		
 		// taking the visit's most recent immunization encounter
 		Optional<Encounter> encounter = visit.getEncounters().stream()

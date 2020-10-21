@@ -40,15 +40,11 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.EncounterRole;
-import org.openmrs.EncounterType;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Obs;
 import org.openmrs.Provider;
 import org.openmrs.api.AdministrationService;
-import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
-import org.openmrs.module.fhir2.FhirActivator;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.translators.impl.ImmunizationObsGroupHelper;
@@ -72,14 +68,10 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 	private ObsService obsService;
 	
 	@Autowired
-	private ConceptService conceptService;
-	
-	@Autowired
 	private AdministrationService adminService;
 	
-	private EncounterRole administeringRole = null;
-	
-	private EncounterType immunizationEncounterType = null;
+	@Autowired
+	private ImmunizationObsGroupHelper helper;
 	
 	private List<Immunization> get(IBundleProvider results) {
 		return results.getResources(0, results.size()).stream().filter(it -> it instanceof Immunization)
@@ -93,8 +85,6 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		adminService.saveGlobalProperty(
 		    new GlobalProperty(FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY, "546cce2d-6d58-4097-ba92-206c1a2a0462"));
 		executeDataSet(IMMUNIZATIONS_METADATA_XML);
-		administeringRole = FhirActivator.getAdministeringEncounterRoleOrCreateIfMissing();
-		immunizationEncounterType = FhirActivator.getImmunizationsEncounterTypeOrCreateIfMissing();
 		executeDataSet(IMMUNIZATIONS_INITIAL_DATA_XML);
 		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
 	}
@@ -109,9 +99,9 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 	 */
 	private void assertObsCommons(Obs obs, String patientUuid, String visitUuid, String providerUuid) {
 		assertThat(obs.getPerson().getUuid(), is(patientUuid));
-		assertThat(obs.getEncounter().getEncounterType(), is(immunizationEncounterType));
+		assertThat(obs.getEncounter().getEncounterType(), is(helper.getImmunizationsEncounterType()));
 		assertThat(obs.getEncounter().getVisit().getUuid(), is(visitUuid));
-		Set<Provider> providers = obs.getEncounter().getProvidersByRole(administeringRole);
+		Set<Provider> providers = obs.getEncounter().getProvidersByRole(helper.getAdministeringEncounterRole());
 		assertThat(providers.size(), is(1));
 		assertThat(providers.stream().findFirst().get().getUuid(), is(providerUuid));
 	}
@@ -142,7 +132,6 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
 		
 		// verify
-		ImmunizationObsGroupHelper helper = new ImmunizationObsGroupHelper(conceptService);
 		helper.validateImmunizationObsGroup(obs);
 		assertObsCommons(obs, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 		    "f9badd80-ab76-11e2-9e96-0800200c9a66");
@@ -191,7 +180,6 @@ public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest 
 		Obs obs = obsService.getObsByUuid(savedImmunization.getId());
 		
 		// verify
-		ImmunizationObsGroupHelper helper = new ImmunizationObsGroupHelper(conceptService);
 		helper.validateImmunizationObsGroup(obs);
 		assertObsCommons(obs, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 		    "f9badd80-ab76-11e2-9e96-0800200c9a66");

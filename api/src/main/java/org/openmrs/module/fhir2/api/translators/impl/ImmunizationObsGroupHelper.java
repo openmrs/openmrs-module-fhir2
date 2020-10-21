@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY;
+import static org.openmrs.module.fhir2.FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationConcepts;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationGroupingConcept;
 
@@ -27,11 +29,13 @@ import org.apache.commons.lang.Validate;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
 import org.openmrs.Concept;
 import org.openmrs.EncounterRole;
+import org.openmrs.EncounterType;
 import org.openmrs.Obs;
 import org.openmrs.Provider;
 import org.openmrs.api.APIException;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ConceptService;
-import org.openmrs.module.fhir2.FhirActivator;
+import org.openmrs.api.EncounterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,11 +44,25 @@ import org.springframework.stereotype.Component;
 public class ImmunizationObsGroupHelper {
 	
 	@Autowired
-	public ImmunizationObsGroupHelper(ConceptService conceptService) {
-		this.conceptService = conceptService;
+	private ConceptService conceptService;
+	
+	@Autowired
+	private EncounterService encounterService;
+	
+	@Autowired
+	private AdministrationService adminService;
+	
+	public EncounterType getImmunizationsEncounterType() {
+		String uuid = adminService.getGlobalProperty(IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY);
+		return Optional.of(encounterService.getEncounterTypeByUuid(uuid))
+		        .orElseThrow(() -> new IllegalStateException("No immunizations encounter type is defined."));
 	}
 	
-	private ConceptService conceptService;
+	public EncounterRole getAdministeringEncounterRole() {
+		String uuid = adminService.getGlobalProperty(ADMINISTERING_ENCOUNTER_ROLE_PROPERTY);
+		return Optional.of(encounterService.getEncounterRoleByUuid(uuid))
+		        .orElseThrow(() -> new IllegalStateException("No immunizations administering encounter role is defined."));
+	}
 	
 	public Concept concept(String refTerm) throws IllegalStateException, APIException {
 		String[] mapping = refTerm.split(":");
@@ -69,7 +87,7 @@ public class ImmunizationObsGroupHelper {
 	}
 	
 	public Provider getAdministeringProvider(Obs obs) throws IllegalArgumentException {
-		EncounterRole role = FhirActivator.getAdministeringEncounterRoleOrCreateIfMissing();
+		EncounterRole role = getAdministeringEncounterRole();
 		return obs.getEncounter().getProvidersByRole(role).stream().findFirst()
 		        .orElseThrow(() -> new IllegalArgumentException(
 		                "The immunization obs group should involve a single encounter provider with the role: "
