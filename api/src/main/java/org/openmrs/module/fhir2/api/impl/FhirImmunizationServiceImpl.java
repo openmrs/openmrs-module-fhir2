@@ -59,6 +59,11 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	}
 	
 	@Override
+	public List<Immunization> get(Collection<String> uuids) {
+		return uuids.stream().map(uuid -> get(uuid)).collect(Collectors.toList());
+	}
+	
+	@Override
 	public Immunization create(Immunization newImmunization) {
 		Obs obs = translator.toOpenmrsType(newImmunization);
 		if (obs.getEncounter().getId() == null) {

@@ -72,9 +72,9 @@ public class ImmunizationObsGroupHelper {
 	public Provider getAdministeringProvider(Obs obs) throws IllegalArgumentException {
 		EncounterRole role = FhirActivator.getAdministeringEncounterRoleOrCreateIfMissing();
 		return obs.getEncounter().getProvidersByRole(role).stream().findFirst()
-		        .orElseThrow(() -> new IllegalArgumentException(new IllegalArgumentException(
+		        .orElseThrow(() -> new IllegalArgumentException(
 		                "The immunization obs group should involve a single encounter provider with the role: "
-		                        + role.getName() + ".")));
+		                        + role.getName() + "."));
 	}
 	
 	public void validateImmunizationObsGroup(Obs obs) throws IllegalArgumentException {
