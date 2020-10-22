@@ -102,8 +102,6 @@ public class FhirConstants {
 	
 	public static final String DIAGNOSTIC_REPORT = "DiagnosticReport";
 	
-	public static final String VISIT = "Visit";
-	
 	public static final String ENCOUNTER = "Encounter";
 	
 	public static final String IDENTIFIER = "Identifier";
