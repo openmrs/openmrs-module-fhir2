@@ -26,10 +26,7 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.openmrs.Concept;
 import org.openmrs.EncounterRole;
 import org.openmrs.EncounterType;
@@ -55,34 +52,29 @@ public class ImmunizationObsGroupHelper {
 	private AdministrationService adminService;
 	
 	public EncounterType getImmunizationsEncounterType() throws InvalidRequestException {
-		OperationOutcome errorOutcome = createExceptionErrorOperationOutcome(
-		    "The Immunization resource requires an immunizations encounter type to be defined in the global property '"
-		            + IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY
-		            + "', but no immunizations encounter type is defined for this instance.");
+		String errMsg = "The Immunization resource requires an immunizations encounter type to be defined in the global property '"
+		        + IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY
+		        + "', but no immunizations encounter type is defined for this instance.";
 		String uuid = adminService.getGlobalProperty(IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY);
 		return Optional.of(encounterService.getEncounterTypeByUuid(uuid))
-		        .orElseThrow(() -> new InvalidRequestException("No immunizations encounter type is defined.", errorOutcome));
+		        .orElseThrow(() -> new InvalidRequestException(errMsg, createExceptionErrorOperationOutcome(errMsg)));
 	}
 	
 	public EncounterRole getAdministeringEncounterRole() throws InvalidRequestException {
-		OperationOutcome errorOutcome = createExceptionErrorOperationOutcome(
-		    "The Immunization resource requires an immunizations administering encounter role to be defined in the global property '"
-		            + ADMINISTERING_ENCOUNTER_ROLE_PROPERTY
-		            + "', but no immunizations administering encounter role is defined for this instance.");
+		String errMsg = "The Immunization resource requires an administering encounter role to be defined in the global property '"
+		        + ADMINISTERING_ENCOUNTER_ROLE_PROPERTY
+		        + "', but no administering encounter role is defined for this instance.";
 		String uuid = adminService.getGlobalProperty(ADMINISTERING_ENCOUNTER_ROLE_PROPERTY);
-		return Optional.of(encounterService.getEncounterRoleByUuid(uuid)).orElseThrow(
-		    () -> new InvalidRequestException("No immunizations administering encounter role is defined.", errorOutcome));
+		return Optional.of(encounterService.getEncounterRoleByUuid(uuid))
+		        .orElseThrow(() -> new InvalidRequestException(errMsg, createExceptionErrorOperationOutcome(errMsg)));
 	}
 	
 	public Concept concept(String refTerm) throws InvalidRequestException {
-		OperationOutcome errorOutcome = createExceptionErrorOperationOutcome(
-		    "The Immunization resource requires a concept mapped to '" + refTerm
-		            + "', however either multiple concepts are mapped to that term or not concepts are mapped to that term.");
+		String errMsg = "The Immunization resource requires a concept mapped to '" + refTerm
+		        + "', however either multiple concepts are mapped to that term or not concepts are mapped to that term.";
 		String[] mapping = refTerm.split(":");
 		return Optional.of(conceptService.getConceptByMapping(mapping[1], mapping[0]))
-		        .orElseThrow(() -> new InvalidRequestException(
-		                "The reference term '" + refTerm + "' is either mapped to no concepts or to more than one concept.",
-		                errorOutcome));
+		        .orElseThrow(() -> new InvalidRequestException(errMsg, createExceptionErrorOperationOutcome(errMsg)));
 	}
 	
 	public Obs newImmunizationObsGroup() {
@@ -102,26 +94,20 @@ public class ImmunizationObsGroupHelper {
 	
 	public Provider getAdministeringProvider(Obs obs) throws InvalidRequestException {
 		EncounterRole role = getAdministeringEncounterRole();
-		OperationOutcome errorOutcome = createExceptionErrorOperationOutcome(
-		    "The Immunization resource is required to be attached to an OpenMRS encounter involving a single encounter provider with the role '"
-		            + role.getName() + "'. This is not the case for immunization '" + obs.getUuid()
-		            + "' attached to encounter '" + obs.getEncounter().getUuid() + "'.");
+		String errMsg = "The Immunization resource is required to be attached to an OpenMRS encounter involving a single encounter provider with the role '"
+		        + role.getName() + "'. This is not the case for immunization '" + obs.getUuid() + "' attached to encounter '"
+		        + obs.getEncounter().getUuid() + "'.";
 		return obs.getEncounter().getProvidersByRole(role).stream().findFirst()
-		        .orElseThrow(() -> new InvalidRequestException(
-		                "The immunization obs group should involve a single encounter provider with the role: "
-		                        + role.getName() + ".",
-		                errorOutcome));
+		        .orElseThrow(() -> new InvalidRequestException(errMsg, createExceptionErrorOperationOutcome(errMsg)));
 	}
 	
 	public void validateImmunizationObsGroup(Obs obs) throws InvalidRequestException {
 		
 		if (!concept(immunizationGroupingConcept).equals(obs.getConcept())) {
-			OperationOutcome errorOutcome = createExceptionErrorOperationOutcome(
-			    "The Immunization resource requires the underlying OpenMRS immunization obs group to be defined by a concept mapped as same as "
-			            + immunizationGroupingConcept + ". That is not the case for obs '" + obs.getUuid()
-			            + "' that is defined by the concept named '" + obs.getConcept().getName().toString() + "'.");
-			throw new InvalidRequestException("The immunization obs group should be defined by a concept mapped as same as "
-			        + immunizationGroupingConcept + ".", errorOutcome);
+			String errMsg = "The Immunization resource requires the underlying OpenMRS immunization obs group to be defined by a concept mapped as same as "
+			        + immunizationGroupingConcept + ". That is not the case for obs '" + obs.getUuid()
+			        + "' that is defined by the concept named '" + obs.getConcept().getName().toString() + "'.";
+			throw new InvalidRequestException(errMsg, createExceptionErrorOperationOutcome(errMsg));
 		}
 		
 		final Set<String> refConcepts = immunizationConcepts.stream()
@@ -138,8 +124,9 @@ public class ImmunizationObsGroupHelper {
 			if (refConcepts.contains(uuid)) {
 				refConcepts.remove(uuid);
 			} else {
-				throw new IllegalArgumentException("The immunization obs member defined by concept " + uuid
-				        + " is found multiple times in the immunization obs group.");
+				String errMsg = "The immunization obs member defined by concept with UUID '" + uuid
+				        + "' is found multiple times in the immunization obs group.";
+				throw new InvalidRequestException(errMsg, createExceptionErrorOperationOutcome(errMsg));
 			}
 		});
 		Validate.isTrue(refConcepts.size() == 0);
@@ -155,18 +142,11 @@ public class ImmunizationObsGroupHelper {
 			immunizationConcepts.stream().forEach(refTerm -> {
 				if (o.getConcept().equals(concept(refTerm))) {
 					members.put(refTerm, o);
+					
 				}
 			});
 		});
 		return members;
-	}
-	
-	public String getProviderUuid(ImmunizationPerformerComponent performer) {
-		if (performer.getActor() == null) {
-			return "";
-		}
-		String ref = Optional.of(performer.getActor().getReference()).orElse("/");
-		return StringUtils.split(ref, "/")[1];
 	}
 	
 }

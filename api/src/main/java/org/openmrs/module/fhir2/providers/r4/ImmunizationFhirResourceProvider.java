@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Read
-	public Immunization getImmunizationByUuid(@IdParam @NotNull IdType id) {
+	public Immunization getImmunizationByUuid(@IdParam @Nonnull IdType id) {
 		Immunization immunization = immunizationService.get(id.getIdPart());
 		if (immunization == null) {
 			throw new ResourceNotFoundException("Could not find Immunization with Id " + id.getIdPart());
@@ -66,7 +66,7 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 	
 	@History
 	@SuppressWarnings("unused")
-	public List<Resource> getImmunizationHistoryById(@IdParam @NotNull IdType id) {
+	public List<Resource> getImmunizationHistoryById(@IdParam @Nonnull IdType id) {
 		Immunization immunization = immunizationService.get(id.getIdPart());
 		if (immunization == null) {
 			throw new ResourceNotFoundException("Could not find Immunization with Id " + id.getIdPart());

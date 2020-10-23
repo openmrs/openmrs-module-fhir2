@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.util.FhirUtils.createExceptionErrorOperationOutcome;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -103,8 +106,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		List<ImmunizationPerformerComponent> performers = fhirImmunization.getPerformer();
 		
 		if (CollectionUtils.size(performers) != 1) {
-			throw new IllegalArgumentException(
-			        "Either no performer was found or multiple performers were found. Only strictly one performer is currently supported for each immunization.");
+			String errMsg = "Either no performer was found or multiple performers were found. Only strictly one performer is currently supported for each immunization.";
+			throw new InvalidRequestException(errMsg, createExceptionErrorOperationOutcome(errMsg));
 		}
 		ImmunizationPerformerComponent performer = performers.get(0);
 		
@@ -114,8 +117,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		Location location = visit.getLocation();
 		
 		if (!patient.equals(visit.getPatient())) {
-			throw new IllegalArgumentException(
-			        "The visit '" + visit.getUuid() + "' does not belong to patient '" + patient.getUuid() + "'.");
+			String errMsg = "The visit '" + visit.getUuid() + "' does not belong to patient '" + patient.getUuid() + "'.";
+			throw new InvalidRequestException(errMsg, createExceptionErrorOperationOutcome(errMsg));
 		}
 		
 		EncounterType encounterType = helper.getImmunizationsEncounterType();
@@ -151,17 +154,18 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		
 		Coding coding = fhirImmunization.getVaccineCode().getCoding().stream()
 		        .filter(code -> StringUtils.isEmpty(code.getSystem())).reduce((code1, code2) -> {
-			        throw new IllegalArgumentException("Multiple system-less coding found for the immunization's vaccine: "
-			                + code1.getCode() + " and " + code2.getCode()
-			                + ". No unique system concept could be identified as the coded answer.");
+			        String errMsg = "Multiple system-less coding found for the immunization's vaccine: " + code1.getCode()
+			                + " and " + code2.getCode()
+			                + ". No unique system concept could be identified as the coded answer.";
+			        throw new InvalidRequestException(errMsg, createExceptionErrorOperationOutcome(errMsg));
 		        }).get();
 		members.get(ciel984).setValueCoded(conceptService.getConceptByUuid(coding.getCode()));
 		
 		members.get(ciel1410).setValueDatetime(fhirImmunization.getOccurrenceDateTimeType().getValue());
 		
 		if (CollectionUtils.size(fhirImmunization.getProtocolApplied()) != 1) {
-			throw new IllegalArgumentException(
-			        "Either no protocol applied was found or multiple protocols applied were found. Only strictly one protocol is currently supported for each immunization.");
+			String errMsg = "Either no protocol applied was found or multiple protocols applied were found. Only strictly one protocol is currently supported for each immunization.";
+			throw new InvalidRequestException(errMsg, createExceptionErrorOperationOutcome(errMsg));
 		}
 		ImmunizationProtocolAppliedComponent protocolApplied = fhirImmunization.getProtocolApplied().get(0);
 		members.get(ciel1418).setValueNumeric(protocolApplied.getDoseNumberPositiveIntType().getValue().doubleValue());
