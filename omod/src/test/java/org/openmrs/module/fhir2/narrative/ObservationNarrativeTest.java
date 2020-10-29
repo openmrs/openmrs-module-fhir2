@@ -18,12 +18,20 @@ import java.io.IOException;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.Test;
 
+/**
+ * Test for Observation resource narrative generation
+ */
 public class ObservationNarrativeTest extends BaseFhirNarrativeTest {
 	
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/observation-example.json";
 	
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/observation-expected.html";
 	
+	/**
+	 * Check that the expected narrative is generated for some example Observation resource
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void shouldGenerateObservationNarrative() throws IOException {
 		Observation given = parser.parseResource(Observation.class,

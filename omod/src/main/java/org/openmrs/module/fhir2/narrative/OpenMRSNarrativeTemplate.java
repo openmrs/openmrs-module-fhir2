@@ -31,6 +31,9 @@ import ca.uhn.fhir.narrative2.TemplateTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 
+/**
+ * Class which defines the narrative template
+ */
 public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 	
 	private String contextPath;
@@ -49,6 +52,9 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 	
 	private final Set<String> appliesToDatatypes = new HashSet<>();
 	
+	/**
+	 * @return the context path of template
+	 */
 	@Override
 	public String getContextPath() {
 		return this.contextPath;
@@ -58,6 +64,9 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 		this.contextPath = contextPath;
 	}
 	
+	/**
+	 * @return string set of profiles which the template is applicable to
+	 */
 	@Override
 	public Set<String> getAppliesToProfiles() {
 		return Collections.unmodifiableSet(this.appliesToProfiles);
@@ -67,6 +76,9 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 		this.appliesToProfiles.add(profile);
 	}
 	
+	/**
+	 * @return string set of resource types which the template is applicable to
+	 */
 	@Override
 	public Set<String> getAppliesToResourceTypes() {
 		return Collections.unmodifiableSet(this.appliesToResourceTypes);
@@ -76,11 +88,17 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 		this.appliesToResourceTypes.add(resourceType);
 	}
 	
+	/**
+	 * @return set of resource classes which the template is applicable to
+	 */
 	@Override
 	public Set<Class<? extends IBase>> getAppliesToResourceClasses() {
 		return Collections.unmodifiableSet(this.appliesToResourceClasses);
 	}
 	
+	/**
+	 * @return the template type
+	 */
 	@Override
 	public TemplateTypeEnum getTemplateType() {
 		return this.templateType;
@@ -90,6 +108,9 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 		this.templateType = templateType;
 	}
 	
+	/**
+	 * @return the template name
+	 */
 	@Override
 	public String getTemplateName() {
 		return this.templateName;
@@ -100,6 +121,9 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 		return this;
 	}
 	
+	/**
+	 * @return the template text
+	 */
 	@Override
 	public String getTemplateText() {
 		try {
@@ -114,6 +138,9 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 		this.templateFilename = templateFileName;
 	}
 	
+	/**
+	 * @return string set of data types which the template is applicable to
+	 */
 	public Set<String> getAppliesToDataTypes() {
 		return Collections.unmodifiableSet(this.appliesToDatatypes);
 	}

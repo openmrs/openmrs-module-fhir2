@@ -18,12 +18,20 @@ import java.io.IOException;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Test;
 
+/**
+ * Test for ServiceRequest resource narrative generation
+ */
 public class ServiceRequestNarrativeTest extends BaseFhirNarrativeTest {
 	
 	private static final String EXAMPLE_RESOURCE_PATH = "org/openmrs/module/fhir2/narrative/example/servicerequest-example.json";
 	
 	private static final String EXPECTED_NARRATIVE_PATH = "org/openmrs/module/fhir2/narrative/expected/servicerequest-expected.html";
 	
+	/**
+	 * Check that the expected narrative is generated for some example ServiceRequest resource
+	 * 
+	 * @throws IOException
+	 */
 	@Test
 	public void shouldGenerateServiceRequestNarrative() throws IOException {
 		ServiceRequest given = parser.parseResource(ServiceRequest.class,
