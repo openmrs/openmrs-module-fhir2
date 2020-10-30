@@ -11,17 +11,20 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 import javax.annotation.Nonnull;
 
-import java.util.Collections;
-
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.Task;
 import org.openmrs.Encounter;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
+import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -30,9 +33,23 @@ import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import lombok.AccessLevel;
+import lombok.Setter;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorImpl implements ServiceRequestTranslator<TestOrder> {
+public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<TestOrder> {
+
+	private static final int START_INDEX = 0;
+
+	private static final int END_INDEX = 10;
+
+	@Autowired
+	private FhirTaskService taskService;
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
@@ -79,5 +96,55 @@ public class ServiceRequestTranslatorImpl extends BaseServiceRequestTranslatorIm
 	@Override
 	public TestOrder toOpenmrsType(@Nonnull ServiceRequest resource) {
 		throw new UnsupportedOperationException();
+	}
+
+	private ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(String orderUuid) {
+		IBundleProvider results = taskService.searchForTasks(
+				new ReferenceAndListParam()
+						.addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
+				null, null, null, null, null);
+
+		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
+				.collect(Collectors.toList());
+
+		ServiceRequest.ServiceRequestStatus serviceRequestStatus = ServiceRequest.ServiceRequestStatus.UNKNOWN;
+
+		if (serviceRequestTasks.size() != 1) {
+			return serviceRequestStatus;
+		}
+
+		Task serviceRequestTask = serviceRequestTasks.iterator().next();
+
+		if (serviceRequestTask.hasStatus()) {
+			switch (serviceRequestTask.getStatus()) {
+			case ACCEPTED:
+			case REQUESTED:
+				serviceRequestStatus = ServiceRequest.ServiceRequestStatus.ACTIVE;
+				break;
+			case REJECTED:
+				serviceRequestStatus = ServiceRequest.ServiceRequestStatus.REVOKED;
+				break;
+			case COMPLETED:
+				serviceRequestStatus = ServiceRequest.ServiceRequestStatus.COMPLETED;
+				break;
+			}
+		}
+		return serviceRequestStatus;
+	}
+
+	private Reference determineServiceRequestPerformer(String orderUuid) {
+		IBundleProvider results = taskService.searchForTasks(
+				new ReferenceAndListParam()
+						.addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
+				null, null, null, null, null);
+
+		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
+				.collect(Collectors.toList());
+
+		if (serviceRequestTasks.size() != 1) {
+			return null;
+		}
+
+		return serviceRequestTasks.iterator().next().getOwner();
 	}
 }
