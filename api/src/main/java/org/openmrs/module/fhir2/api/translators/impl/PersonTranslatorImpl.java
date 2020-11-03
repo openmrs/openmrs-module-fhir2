@@ -13,11 +13,14 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import java.util.Calendar;
 import java.util.Objects;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Person;
@@ -67,7 +70,26 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
 		person.setId(openmrsPerson.getUuid());
 		person.setActive(!openmrsPerson.getVoided());
-		person.setBirthDate(openmrsPerson.getBirthdate());
+		
+		if (openmrsPerson.getBirthdateEstimated() != null) {
+			if (!openmrsPerson.getBirthdateEstimated()) {
+				person.setBirthDate(openmrsPerson.getBirthdate());
+			} else {
+				DateType dateType = new DateType();
+				Calendar calendar = Calendar.getInstance();
+				int currentYear = calendar.get(Calendar.YEAR);
+				calendar.setTime(openmrsPerson.getBirthdate());
+				int birthDateYear = calendar.get(Calendar.YEAR);
+				
+				if ((currentYear - birthDateYear) > 5) {
+					dateType.setValue(openmrsPerson.getBirthdate(), TemporalPrecisionEnum.YEAR);
+				} else {
+					dateType.setValue(openmrsPerson.getBirthdate(), TemporalPrecisionEnum.MONTH);
+				}
+				
+				person.setBirthDateElement(dateType);
+			}
+		}
 		
 		if (openmrsPerson.getGender() != null) {
 			person.setGender(genderTranslator.toFhirResource(openmrsPerson.getGender()));
@@ -107,7 +129,16 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		
 		openmrsPerson.setUuid(person.getId());
 		openmrsPerson.setVoided(person.getActive());
-		openmrsPerson.setBirthdate(person.getBirthDate());
+		
+		if (person.getBirthDateElement().getPrecision() == TemporalPrecisionEnum.DAY) {
+			openmrsPerson.setBirthdate(person.getBirthDate());
+		}
+		
+		if (person.getBirthDateElement().getPrecision() == TemporalPrecisionEnum.YEAR
+		        || person.getBirthDateElement().getPrecision() == TemporalPrecisionEnum.MONTH) {
+			openmrsPerson.setBirthdate(person.getBirthDate());
+			openmrsPerson.setBirthdateEstimated(true);
+		}
 		
 		for (HumanName name : person.getName()) {
 			openmrsPerson.addName(nameTranslator.toOpenmrsType(name));

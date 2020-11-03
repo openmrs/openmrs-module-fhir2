@@ -13,10 +13,13 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import java.util.Calendar;
 import java.util.Date;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedPerson;
@@ -64,7 +67,27 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		RelatedPerson relatedPerson = new RelatedPerson();
 		
 		relatedPerson.setId(relationship.getUuid());
-		relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
+		if (omrsRelatedPerson.getBirthdateEstimated() != null) {
+			if (!omrsRelatedPerson.getBirthdateEstimated()) {
+				relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
+			} else {
+				DateType dateType = new DateType();
+				Calendar calendar = Calendar.getInstance();
+				int currentYear = calendar.get(Calendar.YEAR);
+				calendar.setTime(omrsRelatedPerson.getBirthdate());
+				int birthDateYear = calendar.get(Calendar.YEAR);
+				
+				if ((currentYear - birthDateYear) > 5) {
+					dateType.setValue(omrsRelatedPerson.getBirthdate(), TemporalPrecisionEnum.YEAR);
+				} else {
+					dateType.setValue(omrsRelatedPerson.getBirthdate(), TemporalPrecisionEnum.MONTH);
+				}
+				
+				relatedPerson.setBirthDateElement(dateType);
+			}
+		} else {
+			relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
+		}
 		
 		if (relationship.getPersonB() != null) {
 			if (relationship.getPersonB().getIsPatient()) {
