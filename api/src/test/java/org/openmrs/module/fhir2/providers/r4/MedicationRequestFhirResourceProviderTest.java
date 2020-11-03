@@ -121,7 +121,7 @@ public class MedicationRequestFhirResourceProviderTest {
 		code.addAnd(codingToken);
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, code, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -143,7 +143,7 @@ public class MedicationRequestFhirResourceProviderTest {
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(patientParam, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -164,8 +164,8 @@ public class MedicationRequestFhirResourceProviderTest {
 		ReferenceAndListParam medicationParam = new ReferenceAndListParam();
 		medicationParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Medication.SP_IDENTIFIER)));
 		
-		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, medicationParam,
-		    null, null, null);
+		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null,
+		    medicationParam, null, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -186,8 +186,8 @@ public class MedicationRequestFhirResourceProviderTest {
 		ReferenceAndListParam participantParam = new ReferenceAndListParam();
 		participantParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Practitioner.SP_NAME)));
 		
-		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, participantParam,
-		    null, null, null, null);
+		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null,
+		    participantParam, null, null, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -209,7 +209,7 @@ public class MedicationRequestFhirResourceProviderTest {
 		encounterParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Encounter.SP_IDENTIFIER)));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, encounterParam, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -228,8 +228,8 @@ public class MedicationRequestFhirResourceProviderTest {
 		    fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
-		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, uuid,
-		    null, null);
+		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
+		    uuid, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -249,7 +249,7 @@ public class MedicationRequestFhirResourceProviderTest {
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
-		    lastUpdated, null);
+		    null, lastUpdated, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -270,7 +270,7 @@ public class MedicationRequestFhirResourceProviderTest {
 		            .thenReturn(new MockIBundleProvider<>(Arrays.asList(medicationRequest, new Practitioner()), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
-		    null, includes);
+		    null, null, includes);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -290,7 +290,7 @@ public class MedicationRequestFhirResourceProviderTest {
 		    isNull())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
-		    null, includes);
+		    null, null, includes);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		

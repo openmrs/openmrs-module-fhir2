@@ -53,7 +53,7 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 	@Override
 	public IBundleProvider searchForServiceRequests(ReferenceAndListParam patientReference, TokenAndListParam code,
 	        ReferenceAndListParam encounterReference, ReferenceAndListParam participantReference, DateRangeParam occurrence,
-	        TokenAndListParam uuid, DateRangeParam lastUpdated, HashSet<Include> includes) {
+	        TokenAndListParam uuid, TokenAndListParam identifier, DateRangeParam lastUpdated, HashSet<Include> includes) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
@@ -62,10 +62,20 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, occurrence)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.IDENTIFIER, identifier)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
+	
+	@Override
+	public IBundleProvider searchForServiceRequests(ReferenceAndListParam patientReference, TokenAndListParam code,
+	        ReferenceAndListParam encounterReference, ReferenceAndListParam participantReference, DateRangeParam occurrence,
+	        TokenAndListParam uuid, DateRangeParam lastUpdated, HashSet<Include> includes) {
+		
+		return searchForServiceRequests(patientReference, code, encounterReference, participantReference, occurrence, uuid,
+		    null, lastUpdated, includes);
 	}
 	
 }

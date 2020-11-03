@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.or;
 
 import java.util.Optional;
@@ -58,6 +59,11 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
+				case FhirConstants.IDENTIFIER:    
+					entry.getValue()
+					        .forEach(orderNumber -> handleOrderNumber((TokenAndListParam) orderNumber.getParam())
+					                .ifPresent(criteria::add));
+					break;
 			}
 		});
 	}
@@ -82,6 +88,13 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 		        handleDate("dateActivated", dateRangeParam.getLowerBound()))))),
 		    Optional.of(or(toCriteriaArray(Stream.of(handleDate("dateStopped", dateRangeParam.getUpperBound()),
 		        handleDate("autoExpireDate", dateRangeParam.getUpperBound())))))))));
+	}
+	
+	private Optional<Criterion> handleOrderNumber(TokenAndListParam orderNumber) {
+		if (orderNumber != null) {
+			return handleAndListParam(orderNumber, param -> Optional.of(eq("orderNumber", param.getValue())));
+		}
+		return Optional.empty();
 	}
 	
 }
