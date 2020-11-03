@@ -42,5 +42,4 @@ public class OrderIdentifierTranslatorImpl implements OrderIdentifierTranslator 
 	public Order toOpenmrsType(Identifier resource) {
 		throw new InvalidRequestException("Order Identifier cannot be manualy set");
 	}
-	
 }
