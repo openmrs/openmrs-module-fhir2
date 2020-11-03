@@ -83,11 +83,10 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		Patient patient = new Patient();
 		patient.setId(openmrsPatient.getUuid());
 		patient.setActive(!openmrsPatient.getVoided());
+		patient.setBirthDate(openmrsPatient.getBirthdate());
 		
 		if (openmrsPatient.getBirthdateEstimated() != null) {
-			if (!openmrsPatient.getBirthdateEstimated()) {
-				patient.setBirthDate(openmrsPatient.getBirthdate());
-			} else {
+			if (openmrsPatient.getBirthdateEstimated()) {
 				DateType dateType = new DateType();
 				Calendar calendar = Calendar.getInstance();
 				int currentYear = calendar.get(Calendar.YEAR);

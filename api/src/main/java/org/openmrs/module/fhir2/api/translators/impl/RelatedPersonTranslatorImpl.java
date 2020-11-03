@@ -65,12 +65,11 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		
 		Person omrsRelatedPerson = relationship.getPersonA();
 		RelatedPerson relatedPerson = new RelatedPerson();
-		
+		relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
 		relatedPerson.setId(relationship.getUuid());
+		
 		if (omrsRelatedPerson.getBirthdateEstimated() != null) {
-			if (!omrsRelatedPerson.getBirthdateEstimated()) {
-				relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
-			} else {
+			if (omrsRelatedPerson.getBirthdateEstimated()) {
 				DateType dateType = new DateType();
 				Calendar calendar = Calendar.getInstance();
 				int currentYear = calendar.get(Calendar.YEAR);
@@ -85,8 +84,6 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 				
 				relatedPerson.setBirthDateElement(dateType);
 			}
-		} else {
-			relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
 		}
 		
 		if (relationship.getPersonB() != null) {

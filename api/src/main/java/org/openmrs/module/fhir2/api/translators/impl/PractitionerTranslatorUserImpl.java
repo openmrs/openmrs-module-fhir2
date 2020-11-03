@@ -60,9 +60,7 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 		if (user.getPerson() != null) {
 			
 			if (user.getPerson().getBirthdateEstimated() != null) {
-				if (!user.getPerson().getBirthdateEstimated()) {
-					practitioner.setBirthDate(user.getPerson().getBirthdate());
-				} else {
+				if (user.getPerson().getBirthdateEstimated()) {
 					DateType dateType = new DateType();
 					Calendar calendar = Calendar.getInstance();
 					int currentYear = calendar.get(Calendar.YEAR);
@@ -78,6 +76,8 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 					practitioner.setBirthDateElement(dateType);
 				}
 			}
+			
+			practitioner.setBirthDate(user.getPerson().getBirthdate());
 			
 			practitioner.setGender(genderTranslator.toFhirResource(user.getPerson().getGender()));
 			for (PersonName name : user.getPerson().getNames()) {

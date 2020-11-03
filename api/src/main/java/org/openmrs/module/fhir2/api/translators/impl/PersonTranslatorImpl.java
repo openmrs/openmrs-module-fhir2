@@ -70,11 +70,10 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
 		person.setId(openmrsPerson.getUuid());
 		person.setActive(!openmrsPerson.getVoided());
+		person.setBirthDate(openmrsPerson.getBirthdate());
 		
 		if (openmrsPerson.getBirthdateEstimated() != null) {
-			if (!openmrsPerson.getBirthdateEstimated()) {
-				person.setBirthDate(openmrsPerson.getBirthdate());
-			} else {
+			if (openmrsPerson.getBirthdateEstimated()) {
 				DateType dateType = new DateType();
 				Calendar calendar = Calendar.getInstance();
 				int currentYear = calendar.get(Calendar.YEAR);
@@ -86,7 +85,6 @@ public class PersonTranslatorImpl implements PersonTranslator {
 				} else {
 					dateType.setValue(openmrsPerson.getBirthdate(), TemporalPrecisionEnum.MONTH);
 				}
-				
 				person.setBirthDateElement(dateType);
 			}
 		}

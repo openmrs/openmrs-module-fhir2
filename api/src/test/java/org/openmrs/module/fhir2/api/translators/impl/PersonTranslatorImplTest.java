@@ -24,11 +24,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
+import java.util.Calendar;
 import java.util.Date;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
@@ -187,6 +190,74 @@ public class PersonTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getActive(), is(true));
+	}
+	
+	@Test
+	public void shouldTranslateToOpenMRSBirthDate() {
+		org.hl7.fhir.r4.model.Person openMRSPerson = new org.hl7.fhir.r4.model.Person();
+		Date date = new Date();
+		DateType dateType = new DateType();
+		
+		// for TemporalPrecisionEnum.DAY
+		dateType.setValue(date, TemporalPrecisionEnum.DAY);
+		openMRSPerson.setBirthDateElement(dateType);
+		
+		Person result = personTranslator.toOpenmrsType(openMRSPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthdateEstimated(), equalTo(false));
+		assertThat(result.getBirthdate(), equalTo(date));
+		
+		// for TemporalPrecisionEnum.Month
+		dateType.setValue(date, TemporalPrecisionEnum.MONTH);
+		openMRSPerson.setBirthDateElement(dateType);
+		
+		result = personTranslator.toOpenmrsType(openMRSPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthdateEstimated(), equalTo(true));
+		assertThat(result.getBirthdate(), equalTo(date));
+		
+		// for TemporalPrecisionEnum.YEAR
+		dateType.setValue(date, TemporalPrecisionEnum.YEAR);
+		openMRSPerson.setBirthDateElement(dateType);
+		
+		result = personTranslator.toOpenmrsType(openMRSPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthdateEstimated(), equalTo(true));
+		assertThat(result.getBirthdate(), equalTo(date));
+	}
+	
+	@Test
+	public void shouldTranslateToFHIRBirthDate() {
+		
+		Person person = new Person();
+		Calendar calendar = Calendar.getInstance();
+		DateType dateType = new DateType();
+		
+		// when birthdate more than 5 year
+		calendar.set(2000, Calendar.AUGUST, 12);
+		person.setBirthdateEstimated(true);
+		person.setBirthdate(calendar.getTime());
+		
+		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthDateElement().getPrecision(), equalTo(TemporalPrecisionEnum.YEAR));
+		assertThat(result.getBirthDateElement().getYear(), equalTo(2000));
+		
+		//when birthDate less then 5 year
+		Date date = new Date();
+		person.setBirthdate(date);
+		dateType.setValue(date, TemporalPrecisionEnum.MONTH);
+		
+		result = personTranslator.toFhirResource(person);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthDateElement().getPrecision(), equalTo(TemporalPrecisionEnum.MONTH));
+		assertThat(result.getBirthDateElement().getYear(), equalTo(dateType.getYear()));
+		assertThat(result.getBirthDateElement().getMonth(), equalTo(dateType.getMonth()));
 	}
 	
 	@Test

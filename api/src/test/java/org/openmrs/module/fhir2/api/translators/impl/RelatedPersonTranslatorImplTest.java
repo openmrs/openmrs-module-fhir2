@@ -21,10 +21,13 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
+import java.util.Calendar;
 import java.util.Date;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Reference;
@@ -285,5 +288,37 @@ public class RelatedPersonTranslatorImplTest {
 		RelatedPerson result = relatedPersonTranslator.toFhirResource(relationship);
 		assertThat(result, notNullValue());
 		assertThat(result.getPatient().getReference(), nullValue());
+	}
+	
+	@Test
+	public void shouldTranslateToFHIRBirthdate() {
+		Person person = new Person();
+		Calendar calendar = Calendar.getInstance();
+		DateType dateType = new DateType();
+		
+		// when birthdate more than 5 year
+		calendar.set(2000, Calendar.AUGUST, 12);
+		person.setBirthdateEstimated(true);
+		person.setBirthdate(calendar.getTime());
+		relationship.setPersonA(person);
+		
+		RelatedPerson result = relatedPersonTranslator.toFhirResource(relationship);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthDateElement().getPrecision(), equalTo(TemporalPrecisionEnum.YEAR));
+		assertThat(result.getBirthDateElement().getYear(), equalTo(2000));
+		
+		//when birthDate less then 5 year
+		Date date = new Date();
+		person.setBirthdate(date);
+		dateType.setValue(date, TemporalPrecisionEnum.MONTH);
+		relationship.setPersonA(person);
+		
+		result = relatedPersonTranslator.toFhirResource(relationship);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthDateElement().getPrecision(), equalTo(TemporalPrecisionEnum.MONTH));
+		assertThat(result.getBirthDateElement().getYear(), equalTo(dateType.getYear()));
+		assertThat(result.getBirthDateElement().getMonth(), equalTo(dateType.getMonth()));
 	}
 }
