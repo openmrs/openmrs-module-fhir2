@@ -131,6 +131,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		}
 		
 		return fhirMedicationRequestService.searchForMedicationRequests(patientReference, encounterReference, code,
-		    participantReference, medicationReference, id, lastUpdated, includes);
+		    participantReference, medicationReference, orderNumber, id, lastUpdated, includes);
 	}
 }

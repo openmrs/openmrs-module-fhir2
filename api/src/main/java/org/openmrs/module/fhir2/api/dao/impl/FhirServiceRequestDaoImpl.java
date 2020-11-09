@@ -59,10 +59,9 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
-				case FhirConstants.IDENTIFIER:    
-					entry.getValue()
-					        .forEach(orderNumber -> handleOrderNumber((TokenAndListParam) orderNumber.getParam())
-					                .ifPresent(criteria::add));
+				case FhirConstants.IDENTIFIER:
+					entry.getValue().forEach(orderNumber -> handleOrderNumber((TokenAndListParam) orderNumber.getParam())
+					        .ifPresent(criteria::add));
 					break;
 			}
 		});

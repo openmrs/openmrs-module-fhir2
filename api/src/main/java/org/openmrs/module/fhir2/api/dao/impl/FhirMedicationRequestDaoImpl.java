@@ -9,11 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.eq;
+
+import java.util.Optional;
+
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
@@ -50,6 +55,10 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
+				case FhirConstants.IDENTIFIER:
+					entry.getValue().forEach(orderNumber -> handleOrderNumber((TokenAndListParam) orderNumber.getParam())
+					        .ifPresent(criteria::add));
+					break;
 			}
 		});
 	}
@@ -62,6 +71,13 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 			
 			handleCodeableConcept(criteria, code, "c", "cm", "crt").ifPresent(criteria::add);
 		}
+	}
+	
+	private Optional<Criterion> handleOrderNumber(TokenAndListParam orderNumber) {
+		if (orderNumber != null) {
+			return handleAndListParam(orderNumber, param -> Optional.of(eq("orderNumber", param.getValue())));
+		}
+		return Optional.empty();
 	}
 	
 }
