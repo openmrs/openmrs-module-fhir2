@@ -13,12 +13,15 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
+import org.openmrs.Order;
 import org.openmrs.Provider;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
@@ -27,6 +30,7 @@ import org.openmrs.module.fhir2.api.translators.MedicationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
+import org.openmrs.module.fhir2.api.translators.OrderIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +38,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class MedicationRequestTranslatorImpl implements MedicationRequestTranslator {
+public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTranslator implements MedicationRequestTranslator {
 	
 	@Autowired
 	private MedicationRequestStatusTranslator statusTranslator;
@@ -60,6 +64,9 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 	@Autowired
 	private DosageTranslator dosageTranslator;
 	
+	@Autowired
+	private OrderIdentifierTranslator orderIdentifierTranslator;
+	
 	@Override
 	public MedicationRequest toFhirResource(@Nonnull DrugOrder drugOrder) {
 		notNull(drugOrder, "The DrugOrder object should not be null");
@@ -78,6 +85,15 @@ public class MedicationRequestTranslatorImpl implements MedicationRequestTransla
 		medicationRequest.addNote(new Annotation().setText(drugOrder.getCommentToFulfiller()));
 		medicationRequest.addReasonCode(conceptTranslator.toFhirResource(drugOrder.getOrderReason()));
 		medicationRequest.addDosageInstruction(dosageTranslator.toFhirResource(drugOrder));
+		
+		if (drugOrder.getPreviousOrder() != null
+		        && (drugOrder.getAction() == Order.Action.DISCONTINUE || drugOrder.getAction() == Order.Action.REVISE)) {
+			medicationRequest.setPriorPrescription(createOrderReference(drugOrder.getPreviousOrder())
+			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder())));
+		} else if (drugOrder.getPreviousOrder() != null && drugOrder.getAction() == Order.Action.RENEW) {
+			medicationRequest.setBasedOn(Collections.singletonList(createOrderReference(drugOrder.getPreviousOrder())
+			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder()))));
+		}
 		
 		return medicationRequest;
 	}

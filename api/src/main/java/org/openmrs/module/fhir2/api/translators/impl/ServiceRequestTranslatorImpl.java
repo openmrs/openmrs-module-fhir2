@@ -28,11 +28,13 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.Encounter;
+import org.openmrs.Order;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.OrderIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ServiceRequestTranslator;
@@ -41,7 +43,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<TestOrder> {
+public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslator implements ServiceRequestTranslator<TestOrder> {
 	
 	private static final int START_INDEX = 0;
 	
@@ -61,6 +63,9 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 	
 	@Autowired
 	private PractitionerReferenceTranslator<Provider> providerReferenceTranslator;
+	
+	@Autowired
+	private OrderIdentifierTranslator orderIdentifierTranslator;
 	
 	@Override
 	public ServiceRequest toFhirResource(@Nonnull TestOrder order) {
@@ -88,6 +93,15 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		        .setOccurrence(new Period().setStart(order.getEffectiveStartDate()).setEnd(order.getEffectiveStopDate()));
 		
 		serviceRequest.getMeta().setLastUpdated(order.getDateChanged());
+		
+		if (order.getPreviousOrder() != null
+		        && (order.getAction() == Order.Action.DISCONTINUE || order.getAction() == Order.Action.REVISE)) {
+			serviceRequest.setReplaces((Collections.singletonList(createOrderReference(order.getPreviousOrder())
+			        .setIdentifier(orderIdentifierTranslator.toFhirResource(order.getPreviousOrder())))));
+		} else if (order.getPreviousOrder() != null && order.getAction() == Order.Action.RENEW) {
+			serviceRequest.setBasedOn(Collections.singletonList(createOrderReference(order.getPreviousOrder())
+			        .setIdentifier(orderIdentifierTranslator.toFhirResource(order.getPreviousOrder()))));
+		}
 		
 		return serviceRequest;
 	}
