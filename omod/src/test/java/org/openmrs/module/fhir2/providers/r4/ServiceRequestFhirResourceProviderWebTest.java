@@ -55,6 +55,8 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 	
 	private static final String SERVICE_REQUEST_UUID = "7d13b03b-58c2-43f5-b34d-08750c51aea9";
 	
+	private static final String SERVICE_REQUEST_IDENTIFIER = "ORD-1";
+	
 	private static final String WRONG_SERVICE_REQUEST_UUID = "92b04062-e57d-43aa-8c38-90a1ad70080c";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
@@ -566,6 +568,20 @@ public class ServiceRequestFhirResourceProviderWebTest extends BaseFhirR4Resourc
 		assertThat(includeArgumentCaptor.getValue(),
 		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PATIENT_PARAM)),
 		        hasProperty("paramType", equalTo(FhirConstants.SERVICE_REQUEST)))));
+	}
+	
+	@Test
+	public void searchForServiceRequests_shouldSearchForServiceRequestsByOrderNumber() throws Exception {
+		verifyUri(String.format("/ServiceRequest?identifier=%s", SERVICE_REQUEST_IDENTIFIER));
+		
+		verify(service).searchForServiceRequests(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull());
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo(SERVICE_REQUEST_IDENTIFIER));
 	}
 	
 	private void verifyUri(String uri) throws Exception {

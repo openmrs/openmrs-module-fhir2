@@ -57,6 +57,8 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	private static final String SERVICE_REQUEST_UUID = "7d13b03b-58c2-43f5-b34d-08750c51aea9";
 	
+	private static final String SERVICE_REQUEST_ORDER_NUMBER = "ORD-1";
+	
 	private static final String WRONG_SERVICE_REQUEST_UUID = "92b04062-e57d-43aa-8c38-90a1ad70080c";
 	
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
@@ -392,6 +394,26 @@ public class ServiceRequestFhirResourceProviderTest {
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, null, null,
 		    null, includes);
+		
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resources, hasSize(Matchers.equalTo(1)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), Matchers.equalTo(FhirConstants.SERVICE_REQUEST));
+		assertThat(resources.get(0).getIdElement().getIdPart(), Matchers.equalTo(SERVICE_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchServiceRequest_shouldReturnMatchingServiceRequestWhenOrderNumberSpecified() {
+		TokenAndListParam orderNumber = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_ORDER_NUMBER));
+		
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(),
+		    argThat(is(orderNumber)), any(), any()))
+		            .thenReturn(new MockIBundleProvider<>(Arrays.asList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, null,
+		    orderNumber, null, null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
