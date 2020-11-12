@@ -63,6 +63,8 @@ public class MedicationRequestTranslatorImplTest {
 	
 	private static final String PRIOR_MEDICATION_REQUEST_REFERENCE = FhirConstants.MEDICATION + "/" + DRUG_ORDER_UUID;
 	
+	private static final String DRUG_ORDER_NUMBER = "ORD-1";
+	
 	private static final String DRUG_UUID = "99fdc8ad-fe4d-499b-93a8-8a991c1d477g";
 	
 	private static final String CONCEPT_UUID = "33fdc8ad-fe4d-499b-93a8-8a991c1d488g";
@@ -137,6 +139,18 @@ public class MedicationRequestTranslatorImplTest {
 		medicationRequest = new MedicationRequest();
 		medicationRequest.setId(DRUG_ORDER_UUID);
 		
+		try {
+			Class clazz = drugOrder.getClass();
+			Field orderNumberField = clazz.getSuperclass().getDeclaredField("orderNumber");
+			Boolean isAccessible = orderNumberField.isAccessible();
+			if (!isAccessible) {
+				orderNumberField.setAccessible(true);
+			}
+			orderNumberField.set(((Order) drugOrder), "ORD-1");
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Test
@@ -153,6 +167,7 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(DRUG_ORDER_UUID));
+		assertThat(result.getIdentifier().get(0).getValue(), equalTo(DRUG_ORDER_NUMBER));
 	}
 	
 	@Test

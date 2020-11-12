@@ -17,10 +17,11 @@ import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.DrugOrder;
 import org.openmrs.OrderType;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -30,9 +31,6 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
-
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTest {

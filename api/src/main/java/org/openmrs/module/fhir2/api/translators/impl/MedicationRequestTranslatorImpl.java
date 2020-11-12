@@ -75,7 +75,9 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		medicationRequest.setId(drugOrder.getUuid());
 		medicationRequest.setStatus(statusTranslator.toFhirResource(drugOrder));
 		
-		medicationRequest.addIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder));
+		if (drugOrder.getOrderNumber() != null) {
+			medicationRequest.addIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder));
+		}
 		
 		medicationRequest.setMedication(medicationReferenceTranslator.toFhirResource(drugOrder.getDrug()));
 		medicationRequest.setPriority(medicationRequestPriorityTranslator.toFhirResource(drugOrder.getUrgency()));

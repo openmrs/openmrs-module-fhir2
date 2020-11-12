@@ -105,5 +105,5 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 		// Verify
 		assertThat(drugOrders, notNullValue());
 		assertThat(drugOrders.get(0).getOrderNumber(), equalTo(DRUG_ORDER_NUMBER));
-	}	
+	}
 }
