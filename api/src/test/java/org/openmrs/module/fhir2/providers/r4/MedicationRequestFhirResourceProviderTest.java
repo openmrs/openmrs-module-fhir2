@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
@@ -57,6 +59,8 @@ import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 public class MedicationRequestFhirResourceProviderTest {
 	
 	private static final String MEDICATION_REQUEST_UUID = "d7f5a4dd-019e-4221-85fa-e084505b9695";
+	
+	private static final String MEDICATION_REQUEST_ORDER_NUMBER = "ORD-1";
 	
 	private static final String WRONG_MEDICATION_REQUEST_UUID = "862e20a1-e73c-4c92-a4e8-9f922e0cd7f4";
 	
@@ -360,6 +364,26 @@ public class MedicationRequestFhirResourceProviderTest {
 	public void deleteMedicationRequest_shouldThrowResourceNotFoundException() {
 		when(fhirMedicationRequestService.delete(WRONG_MEDICATION_REQUEST_UUID)).thenReturn(null);
 		resourceProvider.deleteMedicationRequest(new IdType().setValue(WRONG_MEDICATION_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchServiceRequest_shouldReturnMatchingServiceRequestWhenOrderNumberSpecified() {
+		TokenAndListParam orderNumber = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_ORDER_NUMBER));
+		
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(),
+		    argThat(is(orderNumber)), any(), any(), any()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 1, 1));
+		
+		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, orderNumber, null,
+		    null, null, null, null);
+		
+		List<IBaseResource> resources = getResources(results, 1, 5);
+		
+		assertThat(results, notNullValue());
+		assertThat(resources, hasSize(Matchers.equalTo(1)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), Matchers.equalTo(FhirConstants.MEDICATION_REQUEST));
+		assertThat(resources.get(0).getIdElement().getIdPart(), Matchers.equalTo(MEDICATION_REQUEST_UUID));
 	}
 	
 }

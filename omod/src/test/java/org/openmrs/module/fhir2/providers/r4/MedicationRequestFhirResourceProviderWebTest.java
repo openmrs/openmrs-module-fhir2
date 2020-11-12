@@ -56,6 +56,8 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 	
 	private static final String MEDICATION_REQUEST_UUID = "294face4-a498-4ba3-89a1-ffc505837026";
 	
+	private static final String MEDICATION_REQUEST_ORDER_NUMBER = "ORD-1";
+	
 	private static final String WRONG_MEDICATION_REQUEST_UUID = "391deb85-94a7-4596-84fa-bc178efa9918";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
@@ -148,6 +150,20 @@ public class MedicationRequestFhirResourceProviderWebTest extends BaseFhirR4Reso
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
 		    equalTo(MEDICATION_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByOrderNumber() throws Exception {
+		verifyUri(String.format("/MedicationRequest?identifier=%s", MEDICATION_REQUEST_ORDER_NUMBER));
+		
+		verify(fhirMedicationRequestService).searchForMedicationRequests(isNull(), isNull(), isNull(), isNull(), isNull(),
+		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull());
+		
+		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
+		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		        .getValue(),
+		    equalTo(MEDICATION_REQUEST_ORDER_NUMBER));
 	}
 	
 	@Test
