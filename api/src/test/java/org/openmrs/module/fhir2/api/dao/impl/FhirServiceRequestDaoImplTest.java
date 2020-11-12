@@ -9,27 +9,37 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+
+import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.DrugOrder;
 import org.openmrs.OrderType;
 import org.openmrs.TestOrder;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String TEST_ORDER_UUID = "7d96f25c-4949-4f72-9931-d808fbc226de";
+	
+	private static final String TEST_ORDER_NUMBER = "ORD-6";
 	
 	private static final String OTHER_ORDER_UUID = "02b9d1e4-7619-453e-bd6b-c32286f861df";
 	
@@ -71,5 +81,25 @@ public class FhirServiceRequestDaoImplTest extends BaseModuleContextSensitiveTes
 	public void shouldReturnNullIfUuidIsNotValidTestOrder() {
 		TestOrder result = dao.get(OTHER_ORDER_UUID);
 		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void search_shouldReturnResultsBasedOnOrderNumber() {
+		// Settup
+		TokenAndListParam ordrNumber = new TokenAndListParam();
+		TokenParam token = new TokenParam();
+		token.setValue(TEST_ORDER_NUMBER);
+		ordrNumber.addAnd(token);
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.IDENTIFIER, ordrNumber);
+		
+		// Replay
+		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
+		List<TestOrder> drugOrders = dao.getSearchResults(theParams, matchingResourceUuids);
+		
+		// Verify
+		assertThat(drugOrders, notNullValue());
+		assertThat(drugOrders.get(0).getOrderNumber(), equalTo(TEST_ORDER_NUMBER));
 	}
 }
