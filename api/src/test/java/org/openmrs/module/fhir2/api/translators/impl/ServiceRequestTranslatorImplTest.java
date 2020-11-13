@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
@@ -443,5 +445,21 @@ public class ServiceRequestTranslatorImplTest {
 		ServiceRequest result = translator.toFhirResource(order);
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	private TestOrder setOrderNumberByReflection(TestOrder order, String orderNumber) {
+		try {
+			Class clazz = order.getClass();
+			Field orderNumberField = clazz.getSuperclass().getDeclaredField("orderNumber");
+			Boolean isAccessible = orderNumberField.isAccessible();
+			if (!isAccessible) {
+				orderNumberField.setAccessible(true);
+			}
+			orderNumberField.set(((Order) order), orderNumber);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return order;
 	}
 }

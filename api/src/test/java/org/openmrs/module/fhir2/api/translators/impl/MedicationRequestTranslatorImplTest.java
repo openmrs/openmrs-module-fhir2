@@ -17,6 +17,8 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -33,6 +35,7 @@ import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.User;
@@ -394,6 +397,22 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result.getDosageInstructionFirstRep().getText(), equalTo(DOSING_INSTRUCTIONS));
 		assertThat(result.getDosageInstructionFirstRep().getAsNeededBooleanType().booleanValue(), is(true));
 		assertThat(result.getDosageInstructionFirstRep().getRoute(), equalTo(codeableConcept));
+	}
+	
+	private DrugOrder setOrderNumberByReflection(DrugOrder order, String orderNumber) {
+		try {
+			Class clazz = order.getClass();
+			Field orderNumberField = clazz.getSuperclass().getDeclaredField("orderNumber");
+			Boolean isAccessible = orderNumberField.isAccessible();
+			if (!isAccessible) {
+				orderNumberField.setAccessible(true);
+			}
+			orderNumberField.set(((Order) order), orderNumber);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return order;
 	}
 	
 }

@@ -65,7 +65,7 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 	private PractitionerReferenceTranslator<Provider> providerReferenceTranslator;
 	
 	@Autowired
-	private OrderIdentifierTranslator orderIdTranslator;
+	private OrderIdentifierTranslator orderIdentifierTranslator;
 	
 	@Override
 	public ServiceRequest toFhirResource(@Nonnull TestOrder order) {
@@ -97,10 +97,10 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		if (order.getPreviousOrder() != null
 		        && (order.getAction() == Order.Action.DISCONTINUE || order.getAction() == Order.Action.REVISE)) {
 			serviceRequest.setReplaces((Collections.singletonList(createOrderReference((Order) order.getPreviousOrder())
-			        .setIdentifier(orderIdTranslator.toFhirResource(order.getPreviousOrder())))));
+			        .setIdentifier(orderIdentifierTranslator.toFhirResource(order.getPreviousOrder())))));
 		} else if (order.getPreviousOrder() != null && order.getAction() == Order.Action.RENEW) {
 			serviceRequest.setBasedOn(Collections.singletonList(createOrderReference((Order) order.getPreviousOrder())
-			        .setIdentifier(orderIdTranslator.toFhirResource(order.getPreviousOrder()))));
+			        .setIdentifier(orderIdentifierTranslator.toFhirResource(order.getPreviousOrder()))));
 		}
 		
 		return serviceRequest;
