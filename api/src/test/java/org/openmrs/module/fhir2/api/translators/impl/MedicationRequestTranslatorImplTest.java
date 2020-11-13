@@ -36,6 +36,7 @@ import org.openmrs.Drug;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
+import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.User;
@@ -53,6 +54,14 @@ import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 public class MedicationRequestTranslatorImplTest {
 	
 	private static final String DRUG_ORDER_UUID = "44fdc8ad-fe4d-499b-93a8-8a991c1d477e";
+	
+	private static final String DISCONTINUED_DRUG_ORDER_UUID = "efca4077-493c-496b-8312-856ee5d1cc27";
+	
+	private static final String DRUG_ORDER_NUMBER = "ORD-1";
+	
+	private static final String DISCONTINUED_DRUG_ORDER_NUMBER = "ORD-2";
+	
+	private static final String PRIOR_MEDICATION_REQUEST_REFERENCE = FhirConstants.MEDICATION + "/" + DRUG_ORDER_UUID;
 	
 	private static final String DRUG_UUID = "99fdc8ad-fe4d-499b-93a8-8a991c1d477g";
 	
@@ -98,6 +107,8 @@ public class MedicationRequestTranslatorImplTest {
 	
 	private DrugOrder drugOrder;
 	
+	private DrugOrder discontinuedDrugOrder;
+	
 	@Before
 	public void setup() {
 		medicationRequestTranslator = new MedicationRequestTranslatorImpl();
@@ -109,12 +120,23 @@ public class MedicationRequestTranslatorImplTest {
 		medicationRequestTranslator.setDosageTranslator(dosageTranslator);
 		medicationRequestTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		medicationRequestTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
+		medicationRequestTranslator.setOrderIdentifierTranslator(new OrderIdentifierTranslatorImpl());
 		
 		drugOrder = new DrugOrder();
 		drugOrder.setUuid(DRUG_ORDER_UUID);
+		setOrderNumberByReflection(drugOrder, DRUG_ORDER_NUMBER);
+		OrderType ordertype = new OrderType();
+		ordertype.setUuid(BaseReferenceHandlingTranslator.DRUG_ORDER_TYPE_UUID);
+		drugOrder.setOrderType(ordertype);
+		
+		discontinuedDrugOrder = new DrugOrder();
+		discontinuedDrugOrder.setUuid(DISCONTINUED_DRUG_ORDER_UUID);
+		setOrderNumberByReflection(discontinuedDrugOrder, DISCONTINUED_DRUG_ORDER_NUMBER);
+		discontinuedDrugOrder.setPreviousOrder(drugOrder);
 		
 		medicationRequest = new MedicationRequest();
 		medicationRequest.setId(DRUG_ORDER_UUID);
+		
 	}
 	
 	@Test
@@ -131,6 +153,45 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(DRUG_ORDER_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateToFhirResourceWithReplacesFieldGivenDiscontinuedOrder() {
+		discontinuedDrugOrder.setAction(Order.Action.DISCONTINUE);
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(discontinuedDrugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(DISCONTINUED_DRUG_ORDER_UUID));
+		assertThat(result.getPriorPrescription().getReference(), equalTo(PRIOR_MEDICATION_REQUEST_REFERENCE));
+		assertThat(result.getPriorPrescription().getIdentifier().getValue(), equalTo(DRUG_ORDER_NUMBER));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateToFhirResourceWithReplacesFieldGivenRevisedOrder() {
+		discontinuedDrugOrder.setAction(Order.Action.REVISE);
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(discontinuedDrugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(DISCONTINUED_DRUG_ORDER_UUID));
+		assertThat(result.getPriorPrescription().getReference(), equalTo(PRIOR_MEDICATION_REQUEST_REFERENCE));
+		assertThat(result.getPriorPrescription().getIdentifier().getValue(), equalTo(DRUG_ORDER_NUMBER));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateToFhirResourceWithBasedOnFieldGivenRenewOrder() {
+		discontinuedDrugOrder.setAction(Order.Action.RENEW);
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(discontinuedDrugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(DISCONTINUED_DRUG_ORDER_UUID));
+		assertThat(result.getBasedOn().get(0).getReference(), equalTo(PRIOR_MEDICATION_REQUEST_REFERENCE));
+		assertThat(result.getBasedOn().get(0).getIdentifier().getValue(), equalTo(DRUG_ORDER_NUMBER));
 	}
 	
 	@Test(expected = NullPointerException.class)

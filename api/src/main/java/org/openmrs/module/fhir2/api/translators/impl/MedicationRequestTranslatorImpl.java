@@ -11,9 +11,9 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
-import java.util.Collections;
-
 import javax.annotation.Nonnull;
+
+import java.util.Collections;
 
 import lombok.AccessLevel;
 import lombok.Setter;
