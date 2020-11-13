@@ -139,18 +139,6 @@ public class MedicationRequestTranslatorImplTest {
 		medicationRequest = new MedicationRequest();
 		medicationRequest.setId(DRUG_ORDER_UUID);
 		
-		try {
-			Class clazz = drugOrder.getClass();
-			Field orderNumberField = clazz.getSuperclass().getDeclaredField("orderNumber");
-			Boolean isAccessible = orderNumberField.isAccessible();
-			if (!isAccessible) {
-				orderNumberField.setAccessible(true);
-			}
-			orderNumberField.set(((Order) drugOrder), "ORD-1");
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	
 	@Test

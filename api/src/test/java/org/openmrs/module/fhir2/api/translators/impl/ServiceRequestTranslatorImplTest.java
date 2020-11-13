@@ -30,9 +30,9 @@ import java.util.List;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
@@ -493,29 +493,29 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result.getReference(), containsString(PRACTITIONER_UUID));
 	}
 	
-		@Test
-		public void toFhirResource_shouldTranslateOrderNumber() {
-			
-			TestOrder order = new TestOrder();
-			Provider requester = new Provider();
-			Reference requesterReference = new Reference();
-			
-			requester.setUuid(PRACTITIONER_UUID);
-			order.setUuid(SERVICE_REQUEST_UUID);
-			order.setOrderer(requester);
-			setOrderNumberByReflection(order, TEST_ORDER_NUMBER);
-			requesterReference.setType(FhirConstants.PRACTITIONER)
-			        .setReference(FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID);
-			
-			when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
-			        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
-			when(practitionerReferenceTranslator.toFhirResource(requester)).thenReturn(requesterReference);
-			
-			Identifier result = translator.toFhirResource(order).getIdentifier().get(0);
-			
-			assertThat(result, notNullValue());
-			assertThat(result.getValue(), containsString(TEST_ORDER_NUMBER));
-		}
+	@Test
+	public void toFhirResource_shouldTranslateOrderNumber() {
+		
+		TestOrder order = new TestOrder();
+		Provider requester = new Provider();
+		Reference requesterReference = new Reference();
+		
+		requester.setUuid(PRACTITIONER_UUID);
+		order.setUuid(SERVICE_REQUEST_UUID);
+		order.setOrderer(requester);
+		setOrderNumberByReflection(order, TEST_ORDER_NUMBER);
+		requesterReference.setType(FhirConstants.PRACTITIONER)
+		        .setReference(FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		when(practitionerReferenceTranslator.toFhirResource(requester)).thenReturn(requesterReference);
+		
+		Identifier result = translator.toFhirResource(order).getIdentifier().get(0);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getValue(), containsString(TEST_ORDER_NUMBER));
+	}
 	
 	private List<Task> setUpBasedOnScenario(Task.TaskStatus status) {
 		Reference basedOnRef = new Reference();
