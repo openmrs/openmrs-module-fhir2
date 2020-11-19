@@ -69,8 +69,6 @@ public class ServiceRequestTranslatorImplTest {
 	
 	private static final String PRIOR_SERVICE_REQUEST_REFERENCE = FhirConstants.SERVICE_REQUEST + "/" + SERVICE_REQUEST_UUID;
 	
-	private static final String TEST_ORDER_NUMBER = "ORD-1";
-	
 	private static final String LOINC_CODE = "1000-1";
 	
 	private static final String PATIENT_UUID = "14d4f066-15f5-102d-96e4-000c29c2a5d7";
@@ -84,6 +82,12 @@ public class ServiceRequestTranslatorImplTest {
 	private static final int PREFERRED_PAGE_SIZE = 10;
 	
 	private static final int COUNT = 1;
+	
+	private static final String IDENTIFIER_SYSTEM = "http://terminology.hl7.org/CodeSystem/v2-0203";
+	
+	private static final String IDENTIFIER_CODE = "PLAC";
+	
+	private static final String IDENTIFIER_DISPLAY = "Placer Identifier";
 	
 	private ServiceRequestTranslatorImpl translator;
 	
@@ -515,6 +519,10 @@ public class ServiceRequestTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getValue(), containsString(TEST_ORDER_NUMBER));
+		assertThat(result.getType().getCoding().get(0).getSystem(), equalTo(IDENTIFIER_SYSTEM));
+		assertThat(result.getType().getCoding().get(0).getCode(), equalTo(IDENTIFIER_CODE));
+		assertThat(result.getType().getCoding().get(0).getDisplay(), equalTo(IDENTIFIER_DISPLAY));
+		assertThat(result.getUse().getDisplay(), equalTo("Usual"));
 	}
 	
 	private List<Task> setUpBasedOnScenario(Task.TaskStatus status) {

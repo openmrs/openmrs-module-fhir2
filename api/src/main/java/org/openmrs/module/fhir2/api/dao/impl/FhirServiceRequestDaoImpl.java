@@ -56,12 +56,12 @@ public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements
 					entry.getValue().forEach(dateRangeParam -> handleDateRange((DateRangeParam) dateRangeParam.getParam())
 					        .ifPresent(criteria::add));
 					break;
-				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
-					break;
 				case FhirConstants.IDENTIFIER:
 					entry.getValue().forEach(orderNumber -> handleOrderNumber((TokenAndListParam) orderNumber.getParam())
 					        .ifPresent(criteria::add));
+					break;
+				case FhirConstants.COMMON_SEARCH_HANDLER:
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
 			}
 		});

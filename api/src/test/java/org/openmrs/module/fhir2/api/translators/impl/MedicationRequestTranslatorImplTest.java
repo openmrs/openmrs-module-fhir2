@@ -63,8 +63,6 @@ public class MedicationRequestTranslatorImplTest {
 	
 	private static final String PRIOR_MEDICATION_REQUEST_REFERENCE = FhirConstants.MEDICATION + "/" + DRUG_ORDER_UUID;
 	
-	private static final String DRUG_ORDER_NUMBER = "ORD-1";
-	
 	private static final String DRUG_UUID = "99fdc8ad-fe4d-499b-93a8-8a991c1d477g";
 	
 	private static final String CONCEPT_UUID = "33fdc8ad-fe4d-499b-93a8-8a991c1d488g";
@@ -78,6 +76,12 @@ public class MedicationRequestTranslatorImplTest {
 	private static final String COMMENT_TO_THE_FULL_FILLER = "comment to the full filler";
 	
 	private static final String DOSING_INSTRUCTIONS = "Dosing instructions";
+	
+	private static final String IDENTIFIER_SYSTEM = "http://terminology.hl7.org/CodeSystem/v2-0203";
+	
+	private static final String IDENTIFIER_CODE = "PLAC";
+	
+	private static final String IDENTIFIER_DISPLAY = "Placer Identifier";
 	
 	@Mock
 	private PractitionerReferenceTranslator<Provider> providerPractitionerReferenceTranslator;
@@ -156,6 +160,10 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(DRUG_ORDER_UUID));
 		assertThat(result.getIdentifier().get(0).getValue(), equalTo(DRUG_ORDER_NUMBER));
+		assertThat(result.getIdentifier().get(0).getType().getCoding().get(0).getSystem(), equalTo(IDENTIFIER_SYSTEM));
+		assertThat(result.getIdentifier().get(0).getType().getCoding().get(0).getCode(), equalTo(IDENTIFIER_CODE));
+		assertThat(result.getIdentifier().get(0).getType().getCoding().get(0).getDisplay(), equalTo(IDENTIFIER_DISPLAY));
+		assertThat(result.getIdentifier().get(0).getUse().getDisplay(), equalTo("Usual"));
 	}
 	
 	@Test

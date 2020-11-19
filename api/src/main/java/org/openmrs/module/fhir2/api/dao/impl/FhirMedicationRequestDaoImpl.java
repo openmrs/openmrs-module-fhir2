@@ -52,12 +52,12 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					entry.getValue().forEach(d -> handleMedicationReference("d", (ReferenceAndListParam) d.getParam())
 					        .ifPresent(c -> criteria.createAlias("drug", "d").add(c)));
 					break;
-				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
-					break;
 				case FhirConstants.IDENTIFIER:
 					entry.getValue().forEach(orderNumber -> handleOrderNumber((TokenAndListParam) orderNumber.getParam())
 					        .ifPresent(criteria::add));
+					break;
+				case FhirConstants.COMMON_SEARCH_HANDLER:
+					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
 			}
 		});
