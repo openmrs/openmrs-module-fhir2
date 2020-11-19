@@ -88,10 +88,10 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		if (drugOrder.getPreviousOrder() != null
 		        && (drugOrder.getAction() == Order.Action.DISCONTINUE || drugOrder.getAction() == Order.Action.REVISE)) {
-			medicationRequest.setPriorPrescription(createOrderReference((Order) drugOrder.getPreviousOrder())
+			medicationRequest.setPriorPrescription(createOrderReference(drugOrder.getPreviousOrder())
 			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder())));
 		} else if (drugOrder.getPreviousOrder() != null && drugOrder.getAction() == Order.Action.RENEW) {
-			medicationRequest.setBasedOn(Collections.singletonList(createOrderReference((Order) drugOrder.getPreviousOrder())
+			medicationRequest.setBasedOn(Collections.singletonList(createOrderReference(drugOrder.getPreviousOrder())
 			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder()))));
 		}
 		

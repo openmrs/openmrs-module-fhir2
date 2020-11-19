@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<TestOrder> {
+public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslator implements ServiceRequestTranslator<TestOrder> {
 	
 	private static final int START_INDEX = 0;
 	
@@ -96,10 +96,10 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		
 		if (order.getPreviousOrder() != null
 		        && (order.getAction() == Order.Action.DISCONTINUE || order.getAction() == Order.Action.REVISE)) {
-			serviceRequest.setReplaces((Collections.singletonList(createOrderReference((Order) order.getPreviousOrder())
+			serviceRequest.setReplaces((Collections.singletonList(createOrderReference(order.getPreviousOrder())
 			        .setIdentifier(orderIdentifierTranslator.toFhirResource(order.getPreviousOrder())))));
 		} else if (order.getPreviousOrder() != null && order.getAction() == Order.Action.RENEW) {
-			serviceRequest.setBasedOn(Collections.singletonList(createOrderReference((Order) order.getPreviousOrder())
+			serviceRequest.setBasedOn(Collections.singletonList(createOrderReference(order.getPreviousOrder())
 			        .setIdentifier(orderIdentifierTranslator.toFhirResource(order.getPreviousOrder()))));
 		}
 		
@@ -131,15 +131,15 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		if (serviceRequestTask.hasStatus()) {
 			switch (serviceRequestTask.getStatus()) {
 				case ACCEPTED:
-					
+				
 				case REQUESTED:
 					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.ACTIVE;
 					break;
-					
+				
 				case REJECTED:
 					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.REVOKED;
 					break;
-					
+				
 				case COMPLETED:
 					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.COMPLETED;
 					break;

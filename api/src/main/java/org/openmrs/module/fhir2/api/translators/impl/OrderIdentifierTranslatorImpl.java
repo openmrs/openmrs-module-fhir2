@@ -11,7 +11,9 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.api.translators.OrderIdentifierTranslator;
@@ -20,20 +22,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderIdentifierTranslatorImpl implements OrderIdentifierTranslator {
 	
-	private static String ORDER_ID_TYPE = "Order Number";
-	
 	@Override
 	public Identifier toFhirResource(@Nonnull Order order) {
 		
 		Identifier orderIdentifier = new Identifier();
 		
-		orderIdentifier.setType(new CodeableConcept().setText(ORDER_ID_TYPE));
+		Coding placCoding = new Coding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0203").setCode("PLAC")
+		        .setDisplay("Placer Identifier");
+		orderIdentifier.setType(new CodeableConcept().addCoding(placCoding));
 		
 		orderIdentifier.setValue(order.getOrderNumber());
 		
-		orderIdentifier.setUse(Identifier.IdentifierUse.OFFICIAL);
+		orderIdentifier.setUse(Identifier.IdentifierUse.USUAL);
 		
 		return orderIdentifier;
+	}
+	
+	@Override
+	public Order toOpenmrsType(Identifier resource) {
+		throw new InvalidRequestException("Order Identifier cannot be manualy set");
 	}
 	
 }

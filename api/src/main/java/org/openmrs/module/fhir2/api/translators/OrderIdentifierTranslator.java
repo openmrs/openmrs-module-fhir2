@@ -12,8 +12,9 @@ package org.openmrs.module.fhir2.api.translators;
 import org.hl7.fhir.r4.model.Identifier;
 import org.openmrs.Order;
 
-public interface OrderIdentifierTranslator {
+public interface OrderIdentifierTranslator extends OpenmrsFhirTranslator<Order, Identifier> {
 	
-	Identifier toFhirResource(Order identifier);
+	@Override
+	public Identifier toFhirResource(Order order);
 	
 }
