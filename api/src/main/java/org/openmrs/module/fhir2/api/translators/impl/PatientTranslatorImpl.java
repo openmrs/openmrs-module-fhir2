@@ -13,7 +13,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -83,15 +84,13 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		Patient patient = new Patient();
 		patient.setId(openmrsPatient.getUuid());
 		patient.setActive(!openmrsPatient.getVoided());
-		patient.setBirthDate(openmrsPatient.getBirthdate());
 		
 		if (openmrsPatient.getBirthdateEstimated() != null) {
 			if (openmrsPatient.getBirthdateEstimated()) {
 				DateType dateType = new DateType();
-				Calendar calendar = Calendar.getInstance();
-				int currentYear = calendar.get(Calendar.YEAR);
-				calendar.setTime(openmrsPatient.getBirthdate());
-				int birthDateYear = calendar.get(Calendar.YEAR);
+				int currentYear = LocalDate.now().getYear();
+				int birthDateYear = LocalDate.parse(new SimpleDateFormat("yyyy-MM-dd").format(openmrsPatient.getBirthdate()))
+				        .getYear();
 				
 				if ((currentYear - birthDateYear) > 5) {
 					dateType.setValue(openmrsPatient.getBirthdate(), TemporalPrecisionEnum.YEAR);
@@ -100,7 +99,11 @@ public class PatientTranslatorImpl implements PatientTranslator {
 				}
 				
 				patient.setBirthDateElement(dateType);
+			} else {
+				patient.setBirthDate(openmrsPatient.getBirthdate());
 			}
+		} else {
+			patient.setBirthDate(openmrsPatient.getBirthdate());
 		}
 		
 		if (openmrsPatient.getDead()) {

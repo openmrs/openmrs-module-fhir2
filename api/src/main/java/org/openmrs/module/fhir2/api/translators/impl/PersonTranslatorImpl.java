@@ -13,7 +13,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -70,15 +71,13 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
 		person.setId(openmrsPerson.getUuid());
 		person.setActive(!openmrsPerson.getVoided());
-		person.setBirthDate(openmrsPerson.getBirthdate());
 		
 		if (openmrsPerson.getBirthdateEstimated() != null) {
 			if (openmrsPerson.getBirthdateEstimated()) {
 				DateType dateType = new DateType();
-				Calendar calendar = Calendar.getInstance();
-				int currentYear = calendar.get(Calendar.YEAR);
-				calendar.setTime(openmrsPerson.getBirthdate());
-				int birthDateYear = calendar.get(Calendar.YEAR);
+				int currentYear = LocalDate.now().getYear();
+				int birthDateYear = LocalDate.parse(new SimpleDateFormat("yyyy-MM-dd").format(openmrsPerson.getBirthdate()))
+				        .getYear();
 				
 				if ((currentYear - birthDateYear) > 5) {
 					dateType.setValue(openmrsPerson.getBirthdate(), TemporalPrecisionEnum.YEAR);
@@ -86,7 +85,11 @@ public class PersonTranslatorImpl implements PersonTranslator {
 					dateType.setValue(openmrsPerson.getBirthdate(), TemporalPrecisionEnum.MONTH);
 				}
 				person.setBirthDateElement(dateType);
+			} else {
+				person.setBirthDate(openmrsPerson.getBirthdate());
 			}
+		} else {
+			person.setBirthDate(openmrsPerson.getBirthdate());
 		}
 		
 		if (openmrsPerson.getGender() != null) {

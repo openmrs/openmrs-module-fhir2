@@ -13,7 +13,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -65,16 +66,14 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		
 		Person omrsRelatedPerson = relationship.getPersonA();
 		RelatedPerson relatedPerson = new RelatedPerson();
-		relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
 		relatedPerson.setId(relationship.getUuid());
 		
 		if (omrsRelatedPerson.getBirthdateEstimated() != null) {
 			if (omrsRelatedPerson.getBirthdateEstimated()) {
 				DateType dateType = new DateType();
-				Calendar calendar = Calendar.getInstance();
-				int currentYear = calendar.get(Calendar.YEAR);
-				calendar.setTime(omrsRelatedPerson.getBirthdate());
-				int birthDateYear = calendar.get(Calendar.YEAR);
+				int currentYear = LocalDate.now().getYear();
+				int birthDateYear = LocalDate
+				        .parse(new SimpleDateFormat("yyyy-MM-dd").format(omrsRelatedPerson.getBirthdate())).getYear();
 				
 				if ((currentYear - birthDateYear) > 5) {
 					dateType.setValue(omrsRelatedPerson.getBirthdate(), TemporalPrecisionEnum.YEAR);
@@ -83,7 +82,11 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 				}
 				
 				relatedPerson.setBirthDateElement(dateType);
+			} else {
+				relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
 			}
+		} else {
+			relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
 		}
 		
 		if (relationship.getPersonB() != null) {

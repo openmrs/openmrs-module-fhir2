@@ -13,7 +13,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import lombok.AccessLevel;
@@ -62,10 +63,9 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 			if (user.getPerson().getBirthdateEstimated() != null) {
 				if (user.getPerson().getBirthdateEstimated()) {
 					DateType dateType = new DateType();
-					Calendar calendar = Calendar.getInstance();
-					int currentYear = calendar.get(Calendar.YEAR);
-					calendar.setTime(user.getPerson().getBirthdate());
-					int birthDateYear = calendar.get(Calendar.YEAR);
+					int currentYear = LocalDate.now().getYear();
+					int birthDateYear = LocalDate
+					        .parse(new SimpleDateFormat("yyyy-MM-dd").format(user.getPerson().getBirthdate())).getYear();
 					
 					if ((currentYear - birthDateYear) > 5) {
 						dateType.setValue(user.getPerson().getBirthdate(), TemporalPrecisionEnum.YEAR);
@@ -74,10 +74,12 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 					}
 					
 					practitioner.setBirthDateElement(dateType);
+				} else {
+					practitioner.setBirthDate(user.getPerson().getBirthdate());
 				}
+			} else {
+				practitioner.setBirthDate(user.getPerson().getBirthdate());
 			}
-			
-			practitioner.setBirthDate(user.getPerson().getBirthdate());
 			
 			practitioner.setGender(genderTranslator.toFhirResource(user.getPerson().getGender()));
 			for (PersonName name : user.getPerson().getNames()) {
