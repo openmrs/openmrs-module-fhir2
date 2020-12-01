@@ -117,15 +117,15 @@ public class ServiceRequestTranslatorImpl implements ServiceRequestTranslator<Te
 		if (serviceRequestTask.hasStatus()) {
 			switch (serviceRequestTask.getStatus()) {
 				case ACCEPTED:
-					
+				
 				case REQUESTED:
 					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.ACTIVE;
 					break;
-					
+				
 				case REJECTED:
 					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.REVOKED;
 					break;
-					
+				
 				case COMPLETED:
 					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.COMPLETED;
 					break;

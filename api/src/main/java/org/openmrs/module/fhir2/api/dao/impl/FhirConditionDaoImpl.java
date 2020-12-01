@@ -14,6 +14,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.ge;
 import static org.hibernate.criterion.Restrictions.le;
 import static org.hibernate.criterion.Restrictions.not;
+import static org.hibernate.criterion.Subqueries.propertyIn;
 
 import javax.annotation.Nonnull;
 
@@ -38,8 +39,13 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
 import org.openmrs.Obs;
+import org.openmrs.Retireable;
+import org.openmrs.Voidable;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -48,17 +54,28 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
 import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-@Primary
 @Component
-@Setter(AccessLevel.PROTECTED)
+@Setter(AccessLevel.PUBLIC)
 @OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
 public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirConditionDao<Obs> {
 	
+	@Qualifier("sessionFactory")
 	@Autowired
-	private LocalDateTimeFactory localDateTimeFactory; 
+	private SessionFactory sessionFactory;
+	
+	private final boolean isRetireable;
+	
+	private final boolean isVoidable;
+	
+	protected FhirConditionDaoImpl() {
+		this.isRetireable = Retireable.class.isAssignableFrom(typeToken.getRawType());
+		this.isVoidable = Voidable.class.isAssignableFrom(typeToken.getRawType());
+	};
+	
+	private LocalDateTimeFactory localDateTimeFactory;
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
@@ -68,7 +85,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirCondit
 	
 	@Override
 	@Authorized(PrivilegeConstants.EDIT_OBS)
-	public  Obs createOrUpdate(@Nonnull Obs newEntry) {
+	public Obs createOrUpdate(@Nonnull Obs newEntry) {
 		return super.createOrUpdate(newEntry);
 	}
 	
@@ -81,16 +98,38 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirCondit
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
-		return super.getSearchResultUuids(theParams);
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Obs.class);
+		criteria.add(eq("concept.conceptId", FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID));
+		
+		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(Obs.class);
+		Criteria detachedExecutableCriteria = detachedCriteria.getExecutableCriteria(sessionFactory.getCurrentSession());
+		
+		if (isVoidable) {
+			handleVoidable(detachedExecutableCriteria);
+		} else if (isRetireable) {
+			handleRetireable(detachedExecutableCriteria);
+		}
+		
+		setupSearchParams(detachedExecutableCriteria, theParams);
+		handleSort(detachedExecutableCriteria, theParams.getSortSpec());
+		
+		detachedCriteria.setProjection(Projections.property("uuid"));
+		
+		criteria.add(propertyIn("uuid", detachedCriteria));
+		criteria.setProjection(Projections.groupProperty("uuid"));
+		
+		@SuppressWarnings("unchecked")
+		List<String> results = criteria.list();
+		
+		return results;
 	}
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams,
-	        @Nonnull List<String> matchingResourceUuids, int firstResult, int lastResult) {
+	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
+	        int firstResult, int lastResult) {
 		return super.getSearchResults(theParams, matchingResourceUuids, firstResult, lastResult);
 	}
-	
 	
 	private Optional<Criterion> handleAgeByDateProperty(@Nonnull String datePropertyName, @Nonnull QuantityParam age) {
 		BigDecimal value = age.getValue();
@@ -220,12 +259,10 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirCondit
 	
 	private void handleCode(Criteria criteria, TokenAndListParam code) {
 		if (code != null) {
-			criteria.createAlias("condition.coded", "cd");
-			handleCodeableConcept(criteria, code, "cd", "map", "term").ifPresent(criteria::add);
+			criteria.createAlias("valueCoded", "vc");
+			handleCodeableConcept(criteria, code, "vc", "map", "term").ifPresent(criteria::add);
 		}
 	}
-	
-	
 	
 	private void handleOnsetAge(Criteria criteria, QuantityAndListParam onsetAge) {
 		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("onsetDate", onsetAgeParam))

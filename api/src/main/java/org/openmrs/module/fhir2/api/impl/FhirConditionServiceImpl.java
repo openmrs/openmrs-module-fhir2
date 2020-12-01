@@ -11,6 +11,16 @@ package org.openmrs.module.fhir2.api.impl;
 
 import java.util.HashSet;
 
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.Obs;
 import org.openmrs.annotation.OpenmrsProfile;
@@ -24,17 +34,6 @@ import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QuantityAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import lombok.AccessLevel;
-import lombok.Getter;
-
 @Component
 @Getter(AccessLevel.PROTECTED)
 @OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
@@ -47,7 +46,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, Obs> im
 	private ConditionTranslator<org.openmrs.Obs> translator;
 	
 	@Autowired
-	private SearchQueryInclude searchQueryInclude;
+	private SearchQueryInclude<Condition> searchQueryInclude;
 	
 	@Autowired
 	private SearchQuery<org.openmrs.Obs, Condition, FhirConditionDao<org.openmrs.Obs>, ConditionTranslator<org.openmrs.Obs>, SearchQueryInclude<Condition>> searchQuery;
@@ -66,7 +65,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, Obs> im
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordedDate)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sort);	
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sort);
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

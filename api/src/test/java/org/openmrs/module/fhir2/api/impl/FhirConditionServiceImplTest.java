@@ -9,62 +9,26 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertEquals;
 
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import org.hl7.fhir.r4.model.Condition;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.OpenmrsObject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
 	
-	private static final String BAD_CONDITION_UUID = "90378769-f1a4-46af-b08b-d9fe8a09034j";
+	private static final String NEW_OBS_CONDITION_UUID = "NEW6880e-2c46-15e4-9038-a6c5e4d22gh8";
 	
-	private FhirConditionServiceImpl<?> conditionService;
+	private static final String EXISTING_OBS_CONDITION_UUID = "942ec003-a55d-43c4-ac7a-bd6d1ba63382";
 	
-	private Condition condition;
+	private static final String WRONG_OBS_CONDITION_UUID = "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9";
 	
-	@Before
-	@SuppressWarnings("rawtypes")
-	public void setup() {
-		conditionService = new FhirConditionServiceImpl() {
-			
-			@Override
-			protected void validateObject(OpenmrsObject object) {
-			}
-		};
-		
-		condition = new Condition();
-		condition.setId(BAD_CONDITION_UUID);
-	}
+	private static final String OBS_CONDITION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirObsConditionDaoImplTest_initial_data.xml";
 	
 	@Test
-	public void get_shouldThrowNotImplementedOperationException() {
-		assertThrows(NotImplementedOperationException.class, () -> conditionService.get(BAD_CONDITION_UUID));
+	public void get_shouldGetObsConditionByUuid() {
+		assertEquals("", "");
 	}
 	
-	@Test
-	public void create_shouldThrowNotImplementedOperationException() {
-		assertThrows(NotImplementedOperationException.class, () -> conditionService.create(condition));
-	}
-	
-	@Test
-	public void update_shouldThrowNotImplementedOperationException() {
-		assertThrows(NotImplementedOperationException.class, () -> conditionService.update(BAD_CONDITION_UUID, condition));
-	}
-	
-	@Test
-	public void delete_shouldThrowNotImplementedOperationException() {
-		assertThrows(NotImplementedOperationException.class, () -> conditionService.delete(BAD_CONDITION_UUID));
-	}
-	
-	@Test
-	public void searchConditions_shouldThrowNotImplementedOperationException() {
-		assertThrows(NotImplementedOperationException.class,
-		    () -> conditionService.searchConditions(null, null, null, null, null, null, null, null, null, null));
-	}
 }
