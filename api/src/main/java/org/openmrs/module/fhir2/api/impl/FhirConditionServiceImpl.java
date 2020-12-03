@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.transaction.Transactional;
+
 import java.util.HashSet;
 
 import ca.uhn.fhir.model.api.Include;
@@ -21,6 +23,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import org.hl7.fhir.r4.model.Condition;
 import org.openmrs.Obs;
 import org.openmrs.annotation.OpenmrsProfile;
@@ -35,7 +38,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Transactional
 @Getter(AccessLevel.PROTECTED)
+@Setter(AccessLevel.PACKAGE)
 @OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
 public class FhirConditionServiceImpl extends BaseFhirService<Condition, Obs> implements FhirConditionService {
 	
@@ -61,7 +66,7 @@ public class FhirConditionServiceImpl extends BaseFhirService<Condition, Obs> im
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientParam)
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
 		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, onsetAge)
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "onsetDate", onsetDate)
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime", onsetDate)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "dateCreated", recordedDate)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)

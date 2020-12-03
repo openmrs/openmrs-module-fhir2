@@ -236,8 +236,8 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirCondit
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
+					entry.getValue().forEach(
+					    param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam(), "person"));
 					break;
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleCode(criteria, (TokenAndListParam) param.getParam()));
@@ -265,7 +265,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirCondit
 	}
 	
 	private void handleOnsetAge(Criteria criteria, QuantityAndListParam onsetAge) {
-		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("onsetDate", onsetAgeParam))
+		handleAndListParam(onsetAge, onsetAgeParam -> handleAgeByDateProperty("obsDatetime", onsetAgeParam))
 		        .ifPresent(criteria::add);
 	}
 	
@@ -278,7 +278,7 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirCondit
 	protected String paramToProp(@Nonnull String param) {
 		switch (param) {
 			case org.hl7.fhir.r4.model.Condition.SP_ONSET_DATE:
-				return "onsetDate";
+				return "obsDatetime";
 			case org.hl7.fhir.r4.model.Condition.SP_RECORDED_DATE:
 				return "dateCreated";
 		}
