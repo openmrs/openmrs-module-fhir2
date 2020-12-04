@@ -13,18 +13,26 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import java.util.Date;
+
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.openmrs.Concept;
 import org.openmrs.Obs;
+import org.openmrs.Patient;
+import org.openmrs.Person;
 import org.openmrs.User;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.api.ConceptService;
-import org.openmrs.api.PatientService;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
+import org.openmrs.module.fhir2.api.translators.ObservationEffectiveDatetimeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
@@ -49,10 +57,10 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 	private ProvenanceTranslator<Obs> provenanceTranslator;
 	
 	@Autowired
-	private PatientService patientService;
+	private ConceptService conceptService;
 	
 	@Autowired
-	private ConceptService conceptService;
+	private ObservationEffectiveDatetimeTranslator datetimeTranslator;
 	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Obs obsCondition) {
@@ -60,11 +68,24 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 		
 		org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
 		fhirCondition.setId(obsCondition.getUuid());
-		fhirCondition.setSubject(
-		    patientReferenceTranslator.toFhirResource(patientService.getPatient(obsCondition.getPersonId())));
+		
+		Person obsPerson = obsCondition.getPerson();
+		if (obsPerson != null) {
+			if (obsPerson instanceof HibernateProxy) {
+				obsPerson = HibernateUtil.getRealObjectFromProxy(obsPerson);
+			}
+			
+			if (obsPerson instanceof Patient) {
+				fhirCondition.setSubject(patientReferenceTranslator.toFhirResource((Patient) obsPerson));
+			}
+		}
 		if (obsCondition.getValueCoded() != null) {
 			fhirCondition.setCode(conceptTranslator.toFhirResource(obsCondition.getValueCoded()));
 		}
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setCode("UNKNOWN").setDisplay("UNKNOWN")
+		        .setSystem(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI);
+		fhirCondition.setClinicalStatus(codeableConcept);
 		fhirCondition.setOnset(new DateTimeType().setValue(obsCondition.getObsDatetime()));
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(obsCondition.getCreator()));
 		fhirCondition.setRecordedDate(obsCondition.getDateCreated());
@@ -89,8 +110,20 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 		CodeableConcept codeableConcept = condition.getCode();
 		existingObsCondition.setValueCoded(conceptTranslator.toOpenmrsType(codeableConcept));
 		existingObsCondition.setPerson(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));
-		existingObsCondition.setConcept(conceptService.getConcept(FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID));
-		existingObsCondition.setObsDatetime(condition.getOnsetDateTimeType().getValue());
+		Concept problemList = conceptService.getConcept(FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID);
+		if (problemList != null) {
+			existingObsCondition.setConcept(problemList);
+		} else {
+			throw new InternalErrorException(
+			        "Concept " + FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID + " ProblemList Not found");
+		}
+		Date startTime = condition.getOnsetDateTimeType().getValue();
+		
+		if (startTime != null) {
+			existingObsCondition.setObsDatetime(startTime);
+		} else {
+			existingObsCondition.setObsDatetime(condition.getRecordedDateElement().getValue());
+		}
 		existingObsCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));
 		
 		return existingObsCondition;

@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Location;
@@ -442,6 +443,10 @@ public class SearchQueryInclude<U extends IBaseResource> {
 			case FhirConstants.SERVICE_REQUEST:
 				resourceList.forEach(
 				    resource -> uniquePatientUUIDs.add(getIdFromReference(((ServiceRequest) resource).getSubject())));
+				break;
+			case FhirConstants.CONDITION:
+				resourceList.forEach(
+				    resource -> uniquePatientUUIDs.add(getIdFromReference(((Condition) resource).getSubject())));
 				break;
 		}
 		
