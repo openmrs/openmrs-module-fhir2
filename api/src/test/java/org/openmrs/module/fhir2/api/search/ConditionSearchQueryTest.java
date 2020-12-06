@@ -51,7 +51,6 @@ import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
-import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -119,8 +118,6 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String CONCEPT_ID_2 = "c607c80f-1ea9-4da3-bb88-6276ce8868dd";
 	
-	//
-	
 	@Autowired
 	private FhirConditionDao<org.openmrs.Obs> dao;
 	
@@ -132,9 +129,6 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Autowired
 	private SearchQuery<org.openmrs.Obs, Condition, FhirConditionDao<org.openmrs.Obs>, ConditionTranslator<org.openmrs.Obs>, SearchQueryInclude<Condition>> searchQuery;
-	
-	@Autowired
-	private LocalDateTimeFactory localDateTimeFactory;
 	
 	@Autowired
 	PatientService patientService;

@@ -31,8 +31,8 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
-import org.openmrs.module.fhir2.api.translators.ObservationEffectiveDatetimeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
@@ -60,7 +60,7 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 	private ConceptService conceptService;
 	
 	@Autowired
-	private ObservationEffectiveDatetimeTranslator datetimeTranslator;
+	private ConditionClinicalStatusTranslator<Obs> conditionClinicalStatusTranslator;
 	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Obs obsCondition) {
@@ -82,10 +82,7 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 		if (obsCondition.getValueCoded() != null) {
 			fhirCondition.setCode(conceptTranslator.toFhirResource(obsCondition.getValueCoded()));
 		}
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding().setCode("UNKNOWN").setDisplay("UNKNOWN")
-		        .setSystem(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI);
-		fhirCondition.setClinicalStatus(codeableConcept);
+		fhirCondition.setClinicalStatus(conditionClinicalStatusTranslator.toFhirResource(obsCondition));
 		fhirCondition.setOnset(new DateTimeType().setValue(obsCondition.getObsDatetime()));
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(obsCondition.getCreator()));
 		fhirCondition.setRecordedDate(obsCondition.getDateCreated());
@@ -117,12 +114,12 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 			throw new InternalErrorException(
 			        "Concept " + FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID + " ProblemList Not found");
 		}
-		Date startTime = condition.getOnsetDateTimeType().getValue();
-		
-		if (startTime != null) {
-			existingObsCondition.setObsDatetime(startTime);
-		} else {
-			existingObsCondition.setObsDatetime(condition.getRecordedDateElement().getValue());
+		Date onsetTime = condition.getOnsetDateTimeType().getValue();
+		Date recordTime = condition.getRecordedDateElement().getValue();
+		if (onsetTime != null) {
+			existingObsCondition.setObsDatetime(onsetTime);
+		} else if (recordTime != null) {
+			existingObsCondition.setObsDatetime(recordTime);
 		}
 		existingObsCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));
 		

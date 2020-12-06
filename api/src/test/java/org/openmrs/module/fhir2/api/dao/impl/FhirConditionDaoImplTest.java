@@ -55,7 +55,6 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String WORNG_OBS_CONDITION_CONCEPT_ID = "116145";
 	
 	private static final Integer PATIENT_ID = 6;
-	//1284
 	
 	@Autowired
 	private FhirConditionDao<Obs> dao;

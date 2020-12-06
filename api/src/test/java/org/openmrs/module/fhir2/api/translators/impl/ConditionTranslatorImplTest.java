@@ -44,6 +44,7 @@ import org.openmrs.User;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
@@ -83,6 +84,9 @@ public class ConditionTranslatorImplTest {
 	@Mock
 	private PractitionerReferenceTranslator<User> creatorReferenceTranslator;
 	
+	@Mock
+	private ConditionClinicalStatusTranslator<Obs> conditionClinicalStatusTranslator;
+	
 	private ConditionTranslatorImpl conditionTranslator;
 	
 	private Condition fhirCondition;
@@ -103,6 +107,7 @@ public class ConditionTranslatorImplTest {
 		conditionTranslator.setPractitionerReferenceTranslator(creatorReferenceTranslator);
 		conditionTranslator.setProvenanceTranslator(provenanceTranslator);
 		conditionTranslator.setConceptService(conceptService);
+		conditionTranslator.setConditionClinicalStatusTranslator(conditionClinicalStatusTranslator);
 		
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
