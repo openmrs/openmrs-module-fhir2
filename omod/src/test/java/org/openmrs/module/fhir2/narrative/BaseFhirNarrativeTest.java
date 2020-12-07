@@ -35,7 +35,7 @@ public class BaseFhirNarrativeTest {
 	
 	protected ReloadableResourceBundleMessageSource messageSource;
 	
-  /**
+	/**
 	 * Setup a common timezone before all the tests to avoid assertion errors in narrative generation
 	 * tests due to timezone mismatch
 	 */

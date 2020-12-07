@@ -14,7 +14,6 @@ import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.in;
 import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.or;
-import static org.hibernate.criterion.Subqueries.propertyIn;
 
 import javax.annotation.Nonnull;
 
@@ -31,7 +30,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -153,27 +151,21 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
 		
-		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(typeToken.getRawType());
-		Criteria detachedExecutableCriteria = detachedCriteria.getExecutableCriteria(sessionFactory.getCurrentSession());
-		
 		if (isVoidable) {
-			handleVoidable(detachedExecutableCriteria);
+			handleVoidable(criteria);
 		} else if (isRetireable) {
-			handleRetireable(detachedExecutableCriteria);
+			handleRetireable(criteria);
 		}
 		
-		setupSearchParams(detachedExecutableCriteria, theParams);
-		handleSort(detachedExecutableCriteria, theParams.getSortSpec());
+		setupSearchParams(criteria, theParams);
+		handleSort(criteria, theParams.getSortSpec());
 		
-		detachedCriteria.setProjection(Projections.property("uuid"));
-		
-		criteria.add(propertyIn("uuid", detachedCriteria));
-		criteria.setProjection(Projections.groupProperty("uuid"));
+		criteria.setProjection(Projections.property("uuid"));
 		
 		@SuppressWarnings("unchecked")
 		List<String> results = criteria.list();
 		
-		return results;
+		return results.stream().distinct().collect(Collectors.toList());
 	}
 	
 	@Override
