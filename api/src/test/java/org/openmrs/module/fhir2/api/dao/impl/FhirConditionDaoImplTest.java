@@ -94,7 +94,6 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
 		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
-		System.out.println(matchingResourceUuids.size());
 		assertEquals(matchingResourceUuids.size(), 2);
 	}
 	
@@ -109,7 +108,6 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
 		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
-		System.out.println(matchingResourceUuids.size());
 		assertEquals(matchingResourceUuids.size(), 0);
 	}
 	
@@ -124,7 +122,6 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
 		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
-		System.out.println(matchingResourceUuids.size());
 		assertFalse(matchingResourceUuids.contains(VOIDED_OBS_CONDITION_UUID));
 	}
 	
