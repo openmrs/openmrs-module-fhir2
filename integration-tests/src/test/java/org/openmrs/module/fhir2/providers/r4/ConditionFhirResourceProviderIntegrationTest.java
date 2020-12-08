@@ -151,7 +151,7 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
-	public void shouldCreateNewPatientAsJson() throws Exception {
+	public void shouldCreateNewConditionAsJson() throws Exception {
 		String jsonCondition;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_CONDITION_DOCUMENT)) {
 			assertThat(is, notNullValue());
@@ -187,7 +187,7 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
-	public void shouldCreateNewPatientAsXML() throws Exception {
+	public void shouldCreateNewConditionAsXML() throws Exception {
 		String xmlCondition;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_CONDITION_DOCUMENT)) {
 			assertThat(is, notNullValue());
