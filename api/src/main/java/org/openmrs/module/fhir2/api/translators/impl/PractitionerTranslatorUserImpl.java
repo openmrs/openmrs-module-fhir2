@@ -13,8 +13,13 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.PersonAddress;
@@ -54,7 +59,28 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 		practitioner.addIdentifier(userIdentifier);
 		
 		if (user.getPerson() != null) {
-			practitioner.setBirthDate(user.getPerson().getBirthdate());
+			
+			if (user.getPerson().getBirthdateEstimated() != null) {
+				if (user.getPerson().getBirthdateEstimated()) {
+					DateType dateType = new DateType();
+					int currentYear = LocalDate.now().getYear();
+					int birthDateYear = LocalDate
+					        .parse(new SimpleDateFormat("yyyy-MM-dd").format(user.getPerson().getBirthdate())).getYear();
+					
+					if ((currentYear - birthDateYear) > 5) {
+						dateType.setValue(user.getPerson().getBirthdate(), TemporalPrecisionEnum.YEAR);
+					} else {
+						dateType.setValue(user.getPerson().getBirthdate(), TemporalPrecisionEnum.MONTH);
+					}
+					
+					practitioner.setBirthDateElement(dateType);
+				} else {
+					practitioner.setBirthDate(user.getPerson().getBirthdate());
+				}
+			} else {
+				practitioner.setBirthDate(user.getPerson().getBirthdate());
+			}
+			
 			practitioner.setGender(genderTranslator.toFhirResource(user.getPerson().getGender()));
 			for (PersonName name : user.getPerson().getNames()) {
 				practitioner.addName(nameTranslator.toFhirResource(name));
