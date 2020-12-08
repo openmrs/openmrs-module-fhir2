@@ -197,7 +197,6 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
-		assertThat(condition.getClinicalStatus(), notNullValue());
 		assertThat(condition.getOnsetDateTimeType(), notNullValue());
 		assertThat(condition.getCode().getCoding(),
 		    hasItem(hasProperty("code", equalTo("116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))));
