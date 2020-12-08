@@ -82,7 +82,6 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 		if (obsCondition.getValueCoded() != null) {
 			fhirCondition.setCode(conceptTranslator.toFhirResource(obsCondition.getValueCoded()));
 		}
-		fhirCondition.setClinicalStatus(conditionClinicalStatusTranslator.toFhirResource(obsCondition));
 		fhirCondition.setOnset(new DateTimeType().setValue(obsCondition.getObsDatetime()));
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(obsCondition.getCreator()));
 		fhirCondition.setRecordedDate(obsCondition.getDateCreated());

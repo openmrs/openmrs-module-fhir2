@@ -78,6 +78,8 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirCondit
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		criteria.createAlias("concept", "c");
+		criteria.add(eq("c.uuid", FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID));
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
@@ -100,8 +102,6 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirCondit
 					break;
 			}
 		});
-		criteria.createAlias("concept", "conc");
-		criteria.add(eq("conc.uuid", FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID));
 	}
 	
 	private void handleCode(Criteria criteria, TokenAndListParam code) {

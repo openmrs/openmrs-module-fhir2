@@ -12,7 +12,6 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Obs;
 import org.openmrs.annotation.OpenmrsProfile;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -24,10 +23,7 @@ public class ConditionClinicalStatusTranslatorImpl implements ConditionClinicalS
 	
 	@Override
 	public CodeableConcept toFhirResource(Obs clinicalStatus) {
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding().setCode("active").setDisplay("active")
-		        .setSystem(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI);
-		return codeableConcept;
+		return null;
 	}
 	
 	@Override

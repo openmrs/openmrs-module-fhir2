@@ -37,7 +37,6 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -82,11 +81,6 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
 		
-		assertThat(condition.hasClinicalStatus(), is(true));
-		assertThat(condition.getClinicalStatus().getSystem(),
-		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI_R3));
-		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
-		
 		assertThat(condition.getOnsetDateTimeType().getValue(),
 		    equalTo(Date.from(LocalDateTime.of(2008, 07, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())));
 		
@@ -122,11 +116,6 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
-		
-		assertThat(condition.hasClinicalStatus(), is(true));
-		assertThat(condition.getClinicalStatus().getSystem(),
-		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI_R3));
-		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
 		
 		assertThat(condition.getOnsetDateTimeType().getValue(),
 		    equalTo(Date.from(LocalDateTime.of(2008, 07, 01, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())));
@@ -171,9 +160,6 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
-		assertThat(condition.getClinicalStatus(), notNullValue());
-		assertThat(condition.getOnsetDateTimeType(), notNullValue());
-		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
 		assertThat(condition.getCode(), notNullValue());
 		assertThat(condition.getCode().getCoding(),
 		    hasItem(hasProperty("code", equalTo("116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))));
@@ -213,9 +199,6 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
 		assertThat(condition.getClinicalStatus(), notNullValue());
 		assertThat(condition.getOnsetDateTimeType(), notNullValue());
-		assertThat(condition.getClinicalStatus().getSystem(),
-		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI_R3));
-		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
 		assertThat(condition.getCode().getCoding(),
 		    hasItem(hasProperty("code", equalTo("116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))));
 		assertThat(condition.getSubject().getReference(), endsWith(CONDITION_SUBJECT_UUID));
@@ -393,8 +376,6 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		
 		assertThat(entries.size(), equalTo(2));
 		assertThat(entries,
-		    everyItem(hasResource(hasProperty("clinicalStatus", equalTo(Condition.ConditionClinicalStatus.ACTIVE)))));
-		assertThat(entries,
 		    containsInRelativeOrder(
 		        hasResource(hasProperty(
 		            "onsetDateTimeType",
@@ -446,8 +427,6 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
 		assertThat(entries.size(), equalTo(2));
-		assertThat(entries,
-		    everyItem(hasResource(hasProperty("clinicalStatus", equalTo(Condition.ConditionClinicalStatus.ACTIVE)))));
 		assertThat(entries,
 		    containsInRelativeOrder(
 		        hasResource(hasProperty(
