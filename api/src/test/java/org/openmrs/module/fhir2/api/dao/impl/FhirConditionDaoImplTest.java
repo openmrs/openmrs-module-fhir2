@@ -22,6 +22,8 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+
+import org.apache.commons.collections.functors.TruePredicate;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
@@ -94,7 +96,7 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
 		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
-		assertEquals(matchingResourceUuids.size(), 2);
+		assertEquals(2, matchingResourceUuids.size());
 	}
 	
 	@Test
@@ -158,5 +160,13 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(NEW_OBS_CONDITION_UUID));
 	}
-	
+
+	@Test
+	public void shouldDeleteObsCondition() {
+		Obs result = dao.delete(EXISTING_OBS_CONDITION_UUID);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(EXISTING_OBS_CONDITION_UUID));
+		assertThat(result.getVoided(), equalTo(true));
+
+	}
 }

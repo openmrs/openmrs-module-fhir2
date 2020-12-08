@@ -107,12 +107,12 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 		CodeableConcept codeableConcept = condition.getCode();
 		existingObsCondition.setValueCoded(conceptTranslator.toOpenmrsType(codeableConcept));
 		existingObsCondition.setPerson(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));
-		Concept problemList = conceptService.getConcept(FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID);
+		Concept problemList = conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID);
 		if (problemList != null) {
 			existingObsCondition.setConcept(problemList);
 		} else {
 			throw new InternalErrorException(
-			        "Concept " + FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID + " ProblemList Not found");
+			        "Concept " + FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID + " ProblemList Not found");
 		}
 		Date onsetTime = condition.getOnsetDateTimeType().getValue();
 		Date recordTime = condition.getRecordedDateElement().getValue();

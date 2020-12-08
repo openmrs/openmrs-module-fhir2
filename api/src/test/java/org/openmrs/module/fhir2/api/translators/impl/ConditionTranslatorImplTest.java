@@ -55,6 +55,8 @@ public class ConditionTranslatorImplTest {
 	
 	private static final String CONDITION_UUID = "36aa91ad-66f3-455b-b28a-71beb6ca3195";
 	
+	private static final Integer CONDITION_ID = 1284;
+	
 	private static final String PATIENT_UUID = "fc8b217b-2ed4-4dde-b9f7-a5334347e7ca";
 	
 	private static final String PATIENT_REF = "Patient/" + PATIENT_UUID;
@@ -117,7 +119,7 @@ public class ConditionTranslatorImplTest {
 		
 		concept = new Concept();
 		concept.setUuid(CONDITION_UUID);
-		concept.setConceptId(FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID);
+		concept.setConceptId(CONDITION_ID);
 		
 		Concept valueCoded = new Concept();
 		concept.setUuid(CONDITION_UUID);
@@ -143,7 +145,7 @@ public class ConditionTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateConditionUuidToOpenMrsType() {
-		when(conceptService.getConcept(FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID)).thenReturn(concept);
+		when(conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID)).thenReturn(concept);
 		Obs obsCondition = conditionTranslator.toOpenmrsType(fhirCondition);
 		assertThat(obsCondition, notNullValue());
 		assertThat(obsCondition.getUuid(), equalTo(CONDITION_UUID));
@@ -165,7 +167,7 @@ public class ConditionTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateConditionSubjectToOpenMrsType() {
-		when(conceptService.getConcept(FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID)).thenReturn(concept);
+		when(conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID)).thenReturn(concept);
 		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
 		Obs obsCondition = conditionTranslator.toOpenmrsType(fhirCondition);
 		assertThat(obsCondition, notNullValue());
@@ -194,7 +196,7 @@ public class ConditionTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateFhirConditionOnsetToOpenMrsOnsetDate() {
-		when(conceptService.getConcept(FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID)).thenReturn(concept);
+		when(conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID)).thenReturn(concept);
 		DateTimeType theDateTime = new DateTimeType();
 		theDateTime.setValue(new Date());
 		fhirCondition.setOnset(theDateTime);
@@ -215,7 +217,7 @@ public class ConditionTranslatorImplTest {
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
 		concept.setConceptId(CODE);
-		when(conceptService.getConcept(FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID)).thenReturn(concept);
+		when(conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID)).thenReturn(concept);
 		when(conceptTranslator.toOpenmrsType(codeableConcept)).thenReturn(concept);
 		Obs condition = conditionTranslator.toOpenmrsType(fhirCondition);
 		assertThat(condition, notNullValue());
@@ -259,7 +261,7 @@ public class ConditionTranslatorImplTest {
 		fhirCondition.setRecorder(userRef);
 		User user = new User();
 		user.setUuid(PRACTITIONER_UUID);
-		when(conceptService.getConcept(FhirConstants.CONDITION_OBSERVATION_CONCEPT_ID)).thenReturn(concept);
+		when(conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID)).thenReturn(concept);
 		when(creatorReferenceTranslator.toOpenmrsType(userRef)).thenReturn(user);
 		Obs condition = conditionTranslator.toOpenmrsType(fhirCondition);
 		assertThat(condition, notNullValue());

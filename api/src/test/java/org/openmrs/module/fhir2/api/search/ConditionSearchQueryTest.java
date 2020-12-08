@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
@@ -23,7 +24,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +36,10 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.QuantityOrListParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -51,6 +59,7 @@ import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
+import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -135,6 +144,9 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Autowired
 	ConceptService conceptService;
+	
+	@Autowired
+	private LocalDateTimeFactory localDateTimeFactory;
 	
 	@Before
 	public void setup() throws Exception {
@@ -834,5 +846,26 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 		org.hl7.fhir.r4.model.Condition returnedCondition = (org.hl7.fhir.r4.model.Condition) resultList.iterator().next();
 		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
 		    hasProperty("id", Matchers.equalTo(returnedCondition.getSubject().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForConditions_shouldReturnConditionByOnsetAgeEqualHour() {
+		QuantityOrListParam orList = new QuantityOrListParam();
+		orList.addOr(new QuantityParam(ParamPrefixEnum.EQUAL, 2, "", "h"));
+		QuantityAndListParam onsetAgeParam = new QuantityAndListParam().addAnd(orList);
+		
+		when(localDateTimeFactory.now()).thenReturn(LocalDateTime.of(2008, Month.JULY, 1, 3, 0, 0));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER,
+		    onsetAgeParam);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((org.hl7.fhir.r4.model.Condition) resultList.iterator().next()).getIdElement().getIdPart(),
+		    equalTo(EXISTING_OBS_CONDITION_UUID));
 	}
 }
