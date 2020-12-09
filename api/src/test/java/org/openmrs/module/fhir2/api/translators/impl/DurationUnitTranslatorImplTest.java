@@ -9,8 +9,6 @@ import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 
-import java.util.Calendar;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -26,63 +24,125 @@ public class DurationUnitTranslatorImplTest {
 
 	private Concept concept;
 
+	private String SECONDS_UUID = "162583";
+
+	private String MINUTES_UUID = "1733";
+
+	private String HOUR_UUID = "1822";
+
+	private String DAYS_UUID = "1072";
+
+	private String WEEKS_UUID = "1073";
+
+	private String MONTHS_UUID = "1074";
+
+	private String YEARS_UUID = "1734";
+
+	private String WRONG_UUID = "2909";
+
 	@Before
 	public void setup() {
 
 		durationUnitTranslator = new DurationUnitTranslatorImpl();
-
 		drugOrder = new DrugOrder();
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(2020, Calendar.APRIL, 16);
 		concept = new Concept();
-		concept.setDateCreated(calendar.getTime());
-		drugOrder.setDurationUnits(concept);
 	}
 
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsNull() {
 
+		concept.setUuid(WRONG_UUID);
+		drugOrder.setDurationUnits(concept);
+
 		result = durationUnitTranslator.toFhirResource(drugOrder);
 		assertThat(result, equalTo(Timing.UnitsOfTime.NULL));
 
-		result = durationUnitTranslator.toFhirResource(new DrugOrder());
+		result = durationUnitTranslator.toFhirResource(drugOrder);
 		assertThat(result, equalTo(Timing.UnitsOfTime.NULL));
+		assertThat(result, notNullValue());
+	}
+
+	@Test
+	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsSeconds() {
+
+		concept.setUuid(SECONDS_UUID);
+		drugOrder.setDurationUnits(concept);
+
+		result = durationUnitTranslator.toFhirResource(drugOrder);
+
+		assertThat(result, equalTo(Timing.UnitsOfTime.S));
+		assertThat(result, notNullValue());
+	}
+
+	@Test
+	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsMinutes() {
+
+		concept.setUuid(MINUTES_UUID);
+		drugOrder.setDurationUnits(concept);
+
+		result = durationUnitTranslator.toFhirResource(drugOrder);
+
+		assertThat(result, equalTo(Timing.UnitsOfTime.MIN));
+		assertThat(result, notNullValue());
+	}
+
+	@Test
+	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsHours() {
+
+		concept.setUuid(HOUR_UUID);
+		drugOrder.setDurationUnits(concept);
+
+		result = durationUnitTranslator.toFhirResource(drugOrder);
+
+		assertThat(result, equalTo(Timing.UnitsOfTime.H));
+		assertThat(result, notNullValue());
+	}
+
+	@Test
+	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsWeeks() {
+
+		concept.setUuid(WEEKS_UUID);
+		drugOrder.setDurationUnits(concept);
+
+		result = durationUnitTranslator.toFhirResource(drugOrder);
+
+		assertThat(result, equalTo(Timing.UnitsOfTime.WK));
 		assertThat(result, notNullValue());
 	}
 
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsDay() {
 
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(2020, Calendar.APRIL, 20);
-		concept.setDateRetired(calendar.getTime());
+		concept.setUuid(DAYS_UUID);
 		drugOrder.setDurationUnits(concept);
+
 		result = durationUnitTranslator.toFhirResource(drugOrder);
 
 		assertThat(result, equalTo(Timing.UnitsOfTime.D));
+		assertThat(result, notNullValue());
 	}
 
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsMonth() {
 
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(2020, Calendar.SEPTEMBER, 29);
-		concept.setDateRetired(calendar.getTime());
+		concept.setUuid(MONTHS_UUID);
 		drugOrder.setDurationUnits(concept);
+
 		result = durationUnitTranslator.toFhirResource(drugOrder);
 
 		assertThat(result, equalTo(Timing.UnitsOfTime.MO));
+		assertThat(result, notNullValue());
 	}
 
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsYear() {
 
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(2021, Calendar.APRIL, 20);
-		concept.setDateRetired(calendar.getTime());
+		concept.setUuid(YEARS_UUID);
 		drugOrder.setDurationUnits(concept);
+
 		result = durationUnitTranslator.toFhirResource(drugOrder);
 
 		assertThat(result, equalTo(Timing.UnitsOfTime.A));
+		assertThat(result, notNullValue());
 	}
 }
