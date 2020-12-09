@@ -13,10 +13,13 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -24,6 +27,7 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -79,8 +83,28 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		
 		Patient patient = new Patient();
 		patient.setId(openmrsPatient.getUuid());
-		patient.setBirthDate(openmrsPatient.getBirthdate());
 		patient.setActive(!openmrsPatient.getVoided());
+		
+		if (openmrsPatient.getBirthdateEstimated() != null) {
+			if (openmrsPatient.getBirthdateEstimated()) {
+				DateType dateType = new DateType();
+				int currentYear = LocalDate.now().getYear();
+				int birthDateYear = LocalDate.parse(new SimpleDateFormat("yyyy-MM-dd").format(openmrsPatient.getBirthdate()))
+				        .getYear();
+				
+				if ((currentYear - birthDateYear) > 5) {
+					dateType.setValue(openmrsPatient.getBirthdate(), TemporalPrecisionEnum.YEAR);
+				} else {
+					dateType.setValue(openmrsPatient.getBirthdate(), TemporalPrecisionEnum.MONTH);
+				}
+				
+				patient.setBirthDateElement(dateType);
+			} else {
+				patient.setBirthDate(openmrsPatient.getBirthdate());
+			}
+		} else {
+			patient.setBirthDate(openmrsPatient.getBirthdate());
+		}
 		
 		if (openmrsPatient.getDead()) {
 			if (openmrsPatient.getDeathDate() != null) {
@@ -134,7 +158,16 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		notNull(patient, "The Patient object should not be null");
 		
 		currentPatient.setUuid(patient.getId());
-		currentPatient.setBirthdate(patient.getBirthDate());
+		
+		if (patient.getBirthDateElement().getPrecision() == TemporalPrecisionEnum.DAY) {
+			currentPatient.setBirthdate(patient.getBirthDate());
+		}
+		
+		if (patient.getBirthDateElement().getPrecision() == TemporalPrecisionEnum.YEAR
+		        || patient.getBirthDateElement().getPrecision() == TemporalPrecisionEnum.MONTH) {
+			currentPatient.setBirthdate(patient.getBirthDate());
+			currentPatient.setBirthdateEstimated(true);
+		}
 		
 		if (patient.hasDeceased()) {
 			try {

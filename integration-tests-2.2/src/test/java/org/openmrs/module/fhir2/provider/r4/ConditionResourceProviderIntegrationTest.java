@@ -201,7 +201,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	}
 	
 	@Test
-	public void shouldCreateNewPatientAsXML() throws Exception {
+	public void shouldCreateNewConditionAsXML() throws Exception {
 		String xmlCondition;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_CONDITION_DOCUMENT)) {
 			assertThat(is, notNullValue());

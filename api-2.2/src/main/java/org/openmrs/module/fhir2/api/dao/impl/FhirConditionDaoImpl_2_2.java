@@ -96,13 +96,7 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 		if ("active".equalsIgnoreCase(status)) {
 			return ConditionClinicalStatus.ACTIVE;
 		}
-		if ("inactive".equalsIgnoreCase(status)) {
-			return ConditionClinicalStatus.INACTIVE;
-		}
-		// Note `history_of` is not a valid value in the FHIR spec:
-		// http://www.hl7.org/fhir/valueset-condition-clinical.html
-		// We are simply following the logic implemented in `ConditionClinicalStatusTranslatorImpl_2_2`.
-		return ConditionClinicalStatus.HISTORY_OF;
+		return ConditionClinicalStatus.INACTIVE;
 	}
 	
 	private Optional<Criterion> handleAgeByDateProperty(@Nonnull String datePropertyName, @Nonnull QuantityParam age) {
