@@ -24,15 +24,18 @@ import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.time.Instant;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.collect.Sets;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
@@ -412,5 +415,72 @@ public class PatientTranslatorImplTest {
 		assertThat(result.getContained().stream()
 		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
 		    is(true));
+	}
+	
+	@Test
+	public void shouldTranslateToOpenMRSBirthDate() {
+		org.hl7.fhir.r4.model.Patient openMRSPatient = new org.hl7.fhir.r4.model.Patient();
+		Date date = new Date();
+		DateType dateType = new DateType();
+		
+		// for TemporalPrecisionEnum.DAY
+		dateType.setValue(date, TemporalPrecisionEnum.DAY);
+		openMRSPatient.setBirthDateElement(dateType);
+		
+		org.openmrs.Patient result = patientTranslator.toOpenmrsType(openMRSPatient);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthdateEstimated(), equalTo(false));
+		assertThat(result.getBirthdate(), equalTo(date));
+		
+		// for TemporalPrecisionEnum.Month
+		dateType.setValue(date, TemporalPrecisionEnum.MONTH);
+		openMRSPatient.setBirthDateElement(dateType);
+		
+		result = patientTranslator.toOpenmrsType(openMRSPatient);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthdateEstimated(), equalTo(true));
+		assertThat(result.getBirthdate(), equalTo(date));
+		
+		// for TemporalPrecisionEnum.YEAR
+		dateType.setValue(date, TemporalPrecisionEnum.YEAR);
+		openMRSPatient.setBirthDateElement(dateType);
+		
+		result = patientTranslator.toOpenmrsType(openMRSPatient);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthdateEstimated(), equalTo(true));
+		assertThat(result.getBirthdate(), equalTo(date));
+	}
+	
+	@Test
+	public void shouldTranslateToFHIRBirthDate() {
+		org.openmrs.Patient patient = new org.openmrs.Patient();
+		Calendar calendar = Calendar.getInstance();
+		DateType dateType = new DateType();
+		
+		// when birthdate more than 5 year
+		calendar.set(2000, Calendar.AUGUST, 12);
+		patient.setBirthdateEstimated(true);
+		patient.setBirthdate(calendar.getTime());
+		
+		Patient result = patientTranslator.toFhirResource(patient);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthDateElement().getPrecision(), equalTo(TemporalPrecisionEnum.YEAR));
+		assertThat(result.getBirthDateElement().getYear(), equalTo(2000));
+		
+		//when birthDate less then 5 year
+		Date date = new Date();
+		patient.setBirthdate(date);
+		dateType.setValue(date, TemporalPrecisionEnum.MONTH);
+		
+		result = patientTranslator.toFhirResource(patient);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getBirthDateElement().getPrecision(), equalTo(TemporalPrecisionEnum.MONTH));
+		assertThat(result.getBirthDateElement().getYear(), equalTo(dateType.getYear()));
+		assertThat(result.getBirthDateElement().getMonth(), equalTo(dateType.getMonth()));
 	}
 }
