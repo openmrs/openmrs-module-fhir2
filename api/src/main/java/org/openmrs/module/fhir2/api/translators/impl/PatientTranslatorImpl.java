@@ -187,7 +187,10 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		}
 		
 		for (Identifier identifier : patient.getIdentifier()) {
-			currentPatient.addIdentifier(identifierTranslator.toOpenmrsType(identifier));
+			PatientIdentifier omrsIdentifier = identifierTranslator.toOpenmrsType(identifier);
+			if (omrsIdentifier != null) {
+				currentPatient.addIdentifier(omrsIdentifier);
+			}
 		}
 		
 		for (HumanName name : patient.getName()) {

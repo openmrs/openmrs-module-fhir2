@@ -90,8 +90,7 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		PatientIdentifierType type = patientService.getPatientIdentifierTypeByIdentifier(identifier);
 		if (type == null && patientIdentifier.getIdentifierType() == null) {
-			// TODO implement error handling
-			throw new UnsupportedOperationException("cannot find identifier type for " + identifier.getId());
+			return null;
 		}
 		
 		patientIdentifier.setIdentifierType(type);

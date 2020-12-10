@@ -90,7 +90,6 @@ public abstract class BaseReferenceHandlingTranslator {
 		}
 		
 		reference.setDisplay(sb.toString());
-		
 		return reference;
 	}
 	
