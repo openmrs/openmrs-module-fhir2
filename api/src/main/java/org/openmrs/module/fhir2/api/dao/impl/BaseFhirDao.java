@@ -17,7 +17,12 @@ import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -257,7 +262,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param theParams the parameters for this search
 	 */
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		
+
 	}
 	
 	@Override
