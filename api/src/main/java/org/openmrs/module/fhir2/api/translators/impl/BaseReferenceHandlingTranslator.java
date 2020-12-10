@@ -85,12 +85,11 @@ public abstract class BaseReferenceHandlingTranslator {
 			if (identifierType != null && identifierType.getName() != null) {
 				sb.append(identifierType.getName()).append(": ");
 			}
-			sb.append(identifier.getIdentifier()).append(")");
 			
+			sb.append(identifier.getIdentifier()).append(")");	
 		}
 		
 		reference.setDisplay(sb.toString());
-		
 		return reference;
 	}
 	
