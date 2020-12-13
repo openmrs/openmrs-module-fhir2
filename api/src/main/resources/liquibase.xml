@@ -12,690 +12,690 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-	<changeSet id="add_fhir_concept_source_20200105" author="ibacher">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_concept_source"/>
-			</not>
-		</preConditions>
-		<createTable tableName="fhir_concept_source">
-			<column name="fhir_concept_source_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="concept_source_id" type="int"/>
-			<column name="url" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="name" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="description" type="varchar(255)"/>
-			<column name="creator" type="int">
-				<constraints nullable="false"/>
-			</column>
-			<column name="date_created" type="datetime">
-				<constraints nullable="false"/>
-			</column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime"/>
-			<column name="retired" type="boolean" defaultValueBoolean="false">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="datetime"/>
-			<column name="retire_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="varchar(38)">
-				<constraints nullable="false" unique="true"/>
-			</column>
-		</createTable>
-		<addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="concept_source_id"
-		                         constraintName="fhir_concept_source_concept_reference_source_fk"
-		                         referencedTableName="concept_reference_source" referencedColumnNames="concept_source_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="creator"
-		                         constraintName="fhir_concept_source_creator_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="changed_by"
-		                         constraintName="fhir_concept_source_changed_by_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="retired_by"
-		                         constraintName="fhir_concept_source_retired_by_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-	</changeSet>
+    <changeSet id="add_fhir_concept_source_20200105" author="ibacher">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_concept_source"/>
+            </not>
+        </preConditions>
+        <createTable tableName="fhir_concept_source">
+            <column name="fhir_concept_source_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="concept_source_id" type="int"/>
+            <column name="url" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="concept_source_id"
+                                 constraintName="fhir_concept_source_concept_reference_source_fk"
+                                 referencedTableName="concept_reference_source" referencedColumnNames="concept_source_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="creator"
+                                 constraintName="fhir_concept_source_creator_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="changed_by"
+                                 constraintName="fhir_concept_source_changed_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_concept_source" baseColumnNames="retired_by"
+                                 constraintName="fhir_concept_source_retired_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
 
-	<changeSet id="add_loinc_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<and>
-				<tableExists tableName="fhir_concept_source"/>
-				<tableExists tableName="concept_reference_source"/>
-				<sqlCheck expectedResult="1">select 1 from concept_reference_source where name='LOINC' and retired = 0
-				</sqlCheck>
-				<sqlCheck expectedResult="0">select count(*) from fhir_concept_source where uuid =
-					'249b13c8-72fa-4b96-8d3d-b200efed985e'
-				</sqlCheck>
-			</and>
-		</preConditions>
-		<sql><![CDATA[
+    <changeSet id="add_loinc_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <and>
+                <tableExists tableName="fhir_concept_source"/>
+                <tableExists tableName="concept_reference_source"/>
+                <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='LOINC' and retired = 0
+                </sqlCheck>
+                <sqlCheck expectedResult="0">select count(*) from fhir_concept_source where uuid =
+                    '249b13c8-72fa-4b96-8d3d-b200efed985e'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <sql><![CDATA[
             insert into fhir_concept_source (name, concept_source_id, url, creator, date_created, uuid)
             select name, concept_source_id, 'http://loinc.org', 1, now(), '249b13c8-72fa-4b96-8d3d-b200efed985e'
             from concept_reference_source
             where name = 'LOINC' and retired = 0
         ]]></sql>
-	</changeSet>
+    </changeSet>
 
-	<changeSet id="add_ciel_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<and>
-				<tableExists tableName="fhir_concept_source"/>
-				<tableExists tableName="concept_reference_source"/>
-				<sqlCheck expectedResult="1">select 1 from concept_reference_source where name='CIEL' and retired = 0
-				</sqlCheck>
-				<sqlCheck expectedResult="0">select count(*) from fhir_concept_source where uuid =
-					'2b3c1ff8-768a-102f-83f4-12313b04a615'
-				</sqlCheck>
-			</and>
-		</preConditions>
-		<sql><![CDATA[
+    <changeSet id="add_ciel_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <and>
+                <tableExists tableName="fhir_concept_source"/>
+                <tableExists tableName="concept_reference_source"/>
+                <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='CIEL' and retired = 0
+                </sqlCheck>
+                <sqlCheck expectedResult="0">select count(*) from fhir_concept_source where uuid =
+                    '2b3c1ff8-768a-102f-83f4-12313b04a615'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <sql><![CDATA[
             insert into fhir_concept_source (name, concept_source_id, url, creator, date_created, uuid)
             select name, concept_source_id, 'urn:oid:2.16.840.1.113883.3.7201', 1, now(), '2b3c1ff8-768a-102f-83f4-12313b04a615'
             from concept_reference_source
             where name = 'CIEL' and retired = 0
         ]]></sql>
-	</changeSet>
+    </changeSet>
 
-	<changeSet id="change_ciel_url_fhir_concept_source_20200820" author="ibacher" dbms="mysql,mariadb,postgresql">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<sqlCheck expectedResult="1">select 1 from fhir_concept_source where url = 'urn:oid:2.16.840.1.113883.3.7201'
-			</sqlCheck>
-		</preConditions>
-		<sql><![CDATA[
+    <changeSet id="change_ciel_url_fhir_concept_source_20200820" author="ibacher" dbms="mysql,mariadb,postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <sqlCheck expectedResult="1">select 1 from fhir_concept_source where url = 'urn:oid:2.16.840.1.113883.3.7201'
+            </sqlCheck>
+        </preConditions>
+        <sql><![CDATA[
             update fhir_concept_source set url = 'https://openconceptlab.org/orgs/CIEL/sources/CIEL'
             where url = 'urn:oid:2.16.840.1.113883.3.7201'
         ]]></sql>
-	</changeSet>
+    </changeSet>
 
-	<changeSet id="add_fhir_task_20200311" author="pmanko">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_task"/>
-			</not>
-		</preConditions>
-		<comment>
-			Create Task table for the Task FHIR resource
-		</comment>
-		<createTable tableName="fhir_task">
-			<column name="task_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="status" type="varchar(255)" defaultValue="UNKNOWN">
-				<constraints nullable="false"/>
-			</column>
-			<column name="status_reason" type="varchar(255)"/>
-			<column name="description" type="varchar(255)"/>
-			<column name="uuid" type="char(38)">
-				<constraints nullable="false" unique="true"/>
-			</column>
-			<column name="intent" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="owner_reference_id" type="int"/>
-			<column name="encounter_reference_id" type="int"/>
-			<column name="for_reference_id" type="int"/>
-			<column name="based_on" type="varchar(255)"/>
-			<column name="creator" type="int">
-				<constraints nullable="false"/>
-			</column>
-			<column name="date_created" type="datetime">
-				<constraints nullable="false"/>
-			</column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime"/>
-			<column name="name" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired" type="boolean" defaultValueBoolean="false">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="datetime"/>
-			<column name="retire_reason" type="varchar(255)" defaultValue="null"/>
-		</createTable>
+    <changeSet id="add_fhir_task_20200311" author="pmanko">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_task"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create Task table for the Task FHIR resource
+        </comment>
+        <createTable tableName="fhir_task">
+            <column name="task_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="status" type="varchar(255)" defaultValue="UNKNOWN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status_reason" type="varchar(255)"/>
+            <column name="description" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="intent" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner_reference_id" type="int"/>
+            <column name="encounter_reference_id" type="int"/>
+            <column name="for_reference_id" type="int"/>
+            <column name="based_on" type="varchar(255)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+        </createTable>
 
-		<addForeignKeyConstraint constraintName="task_creator"
-		                         baseTableName="fhir_task" baseColumnNames="creator"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="task_changed_by"
-		                         baseTableName="fhir_task" baseColumnNames="changed_by"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="fhir_task_retired_by_fk"
-		                         baseTableName="fhir_task" baseColumnNames="retired_by"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-	</changeSet>
+        <addForeignKeyConstraint constraintName="task_creator"
+                                 baseTableName="fhir_task" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="task_changed_by"
+                                 baseTableName="fhir_task" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_task_retired_by_fk"
+                                 baseTableName="fhir_task" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
 
-	<changeSet id="add_fhir_reference_20200311" author="pmanko">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_reference"/>
-			</not>
-			<tableExists tableName="fhir_task"/>
-		</preConditions>
-		<createTable tableName="fhir_reference">
-			<column name="reference_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="target_type" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="reference" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="description" type="varchar(255)"/>
-			<column name="creator" type="int">
-				<constraints nullable="false"/>
-			</column>
-			<column name="date_created" type="datetime">
-				<constraints nullable="false"/>
-			</column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime"/>
-			<column name="name" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired" type="boolean" defaultValueBoolean="false">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="datetime"/>
-			<column name="retire_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="varchar(38)">
-				<constraints nullable="false" unique="true"/>
-			</column>
-		</createTable>
-		<addForeignKeyConstraint baseTableName="fhir_reference" baseColumnNames="creator"
-		                         constraintName="fhir_reference_creator_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_reference" baseColumnNames="changed_by"
-		                         constraintName="fhir_reference_changed_by_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_reference" baseColumnNames="retired_by"
-		                         constraintName="fhir_reference_retired_by_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="owner_reference_id"
-		                         constraintName="task_owner_reference_fk"
-		                         referencedTableName="fhir_reference"
-		                         referencedColumnNames="reference_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="for_reference_id"
-		                         constraintName="task_for_reference_fk"
-		                         referencedTableName="fhir_reference"
-		                         referencedColumnNames="reference_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="encounter_reference_id"
-		                         constraintName="task_encounter_reference_fk"
-		                         referencedTableName="fhir_reference"
-		                         referencedColumnNames="reference_id"/>
-	</changeSet>
+    <changeSet id="add_fhir_reference_20200311" author="pmanko">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_reference"/>
+            </not>
+            <tableExists tableName="fhir_task"/>
+        </preConditions>
+        <createTable tableName="fhir_reference">
+            <column name="reference_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="target_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reference" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="fhir_reference" baseColumnNames="creator"
+                                 constraintName="fhir_reference_creator_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_reference" baseColumnNames="changed_by"
+                                 constraintName="fhir_reference_changed_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_reference" baseColumnNames="retired_by"
+                                 constraintName="fhir_reference_retired_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="owner_reference_id"
+                                 constraintName="task_owner_reference_fk"
+                                 referencedTableName="fhir_reference"
+                                 referencedColumnNames="reference_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="for_reference_id"
+                                 constraintName="task_for_reference_fk"
+                                 referencedTableName="fhir_reference"
+                                 referencedColumnNames="reference_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="encounter_reference_id"
+                                 constraintName="task_encounter_reference_fk"
+                                 referencedTableName="fhir_reference"
+                                 referencedColumnNames="reference_id"/>
+    </changeSet>
 
-	<changeSet id="add_based_on_reference_join_table_20200311" author="pmanko">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_task_based_on_reference"/>
-			</not>
-			<tableExists tableName="fhir_task"/>
-			<tableExists tableName="fhir_reference"/>
-		</preConditions>
-		<createTable tableName="fhir_task_based_on_reference">
-			<column name="task_id" type="int">
-				<constraints nullable="false"/>
-			</column>
-			<column name="reference_id" type="int">
-				<constraints nullable="false" unique="true"/>
-			</column>
-		</createTable>
-		<addForeignKeyConstraint baseTableName="fhir_task_based_on_reference" baseColumnNames="task_id"
-		                         constraintName="task_based_on_fk"
-		                         referencedTableName="fhir_task"
-		                         referencedColumnNames="task_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_based_on_reference" baseColumnNames="reference_id"
-		                         constraintName="reference_based_on_fk"
-		                         referencedTableName="fhir_reference"
-		                         referencedColumnNames="reference_id"/>
-	</changeSet>
+    <changeSet id="add_based_on_reference_join_table_20200311" author="pmanko">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_task_based_on_reference"/>
+            </not>
+            <tableExists tableName="fhir_task"/>
+            <tableExists tableName="fhir_reference"/>
+        </preConditions>
+        <createTable tableName="fhir_task_based_on_reference">
+            <column name="task_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reference_id" type="int">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="fhir_task_based_on_reference" baseColumnNames="task_id"
+                                 constraintName="task_based_on_fk"
+                                 referencedTableName="fhir_task"
+                                 referencedColumnNames="task_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_based_on_reference" baseColumnNames="reference_id"
+                                 constraintName="reference_based_on_fk"
+                                 referencedTableName="fhir_reference"
+                                 referencedColumnNames="reference_id"/>
+    </changeSet>
 
 
-	<changeSet id="add_fhir_task_output_20200311" author="pmanko">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_task_output"/>
-			</not>
-			<tableExists tableName="fhir_task"/>
-			<tableExists tableName="fhir_reference"/>
-		</preConditions>
-		<createTable tableName="fhir_task_output">
-			<column name="task_output_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="task_id" type="int"/>
-			<column name="type_id" type="int">
-				<constraints nullable="false"/>
-			</column>
-			<column name="value_datetime" type="datetime"/>
-			<column name="value_numeric" type="double"/>
-			<column name="value_text" type="varchar(255)"/>
-			<column name="value_reference_id" type="int"/>
-			<column name="description" type="varchar(255)"/>
-			<column name="creator" type="int">
-				<constraints nullable="false"/>
-			</column>
-			<column name="date_created" type="datetime">
-				<constraints nullable="false"/>
-			</column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime"/>
-			<column name="name" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired" type="boolean" defaultValueBoolean="false">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="datetime"/>
-			<column name="retire_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="varchar(38)">
-				<constraints nullable="false" unique="true"/>
-			</column>
-		</createTable>
-		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="creator"
-		                         constraintName="fhir_task_output_creator_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="changed_by"
-		                         constraintName="fhir_task_output_changed_by_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="retired_by"
-		                         constraintName="fhir_task_output_retired_by_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="type_id"
-		                         constraintName="output_type_fk"
-		                         referencedTableName="concept"
-		                         referencedColumnNames="concept_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="value_reference_id"
-		                         constraintName="output_reference_fk"
-		                         referencedTableName="fhir_reference"
-		                         referencedColumnNames="reference_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="task_id"
-		                         constraintName="output_task_fk"
-		                         referencedTableName="fhir_task"
-		                         referencedColumnNames="task_id"/>
-	</changeSet>
+    <changeSet id="add_fhir_task_output_20200311" author="pmanko">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_task_output"/>
+            </not>
+            <tableExists tableName="fhir_task"/>
+            <tableExists tableName="fhir_reference"/>
+        </preConditions>
+        <createTable tableName="fhir_task_output">
+            <column name="task_output_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="task_id" type="int"/>
+            <column name="type_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value_datetime" type="datetime"/>
+            <column name="value_numeric" type="double"/>
+            <column name="value_text" type="varchar(255)"/>
+            <column name="value_reference_id" type="int"/>
+            <column name="description" type="varchar(255)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="creator"
+                                 constraintName="fhir_task_output_creator_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="changed_by"
+                                 constraintName="fhir_task_output_changed_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="retired_by"
+                                 constraintName="fhir_task_output_retired_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="type_id"
+                                 constraintName="output_type_fk"
+                                 referencedTableName="concept"
+                                 referencedColumnNames="concept_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="value_reference_id"
+                                 constraintName="output_reference_fk"
+                                 referencedTableName="fhir_reference"
+                                 referencedColumnNames="reference_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_output" baseColumnNames="task_id"
+                                 constraintName="output_task_fk"
+                                 referencedTableName="fhir_task"
+                                 referencedColumnNames="task_id"/>
+    </changeSet>
 
-	<changeSet id="add_fhir_task_input_20200308" author="pmanko">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_task_input"/>
-			</not>
-		</preConditions>
-		<createTable tableName="fhir_task_input">
-			<column name="task_input_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="task_id" type="int"/>
-			<column name="type_id" type="int"/>
-			<column name="value_datetime" type="datetime"/>
-			<column name="value_numeric" type="double"/>
-			<column name="value_text" type="varchar(255)"/>
-			<column name="value_reference_id" type="int"/>
-			<column name="description" type="varchar(255)"/>
-			<column name="creator" type="int">
-				<constraints nullable="false"/>
-			</column>
-			<column name="date_created" type="datetime">
-				<constraints nullable="false"/>
-			</column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime"/>
-			<column name="name" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired" type="boolean" defaultValueBoolean="false">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="datetime"/>
-			<column name="retire_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="varchar(38)">
-				<constraints nullable="false" unique="true"/>
-			</column>
-		</createTable>
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="creator"
-		                         constraintName="fhir_task_input_creator_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="changed_by"
-		                         constraintName="fhir_task_input_changed_by_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="retired_by"
-		                         constraintName="fhir_task_input_retired_by_fk"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="type_id"
-		                         constraintName="input_type_fk"
-		                         referencedTableName="concept"
-		                         referencedColumnNames="concept_id"/>
+    <changeSet id="add_fhir_task_input_20200308" author="pmanko">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_task_input"/>
+            </not>
+        </preConditions>
+        <createTable tableName="fhir_task_input">
+            <column name="task_input_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="task_id" type="int"/>
+            <column name="type_id" type="int"/>
+            <column name="value_datetime" type="datetime"/>
+            <column name="value_numeric" type="double"/>
+            <column name="value_text" type="varchar(255)"/>
+            <column name="value_reference_id" type="int"/>
+            <column name="description" type="varchar(255)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="creator"
+                                 constraintName="fhir_task_input_creator_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="changed_by"
+                                 constraintName="fhir_task_input_changed_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="retired_by"
+                                 constraintName="fhir_task_input_retired_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="type_id"
+                                 constraintName="input_type_fk"
+                                 referencedTableName="concept"
+                                 referencedColumnNames="concept_id"/>
 
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="value_reference_id"
-		                         constraintName="input_reference_fk"
-		                         referencedTableName="fhir_reference"
-		                         referencedColumnNames="reference_id"/>
-		<addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="task_id"
-		                         constraintName="input_task_fk"
-		                         referencedTableName="fhir_task"
-		                         referencedColumnNames="task_id"/>
-	</changeSet>
+        <addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="value_reference_id"
+                                 constraintName="input_reference_fk"
+                                 referencedTableName="fhir_reference"
+                                 referencedColumnNames="reference_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_task_input" baseColumnNames="task_id"
+                                 constraintName="input_task_fk"
+                                 referencedTableName="fhir_task"
+                                 referencedColumnNames="task_id"/>
+    </changeSet>
 
-	<changeSet id="add_target_uuid_to_fhir_reference_202020917" author="ibacher" dbms="mysql,mariadb,postgresql">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<tableExists tableName="fhir_reference"/>
-			<not>
-				<columnExists tableName="fhir_reference" columnName="target_uuid"/>
-			</not>
-		</preConditions>
-		<addColumn tableName="fhir_reference">
-			<column name="target_uuid" type="char(32)">
-				<constraints unique="true"/>
-			</column>
-		</addColumn>
-		<sql>
-			update fhir_reference
-			set target_uuid = substring(reference from position('/' in reference) + 1)
-		</sql>
-	</changeSet>
+    <changeSet id="add_target_uuid_to_fhir_reference_202020917" author="ibacher" dbms="mysql,mariadb,postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_reference"/>
+            <not>
+                <columnExists tableName="fhir_reference" columnName="target_uuid"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="fhir_reference">
+            <column name="target_uuid" type="char(32)">
+                <constraints unique="true"/>
+            </column>
+        </addColumn>
+        <sql>
+            update fhir_reference
+            set target_uuid = substring(reference from position('/' in reference) + 1)
+        </sql>
+    </changeSet>
 
-	<changeSet id="add_fhir_diagnostic_report_20200917" author="ibacher">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_diagnostic_report"/>
-			</not>
-		</preConditions>
-		<comment>Create the table for storing Diagnostic Reports</comment>
-		<createTable tableName="fhir_diagnostic_report">
-			<column name="diagnostic_report_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="status" type="varchar(50)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="concept_id" type="int"/>
-			<column name="subject_id" type="int"/>
-			<column name="encounter_id" type="int"/>
-			<column name="creator" type="int">
-				<constraints nullable="false"/>
-			</column>
-			<column name="date_created" type="datetime">
-				<constraints nullable="false"/>
-			</column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime"/>
-			<column name="name" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="voided" type="boolean" defaultValueBoolean="false">
-				<constraints nullable="false"/>
-			</column>
-			<column name="voided_by" type="int"/>
-			<column name="date_voided" type="datetime"/>
-			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="char(38)">
-				<constraints nullable="false" unique="true"/>
-			</column>
-		</createTable>
-		<addForeignKeyConstraint constraintName="fhir_diagnostic_report_creator"
-		                         baseTableName="fhir_diagnostic_report" baseColumnNames="creator"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="fhir_diagnostic_report_changed_by"
-		                         baseTableName="fhir_diagnostic_report" baseColumnNames="changed_by"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="fhir_diagnostic_report_voided_by"
-		                         baseTableName="fhir_diagnostic_report" baseColumnNames="voided_by"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="fhir_diagnostic_report_code"
-		                         baseTableName="fhir_diagnostic_report" baseColumnNames="concept_id"
-		                         referencedTableName="concept" referencedColumnNames="concept_id"/>
-		<addForeignKeyConstraint constraintName="fhir_diagnostic_report_subject"
-		                         baseTableName="fhir_diagnostic_report" baseColumnNames="subject_id"
-		                         referencedTableName="patient" referencedColumnNames="patient_id"/>
-		<addForeignKeyConstraint constraintName="fhir_diagnostic_report_encounter"
-		                         baseTableName="fhir_diagnostic_report" baseColumnNames="encounter_id"
-		                         referencedTableName="encounter" referencedColumnNames="encounter_id"/>
-	</changeSet>
+    <changeSet id="add_fhir_diagnostic_report_20200917" author="ibacher">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_diagnostic_report"/>
+            </not>
+        </preConditions>
+        <comment>Create the table for storing Diagnostic Reports</comment>
+        <createTable tableName="fhir_diagnostic_report">
+            <column name="diagnostic_report_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="concept_id" type="int"/>
+            <column name="subject_id" type="int"/>
+            <column name="encounter_id" type="int"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_creator"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_changed_by"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_voided_by"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="voided_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_code"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="concept_id"
+                                 referencedTableName="concept" referencedColumnNames="concept_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_subject"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="subject_id"
+                                 referencedTableName="patient" referencedColumnNames="patient_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_encounter"
+                                 baseTableName="fhir_diagnostic_report" baseColumnNames="encounter_id"
+                                 referencedTableName="encounter" referencedColumnNames="encounter_id"/>
+    </changeSet>
 
-	<changeSet id="add_fhir_diagnostic_report_performers_20200917" author="ibacher">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_diagnostic_report_performers"/>
-			</not>
-			<tableExists tableName="fhir_diagnostic_report"/>
-			<tableExists tableName="fhir_reference"/>
-		</preConditions>
-		<createTable tableName="fhir_diagnostic_report_performers">
-			<column name="diagnostic_report_id" type="int">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="provider_id" type="int">
-				<constraints primaryKey="true"/>
-			</column>
-		</createTable>
-		<addForeignKeyConstraint constraintName="fhir_diagnostic_report_performers_diagnostic_report"
-		                         baseTableName="fhir_diagnostic_report_performers" baseColumnNames="diagnostic_report_id"
-		                         referencedTableName="fhir_diagnostic_report"
-		                         referencedColumnNames="diagnostic_report_id"/>
-		<addForeignKeyConstraint constraintName="fhir_diagnostic_report_performers_reference"
-		                         baseTableName="fhir_diagnostic_report_performers" baseColumnNames="provider_id"
-		                         referencedTableName="provider"
-		                         referencedColumnNames="provider_id"/>
-	</changeSet>
+    <changeSet id="add_fhir_diagnostic_report_performers_20200917" author="ibacher">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_diagnostic_report_performers"/>
+            </not>
+            <tableExists tableName="fhir_diagnostic_report"/>
+            <tableExists tableName="fhir_reference"/>
+        </preConditions>
+        <createTable tableName="fhir_diagnostic_report_performers">
+            <column name="diagnostic_report_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="provider_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_performers_diagnostic_report"
+                                 baseTableName="fhir_diagnostic_report_performers" baseColumnNames="diagnostic_report_id"
+                                 referencedTableName="fhir_diagnostic_report"
+                                 referencedColumnNames="diagnostic_report_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_performers_reference"
+                                 baseTableName="fhir_diagnostic_report_performers" baseColumnNames="provider_id"
+                                 referencedTableName="provider"
+                                 referencedColumnNames="provider_id"/>
+    </changeSet>
 
-	<changeSet id="add_fhir_diagnostic_report_results_20201020" author="ibacher">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_diagnostic_report_results"/>
-			</not>
-			<tableExists tableName="fhir_diagnostic_report"/>
-			<tableExists tableName="fhir_reference"/>
-		</preConditions>
-		<createTable tableName="fhir_diagnostic_report_results">
-			<column name="diagnostic_report_id" type="int">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="obs_id" type="int">
-				<constraints primaryKey="true"/>
-			</column>
-		</createTable>
-		<addForeignKeyConstraint constraintName="fhir_diagnostic_report_results_diagnostic_report"
-		                         baseTableName="fhir_diagnostic_report_results" baseColumnNames="diagnostic_report_id"
-		                         referencedTableName="fhir_diagnostic_report"
-		                         referencedColumnNames="diagnostic_report_id"/>
-		<addForeignKeyConstraint constraintName="fhir_diagnostic_report_results_reference"
-		                         baseTableName="fhir_diagnostic_report_results" baseColumnNames="obs_id"
-		                         referencedTableName="obs"
-		                         referencedColumnNames="obs_id"/>
-	</changeSet>
+    <changeSet id="add_fhir_diagnostic_report_results_20201020" author="ibacher">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_diagnostic_report_results"/>
+            </not>
+            <tableExists tableName="fhir_diagnostic_report"/>
+            <tableExists tableName="fhir_reference"/>
+        </preConditions>
+        <createTable tableName="fhir_diagnostic_report_results">
+            <column name="diagnostic_report_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="obs_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_results_diagnostic_report"
+                                 baseTableName="fhir_diagnostic_report_results" baseColumnNames="diagnostic_report_id"
+                                 referencedTableName="fhir_diagnostic_report"
+                                 referencedColumnNames="diagnostic_report_id"/>
+        <addForeignKeyConstraint constraintName="fhir_diagnostic_report_results_reference"
+                                 baseTableName="fhir_diagnostic_report_results" baseColumnNames="obs_id"
+                                 referencedTableName="obs"
+                                 referencedColumnNames="obs_id"/>
+    </changeSet>
 
-	<changeSet id="add_fhir_encounter_class_map_20200930" author="ibacher">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_encounter_class_map"/>
-			</not>
-		</preConditions>
-		<createTable tableName="fhir_encounter_class_map">
-			<column name="encounter_class_map_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="location_id" type="int"/>
-			<column name="encounter_class" type="varchar(255)"/>
-			<column name="creator" type="int">
-				<constraints nullable="false"/>
-			</column>
-			<column name="date_created" type="datetime">
-				<constraints nullable="false"/>
-			</column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime"/>
-			<column name="retired" type="boolean" defaultValueBoolean="false">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="datetime"/>
-			<column name="retired_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="char(36)">
-				<constraints nullable="false" unique="true"/>
-			</column>
-		</createTable>
-		<addForeignKeyConstraint constraintName="fhir_encounter_class_map_creator"
-		                         baseTableName="fhir_encounter_class_map" baseColumnNames="creator"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="fhir_encounter_class_map_changed_by"
-		                         baseTableName="fhir_encounter_class_map" baseColumnNames="changed_by"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="fhir_encounter_class_map_retired_by"
-		                         baseTableName="fhir_encounter_class_map" baseColumnNames="retired_by"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="fhir_encounter_class_map_location"
-		                         baseTableName="fhir_encounter_class_map" baseColumnNames="location_id"
-		                         referencedTableName="location" referencedColumnNames="location_id"/>
-	</changeSet>
+    <changeSet id="add_fhir_encounter_class_map_20200930" author="ibacher">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_encounter_class_map"/>
+            </not>
+        </preConditions>
+        <createTable tableName="fhir_encounter_class_map">
+            <column name="encounter_class_map_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="location_id" type="int"/>
+            <column name="encounter_class" type="varchar(255)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retired_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="char(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fhir_encounter_class_map_creator"
+                                 baseTableName="fhir_encounter_class_map" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_encounter_class_map_changed_by"
+                                 baseTableName="fhir_encounter_class_map" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_encounter_class_map_retired_by"
+                                 baseTableName="fhir_encounter_class_map" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_encounter_class_map_location"
+                                 baseTableName="fhir_encounter_class_map" baseColumnNames="location_id"
+                                 referencedTableName="location" referencedColumnNames="location_id"/>
+    </changeSet>
 
-	<changeSet id="add_fhir_observation_category_map_20200930" author="ibacher">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<not>
-				<tableExists tableName="fhir_observation_category_map"/>
-			</not>
-		</preConditions>
-		<createTable tableName="fhir_observation_category_map">
-			<column name="observation_category_map_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true"/>
-			</column>
-			<column name="concept_class_id" type="int"/>
-			<column name="observation_category" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
-			<column name="creator" type="int">
-				<constraints nullable="false"/>
-			</column>
-			<column name="date_created" type="datetime">
-				<constraints nullable="false"/>
-			</column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime"/>
-			<column name="retired" type="boolean" defaultValueBoolean="false">
-				<constraints nullable="false"/>
-			</column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="datetime"/>
-			<column name="retired_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="char(36)">
-				<constraints nullable="false" unique="true"/>
-			</column>
-		</createTable>
-		<addForeignKeyConstraint constraintName="fhir_observation_category_map_creator"
-		                         baseTableName="fhir_observation_category_map" baseColumnNames="creator"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="fhir_observation_category_map_changed_by"
-		                         baseTableName="fhir_observation_category_map" baseColumnNames="changed_by"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="fhir_observation_category_map_retired_by"
-		                         baseTableName="fhir_observation_category_map" baseColumnNames="retired_by"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="fhir_observation_category_map_concept_class"
-		                         baseTableName="fhir_observation_category_map" baseColumnNames="concept_class_id"
-		                         referencedTableName="concept_class" referencedColumnNames="concept_class_id"/>
-		<createIndex tableName="fhir_observation_category_map" indexName="fhir_observation_category_map_observation_category">
-			<column name="observation_category"/>
-		</createIndex>
-	</changeSet>
+    <changeSet id="add_fhir_observation_category_map_20200930" author="ibacher">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_observation_category_map"/>
+            </not>
+        </preConditions>
+        <createTable tableName="fhir_observation_category_map">
+            <column name="observation_category_map_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="concept_class_id" type="int"/>
+            <column name="observation_category" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retired_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="char(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fhir_observation_category_map_creator"
+                                 baseTableName="fhir_observation_category_map" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_observation_category_map_changed_by"
+                                 baseTableName="fhir_observation_category_map" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_observation_category_map_retired_by"
+                                 baseTableName="fhir_observation_category_map" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_observation_category_map_concept_class"
+                                 baseTableName="fhir_observation_category_map" baseColumnNames="concept_class_id"
+                                 referencedTableName="concept_class" referencedColumnNames="concept_class_id"/>
+        <createIndex tableName="fhir_observation_category_map" indexName="fhir_observation_category_map_observation_category">
+            <column name="observation_category"/>
+        </createIndex>
+    </changeSet>
 
-	<changeSet id="add_default_observation_categories_20200930" author="ibacher" dbms="mysql,mariadb">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<and>
-				<tableExists tableName="fhir_observation_category_map"/>
-				<sqlCheck expectedResult="0">
-					select count(*) from fhir_observation_category_map
-				</sqlCheck>
-				<!-- default UUID for Test -->
-				<sqlCheck expectedResult="1">
-					select 1 from concept_class where uuid = '8d4907b2-c2cc-11de-8d13-0010c6dffd0f'
-				</sqlCheck>
-				<!-- default UUID for Procedure -->
-				<sqlCheck expectedResult="1">
-					select 1 from concept_class where uuid = '8d490bf4-c2cc-11de-8d13-0010c6dffd0f'
-				</sqlCheck>
-				<!-- default UUID for Finding -->
-				<sqlCheck expectedResult="1">
-					select 1 from concept_class where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
-				</sqlCheck>
-			</and>
-		</preConditions>
-		<sql><![CDATA[
+    <changeSet id="add_default_observation_categories_20200930" author="ibacher" dbms="mysql,mariadb">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <and>
+                <tableExists tableName="fhir_observation_category_map"/>
+                <sqlCheck expectedResult="0">
+                    select count(*) from fhir_observation_category_map
+                </sqlCheck>
+                <!-- default UUID for Test -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d4907b2-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+                <!-- default UUID for Procedure -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d490bf4-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+                <!-- default UUID for Finding -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <sql><![CDATA[
             insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
             select concept_class_id, 'laboratory', 1, now(), uuid()
             from concept_class
             where uuid = '8d4907b2-c2cc-11de-8d13-0010c6dffd0f'
         ]]>
-		</sql>
-		<sql><![CDATA[
+        </sql>
+        <sql><![CDATA[
             insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
             select concept_class_id, 'procedure', 1, now(), uuid()
             from concept_class
             where uuid = '8d490bf4-c2cc-11de-8d13-0010c6dffd0f'
         ]]>
-		</sql>
-		<sql><![CDATA[
+        </sql>
+        <sql><![CDATA[
             insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
             select concept_class_id, 'exam', 1, now(), uuid()
             from concept_class
             where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
         ]]>
-		</sql>
-	</changeSet>
+        </sql>
+    </changeSet>
 
-	<changeSet id="add_default_observation_categories_20200930" author="ibacher" dbms="postgresql">
-		<preConditions onFail="MARK_RAN" onError="WARN">
-			<and>
-				<tableExists tableName="fhir_observation_category_map"/>
-				<sqlCheck expectedResult="0">
-					select count(*) from fhir_observation_category_map
-				</sqlCheck>
-				<!-- default UUID for Test -->
-				<sqlCheck expectedResult="1">
-					select 1 from concept_class where uuid = '8d4907b2-c2cc-11de-8d13-0010c6dffd0f'
-				</sqlCheck>
-				<!-- default UUID for Procedure -->
-				<sqlCheck expectedResult="1">
-					select 1 from concept_class where uuid = '8d490bf4-c2cc-11de-8d13-0010c6dffd0f'
-				</sqlCheck>
-				<!-- default UUID for Finding -->
-				<sqlCheck expectedResult="1">
-					select 1 from concept_class where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
-				</sqlCheck>
-			</and>
-		</preConditions>
-		<!-- UUID function taken from here: https://stackoverflow.com/a/21327318 -->
-		<sql><![CDATA[
+    <changeSet id="add_default_observation_categories_20200930" author="ibacher" dbms="postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <and>
+                <tableExists tableName="fhir_observation_category_map"/>
+                <sqlCheck expectedResult="0">
+                    select count(*) from fhir_observation_category_map
+                </sqlCheck>
+                <!-- default UUID for Test -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d4907b2-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+                <!-- default UUID for Procedure -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d490bf4-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+                <!-- default UUID for Finding -->
+                <sqlCheck expectedResult="1">
+                    select 1 from concept_class where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <!-- UUID function taken from here: https://stackoverflow.com/a/21327318 -->
+        <sql><![CDATA[
             insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
             select concept_class_id, 'laboratory', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
             from concept_class
             where uuid = '8d4907b2-c2cc-11de-8d13-0010c6dffd0f'
         ]]>
-		</sql>
-		<sql><![CDATA[
+        </sql>
+        <sql><![CDATA[
             insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
             select concept_class_id, 'procedure', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
             from concept_class
             where uuid = '8d490bf4-c2cc-11de-8d13-0010c6dffd0f'
         ]]>
-		</sql>
-		<sql><![CDATA[
+        </sql>
+        <sql><![CDATA[
             insert into fhir_observation_category_map (concept_class_id, observation_category, creator, date_created, uuid)
             select concept_class_id, 'exam', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
             from concept_class
             where uuid = '8d491a9a-c2cc-11de-8d13-0010c6dffd0f'
         ]]>
-		</sql>
-	</changeSet>
+        </sql>
+    </changeSet>
 
 	<changeSet id="add_fhir_duration_unit_map_20200930" author="ankit">
 		<preConditions onFail="MARK_RAN" onError="WARN">
