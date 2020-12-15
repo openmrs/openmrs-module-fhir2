@@ -697,7 +697,7 @@
         </sql>
     </changeSet>
 
-	<changeSet id="add_fhir_duration_unit_map_20200930" author="ankit">
+	<changeSet id="add_fhir_duration_unit_map_20200930" author="ibacher">
 		<preConditions onFail="MARK_RAN" onError="WARN">
 			<not>
 				<tableExists tableName="fhir_duration_unit_map"/>
@@ -747,42 +747,35 @@
 		</createIndex>
 	</changeSet>
 
-	<changeSet id="add_default_duration_unit_20200930" author="ankit" dbms="mysql,mariadb">
+	<changeSet id="add_default_duration_unit_20200930" author="ibacher" dbms="mysql,mariadb">
 		<preConditions onFail="MARK_RAN" onError="WARN">
 			<and>
+                <tableExists tableName="concept"/>
 				<tableExists tableName="fhir_duration_unit_map"/>
 				<sqlCheck expectedResult="0">
 					select count(*) from fhir_duration_unit_map
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1822AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 			</and>
 		</preConditions>
 		<sql><![CDATA[
@@ -836,38 +829,31 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="add_default_duration_unit_20200930" author="ankit" dbms="postgresql">
+	<changeSet id="add_default_duration_unit_20200930" author="ibacher" dbms="postgresql">
 		<preConditions onFail="MARK_RAN" onError="WARN">
 			<and>
 				<tableExists tableName="fhir_duration_unit_map"/>
 				<sqlCheck expectedResult="0">
 					select count(*) from fhir_duration_unit_map
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>
-
 				<sqlCheck expectedResult="1">
 					select 1 from concept where uuid = '1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 				</sqlCheck>

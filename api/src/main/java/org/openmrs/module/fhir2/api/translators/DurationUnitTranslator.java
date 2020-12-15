@@ -12,10 +12,11 @@ package org.openmrs.module.fhir2.api.translators;
 import javax.annotation.Nonnull;
 
 import org.hl7.fhir.r4.model.Timing;
+import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
 
-public interface DurationUnitTranslator extends ToFhirTranslator<DrugOrder, Timing.UnitsOfTime> {
+public interface DurationUnitTranslator extends ToFhirTranslator<Concept, Timing.UnitsOfTime> {
 	
 	@Override
-	Timing.UnitsOfTime toFhirResource(@Nonnull DrugOrder drugOrder);
+	Timing.UnitsOfTime toFhirResource(@Nonnull Concept concept);
 }

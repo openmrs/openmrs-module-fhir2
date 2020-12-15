@@ -14,7 +14,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.annotation.Nonnull;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.HibernateException;
+import org.hibernate.NonUniqueResultException;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
 import org.hl7.fhir.r4.model.Timing;
@@ -38,10 +38,9 @@ public class DurationUnitMap {
 			        .createAlias("concept", "c").add(eq("c.uuid", conceptUuid))
 			        .setProjection(Projections.property("unit_of_time")).uniqueResult();
 		}
-		catch (HibernateException e) {
+		catch (NonUniqueResultException e) {
 			log.error("Exception caught while trying to load DurationUnit for concept '{}'", conceptUuid, e);
 		}
 		return null;
 	}
-	
 }

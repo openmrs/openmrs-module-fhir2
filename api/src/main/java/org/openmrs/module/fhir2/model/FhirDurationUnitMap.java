@@ -45,7 +45,7 @@ public class FhirDurationUnitMap implements Auditable, Retireable {
 	private Integer id;
 	
 	@ManyToOne(optional = false)
-	@JoinColumn(nullable = false, name = "concept_uuid")
+	@JoinColumn(nullable = false, name = "concept_id")
 	private Concept concept;
 	
 	@Column(nullable = false, name = "unit_of_time")
