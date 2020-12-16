@@ -154,4 +154,13 @@ public class PatientIdentifierTranslatorImplTest {
 		assertThat(identifierTranslator.toOpenmrsType(null), nullValue());
 	}
 	
+	@Test
+	public void shouldConvertIdentifierWithNullTypeToNull() {
+		Identifier identifier = new Identifier();
+		identifier.setType(null);
+		
+		when(patientService.getPatientIdentifierTypeByIdentifier(argThat(equalTo(identifier)))).thenReturn(null);
+		
+		assertThat(identifierTranslator.toOpenmrsType(identifier), nullValue());
+	}
 }

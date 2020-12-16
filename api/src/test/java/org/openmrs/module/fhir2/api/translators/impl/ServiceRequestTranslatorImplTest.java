@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +41,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
+import org.openmrs.Order;
+import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
@@ -56,6 +59,14 @@ import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 public class ServiceRequestTranslatorImplTest {
 	
 	private static final String SERVICE_REQUEST_UUID = "4e4851c3-c265-400e-acc9-1f1b0ac7f9c4";
+	
+	private static final String DISCONTINUED_TEST_ORDER_UUID = "efca4077-493c-496b-8312-856ee5d1cc27";
+	
+	private static final String TEST_ORDER_NUMBER = "ORD-1";
+	
+	private static final String DISCONTINUED_TEST_ORDER_NUMBER = "ORD-2";
+	
+	private static final String PRIOR_SERVICE_REQUEST_REFERENCE = FhirConstants.SERVICE_REQUEST + "/" + SERVICE_REQUEST_UUID;
 	
 	private static final String LOINC_CODE = "1000-1";
 	
@@ -88,6 +99,10 @@ public class ServiceRequestTranslatorImplTest {
 	@Mock
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
 	
+	private TestOrder order;
+	
+	private TestOrder discontinuedTestOrder;
+	
 	@Before
 	public void setup() {
 		translator = new ServiceRequestTranslatorImpl();
@@ -96,6 +111,72 @@ public class ServiceRequestTranslatorImplTest {
 		translator.setPatientReferenceTranslator(patientReferenceTranslator);
 		translator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		translator.setProviderReferenceTranslator(practitionerReferenceTranslator);
+		translator.setOrderIdentifierTranslator(new OrderIdentifierTranslatorImpl());
+		
+		order = new TestOrder();
+		order.setUuid(SERVICE_REQUEST_UUID);
+		setOrderNumberByReflection(order, TEST_ORDER_NUMBER);
+		OrderType ordertype = new OrderType();
+		ordertype.setUuid(BaseReferenceHandlingTranslator.TEST_ORDER_TYPE_UUID);
+		order.setOrderType(ordertype);
+		
+		discontinuedTestOrder = new TestOrder();
+		discontinuedTestOrder.setUuid(DISCONTINUED_TEST_ORDER_UUID);
+		setOrderNumberByReflection(discontinuedTestOrder, DISCONTINUED_TEST_ORDER_NUMBER);
+		discontinuedTestOrder.setPreviousOrder(order);
+	}
+	
+	public void toFhirResource_shouldTranslateToFhirResourceWithReplacesFieldGivenDiscontinuedOrder() {
+		discontinuedTestOrder.setAction(Order.Action.DISCONTINUE);
+		
+		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REJECTED);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
+		
+		ServiceRequest result = translator.toFhirResource(discontinuedTestOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(DISCONTINUED_TEST_ORDER_UUID));
+		assertThat(result.getReplaces().get(0).getReference(), equalTo(PRIOR_SERVICE_REQUEST_REFERENCE));
+		assertThat(result.getReplaces().get(0).getIdentifier().getValue(), equalTo(TEST_ORDER_NUMBER));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateToFhirResourceWithReplacesFieldGivenRevisedOrder() {
+		discontinuedTestOrder.setAction(Order.Action.REVISE);
+		
+		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.ACCEPTED);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
+		
+		ServiceRequest result = translator.toFhirResource(discontinuedTestOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(DISCONTINUED_TEST_ORDER_UUID));
+		assertThat(result.getReplaces().get(0).getReference(), equalTo(PRIOR_SERVICE_REQUEST_REFERENCE));
+		assertThat(result.getReplaces().get(0).getIdentifier().getValue(), equalTo(TEST_ORDER_NUMBER));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateToFhirResourceWithBasedOnFieldGivenRenewedOrder() {
+		discontinuedTestOrder.setAction(Order.Action.RENEW);
+		
+		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.ACCEPTED);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
+		
+		ServiceRequest result = translator.toFhirResource(discontinuedTestOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(DISCONTINUED_TEST_ORDER_UUID));
+		assertThat(result.getBasedOn().get(0).getReference(), equalTo(PRIOR_SERVICE_REQUEST_REFERENCE));
+		assertThat(result.getBasedOn().get(0).getIdentifier().getValue(), equalTo(TEST_ORDER_NUMBER));
 	}
 	
 	@Test
@@ -443,5 +524,21 @@ public class ServiceRequestTranslatorImplTest {
 		ServiceRequest result = translator.toFhirResource(order);
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	private TestOrder setOrderNumberByReflection(TestOrder order, String orderNumber) {
+		try {
+			Class clazz = order.getClass();
+			Field orderNumberField = clazz.getSuperclass().getDeclaredField("orderNumber");
+			Boolean isAccessible = orderNumberField.isAccessible();
+			if (!isAccessible) {
+				orderNumberField.setAccessible(true);
+			}
+			orderNumberField.set(((Order) order), orderNumber);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return order;
 	}
 }
