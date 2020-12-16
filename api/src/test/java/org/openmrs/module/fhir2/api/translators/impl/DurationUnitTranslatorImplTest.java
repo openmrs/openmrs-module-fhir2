@@ -16,125 +16,128 @@ import static org.hamcrest.Matchers.notNullValue;
 import org.hl7.fhir.r4.model.Timing;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 
+@RunWith(MockitoJUnitRunner.class)
 public class DurationUnitTranslatorImplTest {
 	
 	private static final String SECONDS_UUID = "162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String MINUTES_UUID = "1733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String HOUR_UUID = "1822AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String DAYS_UUID = "1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String WEEKS_UUID = "1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String MONTHS_UUID = "1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String YEARS_UUID = "1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private static final String WRONG_UUID = "2909AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
+
 	private Concept concept;
-	
+
 	private Timing.UnitsOfTime result;
-	
+
 	private DurationUnitTranslatorImpl durationUnitTranslator;
-	
+
 	@Before
 	public void setup() {
-		
+
 		durationUnitTranslator = new DurationUnitTranslatorImpl();
 		concept = new Concept();
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitTimeIsNull() {
-		
+
 		concept.setUuid(WRONG_UUID);
-		
+
 		result = durationUnitTranslator.toFhirResource(concept);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(Timing.UnitsOfTime.NULL));
-		
+
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsSeconds() {
-		
+
 		concept.setUuid(SECONDS_UUID);
-		
+
 		result = durationUnitTranslator.toFhirResource(concept);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(Timing.UnitsOfTime.S));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsMinutes() {
-		
+
 		concept.setUuid(MINUTES_UUID);
-		
+
 		result = durationUnitTranslator.toFhirResource(concept);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(Timing.UnitsOfTime.MIN));
-		
+
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsHours() {
-		
+
 		concept.setUuid(HOUR_UUID);
-		
+
 		result = durationUnitTranslator.toFhirResource(concept);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(Timing.UnitsOfTime.H));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsDays() {
-		
+
 		concept.setUuid(DAYS_UUID);
-		
+
 		result = durationUnitTranslator.toFhirResource(concept);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(Timing.UnitsOfTime.D));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsWeeks() {
-		
+
 		concept.setUuid(WEEKS_UUID);
-		
+
 		result = durationUnitTranslator.toFhirResource(concept);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(Timing.UnitsOfTime.WK));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsMonths() {
-		
+
 		concept.setUuid(MONTHS_UUID);
-		
+
 		result = durationUnitTranslator.toFhirResource(concept);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(Timing.UnitsOfTime.MO));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsYears() {
-		
+
 		concept.setUuid(YEARS_UUID);
-		
+
 		result = durationUnitTranslator.toFhirResource(concept);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(Timing.UnitsOfTime.A));
 	}
