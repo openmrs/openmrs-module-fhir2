@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<dataset>
+	<fhir_observation_category_map observation_category_map_id="1" concept_class_id="1" observation_category="laboratory" creator="1" date_created="2020-12-16 19:20:53" retired="0" uuid="b6b107d8-3fa5-11eb-81d3-84fdd1f54722"/>
+	<fhir_observation_category_map observation_category_map_id="2" concept_class_id="2" observation_category="procedure" creator="1" date_created="2020-12-16 19:20:53" retired="0" uuid="b6b13299-3fa5-11eb-81d3-84fdd1f54722"/>
+	<fhir_observation_category_map observation_category_map_id="3" concept_class_id="5" observation_category="exam" creator="1" date_created="2020-12-16 19:20:53" retired="0" uuid="b6b16756-3fa5-11eb-81d3-84fdd1f54722"/>
+	<concept_class concept_class_id="1" name="Test" description="Acq. during patient encounter (vitals, labs, etc.)" creator="1" date_created="2004-02-02 00:00:00" retired="0" uuid="8d4907b2-c2cc-11de-8d13-0010c6dffd0f"/>
+	<concept_class concept_class_id="2" name="Procedure" description="Describes a clinical procedure" creator="1" date_created="2004-02-02 00:00:00" retired="0" uuid="8d490bf4-c2cc-11de-8d13-0010c6dffd0f"/>
+	<concept_class concept_class_id="5" name="Finding" description="Practitioner observation/finding" creator="1" date_created="2004-02-02 00:00:00" retired="0" uuid="8d491a9a-c2cc-11de-8d13-0010c6dffd0f"/>
+</dataset>
