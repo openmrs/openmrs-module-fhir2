@@ -12,12 +12,15 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.api.mappings.DurationUnitMap;
 import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Setter(AccessLevel.PACKAGE)
 public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 	
 	Timing.UnitsOfTime unitsOfTime;

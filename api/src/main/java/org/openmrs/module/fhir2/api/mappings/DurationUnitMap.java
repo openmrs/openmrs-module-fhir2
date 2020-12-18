@@ -13,6 +13,8 @@ import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.SessionFactory;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
+@Setter(AccessLevel.PUBLIC)
 public class DurationUnitMap {
 	
 	@Autowired
