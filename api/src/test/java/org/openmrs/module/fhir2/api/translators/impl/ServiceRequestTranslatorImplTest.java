@@ -21,7 +21,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,7 +54,6 @@ import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
-import org.openmrs.order.OrderUtil;
 import org.openmrs.order.OrderUtilTest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,7 +64,7 @@ public class ServiceRequestTranslatorImplTest {
 	private static final String DISCONTINUED_TEST_ORDER_UUID = "efca4077-493c-496b-8312-856ee5d1cc27";
 	
 	private static final String TEST_ORDER_NUMBER = "ORD-1";
-	
+
 	private static final String DISCONTINUED_TEST_ORDER_NUMBER = "ORD-2";
 	
 	private static final String PRIOR_SERVICE_REQUEST_REFERENCE = FhirConstants.SERVICE_REQUEST + "/" + SERVICE_REQUEST_UUID;

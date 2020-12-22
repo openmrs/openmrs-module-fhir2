@@ -13,7 +13,6 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
