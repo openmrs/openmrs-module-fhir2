@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -54,6 +55,8 @@ import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
+import org.openmrs.order.OrderUtil;
+import org.openmrs.order.OrderUtilTest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceRequestTranslatorImplTest {
@@ -193,14 +196,15 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateOrderFromRequestedTaskToActiveServiceRequest() {
+	public void toFhirResource_shouldTranslateOrderFromOnlyDateActivatedToActiveServiceRequest() {
 		TestOrder newOrder = new TestOrder();
-		newOrder.setUuid(SERVICE_REQUEST_UUID);
-		
-		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REQUESTED);
 		
 		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
-		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		Calendar activationDate = Calendar.getInstance();
+		activationDate.set(2000, Calendar.APRIL, 16);
+		newOrder.setDateActivated(activationDate.getTime());
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -209,46 +213,19 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateOrderFromRejectedTaskToRevokedServiceRequest() {
+	public void toFhirResource_shouldTranslateOrderFromAutoExpireToCompleteServiceRequest() throws Exception {
 		TestOrder newOrder = new TestOrder();
-		newOrder.setUuid(SERVICE_REQUEST_UUID);
-		
-		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.REJECTED);
 		
 		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
-		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
-		ServiceRequest result = translator.toFhirResource(newOrder);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.REVOKED));
-	}
-	
-	@Test
-	public void toFhirResource_shouldTranslateOrderFromAcceptedTaskToActiveServiceRequest() {
-		TestOrder newOrder = new TestOrder();
-		newOrder.setUuid(SERVICE_REQUEST_UUID);
-		
-		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.ACCEPTED);
-		
-		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
-		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
-		
-		ServiceRequest result = translator.toFhirResource(newOrder);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.ACTIVE));
-	}
-	
-	@Test
-	public void toFhirResource_shouldTranslateOrderFromCompletedTaskToCompletedServiceRequest() {
-		TestOrder newOrder = new TestOrder();
-		newOrder.setUuid(SERVICE_REQUEST_UUID);
-		
-		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.COMPLETED);
-		
-		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
-		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
+		Calendar date = Calendar.getInstance();
+		date.set(2000, Calendar.APRIL, 16);
+		newOrder.setDateActivated(date.getTime());
+		date.set(2070, Calendar.APRIL, 16);
+		newOrder.setAutoExpireDate(date.getTime());
+		date.set(2010, Calendar.APRIL, 16);
+		OrderUtilTest.setDateStopped(newOrder, date.getTime());
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -257,14 +234,62 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateOrderFromOtherTaskToUnknownServiceRequest() {
+	public void toFhirResource_shouldTranslateOrderToActiveServiceRequest() throws Exception {
 		TestOrder newOrder = new TestOrder();
-		newOrder.setUuid(SERVICE_REQUEST_UUID);
-		
-		List<Task> tasks = setUpBasedOnScenario(Task.TaskStatus.DRAFT);
 		
 		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
-		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		Calendar date = Calendar.getInstance();
+		date.set(2000, Calendar.APRIL, 16);
+		newOrder.setDateActivated(date.getTime());
+		date.set(2070, Calendar.APRIL, 16);
+		newOrder.setAutoExpireDate(date.getTime());
+		date.set(2069, Calendar.APRIL, 16);
+		OrderUtilTest.setDateStopped(newOrder, date.getTime());
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.ACTIVE));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateOrderToCompletedServiceRequest() throws Exception {
+		TestOrder newOrder = new TestOrder();
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		Calendar date = Calendar.getInstance();
+		date.set(2000, Calendar.APRIL, 16);
+		newOrder.setDateActivated(date.getTime());
+		date.set(2011, Calendar.APRIL, 16);
+		newOrder.setAutoExpireDate(date.getTime());
+		date.set(2010, Calendar.APRIL, 16);
+		OrderUtilTest.setDateStopped(newOrder, date.getTime());
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.COMPLETED));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateWrongOrderFromActiveToUnknownServiceRequest() throws Exception {
+		TestOrder newOrder = new TestOrder();
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		Calendar date = Calendar.getInstance();
+		date.set(2000, Calendar.APRIL, 16);
+		newOrder.setDateActivated(date.getTime());
+		date.set(2015, Calendar.APRIL, 16);
+		newOrder.setAutoExpireDate(date.getTime());
+		date.set(2010, Calendar.APRIL, 16);
+		newOrder.setAction(Order.Action.DISCONTINUE);
+		OrderUtilTest.setDateStopped(newOrder, date.getTime());
 		
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
@@ -273,9 +298,68 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateOrderWithoutTaskToUnknownServiceRequest() {
+	public void toFhirResource_shouldTranslateWrongOrderFromCompleteToUnknownServiceRequest() throws Exception {
 		TestOrder newOrder = new TestOrder();
-		newOrder.setUuid(SERVICE_REQUEST_UUID);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		Calendar date = Calendar.getInstance();
+		date.set(2000, Calendar.APRIL, 16);
+		newOrder.setDateActivated(date.getTime());
+		date.set(2070, Calendar.APRIL, 16);
+		newOrder.setAutoExpireDate(date.getTime());
+		date.set(2069, Calendar.APRIL, 16);
+		newOrder.setAction(Order.Action.DISCONTINUE);
+		OrderUtilTest.setDateStopped(newOrder, date.getTime());
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.UNKNOWN));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateOrderFromOnlyAutoExpireToCompleteServiceRequest() throws Exception {
+		TestOrder newOrder = new TestOrder();
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		Calendar date = Calendar.getInstance();
+		date.set(2000, Calendar.APRIL, 16);
+		newOrder.setDateActivated(date.getTime());
+		date.set(2015, Calendar.APRIL, 16);
+		newOrder.setAutoExpireDate(date.getTime());
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.COMPLETED));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateOrderFromOnlyDateStoppedToCompleteServiceRequest() throws Exception {
+		TestOrder newOrder = new TestOrder();
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		
+		Calendar date = Calendar.getInstance();
+		date.set(2000, Calendar.APRIL, 16);
+		newOrder.setDateActivated(date.getTime());
+		date.set(2015, Calendar.APRIL, 16);
+		OrderUtilTest.setDateStopped(newOrder, date.getTime());
+		
+		ServiceRequest result = translator.toFhirResource(newOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.COMPLETED));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateFromNoDataToActiveServiceRequest() {
+		TestOrder newOrder = new TestOrder();
 		
 		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
@@ -283,33 +367,7 @@ public class ServiceRequestTranslatorImplTest {
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.UNKNOWN));
-	}
-	
-	@Test
-	public void toFhirResource_shouldTranslateOrderWithMultipleTasksToUnknownServiceRequest() {
-		TestOrder newOrder = new TestOrder();
-		newOrder.setUuid(SERVICE_REQUEST_UUID);
-		
-		Task firstTask = new Task();
-		Task secondTask = new Task();
-		
-		Reference basedOnRef = new Reference();
-		basedOnRef.setReference("ServiceRequest/" + SERVICE_REQUEST_UUID);
-		basedOnRef.setType("ServiceRequest");
-		
-		firstTask.addBasedOn(basedOnRef);
-		secondTask.addBasedOn(basedOnRef);
-		
-		List<Task> tasks = Arrays.asList(firstTask, secondTask);
-		
-		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
-		        .thenReturn(new MockIBundleProvider<>(tasks, PREFERRED_PAGE_SIZE, COUNT));
-		
-		ServiceRequest result = translator.toFhirResource(newOrder);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.UNKNOWN));
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.ACTIVE));
 	}
 	
 	@Test
