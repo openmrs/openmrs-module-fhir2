@@ -31,7 +31,7 @@ public class FhirRelatedPersonDaoImplTest extends BaseModuleContextSensitiveTest
 	
 	private static final String BAD_RELATIONSHIP_UUID = "d4c91630-8563-481b-8efa-48e10c139w6e";
 	
-	private static final String RELATIONSHIP_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirRelatedPersonDaoImplTest_intial_data.xml";
+	private static final String RELATIONSHIP_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirRelatedPersonDaoImplTest_initial_data.xml";
 	
 	@Autowired
 	@Qualifier("sessionFactory")
