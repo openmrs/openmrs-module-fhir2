@@ -16,6 +16,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
@@ -26,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -34,9 +37,12 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.convertors.conv30_40.RelatedPerson30_40;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.RelatedPerson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -333,4 +339,68 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		assertThat(resultList.size(), equalTo(1));
 	}
 	
+	@Test
+	public void updateRelatedPerson_shouldUpdateRelatedPerson() {
+		when(relatedPersonService.update(eq(RELATED_PERSON_UUID), any(org.hl7.fhir.r4.model.RelatedPerson.class)))
+		        .thenReturn(relatedPerson);
+		
+		MethodOutcome result = resourceProvider.updateRelatedPerson(new IdType().setValue(RELATED_PERSON_UUID),
+		    RelatedPerson30_40.convertRelatedPerson(relatedPerson));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(RELATED_PERSON_UUID));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateRelatedPerson_shouldThrowInvalidRequestForUuidMismatch() {
+		when(relatedPersonService.update(eq(WRONG_RELATED_PERSON_UUID), any(org.hl7.fhir.r4.model.RelatedPerson.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateRelatedPerson(new IdType().setValue(WRONG_RELATED_PERSON_UUID),
+		    RelatedPerson30_40.convertRelatedPerson(relatedPerson));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateRelatedPerson_shouldThrowInvalidRequestForMissingId() {
+		org.hl7.fhir.r4.model.RelatedPerson noIdRelatedPerson = new org.hl7.fhir.r4.model.RelatedPerson();
+		
+		when(relatedPersonService.update(eq(RELATED_PERSON_UUID), any(org.hl7.fhir.r4.model.RelatedPerson.class)))
+		        .thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateRelatedPerson(new IdType().setValue(RELATED_PERSON_UUID),
+		    RelatedPerson30_40.convertRelatedPerson(noIdRelatedPerson));
+	}
+	
+	@Test
+	public void createRelatedPerson_shouldCreateNewRelatedPerson() {
+		when(relatedPersonService.create(any(org.hl7.fhir.r4.model.RelatedPerson.class))).thenReturn(relatedPerson);
+		
+		MethodOutcome result = resourceProvider.createRelatedPerson(RelatedPerson30_40.convertRelatedPerson(relatedPerson));
+		
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getCreated(), is(true));
+		assertThat(result.getResource(), Matchers.notNullValue());
+		assertThat(result.getResource().getIdElement().getIdPart(), Matchers.equalTo(RELATED_PERSON_UUID));
+	}
+	
+	@Test
+	public void deleteRelatedPerson_shouldDeleteRelatedPerson() {
+		when(relatedPersonService.delete(RELATED_PERSON_UUID)).thenReturn(relatedPerson);
+		
+		OperationOutcome result = resourceProvider.deleteRelatedPerson(new IdType().setValue(RELATED_PERSON_UUID));
+		assertThat(result, Matchers.notNullValue());
+		assertThat(result.getIssue(), Matchers.notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), Matchers.equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), Matchers.equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    Matchers.equalTo("This resource has been deleted"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteRelatedPerson_shouldThrowResourceNotFoundException() {
+		when(relatedPersonService.delete(WRONG_RELATED_PERSON_UUID)).thenReturn(null);
+		
+		resourceProvider.deleteRelatedPerson(new IdType().setValue(WRONG_RELATED_PERSON_UUID));
+	}
 }
