@@ -64,7 +64,7 @@ public class ServiceRequestTranslatorImplTest {
 	private static final String DISCONTINUED_TEST_ORDER_UUID = "efca4077-493c-496b-8312-856ee5d1cc27";
 	
 	private static final String TEST_ORDER_NUMBER = "ORD-1";
-
+	
 	private static final String DISCONTINUED_TEST_ORDER_NUMBER = "ORD-2";
 	
 	private static final String PRIOR_SERVICE_REQUEST_REFERENCE = FhirConstants.SERVICE_REQUEST + "/" + SERVICE_REQUEST_UUID;
@@ -314,7 +314,7 @@ public class ServiceRequestTranslatorImplTest {
 		ServiceRequest result = translator.toFhirResource(newOrder);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.UNKNOWN));
+		assertThat(result.getStatus(), equalTo(ServiceRequest.ServiceRequestStatus.REVOKED));
 	}
 	
 	@Test

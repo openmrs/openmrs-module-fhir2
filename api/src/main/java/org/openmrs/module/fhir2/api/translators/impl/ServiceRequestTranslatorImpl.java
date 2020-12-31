@@ -116,15 +116,12 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 		
 		Date currentDate = new Date();
 		
-		boolean isActive = order.isActivated()
-		        && ((order.getAutoExpireDate() == null || order.getAutoExpireDate().after(currentDate))
-		                && (order.getDateStopped() == null || order.getDateStopped().after(currentDate)));
 		boolean isCompeted = order.isActivated()
 		        && ((order.getDateStopped() != null && currentDate.after(order.getDateStopped()))
 		                || (order.getAutoExpireDate() != null && currentDate.after(order.getAutoExpireDate())));
 		boolean isDiscontinued = order.isActivated() && order.getAction() == Order.Action.DISCONTINUE;
 		
-		if ((isCompeted && isDiscontinued) || (isDiscontinued && isActive)) {
+		if ((isCompeted && isDiscontinued)) {
 			return ServiceRequest.ServiceRequestStatus.UNKNOWN;
 		} else if (isDiscontinued) {
 			return ServiceRequest.ServiceRequestStatus.REVOKED;
