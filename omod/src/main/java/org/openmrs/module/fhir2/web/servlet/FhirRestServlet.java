@@ -9,10 +9,16 @@
  */
 package org.openmrs.module.fhir2.web.servlet;
 
+import static org.openmrs.module.fhir2.FhirConstants.FHIR2_MODULE_ID;
+
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -28,20 +34,27 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.GlobalPropertyListener;
+import org.openmrs.module.Module;
+import org.openmrs.module.ModuleFactory;
+import org.openmrs.module.fhir2.FhirActivator;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.spi.ModuleLifecycleListener;
 import org.openmrs.module.fhir2.narrative.OpenmrsThymeleafNarrativeGenerator;
 import org.openmrs.module.fhir2.web.util.NarrativeUtils;
 import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSource;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 @Component
 @Setter(AccessLevel.PUBLIC)
-public class FhirRestServlet extends RestfulServer {
+public class FhirRestServlet extends RestfulServer implements ModuleLifecycleListener {
 	
 	private static final long serialVersionUID = 2L;
 	
@@ -59,12 +72,13 @@ public class FhirRestServlet extends RestfulServer {
 	@Qualifier("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
 	
-	private SummaryInterceptor summaryInterceptor;
+	private ConfigurableApplicationContext ctx;
 	
+	private boolean started = false;
+	
+	@Autowired
+	@Qualifier("messageSourceService")
 	private MessageSource messageSource;
-	
-	@Setter(AccessLevel.NONE)
-	private BasePagingProvider pagingProvider;
 	
 	private GlobalPropertyListener fhirRestServletListener = new GlobalPropertyListener() {
 		
@@ -87,10 +101,10 @@ public class FhirRestServlet extends RestfulServer {
 			
 			switch (newValue.getProperty()) {
 				case FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE:
-					pagingProvider.setDefaultPageSize(value);
+					((BasePagingProvider) getPagingProvider()).setDefaultPageSize(value);
 					break;
 				case FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE:
-					pagingProvider.setMaximumPageSize(value);
+					((BasePagingProvider) getPagingProvider()).setMaximumPageSize(value);
 					break;
 			}
 		}
@@ -99,10 +113,10 @@ public class FhirRestServlet extends RestfulServer {
 		public void globalPropertyDeleted(String propertyName) {
 			switch (propertyName) {
 				case FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE:
-					pagingProvider.setDefaultPageSize(10);
+					((BasePagingProvider) getPagingProvider()).setDefaultPageSize(10);
 					break;
 				case FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE:
-					pagingProvider.setMaximumPageSize(100);
+					((BasePagingProvider) getPagingProvider()).setMaximumPageSize(100);
 					break;
 			}
 		}
@@ -112,27 +126,29 @@ public class FhirRestServlet extends RestfulServer {
 	//@formatter:off
 	@Override
 	protected void initialize() {
-		// ensure properties for this class are properly injected
+		// we need to load the application context for the FHIR2 module
+		Module fhirModule = ModuleFactory.getModuleById(FHIR2_MODULE_ID);
+		if (fhirModule != null) {
+			FhirActivator activator = (FhirActivator) fhirModule.getModuleActivator();
+
+			// get the activator which contains our ApplicationContext
+			ctx = FhirActivator.getApplicationContext();
+			activator.addModuleLifecycleListener(this);
+		}
+
+		// globalPropertyService is chosen reasonably arbitrarily to ensure we don't overwrite classes explicitly added
+		// by tests
 		if (globalPropertyService == null) {
-			SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, getServletContext());
+			// ensure properties for this class are properly injected
+			autoInject();
 			administrationService.addGlobalPropertyListener(fhirRestServletListener);
 		}
 
-		int defaultPageSize = NumberUtils
-				.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE), 10);
-		int maximumPageSize = NumberUtils
-				.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE), 100);
-
-		pagingProvider = new FifoMemoryPagingProvider(10_000);
-		pagingProvider.setDefaultPageSize(defaultPageSize);
-		pagingProvider.setMaximumPageSize(maximumPageSize);
-
-		setPagingProvider(pagingProvider);
+		setPagingProvider(createPagingProvider());
 		setDefaultResponseEncoding(EncodingEnum.JSON);
-		registerInterceptor(loggingInterceptor);
 
-		summaryInterceptor = new SummaryInterceptor();
-		registerInterceptor(summaryInterceptor);
+		registerInterceptor(loggingInterceptor);
+		registerInterceptor(new SummaryInterceptor());
 
 		String narrativesOverridePropertyFile = NarrativeUtils.getValidatedPropertiesFilePath(
 				globalPropertyService.getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, (String) null));
@@ -148,8 +164,14 @@ public class FhirRestServlet extends RestfulServer {
 
 		getFhirContext()
 				.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(messageSource, narrativePropertiesFiles));
+
+		started = true;
 	}
 	//@formatter:on
+	
+	protected Class<? extends Annotation> getResourceProviderAnnotation() {
+		return R4Provider.class;
+	}
 	
 	@Override
 	protected String createPoweredByHeaderComponentName() {
@@ -171,7 +193,7 @@ public class FhirRestServlet extends RestfulServer {
 	
 	@Override
 	@Autowired
-	@Qualifier("fhirResources")
+	@R4Provider
 	public void setResourceProviders(Collection<IResourceProvider> theProviders) {
 		super.setResourceProviders(theProviders);
 	}
@@ -182,8 +204,56 @@ public class FhirRestServlet extends RestfulServer {
 		super.setServerAddressStrategy(theServerAddressStrategy);
 	}
 	
-	@Autowired
-	public void setMessageSource(MessageSource messageSource) {
-		this.messageSource = messageSource;
+	private BasePagingProvider createPagingProvider() {
+		int defaultPageSize=NumberUtils.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE),10);int maximumPageSize=NumberUtils.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE),100);
+		
+		BasePagingProvider pagingProvider=new FifoMemoryPagingProvider(10_000);pagingProvider.setDefaultPageSize(defaultPageSize);pagingProvider.setMaximumPageSize(maximumPageSize);return pagingProvider;
+	}
+	
+	protected void autoInject() {
+		if (ctx != null) {
+			AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+			bpp.setBeanFactory(ctx.getAutowireCapableBeanFactory());
+			bpp.processInjection(this);
+		}
+	}
+	
+	@Override
+	public void refreshed() {
+		if (started) {
+			getInterceptorService().unregisterAllInterceptors();
+			
+			unregisterAllProviders();
+			
+			// load the resource providers from the Spring context
+			Set<String> validBeanNames = Arrays.stream(ctx.getBeanNamesForAnnotation(getResourceProviderAnnotation()))
+			        .collect(Collectors.toSet());
+			setResourceProviders(ctx.getBeansOfType(IResourceProvider.class).entrySet().stream()
+			        .filter(entry -> validBeanNames.contains(entry.getKey())).map(Map.Entry::getValue)
+			        .collect(Collectors.toList()));
+			
+			registerInterceptor(ctx.getBean("hapiLoggingInterceptor", LoggingInterceptor.class));
+			registerInterceptor(new SummaryInterceptor());
+			setAdministrationService(ctx.getBean("adminService", AdministrationService.class));
+			setGlobalPropertyService(ctx.getBean(FhirGlobalPropertyService.class));
+			setServerAddressStrategy(ctx.getBean(IServerAddressStrategy.class));
+			setPagingProvider(createPagingProvider());
+			
+			administrationService.addGlobalPropertyListener(fhirRestServletListener);
+		}
+	}
+	
+	@Override
+	public void destroy() {
+		try {
+			administrationService.removeGlobalPropertyListener(fhirRestServletListener);
+		}
+		catch (Exception ignored) {
+			
+		}
+		
+		ctx = null;
+		
+		super.destroy();
 	}
 }

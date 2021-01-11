@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static lombok.AccessLevel.PACKAGE;
+
 import javax.annotation.Nonnull;
 
 import ca.uhn.fhir.rest.annotation.Create;
@@ -25,7 +27,6 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Group;
@@ -33,14 +34,14 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.module.fhir2.api.FhirGroupService;
+import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("GroupFhirR4ResourceProvider")
-@Qualifier("fhirResources")
-@Setter(AccessLevel.PACKAGE)
+@R4Provider
+@Setter(PACKAGE)
 public class GroupFhirResourceProvider implements IResourceProvider {
 	
 	@Autowired
