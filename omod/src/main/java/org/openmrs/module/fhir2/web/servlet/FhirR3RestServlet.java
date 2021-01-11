@@ -27,6 +27,11 @@ public class FhirR3RestServlet extends FhirRestServlet {
 	}
 	
 	@Override
+	protected String getResourceProviderListName() {
+		return "fhirR3Resources";
+	}
+	
+	@Override
 	@Autowired
 	@Qualifier("fhirR3")
 	public void setFhirContext(FhirContext theFhirContext) {

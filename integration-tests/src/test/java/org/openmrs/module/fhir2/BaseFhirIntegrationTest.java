@@ -42,6 +42,8 @@ import org.junit.Before;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
 import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -62,6 +64,9 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	
 	private FhirRestServlet servlet;
 	
+	@Autowired
+	private ConfigurableApplicationContext ctx;
+
 	private SummaryInterceptor summaryInterceptor;
 	
 	// This must be implemented by subclasses
@@ -98,6 +103,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	
 	public void setupFhirServlet() throws ServletException {
 		servlet = getRestfulServer();
+		servlet.setCtx(ctx);
 		servlet.setFhirContext(getFhirContext());
 		servlet.setSummaryInterceptor(summaryInterceptor);
 		servlet.init(servletConfig);
