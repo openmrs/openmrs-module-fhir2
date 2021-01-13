@@ -17,13 +17,17 @@ import javax.servlet.http.HttpServletRequest;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import lombok.AccessLevel;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.HibernateException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Slf4j
 @Setter(AccessLevel.PACKAGE)
 public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 	
@@ -31,8 +35,16 @@ public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public String determineServerBase(ServletContext context, HttpServletRequest request) {
-		String gpPrefix = globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX);
+		String gpPrefix = null;
+		
+		try {
+			gpPrefix = globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX);
+		}
+		catch (HibernateException e) {
+			log.error("An error occurred while trying to read the {} property", FhirConstants.GLOBAL_PROPERTY_URI_PREFIX, e);
+		}
 		
 		if (StringUtils.isNotBlank(gpPrefix)) {
 			StringBuilder gpUrl = new StringBuilder().append(gpPrefix);
