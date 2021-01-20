@@ -58,6 +58,8 @@ import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceRequestTranslatorImplTest {
 	
+	public static final String TEST_ORDER_TYPE_UUID = "52a447d3-a64a-11e3-9aeb-50e549534c5e";
+	
 	private static final String SERVICE_REQUEST_UUID = "4e4851c3-c265-400e-acc9-1f1b0ac7f9c4";
 	
 	private static final String DISCONTINUED_TEST_ORDER_UUID = "efca4077-493c-496b-8312-856ee5d1cc27";
@@ -116,8 +118,9 @@ public class ServiceRequestTranslatorImplTest {
 		order = new TestOrder();
 		order.setUuid(SERVICE_REQUEST_UUID);
 		setOrderNumberByReflection(order, TEST_ORDER_NUMBER);
+		
 		OrderType ordertype = new OrderType();
-		ordertype.setUuid(BaseReferenceHandlingTranslator.TEST_ORDER_TYPE_UUID);
+		ordertype.setUuid(TEST_ORDER_TYPE_UUID);
 		order.setOrderType(ordertype);
 		
 		discontinuedTestOrder = new TestOrder();
@@ -126,6 +129,7 @@ public class ServiceRequestTranslatorImplTest {
 		discontinuedTestOrder.setPreviousOrder(order);
 	}
 	
+	@Test
 	public void toFhirResource_shouldTranslateToFhirResourceWithReplacesFieldGivenDiscontinuedOrder() {
 		discontinuedTestOrder.setAction(Order.Action.DISCONTINUE);
 		
