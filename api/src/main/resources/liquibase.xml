@@ -67,7 +67,7 @@
             <and>
                 <tableExists tableName="fhir_concept_source"/>
                 <tableExists tableName="concept_reference_source"/>
-                <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='LOINC' and retired = 0
+                <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='LOINC' and retired = false
                 </sqlCheck>
                 <sqlCheck expectedResult="0">select count(*) from fhir_concept_source where uuid =
                     '249b13c8-72fa-4b96-8d3d-b200efed985e'
@@ -78,7 +78,7 @@
             insert into fhir_concept_source (name, concept_source_id, url, creator, date_created, uuid)
             select name, concept_source_id, 'http://loinc.org', 1, now(), '249b13c8-72fa-4b96-8d3d-b200efed985e'
             from concept_reference_source
-            where name = 'LOINC' and retired = 0
+            where name = 'LOINC' and retired = false
         ]]></sql>
     </changeSet>
 
@@ -87,7 +87,7 @@
             <and>
                 <tableExists tableName="fhir_concept_source"/>
                 <tableExists tableName="concept_reference_source"/>
-                <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='CIEL' and retired = 0
+                <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='CIEL' and retired = false
                 </sqlCheck>
                 <sqlCheck expectedResult="0">select count(*) from fhir_concept_source where uuid =
                     '2b3c1ff8-768a-102f-83f4-12313b04a615'
@@ -98,7 +98,7 @@
             insert into fhir_concept_source (name, concept_source_id, url, creator, date_created, uuid)
             select name, concept_source_id, 'urn:oid:2.16.840.1.113883.3.7201', 1, now(), '2b3c1ff8-768a-102f-83f4-12313b04a615'
             from concept_reference_source
-            where name = 'CIEL' and retired = 0
+            where name = 'CIEL' and retired = false
         ]]></sql>
     </changeSet>
 
