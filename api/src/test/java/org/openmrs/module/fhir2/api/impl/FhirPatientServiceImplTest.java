@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -171,6 +172,30 @@ public class FhirPatientServiceImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void getById_shouldReturnPatientById() {
+		when(dao.getPatientById(1)).thenReturn(patient);
+		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
+		
+		org.hl7.fhir.r4.model.Patient result = patientService.getById(1);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), notNullValue());
+		assertThat(result.getId(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void getByIds_shouldRetrievePatientsByIds() {
+		when(dao.getPatientById(anyInt())).thenReturn(patient);
+		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
+		
+		List<org.hl7.fhir.r4.model.Patient> patientList = patientService.getByIds(new HashSet<>(Arrays.asList(1, 2, 3)));
+		
+		assertThat(patientList, notNullValue());
+		assertThat(patientList, not(empty()));
+		assertThat(patientList, hasSize(3));
 	}
 	
 	@Test

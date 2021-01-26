@@ -9,7 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.annotation.Nonnull;
+
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -52,6 +57,18 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	
 	@Autowired
 	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator, SearchQueryInclude<Patient>> searchQuery;
+	
+	@Override
+	public List<Patient> getByIds(Set<Integer> ids) {
+		List<Patient> patients = new ArrayList<>();
+		ids.forEach(id -> patients.add(translator.toFhirResource(dao.getPatientById(id))));
+		return patients;
+	}
+	
+	@Override
+	public Patient getById(@Nonnull Integer id) {
+		return translator.toFhirResource(dao.getPatientById(id));
+	}
 	
 	@Override
 	@Transactional(readOnly = true)
