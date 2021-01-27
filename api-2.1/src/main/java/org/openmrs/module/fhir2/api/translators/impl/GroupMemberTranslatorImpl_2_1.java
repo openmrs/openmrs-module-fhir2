@@ -1,4 +1,3 @@
-
 /*
  * This Source Code Form is subject to the terms of the Mozilla Public License,
  * v. 2.0. If a copy of the MPL was not distributed with this file, You can
@@ -16,16 +15,20 @@ import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Period;
 import org.openmrs.CohortMembership;
+import org.openmrs.Patient;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @Setter(AccessLevel.MODULE)
 @OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.*")
@@ -37,18 +40,26 @@ public class GroupMemberTranslatorImpl_2_1 implements GroupMemberTranslator<Coho
 	@Autowired
 	private FhirPatientDao patientDao;
 	
+	@Autowired
+	private PatientTranslator patientTranslator;
+	
 	@Override
 	public Group.GroupMemberComponent toFhirResource(@Nonnull CohortMembership cohortMember) {
 		notNull(cohortMember, "CohortMember object should not be null");
 		Group.GroupMemberComponent groupMemberComponent = new Group.GroupMemberComponent();
 		groupMemberComponent.setId(cohortMember.getUuid());
-		groupMemberComponent.setEntity(
-		    patientReferenceTranslator.toFhirResource(patientDao.getPatientById(cohortMember.getPatientId())));
+		groupMemberComponent.setInactive(!cohortMember.isActive());
+		
+		Patient patient = patientDao.getPatientById(cohortMember.getPatientId());
+		if (patient != null) {
+			groupMemberComponent.setEntityTarget(patientTranslator.toFhirResource(patient));
+			groupMemberComponent.setEntity(patientReferenceTranslator.toFhirResource(patient));
+		}
+		
 		Period period = new Period();
 		period.setStart(cohortMember.getStartDate());
 		period.setEnd(cohortMember.getEndDate());
 		groupMemberComponent.setPeriod(period);
-		groupMemberComponent.setInactive(!cohortMember.isActive());
 		
 		return groupMemberComponent;
 	}

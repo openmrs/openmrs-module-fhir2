@@ -33,6 +33,7 @@ import org.openmrs.CohortMembership;
 import org.openmrs.Patient;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GroupMemberTranslatorImpl_2_1Test {
@@ -47,12 +48,16 @@ public class GroupMemberTranslatorImpl_2_1Test {
 	@Mock
 	private FhirPatientDao patientDao;
 	
+	@Mock
+	private PatientTranslator patientTranslator;
+	
 	private GroupMemberTranslatorImpl_2_1 groupMemberTranslator;
 	
 	@Before
 	public void setup() {
 		groupMemberTranslator = new GroupMemberTranslatorImpl_2_1();
 		groupMemberTranslator.setPatientDao(patientDao);
+		groupMemberTranslator.setPatientTranslator(patientTranslator);
 		groupMemberTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 	}
 	

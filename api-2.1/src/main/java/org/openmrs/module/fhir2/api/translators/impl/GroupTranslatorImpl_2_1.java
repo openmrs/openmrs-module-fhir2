@@ -13,37 +13,40 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
-import java.util.Set;
+import java.util.Collection;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Group;
 import org.openmrs.Cohort;
+import org.openmrs.CohortMembership;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Slf4j
+@Primary
 @Component
 @Setter(AccessLevel.MODULE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.*")
-public class GroupTranslatorImpl extends BaseGroupTranslator implements GroupTranslator {
+@OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.*")
+public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements GroupTranslator {
 	
 	@Autowired
-	private GroupMemberTranslator<Integer> groupMemberTranslator;
+	private GroupMemberTranslator<CohortMembership> groupMemberTranslator;
 	
 	@Override
 	public Group toFhirResource(@Nonnull Cohort cohort) {
 		notNull(cohort, "Cohort object should not be null");
 		Group group = super.toFhirResource(cohort);
 		
-		Set<Integer> memberIds = cohort.getMemberIds();
-		log.info("Number of members " + memberIds.size());
-		group.setQuantity(cohort.size());
-		memberIds.forEach(id -> group.addMember(groupMemberTranslator.toFhirResource(id)));
+		Collection<CohortMembership> memberships = cohort.getMemberships();
+		log.info("Number of members " + memberships.size());
+		group.setQuantity(memberships.size());
+		memberships.forEach(membership -> group.addMember(groupMemberTranslator.toFhirResource(membership)));
 		
 		return group;
 	}
@@ -62,7 +65,8 @@ public class GroupTranslatorImpl extends BaseGroupTranslator implements GroupTra
 		Cohort finalExistingCohort = super.toOpenmrsType(existingCohort, group);
 		
 		if (group.hasMember()) {
-			group.getMember().forEach(member -> finalExistingCohort.addMember(groupMemberTranslator.toOpenmrsType(member)));
+			group.getMember()
+			        .forEach(member -> finalExistingCohort.addMembership(groupMemberTranslator.toOpenmrsType(member)));
 		}
 		
 		return finalExistingCohort;

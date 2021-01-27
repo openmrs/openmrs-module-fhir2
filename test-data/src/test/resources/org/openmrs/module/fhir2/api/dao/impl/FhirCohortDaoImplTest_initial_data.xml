@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <cohort cohort_id="1" name="John's patientList" description="cohort voided" creator="1" date_created="2005-01-01 00:00:00.0" voided="true" voided_by="1" date_voided="2005-01-01 00:00:00.0" void_reason="This is voided" uuid="985ff1a2-c2ef-49fd-836f-8a1d936d9ef9"/>
+    <cohort cohort_id="2" name="Covid19 patients" description="Covid19 patients" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1d64befb-3b2e-48e5-85f5-353d43e23e46"/>
+</dataset>

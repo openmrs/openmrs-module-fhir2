@@ -107,7 +107,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
-	public List<T> get(Collection<String> uuids) {
+	public List<T> get(@Nonnull Collection<String> uuids) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
 		criteria.add(in("uuid", uuids));
 		
