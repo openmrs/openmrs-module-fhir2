@@ -11,11 +11,16 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.openmrs.EncounterType;
 import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Collections;
+import java.util.List;
 
 @Setter(AccessLevel.PACKAGE)
 public abstract class BaseEncounterTranslator {
@@ -37,5 +42,28 @@ public abstract class BaseEncounterTranslator {
 		}
 		return coding;
 	}
-	
+
+	protected List<CodeableConcept> mapEncounterTypeClass(EncounterType openmrsEncounterType) {
+		Coding coding = new Coding();
+		coding.setCode(openmrsEncounterType.getUuid());
+		coding.setDisplay(openmrsEncounterType.getName());
+
+		CodeableConcept code = new CodeableConcept();
+		code.setCoding(Collections.singletonList(coding));
+
+		return Collections.singletonList(code);
+	}
+
+	protected EncounterType mapEncounterTypeField(CodeableConcept fhirEncounterType) {
+		EncounterType openmrsEncounterType = null;
+
+		if(fhirEncounterType != null && fhirEncounterType.getCoding() != null && !fhirEncounterType.getCoding().isEmpty()) {
+			openmrsEncounterType = new EncounterType();
+			openmrsEncounterType.setName(fhirEncounterType.getCodingFirstRep().getDisplay());
+			openmrsEncounterType.setUuid(fhirEncounterType.getCodingFirstRep().getCode());
+		}
+
+		return openmrsEncounterType;
+	}
+
 }

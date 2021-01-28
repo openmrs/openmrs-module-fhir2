@@ -11,10 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -35,14 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.EncounterProvider;
-import org.openmrs.Location;
-import org.openmrs.Patient;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.PatientIdentifierType;
-import org.openmrs.PersonName;
-import org.openmrs.Provider;
-import org.openmrs.Visit;
+import org.openmrs.*;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
@@ -425,6 +416,27 @@ public class EncounterTranslatorImplTest {
 		assertThat(result.getClass_(), notNullValue());
 		assertThat(result.getClass_().getSystem(), is(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI));
 		assertThat(result.getClass_().getCode(), is("AMB"));
+	}
+
+	@Test
+	public void toFhirResource_shouldTranslateEncounterTypeToEncounterTypeField() {
+		String name = "someEncounterType";
+		String uuid = "someUuid";
+		EncounterType omrsEncounterType = new EncounterType();
+
+		omrsEncounterType.setName(name);
+		omrsEncounterType.setUuid(uuid);
+
+		omrsEncounter.setEncounterType(omrsEncounterType);
+
+		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+
+		assertThat(result, notNullValue());
+		assertThat(result.getType().size(), greaterThan(0));
+		assertThat(result.getTypeFirstRep(), notNullValue());
+		assertThat(result.getTypeFirstRep().getCoding().size(), greaterThan(0));
+		assertThat(result.getTypeFirstRep().getCodingFirstRep().getCode(), is(uuid));
+		assertThat(result.getTypeFirstRep().getCodingFirstRep().getDisplay(), is(name));
 	}
 	
 }
