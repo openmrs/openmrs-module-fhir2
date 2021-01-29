@@ -74,14 +74,14 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		encounter.addContained(provenanceTranslator.getCreateProvenance(openMrsEncounter));
 		encounter.addContained(provenanceTranslator.getUpdateProvenance(openMrsEncounter));
 		encounter.setClass_(mapLocationToClass(openMrsEncounter.getLocation()));
-
+		
 		if (openMrsEncounter.getEncounterType() != null) {
 			encounter.setType(mapEncounterTypeClass(openMrsEncounter.getEncounterType()));
 		}
-
+		
 		return encounter;
 	}
-
+	
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(@Nonnull Encounter fhirEncounter) {
 		notNull(fhirEncounter, "The Encounter object should not be null");
@@ -104,9 +104,9 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		
 		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
 		existingEncounter.setVisit(encounterReferenceTranslator.toOpenmrsType(encounter.getPartOf()));
-
+		
 		existingEncounter.setEncounterType(mapEncounterTypeField(encounter.getTypeFirstRep()));
-
+		
 		return existingEncounter;
 	}
 }
