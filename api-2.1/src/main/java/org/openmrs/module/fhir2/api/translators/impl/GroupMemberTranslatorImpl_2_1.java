@@ -52,7 +52,6 @@ public class GroupMemberTranslatorImpl_2_1 implements GroupMemberTranslator<Coho
 		
 		Patient patient = patientDao.getPatientById(cohortMember.getPatientId());
 		if (patient != null) {
-			groupMemberComponent.setEntityTarget(patientTranslator.toFhirResource(patient));
 			groupMemberComponent.setEntity(patientReferenceTranslator.toFhirResource(patient));
 		}
 		
@@ -88,6 +87,7 @@ public class GroupMemberTranslatorImpl_2_1 implements GroupMemberTranslator<Coho
 		
 		if (groupMemberComponent.hasInactive()) {
 			existingCohort.setVoided(groupMemberComponent.getInactive());
+			existingCohort.setVoidReason("Voided via FHIR API");
 		}
 		
 		return existingCohort;

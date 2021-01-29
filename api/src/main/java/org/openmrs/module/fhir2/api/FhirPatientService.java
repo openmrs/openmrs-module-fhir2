@@ -30,7 +30,7 @@ public interface FhirPatientService extends FhirService<Patient> {
 	@Override
 	Patient get(@Nonnull String uuid);
 	
-	List<Patient> getByIds(Set<Integer> ids);
+	List<Patient> getPatientsByIds(@Nonnull Set<Integer> ids);
 	
 	Patient getById(@Nonnull Integer id);
 	

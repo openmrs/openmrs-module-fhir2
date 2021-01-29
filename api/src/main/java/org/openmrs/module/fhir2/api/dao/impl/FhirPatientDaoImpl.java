@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -42,6 +43,12 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	public Patient getPatientById(@Nonnull Integer id) {
 		return (Patient) getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(eq("patientId", id))
 		        .uniqueResult();
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<Patient> getPatientsByIds(@Nonnull Set<Integer> ids) {
+		return getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(in("id", ids)).list();
 	}
 	
 	@Override

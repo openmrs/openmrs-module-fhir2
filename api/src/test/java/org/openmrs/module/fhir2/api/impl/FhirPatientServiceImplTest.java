@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -188,10 +189,11 @@ public class FhirPatientServiceImplTest {
 	
 	@Test
 	public void getByIds_shouldRetrievePatientsByIds() {
-		when(dao.getPatientById(anyInt())).thenReturn(patient);
+		when(dao.getPatientsByIds(anySet())).thenReturn(Arrays.asList(patient, patient, patient));
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
-		List<org.hl7.fhir.r4.model.Patient> patientList = patientService.getByIds(new HashSet<>(Arrays.asList(1, 2, 3)));
+		List<org.hl7.fhir.r4.model.Patient> patientList = patientService
+		        .getPatientsByIds(new HashSet<>(Arrays.asList(1, 2, 3)));
 		
 		assertThat(patientList, notNullValue());
 		assertThat(patientList, not(empty()));

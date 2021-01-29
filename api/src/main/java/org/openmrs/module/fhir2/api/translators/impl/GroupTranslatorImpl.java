@@ -41,7 +41,7 @@ public class GroupTranslatorImpl extends BaseGroupTranslator implements GroupTra
 		Group group = super.toFhirResource(cohort);
 		
 		Set<Integer> memberIds = cohort.getMemberIds();
-		log.info("Number of members " + memberIds.size());
+		log.info("Number of members {} ", memberIds.size());
 		group.setQuantity(cohort.size());
 		memberIds.forEach(id -> group.addMember(groupMemberTranslator.toFhirResource(id)));
 		

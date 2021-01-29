@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.dao;
 import javax.annotation.Nonnull;
 
 import java.util.List;
+import java.util.Set;
 
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
@@ -23,6 +24,9 @@ public interface FhirPatientDao extends FhirDao<Patient> {
 	
 	@Authorized(PrivilegeConstants.GET_PATIENTS)
 	Patient getPatientById(@Nonnull Integer id);
+	
+	@Authorized(PrivilegeConstants.GET_PATIENTS)
+	List<Patient> getPatientsByIds(@Nonnull Set<Integer> id);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENTS)

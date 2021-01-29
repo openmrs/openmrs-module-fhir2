@@ -14,6 +14,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -44,7 +46,7 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 		Group group = super.toFhirResource(cohort);
 		
 		Collection<CohortMembership> memberships = cohort.getMemberships();
-		log.info("Number of members " + memberships.size());
+		log.info("Number of members {} ", memberships.size());
 		group.setQuantity(memberships.size());
 		memberships.forEach(membership -> group.addMember(groupMemberTranslator.toFhirResource(membership)));
 		
@@ -65,8 +67,9 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 		Cohort finalExistingCohort = super.toOpenmrsType(existingCohort, group);
 		
 		if (group.hasMember()) {
-			group.getMember()
-			        .forEach(member -> finalExistingCohort.addMembership(groupMemberTranslator.toOpenmrsType(member)));
+			List<CohortMembership> memberships = group.getMember().stream().map(groupMemberTranslator::toOpenmrsType)
+			        .collect(Collectors.toList());
+			existingCohort.setMemberships(memberships);
 		}
 		
 		return finalExistingCohort;
