@@ -7,7 +7,7 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api;
+package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,13 +47,14 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ObsService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.FhirImmunizationService;
 import org.openmrs.module.fhir2.api.translators.impl.ImmunizationObsGroupHelper;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirImmunizationServiceTest extends BaseModuleContextSensitiveTest {
+public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String IMMUNIZATIONS_METADATA_XML = "org/openmrs/module/fhir2/api/translators/ImmunizationTranslator_metadata.xml";
 	

@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Concept;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Setter(AccessLevel.PACKAGE)
 public class ObservationCategoryTranslatorImpl implements ObservationCategoryTranslator {
 	
 	@Autowired

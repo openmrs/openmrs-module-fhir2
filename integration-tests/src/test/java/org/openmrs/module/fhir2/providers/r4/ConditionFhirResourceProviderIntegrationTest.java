@@ -7,7 +7,7 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.provider.r3;
+package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
@@ -32,41 +32,39 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Condition;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.providers.r3.BaseFhirR3IntegrationTest;
-import org.openmrs.module.fhir2.providers.r3.ConditionFhirResourceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-public class ConditionResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<ConditionFhirResourceProvider, Condition> {
+public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<ConditionFhirResourceProvider, Condition> {
 	
-	private static final String CONDITION_DATA_SET_FILE = "org/openmrs/module/fhir2/api/dao/impl/FhirConditionDaoImplTest_initial_data.xml";
+	private static final String CONDITION_UUID = "86sgf-1f7d-4394-a316-0a458edf28c4";
 	
-	private static final String JSON_CREATE_CONDITION_DOCUMENT = "org/openmrs/module/fhir2/providers/ConditionWebTest_create_r3.json";
+	private static final String OBS_CONDITION_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirObsConditionDaoImplTest_initial_data.xml";
 	
-	private static final String XML_CREATE_CONDITION_DOCUMENT = "org/openmrs/module/fhir2/providers/ConditionWebTest_create_r3.xml";
+	private static final String CONDITION_SUBJECT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
 	
-	private static final String CONDITION_UUID = "2cc6880e-2c46-11e4-9138-a6c5e4d20fb7";
+	private static final String EXISTING_OBS_CONDITION_SUBJECT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
 	
 	private static final String WRONG_CONDITION_UUID = "950d965d-a935-429f-945f-75a502a90188";
 	
-	private static final String CONDITION_SUBJECT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
+	private static final String JSON_CREATE_CONDITION_DOCUMENT = "org/openmrs/module/fhir2/providers/ConditionWebTest_create.json";
+	
+	private static final String XML_CREATE_CONDITION_DOCUMENT = "org/openmrs/module/fhir2/providers/ConditionWebTest_create.xml";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private ConditionFhirResourceProvider resourceProvider;
 	
 	@Before
-	@Override
-	public void setup() throws Exception {
+	public void setUp() throws Exception {
 		super.setup();
-		executeDataSet(CONDITION_DATA_SET_FILE);
+		executeDataSet(OBS_CONDITION_INITIAL_DATA_XML);
 	}
 	
 	@Test
@@ -82,21 +80,11 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
 		
-		assertThat(condition.hasClinicalStatus(), is(true));
-		assertThat(condition.getClinicalStatus().getSystem(),
-		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI_R3));
-		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
-		
-		assertThat(condition.hasVerificationStatus(), is(true));
-		assertThat(condition.getVerificationStatus().getSystem(),
-		    equalTo(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI_R3));
-		assertThat(condition.getVerificationStatus().toCode(), equalTo("confirmed"));
-		
 		assertThat(condition.getOnsetDateTimeType().getValue(),
-		    equalTo(Date.from(LocalDateTime.of(2017, 1, 12, 0, 0, 50).atZone(ZoneId.systemDefault()).toInstant())));
+		    equalTo(Date.from(LocalDateTime.of(2008, 07, 01, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())));
 		
 		assertThat(condition.hasSubject(), is(true));
-		assertThat(condition.getSubject().getReference(), equalTo("Patient/" + CONDITION_SUBJECT_UUID));
+		assertThat(condition.getSubject().getReference(), equalTo("Patient/" + EXISTING_OBS_CONDITION_SUBJECT_UUID));
 		
 		assertThat(condition, validResource());
 	}
@@ -128,21 +116,11 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
 		
-		assertThat(condition.hasClinicalStatus(), is(true));
-		assertThat(condition.getClinicalStatus().getSystem(),
-		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI_R3));
-		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
-		
-		assertThat(condition.hasVerificationStatus(), is(true));
-		assertThat(condition.getVerificationStatus().getSystem(),
-		    equalTo(FhirConstants.CONDITION_VERIFICATION_STATUS_SYSTEM_URI_R3));
-		assertThat(condition.getVerificationStatus().toCode(), equalTo("confirmed"));
-		
 		assertThat(condition.getOnsetDateTimeType().getValue(),
-		    equalTo(Date.from(LocalDateTime.of(2017, 1, 12, 0, 0, 50).atZone(ZoneId.systemDefault()).toInstant())));
+		    equalTo(Date.from(LocalDateTime.of(2008, 07, 01, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())));
 		
 		assertThat(condition.hasSubject(), is(true));
-		assertThat(condition.getSubject().getReference(), equalTo("Patient/" + CONDITION_SUBJECT_UUID));
+		assertThat(condition.getSubject().getReference(), equalTo("Patient/" + EXISTING_OBS_CONDITION_SUBJECT_UUID));
 		
 		assertThat(condition, validResource());
 	}
@@ -162,7 +140,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 	}
 	
 	@Test
-	public void shouldCreateNewPatientAsJson() throws Exception {
+	public void shouldCreateNewConditionAsJson() throws Exception {
 		String jsonCondition;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_CONDITION_DOCUMENT)) {
 			assertThat(is, notNullValue());
@@ -181,9 +159,6 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
-		assertThat(condition.getClinicalStatus(), notNullValue());
-		assertThat(condition.getOnsetDateTimeType(), notNullValue());
-		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
 		assertThat(condition.getCode(), notNullValue());
 		assertThat(condition.getCode().getCoding(),
 		    hasItem(hasProperty("code", equalTo("116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))));
@@ -193,11 +168,8 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		assertThat(condition, validResource());
 		
 		response = get("/Condition/" + condition.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
-		
 		assertThat(response, isOk());
-		
 		Condition newCondition = readResponse(response);
-		
 		assertThat(newCondition.getId(), equalTo(condition.getId()));
 	}
 	
@@ -221,9 +193,6 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
-		assertThat(condition.getClinicalStatus(), notNullValue());
-		assertThat(condition.getOnsetDateTimeType(), notNullValue());
-		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
 		assertThat(condition.getCode().getCoding(),
 		    hasItem(hasProperty("code", equalTo("116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))));
 		assertThat(condition.getSubject().getReference(), endsWith(CONDITION_SUBJECT_UUID));
@@ -237,43 +206,6 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		Condition newCondition = readResponse(response);
 		
 		assertThat(newCondition.getId(), equalTo(condition.getId()));
-	}
-	
-	@Test
-	public void shouldUpdateExistingConditionAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Condition condition = readResponse(response);
-		
-		assertThat(condition.getVerificationStatus().toCode(), equalTo("confirmed"));
-		
-		condition.setVerificationStatus(Condition.ConditionVerificationStatus.PROVISIONAL);
-		
-		response = put("/Condition/" + CONDITION_UUID).jsonContent(toJson(condition)).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Condition updatedCondition = readResponse(response);
-		
-		assertThat(updatedCondition, notNullValue());
-		assertThat(updatedCondition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
-		assertThat(updatedCondition.getVerificationStatus().toCode(), equalTo("provisional"));
-		
-		assertThat(updatedCondition, validResource());
-		
-		response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		
-		Condition reReadCondition = readResponse(response);
-		
-		assertThat(reReadCondition.getVerificationStatus().toCode(), equalTo("provisional"));
 	}
 	
 	@Test
@@ -322,43 +254,6 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
-	}
-	
-	@Test
-	public void shouldUpdateExistingConditionAsXML() throws Exception {
-		MockHttpServletResponse response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.XML).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.XML.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Condition condition = readResponse(response);
-		
-		assertThat(condition.getVerificationStatus().toCode(), equalTo("confirmed"));
-		
-		condition.setVerificationStatus(Condition.ConditionVerificationStatus.PROVISIONAL);
-		
-		response = put("/Condition/" + CONDITION_UUID).xmlContext(toXML(condition)).accept(FhirMediaTypes.XML).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Condition updatedCondition = readResponse(response);
-		
-		assertThat(updatedCondition, notNullValue());
-		assertThat(updatedCondition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
-		assertThat(updatedCondition.getVerificationStatus().toCode(), equalTo("provisional"));
-		
-		assertThat(updatedCondition, validResource());
-		
-		response = get("/Condition/" + CONDITION_UUID).accept(FhirMediaTypes.XML).go();
-		
-		assertThat(response, isOk());
-		
-		Condition reReadCondition = readResponse(response);
-		
-		assertThat(reReadCondition.getVerificationStatus().toCode(), equalTo("provisional"));
 	}
 	
 	@Test
@@ -450,14 +345,15 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Condition/"))));
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Condition/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Condition.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries.size(), equalTo(2));
 	}
 	
 	@Test
 	public void shouldReturnSortedAndFilteredSearchResultsForConditionsAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Condition?clinical-status=active&onset-date=2020&_sort=-onset-date")
+		MockHttpServletResponse response = get("/Condition?clinical-status=active&onset-date=2008&_sort=-onset-date")
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -472,18 +368,17 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries,
-		    everyItem(hasResource(hasProperty("clinicalStatus", equalTo(Condition.ConditionClinicalStatus.ACTIVE)))));
+		assertThat(entries.size(), equalTo(2));
 		assertThat(entries,
 		    containsInRelativeOrder(
 		        hasResource(hasProperty(
 		            "onsetDateTimeType",
 		            hasProperty(
 		                "value",
-		                equalTo(Date.from(
-		                    LocalDateTime.of(2020, 3, 13, 19, 0, 0).atZone(ZoneId.systemDefault()).toInstant()))))),
+		                equalTo(
+		                    Date.from(LocalDateTime.of(2008, 7, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant()))))),
 		        hasResource(hasProperty("onsetDateTimeType", hasProperty("value", equalTo(
-		            Date.from(LocalDateTime.of(2020, 3, 5, 19, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
+		            Date.from(LocalDateTime.of(2008, 7, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
 	}
 	
 	@Test
@@ -502,14 +397,15 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Condition/"))));
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Condition/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Condition.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries.size(), equalTo(2));
 	}
 	
 	@Test
 	public void shouldReturnSortedAndFilteredSearchResultsForConditionsAsXML() throws Exception {
-		MockHttpServletResponse response = get("/Condition?clinical-status=active&onset-date=2020&_sort=-onset-date")
+		MockHttpServletResponse response = get("/Condition?clinical-status=active&onset-date=2008&_sort=-onset-date")
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
@@ -524,17 +420,17 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		List<Bundle.BundleEntryComponent> entries = results.getEntry();
 		
-		assertThat(entries,
-		    everyItem(hasResource(hasProperty("clinicalStatus", equalTo(Condition.ConditionClinicalStatus.ACTIVE)))));
+		assertThat(entries.size(), equalTo(2));
 		assertThat(entries,
 		    containsInRelativeOrder(
 		        hasResource(hasProperty(
 		            "onsetDateTimeType",
 		            hasProperty(
 		                "value",
-		                equalTo(Date.from(
-		                    LocalDateTime.of(2020, 3, 13, 19, 0, 0).atZone(ZoneId.systemDefault()).toInstant()))))),
+		                equalTo(
+		                    Date.from(LocalDateTime.of(2008, 7, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant()))))),
 		        hasResource(hasProperty("onsetDateTimeType", hasProperty("value", equalTo(
-		            Date.from(LocalDateTime.of(2020, 3, 5, 19, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
+		            Date.from(LocalDateTime.of(2008, 7, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
 	}
+	
 }
