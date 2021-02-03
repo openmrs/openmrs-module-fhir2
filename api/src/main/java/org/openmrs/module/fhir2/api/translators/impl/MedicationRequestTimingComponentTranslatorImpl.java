@@ -38,7 +38,9 @@ public class MedicationRequestTimingComponentTranslatorImpl implements Medicatio
 			repeatComponent.setDuration(drugOrder.getDuration());
 		}
 		
-		repeatComponent.setDurationUnit(durationUnitTranslator.toFhirResource(drugOrder.getConcept()));
+		if (drugOrder.getDurationUnits() != null) {
+			repeatComponent.setDurationUnit(durationUnitTranslator.toFhirResource(drugOrder.getDurationUnits()));
+		}
 		OrderFrequency frequency = drugOrder.getFrequency();
 		if (frequency != null) {
 			if (frequency.getFrequencyPerDay() != null) {

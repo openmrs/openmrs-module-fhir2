@@ -133,7 +133,7 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateConceptToUnitOfTimeSeconds() {
 		concept.setUuid(SECONDS_UUID);
-		drugOrder.setConcept(concept);
+		drugOrder.setDurationUnits(concept);
 		
 		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.S);
 		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
@@ -145,7 +145,7 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateConceptToUnitOfTimeMinutes() {
 		concept.setUuid(MINUTES_UUID);
-		drugOrder.setConcept(concept);
+		drugOrder.setDurationUnits(concept);
 		
 		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.MIN);
 		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
@@ -157,7 +157,7 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateConceptToUnitOfTimeHours() {
 		concept.setUuid(HOUR_UUID);
-		drugOrder.setConcept(concept);
+		drugOrder.setDurationUnits(concept);
 		
 		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.H);
 		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
@@ -169,7 +169,7 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateConceptToUnitOfTimeDays() {
 		concept.setUuid(DAYS_UUID);
-		drugOrder.setConcept(concept);
+		drugOrder.setDurationUnits(concept);
 		
 		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.D);
 		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
@@ -181,7 +181,7 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateConceptToUnitOfTimeWeeks() {
 		concept.setUuid(WEEKS_UUID);
-		drugOrder.setConcept(concept);
+		drugOrder.setDurationUnits(concept);
 		
 		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.WK);
 		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
@@ -193,7 +193,7 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateConceptToUnitOfTimeMonths() {
 		concept.setUuid(MONTHS_UUID);
-		drugOrder.setConcept(concept);
+		drugOrder.setDurationUnits(concept);
 		
 		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.MO);
 		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
@@ -205,7 +205,7 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateConceptToUnitOfTimeYears() {
 		concept.setUuid(YEARS_UUID);
-		drugOrder.setConcept(concept);
+		drugOrder.setDurationUnits(concept);
 		
 		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.A);
 		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
@@ -217,7 +217,7 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateConceptToUnitOfTimeSecondNull() {
 		concept.setUuid(WRONG_UUID);
-		drugOrder.setConcept(concept);
+		drugOrder.setDurationUnits(concept);
 		
 		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.NULL);
 		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
