@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
@@ -20,12 +21,34 @@ import org.hl7.fhir.r4.model.Timing;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
 import org.openmrs.OrderFrequency;
+import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestTimingComponentTranslatorImplTest {
+	
+	private static final String SECONDS_UUID = "162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String MINUTES_UUID = "1733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String HOUR_UUID = "1822AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String DAYS_UUID = "1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String WEEKS_UUID = "1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String MONTHS_UUID = "1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String YEARS_UUID = "1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	private static final String WRONG_UUID = "2909AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	@Mock
+	private DurationUnitTranslator durationUnitTranslator;
 	
 	private static final int DURATION = 2;
 	
@@ -35,10 +58,14 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	
 	private DrugOrder drugOrder;
 	
+	private Concept concept;
+	
 	@Before
 	public void setup() {
 		requestTimingComponentTranslator = new MedicationRequestTimingComponentTranslatorImpl();
+		requestTimingComponentTranslator.setDurationUnitTranslator(durationUnitTranslator);
 		
+		concept = new Concept();
 		drugOrder = new DrugOrder();
 		drugOrder.setDuration(DURATION);
 		
@@ -103,4 +130,99 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 		assertThat(requestTimingComponentTranslator.toFhirResource(null), nullValue());
 	}
 	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToUnitOfTimeSeconds() {
+		concept.setUuid(SECONDS_UUID);
+		drugOrder.setConcept(concept);
+		
+		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.S);
+		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDurationUnit(), equalTo(Timing.UnitsOfTime.S));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToUnitOfTimeMinutes() {
+		concept.setUuid(MINUTES_UUID);
+		drugOrder.setConcept(concept);
+		
+		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.MIN);
+		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDurationUnit(), equalTo(Timing.UnitsOfTime.MIN));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToUnitOfTimeHours() {
+		concept.setUuid(HOUR_UUID);
+		drugOrder.setConcept(concept);
+		
+		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.H);
+		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDurationUnit(), equalTo(Timing.UnitsOfTime.H));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToUnitOfTimeDays() {
+		concept.setUuid(DAYS_UUID);
+		drugOrder.setConcept(concept);
+		
+		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.D);
+		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDurationUnit(), equalTo(Timing.UnitsOfTime.D));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToUnitOfTimeWeeks() {
+		concept.setUuid(WEEKS_UUID);
+		drugOrder.setConcept(concept);
+		
+		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.WK);
+		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDurationUnit(), equalTo(Timing.UnitsOfTime.WK));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToUnitOfTimeMonths() {
+		concept.setUuid(MONTHS_UUID);
+		drugOrder.setConcept(concept);
+		
+		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.MO);
+		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDurationUnit(), equalTo(Timing.UnitsOfTime.MO));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToUnitOfTimeYears() {
+		concept.setUuid(YEARS_UUID);
+		drugOrder.setConcept(concept);
+		
+		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.A);
+		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDurationUnit(), equalTo(Timing.UnitsOfTime.A));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToUnitOfTimeSecondNull() {
+		concept.setUuid(WRONG_UUID);
+		drugOrder.setConcept(concept);
+		
+		when(durationUnitTranslator.toFhirResource(concept)).thenReturn(Timing.UnitsOfTime.NULL);
+		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDurationUnit(), equalTo(Timing.UnitsOfTime.NULL));
+	}
 }

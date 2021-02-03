@@ -11,14 +11,22 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.DrugOrder;
 import org.openmrs.OrderFrequency;
+import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingComponentTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Setter(AccessLevel.PACKAGE)
 public class MedicationRequestTimingComponentTranslatorImpl implements MedicationRequestTimingComponentTranslator {
+	
+	@Autowired
+	private DurationUnitTranslator durationUnitTranslator;
 	
 	@Override
 	public Timing.TimingRepeatComponent toFhirResource(@Nonnull DrugOrder drugOrder) {
@@ -26,14 +34,16 @@ public class MedicationRequestTimingComponentTranslatorImpl implements Medicatio
 			return null;
 		}
 		Timing.TimingRepeatComponent repeatComponent = new Timing.TimingRepeatComponent();
-		if (drugOrder.getDuration() != null)
+		if (drugOrder.getDuration() != null) {
 			repeatComponent.setDuration(drugOrder.getDuration());
+		}
 		/*
 		 * TODO
 		 * Figure out how to map DurationUnit to UnitsOfTime since openMrs duration units is concept
 		 * which differs across implementation. Make use of concept mappings
 		 */
-		//repeatComponent.setDurationUnit(drugOrder.getDurationUnits());
+		
+		repeatComponent.setDurationUnit(durationUnitTranslator.toFhirResource(drugOrder.getConcept()));
 		OrderFrequency frequency = drugOrder.getFrequency();
 		if (frequency != null) {
 			if (frequency.getFrequencyPerDay() != null) {
