@@ -37,11 +37,6 @@ public class MedicationRequestTimingComponentTranslatorImpl implements Medicatio
 		if (drugOrder.getDuration() != null) {
 			repeatComponent.setDuration(drugOrder.getDuration());
 		}
-		/*
-		 * TODO
-		 * Figure out how to map DurationUnit to UnitsOfTime since openMrs duration units is concept
-		 * which differs across implementation. Make use of concept mappings
-		 */
 		
 		repeatComponent.setDurationUnit(durationUnitTranslator.toFhirResource(drugOrder.getConcept()));
 		OrderFrequency frequency = drugOrder.getFrequency();
