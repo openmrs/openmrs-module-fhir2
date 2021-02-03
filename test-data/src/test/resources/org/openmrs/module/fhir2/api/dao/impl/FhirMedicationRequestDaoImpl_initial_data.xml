@@ -86,16 +86,16 @@
     <drug drug_id="2003" concept_id="4022" dosage_form="51" name="Rifampicin" combination="true" creator="1"
           date_created="2005-02-24 00:00:00.0" retired="false" uuid="yuf00b94-26fe-102b-80bc-0017a4787b12"/>
 
-    <drug_order order_id="1005" drug_inventory_id="2001" duration="6" duration_units="27" dispense_as_written="true"
+    <drug_order order_id="1005" drug_inventory_id="2001" duration="6" duration_units="162583" dispense_as_written="true"
                 as_needed="false"
                 frequency="2"/>
-    <drug_order order_id="1006" drug_inventory_id="2002" duration="6" duration_units="27" dispense_as_written="true"
+    <drug_order order_id="1006" drug_inventory_id="2002" duration="6" duration_units="162583" dispense_as_written="true"
                 as_needed="false"
                 frequency="1"/>
-    <drug_order order_id="1007" drug_inventory_id="2003" duration="6" duration_units="27" dispense_as_written="true"
+    <drug_order order_id="1007" drug_inventory_id="2003" duration="6" duration_units="162583" dispense_as_written="true"
                 as_needed="false"
                 frequency="2"/>
-    <drug_order order_id="8" drug_inventory_id="2003" duration="8" duration_units="29" dispense_as_written="true"
+    <drug_order order_id="8" drug_inventory_id="2003" duration="8" duration_units="1733" dispense_as_written="true"
                 as_needed="false" frequency="3"/>
 
     <fhir_duration_unit_map duration_unit_map_id="1" concept_id="162583" unit_of_time="S" creator="1"
