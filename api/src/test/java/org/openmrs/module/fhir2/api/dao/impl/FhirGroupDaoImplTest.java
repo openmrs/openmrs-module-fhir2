@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -28,6 +29,8 @@ import org.springframework.test.context.ContextConfiguration;
 public class FhirGroupDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String COHORT_UUID = "985ff1a2-c2ef-49fd-836f-8a1d936d9ef9";
+	
+	private static final String NEW_COHORT_UUID = "111ff1a2-c2ef-49fd-836f-8a1d936d9ef0";
 	
 	private static final String BAD_COHORT_UUID = "005ff1a0-c2ef-49fd-836f-8a1d936d9ef7";
 	
@@ -62,4 +65,42 @@ public class FhirGroupDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(cohort, nullValue());
 	}
 	
+	@Test
+	public void shouldSaveGroup() {
+		Cohort cohort = new Cohort();
+		cohort.setUuid(NEW_COHORT_UUID);
+		cohort.setName(COHORT_NAME);
+		cohort.setDescription("Test cohort");
+		
+		Cohort result = dao.createOrUpdate(cohort);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(NEW_COHORT_UUID));
+		assertThat(result.getName(), equalTo(COHORT_NAME));
+	}
+	
+	@Test
+	public void shouldUpdateGroupCorrectly() {
+		Cohort cohort = dao.get(COHORT_UUID);
+		cohort.setName("Update cohort name");
+		
+		Cohort result = dao.createOrUpdate(cohort);
+		assertThat(result, notNullValue());
+		assertThat(result.getName(), equalTo("Update cohort name"));
+	}
+	
+	@Test
+	public void shouldDeleteGroup() {
+		Cohort result = dao.delete(COHORT_UUID);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getVoided(), is(true));
+		assertThat(result.getVoidReason(), equalTo("Voided via FHIR API"));
+	}
+	
+	@Test
+	public void shouldReturnNullIfGroupToDeleteDoesNotExist() {
+		Cohort result = dao.delete(BAD_COHORT_UUID);
+		
+		assertThat(result, nullValue());
+	}
 }

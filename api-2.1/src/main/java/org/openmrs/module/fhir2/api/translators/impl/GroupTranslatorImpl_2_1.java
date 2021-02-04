@@ -14,8 +14,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -67,11 +67,17 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 		Cohort finalExistingCohort = super.toOpenmrsType(existingCohort, group);
 		
 		if (group.hasMember()) {
-			List<CohortMembership> memberships = group.getMember().stream().map(groupMemberTranslator::toOpenmrsType)
-			        .collect(Collectors.toList());
+			Set<CohortMembership> memberships = new HashSet<>();
+			group.getMember().forEach(member -> memberships.add(this.setCohort(existingCohort, member)));
 			existingCohort.setMemberships(memberships);
 		}
 		
 		return finalExistingCohort;
+	}
+	
+	private CohortMembership setCohort(Cohort cohort, Group.GroupMemberComponent groupMember) {
+		CohortMembership cohortMembership = groupMemberTranslator.toOpenmrsType(groupMember);
+		cohortMembership.setCohort(cohort);
+		return cohortMembership;
 	}
 }

@@ -24,7 +24,6 @@ import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,9 +38,6 @@ public class GroupMemberTranslatorImpl_2_1 implements GroupMemberTranslator<Coho
 	
 	@Autowired
 	private FhirPatientDao patientDao;
-	
-	@Autowired
-	private PatientTranslator patientTranslator;
 	
 	@Override
 	public Group.GroupMemberComponent toFhirResource(@Nonnull CohortMembership cohortMember) {

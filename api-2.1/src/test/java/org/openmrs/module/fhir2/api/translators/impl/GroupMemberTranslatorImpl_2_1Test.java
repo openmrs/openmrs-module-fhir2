@@ -57,7 +57,6 @@ public class GroupMemberTranslatorImpl_2_1Test {
 	public void setup() {
 		groupMemberTranslator = new GroupMemberTranslatorImpl_2_1();
 		groupMemberTranslator.setPatientDao(patientDao);
-		groupMemberTranslator.setPatientTranslator(patientTranslator);
 		groupMemberTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 	}
 	

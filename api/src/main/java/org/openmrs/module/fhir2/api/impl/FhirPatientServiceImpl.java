@@ -11,9 +11,9 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.api.Include;
@@ -59,7 +59,7 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator, SearchQueryInclude<Patient>> searchQuery;
 	
 	@Override
-	public List<Patient> getPatientsByIds(@Nonnull Set<Integer> ids) {
+	public List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids) {
 		List<org.openmrs.Patient> patients = dao.getPatientsByIds(ids);
 		return patients.stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}

@@ -17,10 +17,10 @@ import static org.hl7.fhir.r4.model.Patient.SP_DEATH_DATE;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -47,7 +47,7 @@ public class FhirPatientDaoImpl extends BasePersonDao<Patient> implements FhirPa
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<Patient> getPatientsByIds(@Nonnull Set<Integer> ids) {
+	public List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids) {
 		return getSessionFactory().getCurrentSession().createCriteria(Patient.class).add(in("id", ids)).list();
 	}
 	

@@ -10,11 +10,13 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Group;
 import org.junit.Before;
@@ -47,7 +49,12 @@ public class FhirGroupServiceImplTest {
 	
 	@Before
 	public void setup() {
-		groupService = new FhirGroupServiceImpl();
+		groupService = new FhirGroupServiceImpl() {
+			
+			@Override
+			protected void validateObject(Cohort object) {
+			}
+		};
 		groupService.setDao(dao);
 		groupService.setTranslator(translator);
 		
@@ -74,4 +81,78 @@ public class FhirGroupServiceImplTest {
 		assertThrows(ResourceNotFoundException.class, () -> groupService.get(BAD_COHORT_UUID));
 	}
 	
+	@Test
+	public void shouldSaveNewGroup() {
+		Cohort cohort = new Cohort();
+		cohort.setUuid(COHORT_UUID);
+		
+		Group group = new Group();
+		group.setId(COHORT_UUID);
+		
+		when(translator.toFhirResource(cohort)).thenReturn(group);
+		when(translator.toOpenmrsType(group)).thenReturn(cohort);
+		when(dao.createOrUpdate(cohort)).thenReturn(cohort);
+		
+		Group result = groupService.create(group);
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), equalTo(COHORT_UUID));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateGroupShouldThrowInvalidRequestExceptionIfIdIsNull() {
+		Group group = new Group();
+		group.setId(COHORT_UUID);
+		
+		groupService.update(null, group);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateGroupShouldThrowInvalidRequestExceptionIfIdIsBad() {
+		Group group = new Group();
+		group.setId(COHORT_UUID);
+		
+		groupService.update(BAD_COHORT_UUID, group);
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void updateGroupShouldThrowResourceNotFoundException() {
+		Group group = new Group();
+		group.setId(COHORT_UUID);
+		
+		groupService.update(COHORT_UUID, group);
+	}
+	
+	@Test
+	public void shouldUpdateGroup() {
+		Cohort cohort = new Cohort();
+		cohort.setUuid(COHORT_UUID);
+		cohort.setVoided(false);
+		
+		Group group = new Group();
+		group.setId(COHORT_UUID);
+		group.setActive(false);
+		
+		when(dao.get(COHORT_UUID)).thenReturn(cohort);
+		when(translator.toFhirResource(cohort)).thenReturn(group);
+		when(translator.toOpenmrsType(cohort, group)).thenReturn(cohort);
+		when(dao.createOrUpdate(cohort)).thenReturn(cohort);
+		
+		Group result = groupService.update(COHORT_UUID, group);
+		assertThat(result, notNullValue());
+		assertThat(result.getActive(), is(false));
+	}
+	
+	@Test
+	public void shouldDeleteGroup() {
+		Group group = new Group();
+		group.setId(COHORT_UUID);
+		
+		when(dao.delete(COHORT_UUID)).thenReturn(cohort);
+		when(translator.toFhirResource(cohort)).thenReturn(group);
+		
+		Group result = groupService.delete(COHORT_UUID);
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), equalTo(COHORT_UUID));
+		assertThat(result.getActive(), is(false));
+	}
 }

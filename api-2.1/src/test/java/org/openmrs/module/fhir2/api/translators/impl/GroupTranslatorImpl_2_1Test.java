@@ -172,7 +172,7 @@ public class GroupTranslatorImpl_2_1Test {
 		Cohort cohort = groupTranslator.toOpenmrsType(group);
 		assertThat(cohort, notNullValue());
 		assertThat(cohort.getMemberships().isEmpty(), is(false));
-		assertThat(cohort.getMemberships(), hasSize(2));
+		assertThat(cohort.getMemberships(), hasSize(1));
 		assertThat(cohort.getMemberships().iterator().next(), is(cohortMembership));
 	}
 	
@@ -194,6 +194,6 @@ public class GroupTranslatorImpl_2_1Test {
 		Cohort updateCohort = groupTranslator.toOpenmrsType(existingCohort, group);
 		assertThat(updateCohort, notNullValue());
 		assertThat(updateCohort.getMemberships(), notNullValue());
-		assertThat(updateCohort.getMemberships(), hasSize(2));
+		assertThat(updateCohort.getMemberships(), hasSize(1));
 	}
 }
