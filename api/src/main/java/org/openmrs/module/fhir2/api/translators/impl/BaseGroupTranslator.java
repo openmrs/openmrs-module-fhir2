@@ -13,8 +13,11 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.Cohort;
+import org.openmrs.module.fhir2.FhirConstants;
 
 public abstract class BaseGroupTranslator {
 	
@@ -23,6 +26,12 @@ public abstract class BaseGroupTranslator {
 		Group group = new Group();
 		group.setId(cohort.getUuid());
 		group.setActive(!cohort.getVoided());
+		
+		/*
+		 * Apparently, cohort.description is a required field
+		 */
+		group.addExtension(new Extension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_GROUP_DESCRIPTION)
+		        .setValue(new StringType(cohort.getDescription())));
 		
 		// Not sure about this, It's either actual or descriptive
 		// I will set actual - true temporarily as it required - valid resource.
@@ -49,6 +58,11 @@ public abstract class BaseGroupTranslator {
 		
 		if (group.hasActive()) {
 			existingCohort.setVoided(!group.getActive());
+		}
+		
+		Extension extension = group.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_GROUP_DESCRIPTION);
+		if (extension != null && extension.hasValue()) {
+			existingCohort.setDescription(extension.getValue().toString());
 		}
 		
 		return existingCohort;
