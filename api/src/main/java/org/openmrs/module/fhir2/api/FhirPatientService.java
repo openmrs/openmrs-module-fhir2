@@ -11,7 +11,9 @@ package org.openmrs.module.fhir2.api;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -27,6 +29,10 @@ public interface FhirPatientService extends FhirService<Patient> {
 	
 	@Override
 	Patient get(@Nonnull String uuid);
+	
+	List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids);
+	
+	Patient getById(@Nonnull Integer id);
 	
 	PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier);
 	

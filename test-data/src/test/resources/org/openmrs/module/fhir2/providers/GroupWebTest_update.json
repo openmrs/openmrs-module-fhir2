@@ -1,0 +1,28 @@
+{
+  "resourceType": "Group",
+  "id": "1d64befb-3b2e-48e5-85f5-353d43e23e46",
+  "extension": [
+    {
+      "url": "http://fhir.openmrs.org/ext/group/description",
+      "valueString": "Patients with at least one encounter"
+    }
+  ],
+  "active": true,
+  "type": "person",
+  "actual": true,
+  "name": "Test group",
+  "quantity": 1,
+  "member": [
+    {
+      "id": "d275f94d-a093-42c8-a4b1-24f90f7c0fb9",
+      "entity": {
+        "reference": "Patient/61b38324-e2fd-4feb-95b7-9e9a2a4400df",
+        "display": "John Doe (OpenMRS ID: 1234-4)"
+      },
+      "period": {
+        "start": "2019-10-16T00:00:28+03:00"
+      },
+      "inactive": false
+    }
+  ]
+}
