@@ -91,10 +91,14 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 			firstResult = fromIndex;
 		}
 		
+		Integer size = size();
+		if (size != null && firstResult > size) {
+			return Collections.emptyList();
+		}
+		
 		// NPE-safe unboxing
 		int lastResult = Integer.MAX_VALUE;
-		Integer lastResultHolder = size();
-		lastResult = lastResultHolder == null ? lastResult : lastResultHolder;
+		lastResult = size == null ? lastResult : size;
 		
 		if (toIndex - firstResult > 0) {
 			lastResult = Math.min(lastResult, toIndex);
