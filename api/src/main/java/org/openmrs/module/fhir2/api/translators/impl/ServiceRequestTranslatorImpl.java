@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -79,7 +80,7 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 			serviceRequest.addIdentifier(orderIdentifierTranslator.toFhirResource(order));
 		}
 		
-		serviceRequest.setStatus(determineServiceRequestStatus(order.getUuid()));
+		serviceRequest.setStatus(determineServiceRequestStatus(order));
 		
 		serviceRequest.setCode(conceptTranslator.toFhirResource(order.getConcept()));
 		
@@ -115,41 +116,24 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 		throw new UnsupportedOperationException();
 	}
 	
-	private ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(String orderUuid) {
-		IBundleProvider results = taskService.searchForTasks(
-		    new ReferenceAndListParam()
-		            .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
-		    null, null, null, null, null);
+	private ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(TestOrder order) {
 		
-		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
-		        .collect(Collectors.toList());
+		Date currentDate = new Date();
 		
-		ServiceRequest.ServiceRequestStatus serviceRequestStatus = ServiceRequest.ServiceRequestStatus.UNKNOWN;
+		boolean isCompeted = order.isActivated()
+		        && ((order.getDateStopped() != null && currentDate.after(order.getDateStopped()))
+		                || (order.getAutoExpireDate() != null && currentDate.after(order.getAutoExpireDate())));
+		boolean isDiscontinued = order.isActivated() && order.getAction() == Order.Action.DISCONTINUE;
 		
-		if (serviceRequestTasks.size() != 1) {
-			return serviceRequestStatus;
+		if ((isCompeted && isDiscontinued)) {
+			return ServiceRequest.ServiceRequestStatus.UNKNOWN;
+		} else if (isDiscontinued) {
+			return ServiceRequest.ServiceRequestStatus.REVOKED;
+		} else if (isCompeted) {
+			return ServiceRequest.ServiceRequestStatus.COMPLETED;
+		} else {
+			return ServiceRequest.ServiceRequestStatus.ACTIVE;
 		}
-		
-		Task serviceRequestTask = serviceRequestTasks.iterator().next();
-		
-		if (serviceRequestTask.hasStatus()) {
-			switch (serviceRequestTask.getStatus()) {
-				case ACCEPTED:
-				
-				case REQUESTED:
-					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.ACTIVE;
-					break;
-				
-				case REJECTED:
-					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.REVOKED;
-					break;
-				
-				case COMPLETED:
-					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.COMPLETED;
-					break;
-			}
-		}
-		return serviceRequestStatus;
 	}
 	
 	private Reference determineServiceRequestPerformer(String orderUuid) {

@@ -28,6 +28,13 @@ import static org.hibernate.criterion.Subqueries.propertyEq;
 import javax.annotation.Nonnull;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -80,7 +87,9 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
+import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * <p>
@@ -158,6 +167,9 @@ import org.openmrs.module.fhir2.model.FhirConceptSource;
 public abstract class BaseDao {
 	
 	private static final BigDecimal APPROX_RANGE = new BigDecimal("0.1");
+	
+	@Autowired
+	private LocalDateTimeFactory localDateTimeFactory;
 	
 	/**
 	 * Converts an {@link Iterable} to a {@link Stream}
@@ -1036,6 +1048,106 @@ public abstract class BaseDao {
 		private SortOrderEnum sortOrder;
 		
 		private String parameter;
+	}
+	
+	protected Optional<Criterion> handleAgeByDateProperty(@Nonnull String datePropertyName, @Nonnull QuantityParam age) {
+		BigDecimal value = age.getValue();
+		if (value == null) {
+			throw new IllegalArgumentException("Age value should be provided in " + age);
+		}
+		
+		String unit = age.getUnits();
+		if (unit == null) {
+			throw new IllegalArgumentException("Age unit should be provided in " + age);
+		}
+		
+		LocalDateTime localDateTime = localDateTimeFactory.now();
+		
+		TemporalAmount temporalAmount;
+		TemporalUnit temporalUnit;
+		// TODO check if HAPI FHIR already defines these constant strings. These are mostly from
+		// http://www.hl7.org/fhir/valueset-age-units.html with the exception of "s" which is not
+		// listed but was seen in FHIR examples: http://www.hl7.org/fhir/datatypes-examples.html#Quantity
+		switch (unit) {
+			case "s":
+				temporalUnit = ChronoUnit.SECONDS;
+				temporalAmount = Duration.ofSeconds(value.longValue());
+				break;
+			case "min":
+				temporalUnit = ChronoUnit.MINUTES;
+				temporalAmount = Duration.ofMinutes(value.longValue());
+				break;
+			case "h":
+				temporalUnit = ChronoUnit.HOURS;
+				temporalAmount = Duration.ofHours(value.longValue());
+				break;
+			case "d":
+				temporalUnit = ChronoUnit.DAYS;
+				temporalAmount = Period.ofDays(value.intValue());
+				break;
+			case "wk":
+				temporalUnit = ChronoUnit.WEEKS;
+				temporalAmount = Period.ofWeeks(value.intValue());
+				break;
+			case "mo":
+				temporalUnit = ChronoUnit.MONTHS;
+				temporalAmount = Period.ofMonths(value.intValue());
+				break;
+			case "a":
+				temporalUnit = ChronoUnit.YEARS;
+				temporalAmount = Period.ofYears(value.intValue());
+				break;
+			default:
+				throw new IllegalArgumentException(
+				        "Invalid unit " + unit + " in age " + age + " should be one of 'min', 'h', 'd', 'wk', 'mo', 'a'");
+		}
+		
+		localDateTime = localDateTime.minus(temporalAmount);
+		
+		ParamPrefixEnum prefix = age.getPrefix();
+		if (prefix == null) {
+			prefix = ParamPrefixEnum.EQUAL;
+		}
+		
+		if (prefix == ParamPrefixEnum.EQUAL || prefix == ParamPrefixEnum.NOT_EQUAL) {
+			// Create a range for the targeted unit; the interval length is determined by the unit and
+			// its center is `offsetSeconds` in the past.
+			final long offset;
+			
+			// Duration only supports hours as a chunk of seconds
+			if (temporalUnit == ChronoUnit.HOURS) {
+				offset = temporalAmount.get(ChronoUnit.SECONDS) / (2 * 3600);
+			} else {
+				offset = temporalAmount.get(temporalUnit) / 2;
+			}
+			
+			LocalDateTime lowerBoundDateTime = LocalDateTime.from(localDateTime).minus(Duration.of(offset, temporalUnit));
+			Date lowerBound = Date.from(lowerBoundDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			
+			LocalDateTime upperBoundDateTime = LocalDateTime.from(localDateTime).plus(offset, temporalUnit);
+			Date upperBound = Date.from(upperBoundDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			
+			if (prefix == ParamPrefixEnum.EQUAL) {
+				return Optional.of(and(ge(datePropertyName, lowerBound), le(datePropertyName, upperBound)));
+			} else {
+				return Optional.of(not(and(ge(datePropertyName, lowerBound), le(datePropertyName, upperBound))));
+			}
+		}
+		
+		switch (prefix) {
+			case LESSTHAN_OR_EQUALS:
+			case LESSTHAN:
+			case STARTS_AFTER:
+				return Optional
+				        .of(ge(datePropertyName, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant())));
+			case GREATERTHAN_OR_EQUALS:
+			case GREATERTHAN:
+				return Optional
+				        .of(le(datePropertyName, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant())));
+			// Ignoring ENDS_BEFORE as it is not meaningful for age.
+		}
+		
+		return Optional.empty();
 	}
 	
 }

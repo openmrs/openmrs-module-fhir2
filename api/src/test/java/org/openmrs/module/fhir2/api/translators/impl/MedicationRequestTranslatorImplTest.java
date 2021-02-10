@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 
+import lombok.SneakyThrows;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -53,6 +54,8 @@ import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestTranslatorImplTest {
 	
+	public static final String DRUG_ORDER_TYPE_UUID = "131168f4-15f5-102d-96e4-000c29c2a5d7";
+	
 	private static final String DRUG_ORDER_UUID = "44fdc8ad-fe4d-499b-93a8-8a991c1d477e";
 	
 	private static final String DISCONTINUED_DRUG_ORDER_UUID = "efca4077-493c-496b-8312-856ee5d1cc27";
@@ -61,7 +64,8 @@ public class MedicationRequestTranslatorImplTest {
 	
 	private static final String DISCONTINUED_DRUG_ORDER_NUMBER = "ORD-2";
 	
-	private static final String PRIOR_MEDICATION_REQUEST_REFERENCE = FhirConstants.MEDICATION + "/" + DRUG_ORDER_UUID;
+	private static final String PRIOR_MEDICATION_REQUEST_REFERENCE = FhirConstants.MEDICATION_REQUEST + "/"
+	        + DRUG_ORDER_UUID;
 	
 	private static final String DRUG_UUID = "99fdc8ad-fe4d-499b-93a8-8a991c1d477g";
 	
@@ -131,8 +135,9 @@ public class MedicationRequestTranslatorImplTest {
 		drugOrder = new DrugOrder();
 		drugOrder.setUuid(DRUG_ORDER_UUID);
 		setOrderNumberByReflection(drugOrder, DRUG_ORDER_NUMBER);
+		
 		OrderType ordertype = new OrderType();
-		ordertype.setUuid(BaseReferenceHandlingTranslator.DRUG_ORDER_TYPE_UUID);
+		ordertype.setUuid(DRUG_ORDER_TYPE_UUID);
 		drugOrder.setOrderType(ordertype);
 		
 		discontinuedDrugOrder = new DrugOrder();
@@ -148,6 +153,7 @@ public class MedicationRequestTranslatorImplTest {
 	@Test
 	public void toOpenMrsType_shouldTranslateToOpenType() {
 		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), notNullValue());
 		assertThat(result.getUuid(), equalTo(DRUG_ORDER_UUID));
@@ -156,6 +162,7 @@ public class MedicationRequestTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateToFhirResource() {
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(DRUG_ORDER_UUID));
@@ -214,9 +221,12 @@ public class MedicationRequestTranslatorImplTest {
 	public void toFhirResource_shouldConvertStatusToFhirType() {
 		drugOrder.setVoided(true);
 		drugOrder.setVoidedBy(new User());
+		
 		when(medicationRequestStatusTranslator.toFhirResource(drugOrder))
 		        .thenReturn(MedicationRequest.MedicationRequestStatus.CANCELLED);
+		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getStatus(), notNullValue());
 		assertThat(result.getStatus(), equalTo(MedicationRequest.MedicationRequestStatus.CANCELLED));
@@ -226,7 +236,9 @@ public class MedicationRequestTranslatorImplTest {
 	public void toFhirResource_shouldConvertActiveStatusToFhirType() {
 		when(medicationRequestStatusTranslator.toFhirResource(drugOrder))
 		        .thenReturn(MedicationRequest.MedicationRequestStatus.ACTIVE);
+		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getStatus(), notNullValue());
 		assertThat(result.getStatus(), equalTo(MedicationRequest.MedicationRequestStatus.ACTIVE));
@@ -337,6 +349,7 @@ public class MedicationRequestTranslatorImplTest {
 		patientReference.setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID);
 		
 		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientReference);
+		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
 		
 		assertThat(result, notNullValue());
@@ -349,6 +362,7 @@ public class MedicationRequestTranslatorImplTest {
 		drugOrder.setUrgency(DrugOrder.Urgency.ON_SCHEDULED_DATE);
 		when(medicationRequestPriorityTranslator.toFhirResource(DrugOrder.Urgency.ON_SCHEDULED_DATE))
 		        .thenReturn(MedicationRequest.MedicationRequestPriority.URGENT);
+		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
 		
 		assertThat(result, notNullValue());
@@ -360,7 +374,7 @@ public class MedicationRequestTranslatorImplTest {
 	@Test
 	public void toOpenMrsType_shouldTranslateMedicationToOpenMrsDrug() {
 		Reference medicationRef = new Reference();
-		medicationRef.setReference(FhirConstants.MEDICATION + "/" + DRUG_UUID);
+		medicationRef.setReference(FhirConstants.MEDICATION_REQUEST + "/" + DRUG_UUID);
 		Drug drug = new Drug();
 		drug.setUuid(DRUG_UUID);
 		
@@ -379,9 +393,10 @@ public class MedicationRequestTranslatorImplTest {
 		drug.setUuid(DRUG_UUID);
 		drugOrder.setDrug(drug);
 		Reference medicationRef = new Reference();
-		medicationRef.setReference(FhirConstants.MEDICATION + "/" + DRUG_UUID);
+		medicationRef.setReference(FhirConstants.MEDICATION_REQUEST + "/" + DRUG_UUID);
 		
 		when(medicationReferenceTranslator.toFhirResource(drug)).thenReturn(medicationRef);
+		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
 		
 		assertThat(result, notNullValue());
@@ -400,7 +415,9 @@ public class MedicationRequestTranslatorImplTest {
 		codeableConcept.addCoding(new Coding().setCode(concept.getConceptId().toString()));
 		
 		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
+		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getReasonCode(), not(empty()));
 		assertThat(result.getReasonCodeFirstRep(), equalTo(codeableConcept));
@@ -417,7 +434,9 @@ public class MedicationRequestTranslatorImplTest {
 		medicationRequest.addReasonCode(codeableConcept);
 		
 		when(conceptTranslator.toOpenmrsType(codeableConcept)).thenReturn(concept);
+		
 		DrugOrder drugOrder = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		
 		assertThat(drugOrder, notNullValue());
 		assertThat(drugOrder.getOrderReason(), notNullValue());
 		assertThat(drugOrder.getOrderReason().getUuid(), equalTo(CONCEPT_UUID));
@@ -429,6 +448,7 @@ public class MedicationRequestTranslatorImplTest {
 		drugOrder.setCommentToFulfiller(COMMENT_TO_THE_FULL_FILLER);
 		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getNote(), not(empty()));
 		assertThat(result.getNoteFirstRep().getText(), equalTo(COMMENT_TO_THE_FULL_FILLER));
@@ -439,6 +459,7 @@ public class MedicationRequestTranslatorImplTest {
 		medicationRequest.addNote(new Annotation().setText(COMMENT_TO_THE_FULL_FILLER));
 		
 		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getCommentToFulfiller(), equalTo(COMMENT_TO_THE_FULL_FILLER));
 	}
@@ -464,6 +485,7 @@ public class MedicationRequestTranslatorImplTest {
 		when(dosageTranslator.toFhirResource(drugOrder)).thenReturn(dosage);
 		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getDosageInstructionFirstRep(), notNullValue());
 		assertThat(result.getDosageInstructionFirstRep().getText(), equalTo(DOSING_INSTRUCTIONS));
@@ -471,20 +493,15 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result.getDosageInstructionFirstRep().getRoute(), equalTo(codeableConcept));
 	}
 	
-	private DrugOrder setOrderNumberByReflection(DrugOrder order, String orderNumber) {
-		try {
-			Class clazz = order.getClass();
-			Field orderNumberField = clazz.getSuperclass().getDeclaredField("orderNumber");
-			Boolean isAccessible = orderNumberField.isAccessible();
-			if (!isAccessible) {
-				orderNumberField.setAccessible(true);
-			}
-			orderNumberField.set(((Order) order), orderNumber);
+	@SneakyThrows
+	private void setOrderNumberByReflection(DrugOrder order, String orderNumber) {
+		Class<? extends DrugOrder> clazz = order.getClass();
+		Field orderNumberField = clazz.getSuperclass().getDeclaredField("orderNumber");
+		boolean isAccessible = orderNumberField.isAccessible();
+		if (!isAccessible) {
+			orderNumberField.setAccessible(true);
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		return order;
+		
+		orderNumberField.set(order, orderNumber);
 	}
-	
 }

@@ -29,7 +29,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AbstractProvenanceHandlingTranslatorTest {
+public class BaseProvenanceHandlingTranslatorTest {
 	
 	private static final String USER_UUID = "ddc25312-9798-4e6c-b8f8-269f2dd07cfd";
 	

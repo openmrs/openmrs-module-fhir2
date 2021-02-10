@@ -182,6 +182,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
 		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getOnsetDateTimeType(), notNullValue());
 		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
 		assertThat(condition.getCode(), notNullValue());
 		assertThat(condition.getCode().getCoding(),
@@ -221,6 +222,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
 		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getOnsetDateTimeType(), notNullValue());
 		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
 		assertThat(condition.getCode().getCoding(),
 		    hasItem(hasProperty("code", equalTo("116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))));

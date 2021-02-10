@@ -212,6 +212,12 @@
                 <groupId>ca.uhn.hapi.fhir</groupId>
                 <artifactId>hapi-fhir-server</artifactId>
                 <version>${hapifhirVersion}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-messaging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
@@ -272,6 +278,11 @@
                 <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
                 <version>${hapifhirVersion}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.fhir</groupId>
+                <artifactId>ucum</artifactId>
+                <version>${ucumVersion}</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -724,7 +735,8 @@
         <lombokVersion>1.18.16</lombokVersion>
         <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
         <openmrsPlatformToolsVersion>2.0.5</openmrsPlatformToolsVersion>
-        <hapifhirVersion>5.0.0</hapifhirVersion>
+        <hapifhirVersion>5.2.1</hapifhirVersion>
+        <ucumVersion>1.0.3</ucumVersion>
     </properties>
 
     <profiles>

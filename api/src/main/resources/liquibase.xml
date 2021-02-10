@@ -67,7 +67,7 @@
             <and>
                 <tableExists tableName="fhir_concept_source"/>
                 <tableExists tableName="concept_reference_source"/>
-                <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='LOINC' and retired = 0
+                <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='LOINC' and retired = false
                 </sqlCheck>
                 <sqlCheck expectedResult="0">select count(*) from fhir_concept_source where uuid =
                     '249b13c8-72fa-4b96-8d3d-b200efed985e'
@@ -78,7 +78,7 @@
             insert into fhir_concept_source (name, concept_source_id, url, creator, date_created, uuid)
             select name, concept_source_id, 'http://loinc.org', 1, now(), '249b13c8-72fa-4b96-8d3d-b200efed985e'
             from concept_reference_source
-            where name = 'LOINC' and retired = 0
+            where name = 'LOINC' and retired = false
         ]]></sql>
     </changeSet>
 
@@ -87,7 +87,7 @@
             <and>
                 <tableExists tableName="fhir_concept_source"/>
                 <tableExists tableName="concept_reference_source"/>
-                <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='CIEL' and retired = 0
+                <sqlCheck expectedResult="1">select 1 from concept_reference_source where name='CIEL' and retired = false
                 </sqlCheck>
                 <sqlCheck expectedResult="0">select count(*) from fhir_concept_source where uuid =
                     '2b3c1ff8-768a-102f-83f4-12313b04a615'
@@ -98,7 +98,7 @@
             insert into fhir_concept_source (name, concept_source_id, url, creator, date_created, uuid)
             select name, concept_source_id, 'urn:oid:2.16.840.1.113883.3.7201', 1, now(), '2b3c1ff8-768a-102f-83f4-12313b04a615'
             from concept_reference_source
-            where name = 'CIEL' and retired = 0
+            where name = 'CIEL' and retired = false
         ]]></sql>
     </changeSet>
 
@@ -696,4 +696,223 @@
         ]]>
         </sql>
     </changeSet>
+
+	<changeSet id="add_fhir_duration_unit_map_20200930" author="ibacher">
+		<preConditions onFail="MARK_RAN" onError="WARN">
+			<not>
+				<tableExists tableName="fhir_duration_unit_map"/>
+			</not>
+		</preConditions>
+		<createTable tableName="fhir_duration_unit_map">
+			<column name="duration_unit_map_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="concept_id" type="int"/>
+			<column name="unit_of_time" type="varchar(20)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false"/>
+			</column>
+			<column name="changed_by" type="int"/>
+			<column name="date_changed" type="datetime"/>
+			<column name="retired" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="retired_by" type="int"/>
+			<column name="date_retired" type="datetime"/>
+			<column name="retired_reason" type="varchar(255)" defaultValue="null"/>
+			<column name="uuid" type="char(36)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="fhir_duration_unit_map_creator"
+		                         baseTableName="fhir_duration_unit_map" baseColumnNames="creator"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="fhir_duration_unit_map_changed_by"
+		                         baseTableName="fhir_duration_unit_map" baseColumnNames="changed_by"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="fhir_duration_unit_map_retired_by"
+		                         baseTableName="fhir_duration_unit_map" baseColumnNames="retired_by"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="fhir_duration_unit_map_concept"
+		                         baseTableName="fhir_duration_unit_map" baseColumnNames="concept_id"
+		                         referencedTableName="concept" referencedColumnNames="concept_id"/>
+		<createIndex tableName="fhir_duration_unit_map"
+		             indexName="fhir_duration_unit_map_unit_of_time">
+			<column name="unit_of_time"/>
+		</createIndex>
+	</changeSet>
+
+	<changeSet id="add_default_duration_unit_20200930" author="ibacher" dbms="mysql,mariadb">
+		<preConditions onFail="MARK_RAN" onError="WARN">
+			<and>
+                <tableExists tableName="concept"/>
+				<tableExists tableName="fhir_duration_unit_map"/>
+				<sqlCheck expectedResult="0">
+					select count(*) from fhir_duration_unit_map
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1822AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+			</and>
+		</preConditions>
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'S', 1, now(), uuid()
+            from concept
+            where uuid = '162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'MIN', 1, now(), uuid()
+            from concept
+            where uuid = '1733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'H', 1, now(), uuid()
+            from concept
+            where uuid = '1822AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'D', 1, now(), uuid()
+            from concept
+            where uuid = '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'WK', 1, now(), uuid()
+            from concept
+            where uuid = '1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'MO', 1, now(), uuid()
+            from concept
+            where uuid = '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'A' ,1, now(), uuid()
+            from concept
+            where uuid = '1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+	</changeSet>
+
+	<changeSet id="add_default_duration_unit_20200930" author="ibacher" dbms="postgresql">
+		<preConditions onFail="MARK_RAN" onError="WARN">
+			<and>
+				<tableExists tableName="fhir_duration_unit_map"/>
+				<sqlCheck expectedResult="0">
+					select count(*) from fhir_duration_unit_map
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+				<sqlCheck expectedResult="1">
+					select 1 from concept where uuid = '1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+				</sqlCheck>
+
+			</and>
+		</preConditions>
+		<!-- UUID function taken from here: https://stackoverflow.com/a/21327318 -->
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, "S", 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept
+            where uuid = '162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'MIN', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept
+            where uuid = '1733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'H', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept
+            where uuid = '1822AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'D', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept
+            where uuid = '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'WK', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept
+            where uuid = '1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'MO', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept
+            where uuid = '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+
+		<sql><![CDATA[
+            insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
+            select concept_id, 'A', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            from concept
+            where uuid = '1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        ]]>
+		</sql>
+	</changeSet>
 </databaseChangeLog>

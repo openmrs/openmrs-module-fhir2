@@ -75,6 +75,8 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_NAME = OPENMRS_FHIR_EXT_PREFIX + "/name";
 	
+	public static final String OPENMRS_FHIR_EXT_GROUP_DESCRIPTION = OPENMRS_FHIR_EXT_PREFIX + "/group/description";
+	
 	public static final String OPENMRS_FHIR_EXT_ADDRESS = OPENMRS_FHIR_EXT_PREFIX + "/address";
 	
 	public static final String OPENMRS_FHIR_EXT_NON_CODED_CONDITION = OPENMRS_FHIR_EXT_PREFIX + "/non-coded-condition";
@@ -277,4 +279,6 @@ public class FhirConstants {
 	public static final String INCLUDE_RESULT_PARAM = "result";
 	
 	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
+	
+	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 }

@@ -15,9 +15,11 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.Drug;
+import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Obs;
@@ -28,17 +30,15 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.Provider;
+import org.openmrs.TestOrder;
 import org.openmrs.User;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @Setter(AccessLevel.PACKAGE)
+@Slf4j
 public abstract class BaseReferenceHandlingTranslator {
-	
-	public static final String DRUG_ORDER_TYPE_UUID = "131168f4-15f5-102d-96e4-000c29c2a5d7";
-	
-	public static final String TEST_ORDER_TYPE_UUID = "52a447d3-a64a-11e3-9aeb-50e549534c5e";
 	
 	protected Reference createEncounterReference(@Nonnull Encounter encounter) {
 		return createEncounterReference((OpenmrsObject) encounter);
@@ -130,18 +130,19 @@ public abstract class BaseReferenceHandlingTranslator {
 	}
 	
 	protected Reference createOrderReference(@Nonnull Order order) {
-		if (order.getOrderType() == null) {
+		if (order == null) {
 			return null;
 		}
 		
-		if (order.getOrderType().getUuid().equals(TEST_ORDER_TYPE_UUID)) {
+		if (order instanceof TestOrder) {
 			return new Reference().setReference(FhirConstants.SERVICE_REQUEST + "/" + order.getUuid())
 			        .setType(FhirConstants.SERVICE_REQUEST);
-		} else if (order.getOrderType().getUuid().equals(DRUG_ORDER_TYPE_UUID)) {
-			return new Reference().setReference(FhirConstants.MEDICATION + "/" + order.getUuid())
-			        .setType(FhirConstants.MEDICATION);
+		} else if (order instanceof DrugOrder) {
+			return new Reference().setReference(FhirConstants.MEDICATION_REQUEST + "/" + order.getUuid())
+			        .setType(FhirConstants.MEDICATION_REQUEST);
 		} else {
-			throw new IllegalArgumentException("Cannot create reference of undetermined order type");
+			log.warn("Could not determine order type for order {}", order);
+			return null;
 		}
 	}
 	
