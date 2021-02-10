@@ -262,7 +262,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param theParams the parameters for this search
 	 */
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		
 	}
 	
 	@Override
