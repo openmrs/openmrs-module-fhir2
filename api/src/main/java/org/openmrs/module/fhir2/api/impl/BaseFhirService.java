@@ -191,7 +191,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		}
 	}
 	
-	private ResourceNotFoundException resourceNotFound(String uuid) {
+	protected ResourceNotFoundException resourceNotFound(String uuid) {
 		return new ResourceNotFoundException(
 		        "Resource of type " + resourceClass.getSimpleName() + " with ID " + uuid + " is not known");
 	}

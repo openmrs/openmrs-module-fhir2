@@ -39,7 +39,7 @@ public class VisitReferenceTranslatorImpl extends BaseReferenceHandlingTranslato
 	
 	@Override
 	public Visit toOpenmrsType(@Nonnull Reference reference) {
-		if (reference == null) {
+		if (reference == null || !reference.hasReference()) {
 			return null;
 		}
 		

@@ -39,7 +39,7 @@ public class PatientReferenceTranslatorImpl extends BaseReferenceHandlingTransla
 	
 	@Override
 	public Patient toOpenmrsType(@Nonnull Reference patient) {
-		if (patient == null) {
+		if (patient == null || !patient.hasReference()) {
 			return null;
 		}
 		

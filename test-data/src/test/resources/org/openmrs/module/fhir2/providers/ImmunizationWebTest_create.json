@@ -1,0 +1,32 @@
+{
+	"resourceType": "Immunization",
+	"status": "completed",
+	"vaccineCode": {
+		"coding": [{
+			"code": "15f83cd6-64e9-4e06-a5f9-364d3b14a43d",
+			"display": "COVAX"
+		}]
+	},
+	"patient": {
+		"reference": "Patient/8d703ff2-c3e2-4070-9737-73e713d5a50d"
+	},
+	"encounter": {
+		"reference": "Encounter/814fd8dc-e0be-416b-a7b5-4bac0a4b3297"
+	},
+	"occurrenceDateTime": "2020-07-08T18:30:00.000Z",
+	"manufacturer": {
+		"display": "ACME"
+	},
+	"lotNumber": "FOO1234",
+	"expirationDate": "2022-07-31",
+	"performer": {
+		"actor": {
+			"reference": "Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66",
+			"type": "Practitioner"
+		}
+	},
+	"protocolApplied": [{
+		"doseNumberPositiveInt": 2,
+		"series": "COVAX"
+	}]
+}

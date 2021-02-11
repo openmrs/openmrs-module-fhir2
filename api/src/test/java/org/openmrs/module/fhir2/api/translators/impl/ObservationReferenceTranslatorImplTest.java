@@ -87,7 +87,7 @@ public class ObservationReferenceTranslatorImplTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void toOpenmrsType_shouldErrorIfReferenceNotObsType() {
 		Reference otherReference = new Reference().setType(FhirConstants.PATIENT)
-		        .setIdentifier(new Identifier().setValue(UUID));
+		        .setReference(FhirConstants.PATIENT + "/" + UUID);
 		
 		observationReferenceTranslator.toOpenmrsType(otherReference);
 	}

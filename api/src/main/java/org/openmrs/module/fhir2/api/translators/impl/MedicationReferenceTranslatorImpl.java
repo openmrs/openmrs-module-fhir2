@@ -38,7 +38,7 @@ public class MedicationReferenceTranslatorImpl extends BaseReferenceHandlingTran
 	
 	@Override
 	public Drug toOpenmrsType(@Nonnull Reference reference) {
-		if (reference == null) {
+		if (reference == null || !reference.hasReference()) {
 			return null;
 		}
 		

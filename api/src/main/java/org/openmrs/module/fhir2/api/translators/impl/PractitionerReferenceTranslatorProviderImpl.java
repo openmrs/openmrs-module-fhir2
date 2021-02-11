@@ -38,7 +38,7 @@ public class PractitionerReferenceTranslatorProviderImpl extends BaseReferenceHa
 	
 	@Override
 	public Provider toOpenmrsType(@Nonnull Reference reference) {
-		if (reference == null) {
+		if (reference == null || !reference.hasReference()) {
 			return null;
 		}
 		
