@@ -13,13 +13,22 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.Cohort;
+import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 
+@Setter(AccessLevel.MODULE)
 public abstract class BaseGroupTranslator {
+	
+	@Autowired
+	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
 	public Group toFhirResource(@Nonnull Cohort cohort) {
 		notNull(cohort, "Cohort object should not be null");
@@ -40,6 +49,7 @@ public abstract class BaseGroupTranslator {
 		// Set to always person for now
 		group.setType(Group.GroupType.PERSON);
 		group.setName(cohort.getName());
+		group.setManagingEntity(practitionerReferenceTranslator.toFhirResource(cohort.getCreator()));
 		
 		return group;
 	}
@@ -58,6 +68,10 @@ public abstract class BaseGroupTranslator {
 		
 		if (group.hasActive()) {
 			existingCohort.setVoided(!group.getActive());
+		}
+		
+		if (group.hasManagingEntity()) {
+			existingCohort.setCreator(practitionerReferenceTranslator.toOpenmrsType(group.getManagingEntity()));
 		}
 		
 		Extension extension = group.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_GROUP_DESCRIPTION);
