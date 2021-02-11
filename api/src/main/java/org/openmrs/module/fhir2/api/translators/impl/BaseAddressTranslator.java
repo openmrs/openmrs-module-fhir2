@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
 import org.openmrs.module.fhir2.FhirConstants;
 
-public abstract class BaseAddressTranslatorImpl {
+public abstract class BaseAddressTranslator {
 	
 	protected Optional<Extension> getOpenmrsAddressExtension(@Nonnull Address address) {
 		return Optional.ofNullable(address.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_ADDRESS));
