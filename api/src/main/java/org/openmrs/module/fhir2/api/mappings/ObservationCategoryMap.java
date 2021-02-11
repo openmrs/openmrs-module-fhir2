@@ -18,6 +18,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 import org.openmrs.module.fhir2.model.FhirObservationCategoryMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,16 +47,8 @@ public class ObservationCategoryMap {
 		return null;
 	}
 	
-	public String getConceptClassUuid(@Nonnull String category) {
-		try {
-			return (String) sessionFactory.getCurrentSession().createCriteria(FhirObservationCategoryMap.class)
-			        .createAlias("conceptClass", "cc").add(eq("observationCategory", category))
-			        .setProjection(Projections.property("cc.uuid")).uniqueResult();
-		}
-		catch (HibernateException e) {
-			log.error("Exception caught while trying to load concept class for category '{}'", category, e);
-		}
-		
-		return null;
+	public DetachedCriteria queryConceptClassByCategory(@Nonnull String category) {
+		return DetachedCriteria.forClass(FhirObservationCategoryMap.class).createAlias("conceptClass", "cmcc")
+		        .add(eq("observationCategory", category)).setProjection(Projections.property("cmcc.uuid"));
 	}
 }

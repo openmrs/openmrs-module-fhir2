@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Subqueries;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -146,13 +147,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				return Optional.empty();
 			}
 			
-			String conceptClass = categoryMap.getConceptClassUuid(param.getValue());
-			
-			if (conceptClass == null) {
-				return Optional.empty();
-			}
-			
-			return Optional.of(eq("cc.uuid", conceptClass));
+			return Optional.of(Subqueries.propertyIn("cc.uuid", categoryMap.queryConceptClassByCategory(param.getValue())));
 		}).ifPresent(criteria::add);
 	}
 	
