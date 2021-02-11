@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Immunization xmlns="http://hl7.org/fhir">
+	<immunizationStatus>
+		<coding>
+			<system value="http://hl7.org/fhir/R4/valueset-immunization-status.html"/>
+			<code value="completed"/>
+		</coding>
+		<text value="completed"/>
+	</immunizationStatus>
+	<type value="immunization"/>
+	<category value="immunization"/>
+	<code>
+		<coding>
+			<code value="984AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+		</coding>
+	</code>
+	<patient>
+		<reference value="Patient/da7f524f-27ce-4bb2-86d6-6d1d05312bd5"/>
+	</patient>
+	<recorder>
+		<reference value="Practitioner/c98a1558-e131-11de-babe-001e378eb67e"/>
+	</recorder>
+</Immunization>
