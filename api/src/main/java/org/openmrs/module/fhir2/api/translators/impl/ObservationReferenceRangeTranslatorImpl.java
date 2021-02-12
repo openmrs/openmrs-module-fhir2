@@ -29,28 +29,38 @@ public class ObservationReferenceRangeTranslatorImpl implements ObservationRefer
 	public List<Observation.ObservationReferenceRangeComponent> toFhirResource(@Nonnull ConceptNumeric conceptNumeric) {
 		if (conceptNumeric != null) {
 			List<Observation.ObservationReferenceRangeComponent> observationReferenceRangeComponentList = new ArrayList<>();
-			if (conceptNumeric.getHiNormal() != null && conceptNumeric.getLowNormal() != null) {
+			if (conceptNumeric.getHiNormal() != null || conceptNumeric.getLowNormal() != null) {
 				observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiNormal(),
 				    conceptNumeric.getLowNormal(), FhirConstants.OBSERVATION_REFERENCE_NORMAL));
 			}
-			if (conceptNumeric.getHiCritical() != null && conceptNumeric.getLowCritical() != null) {
+			
+			if (conceptNumeric.getHiCritical() != null || conceptNumeric.getLowCritical() != null) {
 				observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiCritical(),
 				    conceptNumeric.getLowCritical(), FhirConstants.OBSERVATION_REFERENCE_TREATMENT));
 			}
-			if (conceptNumeric.getHiAbsolute() != null && conceptNumeric.getLowAbsolute() != null) {
+			
+			if (conceptNumeric.getHiAbsolute() != null || conceptNumeric.getLowAbsolute() != null) {
 				observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiAbsolute(),
 				    conceptNumeric.getLowAbsolute(), FhirConstants.OBSERVATION_REFERENCE_TREATMENT));
 			}
+			
 			return observationReferenceRangeComponentList;
 		} else {
 			return null;
 		}
 	}
 	
-	private Observation.ObservationReferenceRangeComponent createObservationReferenceRange(double hiValue, double lowValue,
+	private Observation.ObservationReferenceRangeComponent createObservationReferenceRange(Double hiValue, Double lowValue,
 	        String code) {
-		Observation.ObservationReferenceRangeComponent component = new Observation.ObservationReferenceRangeComponent()
-		        .setHigh(new Quantity().setValue(hiValue)).setLow(new Quantity().setValue(lowValue));
+		Observation.ObservationReferenceRangeComponent component = new Observation.ObservationReferenceRangeComponent();
+		
+		if (hiValue != null) {
+			component.setHigh(new Quantity().setValue(hiValue));
+		}
+		
+		if (lowValue != null) {
+			component.setLow(new Quantity().setValue(lowValue));
+		}
 		
 		CodeableConcept referenceRangeType = new CodeableConcept();
 		referenceRangeType.addCoding().setCode(code).setSystem(FhirConstants.OBSERVATION_REFERENCE_RANGE_SYSTEM_URI);

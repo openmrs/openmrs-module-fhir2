@@ -168,4 +168,11 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		
 		return null;
 	}
+	
+	@Override
+	protected Obs deproxyResult(Obs result) {
+		Obs obs = super.deproxyResult(result);
+		obs.setConcept(deproxyObject(obs.getConcept()));
+		return obs;
+	}
 }

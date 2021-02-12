@@ -13,6 +13,7 @@ import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
@@ -22,6 +23,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
@@ -56,7 +58,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	
 	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
 	
-	private static final String OBS_CONCEPT_UUID = "c607c80f-1ea9-4da3-bb88-6276ce8868dd";
+	private static final String OBS_CONCEPT_UUID = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String OBS_CONCEPT_DISPLAY_NAME = "Weight";
 	
@@ -65,6 +67,10 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	private static final String OBS_CONCEPT_CIEL_ID = "5089";
 	
 	private static final BigDecimal OBS_CONCEPT_VALUE = BigDecimal.valueOf(50.0);
+	
+	private static final BigDecimal OBS_LOW_REFERENCE_RANGE = BigDecimal.valueOf(0.0);
+	
+	private static final BigDecimal OBS_HIGH_REFERENCE_RANGE = BigDecimal.valueOf(250.0);
 	
 	private static final String OBS_PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
 	
@@ -107,6 +113,14 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		// verify expected value
 		assertThat(observation.getValueQuantity(), notNullValue());
 		assertThat(observation.getValueQuantity().getValue(), equalTo(OBS_CONCEPT_VALUE));
+		
+		// verify reference ranges
+		assertThat(observation.getReferenceRange(), notNullValue());
+		assertThat(observation.getReferenceRange(), not(empty()));
+		assertThat(observation.getReferenceRange(),
+		    hasItem(hasProperty("low", hasProperty("value", equalTo(OBS_LOW_REFERENCE_RANGE)))));
+		assertThat(observation.getReferenceRange(),
+		    hasItem(hasProperty("high", hasProperty("value", equalTo(OBS_HIGH_REFERENCE_RANGE)))));
 		
 		// verify expected patient
 		assertThat(observation.getSubject(), notNullValue());
@@ -159,6 +173,14 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		// verify expected value
 		assertThat(observation.getValueQuantity(), notNullValue());
 		assertThat(observation.getValueQuantity().getValue(), equalTo(OBS_CONCEPT_VALUE));
+		
+		// verify reference ranges
+		assertThat(observation.getReferenceRange(), notNullValue());
+		assertThat(observation.getReferenceRange(), not(empty()));
+		assertThat(observation.getReferenceRange(),
+		    hasItem(hasProperty("low", hasProperty("value", equalTo(OBS_LOW_REFERENCE_RANGE)))));
+		assertThat(observation.getReferenceRange(),
+		    hasItem(hasProperty("high", hasProperty("value", equalTo(OBS_HIGH_REFERENCE_RANGE)))));
 		
 		// verify expected patient
 		assertThat(observation.getSubject(), notNullValue());
