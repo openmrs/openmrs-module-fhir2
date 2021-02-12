@@ -31,7 +31,6 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
@@ -59,9 +58,6 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 	@Autowired
 	private ConceptService conceptService;
 	
-	@Autowired
-	private ConditionClinicalStatusTranslator<Obs> conditionClinicalStatusTranslator;
-	
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Obs obsCondition) {
 		notNull(obsCondition, "The Openmrs Condition object should not be null");
@@ -79,9 +75,11 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 				fhirCondition.setSubject(patientReferenceTranslator.toFhirResource((Patient) obsPerson));
 			}
 		}
+		
 		if (obsCondition.getValueCoded() != null) {
 			fhirCondition.setCode(conceptTranslator.toFhirResource(obsCondition.getValueCoded()));
 		}
+		
 		fhirCondition.setOnset(new DateTimeType().setValue(obsCondition.getObsDatetime()));
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(obsCondition.getCreator()));
 		fhirCondition.setRecordedDate(obsCondition.getDateCreated());
