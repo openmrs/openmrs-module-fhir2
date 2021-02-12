@@ -41,6 +41,5 @@ public interface FhirUserDao extends FhirDao<User> {
 	
 	@Authorized(PrivilegeConstants.GET_USERS)
 	@Override
-	List<User> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
-	        int firstResult, int lastResult);
+	List<User> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
 }

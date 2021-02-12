@@ -43,6 +43,5 @@ public interface FhirLocationDao extends FhirDao<Location> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
-	List<Location> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
-	        int firstResult, int lastResult);
+	List<Location> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
 }

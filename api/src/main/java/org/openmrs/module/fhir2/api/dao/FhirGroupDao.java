@@ -35,5 +35,4 @@ public interface FhirGroupDao extends FhirDao<Cohort> {
 	@Override
 	@Authorized(PrivilegeConstants.DELETE_COHORTS)
 	Cohort delete(@Nonnull String uuid);
-	
 }

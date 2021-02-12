@@ -119,7 +119,7 @@ public class FhirObservationServiceImplTest {
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(obs));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

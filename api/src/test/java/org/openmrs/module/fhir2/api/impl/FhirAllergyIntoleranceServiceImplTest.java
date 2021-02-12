@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -153,7 +152,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientParam);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(allergies);
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -185,7 +184,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientParam);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(allergies);
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -217,7 +216,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientParam);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(allergies);
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -249,7 +248,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    patientParam);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(allergies);
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -277,7 +276,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER,
 		    category);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(allergies);
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -304,7 +303,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ALLERGEN_SEARCH_HANDLER,
 		    allergen);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(allergies);
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -331,7 +330,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.SEVERITY_SEARCH_HANDLER,
 		    severity);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(allergies);
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -358,7 +357,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER,
 		    manifestation);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(allergies);
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -385,7 +384,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, status);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(allergies);
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(allergies);
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -408,8 +407,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt()))
-		        .thenReturn(Collections.singletonList(omrsAllergy));
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(omrsAllergy));
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -432,8 +430,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt()))
-		        .thenReturn(Collections.singletonList(omrsAllergy));
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(omrsAllergy));
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -457,8 +454,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt()))
-		        .thenReturn(Collections.singletonList(omrsAllergy));
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(omrsAllergy));
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
@@ -481,8 +477,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(allergyIntoleranceDao.getSearchResults(any(), any(), anyInt(), anyInt()))
-		        .thenReturn(Collections.singletonList(omrsAllergy));
+		when(allergyIntoleranceDao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(omrsAllergy));
 		when(allergyIntoleranceDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ALLERGY_UUID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        allergyIntoleranceDao, translator, globalPropertyService, searchQueryInclude));
