@@ -240,6 +240,8 @@ public class ObservationTranslatorImplTest {
 		assertThat(result.getReferenceRange(), notNullValue());
 		assertThat(result.getReferenceRange(),
 		    hasItem(hasProperty("low", hasProperty("value", equalTo(BigDecimal.valueOf(LOW_NORMAL_VALUE))))));
+		assertThat(result.getReferenceRange(),
+		    hasItem(hasProperty("high", hasProperty("value", equalTo(BigDecimal.valueOf(HIGH_NORMAL_VALUE))))));
 	}
 	
 	@Test
