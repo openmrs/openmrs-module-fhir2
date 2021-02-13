@@ -41,36 +41,36 @@ import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 @Component
 @Setter(AccessLevel.PUBLIC)
 public class FhirRestServlet extends RestfulServer {
-
+	
 	private static final long serialVersionUID = 2L;
-
+	
 	private static final List<String> DEFAULT_NARRATIVE_FILES = Arrays.asList(FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE,
-			FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE);
-
+	    FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE);
+	
 	@Autowired
 	@Qualifier("adminService")
 	private AdministrationService administrationService;
-
+	
 	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
-
+	
 	@Autowired
 	@Qualifier("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
-
+	
 	private MessageSource messageSource;
-
+	
 	@Setter(AccessLevel.NONE)
 	private BasePagingProvider pagingProvider;
-
+	
 	private GlobalPropertyListener fhirRestServletListener = new GlobalPropertyListener() {
-
+		
 		@Override
 		public boolean supportsPropertyName(String propertyName) {
 			return FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE.equals(propertyName)
-					|| FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE.equals(propertyName);
+			        || FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE.equals(propertyName);
 		}
-
+		
 		@Override
 		public void globalPropertyChanged(GlobalProperty newValue) {
 			int value;
@@ -81,7 +81,7 @@ public class FhirRestServlet extends RestfulServer {
 				globalPropertyDeleted(newValue.getProperty());
 				return;
 			}
-
+			
 			switch (newValue.getProperty()) {
 				case FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE:
 					pagingProvider.setDefaultPageSize(value);
@@ -91,7 +91,7 @@ public class FhirRestServlet extends RestfulServer {
 					break;
 			}
 		}
-
+		
 		@Override
 		public void globalPropertyDeleted(String propertyName) {
 			switch (propertyName) {
@@ -104,7 +104,9 @@ public class FhirRestServlet extends RestfulServer {
 			}
 		}
 	};
-
+	
+	// TODO: Why does the formatter screw up only this method?
+	//@formatter:off
 	@Override
 	protected void initialize() {
 		// ensure properties for this class are properly injected
@@ -141,38 +143,39 @@ public class FhirRestServlet extends RestfulServer {
 		getFhirContext()
 				.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(messageSource, narrativePropertiesFiles));
 	}
-
+	//@formatter:on
+	
 	@Override
 	protected String createPoweredByHeaderComponentName() {
 		return FhirConstants.OPENMRS_FHIR_SERVER_NAME;
 	}
-
+	
 	@Override
 	protected String getRequestPath(String requestFullPath, String servletContextPath, String servletPath) {
 		return requestFullPath
-				.substring(escapedLength(servletContextPath) + escapedLength(servletPath) + escapedLength("/fhir2Servlet"));
+		        .substring(escapedLength(servletContextPath) + escapedLength(servletPath) + escapedLength("/fhir2Servlet"));
 	}
-
+	
 	@Override
 	@Autowired
 	@Qualifier("fhirR4")
 	public void setFhirContext(FhirContext theFhirContext) {
 		super.setFhirContext(theFhirContext);
 	}
-
+	
 	@Override
 	@Autowired
 	@Qualifier("fhirResources")
 	public void setResourceProviders(Collection<IResourceProvider> theProviders) {
 		super.setResourceProviders(theProviders);
 	}
-
+	
 	@Override
 	@Autowired
 	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
 		super.setServerAddressStrategy(theServerAddressStrategy);
 	}
-
+	
 	@Autowired
 	public void setMessageSource(MessageSource messageSource) {
 		this.messageSource = messageSource;

@@ -177,7 +177,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids) {
 		@SuppressWarnings("unchecked")
 		List<T> results = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType())
-				.add(in("uuid", resourceUuids)).list();
+		        .add(in("uuid", resourceUuids)).list();
 		
 		results.sort(Comparator.comparingInt(r -> resourceUuids.indexOf(r.getUuid())));
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());

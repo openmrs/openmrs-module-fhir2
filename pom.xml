@@ -687,7 +687,7 @@
                 <plugin>
                     <groupId>net.revelc.code.formatter</groupId>
                     <artifactId>formatter-maven-plugin</artifactId>
-                    <version>2.11.0</version>
+                    <version>2.13.0</version>
                     <configuration>
                         <lineEnding>LF</lineEnding>
                         <configFile>eclipse/OpenMRSFormatter.xml</configFile>
@@ -696,7 +696,7 @@
                         <dependency>
                             <groupId>org.openmrs.tools</groupId>
                             <artifactId>openmrs-tools</artifactId>
-                            <version>${openmrsPlatformVersion}</version>
+                            <version>${openmrsPlatformToolsVersion}</version>
                         </dependency>
                     </dependencies>
                     <executions>
@@ -710,7 +710,7 @@
                 <plugin>
                     <groupId>net.revelc.code</groupId>
                     <artifactId>impsort-maven-plugin</artifactId>
-                    <version>1.3.2</version>
+                    <version>1.5.0</version>
                     <configuration>
                         <groups>javax, java, *</groups>
                         <removeUnused>true</removeUnused>
@@ -734,7 +734,7 @@
         <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
         <lombokVersion>1.18.16</lombokVersion>
         <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
-        <openmrsPlatformToolsVersion>2.0.5</openmrsPlatformToolsVersion>
+        <openmrsPlatformToolsVersion>2.4.0</openmrsPlatformToolsVersion>
         <hapifhirVersion>5.2.1</hapifhirVersion>
         <ucumVersion>1.0.3</ucumVersion>
     </properties>
