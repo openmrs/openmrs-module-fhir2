@@ -7,13 +7,13 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api;
+package org.openmrs.module.fhir2;
 
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import org.hl7.fhir.r4.model.Group;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 
-public interface FhirGroupService extends FhirService<Group> {
+@Configuration
+@ImportResource({ "classpath:applicationContext-service.xml", "classpath*:moduleApplicationContext.xml" })
+public class TestFhirSpringConfiguration {
 	
-	IBundleProvider searchForGroups(ReferenceAndListParam participant);
 }
