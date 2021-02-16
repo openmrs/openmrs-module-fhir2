@@ -31,6 +31,26 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao, 
     protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
         theParams.getParameters().forEach(entry ->{
             switch (entry.getKey()) {
+                case FhirConstants.MEDIA_STATUS:
+                    entry.getValue().forEach(param ->);
+                    break;
+                case FhirConstants.MEDIA_TYPE:
+                    break;
+                case FhirConstants.MEDIA_SUBJECT:
+                    break;
+                case FhirConstants.MEDIA_ENCOUNTER_REFERENCE:
+                    break;
+                case FhirConstants.MEDIA_CREATED_DATE_TIME:
+                    break;
+                case FhirConstants.MEDIA_CONTENT_TYPE:
+                    break;
+                case FhirConstants.CONTENT_DATA:
+                    break;
+                case FhirConstants.CONTENT_TITLE:
+                    break;
+                case FhirConstants.CONTENT_DATE_OF_CREATION:
+                    break;
+
 
             }
         });

@@ -14,13 +14,14 @@
  */
 package org.openmrs.module.fhir2.api.handler;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
-import org.openmrs.api.ObsService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.customdatatype.CustomDatatypeHandler;
@@ -31,6 +32,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
+@Setter(AccessLevel.PUBLIC)
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class MediaComplexObsHandler implements ComplexObsHandler, CustomDatatypeHandler {
 
@@ -53,7 +55,6 @@ public class MediaComplexObsHandler implements ComplexObsHandler, CustomDatatype
 
         obs.setValueComplex(obs.getComplexData().getTitle());
         obs.setComplexData(null);
-
         return obs;
     }
 
