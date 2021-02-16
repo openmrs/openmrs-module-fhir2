@@ -7,12 +7,16 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api;
+package org.openmrs.module.fhir2.api.dao.impl;
 
-import java.util.Locale;
+import lombok.AccessLevel;
+import lombok.Setter;
+import org.openmrs.Cohort;
+import org.openmrs.module.fhir2.api.dao.FhirGroupDao;
+import org.springframework.stereotype.Component;
 
-public interface FhirUserDefaultProperties {
-	
-	Locale getDefaultLocale();
+@Component
+@Setter(AccessLevel.PACKAGE)
+public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDao {
 	
 }

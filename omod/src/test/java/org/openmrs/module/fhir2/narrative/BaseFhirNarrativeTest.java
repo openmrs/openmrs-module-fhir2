@@ -54,7 +54,7 @@ public class BaseFhirNarrativeTest {
 		messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setBasename("classpath:messages");
 		
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(messageSource,
+		ctx.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(messageSource,
 		        FhirConstants.OPENMRS_NARRATIVES_PROPERTY_FILE, FhirConstants.HAPI_NARRATIVES_PROPERTY_FILE));
 		parser = ctx.newJsonParser();
 	}

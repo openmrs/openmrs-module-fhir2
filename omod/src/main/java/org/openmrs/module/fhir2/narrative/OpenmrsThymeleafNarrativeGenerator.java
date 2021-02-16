@@ -28,6 +28,7 @@ import java.util.List;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import lombok.Getter;
 import org.apache.commons.lang.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.context.MessageSource;
@@ -35,38 +36,26 @@ import org.springframework.context.MessageSource;
 /**
  * Class for carrying out the task of narrative generation
  */
-public class OpenMRSThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator {
+public class OpenmrsThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator {
 	
 	private boolean isInitialized;
 	
-	private List<String> propertyFile;
+	@Getter
+	private List<String> propertyFiles;
+	
+	public OpenmrsThymeleafNarrativeGenerator(MessageSource messageSource, String... propertyFiles) {
+		this(messageSource, Arrays.asList(propertyFiles));
+	}
 	
 	/**
 	 * Constructor for OpenMRSThymeleafNarrativeGenerator
 	 * 
-	 * @param thePropertyFile
+	 * @param propertyFiles property files to define the narratives for this narrative generator
 	 */
-	public OpenMRSThymeleafNarrativeGenerator(MessageSource messageSource, String... propertyFile) {
+	public OpenmrsThymeleafNarrativeGenerator(MessageSource messageSource, List<String> propertyFiles) {
 		super();
 		setMessageResolver(new OpenmrsMessageResolver(messageSource));
-		setPropertyFile(propertyFile);
-	}
-	
-	/**
-	 * Sets property file paths for the narrative generator
-	 * 
-	 * @param propertyFile
-	 */
-	public void setPropertyFile(String... propertyFile) {
-		Validate.notNull(propertyFile, "Property file can not be null");
-		this.propertyFile = Arrays.asList(propertyFile);
-	}
-	
-	/**
-	 * @return the list of property file paths for the narrative generator
-	 */
-	public List<String> getPropertyFile() {
-		return propertyFile;
+		setPropertyFiles(propertyFiles);
 	}
 	
 	/**
@@ -81,15 +70,25 @@ public class OpenMRSThymeleafNarrativeGenerator extends ThymeleafNarrativeGenera
 		if (!isInitialized) {
 			initialize();
 		}
-		super.populateResourceNarrative(theFhirContext, theResource);
-		return false;
+		
+		return super.populateResourceNarrative(theFhirContext, theResource);
+	}
+	
+	/**
+	 * Sets property file paths for the narrative generator
+	 *
+	 * @param propertyFiles
+	 */
+	public void setPropertyFiles(List<String> propertyFiles) {
+		Validate.notNull(propertyFiles, "Property file can not be null");
+		this.propertyFiles = propertyFiles;
 	}
 	
 	private synchronized void initialize() {
 		if (!isInitialized) {
-			List<String> propertyFile = getPropertyFile();
+			List<String> propertyFile = getPropertyFiles();
 			try {
-				OpenMRSNarrativeTemplateManifest manifest = OpenMRSNarrativeTemplateManifest
+				OpenmrsNarrativeTemplateManifest manifest = OpenmrsNarrativeTemplateManifest
 				        .forManifestFileLocation(propertyFile);
 				setManifest(manifest);
 			}

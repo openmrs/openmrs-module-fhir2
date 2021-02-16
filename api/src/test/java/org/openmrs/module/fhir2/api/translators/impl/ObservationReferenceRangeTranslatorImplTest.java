@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.math.BigDecimal;
@@ -39,9 +39,9 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	private static final Double HIGH_CRITICAL_VALUE = 6.0;
 	
-	private ObservationReferenceRangeTranslatorImpl observationReferenceRangeTranslator;
-	
 	private static final String CONCEPT_UUID = "12345-abcdef-12345";
+	
+	private ObservationReferenceRangeTranslatorImpl observationReferenceRangeTranslator;
 	
 	@Before
 	public void setup() {
@@ -50,7 +50,6 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	
 	@Test
 	public void toFhirType_shouldMapHiAndLowCriticalObservationReferenceRangeToExpected() {
-		
 		ConceptNumeric conceptNumeric = new ConceptNumeric();
 		conceptNumeric.setUuid(CONCEPT_UUID);
 		
@@ -102,7 +101,7 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirType_shouldNotMapHiAndLowAbsoluteToExpectedIfOneIsNull() {
+	public void toFhirType_shouldMapHiAndLowAbsoluteToExpectedIfOneIsNull() {
 		ConceptNumeric conceptNumeric = new ConceptNumeric();
 		conceptNumeric.setUuid(CONCEPT_UUID);
 		conceptNumeric.setLowAbsolute(null);
@@ -111,24 +110,30 @@ public class ObservationReferenceRangeTranslatorImplTest {
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
 		        .toFhirResource(conceptNumeric);
 		
-		assertThat(result, is(empty()));
+		assertThat(result, not(empty()));
+		assertThat(result.get(0).hasLow(), equalTo(false));
+		assertThat(result,
+		    hasItem(hasProperty("high", hasProperty("value", equalTo(BigDecimal.valueOf(HIGH_ABSOLUTE_VALUE))))));
 	}
 	
 	@Test
-	public void toFhirType_shouldNotMapHiAndLowNormalToExpectedIfOneIsNull() {
+	public void toFhirType_shouldMapHiAndLowNormalToExpectedIfOneIsNull() {
 		ConceptNumeric conceptNumeric = new ConceptNumeric();
 		conceptNumeric.setUuid(CONCEPT_UUID);
-		conceptNumeric.setHiNormal(null);
+		conceptNumeric.setLowNormal(null);
 		conceptNumeric.setHiNormal(HIGH_NORMAL_VALUE);
 		
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
 		        .toFhirResource(conceptNumeric);
 		
-		assertThat(result, is(empty()));
+		assertThat(result, not(empty()));
+		assertThat(result.get(0).hasLow(), equalTo(false));
+		assertThat(result,
+		    hasItem(hasProperty("high", hasProperty("value", equalTo(BigDecimal.valueOf(HIGH_NORMAL_VALUE))))));
 	}
 	
 	@Test
-	public void toFhirType_shouldNotMapHiAndLowCriticalToExpectedIfOneIsNull() {
+	public void toFhirType_shouldMapHiAndLowCriticalToExpectedIfOneIsNull() {
 		ConceptNumeric conceptNumeric = new ConceptNumeric();
 		conceptNumeric.setUuid(CONCEPT_UUID);
 		conceptNumeric.setLowCritical(null);
@@ -137,6 +142,9 @@ public class ObservationReferenceRangeTranslatorImplTest {
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
 		        .toFhirResource(conceptNumeric);
 		
-		assertThat(result, is(empty()));
+		assertThat(result, not(empty()));
+		assertThat(result.get(0).hasLow(), equalTo(false));
+		assertThat(result,
+		    hasItem(hasProperty("high", hasProperty("value", equalTo(BigDecimal.valueOf(HIGH_CRITICAL_VALUE))))));
 	}
 }

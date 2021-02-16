@@ -43,9 +43,9 @@ public class NarrativeGeneratorTest {
 	 * Check that IOException is thrown when no valid prefix is present in property file path
 	 */
 	@Test
-	public void shouldThrowIOExcpetionWhenNoValidPrefixInPath() {
+	public void shouldThrowIOExceptionWhenNoValidPrefixInPath() {
 		String givenPath = "some/random/path/without/prefix.properties";
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(null, givenPath));
+		ctx.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(null, givenPath));
 		
 		String expectedErrorMessage = "Invalid resource name: '" + givenPath
 		        + "' (must start with classpath: or file: or openmrs:)";
@@ -61,7 +61,7 @@ public class NarrativeGeneratorTest {
 	@Test
 	public void shouldThrowIOExcpetionForIncorrectClassPath() {
 		String givenPath = "classpath:some/random/class/path.properties";
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(null, givenPath));
+		ctx.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(null, givenPath));
 		
 		String expectedErrorMessage = "Can not find '" + givenPath.substring("classpath:".length()) + "' on classpath";
 		
@@ -76,7 +76,7 @@ public class NarrativeGeneratorTest {
 	@Test
 	public void shouldThrowIOExcpetionForIncorrectFilePath() {
 		String givenPath = "file:some/random/file/path.properties";
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(null, givenPath));
+		ctx.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(null, givenPath));
 		
 		File file = new File(givenPath.substring("file:".length()));
 		String expectedErrorMessage = "File not found: " + file.getAbsolutePath();
@@ -92,7 +92,7 @@ public class NarrativeGeneratorTest {
 	@Test
 	public void shouldThrowIOExcpetionForIncorrectOpenmrsPath() {
 		String givenPath = "openmrs:some/random/openmrs/path.properties";
-		ctx.setNarrativeGenerator(new OpenMRSThymeleafNarrativeGenerator(null, givenPath));
+		ctx.setNarrativeGenerator(new OpenmrsThymeleafNarrativeGenerator(null, givenPath));
 		
 		File file = new File(OpenmrsUtil.getApplicationDataDirectory(), givenPath.substring("openmrs:".length()));
 		String expectedErrorMessage = "File not found: " + file.getAbsolutePath();
@@ -118,7 +118,7 @@ public class NarrativeGeneratorTest {
 		String expectedContextPath = "testContextPath";
 		String expectedNarrative = "<div>testNarrativeContent</div>";
 		
-		OpenMRSNarrativeTemplateManifest manifest = OpenMRSNarrativeTemplateManifest
+		OpenmrsNarrativeTemplateManifest manifest = OpenmrsNarrativeTemplateManifest
 		        .forManifestFileLocation(Collections.singletonList(testNarrativePropFile));
 		INarrativeTemplate template = manifest.getTemplateByName(ctx, EnumSet.of(TemplateTypeEnum.THYMELEAF), "testRes")
 		        .get(0);
@@ -140,7 +140,7 @@ public class NarrativeGeneratorTest {
 		        + " - the key must end in one of the expected extensions "
 		        + "'.profile', '.resourceType', '.dataType', '.style', '.contextPath', '.narrative', '.title'";
 		
-		Throwable e = assertThrows(ConfigurationException.class, () -> OpenMRSNarrativeTemplateManifest
+		Throwable e = assertThrows(ConfigurationException.class, () -> OpenmrsNarrativeTemplateManifest
 		        .forManifestFileLocation(Collections.singletonList(testNarrativePropFile)));
 		assertEquals(e.getMessage(), expectedErrorMessage);
 	}

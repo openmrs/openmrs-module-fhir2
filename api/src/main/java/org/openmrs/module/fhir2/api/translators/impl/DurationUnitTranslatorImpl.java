@@ -19,7 +19,9 @@ import org.openmrs.Concept;
 import org.openmrs.module.fhir2.api.mappings.DurationUnitMap;
 import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 @Setter(AccessLevel.PACKAGE)
 public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 	

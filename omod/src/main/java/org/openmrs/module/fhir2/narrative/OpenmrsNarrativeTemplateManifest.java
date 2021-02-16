@@ -58,20 +58,20 @@ import org.openmrs.util.OpenmrsUtil;
  * Class for creating style mappings to Narrative Template from specified properties and resources
  */
 @Slf4j
-public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManifest {
+public class OpenmrsNarrativeTemplateManifest implements INarrativeTemplateManifest {
 	
-	private final Map<String, List<OpenMRSNarrativeTemplate>> styleToResourceTypeToTemplate;
+	private final Map<String, List<OpenmrsNarrativeTemplate>> styleToResourceTypeToTemplate;
 	
-	private final Map<String, List<OpenMRSNarrativeTemplate>> styleToDatatypeToTemplate;
+	private final Map<String, List<OpenmrsNarrativeTemplate>> styleToDatatypeToTemplate;
 	
-	private final Map<String, List<OpenMRSNarrativeTemplate>> styleToNameToTemplate;
+	private final Map<String, List<OpenmrsNarrativeTemplate>> styleToNameToTemplate;
 	
-	private OpenMRSNarrativeTemplateManifest(Collection<OpenMRSNarrativeTemplate> templates) {
-		Map<String, List<OpenMRSNarrativeTemplate>> resourceTypeToTemplate = new HashMap<>();
-		Map<String, List<OpenMRSNarrativeTemplate>> datatypeToTemplate = new HashMap<>();
-		Map<String, List<OpenMRSNarrativeTemplate>> nameToTemplate = new HashMap<>();
+	private OpenmrsNarrativeTemplateManifest(Collection<OpenmrsNarrativeTemplate> templates) {
+		Map<String, List<OpenmrsNarrativeTemplate>> resourceTypeToTemplate = new HashMap<>();
+		Map<String, List<OpenmrsNarrativeTemplate>> datatypeToTemplate = new HashMap<>();
+		Map<String, List<OpenmrsNarrativeTemplate>> nameToTemplate = new HashMap<>();
 		
-		for (OpenMRSNarrativeTemplate nextTemplate : templates) {
+		for (OpenmrsNarrativeTemplate nextTemplate : templates) {
 			nameToTemplate.computeIfAbsent(nextTemplate.getTemplateName(), t -> new ArrayList<>()).add(nextTemplate);
 			for (String nextResourceType : nextTemplate.getAppliesToResourceTypes()) {
 				resourceTypeToTemplate.computeIfAbsent(nextResourceType.toUpperCase(), t -> new ArrayList<>())
@@ -134,7 +134,7 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 	 *         by their filepath
 	 * @throws IOException
 	 */
-	public static OpenMRSNarrativeTemplateManifest forManifestFileLocation(Collection<String> propertyFilePaths)
+	public static OpenmrsNarrativeTemplateManifest forManifestFileLocation(Collection<String> propertyFilePaths)
 	        throws IOException {
 		log.debug("Loading narrative properties file(s): {}", propertyFilePaths);
 		List<String> manifestFileContents = new ArrayList<>(propertyFilePaths.size());
@@ -151,16 +151,16 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 	 *         files
 	 * @throws IOException
 	 */
-	public static OpenMRSNarrativeTemplateManifest forManifestFileContents(Collection<String> resources) throws IOException {
-		List<OpenMRSNarrativeTemplate> templates = new ArrayList<>();
+	public static OpenmrsNarrativeTemplateManifest forManifestFileContents(Collection<String> resources) throws IOException {
+		List<OpenmrsNarrativeTemplate> templates = new ArrayList<>();
 		for (String next : resources) {
 			templates.addAll(loadProperties(next));
 		}
-		return new OpenMRSNarrativeTemplateManifest(templates);
+		return new OpenmrsNarrativeTemplateManifest(templates);
 	}
 	
-	private static Collection<OpenMRSNarrativeTemplate> loadProperties(String manifestText) throws IOException {
-		Map<String, OpenMRSNarrativeTemplate> nameToTemplate = new HashMap<>();
+	private static Collection<OpenmrsNarrativeTemplate> loadProperties(String manifestText) throws IOException {
+		Map<String, OpenmrsNarrativeTemplate> nameToTemplate = new HashMap<>();
 		
 		Properties file = new Properties();
 		
@@ -171,8 +171,8 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 			String name = nextKey.substring(0, nextKey.indexOf('.'));
 			Validate.notBlank(name, "Invalid narrative property file key: %s", nextKey);
 			
-			OpenMRSNarrativeTemplate nextTemplate = nameToTemplate.computeIfAbsent(name,
-			    t -> new OpenMRSNarrativeTemplate().setTemplateName(name));
+			OpenmrsNarrativeTemplate nextTemplate = nameToTemplate.computeIfAbsent(name,
+			    t -> new OpenmrsNarrativeTemplate().setTemplateName(name));
 			
 			Validate.isTrue(!nextKey.endsWith(".class"),
 			    "Narrative manifest does not support specifying templates by class name - Use \"[name].resourceType=[resourceType]\" instead");
@@ -258,13 +258,13 @@ public class OpenMRSNarrativeTemplateManifest implements INarrativeTemplateManif
 	}
 	
 	private static <T> List<INarrativeTemplate> getFromMap(EnumSet<TemplateTypeEnum> styles, T key,
-	        Map<T, List<OpenMRSNarrativeTemplate>> map) {
+	        Map<T, List<OpenmrsNarrativeTemplate>> map) {
 		return map.getOrDefault(key, Collections.emptyList()).stream().filter(t -> styles.contains(t.getTemplateType()))
 		        .collect(Collectors.toList());
 	}
 	
-	private static <T> Map<T, List<OpenMRSNarrativeTemplate>> makeImmutable(
-	        Map<T, List<OpenMRSNarrativeTemplate>> styleToResourceTypeToTemplate) {
+	private static <T> Map<T, List<OpenmrsNarrativeTemplate>> makeImmutable(
+	        Map<T, List<OpenmrsNarrativeTemplate>> styleToResourceTypeToTemplate) {
 		styleToResourceTypeToTemplate.replaceAll((key, value) -> Collections.unmodifiableList(value));
 		return Collections.unmodifiableMap(styleToResourceTypeToTemplate);
 	}

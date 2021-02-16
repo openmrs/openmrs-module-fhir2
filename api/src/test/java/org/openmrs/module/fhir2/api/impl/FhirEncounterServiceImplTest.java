@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -153,7 +152,7 @@ public class FhirEncounterServiceImplTest {
 		
 		fhirEncounter.setId(ENCOUNTER_UUID);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.getSearchResults(any(), any())).thenReturn(encounters);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -184,7 +183,7 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER,
 		    location);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.getSearchResults(any(), any())).thenReturn(encounters);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -215,7 +214,7 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.getSearchResults(any(), any())).thenReturn(encounters);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -247,7 +246,7 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER,
 		    subject);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(encounters);
+		when(dao.getSearchResults(any(), any())).thenReturn(encounters);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -270,7 +269,7 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -293,7 +292,7 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -317,7 +316,7 @@ public class FhirEncounterServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -340,7 +339,7 @@ public class FhirEncounterServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -364,7 +363,7 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER,
 		    revIncludes);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -389,7 +388,7 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER,
 		    revIncludes);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(

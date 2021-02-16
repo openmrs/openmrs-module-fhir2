@@ -34,7 +34,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 /**
  * Class which defines the narrative template
  */
-public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
+public class OpenmrsNarrativeTemplate implements INarrativeTemplate {
 	
 	private String contextPath;
 	
@@ -116,7 +116,7 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 		return this.templateName;
 	}
 	
-	protected OpenMRSNarrativeTemplate setTemplateName(String templateName) {
+	protected OpenmrsNarrativeTemplate setTemplateName(String templateName) {
 		this.templateName = templateName;
 		return this;
 	}
@@ -127,7 +127,7 @@ public class OpenMRSNarrativeTemplate implements INarrativeTemplate {
 	@Override
 	public String getTemplateText() {
 		try {
-			return OpenMRSNarrativeTemplateManifest.loadResource(this.templateFilename);
+			return OpenmrsNarrativeTemplateManifest.loadResource(this.templateFilename);
 		}
 		catch (IOException e) {
 			throw new InternalErrorException(e);

@@ -18,7 +18,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -232,7 +231,7 @@ public class FhirConditionServiceImplTest {
 		        .setSortSpec(sort);
 		
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(obsCondition));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obsCondition));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
