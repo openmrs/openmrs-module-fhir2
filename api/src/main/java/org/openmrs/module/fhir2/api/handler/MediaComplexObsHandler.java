@@ -14,11 +14,13 @@
  */
 package org.openmrs.module.fhir2.api.handler;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
+import org.openmrs.api.ObsService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.customdatatype.CustomDatatypeHandler;
@@ -48,20 +50,48 @@ public class MediaComplexObsHandler implements ComplexObsHandler, CustomDatatype
             throw new APIException("Cannot save complex obs where obsId=" + obs.getObsId() + "Desired Patient id :"
             +Integer.parseInt(obs.getValueComplex()) + "cannot be found");
         }
-        
-        ComplexData complexdata = obs.getComplexData();
-        obs.setValueComplex(complexdata.getTitle());
 
-        return null;
+        obs.setValueComplex(obs.getComplexData().getTitle());
+        obs.setComplexData(null);
+
+        return obs;
     }
 
     @Override
     public Obs getObs(Obs obs, String s) {
-        return null;
+        Patient patient = null;
+        PatientService ps = Context.getPatientService();
+        String contentType = obs.getComplexData().getTitle();
+        String key = obs.getUuid();
+
+        if(key != null && !StringUtils.isEmpty(key)){
+           patient = ps.getPatient(Integer.parseInt(key));
+        }
+
+        if(patient != null){
+            ComplexData complexData = new ComplexData(contentType, key);
+            obs.setComplexData(complexData);
+        }
+        else {
+            log.info("Warning : specified patient cannot be found - returning no ComplexData for " + obs.getObsId());
+        }
+
+        return obs;
     }
 
     @Override
     public boolean purgeComplexData(Obs obs) {
+        String contentType = obs.getComplexData().getTitle();
+        String key = obs.getUuid();
+
+        if(key != null){
+            ComplexData complexData = new ComplexData(contentType, key);
+            obs.setComplexData(complexData);
+            Context.getObsService().getHandler(obs).purgeComplexData(obs);
+        }
+        else{
+            log.info("Sorry There is no such an observation with "+key);
+        }
         return true;
     }
 
@@ -78,5 +108,14 @@ public class MediaComplexObsHandler implements ComplexObsHandler, CustomDatatype
     @Override
     public void setHandlerConfiguration(String s) {
 
+    }
+
+    /**
+     * Gets the handler type for each registered handler.
+     *
+     * @return the handler type
+     */
+    public String getHandlerType() {
+        return MediaComplexObsHandler.HANDLER_TYPE;
     }
 }
