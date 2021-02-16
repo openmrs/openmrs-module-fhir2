@@ -127,7 +127,7 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		}
 		
 		fhirTask.setIdentifier(Collections.singletonList(
-		    new Identifier().setSystem(FhirConstants.OPENMRS_URI + "/identifier").setValue(openmrsTask.getUuid())));
+		    new Identifier().setSystem(FhirConstants.OPENMRS_FHIR_EXT_TASK_IDENTIFIER).setValue(openmrsTask.getUuid())));
 		
 		fhirTask.getMeta().setLastUpdated(openmrsTask.getDateChanged());
 	}

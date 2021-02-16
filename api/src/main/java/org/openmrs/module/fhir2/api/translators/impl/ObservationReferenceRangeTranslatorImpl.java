@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.openmrs.ConceptNumeric;
@@ -41,7 +42,7 @@ public class ObservationReferenceRangeTranslatorImpl implements ObservationRefer
 			
 			if (conceptNumeric.getHiAbsolute() != null || conceptNumeric.getLowAbsolute() != null) {
 				observationReferenceRangeComponentList.add(createObservationReferenceRange(conceptNumeric.getHiAbsolute(),
-				    conceptNumeric.getLowAbsolute(), FhirConstants.OBSERVATION_REFERENCE_TREATMENT));
+				    conceptNumeric.getLowAbsolute(), FhirConstants.OBSERVATION_REFERENCE_ABSOLUTE));
 			}
 			
 			return observationReferenceRangeComponentList;
@@ -63,7 +64,14 @@ public class ObservationReferenceRangeTranslatorImpl implements ObservationRefer
 		}
 		
 		CodeableConcept referenceRangeType = new CodeableConcept();
-		referenceRangeType.addCoding().setCode(code).setSystem(FhirConstants.OBSERVATION_REFERENCE_RANGE_SYSTEM_URI);
+		Coding coding = referenceRangeType.addCoding().setCode(code);
+		
+		if (FhirConstants.OBSERVATION_REFERENCE_ABSOLUTE.equals(code)) {
+			coding.setSystem(FhirConstants.OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE);
+		} else {
+			coding.setSystem(FhirConstants.OBSERVATION_REFERENCE_RANGE_SYSTEM_URI);
+		}
+		
 		component.setType(referenceRangeType);
 		
 		return component;

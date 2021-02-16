@@ -14,8 +14,8 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.ConceptNumeric;
+import org.openmrs.module.fhir2.FhirConstants;
 
 public class ObservationReferenceRangeTranslatorImplTest {
 	
@@ -49,6 +50,30 @@ public class ObservationReferenceRangeTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirType_shouldMapHiAndLowNormalObservationReferenceRangeToExpected() {
+		ConceptNumeric conceptNumeric = new ConceptNumeric();
+		conceptNumeric.setUuid(CONCEPT_UUID);
+		conceptNumeric.setLowNormal(LOW_NORMAL_VALUE);
+		conceptNumeric.setHiNormal(HIGH_NORMAL_VALUE);
+		
+		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
+		        .toFhirResource(conceptNumeric);
+		
+		assertThat(result, not(empty()));
+		
+		Observation.ObservationReferenceRangeComponent component = result.get(0);
+		
+		assertThat(component.getType().hasCoding(), is(true));
+		assertThat(component.getType().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.OBSERVATION_REFERENCE_RANGE_SYSTEM_URI));
+		assertThat(component.getType().getCodingFirstRep().getCode(), equalTo(FhirConstants.OBSERVATION_REFERENCE_NORMAL));
+		assertThat(component.hasLow(), is(true));
+		assertThat(component.getLow().getValue(), equalTo(BigDecimal.valueOf(LOW_NORMAL_VALUE)));
+		assertThat(component.hasHigh(), is(true));
+		assertThat(component.getHigh().getValue(), equalTo(BigDecimal.valueOf(HIGH_NORMAL_VALUE)));
+	}
+	
+	@Test
 	public void toFhirType_shouldMapHiAndLowCriticalObservationReferenceRangeToExpected() {
 		ConceptNumeric conceptNumeric = new ConceptNumeric();
 		conceptNumeric.setUuid(CONCEPT_UUID);
@@ -59,28 +84,19 @@ public class ObservationReferenceRangeTranslatorImplTest {
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
 		        .toFhirResource(conceptNumeric);
 		
-		assertThat(result, notNullValue());
-		assertThat(result,
-		    hasItem(hasProperty("low", hasProperty("value", equalTo(BigDecimal.valueOf(LOW_CRITICAL_VALUE))))));
-		assertThat(result,
-		    hasItem(hasProperty("high", hasProperty("value", equalTo(BigDecimal.valueOf(HIGH_CRITICAL_VALUE))))));
+		assertThat(result, not(empty()));
 		
-	}
-	
-	@Test
-	public void toFhirType_shouldMapHiAndLowNormalObservationReferenceRangeToExpected() {
-		ConceptNumeric conceptNumeric = new ConceptNumeric();
-		conceptNumeric.setUuid(CONCEPT_UUID);
-		conceptNumeric.setLowNormal(LOW_NORMAL_VALUE);
-		conceptNumeric.setHiNormal(HIGH_NORMAL_VALUE);
+		Observation.ObservationReferenceRangeComponent component = result.get(0);
 		
-		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
-		        .toFhirResource(conceptNumeric);
-		
-		assertThat(result, notNullValue());
-		assertThat(result, hasItem(hasProperty("low", hasProperty("value", equalTo(BigDecimal.valueOf(LOW_NORMAL_VALUE))))));
-		assertThat(result,
-		    hasItem(hasProperty("high", hasProperty("value", equalTo(BigDecimal.valueOf(HIGH_NORMAL_VALUE))))));
+		assertThat(component.getType().hasCoding(), is(true));
+		assertThat(component.getType().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.OBSERVATION_REFERENCE_RANGE_SYSTEM_URI));
+		assertThat(component.getType().getCodingFirstRep().getCode(),
+		    equalTo(FhirConstants.OBSERVATION_REFERENCE_TREATMENT));
+		assertThat(component.hasLow(), is(true));
+		assertThat(component.getLow().getValue(), equalTo(BigDecimal.valueOf(LOW_CRITICAL_VALUE)));
+		assertThat(component.hasHigh(), is(true));
+		assertThat(component.getHigh().getValue(), equalTo(BigDecimal.valueOf(HIGH_CRITICAL_VALUE)));
 	}
 	
 	@Test
@@ -93,11 +109,18 @@ public class ObservationReferenceRangeTranslatorImplTest {
 		List<Observation.ObservationReferenceRangeComponent> result = observationReferenceRangeTranslator
 		        .toFhirResource(conceptNumeric);
 		
-		assertThat(result, notNullValue());
-		assertThat(result,
-		    hasItem(hasProperty("low", hasProperty("value", equalTo(BigDecimal.valueOf(LOW_ABSOLUTE_VALUE))))));
-		assertThat(result,
-		    hasItem(hasProperty("high", hasProperty("value", equalTo(BigDecimal.valueOf(HIGH_ABSOLUTE_VALUE))))));
+		assertThat(result, not(empty()));
+		
+		Observation.ObservationReferenceRangeComponent component = result.get(0);
+		
+		assertThat(component.getType().hasCoding(), is(true));
+		assertThat(component.getType().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE));
+		assertThat(component.getType().getCodingFirstRep().getCode(), equalTo(FhirConstants.OBSERVATION_REFERENCE_ABSOLUTE));
+		assertThat(component.hasLow(), is(true));
+		assertThat(component.getLow().getValue(), equalTo(BigDecimal.valueOf(LOW_ABSOLUTE_VALUE)));
+		assertThat(component.hasHigh(), is(true));
+		assertThat(component.getHigh().getValue(), equalTo(BigDecimal.valueOf(HIGH_ABSOLUTE_VALUE)));
 	}
 	
 	@Test
