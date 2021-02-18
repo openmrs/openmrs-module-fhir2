@@ -7,33 +7,28 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api.translators.impl;
+package org.openmrs.module.fhir2.providers.r4;
 
-import javax.annotation.Nonnull;
-
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Media;
-import org.openmrs.Obs;
-import org.openmrs.module.fhir2.api.translators.MediaTranslator;
+import org.openmrs.module.fhir2.api.FhirMediaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("mediaFhirR4ResourceProvider")
+@Qualifier("fhirResources")
 @Setter(AccessLevel.PACKAGE)
-public class FhirMediaTranslatorImpl implements MediaTranslator {
+public class MediaFhirResourceProvider implements IResourceProvider {
+	
+	@Autowired
+	private FhirMediaService fhirMediaService;
 	
 	@Override
-	public Media toFhirResource(@Nonnull Obs data) {
-		return null;
-	}
-	
-	@Override
-	public Obs toOpenmrsType(@Nonnull Media resource) {
-		return null;
-	}
-	
-	@Override
-	public Obs toOpenmrsType(@Nonnull Obs existingObject, @Nonnull Media resource) {
-		return null;
+	public Class<? extends IBaseResource> getResourceType() {
+		return Media.class;
 	}
 }

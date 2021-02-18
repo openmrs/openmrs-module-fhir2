@@ -9,36 +9,31 @@
  */
 package org.openmrs.module.fhir2.api.dao;
 
-import lombok.AccessLevel;
-import lombok.Setter;
-import org.openmrs.Obs;
-
-import org.openmrs.annotation.Authorized;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.obs.ComplexObsHandler;
-import org.openmrs.util.PrivilegeConstants;
-import org.springframework.stereotype.Component;
-
 import javax.annotation.Nonnull;
+
 import java.util.List;
 
+import org.openmrs.Obs;
+import org.openmrs.annotation.Authorized;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.util.PrivilegeConstants;
+
 public interface FhirMediaDao extends FhirDao<Obs> {
-
-    @Override
-    @Authorized(PrivilegeConstants.GET_OBS)
-    Obs get(@Nonnull String uuid);
-
-
-    @Override
-    @Authorized(PrivilegeConstants.ADD_OBS)
-    Obs createOrUpdate(@Nonnull Obs newEntry);
-
-    @Override
-    @Authorized(PrivilegeConstants.DELETE_OBS)
-    Obs delete(@Nonnull String uuid);
-
-    @Override
-    @Authorized(PrivilegeConstants.GET_OBS)
-    List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
-
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_OBS)
+	Obs get(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.ADD_OBS)
+	Obs createOrUpdate(@Nonnull Obs newEntry);
+	
+	@Override
+	@Authorized(PrivilegeConstants.DELETE_OBS)
+	Obs delete(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_OBS)
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
+	
 }

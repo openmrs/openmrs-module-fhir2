@@ -65,9 +65,10 @@ public class FhirConstants {
 	public static final String OBSERVATION_CATEGORY_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/observation-category";
 	
 	public static final String ENCOUNTER_CLASS_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v3-ActCode";
-    public static final String MEDIA_CREATED_DATE_TIME = "media.created.date.time";
-
-    @Value("${project.version}")
+	
+	public static final String MEDIA_CREATED_DATE_TIME = "media.created.date.time";
+	
+	@Value("${project.version}")
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	
 	public static final String OPENMRS_FHIR_PREFIX = "http://fhir.openmrs.org";
@@ -282,25 +283,25 @@ public class FhirConstants {
 	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
 	
 	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-	public  static final String FHIR_MEDIA = "media";
-
-	public  static final String MEDIA_STATUS= "media.status";
-
-	public  static final String MEDIA_TYPE = "media.type";
-
-	public  static final String MEDIA_SUBJECT = "media.subject";
-
-	public  static final String MEDIA_ENCOUNTER_REFERENCE= "media.encounter.reference";
-
-	public  static final String MEDIA_CREATED_ON = "media.created.on";
-
-	public  static final String MEDIA_CONTENT_TYPE = "media.content.type";
-
-	public  static final String CONTENT_DATA = "content.data";
-
-	public  static final String CONTENT_TITLE = "content.title";
-
-	public  static final String CONTENT_DATE_OF_CREATION= "content.creation";
-
+	
+	public static final String FHIR_MEDIA = "media";
+	
+	public static final String MEDIA_STATUS = "media.status";
+	
+	public static final String MEDIA_TYPE = "media.type";
+	
+	public static final String MEDIA_SUBJECT = "media.subject";
+	
+	public static final String MEDIA_ENCOUNTER_REFERENCE = "media.encounter.reference";
+	
+	public static final String MEDIA_CREATED_ON = "media.created.on";
+	
+	public static final String MEDIA_CONTENT_TYPE = "media.content.type";
+	
+	public static final String CONTENT_DATA = "content.data";
+	
+	public static final String CONTENT_TITLE = "content.title";
+	
+	public static final String CONTENT_DATE_OF_CREATION = "content.creation";
+	
 }
