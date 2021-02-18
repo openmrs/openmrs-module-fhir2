@@ -599,7 +599,7 @@ public class FhirTaskTranslatorImplTest {
 		Identifier identifier = result.getIdentifier().iterator().next();
 		
 		assertThat(identifier.getValue(), equalTo(task.getUuid()));
-		assertThat(identifier.getSystem(), equalTo(FhirConstants.OPENMRS_URI + "/identifier"));
+		assertThat(identifier.getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_TASK_IDENTIFIER));
 	}
 	
 	/**
