@@ -115,6 +115,8 @@ public class FhirConstants {
 	
 	public static final String IDENTIFIER = "Identifier";
 	
+	public static final String IMMUNIZATION = "Immunization";
+	
 	public static final String LOCATION = "Location";
 	
 	public static final String MEDICATION = "Medication";
