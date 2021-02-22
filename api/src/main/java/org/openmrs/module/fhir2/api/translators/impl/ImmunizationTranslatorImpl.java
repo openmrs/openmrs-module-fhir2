@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.openmrs.module.fhir2.api.util.FhirUtils.createExceptionErrorOperationOutcome;
 
+import javax.annotation.Nonnull;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -180,7 +182,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	}
 	
 	@Override
-	public Immunization toFhirResource(Obs openMrsImmunization) {
+	public Immunization toFhirResource(@Nonnull Obs openMrsImmunization) {
 		helper.validateImmunizationObsGroup(openMrsImmunization);
 		
 		Immunization immunization = new Immunization();

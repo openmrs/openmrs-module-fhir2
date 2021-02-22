@@ -62,6 +62,8 @@ public class FhirConstants {
 	
 	public static final String OBSERVATION_REFERENCE_TREATMENT = "treatment";
 	
+	public static final String OBSERVATION_REFERENCE_ABSOLUTE = "absolute";
+	
 	public static final String OBSERVATION_CATEGORY_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/observation-category";
 	
 	public static final String ENCOUNTER_CLASS_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v3-ActCode";
@@ -75,11 +77,15 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_NAME = OPENMRS_FHIR_EXT_PREFIX + "/name";
 	
+	public static final String OPENMRS_FHIR_EXT_GROUP_DESCRIPTION = OPENMRS_FHIR_EXT_PREFIX + "/group/description";
+	
 	public static final String OPENMRS_FHIR_EXT_ADDRESS = OPENMRS_FHIR_EXT_PREFIX + "/address";
 	
 	public static final String OPENMRS_FHIR_EXT_NON_CODED_CONDITION = OPENMRS_FHIR_EXT_PREFIX + "/non-coded-condition";
 	
 	public static final String OPENMRS_FHIR_EXT_MEDICINE = OPENMRS_FHIR_EXT_PREFIX + "/medicine";
+	
+	public static final String OPENMRS_FHIR_EXT_TASK_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/task/identifier";
 	
 	public static final String OPENMRS_FHIR_EXT_USER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/user/identifier";
 	
@@ -91,6 +97,9 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION = OPENMRS_FHIR_EXT_PREFIX
 	        + "/patient/identifier#location";
+	
+	public static final String OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE = OPENMRS_FHIR_EXT_PREFIX
+	        + "/obs/reference-range";
 	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
@@ -105,6 +114,8 @@ public class FhirConstants {
 	public static final String ENCOUNTER = "Encounter";
 	
 	public static final String IDENTIFIER = "Identifier";
+	
+	public static final String IMMUNIZATION = "Immunization";
 	
 	public static final String LOCATION = "Location";
 	
@@ -277,4 +288,6 @@ public class FhirConstants {
 	public static final String INCLUDE_RESULT_PARAM = "result";
 	
 	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
+	
+	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 }

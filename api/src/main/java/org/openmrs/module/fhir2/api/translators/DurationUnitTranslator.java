@@ -7,12 +7,15 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api;
+package org.openmrs.module.fhir2.api.translators;
 
-import java.util.Locale;
+import javax.annotation.Nonnull;
 
-public interface FhirUserDefaultProperties {
+import org.hl7.fhir.r4.model.Timing;
+import org.openmrs.Concept;
+
+public interface DurationUnitTranslator extends ToFhirTranslator<Concept, Timing.UnitsOfTime> {
 	
-	Locale getDefaultLocale();
-	
+	@Override
+	Timing.UnitsOfTime toFhirResource(@Nonnull Concept concept);
 }

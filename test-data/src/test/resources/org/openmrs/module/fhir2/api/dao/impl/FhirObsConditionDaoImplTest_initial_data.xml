@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <concept concept_id="116128" retired="false" datatype_id="4" class_id="4" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept_description concept_description_id="116128" concept_id="116128" description="Malaria" locale="en_GB" creator="1" date_created="2008-08-15 15:27:51.0" uuid="4639FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"/>
+	<concept_name concept_name_id="116128" concept_id="116128" name="Malaria" locale="en_GB" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" creator="1" date_created="2008-08-15 15:27:51.0" uuid="16603BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"/>
+	<concept concept_id="1284" retired="false" datatype_id="4" class_id="4" is_set="false" creator="1" date_created="2008-08-15 15:27:51.0" version="" uuid="1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept_description concept_description_id="1284" concept_id="1284" description="PROBLEM LIST" locale="en_GB" creator="1" date_created="2008-08-15 15:27:51.0" uuid="1284FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"/>
+	<concept_name concept_name_id="1284" concept_id="1284" name="PROBLEM LIST" locale="en_GB" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" creator="1" date_created="2008-08-15 15:27:51.0" uuid="1284BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"/>
+    <concept_map_type concept_map_type_id="1" name="SAME-AS" creator="1" date_created="2020-04-02 00:00:00.0" changed_by="1" is_hidden="false" retired="false" retired_by="1" uuid="35543629-7d8c-11e1-909d-c80aa9edcf4ex"/>
+    <concept_reference_source concept_source_id="1" name="ICD-10-WHO" description="SNOMED Preferred mapping" hl7_code="SCT" creator="1" date_created="2009-11-19 20:19:16.0" retired="false" retired_by="1" uuid="1ADDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" />
+    <concept_reference_term concept_reference_term_id="1" concept_source_id="1" code="C00" creator="1" date_created="2010-04-25 00:00:00.0" changed_by="1" retired="false" retired_by="1" uuid="8211fc83-6c63-38c1-b2ce-108aeee34ea6"/>
+    <concept_reference_map concept_map_id="93972" creator="1" date_created="2010-04-25 11:39:31.0" concept_id="116128" uuid="93972ABBBBBBBBBBBBBBBBBBBBBBBBBBBBBB" concept_reference_term_id="1" concept_map_type_id="1" changed_by="1"/>
+    <obs obs_id="30" person_id="7" concept_id="1284" encounter_id="3" obs_datetime="2008-07-01 00:00:00.0" location_id="1"  comments="" creator="1" date_created="2008-08-18 14:09:35.0" voided="false" value_coded="116128"   uuid="86sgf-1f7d-4394-a316-0a458edf28c4"/>
+	<obs obs_id="31" person_id="7" concept_id="1284" encounter_id="3" obs_datetime="2008-07-01 00:00:00.0" location_id="1"  comments="" creator="1" date_created="2008-08-18 14:09:35.0" voided="false" value_coded="116128"   uuid="86sgf-1f7d-4394-a316-0a458edf28c7"/>
+    <obs obs_id="32" person_id="7" concept_id="116128" encounter_id="3" obs_datetime="2008-07-01 10:00:00.0" location_id="1"  comments="" creator="1" date_created="2008-08-18 14:09:35.0" voided="false"  value_coded="116128" uuid="942ec003-a55d-43c4-ac7a-bd6d1ba63382"/>
+    <obs obs_id="33" person_id="7" concept_id="1284" encounter_id="3" obs_datetime="2008-07-01 10:00:00.0" location_id="1"  comments="" creator="1" date_voided="2010-09-03 14:09:35.0" date_created="2008-08-18 14:09:35.0" voided="true"  value_coded="116128" uuid="94dhs003-a55d-43c4-ac7a-bd6d1ba63388"/>	
+    <fhir_concept_source fhir_concept_source_id="1" name="Some Made-up Terminology" url="http://made_up_concepts.info/sct" concept_source_id="1" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="0d30bea3-4ba2-4ab4-ac7b-5525840bde20" />	
+</dataset>

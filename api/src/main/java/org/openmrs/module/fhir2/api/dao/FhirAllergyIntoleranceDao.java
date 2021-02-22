@@ -34,6 +34,5 @@ public interface FhirAllergyIntoleranceDao extends FhirDao<Allergy> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ALLERGIES)
-	List<Allergy> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
-	        int firstResult, int lastResult);
+	List<Allergy> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
 }

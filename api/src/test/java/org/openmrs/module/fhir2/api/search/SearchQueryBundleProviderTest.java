@@ -10,15 +10,22 @@
 package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.Before;
@@ -31,6 +38,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SearchQueryBundleProviderTest {
@@ -51,8 +59,7 @@ public class SearchQueryBundleProviderTest {
 	
 	@Before
 	public void setup() {
-		SearchParameterMap theParams = new SearchParameterMap();
-		searchQueryBundleProvider = new SearchQueryBundleProvider<>(theParams, observationDao, translator,
+		searchQueryBundleProvider = new SearchQueryBundleProvider<>(new SearchParameterMap(), observationDao, translator,
 		        globalPropertyService, searchQueryInclude);
 	}
 	
@@ -72,7 +79,23 @@ public class SearchQueryBundleProviderTest {
 	}
 	
 	@Test
-	public void shouldReturnRandomUuid() {
+	public void shouldReturnEmptyListWhenNoResults() {
+		when(observationDao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		List<IBaseResource> resources = searchQueryBundleProvider.getResources(0, 10);
+		assertThat(resources, empty());
+	}
+	
+	@Test
+	public void shouldReturnEmptyListWhenRequestingTooManyResults() {
+		when(observationDao.getSearchResultUuids(any())).thenReturn(Arrays.asList(FhirUtils.newUuid(), FhirUtils.newUuid()));
+		List<IBaseResource> resources = searchQueryBundleProvider.getResources(3, 13);
+		assertThat(resources, empty());
+	}
+	
+	@Test
+	public void shouldReturnDifferentUuid() {
 		assertThat(searchQueryBundleProvider.getUuid(), notNullValue());
+		assertThat(searchQueryBundleProvider.getUuid(), not(equalTo(new SearchQueryBundleProvider<>(new SearchParameterMap(),
+		        observationDao, translator, globalPropertyService, searchQueryInclude).getUuid())));
 	}
 }

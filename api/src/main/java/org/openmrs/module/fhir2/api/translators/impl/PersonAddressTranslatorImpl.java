@@ -18,7 +18,7 @@ import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PersonAddressTranslatorImpl extends BaseAddressTranslatorImpl implements PersonAddressTranslator {
+public class PersonAddressTranslatorImpl extends BaseAddressTranslator implements PersonAddressTranslator {
 	
 	@Override
 	public Address toFhirResource(@Nonnull PersonAddress address) {

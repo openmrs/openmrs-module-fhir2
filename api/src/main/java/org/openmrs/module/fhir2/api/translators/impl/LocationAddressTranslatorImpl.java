@@ -18,7 +18,7 @@ import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LocationAddressTranslatorImpl extends BaseAddressTranslatorImpl implements LocationAddressTranslator {
+public class LocationAddressTranslatorImpl extends BaseAddressTranslator implements LocationAddressTranslator {
 	
 	@Override
 	public Address toFhirResource(@Nonnull Location omrsLocation) {

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.openmrs.Obs;
 
 public interface ImmunizationTranslator extends OpenmrsFhirUpdatableTranslator<Obs, org.hl7.fhir.r4.model.Immunization> {
@@ -20,7 +22,7 @@ public interface ImmunizationTranslator extends OpenmrsFhirUpdatableTranslator<O
 	 * @return the corresponding FHIR immunization resource
 	 */
 	@Override
-	org.hl7.fhir.r4.model.Immunization toFhirResource(Obs openMrsImmunization);
+	org.hl7.fhir.r4.model.Immunization toFhirResource(@Nonnull Obs openMrsImmunization);
 	
 	/**
 	 * Maps a {@link org.hl7.fhir.r4.model.Immunization} to an OpenMRS immunization obs construct

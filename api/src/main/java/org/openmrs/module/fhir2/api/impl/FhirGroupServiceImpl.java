@@ -9,30 +9,27 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.Locale;
-
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.openmrs.module.fhir2.api.FhirUserDefaultProperties;
+import org.hl7.fhir.r4.model.Group;
+import org.openmrs.Cohort;
+import org.openmrs.module.fhir2.api.FhirGroupService;
+import org.openmrs.module.fhir2.api.dao.FhirGroupDao;
+import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Component
 @Transactional
-@Setter(AccessLevel.PROTECTED)
-public class FhirUserDefaultPropertiesImpl implements FhirUserDefaultProperties {
+@Setter(AccessLevel.PACKAGE)
+@Getter(AccessLevel.PROTECTED)
+public class FhirGroupServiceImpl extends BaseFhirService<Group, Cohort> implements FhirGroupService {
 	
 	@Autowired
-	private FhirGlobalPropertyService globalPropertyService;
+	private FhirGroupDao dao;
 	
-	@Override
-	public Locale getDefaultLocale() {
-		String locale = globalPropertyService.getGlobalProperty("default_locale", "en_GB");
-		locale = locale.replace("_", "-");
-		return new Locale.Builder().setLanguageTag(locale).build();
-	}
+	@Autowired
+	private GroupTranslator translator;
 }

@@ -393,7 +393,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	}
 	
 	@Test
-	public void searchForConditions_shouldReturnConditionByPatientNotFoundName() {
+	public void searchForConditions_shouldReturnEmptyListOfConditionByPatientNotFoundName() {
 		ReferenceParam patientReference = new ReferenceParam(Patient.SP_GIVEN, PATIENT_NOT_FOUND_NAME);
 		ReferenceAndListParam patientList = new ReferenceAndListParam();
 		patientList.addValue(new ReferenceOrListParam().add(patientReference));

@@ -19,14 +19,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
+import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.PersonName;
 import org.openmrs.Provider;
+import org.openmrs.TestOrder;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 
@@ -73,6 +76,12 @@ public class BaseReferenceHandlingTranslatorTest {
 	private static final String USER_UUID = "2ffb1a5f-bcd3-4243-8f40-78edc2642789";
 	
 	private static final String PRACTITIONER_REFERENCE = FhirConstants.PRACTITIONER + "/" + USER_UUID;
+	
+	private static final String ORDER_UUID = "7ed459d6-82a2-4cc0-ba44-86c7fcaf3fc5";
+	
+	private static final String TEST_ORDER_REFERENCE = FhirConstants.SERVICE_REQUEST + "/" + ORDER_UUID;
+	
+	private static final String DRUG_ORDER_REFERENCE = FhirConstants.MEDICATION_REQUEST + "/" + ORDER_UUID;
 	
 	private Patient patient;
 	
@@ -226,6 +235,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	@Test
 	public void shouldReturnNullDisplayForPractitionerWithNullPerson() {
 		Reference reference = referenceHandlingTranslator.createPractitionerReference(provider);
+		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getDisplay(), nullValue());
 	}
@@ -262,6 +272,7 @@ public class BaseReferenceHandlingTranslatorTest {
 	@Test
 	public void shouldAddPractitionerGivenOpenMrsUserReference() {
 		Reference reference = referenceHandlingTranslator.createPractitionerReference(user);
+		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(PRACTITIONER_REFERENCE));
 		assertThat(reference.getType(), equalTo(FhirConstants.PRACTITIONER));
@@ -272,9 +283,79 @@ public class BaseReferenceHandlingTranslatorTest {
 	public void shouldReturnReferenceWithNullDisplayIfUserPersonNameIsNull() {
 		User user = new User();
 		user.setUuid(USER_UUID);
+		
 		Reference reference = referenceHandlingTranslator.createPractitionerReference(user);
+		
 		assertThat(reference, notNullValue());
 		assertThat(reference.getReference(), equalTo(PRACTITIONER_REFERENCE));
 		assertThat(reference.getDisplay(), nullValue());
+	}
+	
+	@Test
+	public void shouldAddOrderReferenceForTestOrder() {
+		TestOrder order = new TestOrder();
+		order.setUuid(ORDER_UUID);
+		
+		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), equalTo(TEST_ORDER_REFERENCE));
+		assertThat(reference.getDisplay(), nullValue());
+	}
+	
+	@Test
+	public void shouldAddOrderReferenceForTestOrderSubclass() {
+		TestOrder order = new TestOrder() {};
+		order.setUuid(ORDER_UUID);
+		
+		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), equalTo(TEST_ORDER_REFERENCE));
+		assertThat(reference.getDisplay(), nullValue());
+	}
+	
+	@Test
+	public void shouldAddOrderReferenceForDrugOrder() {
+		DrugOrder order = new DrugOrder();
+		order.setUuid(ORDER_UUID);
+		
+		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), equalTo(DRUG_ORDER_REFERENCE));
+		assertThat(reference.getDisplay(), nullValue());
+	}
+	
+	@Test
+	public void shouldAddOrderReferenceForDrugOrderSubclass() {
+		DrugOrder order = new DrugOrder() {};
+		order.setUuid(ORDER_UUID);
+		
+		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), equalTo(DRUG_ORDER_REFERENCE));
+		assertThat(reference.getDisplay(), nullValue());
+	}
+	
+	@Test
+	public void shouldReturnNullForRawOrder() {
+		Order order = new Order();
+		order.setUuid(ORDER_UUID);
+		
+		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		
+		assertThat(reference, nullValue());
+	}
+	
+	@Test
+	public void shouldReturnNullForUnknownOrderSubclass() {
+		Order order = new Order() {};
+		order.setUuid(ORDER_UUID);
+		
+		Reference reference = referenceHandlingTranslator.createOrderReference(order);
+		
+		assertThat(reference, nullValue());
 	}
 }

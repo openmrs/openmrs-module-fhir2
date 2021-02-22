@@ -62,8 +62,9 @@ public class ObservationBasedOnReferenceTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldConvertTestOrderToReference() {
-		Order order = new Order();
+		Order order = new TestOrder();
 		order.setUuid(ORDER_UUID);
+		
 		OrderType orderType = new OrderType();
 		orderType.setUuid(TEST_ORDER_TYPE_UUID);
 		order.setOrderType(orderType);
@@ -76,8 +77,9 @@ public class ObservationBasedOnReferenceTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldConvertDrugOrderToReference() {
-		Order order = new Order();
+		Order order = new DrugOrder();
 		order.setUuid(ORDER_UUID);
+		
 		OrderType orderType = new OrderType();
 		orderType.setUuid(DRUG_ORDER_TYPE_UUID);
 		order.setOrderType(orderType);
@@ -85,7 +87,7 @@ public class ObservationBasedOnReferenceTranslatorImplTest {
 		Reference result = translator.toFhirResource(order);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getType(), equalTo(FhirConstants.MEDICATION));
+		assertThat(result.getType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 	}
 	
 	@Test
@@ -98,9 +100,9 @@ public class ObservationBasedOnReferenceTranslatorImplTest {
 		assertThat(result, nullValue());
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
-	public void toFhirType_shouldThrowIllegalArgumentExceptionException() {
-		Order order = new DrugOrder();
+	@Test
+	public void toFhirType_shouldReturnNullForUnknownOrderType() {
+		Order order = new Order() {};
 		order.setUuid(ORDER_UUID);
 		
 		OrderType orderType = new OrderType();

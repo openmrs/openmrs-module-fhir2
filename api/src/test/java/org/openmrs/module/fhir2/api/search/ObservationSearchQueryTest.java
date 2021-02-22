@@ -82,7 +82,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String OBS_CONCEPT_ID = "5089";
 	
-	private static final String OBS_CONCEPT_UUID = "c607c80f-1ea9-4da3-bb88-6276ce8868dd";
+	private static final String OBS_CONCEPT_UUID = "5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	private static final String VALUE_CONCEPT_ID = "5242";
 	
