@@ -68,7 +68,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	}
 		
 	@Test
-	public void shouldReturnExistingIMMUNIZATIONAsJson() throws Exception {
+	public void shouldReturnExistingImmunizationAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -83,7 +83,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	}
 	
 	@Test
-	public void shouldReturnNotFoundWhenIMMUNIZATIONNotFoundAsJson() throws Exception {
+	public void shouldReturnNotFoundWhenImmunizationNotFoundAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
 		
@@ -98,7 +98,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	}
 	
 	@Test
-	public void shouldReturnExistingIMMUNIZATIONAsXML() throws Exception {
+	public void shouldReturnExistingImmunizationAsXML() throws Exception {
 		MockHttpServletResponse response = get("/Immunization/" + IMMUNIZATION_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
@@ -113,7 +113,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	}
 	
 	@Test
-	public void shouldReturnNotFoundWhenIMMUNIZATIONNotFoundAsXML() throws Exception {
+	public void <span class="x x-first x-last">shouldReturnNotFoundWhenImmunizationNotFoundAsXML</span>() throws Exception {
 		MockHttpServletResponse response = get("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).accept(FhirMediaTypes.XML)
 		        .go();
 		
@@ -458,7 +458,6 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(entries, everyItem(hasResource(hasProperty("patient",
 		    hasProperty("referenceElement", hasProperty("idPart", equalTo("8d703ff2-c3e2-4070-9737-73e713d5a50d")))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
-		
 	}
 	
 	@Test
@@ -499,7 +498,6 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(entries, everyItem(hasResource(hasProperty("patient",
 		    hasProperty("referenceElement", hasProperty("idPart", equalTo("8d703ff2-c3e2-4070-9737-73e713d5a50d")))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
-		
 	}
 	
 }

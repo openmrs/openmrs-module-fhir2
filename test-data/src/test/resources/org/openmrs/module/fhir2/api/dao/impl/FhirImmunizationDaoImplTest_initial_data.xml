@@ -26,9 +26,6 @@
 
     <patient_identifier patient_identifier_id="1" patient_id="6" identifier="M4001-1" identifier_type="1" preferred="0" location_id="1" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689f"/>
     <patient_identifier patient_identifier_id="2" patient_id="7" identifier="M4001-2" identifier_type="1" preferred="0" location_id="1" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689g"/>
-
-   
-
     <concept_name concept_id="70000" name="IMMUNIZATIONS HISTORY" locale="en" creator="1" date_created="2020-07-07 19:30:26.0" concept_name_id="70000" locale_preferred="0" voided="false" uuid="ea82d3eb-4c2c-4ccd-acfb-403bd21f5cde"/>
     <concept_name concept_id="70009" name="IMMUNIZATIONS" locale="en" creator="1" date_created="2020-07-07 19:30:26.0" concept_name_id="70009" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="e638a02b-d0b3-467e-87ce-4b79204c2b14"/>
     <concept_name concept_id="70010" name="VACCINATION DATE" locale="en" creator="1" date_created="2020-07-07 19:30:26.0" concept_name_id="70010" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="668eabef-a1ae-4f80-8915-6c76d59b039d"/>
@@ -38,6 +35,4 @@
     <concept_name concept_id="70014" name="Vaccine lot expiration date" locale="en" creator="1" date_created="2020-07-07 19:30:26.0" concept_name_id="70014" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="a349f90e-f317-4817-ae53-e9430e857f8d"/>
 
     <immunization_history immunization_history_id="1421" patient_id="2" immunization_concept_id="1410" creator="1"  date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:30:26.0" voided="true" uuid="1421AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
-
-    
 </dataset>
