@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirGroupDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirGroupDaoImpl_2_1Test extends BaseModuleContextSensitiveTest {
 	
 	private static final String COHORT_UUID = "985ff1a2-c2ef-49fd-836f-8a1d936d9ef9";
 	
