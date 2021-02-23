@@ -450,6 +450,7 @@ public class EncounterTranslatorImplTest {
 		assertThat(result.getTypeFirstRep().getCoding().size(), greaterThan(0));
 		assertThat(result.getTypeFirstRep().getCodingFirstRep().getCode(), is(TYPE_CODE));
 		assertThat(result.getTypeFirstRep().getCodingFirstRep().getDisplay(), is(TYPE_DISPLAY));
+		assertThat(result.getTypeFirstRep().getCodingFirstRep().getSystem(), is(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI));
 	}
 	
 }

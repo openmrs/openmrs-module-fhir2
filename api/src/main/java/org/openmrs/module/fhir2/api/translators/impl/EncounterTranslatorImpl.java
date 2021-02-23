@@ -15,13 +15,18 @@ import javax.annotation.Nonnull;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
+import org.openmrs.EncounterType;
 import org.openmrs.Visit;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
@@ -108,5 +113,29 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		existingEncounter.setEncounterType(mapEncounterTypeField(encounter.getTypeFirstRep()));
 		
 		return existingEncounter;
+	}
+	
+	protected List<CodeableConcept> mapEncounterTypeClass(EncounterType openmrsEncounterType) {
+		Coding coding = new Coding();
+		coding.setCode(openmrsEncounterType.getUuid());
+		coding.setDisplay(openmrsEncounterType.getName());
+		coding.setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI);
+		
+		CodeableConcept code = new CodeableConcept();
+		code.setCoding(Collections.singletonList(coding));
+		
+		return Collections.singletonList(code);
+	}
+	
+	protected EncounterType mapEncounterTypeField(CodeableConcept fhirEncounterType) {
+		EncounterType openmrsEncounterType = null;
+		
+		if (fhirEncounterType != null && fhirEncounterType.getCoding() != null && !fhirEncounterType.getCoding().isEmpty()) {
+			openmrsEncounterType = new EncounterType();
+			openmrsEncounterType.setName(fhirEncounterType.getCodingFirstRep().getDisplay());
+			openmrsEncounterType.setUuid(fhirEncounterType.getCodingFirstRep().getCode());
+		}
+		
+		return openmrsEncounterType;
 	}
 }
