@@ -15,22 +15,19 @@ import javax.annotation.Nonnull;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
 import org.openmrs.EncounterType;
 import org.openmrs.Visit;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +50,10 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	private ProvenanceTranslator<org.openmrs.Encounter> provenanceTranslator;
 	
 	@Autowired
-	private EncounterReferenceTranslator<Visit> encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Visit> visitReferenceTranlator;
+	
+	@Autowired
+	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
 	
 	@Override
 	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openMrsEncounter) {
@@ -62,13 +62,14 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		Encounter encounter = new Encounter();
 		encounter.setId(openMrsEncounter.getUuid());
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
+		encounter.setType(encounterTypeTranslator.toFhirResource(openMrsEncounter.getEncounterType()));
 		
 		encounter.setSubject(patientReferenceTranslator.toFhirResource(openMrsEncounter.getPatient()));
 		encounter.setParticipant(openMrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource)
 		        .collect(Collectors.toList()));
 		
 		// add visit as part of encounter
-		encounter.setPartOf(encounterReferenceTranslator.toFhirResource(openMrsEncounter.getVisit()));
+		encounter.setPartOf(visitReferenceTranlator.toFhirResource(openMrsEncounter.getVisit()));
 		
 		if (openMrsEncounter.getLocation() != null) {
 			encounter.setLocation(
@@ -79,10 +80,6 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		encounter.addContained(provenanceTranslator.getCreateProvenance(openMrsEncounter));
 		encounter.addContained(provenanceTranslator.getUpdateProvenance(openMrsEncounter));
 		encounter.setClass_(mapLocationToClass(openMrsEncounter.getLocation()));
-		
-		if (openMrsEncounter.getEncounterType() != null) {
-			encounter.setType(mapEncounterTypeClass(openMrsEncounter.getEncounterType()));
-		}
 		
 		return encounter;
 	}
@@ -101,6 +98,11 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		
 		existingEncounter.setUuid(encounter.getId());
 		
+		EncounterType encounterType = encounterTypeTranslator.toOpenmrsType(encounter.getType());
+		if (encounterType != null) {
+			existingEncounter.setEncounterType(encounterType);
+		}
+		
 		existingEncounter.setPatient(patientReferenceTranslator.toOpenmrsType(encounter.getSubject()));
 		existingEncounter.setEncounterProviders(encounter
 		        .getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
@@ -108,34 +110,8 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		        .collect(Collectors.toCollection(LinkedHashSet::new)));
 		
 		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
-		existingEncounter.setVisit(encounterReferenceTranslator.toOpenmrsType(encounter.getPartOf()));
-		
-		existingEncounter.setEncounterType(mapEncounterTypeField(encounter.getTypeFirstRep()));
+		existingEncounter.setVisit(visitReferenceTranlator.toOpenmrsType(encounter.getPartOf()));
 		
 		return existingEncounter;
-	}
-	
-	protected List<CodeableConcept> mapEncounterTypeClass(EncounterType openmrsEncounterType) {
-		Coding coding = new Coding();
-		coding.setCode(openmrsEncounterType.getUuid());
-		coding.setDisplay(openmrsEncounterType.getName());
-		coding.setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI);
-		
-		CodeableConcept code = new CodeableConcept();
-		code.setCoding(Collections.singletonList(coding));
-		
-		return Collections.singletonList(code);
-	}
-	
-	protected EncounterType mapEncounterTypeField(CodeableConcept fhirEncounterType) {
-		EncounterType openmrsEncounterType = null;
-		
-		if (fhirEncounterType != null && fhirEncounterType.getCoding() != null && !fhirEncounterType.getCoding().isEmpty()) {
-			openmrsEncounterType = new EncounterType();
-			openmrsEncounterType.setName(fhirEncounterType.getCodingFirstRep().getDisplay());
-			openmrsEncounterType.setUuid(fhirEncounterType.getCodingFirstRep().getCode());
-		}
-		
-		return openmrsEncounterType;
 	}
 }
