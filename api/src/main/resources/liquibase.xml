@@ -863,7 +863,7 @@
 		<!-- UUID function taken from here: https://stackoverflow.com/a/21327318 -->
 		<sql><![CDATA[
             insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
-            select concept_id, "S", 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            select concept_id, 'S', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
             from concept
             where uuid = '162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
         ]]>
