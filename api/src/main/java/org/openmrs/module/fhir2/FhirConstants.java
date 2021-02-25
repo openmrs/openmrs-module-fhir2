@@ -19,6 +19,8 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_URI = "http://openmrs.org";
 	
+	public static final String OPENMRS_CODE_SYSTEM_PREFIX = OPENMRS_URI + "/CodeSystem";
+	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX = "http://terminology.hl7.org/CodeSystem";
 	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX_R3 = "http://hl7.org/fhir";
@@ -52,6 +54,8 @@ public class FhirConstants {
 	        + "/condition-ver-status";
 	
 	public static final String CLINICAL_FINDINGS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/clinical-findings";
+	
+	public static final String ENCOUNTER_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/encounter-type";
 	
 	public static final String TASK_STATUS_VALUE_SET_URI = "http://hl7.org/fhir/task-status";
 	

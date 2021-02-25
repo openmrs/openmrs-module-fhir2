@@ -21,11 +21,13 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
+import org.openmrs.EncounterType;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +50,10 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	private ProvenanceTranslator<org.openmrs.Encounter> provenanceTranslator;
 	
 	@Autowired
-	private EncounterReferenceTranslator<Visit> encounterReferenceTranslator;
+	private EncounterReferenceTranslator<Visit> visitReferenceTranlator;
+	
+	@Autowired
+	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
 	
 	@Override
 	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openMrsEncounter) {
@@ -57,13 +62,14 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		Encounter encounter = new Encounter();
 		encounter.setId(openMrsEncounter.getUuid());
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
+		encounter.setType(encounterTypeTranslator.toFhirResource(openMrsEncounter.getEncounterType()));
 		
 		encounter.setSubject(patientReferenceTranslator.toFhirResource(openMrsEncounter.getPatient()));
 		encounter.setParticipant(openMrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource)
 		        .collect(Collectors.toList()));
 		
 		// add visit as part of encounter
-		encounter.setPartOf(encounterReferenceTranslator.toFhirResource(openMrsEncounter.getVisit()));
+		encounter.setPartOf(visitReferenceTranlator.toFhirResource(openMrsEncounter.getVisit()));
 		
 		if (openMrsEncounter.getLocation() != null) {
 			encounter.setLocation(
@@ -92,6 +98,11 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		
 		existingEncounter.setUuid(encounter.getId());
 		
+		EncounterType encounterType = encounterTypeTranslator.toOpenmrsType(encounter.getType());
+		if (encounterType != null) {
+			existingEncounter.setEncounterType(encounterType);
+		}
+		
 		existingEncounter.setPatient(patientReferenceTranslator.toOpenmrsType(encounter.getSubject()));
 		existingEncounter.setEncounterProviders(encounter
 		        .getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
@@ -99,7 +110,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		        .collect(Collectors.toCollection(LinkedHashSet::new)));
 		
 		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
-		existingEncounter.setVisit(encounterReferenceTranslator.toOpenmrsType(encounter.getPartOf()));
+		existingEncounter.setVisit(visitReferenceTranlator.toOpenmrsType(encounter.getPartOf()));
 		
 		return existingEncounter;
 	}
