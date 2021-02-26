@@ -95,12 +95,12 @@
         <repository>
             <id>openmrs-repo-modules</id>
             <name>OpenMRS Nexus Modules</name>
-            <url>https://openmrs.jfrog.io/artifactory/modules</url>
+            <url>https://mavenrepo.openmrs.org/modules</url>
         </repository>
         <snapshotRepository>
             <id>openmrs-repo-snapshots</id>
             <name>OpenMRS Nexus Snapshots</name>
-            <url>https://openmrs.jfrog.io/artifactory/snapshots</url>
+            <url>https://mavenrepo.openmrs.org/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
