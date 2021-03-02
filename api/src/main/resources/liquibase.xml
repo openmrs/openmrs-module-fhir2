@@ -915,4 +915,55 @@
         ]]>
 		</sql>
 	</changeSet>
+
+    <changeSet id="add_fhir_flags_20210302" author="corneliouzbett">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_flags"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create Flags table for the Flag FHIR resource
+        </comment>
+        <createTable tableName="fhir_flags">
+            <column name="flag_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="status" type="varchar(255)" defaultValue="NULL"/>
+            <column name="priority" type="varchar(255)" defaultValue="NONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flag" type="varchar(255)"/>
+            <column name="start_date" type="datetime"/>
+            <column name="end_date" type="datetime"/>
+            <column name="subject_reference_id" type="int"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retired_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="char(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="flag_creator_fk"
+                                 baseTableName="fhir_flags" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="flag_changed_by_fk"
+                                 baseTableName="fhir_flags" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="fhir_flag_retired_by_fk"
+                                 baseTableName="fhir_flags" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
 </databaseChangeLog>
