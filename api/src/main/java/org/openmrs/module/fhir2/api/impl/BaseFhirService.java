@@ -64,7 +64,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	@Override
-	public List<T> get(Collection<String> uuids) {
+	public List<T> get(@Nonnull Collection<String> uuids) {
 		OpenmrsFhirTranslator<U, T> translator = getTranslator();
 		return getDao().get(uuids).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
