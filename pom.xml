@@ -41,8 +41,8 @@
         <module>api-2.2</module>
         <module>omod</module>
         <module>integration-tests</module>
+        <module>integration-tests-2.1</module>
         <module>integration-tests-2.2</module>
-	    <module>integration-tests-2.1</module>
     </modules>
 
     <repositories>
