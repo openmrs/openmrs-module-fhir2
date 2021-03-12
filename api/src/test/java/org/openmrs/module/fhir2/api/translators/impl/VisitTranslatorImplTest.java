@@ -17,11 +17,13 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.CoreMatchers;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Provenance;
@@ -30,6 +32,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Location;
@@ -38,6 +41,7 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.Visit;
+import org.openmrs.VisitType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
@@ -64,6 +68,10 @@ public class VisitTranslatorImplTest {
 	
 	private static final String TEST_FHIR_CLASS = "Test Class";
 	
+	private static final String TYPE_CODE = "encounter-type-code";
+	
+	private static final String TYPE_DISPLAY = "encounter-type-display";
+	
 	@Mock
 	private EncounterLocationTranslator encounterLocationTranslator;
 	
@@ -72,6 +80,9 @@ public class VisitTranslatorImplTest {
 	
 	@Mock
 	private ProvenanceTranslator<org.openmrs.Visit> provenanceTranslator;
+	
+	@Mock
+	private VisitTypeTranslatorImpl visitTypeTranslator;
 	
 	@Mock
 	private EncounterClassMap encounterClassMap;
@@ -85,6 +96,7 @@ public class VisitTranslatorImplTest {
 		visitTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		visitTranslator.setProvenanceTranslator(provenanceTranslator);
 		visitTranslator.setEncounterClassMap(encounterClassMap);
+		visitTranslator.setVisitTypeTranslator(visitTypeTranslator);
 	}
 	
 	@Test
@@ -243,5 +255,39 @@ public class VisitTranslatorImplTest {
 		assertThat(resources.stream().findAny().isPresent(), CoreMatchers.is(true));
 		assertThat(resources.stream().findAny().get().isResource(), CoreMatchers.is(true));
 		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldTranslateTypeToVisitType() {
+		Encounter encounter = new Encounter();
+		encounter.setId(VISIT_UUID);
+		
+		VisitType visitType = new VisitType();
+		visitType.setName(TYPE_DISPLAY);
+		visitType.setUuid(TYPE_CODE);
+		when(visitTypeTranslator.toOpenmrsType(ArgumentMatchers.any())).thenReturn(visitType);
+		
+		Visit result = visitTranslator.toOpenmrsType(encounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getVisitType(), equalTo(visitType));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateTypeToEncounterType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
+		
+		Visit visit = new Visit();
+		visit.setUuid(VISIT_UUID);
+		
+		when(visitTypeTranslator.toFhirResource(ArgumentMatchers.any()))
+		        .thenReturn(Collections.singletonList(codeableConcept));
+		
+		Encounter result = visitTranslator.toFhirResource(visit);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), not(empty()));
+		assertThat(result.getTypeFirstRep(), equalTo(codeableConcept));
 	}
 }
