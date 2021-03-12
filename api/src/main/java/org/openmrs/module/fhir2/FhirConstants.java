@@ -17,10 +17,6 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_SERVER_NAME = "OpenMRS FHIR Server";
 	
-	public static final String OPENMRS_URI = "http://openmrs.org";
-	
-	public static final String OPENMRS_CODE_SYSTEM_PREFIX = OPENMRS_URI + "/CodeSystem";
-	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX = "http://terminology.hl7.org/CodeSystem";
 	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX_R3 = "http://hl7.org/fhir";
@@ -55,7 +51,7 @@ public class FhirConstants {
 	
 	public static final String CLINICAL_FINDINGS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/clinical-findings";
 	
-	public static final String ENCOUNTER_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/encounter-type";
+  public static final String ENCOUNTER_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/encounter-type";
 	
 	public static final String VISIT_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/visit-type";
 	
@@ -78,6 +74,10 @@ public class FhirConstants {
 	public static String OPENMRS_FHIR_SERVER_VERSION;
 	
 	public static final String OPENMRS_FHIR_PREFIX = "http://fhir.openmrs.org";
+	
+	public static final String OPENMRS_CODE_SYSTEM_PREFIX = OPENMRS_FHIR_PREFIX + "/code-system";
+	
+	public static final String ENCOUNTER_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/encounter-type";
 	
 	public static final String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
 	
