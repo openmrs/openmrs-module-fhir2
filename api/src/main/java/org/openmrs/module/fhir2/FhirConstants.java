@@ -50,7 +50,7 @@ public class FhirConstants {
 	        + "/condition-ver-status";
 	
 	public static final String CLINICAL_FINDINGS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/clinical-findings";
-
+	
 	public static final String TASK_STATUS_VALUE_SET_URI = "http://hl7.org/fhir/task-status";
 	
 	public static final String OBSERVATION_REFERENCE_RANGE_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX
@@ -101,6 +101,8 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION = OPENMRS_FHIR_EXT_PREFIX
 	        + "/patient/identifier#location";
+	
+	public static final String OPENMRS_FHIR_EXT_ENCOUNTER_TAG = OPENMRS_FHIR_EXT_PREFIX + "/encounter-tag";
 	
 	public static final String OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE = OPENMRS_FHIR_EXT_PREFIX
 	        + "/obs/reference-range";

@@ -72,6 +72,8 @@ public class VisitTranslatorImplTest {
 	
 	private static final String TYPE_DISPLAY = "encounter-type-display";
 	
+	private static final String VISIT_TYPE_CODE = "Visit";
+	
 	@Mock
 	private EncounterLocationTranslator encounterLocationTranslator;
 	
@@ -289,5 +291,20 @@ public class VisitTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), not(empty()));
 		assertThat(result.getTypeFirstRep(), equalTo(codeableConcept));
+	}
+	
+	@Test
+	public void toFhirResource_shouldHaveEncounterTag() {
+		Visit visit = new Visit();
+		visit.setUuid(VISIT_UUID);
+		
+		Encounter result = visitTranslator.toFhirResource(visit);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getTag(), notNullValue());
+		assertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
+		assertThat(result.getMeta().getTag().get(0).getCode(), equalTo(VISIT_TYPE_CODE));
+		assertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));
+		
 	}
 }
