@@ -13,6 +13,65 @@ initially using FHIR R4.
 Development Principles
 ----------------------
 
+The FHIR2 module is divided into a series of layers, each responsible for a
+single piece of functionality. Each layer and the principles behind it is
+described below. Note that the rules given for each layer should be read
+as principles rather than hard and fast rules; they can be broken if there
+is a good enough explanation for why.
+
+1. `ResourceProvider`s: These are straight-forward HAPI
+[`ResourceProviders`](https://hapifhir.io/hapi-fhir/docs/server_plain/resource_providers.html).
+They serve to get the necessary parameters for each operation from the HAPI
+framework and then pass those parameters along to a `Service` class that
+implements the actual operation. Note that `ResourceProvider`s support older
+FHIR versions are responsible for translating from newer FHIR resources to
+their older equivalents. `ResourceProvider`s should depend only on `Service`
+layer interfaces to allow the implementation of a resource to be changed at
+runtime based on local customisations. `ResourceProvider`s can be found in
+the 
+[`org.openmrs.module.fhir2.r4`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/providers/r4) package and the 
+[`org.openmrs.module.fhir2.r3`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/providers/r3) package.
+1. `Service`s: `Service` classes are designed to implement the functionality
+needed by `ResourceProviders` in a reusable fashion. This allows us to use a
+single code-base to support multiple FHIR versions and allows the OpenMRS-specific
+FHIR functionality to be isolated from the HAPI-specific FHIR functionality.
+Service classes primarily coordinate between the `Dao` and `Translator`
+layers. Generally, service classes are implemented as both an interface and
+a concrete implementation class, but we really only need the interface where
+the service corresponds directly to a `ResourceProvider`. `Service` classes
+should depend only on the interfaces of `Translator`s and `Dao`s, to enable
+the implementations of these classes to be swapped at runtime.
+`Service` interfaces can be found in the
+[`org.openmrs.module.fhir2.api`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/api) package and the implementations in the
+[`org.openmrs.module.fhir2.api.impl`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/api/impl) package.
+1. `Translator`s: `Translator`s are the classes that are primarily responsible
+for mapping between FHIR's data model and the OpenMRS data model (though note
+that other parts of the code need to be aware of these mappings, for example,
+to ensure that searching and translating use the same mappings. Where possible,
+`Translator`s should try to implement the full `OpenmrsFhirUpdatableTranslator`
+interface, which supports mapping from OpenMRS objects to FHIR objects with
+special handling for creating and updating OpenMRS objects. Where that
+functionality is not needed, perhaps because we only support translating
+something to FHIR and not back to OpenMRS, other interfaces are available to
+describe the functionality supported. See the actual translators for examples.
+`Translator`s can be found in the
+[`org.openmrs.module.fhir2.api.translators`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/api/translators) package and the corresponding
+implementations in the
+[`org.openmrs.module.fhir2.api.translators.impl`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/api/translators/impl) package.
+1. `Dao`s: `Dao` classes are responsible for actually interacting with the
+OpenMRS database. Normally, we do this relatively directly by using Hibernate,
+but this is also the layer than can use default OpenMRS services if there is
+special business logic we need to ensure is respected. The reason for using
+our own data access layer rather than the standard OpenMRS data access layer
+is to enable us to more effectively support the FHIR Search specification.
+Accessing the database directly allows us to turn what might be several
+calls to the OpenMRS service layer and some manual in-memory filtering into
+generally one or two database queries following a standard format.
+`Dao`s can be found in the
+[`org.openmrs.module.fhir2.api.dao`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/api/dao) package and the corresponding
+implementations in the
+[`org.openmrs.module.fhir2.api.dao.impl`](https://github.com/openmrs/openmrs-module-fhir2/tree/master/api/src/main/java/org/openmrs/module/fhir2/api/dao/impl) package.
+
 There are a couple of things that are not standard practice for other OpenMRS
 modules that should be borne in mind while developing this module.
 
@@ -21,6 +80,24 @@ should only be used inside DAO objects.
 1. Avoid using `org.openmrs.Context` except as a last resort. We should favour
 injecting the appropriate service rather than relying on `Context` to load it
 for us.
+
+### Breaking Development Principles
+
+The principles laid out above are just that: principles and baseline expected
+patterns for this module. They are not, however, unbreakable rules, but rather
+guidelines. Generally, these principles are designed to ensure that the FHIR
+module is maximally customisable without making that customisation a core
+feature of the module. The idea is that all of our mapping decisions are
+overridable at runtime via other modules without distracting from the ability
+to easily determine where any given functionality can be found. By sticking
+to common patterns, we make both of these tasks easier as people looking to
+implement, override or improve functionality should be able to easily work
+out where they need to do so.
+
+Exceptions to the rules above are fine as long as they are in line with enabling
+customisation and ease of discovery of implementations. That is to say, we
+should have a stronger justification for breaking these principles than just
+"it's easier to code this way."
 
 Technology Stack
 ----------------
