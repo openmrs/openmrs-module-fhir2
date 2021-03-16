@@ -65,6 +65,10 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	
 	@Override
 	public List<T> get(@Nonnull Collection<String> uuids) {
+		if (uuids == null) {
+			throw new InvalidRequestException("Uuid cannot be null.");
+		}
+		
 		OpenmrsFhirTranslator<U, T> translator = getTranslator();
 		return getDao().get(uuids).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}

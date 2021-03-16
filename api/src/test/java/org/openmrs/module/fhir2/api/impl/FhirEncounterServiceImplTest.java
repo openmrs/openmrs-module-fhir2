@@ -36,8 +36,10 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -61,6 +63,8 @@ import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 public class FhirEncounterServiceImplTest {
 	
 	private static final String ENCOUNTER_UUID = "344kk343-45hj45-34jk34-34ui33";
+	
+	private static final String WRONG_ENCOUNTER_UUID = "344kk343-45hj45-34jk34-34ui34";
 	
 	private static final String ENCOUNTER_DATETIME = "2005-01-01T00:00:00.0";
 	
@@ -102,7 +106,12 @@ public class FhirEncounterServiceImplTest {
 	
 	@Before
 	public void setUp() {
-		encounterService = new FhirEncounterServiceImpl();
+		encounterService = new FhirEncounterServiceImpl() {
+			
+			@Override
+			protected void validateObject(Encounter object) {
+			}
+		};
 		encounterService.setDao(dao);
 		encounterService.setTranslator(encounterTranslator);
 		encounterService.setVisitService(visitService);
@@ -124,7 +133,9 @@ public class FhirEncounterServiceImplTest {
 	public void get_shouldGetEncounterByUuid() {
 		when(dao.get(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		
 		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.get(ENCOUNTER_UUID);
+		
 		assertThat(fhirEncounter, notNullValue());
 		assertThat(fhirEncounter.getId(), notNullValue());
 		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));
@@ -132,9 +143,121 @@ public class FhirEncounterServiceImplTest {
 	
 	@Test
 	public void get_shouldGetEncounterByUuidFromOpenMrsVisit() {
+		when(visitService.get(ENCOUNTER_UUID)).thenReturn(fhirEncounter);
+		
+		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.get(ENCOUNTER_UUID);
+		
+		assertThat(fhirEncounter, notNullValue());
+		assertThat(fhirEncounter.getId(), notNullValue());
+		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void create_shouldCreateEncounter() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("1");
+		fhirEncounter.setType(Collections.singletonList(codeableConcept));
+		
+		when(encounterTranslator.toOpenmrsType(fhirEncounter)).thenReturn(openMrsEncounter);
+		when(dao.createOrUpdate(openMrsEncounter)).thenReturn(openMrsEncounter);
+		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		
+		org.hl7.fhir.r4.model.Encounter encounter = encounterService.create(fhirEncounter);
+		
+		assertThat(encounter, notNullValue());
+	}
+	
+	@Test
+	public void create_shouldCreateEncounterFromOpenMrsVisit() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
+		fhirEncounter.setType(Collections.singletonList(codeableConcept));
+		
+		when(visitService.create(fhirEncounter)).thenReturn(fhirEncounter);
+		
+		org.hl7.fhir.r4.model.Encounter result = encounterService.create(fhirEncounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void create_shouldThrowInvalidRequestExceptionWhenTypeIsMissing() {
+		encounterService.create(fhirEncounter);
+	}
+	
+	@Test
+	public void update_shouldUpdateEncounter() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("1");
+		fhirEncounter.setType(Collections.singletonList(codeableConcept));
+		
+		when(encounterTranslator.toOpenmrsType(openMrsEncounter, fhirEncounter)).thenReturn(openMrsEncounter);
+		when(dao.createOrUpdate(openMrsEncounter)).thenReturn(openMrsEncounter);
 		when(dao.get(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
-		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.get(ENCOUNTER_UUID);
+		
+		org.hl7.fhir.r4.model.Encounter encounter = encounterService.update(ENCOUNTER_UUID, fhirEncounter);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void update_shouldUpdateEncounterFromOpenMrsVisit() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
+		fhirEncounter.setType(Collections.singletonList(codeableConcept));
+		
+		when(visitService.update(ENCOUNTER_UUID, fhirEncounter)).thenReturn(fhirEncounter);
+		
+		org.hl7.fhir.r4.model.Encounter result = encounterService.update(ENCOUNTER_UUID, fhirEncounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void update_shouldThrowInvalidRequestExceptionIfIdIsNull() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("1");
+		fhirEncounter.setType(Collections.singletonList(codeableConcept));
+		
+		encounterService.update(null, fhirEncounter);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void update_shouldThrowInvalidRequestException() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("1");
+		fhirEncounter.setType(Collections.singletonList(codeableConcept));
+		
+		encounterService.update(WRONG_ENCOUNTER_UUID, fhirEncounter);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void update_shouldThrowInvalidRequestExceptionWhenTypeIsMissing() {
+		encounterService.update(ENCOUNTER_UUID, fhirEncounter);
+	}
+	
+	@Test
+	public void delete_shouldDeleteEncounter() {
+		when(dao.delete(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
+		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		
+		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.delete(ENCOUNTER_UUID);
+		
+		assertThat(fhirEncounter, notNullValue());
+		assertThat(fhirEncounter.getId(), notNullValue());
+		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void delete_shouldDeleteEncounterFromOpenMrsVisit() {
+		when(visitService.delete(ENCOUNTER_UUID)).thenReturn(fhirEncounter);
+		
+		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.delete(ENCOUNTER_UUID);
+		
 		assertThat(fhirEncounter, notNullValue());
 		assertThat(fhirEncounter.getId(), notNullValue());
 		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));

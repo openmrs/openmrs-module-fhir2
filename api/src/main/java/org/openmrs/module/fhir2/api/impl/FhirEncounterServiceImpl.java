@@ -31,6 +31,7 @@ import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,6 +72,74 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		}
 		
 		return result;
+	}
+	
+	@Override
+	public Encounter create(@Nonnull Encounter encounter) {
+		
+		if (encounter == null) {
+			throw new InvalidRequestException("Encounter cannot be null");
+		}
+		
+		FhirUtils.OpenmrsEncounterType result = FhirUtils.getOpenmrsEncounterType(encounter).orElse(null);
+		
+		if (result == null) {
+			throw new InvalidRequestException("Invalid type of request");
+		}
+		
+		if (result.equals(FhirUtils.OpenmrsEncounterType.ENCOUNTER)) {
+			return super.create(encounter);
+		}
+		
+		if (result.equals(FhirUtils.OpenmrsEncounterType.VISIT)) {
+			return visitService.create(encounter);
+		}
+		
+		throw new InvalidRequestException("Invalid type of request");
+		
+	}
+	
+	@Override
+	public Encounter update(@Nonnull String uuid, @Nonnull Encounter encounter) {
+		
+		if (uuid == null) {
+			throw new InvalidRequestException("Uuid cannot be null.");
+		}
+		
+		FhirUtils.OpenmrsEncounterType result = FhirUtils.getOpenmrsEncounterType(encounter).orElse(null);
+		
+		if (result == null) {
+			throw new InvalidRequestException("Invalid type of request");
+		}
+		
+		if (result.equals(FhirUtils.OpenmrsEncounterType.ENCOUNTER)) {
+			return super.update(uuid, encounter);
+		}
+		
+		if (result.equals(FhirUtils.OpenmrsEncounterType.VISIT)) {
+			return visitService.update(uuid, encounter);
+		}
+		
+		throw new InvalidRequestException("Invalid type of request");
+	}
+	
+	@Override
+	public Encounter delete(@Nonnull String uuid) {
+		
+		if (uuid == null) {
+			throw new InvalidRequestException("Uuid cannot be null.");
+		}
+		
+		Encounter result;
+		try {
+			result = super.delete(uuid);
+		}
+		catch (ResourceNotFoundException e) {
+			result = visitService.delete(uuid);
+		}
+		
+		return result;
+		
 	}
 	
 	@Override
