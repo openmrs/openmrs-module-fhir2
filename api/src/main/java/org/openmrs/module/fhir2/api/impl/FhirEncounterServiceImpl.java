@@ -59,9 +59,6 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	
 	@Override
 	public Encounter get(@Nonnull String uuid) {
-		if (uuid == null) {
-			throw new InvalidRequestException("Uuid cannot be null.");
-		}
 		
 		Encounter result;
 		try {
