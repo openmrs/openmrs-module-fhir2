@@ -78,6 +78,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Create
+	@SuppressWarnings("unused")
 	public MethodOutcome createEncounter(@ResourceParam Encounter encounter) {
 		return FhirProviderUtils.buildCreate(encounterService.create(encounter));
 	}
