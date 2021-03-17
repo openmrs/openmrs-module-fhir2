@@ -52,7 +52,7 @@ public class FhirConstants {
 	public static final String CONDITION_VERIFICATION_STATUS_SYSTEM_URI_R3 = HL7_FHIR_CODE_SYSTEM_PREFIX_R3
 	        + "/condition-ver-status";
 	
-	public static final String CLINICAL_FINDINGS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/clinical-findings";	
+	public static final String CLINICAL_FINDINGS_SYSTEM_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/clinical-findings";
 
 	public static final String TASK_STATUS_VALUE_SET_URI = "http://hl7.org/fhir/task-status";
 	
