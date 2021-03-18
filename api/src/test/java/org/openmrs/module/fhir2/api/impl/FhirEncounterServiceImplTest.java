@@ -152,6 +152,11 @@ public class FhirEncounterServiceImplTest {
 		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void create_shouldThrowInvalidRequestExceptionWhenEncounterIsMissing() {
+		encounterService.create(null);
+	}
+	
 	@Test
 	public void create_shouldCreateEncounter() {
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -183,6 +188,15 @@ public class FhirEncounterServiceImplTest {
 	
 	@Test(expected = InvalidRequestException.class)
 	public void create_shouldThrowInvalidRequestExceptionWhenTypeIsMissing() {
+		encounterService.create(fhirEncounter);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void create_shouldThrowInvalidRequestExceptionWhenTypeIsNotEncounterOrVisit() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
+		codeableConcept.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("2");
+		fhirEncounter.setType(Collections.singletonList(codeableConcept));
 		encounterService.create(fhirEncounter);
 	}
 	
@@ -238,6 +252,20 @@ public class FhirEncounterServiceImplTest {
 	@Test(expected = InvalidRequestException.class)
 	public void update_shouldThrowInvalidRequestExceptionWhenTypeIsMissing() {
 		encounterService.update(ENCOUNTER_UUID, fhirEncounter);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void update_shouldThrowInvalidRequestExceptionWhenTypeIsNotEncounterOrVisit() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
+		codeableConcept.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("2");
+		fhirEncounter.setType(Collections.singletonList(codeableConcept));
+		encounterService.update(ENCOUNTER_UUID, fhirEncounter);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void delete_shouldThrowInvalidRequestExceptionWhenUidIsMissing() {
+		encounterService.delete(null);
 	}
 	
 	@Test
