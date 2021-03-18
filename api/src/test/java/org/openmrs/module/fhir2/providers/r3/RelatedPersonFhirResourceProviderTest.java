@@ -372,6 +372,11 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirR3ProvenanceR
 		    RelatedPerson30_40.convertRelatedPerson(noIdRelatedPerson));
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void updateRelatedPerson_shouldThrowInvalidRequestForMissingIdType() {
+		resourceProvider.updateRelatedPerson(null, RelatedPerson30_40.convertRelatedPerson(relatedPerson));
+	}
+	
 	@Test
 	public void createRelatedPerson_shouldCreateNewRelatedPerson() {
 		when(relatedPersonService.create(any(org.hl7.fhir.r4.model.RelatedPerson.class))).thenReturn(relatedPerson);

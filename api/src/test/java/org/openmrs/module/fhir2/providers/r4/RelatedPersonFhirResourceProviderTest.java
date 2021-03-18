@@ -374,6 +374,11 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 		resourceProvider.updateRelatedPerson(new IdType().setValue(WRONG_RELATED_PERSON_UUID), relatedPerson);
 	}
 	
+	@Test(expected = InvalidRequestException.class)
+	public void updateRelatedPerson_shouldThrowInvalidRequestForMissingIdType() {
+		resourceProvider.updateRelatedPerson(null, relatedPerson);
+	}
+	
 	@Test
 	public void deleteRelatedPerson_shouldDeleteRelatedPerson() {
 		
