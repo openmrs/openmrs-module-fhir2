@@ -63,6 +63,7 @@
     </changeSet>
 
     <changeSet id="add_loinc_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
+	<validCheckSum>3:f4dec7d10e608fcbd604d17a5e147c64</validCheckSum>
         <preConditions onFail="MARK_RAN" onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source"/>
@@ -83,6 +84,7 @@
     </changeSet>
 
     <changeSet id="add_ciel_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
+	<validCheckSum>3:f540ac5b0cbb385c97531c5fa558a97c</validCheckSum>
         <preConditions onFail="MARK_RAN" onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source"/>
