@@ -436,4 +436,36 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(entries, everyItem(hasResource(instanceOf(Practitioner.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
+	
+	@Test
+	public void shouldReturnCountForPractitionerAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Practitioner?&_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		
+		assertThat(result, hasProperty("total", equalTo(6)));
+	}
+	
+	@Test
+	public void shouldReturnCountForPractitionerAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Practitioner?&_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		
+		assertThat(result, hasProperty("total", equalTo(6)));
+	}
 }

@@ -16,4 +16,5 @@
     <bean name="hapiLoggingInterceptor" class="ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor">
         <property name="loggerName" value="org.openmrs.module.fhir2.accessLog"/>
     </bean>
+    <bean name="hapiSummaryInterceptor" class="org.openmrs.module.fhir2.api.search.interceptor.SummaryInterceptor" />
 </beans>
