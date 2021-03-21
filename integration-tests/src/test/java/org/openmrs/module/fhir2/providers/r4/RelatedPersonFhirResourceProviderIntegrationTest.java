@@ -179,4 +179,36 @@ public class RelatedPersonFhirResourceProviderIntegrationTest extends BaseFhirR4
 		assertThat(entries, containsInRelativeOrder(
 		    hasResource(hasProperty("nameFirstRep", hasProperty("givenAsSingleString", containsString("F"))))));
 	}
+	
+	@Test
+	public void shouldReturnCountForRelatedPersonAsJson() throws Exception {
+		MockHttpServletResponse response = get("/RelatedPerson?name=John&_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		
+		assertThat(result, hasProperty("total", equalTo(1)));
+	}
+	
+	@Test
+	public void shouldReturnCountForRelatedPersonAsXml() throws Exception {
+		MockHttpServletResponse response = get("/RelatedPerson?name=John&_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		
+		assertThat(result, hasProperty("total", equalTo(1)));
+	}
 }

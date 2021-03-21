@@ -30,6 +30,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.GlobalPropertyListener;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.search.interceptor.SummaryInterceptor;
 import org.openmrs.module.fhir2.narrative.OpenmrsThymeleafNarrativeGenerator;
 import org.openmrs.module.fhir2.web.util.NarrativeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,10 @@ public class FhirRestServlet extends RestfulServer {
 	@Autowired
 	@Qualifier("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
+	
+	@Autowired
+	@Qualifier("hapiSummaryInterceptor")
+	private SummaryInterceptor summaryInterceptor;
 	
 	private MessageSource messageSource;
 	
@@ -127,6 +132,7 @@ public class FhirRestServlet extends RestfulServer {
 		setPagingProvider(pagingProvider);
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 		registerInterceptor(loggingInterceptor);
+		registerInterceptor(summaryInterceptor);
 
 		String narrativesOverridePropertyFile = NarrativeUtils.getValidatedPropertiesFilePath(
 				globalPropertyService.getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, (String) null));

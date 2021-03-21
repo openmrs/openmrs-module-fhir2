@@ -474,4 +474,36 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 		return medication.getExtensionsByUrl(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE).stream().findFirst()
 		        .map(it -> it.getExtensionString(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#strength")).orElse(null);
 	}
+	
+	@Test
+	public void shouldReturnCountForMedicationAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Medication?_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		
+		assertThat(result, hasProperty("total", equalTo(4)));
+	}
+	
+	@Test
+	public void shouldReturnCountForMedicationAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Medication?_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		
+		assertThat(result, hasProperty("total", equalTo(4)));
+	}
 }
