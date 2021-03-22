@@ -534,13 +534,10 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		System.out.println(response.getContentAsString());
-		
 		Bundle result = readBundleResponse(response);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(6)));
 	}
 	
@@ -552,13 +549,10 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		System.out.println(response.getContentAsString());
-		
 		Bundle result = readBundleResponse(response);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(6)));
 	}
 	

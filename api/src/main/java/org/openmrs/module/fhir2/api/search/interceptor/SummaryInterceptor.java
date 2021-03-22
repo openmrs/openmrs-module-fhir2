@@ -19,13 +19,9 @@ public class SummaryInterceptor {
 	
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
 	public void handleSummaryCount(RequestDetails requestDetails) {
-		
 		if (requestDetails.getParameters().containsKey("_summary")) {
-			
 			if (requestDetails.getParameters().get("_summary")[0].equals("count")) {
-				
 				if (!requestDetails.getParameters().containsKey("_count")) {
-					
 					requestDetails.addParameter("_count", new String[] { "1" });
 				}
 			}

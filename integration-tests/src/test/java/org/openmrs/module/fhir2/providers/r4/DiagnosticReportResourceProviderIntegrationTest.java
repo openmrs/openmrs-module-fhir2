@@ -587,7 +587,6 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(2)));
 	}
 	
@@ -604,7 +603,6 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(2)));
 	}
 }

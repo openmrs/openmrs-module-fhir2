@@ -501,7 +501,6 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(4)));
 	}
 	
@@ -517,7 +516,6 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(4)));
 	}
 }

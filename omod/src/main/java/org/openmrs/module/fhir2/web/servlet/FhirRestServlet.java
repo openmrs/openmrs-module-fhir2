@@ -59,8 +59,6 @@ public class FhirRestServlet extends RestfulServer {
 	@Qualifier("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
 	
-	@Autowired
-	@Qualifier("hapiSummaryInterceptor")
 	private SummaryInterceptor summaryInterceptor;
 	
 	private MessageSource messageSource;
@@ -125,6 +123,7 @@ public class FhirRestServlet extends RestfulServer {
 		int maximumPageSize = NumberUtils
 				.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE), 100);
 
+		summaryInterceptor = new SummaryInterceptor();
 		pagingProvider = new FifoMemoryPagingProvider(10_000);
 		pagingProvider.setDefaultPageSize(defaultPageSize);
 		pagingProvider.setMaximumPageSize(maximumPageSize);

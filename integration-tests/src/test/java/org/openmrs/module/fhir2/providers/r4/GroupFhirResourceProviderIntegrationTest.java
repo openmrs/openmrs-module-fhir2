@@ -416,7 +416,6 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(1)));
 	}
 	
@@ -432,7 +431,6 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(1)));
 	}
 }

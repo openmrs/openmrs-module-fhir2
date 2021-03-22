@@ -199,7 +199,6 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(4)));
 	}
 	
@@ -215,7 +214,6 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(4)));
 	}
 }

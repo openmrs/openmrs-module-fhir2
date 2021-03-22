@@ -458,7 +458,6 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(1)));
 	}
 	
@@ -474,7 +473,6 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(1)));
 	}
 }

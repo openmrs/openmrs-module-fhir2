@@ -521,13 +521,10 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		System.out.println(response.getContentAsString());
-		
 		Bundle result = readBundleResponse(response);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(21)));
 		
 	}
@@ -541,13 +538,10 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
-		System.out.println(response.getContentAsString());
-		
 		Bundle result = readBundleResponse(response);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(21)));
 		
 	}

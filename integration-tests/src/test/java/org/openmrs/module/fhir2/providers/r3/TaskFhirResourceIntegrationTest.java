@@ -503,7 +503,6 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(2)));
 	}
 	
@@ -519,7 +518,6 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		
 		assertThat(result, hasProperty("total", equalTo(2)));
 	}
 }
