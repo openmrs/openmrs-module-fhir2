@@ -30,9 +30,9 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.GlobalPropertyListener;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
-import org.openmrs.module.fhir2.api.search.interceptor.SummaryInterceptor;
 import org.openmrs.module.fhir2.narrative.OpenmrsThymeleafNarrativeGenerator;
 import org.openmrs.module.fhir2.web.util.NarrativeUtils;
+import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -123,7 +123,6 @@ public class FhirRestServlet extends RestfulServer {
 		int maximumPageSize = NumberUtils
 				.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE), 100);
 
-		summaryInterceptor = new SummaryInterceptor();
 		pagingProvider = new FifoMemoryPagingProvider(10_000);
 		pagingProvider.setDefaultPageSize(defaultPageSize);
 		pagingProvider.setMaximumPageSize(maximumPageSize);
@@ -131,6 +130,8 @@ public class FhirRestServlet extends RestfulServer {
 		setPagingProvider(pagingProvider);
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 		registerInterceptor(loggingInterceptor);
+
+		summaryInterceptor = new SummaryInterceptor();
 		registerInterceptor(summaryInterceptor);
 
 		String narrativesOverridePropertyFile = NarrativeUtils.getValidatedPropertiesFilePath(
