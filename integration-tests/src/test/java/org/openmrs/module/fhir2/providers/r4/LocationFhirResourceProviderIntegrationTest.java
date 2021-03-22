@@ -478,4 +478,34 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		    hasResource(hasProperty("name", equalTo("Test location 8")))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
+	
+	@Test
+	public void shouldReturnCountForLocationAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Location?_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(8)));
+	}
+	
+	@Test
+	public void shouldReturnCountForLocationAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Location?_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(8)));
+	}
 }

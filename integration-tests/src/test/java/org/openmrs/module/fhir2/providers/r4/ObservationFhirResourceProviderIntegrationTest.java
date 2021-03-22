@@ -511,4 +511,38 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 			    sameOrAfter(observations.get(i).getEffectiveDateTimeType().getValue()));
 		}
 	}
+	
+	@Test
+	public void shouldReturnCountForObservationAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Observation?subject.name=Chebaskwony&_summary=count")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(21)));
+		
+	}
+	
+	@Test
+	public void shouldReturnCountForObservationAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Observation?subject.name=Chebaskwony&_summary=count")
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(21)));
+		
+	}
 }
