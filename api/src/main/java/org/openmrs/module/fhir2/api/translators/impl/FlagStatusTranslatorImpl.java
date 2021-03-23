@@ -14,7 +14,9 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Flag;
 import org.openmrs.module.fhir2.api.translators.FlagStatusTranslator;
 import org.openmrs.module.fhir2.model.FhirFlag;
+import org.springframework.stereotype.Component;
 
+@Component
 public class FlagStatusTranslatorImpl implements FlagStatusTranslator {
 	
 	@Override

@@ -21,8 +21,8 @@ import org.hl7.fhir.r4.model.Period;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.api.translators.FlagStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.FlagTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ReferenceTranslator;
 import org.openmrs.module.fhir2.model.FhirFlag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,7 +35,7 @@ public class FlagTranslatorImpl implements FlagTranslator {
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
 	
 	@Autowired
-	private ReferenceTranslator referenceTranslator;
+	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Autowired
 	private FlagStatusTranslator flagStatusTranslator;
@@ -55,7 +55,7 @@ public class FlagTranslatorImpl implements FlagTranslator {
 		flag.setPeriod(period);
 		
 		flag.setStatus(flagStatusTranslator.toFhirResource(fhirFlag.getStatus()));
-		flag.setSubject(referenceTranslator.toFhirResource(fhirFlag.getSubjectReference()));
+		flag.setSubject(patientReferenceTranslator.toFhirResource(fhirFlag.getPatient()));
 		flag.setAuthor(practitionerReferenceTranslator.toFhirResource(fhirFlag.getCreator()));
 		
 		return flag;
@@ -71,6 +71,10 @@ public class FlagTranslatorImpl implements FlagTranslator {
 		notNull(existingFhirFlag, "The ExistingFhirFlag object should not be null");
 		notNull(flag, "The Flag object should not be null");
 		
+		if (flag.hasId()) {
+			existingFhirFlag.setUuid(flag.getId());
+		}
+		
 		if (flag.hasStatus()) {
 			existingFhirFlag.setStatus(flagStatusTranslator.toOpenmrsType(flag.getStatus()));
 		}
@@ -80,12 +84,14 @@ public class FlagTranslatorImpl implements FlagTranslator {
 		}
 		
 		if (flag.hasSubject()) {
-			existingFhirFlag.setSubjectReference(referenceTranslator.toOpenmrsType(flag.getSubject()));
+			existingFhirFlag.setPatient(patientReferenceTranslator.toOpenmrsType(flag.getSubject()));
 		}
 		
 		if (flag.hasCode()) {
 			existingFhirFlag.setFlag(flag.getCode().getText());
 		}
+		
+		existingFhirFlag.setPriority(FhirFlag.FlagPriority.HIGH);
 		
 		if (flag.hasPeriod()) {
 			Period period = flag.getPeriod();

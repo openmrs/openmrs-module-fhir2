@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.fhir2.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -19,19 +18,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import java.util.Date;
-import java.util.UUID;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.search.annotations.Field;
-import org.openmrs.Auditable;
-import org.openmrs.Retireable;
-import org.openmrs.User;
+import org.openmrs.BaseOpenmrsMetadata;
+import org.openmrs.Patient;
 
 /*
  * This class is model based on https://www.hl7.org/fhir/flag.html
@@ -41,7 +36,7 @@ import org.openmrs.User;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Entity
 @Table(name = "fhir_flags")
-public class FhirFlag implements Auditable, Retireable {
+public class FhirFlag extends BaseOpenmrsMetadata {
 	
 	// Based on https://www.hl7.org/fhir/valueset-flag-priority.html
 	public enum FlagPriority {
@@ -75,6 +70,7 @@ public class FhirFlag implements Auditable, Retireable {
 	@Enumerated(EnumType.STRING)
 	private FlagStatus status;
 	
+	@Column(name = "flag")
 	private String flag;
 	
 	@Column(name = "start_date")
@@ -83,44 +79,8 @@ public class FhirFlag implements Auditable, Retireable {
 	@Column(name = "end_date")
 	private Date endDate;
 	
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "subject_reference_id", referencedColumnName = "reference_id")
-	private FhirReference subjectReference;
-	
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "creator", updatable = false)
-	protected User creator;
-	
-	@Column(name = "date_created", nullable = false, updatable = false)
-	private Date dateCreated;
-	
-	@ManyToOne
-	@JoinColumn(name = "changed_by")
-	private User changedBy;
-	
-	@Column(name = "date_changed")
-	private Date dateChanged;
-	
-	@Column(name = "retired", nullable = false)
-	@Field
-	private Boolean retired = Boolean.FALSE;
-	
-	@Column(name = "date_retired")
-	private Date dateRetired;
-	
-	@ManyToOne
-	@JoinColumn(name = "retired_by")
-	private User retiredBy;
-	
-	@Column(name = "retire_reason")
-	private String retireReason;
-	
-	@Column(name = "uuid", unique = true, nullable = false, length = 36)
-	private String uuid = UUID.randomUUID().toString();
-	
-	@Override
-	public Boolean isRetired() {
-		return retired;
-	}
+	@JoinColumn(nullable = false, name = "patient_id")
+	private Patient patient;
 	
 }
