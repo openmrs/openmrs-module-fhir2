@@ -475,6 +475,5 @@ public class EncounterTranslatorImplTest {
 		assertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
 		assertThat(result.getMeta().getTag().get(0).getCode(), equalTo(ENCOUNTER_TYPE_CODE));
 		assertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));
-		
 	}
 }
