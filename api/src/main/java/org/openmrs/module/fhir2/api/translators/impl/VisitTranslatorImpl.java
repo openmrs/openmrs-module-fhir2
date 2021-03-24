@@ -13,8 +13,11 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import java.util.Date;
+
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Visit;
@@ -25,6 +28,7 @@ import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.openmrs.module.fhir2.api.translators.VisitPeriodTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +51,9 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 	@Autowired
 	private VisitTypeTranslatorImpl visitTypeTranslator;
 	
+	@Autowired
+	private VisitPeriodTranslator visitPeriodTranslator;
+
 	@Override
 	public Encounter toFhirResource(@Nonnull Visit visit) {
 		notNull(visit, "The OpenMrs Visit object should not be null");
@@ -60,8 +67,12 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		if (visit.getLocation() != null) {
 			encounterLocationTranslator.toFhirResource(visit.getLocation());
 		}
-		
+
 		encounter.setClass_(mapLocationToClass(visit.getLocation()));
+
+		encounter.setPeriod(
+		    visitPeriodTranslator.toFhirResource(new ImmutablePair(visit.getStartDatetime(), visit.getStopDatetime())));
+
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "visit", "Visit");
 		encounter.getMeta().setLastUpdated(visit.getDateChanged());
 		encounter.addContained(provenanceTranslator.getCreateProvenance(visit));
@@ -87,6 +98,14 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 			existingVisit.setVisitType(visitType);
 		}
 		
+		ImmutablePair<Date, Date> translatedPeriod = visitPeriodTranslator.toOpenmrsType(encounter.getPeriod());
+		if (translatedPeriod != null && translatedPeriod.getKey() != null) {
+			existingVisit.setStartDatetime(translatedPeriod.getKey());
+		}
+		if (translatedPeriod != null && translatedPeriod.getValue() != null) {
+			existingVisit.setStopDatetime(translatedPeriod.getValue());
+		}
+
 		existingVisit.setPatient(patientReferenceTranslator.toOpenmrsType(encounter.getSubject()));
 		existingVisit.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
 		

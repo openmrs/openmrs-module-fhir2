@@ -104,6 +104,9 @@ public class EncounterTranslatorImplTest {
 	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
 	
 	@Mock
+	private EncounterPeriodTranslator encounterPeriodTranslator;
+
+	@Mock
 	private EncounterClassMap encounterClassMap;
 	
 	private Patient patient;
@@ -130,7 +133,8 @@ public class EncounterTranslatorImplTest {
 		encounterTranslator.setEncounterClassMap(encounterClassMap);
 		encounterTranslator.setVisitReferenceTranlator(visitReferenceTranslator);
 		encounterTranslator.setEncounterTypeTranslator(encounterTypeTranslator);
-		
+		encounterTranslator.setEncounterPeriodTranslator(encounterPeriodTranslator);
+
 		PatientIdentifier identifier = new PatientIdentifier();
 		identifier.setIdentifier(PATIENT_IDENTIFIER);
 		
@@ -354,6 +358,22 @@ public class EncounterTranslatorImplTest {
 	}
 	
 	@Test
+	public void toOpenMrsType_shouldTranslatePeriodToEncounterDatetime() {
+		Date encounterDate = new java.util.Date();
+		Period period = new Period();
+
+		fhirEncounter.setPeriod(period);
+
+		when(encounterPeriodTranslator.toOpenmrsType(period)).thenReturn(encounterDate);
+		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
+
+		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
+
+		assertThat(result, notNullValue());
+		assertThat(result.getEncounterDatetime(), equalTo(encounterDate));
+	}
+
+	@Test
 	public void toFhirResource_shouldTranslateToPartOf() {
 		Visit visit = new Visit();
 		visit.setUuid(VISIT_UUID);
@@ -463,15 +483,32 @@ public class EncounterTranslatorImplTest {
 		assertThat(result.getType(), not(empty()));
 		assertThat(result.getTypeFirstRep(), equalTo(fhirEncounterType));
 	}
-	
+
 	@Test
 	public void toFhirResource_shouldHaveEncounterTag() {
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
-		
+
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getTag(), notNullValue());
 		assertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
 		assertThat(result.getMeta().getTag().get(0).getCode(), equalTo(TYPE_CODE));
 		assertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));
+	}
+
+	@Test
+	public void toFhirResource_shouldTranslateEncounterDatetimeToPeriod() {
+		Date encounterDate = new java.util.Date();
+		Period period = new Period();
+
+		omrsEncounter.setEncounterDatetime(encounterDate);
+
+		period.setStart(encounterDate);
+
+		when(encounterPeriodTranslator.toFhirResource(encounterDate)).thenReturn(period);
+
+		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+
+		assertThat(result, notNullValue());
+		assertThat(result.getPeriod(), equalTo(period));
 	}
 }
