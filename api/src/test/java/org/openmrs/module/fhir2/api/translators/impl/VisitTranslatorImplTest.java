@@ -305,6 +305,5 @@ public class VisitTranslatorImplTest {
 		assertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
 		assertThat(result.getMeta().getTag().get(0).getCode(), equalTo(VISIT_TYPE_CODE));
 		assertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));
-		
 	}
 }
