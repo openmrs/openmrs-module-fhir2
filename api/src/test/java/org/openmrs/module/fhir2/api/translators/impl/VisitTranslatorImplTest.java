@@ -70,7 +70,7 @@ public class VisitTranslatorImplTest {
 	
 	private static final String TYPE_CODE = "encounter-type-code";
 	
-	private static final String TYPE_DISPLAY = "encounter-type-display";
+	private static final String TYPE_DISPLAY = "Visit";
 	
 	private static final String VISIT_TYPE_CODE = "Visit";
 	

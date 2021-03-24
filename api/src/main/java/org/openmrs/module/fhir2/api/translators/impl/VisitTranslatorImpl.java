@@ -61,7 +61,7 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 			encounterLocationTranslator.toFhirResource(visit.getLocation());
 		}
 		
-		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "Visit", "encounter-type-display");
+		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "Visit", "Visit");
 		
 		encounter.setClass_(mapLocationToClass(visit.getLocation()));
 		

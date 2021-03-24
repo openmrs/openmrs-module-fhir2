@@ -83,7 +83,7 @@ public class EncounterTranslatorImplTest {
 	
 	private static final String TYPE_CODE = "encounter-type-code";
 	
-	private static final String TYPE_DISPLAY = "encounter-type-display";
+	private static final String TYPE_DISPLAY = "Encounter";
 	
 	private static final String ENCOUNTER_TYPE_CODE = "Encounter";
 	
