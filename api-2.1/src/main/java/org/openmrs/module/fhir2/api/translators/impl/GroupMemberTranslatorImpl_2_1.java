@@ -83,7 +83,6 @@ public class GroupMemberTranslatorImpl_2_1 implements GroupMemberTranslator<Coho
 		
 		if (groupMemberComponent.hasInactive()) {
 			existingCohort.setVoided(groupMemberComponent.getInactive());
-			existingCohort.setVoidReason("Voided via FHIR API");
 		}
 		
 		return existingCohort;
