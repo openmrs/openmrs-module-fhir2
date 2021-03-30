@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.text.SimpleDateFormat;
@@ -29,6 +30,7 @@ import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -89,14 +91,14 @@ public class VisitTranslatorImplTest {
 	
 	@Mock
 	private VisitPeriodTranslatorImpl visitPeriodTranslator;
-
+	
 	@Mock
 	private EncounterClassMap encounterClassMap;
 	
 	private VisitTranslatorImpl visitTranslator;
 	
 	private Date periodStart, periodEnd;
-
+	
 	@SneakyThrows
 	@Before
 	public void setup() {
@@ -107,7 +109,7 @@ public class VisitTranslatorImplTest {
 		visitTranslator.setEncounterClassMap(encounterClassMap);
 		visitTranslator.setVisitTypeTranslator(visitTypeTranslator);
 		visitTranslator.setVisitPeriodTranslator(visitPeriodTranslator);
-
+		
 		periodStart = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse("10-Jan-2019 10:11:00");
 		periodEnd = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse("10-Jan-2019 11:00:00");
 	}
@@ -144,41 +146,41 @@ public class VisitTranslatorImplTest {
 	@Test
 	public void toOpenmrsType_shouldConvertPeriodToStartStopDatetime() {
 		Encounter encounter = new Encounter();
-
+		
 		Period period = new Period();
 		period.setStart(periodStart);
 		period.setEnd(periodEnd);
 		encounter.setPeriod(period);
-
+		
 		ImmutablePair<Date, Date> pair = new ImmutablePair(periodStart, periodEnd);
-
+		
 		when(visitPeriodTranslator.toOpenmrsType(period)).thenReturn(pair);
-
+		
 		Visit result = visitTranslator.toOpenmrsType(new Visit(), encounter);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getStartDatetime(), equalTo(periodStart));
 		assertThat(result.getStopDatetime(), equalTo(periodEnd));
 	}
-
+	
 	@Test
 	public void toOpenmrsType_shouldConvertPeriodWithNullValues() {
 		Encounter encounter = new Encounter();
-
+		
 		Period period = new Period();
 		encounter.setPeriod(period);
-
+		
 		ImmutablePair<Date, Date> pair = new ImmutablePair(null, null);
-
+		
 		when(visitPeriodTranslator.toOpenmrsType(period)).thenReturn(pair);
-
+		
 		Visit result = visitTranslator.toOpenmrsType(new Visit(), encounter);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getStartDatetime(), nullValue());
 		assertThat(result.getStopDatetime(), nullValue());
 	}
-
+	
 	@Test(expected = NullPointerException.class)
 	public void toFhirResource_shouldThrowExceptionWhenVisitIsNull() {
 		visitTranslator.toFhirResource(null);
@@ -341,37 +343,37 @@ public class VisitTranslatorImplTest {
 		assertThat(result.getType(), not(empty()));
 		assertThat(result.getTypeFirstRep(), equalTo(codeableConcept));
 	}
-
+	
 	@Test
 	public void toFhirResource_shouldHaveEncounterTag() {
 		Visit visit = new Visit();
 		visit.setUuid(VISIT_UUID);
-
+		
 		Encounter result = visitTranslator.toFhirResource(visit);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getTag(), notNullValue());
 		assertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
 		assertThat(result.getMeta().getTag().get(0).getCode(), equalTo(TYPE_CODE));
 		assertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));
 	}
-
+	
 	@Test
 	public void toFhirResource_shouldTranslateDateStartedStoppedToPeriod() {
 		Visit visit = new Visit();
 		visit.setUuid(VISIT_UUID);
-
+		
 		Period period = new Period();
 		period.setStart(periodStart);
 		period.setEnd(periodEnd);
-
+		
 		visit.setStartDatetime(periodStart);
 		visit.setStartDatetime(periodEnd);
-
+		
 		when(visitPeriodTranslator.toFhirResource(ArgumentMatchers.any())).thenReturn(period);
-
+		
 		Encounter result = visitTranslator.toFhirResource(visit);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getPeriod().getStart(), equalTo(periodStart));
 		assertThat(result.getPeriod().getEnd(), equalTo(periodEnd));

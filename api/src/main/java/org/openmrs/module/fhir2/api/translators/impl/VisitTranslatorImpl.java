@@ -53,7 +53,7 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 	
 	@Autowired
 	private VisitPeriodTranslator visitPeriodTranslator;
-
+	
 	@Override
 	public Encounter toFhirResource(@Nonnull Visit visit) {
 		notNull(visit, "The OpenMrs Visit object should not be null");
@@ -67,12 +67,12 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		if (visit.getLocation() != null) {
 			encounterLocationTranslator.toFhirResource(visit.getLocation());
 		}
-
+		
 		encounter.setClass_(mapLocationToClass(visit.getLocation()));
-
+		
 		encounter.setPeriod(
 		    visitPeriodTranslator.toFhirResource(new ImmutablePair(visit.getStartDatetime(), visit.getStopDatetime())));
-
+		
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "visit", "Visit");
 		encounter.getMeta().setLastUpdated(visit.getDateChanged());
 		encounter.addContained(provenanceTranslator.getCreateProvenance(visit));
@@ -105,7 +105,7 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		if (translatedPeriod != null && translatedPeriod.getValue() != null) {
 			existingVisit.setStopDatetime(translatedPeriod.getValue());
 		}
-
+		
 		existingVisit.setPatient(patientReferenceTranslator.toOpenmrsType(encounter.getSubject()));
 		existingVisit.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
 		
