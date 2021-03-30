@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Type;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
@@ -29,18 +30,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-// TODO Create proper "System" value
 public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTranslator implements PatientIdentifierTranslator {
 	
 	@Autowired
 	private FhirPatientIdentifierSystemService patientIdentifierSystemService;
-	
+
 	@Autowired
 	private FhirPatientService patientService;
 	
 	@Autowired
 	private FhirLocationDao locationDao;
 	
+	@Autowired
+	private FhirGlobalPropertyService globalPropertyService;
+
 	@Override
 	public Identifier toFhirResource(@Nonnull PatientIdentifier identifier) {
 		if (identifier == null || identifier.getVoided()) {
@@ -68,11 +71,13 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 			        .setValue(createLocationReference(identifier.getLocation()));
 		}
 		
-		if (identifier.getIdentifierType() != null) {
-			patientIdentifier
-			        .setSystem(patientIdentifierSystemService.getUrlByPatientIdentifierType(identifier.getIdentifierType()));
+		if (globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX) != null
+		        && !globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX).isEmpty()
+		        && identifier.getIdentifierType() != null) {
+
+			patientIdentifier.setSystem(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX)
+			        + '/' + identifier.getIdentifierType().getId() + '-' + identifier.getIdentifierType().getName());
 		}
-		
 		return patientIdentifier;
 	}
 	
