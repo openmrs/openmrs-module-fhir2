@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Visit;
 import org.openmrs.VisitType;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
@@ -59,8 +60,9 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		if (visit.getLocation() != null) {
 			encounterLocationTranslator.toFhirResource(visit.getLocation());
 		}
-		encounter.setClass_(mapLocationToClass(visit.getLocation()));
 		
+		encounter.setClass_(mapLocationToClass(visit.getLocation()));
+		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "visit", "Visit");
 		encounter.getMeta().setLastUpdated(visit.getDateChanged());
 		encounter.addContained(provenanceTranslator.getCreateProvenance(visit));
 		encounter.addContained(provenanceTranslator.getUpdateProvenance(visit));

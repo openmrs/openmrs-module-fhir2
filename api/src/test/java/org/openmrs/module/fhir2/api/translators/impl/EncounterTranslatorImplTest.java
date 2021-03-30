@@ -81,9 +81,9 @@ public class EncounterTranslatorImplTest {
 	
 	private static final String VISIT_URI = FhirConstants.ENCOUNTER + "/" + VISIT_UUID;
 	
-	private static final String TYPE_CODE = "encounter-type-code";
+	private static final String TYPE_CODE = "encounter";
 	
-	private static final String TYPE_DISPLAY = "encounter-type-display";
+	private static final String TYPE_DISPLAY = "Encounter";
 	
 	@Mock
 	private EncounterParticipantTranslator participantTranslator;
@@ -462,5 +462,16 @@ public class EncounterTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), not(empty()));
 		assertThat(result.getTypeFirstRep(), equalTo(fhirEncounterType));
+	}
+	
+	@Test
+	public void toFhirResource_shouldHaveEncounterTag() {
+		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getTag(), notNullValue());
+		assertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
+		assertThat(result.getMeta().getTag().get(0).getCode(), equalTo(TYPE_CODE));
+		assertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));
 	}
 }

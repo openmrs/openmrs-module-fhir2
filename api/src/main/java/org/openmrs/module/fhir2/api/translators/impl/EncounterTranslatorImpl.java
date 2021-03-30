@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterProvider;
 import org.openmrs.EncounterType;
 import org.openmrs.Visit;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
@@ -76,6 +77,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 			    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
 		}
 		
+		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "encounter", "Encounter");
 		encounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());
 		encounter.addContained(provenanceTranslator.getCreateProvenance(openMrsEncounter));
 		encounter.addContained(provenanceTranslator.getUpdateProvenance(openMrsEncounter));
