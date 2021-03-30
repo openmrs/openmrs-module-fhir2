@@ -19,8 +19,8 @@ public interface MediaTranslator extends ToFhirTranslator<Obs, Media>, OpenmrsFh
 	/**
 	 * Maps an {@link org.openmrs.Obs} to a {@link org.hl7.fhir.r4.model.Media}
 	 *
-	 * @param data the Observation to translate
-	 * @return the corresponding FHIR location resource
+	 * @param data the FHIR Media to translate
+	 * @return the corresponding FHIR media resource
 	 */
 	@Override
 	Media toFhirResource(@Nonnull Obs data);

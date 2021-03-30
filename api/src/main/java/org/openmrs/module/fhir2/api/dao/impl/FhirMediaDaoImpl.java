@@ -33,27 +33,46 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao, 
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.MEDIA_STATUS:
-					//                    entry.getValue().forEach(param ->);
+					entry.getValue().forEach(param -> handleStatus(criteria, entry.getValue()));
 					break;
 				case FhirConstants.MEDIA_TYPE:
+					entry.getValue().forEach(param -> handleMediaType(criteria, entry.getValue()));
 					break;
 				case FhirConstants.MEDIA_SUBJECT:
+					entry.getValue().forEach(param -> handleMediaSubject(criteria, entry.getValue()));
 					break;
 				case FhirConstants.MEDIA_ENCOUNTER_REFERENCE:
+					entry.getValue().forEach(param -> handleMediaEncounterReference(criteria, entry.getValue()));
 					break;
 				case FhirConstants.MEDIA_CREATED_DATE_TIME:
+					entry.getValue().forEach(param -> handleMediaCreatedDate(criteria, entry.getValue()));
 					break;
 				case FhirConstants.MEDIA_CONTENT_TYPE:
+					entry.getValue().forEach(param -> handleMediaContentType(criteria, entry.getValue()));
 					break;
 				case FhirConstants.CONTENT_DATA:
+					entry.getValue().forEach(param -> handleContentData(criteria, entry.getValue()));
 					break;
 				case FhirConstants.CONTENT_TITLE:
+					entry.getValue().forEach(param -> handleContentTitle(criteria, entry.getValue()));
 					break;
 				case FhirConstants.CONTENT_DATE_OF_CREATION:
+					entry.getValue().forEach(param -> handleContentDateOfCreation(criteria, entry.getValue()));
 					break;
 				
 			}
 		});
+
+//		private void handleStatus(){}
+//		private void handleMediaType(){}
+//		private void handleMediaSubject(){}
+//		private void handleMediaEncounterReference(){}
+//		private void handleMediaCreatedDate(){}
+//		private void handleMediaContentType(){}
+//		private void handleContentData(){}
+//		private void handleContentTitle(){}
+//		private void handleContentDateOfCreation(){}
+
 	}
 	
 	@Override
