@@ -514,4 +514,33 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		
 	}
 	
+	@Test
+	public void shouldReturnCountForAllergyIntoleranceAsJson() throws Exception {
+		MockHttpServletResponse response = get("/AllergyIntolerance?_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(6)));
+	}
+	
+	@Test
+	public void shouldReturnCountForAllergyIntoleranceAsXml() throws Exception {
+		MockHttpServletResponse response = get("/AllergyIntolerance?_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(6)));
+	}
 }

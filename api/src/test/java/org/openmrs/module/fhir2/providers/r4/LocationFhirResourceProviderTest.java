@@ -607,7 +607,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Test(expected = ResourceNotFoundException.class)
 	public void deleteLocation_shouldThrowResourceNotFoundException() {
-		when(locationService.delete(WRONG_LOCATION_UUID)).thenReturn(null, null);
+		when(locationService.delete(WRONG_LOCATION_UUID)).thenReturn(null);
+		
 		resourceProvider.deleteLocation(new IdType().setValue(WRONG_LOCATION_UUID));
 	}
 	

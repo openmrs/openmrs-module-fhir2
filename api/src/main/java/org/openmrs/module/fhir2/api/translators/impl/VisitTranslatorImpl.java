@@ -16,9 +16,13 @@ import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
+import org.openmrs.EncounterType;
 import org.openmrs.Visit;
+import org.openmrs.VisitType;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +41,12 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 	@Autowired
 	private ProvenanceTranslator<org.openmrs.Visit> provenanceTranslator;
 	
+	@Autowired
+	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
+	
+	@Autowired
+	private VisitTypeTranslatorImpl visitTypeTranslator;
+	
 	@Override
 	public Encounter toFhirResource(@Nonnull Visit visit) {
 		notNull(visit, "The OpenMrs Visit object should not be null");
@@ -44,13 +54,15 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		Encounter encounter = new Encounter();
 		encounter.setId(visit.getUuid());
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
+		encounter.setType(visitTypeTranslator.toFhirResource(visit.getVisitType()));
 		
 		encounter.setSubject(patientReferenceTranslator.toFhirResource(visit.getPatient()));
 		if (visit.getLocation() != null) {
 			encounterLocationTranslator.toFhirResource(visit.getLocation());
 		}
-		encounter.setClass_(mapLocationToClass(visit.getLocation()));
 		
+		encounter.setClass_(mapLocationToClass(visit.getLocation()));
+		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "visit", "Visit");
 		encounter.getMeta().setLastUpdated(visit.getDateChanged());
 		encounter.addContained(provenanceTranslator.getCreateProvenance(visit));
 		encounter.addContained(provenanceTranslator.getUpdateProvenance(visit));
@@ -69,6 +81,12 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		notNull(encounter, "The Encounter object should not be null");
 		
 		existingVisit.setUuid(encounter.getId());
+		
+		VisitType visitType = visitTypeTranslator.toOpenmrsType(encounter.getType());
+		if (visitType != null) {
+			existingVisit.setVisitType(visitType);
+		}
+		
 		existingVisit.setPatient(patientReferenceTranslator.toOpenmrsType(encounter.getSubject()));
 		existingVisit.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
 		

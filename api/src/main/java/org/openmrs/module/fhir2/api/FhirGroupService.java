@@ -9,6 +9,11 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import org.hl7.fhir.r4.model.Group;
 
-public interface FhirGroupService extends FhirService<Group> {}
+public interface FhirGroupService extends FhirService<Group> {
+	
+	IBundleProvider searchForGroups(ReferenceAndListParam participant);
+}

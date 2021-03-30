@@ -13,6 +13,8 @@ import static org.openmrs.module.fhir2.FhirConstants.CODED_SEARCH_HANDLER;
 import static org.openmrs.module.fhir2.FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER;
 import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.immunizationGroupingConcept;
 
+import javax.annotation.Nonnull;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,17 +64,17 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	private SearchQuery<org.openmrs.Obs, Immunization, FhirObservationDao, ImmunizationTranslator, SearchQueryInclude<Immunization>> searchQuery;
 	
 	@Override
-	public Immunization get(String uuid) {
+	public Immunization get(@Nonnull String uuid) {
 		return translator.toFhirResource(obsDao.get(uuid));
 	}
 	
 	@Override
-	public List<Immunization> get(Collection<String> uuids) {
+	public List<Immunization> get(@Nonnull Collection<String> uuids) {
 		return uuids.stream().map(uuid -> get(uuid)).collect(Collectors.toList());
 	}
 	
 	@Override
-	public Immunization create(Immunization newImmunization) {
+	public Immunization create(@Nonnull Immunization newImmunization) {
 		Obs obs = translator.toOpenmrsType(newImmunization);
 		if (obs.getEncounter().getId() == null) {
 			encounterService.saveEncounter(obs.getEncounter());
@@ -83,7 +85,7 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	}
 	
 	@Override
-	public Immunization update(String uuid, Immunization updatedImmunization) {
+	public Immunization update(@Nonnull String uuid, @Nonnull Immunization updatedImmunization) {
 		Obs obs = translator.toOpenmrsType(obsDao.get(uuid), updatedImmunization);
 		obs = obsService.saveObs(obs, "Updated when translating a FHIR Immunization resource.");
 		//		obs = obsDao.createOrUpdate(obs);
@@ -91,7 +93,7 @@ public class FhirImmunizationServiceImpl implements FhirImmunizationService {
 	}
 	
 	@Override
-	public Immunization delete(String uuid) {
+	public Immunization delete(@Nonnull String uuid) {
 		Obs obs = translator.toOpenmrsType(get(uuid));
 		obs = obsService.voidObs(obs, "Voided through deleting via the FHIR Immunization resource.");
 		return translator.toFhirResource(obs);

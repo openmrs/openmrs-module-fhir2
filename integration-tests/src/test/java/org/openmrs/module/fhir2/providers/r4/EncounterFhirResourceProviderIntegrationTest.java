@@ -317,4 +317,34 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(entries, everyItem(hasResource(
 		    hasProperty("location", hasItems(hasProperty("location", hasProperty("display", equalTo("Test Location"))))))));
 	}
+	
+	@Test
+	public void shouldReturnCountForEncounterAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/?_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(5)));
+	}
+	
+	@Test
+	public void shouldReturnCountForEncounterAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/?_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(5)));
+	}
 }

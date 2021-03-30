@@ -17,8 +17,6 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_SERVER_NAME = "OpenMRS FHIR Server";
 	
-	public static final String OPENMRS_URI = "http://openmrs.org";
-	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX = "http://terminology.hl7.org/CodeSystem";
 	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX_R3 = "http://hl7.org/fhir";
@@ -75,6 +73,12 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_PREFIX = "http://fhir.openmrs.org";
 	
+	public static final String OPENMRS_CODE_SYSTEM_PREFIX = OPENMRS_FHIR_PREFIX + "/code-system";
+	
+	public static final String ENCOUNTER_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/encounter-type";
+	
+	public static final String VISIT_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/visit-type";
+	
 	public static final String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
 	
 	public static final String OPENMRS_FHIR_EXT_NAME = OPENMRS_FHIR_EXT_PREFIX + "/name";
@@ -100,6 +104,8 @@ public class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION = OPENMRS_FHIR_EXT_PREFIX
 	        + "/patient/identifier#location";
 	
+	public static final String OPENMRS_FHIR_EXT_ENCOUNTER_TAG = OPENMRS_FHIR_EXT_PREFIX + "/encounter-tag";
+	
 	public static final String OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE = OPENMRS_FHIR_EXT_PREFIX
 	        + "/obs/reference-range";
 	
@@ -116,6 +122,8 @@ public class FhirConstants {
 	public static final String ENCOUNTER = "Encounter";
 	
 	public static final String IDENTIFIER = "Identifier";
+	
+	public static final String IMMUNIZATION = "Immunization";
 	
 	public static final String LOCATION = "Location";
 	

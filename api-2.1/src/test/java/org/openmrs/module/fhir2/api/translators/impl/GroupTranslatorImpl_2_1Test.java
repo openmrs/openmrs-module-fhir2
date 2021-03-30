@@ -27,7 +27,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Cohort;
 import org.openmrs.CohortMembership;
+import org.openmrs.User;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
+import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GroupTranslatorImpl_2_1Test {
@@ -41,12 +43,16 @@ public class GroupTranslatorImpl_2_1Test {
 	@Mock
 	private GroupMemberTranslator<CohortMembership> groupMemberTranslator;
 	
+	@Mock
+	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
+	
 	private GroupTranslatorImpl_2_1 groupTranslator;
 	
 	@Before
 	public void setup() {
 		groupTranslator = new GroupTranslatorImpl_2_1();
 		groupTranslator.setGroupMemberTranslator(groupMemberTranslator);
+		groupTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 	}
 	
 	@Test
@@ -174,6 +180,40 @@ public class GroupTranslatorImpl_2_1Test {
 		assertThat(cohort.getMemberships().isEmpty(), is(false));
 		assertThat(cohort.getMemberships(), hasSize(1));
 		assertThat(cohort.getMemberships().iterator().next(), is(cohortMembership));
+	}
+	
+	@Test
+	public void shouldTranslateManagingEntityToCreatorOpenMRSType() {
+		User user = mock(User.class);
+		Group group = mock(Group.class);
+		Reference practitionerRef = mock(Reference.class);
+		when(practitionerReferenceTranslator.toOpenmrsType(practitionerRef)).thenReturn(user);
+		when(group.hasManagingEntity()).thenReturn(true);
+		when(group.getManagingEntity()).thenReturn(practitionerRef);
+		
+		group.setManagingEntity(practitionerRef);
+		
+		Cohort result = groupTranslator.toOpenmrsType(group);
+		assertThat(result, notNullValue());
+		assertThat(result.getCreator(), notNullValue());
+		assertThat(result.getCreator(), is(user));
+	}
+	
+	@Test
+	public void shouldTranslateCreatorToManagingEntityFHIRType() {
+		User user = mock(User.class);
+		Cohort cohort = new Cohort();
+		cohort.setUuid(COHORT_UUID);
+		cohort.setName(COHORT_NAME);
+		cohort.setCreator(user);
+		
+		Reference practitionerRef = mock(Reference.class);
+		when(practitionerReferenceTranslator.toFhirResource(user)).thenReturn(practitionerRef);
+		
+		Group result = groupTranslator.toFhirResource(cohort);
+		assertThat(result, notNullValue());
+		assertThat(result.hasManagingEntity(), is(true));
+		assertThat(result.getManagingEntity(), is(practitionerRef));
 	}
 	
 	@Test

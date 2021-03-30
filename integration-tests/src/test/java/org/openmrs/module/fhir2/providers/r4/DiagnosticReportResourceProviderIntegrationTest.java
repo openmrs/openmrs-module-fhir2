@@ -573,4 +573,36 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		            Date.from(LocalDateTime.of(2008, 8, 18, 14, 9, 35).atZone(ZoneId.systemDefault()).toInstant())))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
+	
+	@Test
+	public void shouldReturnCountForDiagonosticReportAsJson() throws Exception {
+		MockHttpServletResponse response = get("/DiagnosticReport?patient.given=Collet&_summary=count")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(2)));
+	}
+	
+	@Test
+	public void shouldReturnCountForDiagonosticReportAsXml() throws Exception {
+		MockHttpServletResponse response = get("/DiagnosticReport?patient.given=Collet&_summary=count")
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(2)));
+	}
 }

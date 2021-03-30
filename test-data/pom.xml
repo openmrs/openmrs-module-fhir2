@@ -10,4 +10,16 @@
     <artifactId>fhir2-test-data</artifactId>
     <name>FHIR2 Test Data</name>
     <description>This submodule holds the various data file for FHIR2 unit and integration tests</description>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <skipIfEmpty>true</skipIfEmpty>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

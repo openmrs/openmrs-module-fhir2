@@ -52,7 +52,7 @@ public class FhirGroupDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void getCohortByUuid_shouldReturnMatchingCohort() {
+	public void getByUuid_shouldReturnMatchingCohort() {
 		Cohort cohort = dao.get(COHORT_UUID);
 		assertThat(cohort, notNullValue());
 		assertThat(cohort.getUuid(), equalTo(COHORT_UUID));
@@ -60,7 +60,7 @@ public class FhirGroupDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void getCohortByWithWrongUuid_shouldReturnNullCohort() {
+	public void getByWithWrongUuid_shouldReturnNullCohort() {
 		Cohort cohort = dao.get(BAD_COHORT_UUID);
 		assertThat(cohort, nullValue());
 	}

@@ -438,4 +438,33 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		            Date.from(LocalDateTime.of(2008, 7, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
 	}
 	
+	@Test
+	public void shouldReturnCountForConditionAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Condition?_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(2)));
+	}
+	
+	@Test
+	public void shouldReturnCountForConditionAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Condition?_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(2)));
+	}
 }
