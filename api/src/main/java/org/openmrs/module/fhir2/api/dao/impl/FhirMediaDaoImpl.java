@@ -62,17 +62,7 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao, 
 				
 			}
 		});
-
-//		private void handleStatus(){}
-//		private void handleMediaType(){}
-//		private void handleMediaSubject(){}
-//		private void handleMediaEncounterReference(){}
-//		private void handleMediaCreatedDate(){}
-//		private void handleMediaContentType(){}
-//		private void handleContentData(){}
-//		private void handleContentTitle(){}
-//		private void handleContentDateOfCreation(){}
-
+		
 	}
 	
 	@Override
