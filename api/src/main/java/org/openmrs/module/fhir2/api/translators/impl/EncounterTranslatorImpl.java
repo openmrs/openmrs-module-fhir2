@@ -77,7 +77,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 			    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
 		}
 		
-		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "Encounter", "Encounter");
+		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "encounter", "Encounter");
 		encounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());
 		encounter.addContained(provenanceTranslator.getCreateProvenance(openMrsEncounter));
 		encounter.addContained(provenanceTranslator.getUpdateProvenance(openMrsEncounter));

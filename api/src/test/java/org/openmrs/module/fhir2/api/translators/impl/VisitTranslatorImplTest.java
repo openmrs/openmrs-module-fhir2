@@ -68,11 +68,9 @@ public class VisitTranslatorImplTest {
 	
 	private static final String TEST_FHIR_CLASS = "Test Class";
 	
-	private static final String TYPE_CODE = "encounter-type-code";
+	private static final String TYPE_CODE = "visit";
 	
 	private static final String TYPE_DISPLAY = "Visit";
-	
-	private static final String VISIT_TYPE_CODE = "Visit";
 	
 	@Mock
 	private EncounterLocationTranslator encounterLocationTranslator;
@@ -303,7 +301,7 @@ public class VisitTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getTag(), notNullValue());
 		assertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
-		assertThat(result.getMeta().getTag().get(0).getCode(), equalTo(VISIT_TYPE_CODE));
+		assertThat(result.getMeta().getTag().get(0).getCode(), equalTo(TYPE_CODE));
 		assertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));
 	}
 }
