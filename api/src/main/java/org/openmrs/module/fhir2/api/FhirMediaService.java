@@ -24,8 +24,6 @@ import org.hl7.fhir.r4.model.Observation;
 
 public interface FhirMediaService extends FhirService<Observation> {
 	
-	Observation get(@Nonnull String uuid);
-	
 	IBundleProvider searchForMedia(TokenAndListParam status, TokenAndListParam type, ReferenceAndListParam subject,
 	        ReferenceAndListParam encounterReference, DateRangeParam createdDateTime, TokenAndListParam contentType,
 	        StringAndListParam contentDataType, StringAndListParam contentTitle, DateRangeParam contentCreated,

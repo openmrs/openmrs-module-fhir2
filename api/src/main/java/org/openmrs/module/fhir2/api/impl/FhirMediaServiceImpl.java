@@ -10,10 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
-
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -30,7 +27,6 @@ import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMediaService;
 import org.openmrs.module.fhir2.api.dao.FhirMediaDao;
-import org.openmrs.module.fhir2.api.handler.FhirMediaComplexObsHandler;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -43,16 +39,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
-public class FhirMediaServiceImpl implements FhirMediaService {
+public class FhirMediaServiceImpl extends BaseFhirService<Observation, Obs> implements FhirMediaService {
 	
 	@Autowired
 	private FhirMediaDao dao;
 	
 	@Autowired
 	private MediaTranslator translator;
-	
-	@Autowired
-	private FhirMediaComplexObsHandler handler;
 	
 	@Autowired
 	private SearchQuery<org.openmrs.Obs, Observation, FhirMediaDao, MediaTranslator, SearchQueryInclude<Observation>> searchQuery;
@@ -86,25 +79,4 @@ public class FhirMediaServiceImpl implements FhirMediaService {
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
-	
-	@Override
-	public List<Observation> get(@Nonnull Collection<String> uuids) {
-		return null;
-	}
-	
-	@Override
-	public Observation create(@Nonnull Observation newResource) {
-		return null;
-	}
-	
-	@Override
-	public Observation update(@Nonnull String uuid, @Nonnull Observation updatedResource) {
-		return null;
-	}
-	
-	@Override
-	public Observation delete(@Nonnull String uuid) {
-		return null;
-	}
-	
 }

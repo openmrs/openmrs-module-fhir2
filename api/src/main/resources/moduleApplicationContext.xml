@@ -35,13 +35,4 @@
     <bean name="fhirR4" class="ca.uhn.fhir.context.FhirContext" factory-method="forR4">
         <property name="restfulClientFactory" ref="restfulClientFactoryR4"/>
     </bean>
-    <bean name="handler" class="org.openmrs.module.fhir2.api.handler.FhirMediaComplexObsHandler">
-        <property name="handlers">
-            <map>
-                <entry>
-                    <key><value>mediaHandler</value></key>
-                </entry>
-            </map>
-        </property>
-    </bean>
 </beans>
