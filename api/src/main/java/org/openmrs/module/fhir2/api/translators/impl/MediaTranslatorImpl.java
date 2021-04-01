@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Media;
+import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.translators.MediaTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
@@ -33,6 +34,10 @@ public class MediaTranslatorImpl implements MediaTranslator {
     @Override
     public Media toFhirResource(@Nonnull Obs data) {
         notNull(data, "The Openmrs Complex obs object should not be null");
+
+        Observation obs = new Observation();
+        obs.setId(data.getUuid());
+        obs.setStatus(observationStatusTranslator.toFhirResource(data));
         Media media = new Media();
         return media;
     }

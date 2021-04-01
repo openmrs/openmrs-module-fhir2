@@ -25,40 +25,68 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
-	
+
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.MEDIA_STATUS:
-					entry.getValue().forEach(param -> handleStatus(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(status -> handleStatus(criteria, (TokenAndListParam) status.getParam()));
 					break;
 				case FhirConstants.MEDIA_TYPE:
-					entry.getValue().forEach(param -> handleMediaType(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(type -> handleMediaType(criteria, (TokenAndListParam) type.getParam()));
 					break;
 				case FhirConstants.MEDIA_SUBJECT:
-					entry.getValue().forEach(param -> handleMediaSubject(criteria, (ReferenceAndListParam) param.getParam()));
+					entry.getValue().forEach(subject -> handleMediaSubject(criteria, (ReferenceAndListParam) subject.getParam()));
 					break;
 				case FhirConstants.MEDIA_ENCOUNTER_REFERENCE:
-					entry.getValue().forEach(param -> handleMediaEncounterReference(criteria, (ReferenceAndListParam) param.getParam()));
+					entry.getValue().forEach(encounter -> handleMediaEncounterReference(criteria, (ReferenceAndListParam) encounter.getParam()));
 					break;
 				case FhirConstants.MEDIA_CREATED_DATE_TIME:
-					entry.getValue().forEach(param -> handleMediaCreatedDate(criteria, (DateRangeParam) param.getParam()));
+					entry.getValue().forEach(createdDateTime -> handleMediaCreatedDate(criteria, (DateRangeParam) createdDateTime.getParam()));
 					break;
 				case FhirConstants.MEDIA_CONTENT_TYPE:
-					entry.getValue().forEach(param -> handleMediaContentType(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(contentType -> handleMediaContentType(criteria, (TokenAndListParam) contentType.getParam()));
 					break;
 				case FhirConstants.CONTENT_DATA:
-					entry.getValue().forEach(param -> handleContentData(criteria, (StringAndListParam) param.getParam()));
+					entry.getValue().forEach(contentData -> handleContentData(criteria, (StringAndListParam) contentData.getParam()));
 					break;
 				case FhirConstants.CONTENT_TITLE:
-					entry.getValue().forEach(param -> handleContentTitle(criteria, (StringAndListParam) param.getParam()));
+					entry.getValue().forEach(contentTitle -> handleContentTitle(criteria, (StringAndListParam) contentTitle.getParam()));
 					break;
 				case FhirConstants.CONTENT_DATE_OF_CREATION:
-					entry.getValue().forEach(param -> handleContentDateOfCreation(criteria, (DateRangeParam) param.getParam()));
+					entry.getValue().forEach(contentDateOfCreation -> handleContentDateOfCreation(criteria, (DateRangeParam) contentDateOfCreation.getParam()));
 					break;
 				
 			}
 		});
+	}
+
+	private void handleContentDateOfCreation(Criteria criteria, DateRangeParam contentDateOfCreation) {
+
+	}
+
+	private void handleContentTitle(Criteria criteria, StringAndListParam contentTitle) {
+	}
+
+	private void handleContentData(Criteria criteria, StringAndListParam contentData) {
+	}
+
+	private void handleMediaContentType(Criteria criteria, TokenAndListParam mediaContentType) {
+	}
+
+	private void handleMediaCreatedDate(Criteria criteria, DateRangeParam mediaCreatedDate) {
+	}
+
+	private void handleMediaEncounterReference(Criteria criteria, ReferenceAndListParam encounterReference) {
+	}
+
+	private void handleMediaSubject(Criteria criteria, ReferenceAndListParam mediaSubject) {
+	}
+
+	private void handleMediaType(Criteria criteria, TokenAndListParam mediaType) {
+	}
+
+	private void handleStatus(Criteria criteria, TokenAndListParam status) {
 	}
 }
