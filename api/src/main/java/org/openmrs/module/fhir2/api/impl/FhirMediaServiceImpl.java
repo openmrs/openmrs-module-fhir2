@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -43,27 +44,27 @@ public class FhirMediaServiceImpl extends BaseFhirService<Observation, Obs> impl
 	
 	@Autowired
 	private FhirMediaDao dao;
-	
+
 	@Autowired
 	private MediaTranslator translator;
-	
+
 	@Autowired
-	private SearchQuery<org.openmrs.Obs, Observation, FhirMediaDao, MediaTranslator, SearchQueryInclude<Observation>> searchQuery;
-	
+	private SearchQuery<Obs, Media, FhirMediaDao, MediaTranslator, SearchQueryInclude<Media>> searchQuery;
+
 	@Autowired
-	private SearchQueryInclude<Observation> searchQueryInclude;
-	
+	private SearchQueryInclude<Media> searchQueryInclude;
+
 	@Override
 	public Observation get(@Nonnull String uuid) {
 		return null;
 	}
-	
+
 	@Override
 	public IBundleProvider searchForMedia(TokenAndListParam status, TokenAndListParam type, ReferenceAndListParam subject,
-	        ReferenceAndListParam encounterReference, DateRangeParam createdDateTime, TokenAndListParam contentType,
-	        StringAndListParam contentDataType, StringAndListParam contentTitle, DateRangeParam contentCreated,
-	        DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes, SortSpec sort) {
-		
+										  ReferenceAndListParam encounterReference, DateRangeParam createdDateTime, TokenAndListParam contentType,
+										  TokenAndListParam id, StringAndListParam contentDataType, StringAndListParam contentTitle, DateRangeParam contentCreated,
+										  DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes, SortSpec sort) {
+
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.MEDIA_STATUS, status)
 		        .addParameter(FhirConstants.MEDIA_TYPE, type).addParameter(FhirConstants.MEDIA_SUBJECT, subject)
 		        .addParameter(FhirConstants.MEDIA_ENCOUNTER_REFERENCE, encounterReference)
@@ -76,7 +77,7 @@ public class FhirMediaServiceImpl extends BaseFhirService<Observation, Obs> impl
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, includes)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, revIncludes).setSortSpec(sort);
-		
+
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }
