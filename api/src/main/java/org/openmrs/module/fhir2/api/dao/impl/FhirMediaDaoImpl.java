@@ -139,10 +139,6 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 			if(lacksAlias(criteria, "cr")){
 				criteria.createAlias("contentDateOfCreation", "cr");
 			}
-//			theCommonParams.add(theCommonParams.get);
-//			theCommonParams.add(criteria.setComment(""));
-//			handleCommonSearchParameters(theCommonParams);
-//			getSessionFactory()
 		}
 	}
 }
