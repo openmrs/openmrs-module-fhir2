@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Media;
 import org.openmrs.Obs;
 
-public interface MediaTranslator extends ToFhirTranslator<Obs, Media>, OpenmrsFhirUpdatableTranslator<Obs, Media> {
+public interface MediaTranslator extends OpenmrsFhirTranslator<Obs, Media>, OpenmrsFhirUpdatableTranslator<Obs, Media> {
 	
 	/**
 	 * Maps an {@link org.openmrs.Obs} to a {@link org.hl7.fhir.r4.model.Media}

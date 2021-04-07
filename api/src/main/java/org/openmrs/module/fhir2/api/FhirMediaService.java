@@ -16,11 +16,11 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Media;
 
 import java.util.HashSet;
 
-public interface FhirMediaService extends FhirService<Observation> {
+public interface FhirMediaService extends FhirService<Media> {
 	
 	IBundleProvider searchForMedia(TokenAndListParam status, TokenAndListParam type, ReferenceAndListParam subject,
 	        ReferenceAndListParam encounterReference, DateRangeParam createdDateTime, TokenAndListParam contentType,

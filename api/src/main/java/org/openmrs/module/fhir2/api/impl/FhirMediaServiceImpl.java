@@ -23,7 +23,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Media;
-import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMediaService;
@@ -38,10 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Transactional
-@Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
-public class FhirMediaServiceImpl extends BaseFhirService<Observation, Obs> implements FhirMediaService {
-	
+@Setter(AccessLevel.MODULE)
+public class FhirMediaServiceImpl extends BaseFhirService<Media, Obs> implements FhirMediaService {
+
 	@Autowired
 	private FhirMediaDao dao;
 
@@ -55,8 +54,8 @@ public class FhirMediaServiceImpl extends BaseFhirService<Observation, Obs> impl
 	private SearchQueryInclude<Media> searchQueryInclude;
 
 	@Override
-	public Observation get(@Nonnull String uuid) {
-		return null;
+	public Media get(@Nonnull String uuid) {
+		return super.get(uuid);
 	}
 
 	@Override
