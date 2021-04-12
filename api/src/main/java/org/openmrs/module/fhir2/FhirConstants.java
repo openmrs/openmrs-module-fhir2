@@ -298,9 +298,7 @@ public class FhirConstants {
 	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
 	
 	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
-	public static final String FHIR_MEDIA = "media";
-	
+
 	public static final String MEDIA_STATUS = "media.status";
 	
 	public static final String MEDIA_TYPE = "media.type";
@@ -308,9 +306,7 @@ public class FhirConstants {
 	public static final String MEDIA_SUBJECT = "media.subject";
 	
 	public static final String MEDIA_ENCOUNTER_REFERENCE = "media.encounter.reference";
-	
-	public static final String MEDIA_CREATED_ON = "media.created.on";
-	
+
 	public static final String MEDIA_CONTENT_TYPE = "media.content.type";
 	
 	public static final String CONTENT_DATA = "content.data";

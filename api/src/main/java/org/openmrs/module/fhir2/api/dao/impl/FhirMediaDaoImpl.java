@@ -9,14 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.openmrs.Obs;
 import org.openmrs.api.ObsService;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -25,9 +24,10 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.annotation.Nonnull;
 import java.util.Optional;
+
+import static org.hibernate.criterion.Restrictions.eq;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -37,11 +37,16 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 	private ObsService obsService;
 
 	@Override
+	public Obs get(@Nonnull String uuid) {
+		return obsService.getObsByUuid(uuid);
+	}
+
+	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.MEDIA_STATUS:
-					entry.getValue().forEach(status -> handleStatus(criteria, (TokenAndListParam) status.getParam()));
+					entry.getValue().forEach(param -> handleStatus(criteria, (TokenAndListParam) param.getParam()));
 					break;
 				case FhirConstants.MEDIA_TYPE:
 					entry.getValue().forEach(type -> handleMediaType(criteria, (TokenAndListParam) type.getParam()));
@@ -53,8 +58,8 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 					entry.getValue().forEach(encounter -> handleMediaEncounterReference(criteria, (ReferenceAndListParam) encounter.getParam()));
 					break;
 				case FhirConstants.MEDIA_CREATED_DATE_TIME:
-					entry.getValue().forEach(createdDateTime -> handleDateRange(createdDateTime.getPropertyName(),
-							(DateRangeParam) createdDateTime.getParam()).ifPresent(criteria::add));
+					entry.getValue().forEach(createdTime -> handleDate(createdTime.getPropertyName(),
+							(DateParam) createdTime.getParam()).ifPresent(criteria::add));
 					break;
 				case FhirConstants.MEDIA_CONTENT_TYPE:
 					entry.getValue().forEach(contentType -> handleMediaContentType(criteria, (TokenAndListParam) contentType.getParam()));
@@ -66,9 +71,9 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 					entry.getValue().forEach(contentTitle -> handleContentTitle(criteria, (StringAndListParam) contentTitle.getParam()));
 					break;
 				case FhirConstants.CONTENT_DATE_OF_CREATION:
-					entry.getValue().forEach(contentDateOfCreation -> handleContentDateOfCreation(criteria, (DateRangeParam) contentDateOfCreation.getParam()));
+					entry.getValue().forEach(contentDateOfCreation -> handleDate(contentDateOfCreation.getPropertyName(),
+							(DateParam) contentDateOfCreation.getParam()));
 					break;
-				
 			}
 		});
 	}
@@ -77,8 +82,8 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 		if(status != null){
 			if(lacksAlias(criteria, "st")){
 				criteria.createAlias("status", "st");
+				handleAndListParam(status, (tag) -> Optional.of(eq("st.status", tag.getValue()))).ifPresent(criteria::add);
 			}
-			convertStringStatusToBoolean(status);
 		}
 	}
 
@@ -86,6 +91,7 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 		if(mediaType != null){
 			if(lacksAlias(criteria, "mt")){
 				criteria.createAlias("mediaType", "mt");
+				handleAndListParam(mediaType, (tag) -> Optional.of(eq("mt.type", tag.getValue()))).ifPresent(criteria::add);
 			}
 		}
 	}
@@ -94,6 +100,8 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 		if(mediaSubject != null){
 			if(lacksAlias(criteria, "ms")){
 				criteria.createAlias("mediaSubject", "ms");
+				handleAndListParam(mediaSubject, (tag) -> Optional.of(eq("ms.subject", tag.getValue()))).ifPresent(criteria::add);
+
 			}
 		}
 	}
@@ -102,22 +110,16 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 		if(encounterReference != null){
 			if(lacksAlias(criteria, "er")){
 				criteria.createAlias("mediaEncounterReference", "er");
+				handleAndListParam(encounterReference, (tag) -> Optional.of(eq("er.encounter", tag.getValue()))).ifPresent(criteria::add);
 			}
 		}
 	}
-
-//	private void handleMediaCreatedDate(Criteria criteria, DateRangeParam mediaCreatedDate) {
-//		if(mediaCreatedDate != null){
-//			if(lacksAlias(criteria, "dt")){
-//					criteria.createAlias("mediaCreatedDate", "dt");
-//			}
-//		}
-//	}
 
 	private void handleMediaContentType(Criteria criteria, TokenAndListParam mediaContentType) {
 		if(mediaContentType != null){
 			if(lacksAlias(criteria, "ty")){
 				criteria.createAlias("mediaContentType", "ty");
+				handleAndListParam(mediaContentType, (tag) -> Optional.of(eq("ty.modality", tag.getValue()))).ifPresent(criteria::add);
 			}
 		}
 	}
@@ -126,6 +128,7 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 		if(contentData != null){
 			if(lacksAlias(criteria, "cd")){
 				criteria.createAlias("mediaContentData", "cd");
+				handleAndListParam(contentData, (tag) -> Optional.of(eq("cd.content", tag.getValue()))).ifPresent(criteria::add);
 			}
 		}
 	}
@@ -134,15 +137,7 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 		if(contentTitle != null){
 			if(lacksAlias(criteria, "ct")){
 				criteria.createAlias("contentTitle","ct");
-			}
-		}
-	}
-
-	private void handleContentDateOfCreation(Criteria criteria, DateRangeParam contentDateOfCreation) {
-		List<Optional<Criterion>> theCommonParams = new ArrayList<>();
-		if(contentDateOfCreation != null){
-			if(lacksAlias(criteria, "cr")){
-				criteria.createAlias("contentDateOfCreation", "cr");
+				handleAndListParam(contentTitle, (tag) -> Optional.of(eq("ct.type", tag.getValue()))).ifPresent(criteria::add);
 			}
 		}
 	}
