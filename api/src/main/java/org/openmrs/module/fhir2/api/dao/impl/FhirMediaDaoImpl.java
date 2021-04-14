@@ -46,7 +46,7 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.MEDIA_STATUS:
-					entry.getValue().forEach(param -> handleStatus(criteria, (TokenAndListParam) param.getParam()));
+					entry.getValue().forEach(status -> handleStatus(criteria, (TokenAndListParam) status.getParam()));
 					break;
 				case FhirConstants.MEDIA_TYPE:
 					entry.getValue().forEach(type -> handleMediaType(criteria, (TokenAndListParam) type.getParam()));
@@ -62,7 +62,7 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 							(DateParam) createdTime.getParam()).ifPresent(criteria::add));
 					break;
 				case FhirConstants.MEDIA_CONTENT_TYPE:
-					entry.getValue().forEach(contentType -> handleMediaContentType(criteria, (TokenAndListParam) contentType.getParam()));
+					entry.getValue().forEach(contentType -> handleMediaContentType(criteria, (StringAndListParam) contentType.getParam()));
 					break;
 				case FhirConstants.CONTENT_DATA:
 					entry.getValue().forEach(contentData -> handleContentData(criteria, (StringAndListParam) contentData.getParam()));
@@ -78,13 +78,17 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 		});
 	}
 
+//	private void handleStatus(Criteria criteria, TokenAndListParam status) {
+//		if(status != null){
+//			if(lacksAlias(criteria, "st")){
+//				criteria.createAlias("status", "st");
+//				handleAndListParam(status, (tag) -> Optional.of(eq("st.status", tag.getValue()))).ifPresent(criteria::add);
+//			}
+//		}
+//	}
+
 	private void handleStatus(Criteria criteria, TokenAndListParam status) {
-		if(status != null){
-			if(lacksAlias(criteria, "st")){
-				criteria.createAlias("status", "st");
-				handleAndListParam(status, (tag) -> Optional.of(eq("st.status", tag.getValue()))).ifPresent(criteria::add);
-			}
-		}
+//		handleAndListParam(status, (data) -> propertyLike("status", status)).ifPresent(criteria::add);
 	}
 
 	private void handleMediaType(Criteria criteria, TokenAndListParam mediaType) {
@@ -115,30 +119,34 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 		}
 	}
 
-	private void handleMediaContentType(Criteria criteria, TokenAndListParam mediaContentType) {
-		if(mediaContentType != null){
-			if(lacksAlias(criteria, "ty")){
-				criteria.createAlias("mediaContentType", "ty");
-				handleAndListParam(mediaContentType, (tag) -> Optional.of(eq("ty.modality", tag.getValue()))).ifPresent(criteria::add);
-			}
-		}
+//	private void handleMediaContentType(Criteria criteria, TokenAndListParam mediaContentType) {
+//		if(mediaContentType != null){
+//			if(lacksAlias(criteria, "ty")){
+//				criteria.createAlias("mediaContentType", "ty");
+//				handleAndListParam(mediaContentType, (tag) -> Optional.of(eq("ty.modality", tag.getValue()))).ifPresent(criteria::add);
+//			}
+//		}
+//	}
+
+	private void handleMediaContentType(Criteria criteria, StringAndListParam mediaContentType) {
+		handleAndListParam(mediaContentType, (type) -> propertyLike("comments", type)).ifPresent(criteria::add);
 	}
 
+//	private void handleContentData(Criteria criteria, StringAndListParam contentData) {
+//		if(contentData != null){
+//			if(lacksAlias(criteria, "cd")){
+//				criteria.createAlias("mediaContentData", "cd");
+//				handleAndListParam(contentData, (tag) -> Optional.of(eq("cd.content", tag.getValue()))).ifPresent(criteria::add);
+//			}
+//		}
+//	}
+
+
 	private void handleContentData(Criteria criteria, StringAndListParam contentData) {
-		if(contentData != null){
-			if(lacksAlias(criteria, "cd")){
-				criteria.createAlias("mediaContentData", "cd");
-				handleAndListParam(contentData, (tag) -> Optional.of(eq("cd.content", tag.getValue()))).ifPresent(criteria::add);
-			}
-		}
+		handleAndListParam(contentData, (data) -> propertyLike("contentData", data)).ifPresent(criteria::add);
 	}
 
 	private void handleContentTitle(Criteria criteria, StringAndListParam contentTitle) {
-		if(contentTitle != null){
-			if(lacksAlias(criteria, "ct")){
-				criteria.createAlias("contentTitle","ct");
-				handleAndListParam(contentTitle, (tag) -> Optional.of(eq("ct.type", tag.getValue()))).ifPresent(criteria::add);
-			}
-		}
+		handleAndListParam(contentTitle, (title) -> propertyLike("contentTitle", title)).ifPresent(criteria::add);
 	}
 }

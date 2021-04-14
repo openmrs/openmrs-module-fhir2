@@ -9,8 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
@@ -64,13 +64,13 @@ public class FhirMediaDaoTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void search_ShouldReturnSearchQuery(){
-        TokenAndListParam status = new TokenAndListParam();
-        TokenParam codingToken = new TokenParam();
+        StringAndListParam status = new StringAndListParam();
+        StringParam codingToken = new StringParam();
         codingToken.setValue(OBS_CONCEPT_ID);
         status.addAnd(codingToken);
 
         SearchParameterMap theParams = new SearchParameterMap();
-        theParams.addParameter(FhirConstants.MEDIA_STATUS, status);
+        theParams.addParameter(FhirConstants.MEDIA_CONTENT_TYPE, status);
 
         List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
         Collection<Obs> obs = dao.getSearchResults(theParams, matchingResourceUuids);

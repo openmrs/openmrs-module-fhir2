@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Media;
 import org.openmrs.Obs;
+
+import javax.annotation.Nonnull;
 
 public interface MediaTranslator extends OpenmrsFhirTranslator<Obs, Media>, OpenmrsFhirUpdatableTranslator<Obs, Media> {
 	
