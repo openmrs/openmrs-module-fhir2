@@ -10,37 +10,36 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 import java.util.Collection;
 import java.util.List;
 
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
+import org.openmrs.module.fhir2.api.dao.FhirMediaDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
+public class FhirMediaDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String OBS_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirObservationDaoImplTest_initial_data_suppl.xml";
 	
-	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
+	private static final String OBS_UUID = "759a0d9e-ccf8-4f00-a045-6a94c43fbd6b";
 	
-	private static final String BAD_OBS_UUID = "121b73a6-e1a4-4424-8610-d5765bf2fdf7";
-	
-	private static final String OBS_CONCEPT_ID = "5089";
+	private static final String OBS_CONCEPT_ID = "5242";
 	
 	@Autowired
-	private FhirObservationDao dao;
+	FhirMediaDao dao;
 	
 	@Before
 	public void setup() throws Exception {
@@ -48,34 +47,34 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void get_shouldGetObsByUuid() {
-		Obs result = dao.get(OBS_UUID);
+	public void get_shouldGetComplexObsByUuid() {
+		Obs obs = dao.get(OBS_UUID);
 		
-		assertThat(result, notNullValue());
-		assertThat(result.getUuid(), equalTo(OBS_UUID));
+		assertThat(obs, notNullValue());
+		
+		//        assertThat(dao., equalTo(OBS_UUID));
 	}
 	
 	@Test
 	public void get_shouldReturnNullIfObsNotFoundByUuid() {
-		Obs result = dao.get(BAD_OBS_UUID);
+		Obs obs = dao.get(OBS_UUID);
 		
-		assertThat(result, nullValue());
+		assertThat(obs, nullValue());
 	}
 	
 	@Test
-	public void search_shouldReturnSearchQuery() {
-		TokenAndListParam code = new TokenAndListParam();
-		TokenParam codingToken = new TokenParam();
+	public void search_ShouldReturnSearchQuery() {
+		StringAndListParam status = new StringAndListParam();
+		StringParam codingToken = new StringParam();
 		codingToken.setValue(OBS_CONCEPT_ID);
-		code.addAnd(codingToken);
+		status.addAnd(codingToken);
 		
 		SearchParameterMap theParams = new SearchParameterMap();
-		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
+		theParams.addParameter(FhirConstants.MEDIA_CONTENT_TYPE, status);
 		
 		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
 		Collection<Obs> obs = dao.getSearchResults(theParams, matchingResourceUuids);
 		
 		assertThat(obs, notNullValue());
 	}
-	
 }

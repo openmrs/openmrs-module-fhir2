@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import java.util.HashSet;
+
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -18,12 +20,11 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Media;
 
-import java.util.HashSet;
-
 public interface FhirMediaService extends FhirService<Media> {
 	
 	IBundleProvider searchForMedia(TokenAndListParam status, TokenAndListParam type, ReferenceAndListParam subject,
 	        ReferenceAndListParam encounterReference, DateRangeParam createdDateTime, TokenAndListParam contentType,
-			TokenAndListParam id, StringAndListParam contentDataType, StringAndListParam contentTitle, DateRangeParam contentCreated,
-	        DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes, SortSpec sort);
+	        TokenAndListParam id, StringAndListParam contentDataType, StringAndListParam contentTitle,
+	        DateRangeParam contentCreated, DateRangeParam lastUpdated, HashSet<Include> includes,
+	        HashSet<Include> revIncludes, SortSpec sort);
 }

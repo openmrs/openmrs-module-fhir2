@@ -14,6 +14,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirMediaDaoImplTest {
-    public  void setUp(){}
-
+	
+	public void setUp() {
+	}
+	
 }

@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
+
 import java.util.HashSet;
 
 import ca.uhn.fhir.model.api.Include;
@@ -40,30 +41,31 @@ import org.springframework.transaction.annotation.Transactional;
 @Getter(AccessLevel.PROTECTED)
 @Setter(AccessLevel.MODULE)
 public class FhirMediaServiceImpl extends BaseFhirService<Media, Obs> implements FhirMediaService {
-
+	
 	@Autowired
 	private FhirMediaDao dao;
-
+	
 	@Autowired
 	private MediaTranslator translator;
-
+	
 	@Autowired
 	private SearchQuery<Obs, Media, FhirMediaDao, MediaTranslator, SearchQueryInclude<Media>> searchQuery;
-
+	
 	@Autowired
 	private SearchQueryInclude<Media> searchQueryInclude;
-
+	
 	@Override
 	public Media get(@Nonnull String uuid) {
 		return super.get(uuid);
 	}
-
+	
 	@Override
 	public IBundleProvider searchForMedia(TokenAndListParam status, TokenAndListParam type, ReferenceAndListParam subject,
-										  ReferenceAndListParam encounterReference, DateRangeParam createdDateTime, TokenAndListParam contentType,
-										  TokenAndListParam id, StringAndListParam contentDataType, StringAndListParam contentTitle, DateRangeParam contentCreated,
-										  DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes, SortSpec sort) {
-
+	        ReferenceAndListParam encounterReference, DateRangeParam createdDateTime, TokenAndListParam contentType,
+	        TokenAndListParam id, StringAndListParam contentDataType, StringAndListParam contentTitle,
+	        DateRangeParam contentCreated, DateRangeParam lastUpdated, HashSet<Include> includes,
+	        HashSet<Include> revIncludes, SortSpec sort) {
+		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.MEDIA_STATUS, status)
 		        .addParameter(FhirConstants.MEDIA_TYPE, type).addParameter(FhirConstants.MEDIA_SUBJECT, subject)
 		        .addParameter(FhirConstants.MEDIA_ENCOUNTER_REFERENCE, encounterReference)
@@ -76,7 +78,7 @@ public class FhirMediaServiceImpl extends BaseFhirService<Media, Obs> implements
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, includes)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, revIncludes).setSortSpec(sort);
-
+		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

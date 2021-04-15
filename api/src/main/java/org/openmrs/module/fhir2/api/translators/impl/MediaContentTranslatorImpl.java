@@ -15,25 +15,25 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Media;
 import org.openmrs.Obs;
-import org.openmrs.module.fhir2.api.translators.MediaStatusTranslator;
+import org.openmrs.module.fhir2.api.translators.MediaContentTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class MediaStatusTranslatorImpl implements MediaStatusTranslator {
+public class MediaContentTranslatorImpl implements MediaContentTranslator {
 	
 	@Override
-	public Media.MediaStatus toFhirResource(@Nonnull Obs data) {
+	public Media toFhirResource(@Nonnull Obs data) {
 		return null;
 	}
 	
 	@Override
-	public Obs toOpenmrsType(@Nonnull Obs existingObject, @Nonnull Media.MediaStatus resource) {
+	public Obs toOpenmrsType(@Nonnull Obs existingObject, @Nonnull Media resource) {
 		return null;
 	}
 	
 	@Override
-	public Obs toOpenmrsType(@Nonnull Media.MediaStatus resource) {
+	public Obs toOpenmrsType(@Nonnull Media resource) {
 		return null;
 	}
 }

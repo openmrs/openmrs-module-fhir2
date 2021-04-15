@@ -14,32 +14,23 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Media;
 import org.openmrs.Obs;
 
-public interface MediaTranslator extends OpenmrsFhirTranslator<Obs, Media>, OpenmrsFhirUpdatableTranslator<Obs, Media> {
+public interface MediaContentTranslator extends OpenmrsFhirUpdatableTranslator<Obs, Media> {
 	
 	/**
-	 * Maps an {@link org.openmrs.Obs} to a {@link org.hl7.fhir.r4.model.Media}
+	 * Maps an {@link org.openmrs.Obs} to a corresponding {@link org.hl7.fhir.r4.model.Type}
 	 *
-	 * @param data the FHIR Media to translate
-	 * @return the corresponding FHIR media resource
+	 * @param data the obs data to translate
+	 * @return the corresponding FHIR base64 encoded version of the data
 	 */
 	@Override
 	Media toFhirResource(@Nonnull Obs data);
 	
 	/**
-	 * Maps a {@link org.hl7.fhir.r4.model.Media} to an {@link org.openmrs.Obs}
+	 * Maps an {@link org.hl7.fhir.r4.model.Type} to a existing {@link org.openmrs.Obs}
 	 *
-	 * @param resource the FHIR Media resource to translate
-	 * @return the corresponding OpenMRS observation resource
-	 */
-	@Override
-	Obs toOpenmrsType(@Nonnull Media resource);
-	
-	/**
-	 * Maps a {@link Media} to an existing {@link org.openmrs.Obs}
-	 *
-	 * @param existingObject the observation to update
-	 * @param resource the FHIR complex object to map
-	 * @return the updated OpenMRS observation
+	 * @param existingObject the obs data to update
+	 * @param resource the FHIR base64 encoded version of the data to map
+	 * @return an updated version of the obs data
 	 */
 	@Override
 	Obs toOpenmrsType(@Nonnull Obs existingObject, @Nonnull Media resource);

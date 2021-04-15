@@ -15,5 +15,4 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MediaTranslatorImplTest extends BaseFhirProvenanceResourceTest<Media> {
-}
+public class MediaTranslatorImplTest extends BaseFhirProvenanceResourceTest<Media> {}
