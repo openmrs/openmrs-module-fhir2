@@ -24,11 +24,11 @@ import org.openmrs.Visit;
 import org.openmrs.VisitType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
-import org.openmrs.module.fhir2.api.translators.VisitPeriodTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +43,7 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 	private EncounterLocationTranslator encounterLocationTranslator;
 	
 	@Autowired
-	private ProvenanceTranslator<org.openmrs.Visit> provenanceTranslator;
+	private ProvenanceTranslator<Visit> provenanceTranslator;
 	
 	@Autowired
 	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
@@ -52,7 +52,7 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 	private VisitTypeTranslatorImpl visitTypeTranslator;
 	
 	@Autowired
-	private VisitPeriodTranslator visitPeriodTranslator;
+	private EncounterPeriodTranslator<Visit> visitPeriodTranslator;
 	
 	@Override
 	public Encounter toFhirResource(@Nonnull Visit visit) {
@@ -70,8 +70,7 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		
 		encounter.setClass_(mapLocationToClass(visit.getLocation()));
 		
-		encounter.setPeriod(
-		    visitPeriodTranslator.toFhirResource(new ImmutablePair(visit.getStartDatetime(), visit.getStopDatetime())));
+		encounter.setPeriod(visitPeriodTranslator.toFhirResource(visit));
 		
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "visit", "Visit");
 		encounter.getMeta().setLastUpdated(visit.getDateChanged());
@@ -98,13 +97,7 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 			existingVisit.setVisitType(visitType);
 		}
 		
-		ImmutablePair<Date, Date> translatedPeriod = visitPeriodTranslator.toOpenmrsType(encounter.getPeriod());
-		if (translatedPeriod != null && translatedPeriod.getKey() != null) {
-			existingVisit.setStartDatetime(translatedPeriod.getKey());
-		}
-		if (translatedPeriod != null && translatedPeriod.getValue() != null) {
-			existingVisit.setStopDatetime(translatedPeriod.getValue());
-		}
+		visitPeriodTranslator.toOpenmrsType(existingVisit, encounter.getPeriod());
 		
 		existingVisit.setPatient(patientReferenceTranslator.toOpenmrsType(encounter.getSubject()));
 		existingVisit.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));

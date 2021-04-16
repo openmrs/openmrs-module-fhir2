@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.text.SimpleDateFormat;
@@ -24,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -151,10 +151,8 @@ public class VisitTranslatorImplTest {
 		period.setStart(periodStart);
 		period.setEnd(periodEnd);
 		encounter.setPeriod(period);
-		
-		ImmutablePair<Date, Date> pair = new ImmutablePair(periodStart, periodEnd);
-		
-		when(visitPeriodTranslator.toOpenmrsType(period)).thenReturn(pair);
+
+		when(visitPeriodTranslator.toOpenmrsType(any(), any())).thenCallRealMethod();
 		
 		Visit result = visitTranslator.toOpenmrsType(new Visit(), encounter);
 		
@@ -169,10 +167,8 @@ public class VisitTranslatorImplTest {
 		
 		Period period = new Period();
 		encounter.setPeriod(period);
-		
-		ImmutablePair<Date, Date> pair = new ImmutablePair(null, null);
-		
-		when(visitPeriodTranslator.toOpenmrsType(period)).thenReturn(pair);
+
+		when(visitPeriodTranslator.toOpenmrsType(any(), any())).thenCallRealMethod();
 		
 		Visit result = visitTranslator.toOpenmrsType(new Visit(), encounter);
 		

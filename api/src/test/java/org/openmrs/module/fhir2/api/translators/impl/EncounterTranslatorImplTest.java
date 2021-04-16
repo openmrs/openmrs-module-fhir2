@@ -46,7 +46,13 @@ import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
-import org.openmrs.module.fhir2.api.translators.*;
+import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -105,7 +111,7 @@ public class EncounterTranslatorImplTest {
 	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
 	
 	@Mock
-	private EncounterPeriodTranslator encounterPeriodTranslator;
+	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
 	
 	@Mock
 	private EncounterClassMap encounterClassMap;
@@ -362,10 +368,15 @@ public class EncounterTranslatorImplTest {
 	public void toOpenMrsType_shouldTranslatePeriodToEncounterDatetime() {
 		Date encounterDate = new java.util.Date();
 		Period period = new Period();
+		period.setStart(encounterDate);
 		
 		fhirEncounter.setPeriod(period);
 		
-		when(encounterPeriodTranslator.toOpenmrsType(period)).thenReturn(encounterDate);
+		when(encounterPeriodTranslator.toOpenmrsType(ArgumentMatchers.any(), ArgumentMatchers.any())).then(invocation -> {
+			org.openmrs.Encounter encounter = invocation.getArgument(0);
+			encounter.setEncounterDatetime(((Period) invocation.getArgument(1)).getStart());
+			return encounter;
+		});
 		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
 		
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
@@ -505,7 +516,7 @@ public class EncounterTranslatorImplTest {
 		
 		period.setStart(encounterDate);
 		
-		when(encounterPeriodTranslator.toFhirResource(encounterDate)).thenReturn(period);
+		when(encounterPeriodTranslator.toFhirResource(ArgumentMatchers.any())).thenReturn(period);
 		
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
 		

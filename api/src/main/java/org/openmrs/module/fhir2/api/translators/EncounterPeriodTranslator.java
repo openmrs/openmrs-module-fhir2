@@ -14,24 +14,26 @@ import javax.annotation.Nonnull;
 import java.util.Date;
 
 import org.hl7.fhir.r4.model.Period;
+import org.openmrs.OpenmrsData;
 
-public interface EncounterPeriodTranslator extends ToFhirTranslator<Date, Period>, OpenmrsFhirTranslator<Date, Period> {
+public interface EncounterPeriodTranslator<T extends OpenmrsData> extends ToFhirTranslator<T, Period>, UpdatableOpenmrsTranslator<T, Period> {
 	
 	/**
 	 * Maps an {@link Date} to a corresponding {@link org.hl7.fhir.r4.model.Period}
 	 *
-	 * @param encounterDatetime the encounter datetime to translate
+	 * @param encounter the encounter to translate
 	 * @return the corresponding FHIR period
 	 */
 	@Override
-	Period toFhirResource(@Nonnull Date encounterDatetime);
+	Period toFhirResource(@Nonnull T encounter);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model} to a {@link Date}
 	 *
-	 * @param resource the period to map
+	 * @param encounter the encounter to update
+	 * @param period the period to map
 	 * @return an updated version of the visit
 	 */
 	@Override
-	Date toOpenmrsType(@Nonnull Period resource);
+	T toOpenmrsType(@Nonnull T encounter, @Nonnull Period period);
 }

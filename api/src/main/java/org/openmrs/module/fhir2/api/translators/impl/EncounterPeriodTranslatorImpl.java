@@ -16,20 +16,39 @@ import java.util.Date;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Period;
+import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterPeriodTranslatorImpl implements EncounterPeriodTranslator {
+public class EncounterPeriodTranslatorImpl implements EncounterPeriodTranslator<Encounter> {
 	
 	@Override
-	public Period toFhirResource(@Nonnull Date encounterDatetime) {
-		return new Period().setStart(encounterDatetime);
+	public Period toFhirResource(@Nonnull Encounter encounter) {
+		Period result = new Period();
+		result.setStart(encounter.getEncounterDatetime());
+		return result;
 	}
 	
 	@Override
-	public Date toOpenmrsType(@Nonnull Period resource) {
-		return resource.getStart();
+	public Encounter toOpenmrsType(@Nonnull Encounter encounter, @Nonnull Period period) {
+		Date encounterDateTime;
+		if (period.hasStart()) {
+			encounterDateTime = period.getStart();
+		} else if (period.hasEnd()) {
+			encounterDateTime = period.getEnd();
+		} else if (encounter.getEncounterDatetime() == null) {
+			encounterDateTime = encounter.getDateCreated();
+		} else {
+			encounterDateTime = encounter.getEncounterDatetime();
+		}
+
+		if (encounterDateTime == null) {
+			encounterDateTime = new Date();
+		}
+
+		encounter.setEncounterDatetime(encounterDateTime);
+		return encounter;
 	}
 }

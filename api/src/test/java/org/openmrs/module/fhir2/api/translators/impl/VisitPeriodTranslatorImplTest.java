@@ -25,15 +25,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.module.fhir2.api.translators.VisitPeriodTranslator;
+import org.openmrs.Visit;
+import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VisitPeriodTranslatorImplTest extends TestCase {
 	
-	VisitPeriodTranslator visitPeriodTranslator;
-	
+	private EncounterPeriodTranslator<Visit> visitPeriodTranslator;
+
 	Date periodStart, periodEnd;
-	
+
 	@SneakyThrows
 	@Before
 	public void setup() {
@@ -45,19 +46,19 @@ public class VisitPeriodTranslatorImplTest extends TestCase {
 	
 	@Test
 	public void toFhirResource_shouldMapPairOfDatesToPeriod() {
-		ImmutablePair pair = new ImmutablePair(periodStart, periodEnd);
-		
-		Period result = visitPeriodTranslator.toFhirResource(pair);
+		Visit visit = new Visit();
+		visit.setStartDatetime(periodStart);
+		visit.setStopDatetime(periodEnd);
+
+		Period result = visitPeriodTranslator.toFhirResource(visit);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getStart(), notNullValue());
-		assertThat(result.getEnd(), notNullValue());
 		assertThat(result.getStart(), equalTo(periodStart));
 		assertThat(result.getEnd(), equalTo(periodEnd));
 	}
 	
 	@Test
-	public void toOpenmrsObject_shouldMapPeriodToPairOfDates() {
+	public void toOpenmrsObject_shouldMapPeriodToVisit() {
 		Encounter fhirEncounter = new Encounter();
 		
 		Period period = new Period();
@@ -66,13 +67,11 @@ public class VisitPeriodTranslatorImplTest extends TestCase {
 		
 		fhirEncounter.setPeriod(period);
 		
-		ImmutablePair result = visitPeriodTranslator.toOpenmrsType(period);
+		Visit result = visitPeriodTranslator.toOpenmrsType(new Visit(), period);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getKey(), notNullValue());
-		assertThat(result.getValue(), notNullValue());
-		assertThat(result.getKey(), equalTo(periodStart));
-		assertThat(result.getValue(), equalTo(periodEnd));
+		assertThat(result.getStartDatetime(), equalTo(periodStart));
+		assertThat(result.getStopDatetime(), equalTo(periodEnd));
 	}
 	
 }

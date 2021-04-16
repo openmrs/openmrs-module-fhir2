@@ -11,31 +11,37 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
-import java.util.Date;
-
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.r4.model.Period;
-import org.openmrs.module.fhir2.api.translators.VisitPeriodTranslator;
+import org.openmrs.Visit;
+import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class VisitPeriodTranslatorImpl implements VisitPeriodTranslator {
-	
+public class VisitPeriodTranslatorImpl implements EncounterPeriodTranslator<Visit> {
+
 	@Override
-	public Period toFhirResource(@Nonnull ImmutablePair<Date, Date> pair) {
-		Period period = new Period();
-		
-		period.setStart(pair.getKey());
-		period.setEnd(pair.getValue());
-		
-		return period;
+	public Period toFhirResource(@Nonnull Visit visit) {
+		Period result = new Period();
+		result.setStart(visit.getStartDatetime());
+		result.setEnd(visit.getStopDatetime());
+		return result;
 	}
-	
+
 	@Override
-	public ImmutablePair<Date, Date> toOpenmrsType(@Nonnull Period resource) {
-		return new ImmutablePair(resource.getStart(), resource.getEnd());
+	public Visit toOpenmrsType(@Nonnull Visit visit, @Nonnull Period period) {
+		if (period.hasStart()) {
+			visit.setStartDatetime(period.getStart());
+		} else if (visit.getStartDatetime() == null) {
+			visit.setStartDatetime(visit.getDateCreated());
+		}
+
+		if (period.hasEnd()) {
+			visit.setStopDatetime(period.getEnd());
+		}
+
+		return visit;
 	}
 }

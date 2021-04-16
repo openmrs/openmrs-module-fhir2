@@ -58,7 +58,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
 	
 	@Autowired
-	private EncounterPeriodTranslator encounterPeriodTranslator;
+	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
 	
 	@Override
 	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openMrsEncounter) {
@@ -81,7 +81,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 			    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
 		}
 		
-		encounter.setPeriod(encounterPeriodTranslator.toFhirResource(openMrsEncounter.getEncounterDatetime()));
+		encounter.setPeriod(encounterPeriodTranslator.toFhirResource(openMrsEncounter));
 		
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "encounter", "Encounter");
 		encounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());
@@ -120,7 +120,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
 		existingEncounter.setVisit(visitReferenceTranlator.toOpenmrsType(encounter.getPartOf()));
 		
-		existingEncounter.setEncounterDatetime(encounterPeriodTranslator.toOpenmrsType(encounter.getPeriod()));
+		encounterPeriodTranslator.toOpenmrsType(existingEncounter, encounter.getPeriod());
 		
 		return existingEncounter;
 	}
