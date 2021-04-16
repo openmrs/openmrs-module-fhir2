@@ -17,14 +17,14 @@
             <artifactId>${project.parent.artifactId}-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-		<dependency>
-			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>${project.parent.artifactId}-api</artifactId>
-			<version>${project.version}</version>
-			<type>test-jar</type>
-			<classifier>tests</classifier>
-			<scope>test</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>${project.parent.groupId}</groupId>-->
+<!--			<artifactId>${project.parent.artifactId}-api</artifactId>-->
+<!--			<version>${project.version}</version>-->
+<!--			<type>test-jar</type>-->
+<!--			<classifier>tests</classifier>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>${project.parent.artifactId}-api-2.1</artifactId>
@@ -35,13 +35,13 @@
 			<artifactId>${project.parent.artifactId}-api-2.2</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>${project.parent.artifactId}-test-data</artifactId>
-			<version>${project.parent.version}</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>${project.parent.groupId}</groupId>-->
+<!--			<artifactId>${project.parent.artifactId}-test-data</artifactId>-->
+<!--			<version>${project.parent.version}</version>-->
+<!--			<type>test-jar</type>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.openmrs.web</groupId>
 			<artifactId>openmrs-web</artifactId>

@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Locale;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -73,10 +75,11 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		if (globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX) != null
 		        && !globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX).isEmpty()
-		        && identifier.getIdentifierType() != null) {
+		        && identifier.getIdentifierType() != null && !identifier.getPreferred()) {
 
 			patientIdentifier.setSystem(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX)
-			        + '/' + identifier.getIdentifierType().getId() + '-' + identifier.getIdentifierType().getName());
+			        + '/' + identifier.getIdentifierType().getId() + '-'
+			        + identifier.getIdentifierType().getName().toLowerCase(Locale.ROOT).replace(" ", "-"));
 		}
 		return patientIdentifier;
 	}

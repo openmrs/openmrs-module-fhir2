@@ -1,9 +1,0 @@
-{
-  "resourceType": "Person",
-  "name": "adam",
-  "gender": "male",
-  "birthdate": "2004-08-12 00:00:00.0",
-  "state": "mukono",
-  "city": "kampala",
-  "country": "uganda"
-}  

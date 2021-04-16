@@ -97,6 +97,10 @@ public class PatientTranslatorImpl implements PatientTranslator {
 			patient.addName(nameTranslator.toFhirResource(name));
 		}
 		
+		if (patient.hasName()) {
+			patient.getNameFirstRep().setUse(HumanName.NameUse.OFFICIAL);
+		}
+		
 		if (openmrsPatient.getGender() != null) {
 			patient.setGender(genderTranslator.toFhirResource(openmrsPatient.getGender()));
 		}

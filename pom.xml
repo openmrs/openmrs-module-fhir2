@@ -35,7 +35,7 @@
     </scm>
 
     <modules>
-        <module>test-data</module>
+<!--        <module>test-data</module>-->
         <module>api</module>
         <module>api-2.1</module>
         <module>api-2.2</module>
