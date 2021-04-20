@@ -25,6 +25,7 @@ import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -45,7 +46,13 @@ import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
-import org.openmrs.module.fhir2.api.translators.*;
+import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
+import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -104,6 +111,9 @@ public class EncounterTranslatorImplTest {
 	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
 	
 	@Mock
+	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
+	
+	@Mock
 	private EncounterClassMap encounterClassMap;
 	
 	private Patient patient;
@@ -130,6 +140,7 @@ public class EncounterTranslatorImplTest {
 		encounterTranslator.setEncounterClassMap(encounterClassMap);
 		encounterTranslator.setVisitReferenceTranlator(visitReferenceTranslator);
 		encounterTranslator.setEncounterTypeTranslator(encounterTypeTranslator);
+		encounterTranslator.setEncounterPeriodTranslator(encounterPeriodTranslator);
 		
 		PatientIdentifier identifier = new PatientIdentifier();
 		identifier.setIdentifier(PATIENT_IDENTIFIER);
@@ -354,6 +365,27 @@ public class EncounterTranslatorImplTest {
 	}
 	
 	@Test
+	public void toOpenMrsType_shouldTranslatePeriodToEncounterDatetime() {
+		Date encounterDate = new java.util.Date();
+		Period period = new Period();
+		period.setStart(encounterDate);
+		
+		fhirEncounter.setPeriod(period);
+		
+		when(encounterPeriodTranslator.toOpenmrsType(ArgumentMatchers.any(), ArgumentMatchers.any())).then(invocation -> {
+			org.openmrs.Encounter encounter = invocation.getArgument(0);
+			encounter.setEncounterDatetime(((Period) invocation.getArgument(1)).getStart());
+			return encounter;
+		});
+		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
+		
+		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getEncounterDatetime(), equalTo(encounterDate));
+	}
+	
+	@Test
 	public void toFhirResource_shouldTranslateToPartOf() {
 		Visit visit = new Visit();
 		visit.setUuid(VISIT_UUID);
@@ -473,5 +505,22 @@ public class EncounterTranslatorImplTest {
 		assertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
 		assertThat(result.getMeta().getTag().get(0).getCode(), equalTo(TYPE_CODE));
 		assertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateEncounterDatetimeToPeriod() {
+		Date encounterDate = new java.util.Date();
+		Period period = new Period();
+		
+		omrsEncounter.setEncounterDatetime(encounterDate);
+		
+		period.setStart(encounterDate);
+		
+		when(encounterPeriodTranslator.toFhirResource(ArgumentMatchers.any())).thenReturn(period);
+		
+		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPeriod(), equalTo(period));
 	}
 }
