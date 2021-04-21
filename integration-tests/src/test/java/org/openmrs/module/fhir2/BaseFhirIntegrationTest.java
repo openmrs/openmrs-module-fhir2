@@ -40,7 +40,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.junit.Before;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
-import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -66,8 +65,6 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	
 	@Autowired
 	private ConfigurableApplicationContext ctx;
-
-	private SummaryInterceptor summaryInterceptor;
 	
 	// This must be implemented by subclasses
 	public abstract T getResourceProvider();
@@ -90,8 +87,6 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		jsonParser = getFhirContext().newJsonParser();
 		xmlParser = getFhirContext().newXmlParser();
 		
-		summaryInterceptor = new SummaryInterceptor();
-		
 		MockServletContext servletContext = new MockServletContext();
 		WebApplicationContext wac = new DelegatingWebApplicationContext(applicationContext, servletContext);
 		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
@@ -105,7 +100,6 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		servlet = getRestfulServer();
 		servlet.setCtx(ctx);
 		servlet.setFhirContext(getFhirContext());
-		servlet.setSummaryInterceptor(summaryInterceptor);
 		servlet.init(servletConfig);
 	}
 	

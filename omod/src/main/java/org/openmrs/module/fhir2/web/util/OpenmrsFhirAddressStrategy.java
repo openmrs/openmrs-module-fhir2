@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.web.util;
 
 import static org.openmrs.module.fhir2.web.util.FhirVersionUtils.FhirVersion.UNKNOWN;
 
+import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -35,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 	
 	private volatile String gpPrefix;
+	
+	private final AdministrationService administrationService;
 	
 	private GlobalPropertyListener globalPropertyListener = new GlobalPropertyListener() {
 		
@@ -61,6 +64,7 @@ public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 	@Autowired
 	public OpenmrsFhirAddressStrategy(FhirGlobalPropertyService globalPropertyService,
 	    @Qualifier("adminService") AdministrationService administrationService) {
+		this.administrationService = administrationService;
 		if (administrationService != null) {
 			administrationService.addGlobalPropertyListener(globalPropertyListener);
 		}
@@ -114,5 +118,12 @@ public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 		}
 		
 		this.gpPrefix = gpPrefix;
+	}
+	
+	@PreDestroy
+	public void preDestroy() {
+		if (administrationService != null) {
+			administrationService.removeGlobalPropertyListener(globalPropertyListener);
+		}
 	}
 }
