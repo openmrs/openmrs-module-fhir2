@@ -9,11 +9,14 @@
  */
 package org.openmrs.module.fhir2;
 
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 
-@NoArgsConstructor
 public class FhirConstants {
+	
+	private FhirConstants() {
+	}
+	
+	public static final String FHIR2_MODULE_ID = "fhir2";
 	
 	public static final String OPENMRS_FHIR_SERVER_NAME = "OpenMRS FHIR Server";
 	

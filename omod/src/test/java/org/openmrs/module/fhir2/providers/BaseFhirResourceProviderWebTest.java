@@ -38,7 +38,6 @@ import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.impl.FhirGlobalPropertyServiceImpl;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
-import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,8 +55,6 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 	
 	private LoggingInterceptor interceptor;
 	
-	private SummaryInterceptor summaryInterceptor;
-	
 	private FhirRestServlet servlet;
 	
 	// This must be implemented by subclasses
@@ -69,8 +66,6 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		
 		interceptor = new LoggingInterceptor();
 		interceptor.setLoggerName("org.openmrs.module.fhir2.accessLog");
-		
-		summaryInterceptor = new SummaryInterceptor();
 		
 		MockServletContext servletContext = new MockServletContext();
 		servletConfig = new MockServletConfig(servletContext, getServletName());
@@ -93,7 +88,6 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		servlet = getRestfulServer();
 		servlet.setFhirContext(getFhirContext());
 		servlet.setLoggingInterceptor(interceptor);
-		servlet.setSummaryInterceptor(summaryInterceptor);
 		servlet.setGlobalPropertyService(new FhirGlobalPropertyServiceImpl() {
 			
 			@Override
