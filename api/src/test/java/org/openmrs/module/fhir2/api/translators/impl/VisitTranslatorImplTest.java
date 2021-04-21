@@ -151,7 +151,7 @@ public class VisitTranslatorImplTest {
 		period.setStart(periodStart);
 		period.setEnd(periodEnd);
 		encounter.setPeriod(period);
-
+		
 		when(visitPeriodTranslator.toOpenmrsType(any(), any())).thenCallRealMethod();
 		
 		Visit result = visitTranslator.toOpenmrsType(new Visit(), encounter);
@@ -167,7 +167,7 @@ public class VisitTranslatorImplTest {
 		
 		Period period = new Period();
 		encounter.setPeriod(period);
-
+		
 		when(visitPeriodTranslator.toOpenmrsType(any(), any())).thenCallRealMethod();
 		
 		Visit result = visitTranslator.toOpenmrsType(new Visit(), encounter);

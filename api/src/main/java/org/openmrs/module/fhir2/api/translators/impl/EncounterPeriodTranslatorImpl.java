@@ -43,11 +43,11 @@ public class EncounterPeriodTranslatorImpl implements EncounterPeriodTranslator<
 		} else {
 			encounterDateTime = encounter.getEncounterDatetime();
 		}
-
+		
 		if (encounterDateTime == null) {
 			encounterDateTime = new Date();
 		}
-
+		
 		encounter.setEncounterDatetime(encounterDateTime);
 		return encounter;
 	}

@@ -18,7 +18,6 @@ import java.util.Date;
 
 import junit.framework.TestCase;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Period;
 import org.junit.Before;
@@ -32,9 +31,9 @@ import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 public class VisitPeriodTranslatorImplTest extends TestCase {
 	
 	private EncounterPeriodTranslator<Visit> visitPeriodTranslator;
-
+	
 	Date periodStart, periodEnd;
-
+	
 	@SneakyThrows
 	@Before
 	public void setup() {
@@ -49,7 +48,7 @@ public class VisitPeriodTranslatorImplTest extends TestCase {
 		Visit visit = new Visit();
 		visit.setStartDatetime(periodStart);
 		visit.setStopDatetime(periodEnd);
-
+		
 		Period result = visitPeriodTranslator.toFhirResource(visit);
 		
 		assertThat(result, notNullValue());

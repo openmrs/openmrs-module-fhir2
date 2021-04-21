@@ -13,11 +13,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
-import java.util.Date;
-
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.EncounterType;
 import org.openmrs.Visit;

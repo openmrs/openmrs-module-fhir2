@@ -92,7 +92,7 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 		lifecycleListeners.forEach(ModuleLifecycleListener::willStop);
 		unloadModules();
 	}
-
+	
 	@Override
 	public void stopped() {
 		lifecycleListeners.forEach(ModuleLifecycleListener::stopped);

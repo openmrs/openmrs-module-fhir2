@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class VisitPeriodTranslatorImpl implements EncounterPeriodTranslator<Visit> {
-
+	
 	@Override
 	public Period toFhirResource(@Nonnull Visit visit) {
 		Period result = new Period();
@@ -29,7 +29,7 @@ public class VisitPeriodTranslatorImpl implements EncounterPeriodTranslator<Visi
 		result.setEnd(visit.getStopDatetime());
 		return result;
 	}
-
+	
 	@Override
 	public Visit toOpenmrsType(@Nonnull Visit visit, @Nonnull Period period) {
 		if (period.hasStart()) {
@@ -37,11 +37,11 @@ public class VisitPeriodTranslatorImpl implements EncounterPeriodTranslator<Visi
 		} else if (visit.getStartDatetime() == null) {
 			visit.setStartDatetime(visit.getDateCreated());
 		}
-
+		
 		if (period.hasEnd()) {
 			visit.setStopDatetime(period.getEnd());
 		}
-
+		
 		return visit;
 	}
 }
