@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -34,12 +35,15 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.junit.Before;
@@ -333,4 +337,76 @@ public class RelatedPersonFhirResourceProviderTest extends BaseFhirProvenanceRes
 		assertThat(resultList.size(), equalTo(1));
 	}
 	
+	@Test
+	public void updateRelatedPerson_shouldUpdateRelatedPerson() {
+		when(relatedPersonService.update(RELATED_PERSON_UUID, relatedPerson)).thenReturn(relatedPerson);
+		
+		MethodOutcome result = resourceProvider.updateRelatedPerson(new IdType().setValue(RELATED_PERSON_UUID),
+		    relatedPerson);
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(relatedPerson));
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateRelatedPerson_shouldThrowInvalidRequestExceptionForUuidMismatch() {
+		when(relatedPersonService.update(WRONG_RELATED_PERSON_UUID, relatedPerson)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateRelatedPerson(new IdType().setValue(WRONG_RELATED_PERSON_UUID), relatedPerson);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateRelatedPerson_shouldThrowInvalidRequestForMissingId() {
+		RelatedPerson noIdRelatedPerson = new RelatedPerson();
+		
+		when(relatedPersonService.update(RELATED_PERSON_UUID, noIdRelatedPerson)).thenThrow(InvalidRequestException.class);
+		
+		resourceProvider.updateRelatedPerson(new IdType().setValue(RELATED_PERSON_UUID), noIdRelatedPerson);
+	}
+	
+	@Test(expected = MethodNotAllowedException.class)
+	public void updateRelatedPerson_shouldThrowMethodeNotAllowedIfDoesNotExist() {
+		
+		relatedPerson.setId(WRONG_RELATED_PERSON_UUID);
+		
+		when(relatedPersonService.update(WRONG_RELATED_PERSON_UUID, relatedPerson))
+		        .thenThrow(MethodNotAllowedException.class);
+		
+		resourceProvider.updateRelatedPerson(new IdType().setValue(WRONG_RELATED_PERSON_UUID), relatedPerson);
+	}
+	
+	@Test(expected = InvalidRequestException.class)
+	public void updateRelatedPerson_shouldThrowInvalidRequestForMissingIdType() {
+		resourceProvider.updateRelatedPerson(null, relatedPerson);
+	}
+	
+	@Test
+	public void deleteRelatedPerson_shouldDeleteRelatedPerson() {
+		
+		when(relatedPersonService.delete(RELATED_PERSON_UUID)).thenReturn(relatedPerson);
+		
+		OperationOutcome result = resourceProvider.deleteRelatedPerson(new IdType().setValue(RELATED_PERSON_UUID));
+		assertThat(result, notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
+	}
+	
+	@Test(expected = ResourceNotFoundException.class)
+	public void deleteRelatedPerson_shouldThrowResourceNotFoundException() {
+		
+		when(relatedPersonService.delete(WRONG_RELATED_PERSON_UUID)).thenReturn(null);
+		
+		resourceProvider.deleteRelatedPerson(new IdType().setValue(WRONG_RELATED_PERSON_UUID));
+	}
+	
+	@Test
+	public void createRelatedPerson_shouldCreateNewRelatedPerson() {
+		when(relatedPersonService.create(relatedPerson)).thenReturn(relatedPerson);
+		
+		MethodOutcome result = resourceProvider.createRelatedPerson(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(relatedPerson));
+	}
 }

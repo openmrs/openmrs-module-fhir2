@@ -1,0 +1,49 @@
+{
+  "resourceType": "RelatedPerson",
+  "identifier": {
+    "extension": [
+      {
+        "url": "http://fhir.openmrs.org/ext/person/identifier#location",
+        "valueReference": {
+          "reference": "Location/92ab9667-4686-49af-8be8-65a4b58fc49c",
+          "type": "Location"
+        }
+      }
+    ],
+    "use": "official",
+    "type": {
+      "text": "Test Identifier Type"
+    },
+    "value": "4444-6"
+  },
+  "patient": {
+    "reference": "Patient/example"
+  },
+  "relationship": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0131",
+          "code": "N"
+        }
+      ]
+    }
+  ],
+  "name": [
+    {
+      "given": [
+        "Adam"
+      ],
+      "family": "John"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "2004-08-12",
+  "address": [
+    {
+      "state": "Mukono",
+      "city": "Kampala",
+      "country": "Uganda"
+    }
+  ]
+}

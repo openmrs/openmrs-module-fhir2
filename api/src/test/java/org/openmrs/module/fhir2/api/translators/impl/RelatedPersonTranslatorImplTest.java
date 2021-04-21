@@ -321,4 +321,150 @@ public class RelatedPersonTranslatorImplTest {
 		assertThat(result.getBirthDateElement().getYear(), equalTo(dateType.getYear()));
 		assertThat(result.getBirthDateElement().getMonth(), equalTo(dateType.getMonth()));
 	}
+	
+	@Test
+	public void shouldTranslateRelatedPersonToRelationship() {
+		RelatedPerson relatedPerson = new RelatedPerson();
+		
+		Relationship result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+	}
+	
+	@Test
+	public void shouldTranslateRelatedPersonIdToRelationshipUuid() {
+		RelatedPerson relatedPerson = new RelatedPerson();
+		relatedPerson.setId(RELATIONSHIP_UUID);
+		
+		Relationship result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(RELATIONSHIP_UUID));
+	}
+	
+	@Test
+	public void shouldTranslateFhirNameToOpenmrsName() {
+		PersonName personName = new PersonName();
+		personName.setGivenName(PERSON_GIVEN_NAME);
+		personName.setFamilyName(PERSON_FAMILY_NAME);
+		
+		RelatedPerson relatedPerson = new RelatedPerson();
+		HumanName name = relatedPerson.addName();
+		name.addGiven(PERSON_GIVEN_NAME);
+		name.setFamily(PERSON_FAMILY_NAME);
+		when(nameTranslator.toOpenmrsType(name)).thenReturn(personName);
+		
+		Relationship result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPersonA().getGivenName(), equalTo(PERSON_GIVEN_NAME));
+		assertThat(result.getPersonA().getFamilyName(), equalTo(PERSON_FAMILY_NAME));
+	}
+	
+	@Test
+	public void shouldTranslateFhirAddressToOpenmrsAddress() {
+		PersonAddress personAddress = new PersonAddress();
+		personAddress.setUuid(ADDRESS_UUID);
+		personAddress.setCityVillage(ADDRESS_CITY);
+		
+		RelatedPerson relatedPerson = new RelatedPerson();
+		Address address = relatedPerson.addAddress();
+		address.setId(ADDRESS_UUID);
+		address.setCity(ADDRESS_CITY);
+		when(addressTranslator.toOpenmrsType(address)).thenReturn(personAddress);
+		
+		Relationship result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPersonA().getPersonAddress(), notNullValue());
+		assertThat(result.getPersonA().getPersonAddress().getUuid(), equalTo(ADDRESS_UUID));
+		assertThat(result.getPersonA().getPersonAddress().getCityVillage(), equalTo(ADDRESS_CITY));
+		
+	}
+	
+	@Test
+	public void shouldTranslateFhirGenderToOpenmrsGender() {
+		RelatedPerson relatedPerson = new RelatedPerson();
+		relatedPerson.setGender(Enumerations.AdministrativeGender.MALE);
+		when(genderTranslator.toOpenmrsType(Enumerations.AdministrativeGender.MALE)).thenReturn("M");
+		
+		Relationship result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPersonA().getGender(), equalTo("M"));
+	}
+	
+	@Test
+	public void shouldTranslateToOpenmrsBirthdate() {
+		RelatedPerson relatedPerson = new RelatedPerson();
+		Date date = new Date();
+		DateType dateType = new DateType();
+		
+		// for TemporalPrecisionEnum.DAY
+		dateType.setValue(date, TemporalPrecisionEnum.DAY);
+		relatedPerson.setBirthDateElement(dateType);
+		
+		Relationship result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPersonA().getBirthdateEstimated(), equalTo(false));
+		assertThat(result.getPersonA().getBirthdate(), equalTo(date));
+		
+		// for TemporalPrecisionEnum.Month
+		dateType.setValue(date, TemporalPrecisionEnum.MONTH);
+		relatedPerson.setBirthDateElement(dateType);
+		
+		result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPersonA().getBirthdateEstimated(), equalTo(true));
+		assertThat(result.getPersonA().getBirthdate(), equalTo(date));
+		
+		// for TemporalPrecisionEnum.YEAR
+		dateType.setValue(date, TemporalPrecisionEnum.YEAR);
+		relatedPerson.setBirthDateElement(dateType);
+		
+		result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPersonA().getBirthdateEstimated(), equalTo(true));
+		assertThat(result.getPersonA().getBirthdate(), equalTo(date));
+	}
+	
+	@Test
+	public void shouldTranslateFhirStartDateAndEndDateToOpenmrsStartDateAndEndDate() {
+		RelatedPerson relatedPerson = new RelatedPerson();
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2000, Calendar.APRIL, 16);
+		relatedPerson.getPeriod().setStart(calendar.getTime());
+		
+		Relationship result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStartDate().getTime(), equalTo(calendar.getTime().getTime()));
+		
+		calendar.set(2000, Calendar.SEPTEMBER, 29);
+		relatedPerson.getPeriod().setEnd(calendar.getTime());
+		
+		result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getEndDate().getTime(), equalTo(calendar.getTime().getTime()));
+	}
+	
+	@Test
+	public void shouldTranslateFhirPatientToOpenmrsPersonB() {
+		Patient patient = new Patient();
+		patient.setUuid(PATIENT_UUID);
+		RelatedPerson relatedPerson = new RelatedPerson();
+		Reference reference = new Reference();
+		relatedPerson.setPatient(reference);
+		
+		when(patientReferenceTranslator.toOpenmrsType(relatedPerson.getPatient())).thenReturn(patient);
+		
+		Relationship result = relatedPersonTranslator.toOpenmrsType(relatedPerson);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPersonB().getUuid(), equalTo(PATIENT_UUID));
+	}
 }
