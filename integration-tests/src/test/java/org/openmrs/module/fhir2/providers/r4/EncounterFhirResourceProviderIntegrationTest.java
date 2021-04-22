@@ -21,15 +21,20 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -39,6 +44,10 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	private static final String[] ENCOUNTER_DATA_XML = {
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml",
 	        "org/openmrs/module/fhir2/api/dao/impl/FhirVisitDaoImplTest_initial_data.xml" };
+	
+	private static final String ENCOUNTER_JSON_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_create.json";
+	
+	private static final String VISIT_JSON_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/VisitWebTest_create.json";
 	
 	private static final String ENCOUNTER_UUID = "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9";
 	
@@ -319,59 +328,131 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(entries, everyItem(hasResource(
 		    hasProperty("location", hasItems(hasProperty("location", hasProperty("display", equalTo("Test Location"))))))));
 	}
-
+	
 	@Test
 	public void shouldReturnCountForEncounterAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Encounter/?_summary=count").accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-
+		
 		Bundle result = readBundleResponse(response);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(5)));
 	}
-
+	
 	@Test
 	public void shouldReturnCountForEncounterAsXml() throws Exception {
 		MockHttpServletResponse response = get("/Encounter/?_summary=count").accept(FhirMediaTypes.XML).go();
-
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-
+		
 		Bundle result = readBundleResponse(response);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(5)));
 	}
-
+	
 	@Test
 	public void shouldDeleteExistingEncounter() throws Exception {
 		MockHttpServletResponse response = delete("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isOk());
-
+		
 		response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, statusEquals(HttpStatus.GONE));
 	}
-
+	
 	@Test
 	public void shouldReturnNotFoundWhenDeletingNonExistentEncounter() throws Exception {
 		MockHttpServletResponse response = delete("/Encounter/" + BAD_ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
-
+		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-
+		
 		OperationOutcome operationOutcome = readOperationOutcome(response);
-
+		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldCreateEncounterFromOpenMrsEncounterAsJson() throws Exception {
+		String jsonEncounter;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(ENCOUNTER_JSON_CREATE_ENCOUNTER_PATH)) {
+			Objects.requireNonNull(is);
+			jsonEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		MockHttpServletResponse response = post("/Encounter").accept(FhirMediaTypes.JSON).jsonContent(jsonEncounter).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getContentType(), is((FhirMediaTypes.JSON.toString())));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Encounter encounter = readResponse(response);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getIdElement().getIdPart(), notNullValue());
+		assertThat(encounter.getStatus().getDisplay(), notNullValue());
+		assertThat(encounter.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
+		assertThat(encounter.getType().get(0).getCoding().get(0).getSystem(),
+		    equalTo(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI));
+		assertThat(encounter.getSubject().getType(), equalTo("Patient"));
+		assertThat(encounter.getParticipant().get(0).getIndividual().getType(), equalTo("Practitioner"));
+		assertThat(encounter.getPeriod().getStart(), notNullValue());
+		assertThat(encounter.getLocation().get(0).getLocation().getDisplay(), equalTo("Test Location"));
+		
+		response = get("/Encounter/" + encounter.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Encounter newEncounter = readResponse(response);
+		
+		assertThat(newEncounter.getId(), equalTo(encounter.getId()));
+		
+	}
+	
+	@Test
+	public void shouldCreateEncounterFromOpenMrsVisitAsJson() throws Exception {
+		String jsonEncounter;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(VISIT_JSON_CREATE_ENCOUNTER_PATH)) {
+			Objects.requireNonNull(is);
+			jsonEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		MockHttpServletResponse response = post("/Encounter").accept(FhirMediaTypes.JSON).jsonContent(jsonEncounter).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getContentType(), is((FhirMediaTypes.JSON.toString())));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Encounter encounter = readResponse(response);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getIdElement().getIdPart(), notNullValue());
+		assertThat(encounter.getStatus().getDisplay(), notNullValue());
+		assertThat(encounter.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
+		assertThat(encounter.getType().get(0).getCoding().get(0).getSystem(), equalTo(FhirConstants.VISIT_TYPE_SYSTEM_URI));
+		assertThat(encounter.getSubject().getType(), equalTo("Patient"));
+		assertThat(encounter.getPeriod().getStart(), notNullValue());
+		assertThat(encounter.getLocation().get(0).getLocation().getDisplay(), equalTo("Test Location"));
+		
+		response = get("/Encounter/" + encounter.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Encounter newEncounter = readResponse(response);
+		
+		assertThat(newEncounter.getId(), equalTo(encounter.getId()));
+		
 	}
 }
