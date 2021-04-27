@@ -93,7 +93,6 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		}
 		
 		throw new InvalidRequestException("Invalid type of request");
-		
 	}
 	
 	@Override
@@ -136,7 +135,6 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		}
 		
 		return result;
-		
 	}
 	
 	@Override
