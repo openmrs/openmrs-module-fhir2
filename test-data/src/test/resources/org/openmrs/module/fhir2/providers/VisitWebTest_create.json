@@ -16,8 +16,8 @@
     "tag": [
       {
         "system": "http://fhir.openmrs.org/ext/encounter-tag",
-        "code": "encounter",
-        "display": "Encounter"
+        "code": "visit",
+        "display": "Visit"
       }
     ]
   },
@@ -25,7 +25,7 @@
     {
       "coding": [
         {
-          "system": "http://fhir.openmrs.org/code-system/encounter-type",
+          "system": "http://fhir.openmrs.org/code-system/visit-type",
           "code": "c0c579b0-8e59-401d-8a4a-976a0b183519",
           "display": "Consultation"
         }
