@@ -10,9 +10,54 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import org.hl7.fhir.r4.model.Media;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
+import org.openmrs.Obs;
+import org.openmrs.Patient;
+import org.openmrs.module.fhir2.api.translators.MediaContentTranslator;
+import org.openmrs.module.fhir2.api.translators.MediaStatusTranslator;
+
+import java.util.Date;
+
+import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MediaTranslatorImplTest extends BaseFhirProvenanceResourceTest<Media> {}
+public class MediaTranslatorImplTest {
+	
+	private static String OBS_UUID = "96c695c9-148b-4788-ac8e-ff2594381ebf";
+	
+	private static String MEDIA_STATUS = "COMPLETED";
+	
+	@Mock
+	MediaContentTranslator mediaContentTranslator;
+	
+	@Mock
+	MediaStatusTranslator mediaStatusTranslator;
+	
+	@Mock
+	MediaTranslatorImpl mediaTranslator;
+	
+	@Before
+	public void setUp() {
+		mediaContentTranslator = new MediaContentTranslatorImpl();
+		mediaTranslator.setMediaContentTranslator(mediaContentTranslator);
+		mediaTranslator.setMediaStatusTranslator(mediaStatusTranslator);
+	}
+	
+	@Test
+	public void toFhir_shouldConvertObsToMedia() {
+		Obs obs = new Obs();
+		obs.setUuid(OBS_UUID);
+		obs.setObsId(1);
+		obs.setComment("Hand X-ray");
+		obs.setValueTime(new Date());
+		obs.setPerson(new Patient());
+		
+		Media result = mediaTranslator.toFhirResource(obs);
+		assertThat(result, notNullValue());
+	}
+}

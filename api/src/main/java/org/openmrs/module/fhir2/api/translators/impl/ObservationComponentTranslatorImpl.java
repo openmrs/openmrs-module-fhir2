@@ -9,10 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang3.Validate.notNull;
-
-import javax.annotation.Nonnull;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
@@ -23,9 +19,13 @@ import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
+
+import static org.apache.commons.lang3.Validate.notNull;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ObservationComponentTranslatorImpl implements ObservationComponentTranslator {
+public class  ObservationComponentTranslatorImpl implements ObservationComponentTranslator {
 	
 	@Autowired
 	private ObservationValueTranslator observationValueTranslator;

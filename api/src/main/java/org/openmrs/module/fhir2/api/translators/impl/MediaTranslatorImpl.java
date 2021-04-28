@@ -11,11 +11,15 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.Media;
-import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
+import org.openmrs.Patient;
+import org.openmrs.Person;
+import org.openmrs.api.db.hibernate.HibernateUtil;
+import org.openmrs.module.fhir2.api.translators.MediaContentTranslator;
+import org.openmrs.module.fhir2.api.translators.MediaStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.MediaTranslator;
-import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,16 +32,31 @@ import static org.apache.commons.lang.Validate.notNull;
 public class MediaTranslatorImpl implements MediaTranslator {
 	
 	@Autowired
-	private ObservationStatusTranslator observationStatusTranslator;
+	private MediaStatusTranslator mediaStatusTranslator;
+	
+	private MediaContentTranslator mediaContentTranslator;
 	
 	@Override
 	public Media toFhirResource(@Nonnull Obs data) {
 		notNull(data, "The Openmrs Complex obs object should not be null");
 		
-		Observation obs = new Observation();
-		obs.setId(data.getUuid());
-		obs.setStatus(observationStatusTranslator.toFhirResource(data));
 		Media media = new Media();
+		media.setId(data.getUuid());
+		media.setStatus(mediaStatusTranslator.toFhirResource(data));
+		
+		media.setContent(mediaContentTranslator.toFhirResource(data).getContent());
+		//		Media media = new Media();
+		
+		Person obsPerson = data.getPerson();
+		
+		if (obsPerson != null) {
+			if (obsPerson instanceof HibernateProxy) {
+				obsPerson = HibernateUtil.getRealObjectFromProxy(obsPerson);
+			}
+			if (obsPerson instanceof Patient) {
+				data.setPerson(obsPerson);
+			}
+		}
 		return media;
 	}
 	
