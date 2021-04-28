@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static lombok.AccessLevel.PACKAGE;
+
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
@@ -36,7 +38,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.Condition30_40;
@@ -47,15 +48,15 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirConditionService;
+import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("conditionFhirR3ResourceProvider")
-@Qualifier("fhirR3Resources")
-@Setter(AccessLevel.PACKAGE)
+@R3Provider
+@Setter(PACKAGE)
 public class ConditionFhirResourceProvider implements IResourceProvider {
 	
 	@Autowired

@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static lombok.AccessLevel.PACKAGE;
+
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
@@ -27,20 +29,19 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
+import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("relatedPersonFhirR4ResourceProvider")
-@Qualifier("fhirResources")
-@Setter(AccessLevel.PACKAGE)
+@R4Provider
+@Setter(PACKAGE)
 public class RelatedPersonFhirResourceProvider implements IResourceProvider {
 	
 	@Autowired

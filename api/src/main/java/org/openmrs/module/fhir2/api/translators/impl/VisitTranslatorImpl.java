@@ -21,6 +21,7 @@ import org.openmrs.Visit;
 import org.openmrs.VisitType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
@@ -39,13 +40,16 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 	private EncounterLocationTranslator encounterLocationTranslator;
 	
 	@Autowired
-	private ProvenanceTranslator<org.openmrs.Visit> provenanceTranslator;
+	private ProvenanceTranslator<Visit> provenanceTranslator;
 	
 	@Autowired
 	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
 	
 	@Autowired
 	private VisitTypeTranslatorImpl visitTypeTranslator;
+	
+	@Autowired
+	private EncounterPeriodTranslator<Visit> visitPeriodTranslator;
 	
 	@Override
 	public Encounter toFhirResource(@Nonnull Visit visit) {
@@ -62,6 +66,9 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		}
 		
 		encounter.setClass_(mapLocationToClass(visit.getLocation()));
+		
+		encounter.setPeriod(visitPeriodTranslator.toFhirResource(visit));
+		
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "visit", "Visit");
 		encounter.getMeta().setLastUpdated(visit.getDateChanged());
 		encounter.addContained(provenanceTranslator.getCreateProvenance(visit));
@@ -86,6 +93,8 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		if (visitType != null) {
 			existingVisit.setVisitType(visitType);
 		}
+		
+		visitPeriodTranslator.toOpenmrsType(existingVisit, encounter.getPeriod());
 		
 		existingVisit.setPatient(patientReferenceTranslator.toOpenmrsType(encounter.getSubject()));
 		existingVisit.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));

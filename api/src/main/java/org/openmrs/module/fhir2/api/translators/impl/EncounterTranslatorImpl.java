@@ -26,6 +26,7 @@ import org.openmrs.Visit;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterParticipantTranslator;
+import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
@@ -56,6 +57,9 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	@Autowired
 	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
 	
+	@Autowired
+	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
+	
 	@Override
 	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openMrsEncounter) {
 		notNull(openMrsEncounter, "The Openmrs Encounter object should not be null");
@@ -76,6 +80,8 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 			encounter.setLocation(
 			    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
 		}
+		
+		encounter.setPeriod(encounterPeriodTranslator.toFhirResource(openMrsEncounter));
 		
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "encounter", "Encounter");
 		encounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());
@@ -113,6 +119,8 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		
 		existingEncounter.setLocation(encounterLocationTranslator.toOpenmrsType(encounter.getLocationFirstRep()));
 		existingEncounter.setVisit(visitReferenceTranlator.toOpenmrsType(encounter.getPartOf()));
+		
+		encounterPeriodTranslator.toOpenmrsType(existingEncounter, encounter.getPeriod());
 		
 		return existingEncounter;
 	}
