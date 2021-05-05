@@ -13,6 +13,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
 
+import java.util.List;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateParam;
@@ -44,6 +45,16 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 	@Override
 	public Obs createOrUpdate(@Nonnull Obs newEntry) {
 		return super.createOrUpdate(newEntry);
+	}
+	
+	@Override
+	public Obs delete(@Nonnull String uuid) {
+		return super.delete(uuid);
+	}
+	
+	@Override
+	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids) {
+		return super.getSearchResults(theParams, resourceUuids);
 	}
 	
 	@Override

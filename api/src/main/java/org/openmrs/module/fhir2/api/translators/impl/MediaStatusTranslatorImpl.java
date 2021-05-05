@@ -9,16 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Media;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.translators.MediaStatusTranslator;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Nonnull;
-
-import static org.apache.commons.lang3.Validate.notNull;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -33,7 +33,7 @@ public class MediaStatusTranslatorImpl implements MediaStatusTranslator {
 	public Obs toOpenmrsType(@Nonnull Obs existingObject, @Nonnull Media.MediaStatus resource) {
 		notNull(existingObject, "The existing Obs object should not be null");
 		notNull(resource, "The Media object should not be null");
-
+		
 		return existingObject;
 	}
 	

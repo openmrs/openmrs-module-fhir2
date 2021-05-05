@@ -9,4 +9,20 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-public class MediaFhirResourceProvider {}
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import lombok.AccessLevel;
+import lombok.Setter;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+@Component("mediaFhirR4ResourceProvider")
+@Qualifier("fhirResources")
+@Setter(AccessLevel.PACKAGE)
+public class MediaFhirResourceProvider implements IResourceProvider {
+	
+	@Override
+	public Class<? extends IBaseResource> getResourceType() {
+		return null;
+	}
+}

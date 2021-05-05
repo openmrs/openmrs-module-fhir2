@@ -9,45 +9,42 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.apache.commons.lang.Validate.notNull;
+
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Media;
+import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.Concept;
+import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.api.db.hibernate.HibernateUtil;
-import org.openmrs.module.fhir2.api.translators.MediaContentTranslator;
-import org.openmrs.module.fhir2.api.translators.MediaStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.MediaTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
-
-import static org.apache.commons.lang.Validate.notNull;
-
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class MediaTranslatorImpl implements MediaTranslator {
+public class MediaTranslatorImpl extends BaseReferenceHandlingTranslator implements MediaTranslator {
 	
 	@Autowired
-	private MediaStatusTranslator mediaStatusTranslator;
-	
-	private MediaContentTranslator mediaContentTranslator;
+	private MediaTranslator mediaTranslator;
 	
 	@Override
 	public Media toFhirResource(@Nonnull Obs data) {
 		notNull(data, "The Openmrs Complex obs object should not be null");
-		
-		Media media = new Media();
-		media.setId(data.getUuid());
-		media.setStatus(mediaStatusTranslator.toFhirResource(data));
-		
-		media.setContent(mediaContentTranslator.toFhirResource(data).getContent());
-		//		Media media = new Media();
-		
 		Person obsPerson = data.getPerson();
+		Encounter encounter = data.getEncounter();
+		Concept concept = data.getValueCoded();
+		encounter.setLocation(data.getLocation());
+		encounter.setDateCreated(data.getDateCreated());
 		
 		if (obsPerson != null) {
 			if (obsPerson instanceof HibernateProxy) {
@@ -57,6 +54,15 @@ public class MediaTranslatorImpl implements MediaTranslator {
 				data.setPerson(obsPerson);
 			}
 		}
+		data.setEncounter(encounter);
+		data.setValueCoded(data.getValueCoded());
+		
+		Media media = new Media();
+		media.setType(new CodeableConcept());
+		media.setEncounter(null);
+		media.setSubject(new Reference());
+		media.setCreated(new DateType());
+		
 		return media;
 	}
 	

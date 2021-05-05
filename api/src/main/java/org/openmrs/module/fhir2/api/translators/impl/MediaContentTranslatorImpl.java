@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Attachment;
@@ -18,22 +20,20 @@ import org.openmrs.Obs;
 import org.openmrs.module.fhir2.api.translators.MediaContentTranslator;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
-
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class MediaContentTranslatorImpl extends BaseReferenceHandlingTranslator implements MediaContentTranslator {
-
+	
 	@Override
 	public Media toFhirResource(@Nonnull Obs data) {
-		if(data == null){
-           return null;
+		if (data == null) {
+			return null;
 		}
-
+		
 		Media mediaContent = new Media();
 		mediaContent.setContent(new Attachment().setContentType(data.getValueText()));
-		mediaContent.setContent(new Attachment().setDataElement(new Base64BinaryType()
-				.setValue(data.getComplexData().getData().toString().getBytes())));
+		mediaContent.setContent(new Attachment()
+		        .setDataElement(new Base64BinaryType().setValue(data.getComplexData().getData().toString().getBytes())));
 		mediaContent.setContent(new Attachment().setTitle(data.getComment()));
 		mediaContent.setContent(new Attachment().setCreation(data.getDateCreated()));
 		return mediaContent;

@@ -9,18 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-
-import java.util.Collection;
-import java.util.List;
-
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Obs;
+import org.openmrs.api.ObsService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirMediaDao;
@@ -28,6 +22,13 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.util.Collection;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirMediaDaoImplTest extends BaseModuleContextSensitiveTest {
@@ -38,21 +39,20 @@ public class FhirMediaDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String OBS_CONCEPT_ID = "5242";
 	
+	private ObsService obsService;
+	
 	@Autowired
 	FhirMediaDao dao;
 	
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(OBS_DATA_XML);
+		dao = new FhirMediaDaoImpl();
 	}
 	
 	@Test
 	public void get_shouldGetComplexObsByUuid() {
-		Obs obs = dao.get(OBS_UUID);
-		
-		assertThat(obs, notNullValue());
-		
-		//        assertThat(dao., equalTo(OBS_UUID));
+		assertThat(dao.get(OBS_UUID), notNullValue());
 	}
 	
 	@Test
