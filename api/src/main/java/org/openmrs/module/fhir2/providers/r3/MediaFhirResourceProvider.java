@@ -13,11 +13,11 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.springframework.stereotype.Component;
 
-@Component("mediaFhirR4ResourceProvider")
-@Qualifier("fhirResources")
+@Component("mediaFhirR3ResourceProvider")
+@R3Provider
 @Setter(AccessLevel.PACKAGE)
 public class MediaFhirResourceProvider implements IResourceProvider {
 	

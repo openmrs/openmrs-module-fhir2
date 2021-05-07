@@ -9,8 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import java.util.Date;
 

@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang.Validate.notNull;
+import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
@@ -33,10 +33,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class MediaTranslatorImpl extends BaseReferenceHandlingTranslator implements MediaTranslator {
-	
-	@Autowired
-	private MediaTranslator mediaTranslator;
-	
+
 	@Override
 	public Media toFhirResource(@Nonnull Obs data) {
 		notNull(data, "The Openmrs Complex obs object should not be null");
