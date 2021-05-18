@@ -35,7 +35,6 @@ public class FhirClientServiceImplTest {
 		FhirContext fhirR4 = FhirContext.forR4();
 		
 		fhirClientService = new FhirClientServiceImpl(fhirR3, fhirR4);
-		
 	}
 	
 	@Test
