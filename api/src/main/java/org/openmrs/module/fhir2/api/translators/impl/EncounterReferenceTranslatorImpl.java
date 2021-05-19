@@ -39,7 +39,7 @@ public class EncounterReferenceTranslatorImpl extends BaseReferenceHandlingTrans
 	
 	@Override
 	public Encounter toOpenmrsType(@Nonnull Reference encounter) {
-		if (encounter == null) {
+		if (encounter == null || !encounter.hasReference()) {
 			return null;
 		}
 		
