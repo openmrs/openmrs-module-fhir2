@@ -433,4 +433,12 @@ public class GroupFhirResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(1)));
 	}
+	
+	@Test(expected = UnsupportedOperationException.class)
+	public void shouldThrowUnsupportedOperationForOpenmrsPlatformLessThan2_1_0() throws Exception {
+		MockHttpServletResponse response = get("/Group/" + COHORT_UUID + "/$members")
+		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isMethodNotAllowed());
+	}
 }

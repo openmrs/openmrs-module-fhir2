@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.module.fhir2.api.FhirGroupMemberService;
 import org.openmrs.module.fhir2.api.FhirGroupService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,6 +45,9 @@ public class GroupFhirResourceProviderTest {
 	@Mock
 	private FhirGroupService fhirGroupService;
 	
+	@Mock
+	private FhirGroupMemberService groupMemberService;
+	
 	GroupFhirResourceProvider resourceProvider;
 	
 	Group group;
@@ -52,6 +56,7 @@ public class GroupFhirResourceProviderTest {
 	public void setup() {
 		resourceProvider = new GroupFhirResourceProvider();
 		resourceProvider.setGroupService(fhirGroupService);
+		resourceProvider.setGroupMemberService(groupMemberService);
 		
 		group = new Group();
 		group.setId(COHORT_UUID);

@@ -10,8 +10,10 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.InputStream;
@@ -22,10 +24,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -417,6 +421,24 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR4IntegrationT
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	@Ignore
+	//FIXME Unknown resource name "GroupMember" (this name is not known in FHIR version "R4")
+	public void shouldReturnPaginatedListOfGroupMembersAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Group/" + COHORT_UUID + "/$members")
+		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle groupMembers = readBundleResponse(response);
+		
+		assertThat(groupMembers, notNullValue());
+		assertThat(groupMembers.getEntry(), not(empty()));
+		assertThat(groupMembers.getTotal(), is(2));
 	}
 	
 }

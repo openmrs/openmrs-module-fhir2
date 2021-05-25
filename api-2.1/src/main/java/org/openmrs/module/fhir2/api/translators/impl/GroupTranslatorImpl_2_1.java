@@ -24,8 +24,9 @@ import org.hl7.fhir.r4.model.Group;
 import org.openmrs.Cohort;
 import org.openmrs.CohortMembership;
 import org.openmrs.annotation.OpenmrsProfile;
-import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
+import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator_2_1;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
+import org.openmrs.module.fhir2.model.GroupMember;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -38,7 +39,7 @@ import org.springframework.stereotype.Component;
 public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements GroupTranslator {
 	
 	@Autowired
-	private GroupMemberTranslator<CohortMembership> groupMemberTranslator;
+	private GroupMemberTranslator_2_1 groupMemberTranslator21;
 	
 	@Override
 	public Group toFhirResource(@Nonnull Cohort cohort) {
@@ -48,7 +49,8 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 		Collection<CohortMembership> memberships = cohort.getMemberships();
 		log.info("Number of members {} ", memberships.size());
 		group.setQuantity(memberships.size());
-		memberships.forEach(membership -> group.addMember(groupMemberTranslator.toFhirResource(membership)));
+		memberships.forEach(
+		    membership -> group.addMember(transformFromGroupMember(groupMemberTranslator21.toFhirResource(membership))));
 		
 		return group;
 	}
@@ -68,16 +70,37 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 		
 		if (group.hasMember()) {
 			Set<CohortMembership> memberships = new HashSet<>();
-			group.getMember().forEach(member -> memberships.add(this.setCohort(existingCohort, member)));
+			group.getMember()
+			        .forEach(member -> memberships.add(this.setCohort(existingCohort, transformToGroupMember(member))));
 			existingCohort.setMemberships(memberships);
 		}
 		
 		return finalExistingCohort;
 	}
 	
-	private CohortMembership setCohort(Cohort cohort, Group.GroupMemberComponent groupMember) {
-		CohortMembership cohortMembership = groupMemberTranslator.toOpenmrsType(groupMember);
+	private CohortMembership setCohort(Cohort cohort, GroupMember groupMember) {
+		CohortMembership cohortMembership = groupMemberTranslator21.toOpenmrsType(groupMember);
 		cohortMembership.setCohort(cohort);
 		return cohortMembership;
+	}
+	
+	public Group.GroupMemberComponent transformFromGroupMember(GroupMember member) {
+		Group.GroupMemberComponent component = new Group.GroupMemberComponent();
+		component.setId(member.getId());
+		component.setEntity(member.getEntity());
+		component.setEntityTarget(member.getEntityTarget());
+		component.setInactive(member.getInactive());
+		component.setPeriod(member.getPeriod());
+		return component;
+	}
+	
+	public GroupMember transformToGroupMember(Group.GroupMemberComponent component) {
+		GroupMember member = new GroupMember();
+		member.setId(component.getId());
+		member.setEntity(component.getEntity());
+		member.setEntityTarget(component.getEntityTarget());
+		member.setInactive(component.getInactive());
+		member.setPeriod(component.getPeriod());
+		return member;
 	}
 }
