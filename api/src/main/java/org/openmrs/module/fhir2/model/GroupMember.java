@@ -29,9 +29,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Substance;
 
-@ResourceDef(name = "GroupMember",
-        //FIXME add the correct url
-        profile = "http://hl7.org/fhir/StructureDefinition/GroupMember")
+@ResourceDef(name = "GroupMember", profile = "http://fhir.openmrs.org/R4/StructureDefinition/GroupMember")
 public class GroupMember extends DomainResource {
 	
 	private static final long serialVersionUID = 1L;

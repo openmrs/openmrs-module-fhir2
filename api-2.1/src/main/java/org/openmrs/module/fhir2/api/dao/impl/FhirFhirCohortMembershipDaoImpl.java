@@ -14,12 +14,12 @@ import static org.hibernate.criterion.Restrictions.eq;
 import org.hibernate.Criteria;
 import org.openmrs.CohortMembership;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.dao.CohortMembershipDao;
+import org.openmrs.module.fhir2.api.dao.FhirCohortMembershipDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirCohortMembershipDaoImpl extends BaseFhirDao<CohortMembership> implements CohortMembershipDao {
+public class FhirFhirCohortMembershipDaoImpl extends BaseFhirDao<CohortMembership> implements FhirCohortMembershipDao {
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {

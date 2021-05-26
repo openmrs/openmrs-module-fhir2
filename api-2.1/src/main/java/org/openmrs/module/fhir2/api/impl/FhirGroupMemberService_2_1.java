@@ -19,7 +19,7 @@ import org.openmrs.CohortMembership;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGroupMemberService;
-import org.openmrs.module.fhir2.api.dao.CohortMembershipDao;
+import org.openmrs.module.fhir2.api.dao.FhirCohortMembershipDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirGroupMemberService_2_1 implements FhirGroupMemberService {
 	
 	@Autowired
-	private CohortMembershipDao cohortMembershipDao;
+	private FhirCohortMembershipDao fhirCohortMembershipDao;
 	
 	@Autowired
 	private GroupMemberTranslator_2_1 groupMemberTranslator21;
@@ -48,12 +48,12 @@ public class FhirGroupMemberService_2_1 implements FhirGroupMemberService {
 	private SearchQueryInclude<GroupMember> searchQueryInclude;
 	
 	@Autowired
-	private SearchQuery<CohortMembership, GroupMember, CohortMembershipDao, GroupMemberTranslator_2_1, SearchQueryInclude<GroupMember>> searchQuery;
+	private SearchQuery<CohortMembership, GroupMember, FhirCohortMembershipDao, GroupMemberTranslator_2_1, SearchQueryInclude<GroupMember>> searchQuery;
 	
 	@Override
 	public IBundleProvider getGroupMembers(@Nonnull String groupUuid) {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.GROUP_MEMBERS_SEARCH_HANDLER,
 		    groupUuid);
-		return searchQuery.getQueryResults(theParams, cohortMembershipDao, groupMemberTranslator21, searchQueryInclude);
+		return searchQuery.getQueryResults(theParams, fhirCohortMembershipDao, groupMemberTranslator21, searchQueryInclude);
 	}
 }

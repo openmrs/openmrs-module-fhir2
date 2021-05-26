@@ -19,7 +19,7 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
-public interface CohortMembershipDao extends FhirDao<CohortMembership> {
+public interface FhirCohortMembershipDao extends FhirDao<CohortMembership> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)

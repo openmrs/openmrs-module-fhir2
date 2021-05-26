@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.openmrs.Cohort;
 import org.openmrs.CohortMembership;
 import org.openmrs.annotation.OpenmrsProfile;
+import org.openmrs.module.fhir2.api.translators.GroupComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator_2_1;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 import org.openmrs.module.fhir2.model.GroupMember;
@@ -41,6 +42,9 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 	@Autowired
 	private GroupMemberTranslator_2_1 groupMemberTranslator21;
 	
+	@Autowired
+	private GroupComponentTranslator componentTranslator;
+	
 	@Override
 	public Group toFhirResource(@Nonnull Cohort cohort) {
 		notNull(cohort, "Cohort object should not be null");
@@ -49,8 +53,8 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 		Collection<CohortMembership> memberships = cohort.getMemberships();
 		log.info("Number of members {} ", memberships.size());
 		group.setQuantity(memberships.size());
-		memberships.forEach(
-		    membership -> group.addMember(transformFromGroupMember(groupMemberTranslator21.toFhirResource(membership))));
+		memberships.forEach(membership -> group
+		        .addMember(componentTranslator.toFhirResource(groupMemberTranslator21.toFhirResource(membership))));
 		
 		return group;
 	}
@@ -70,8 +74,8 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 		
 		if (group.hasMember()) {
 			Set<CohortMembership> memberships = new HashSet<>();
-			group.getMember()
-			        .forEach(member -> memberships.add(this.setCohort(existingCohort, transformToGroupMember(member))));
+			group.getMember().forEach(
+			    member -> memberships.add(this.setCohort(existingCohort, componentTranslator.toOpenmrsType(member))));
 			existingCohort.setMemberships(memberships);
 		}
 		
@@ -82,25 +86,5 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 		CohortMembership cohortMembership = groupMemberTranslator21.toOpenmrsType(groupMember);
 		cohortMembership.setCohort(cohort);
 		return cohortMembership;
-	}
-	
-	public Group.GroupMemberComponent transformFromGroupMember(GroupMember member) {
-		Group.GroupMemberComponent component = new Group.GroupMemberComponent();
-		component.setId(member.getId());
-		component.setEntity(member.getEntity());
-		component.setEntityTarget(member.getEntityTarget());
-		component.setInactive(member.getInactive());
-		component.setPeriod(member.getPeriod());
-		return component;
-	}
-	
-	public GroupMember transformToGroupMember(Group.GroupMemberComponent component) {
-		GroupMember member = new GroupMember();
-		member.setId(component.getId());
-		member.setEntity(component.getEntity());
-		member.setEntityTarget(component.getEntityTarget());
-		member.setInactive(component.getInactive());
-		member.setPeriod(component.getPeriod());
-		return member;
 	}
 }
