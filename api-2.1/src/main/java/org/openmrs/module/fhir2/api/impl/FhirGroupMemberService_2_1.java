@@ -9,48 +9,51 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.annotation.Nonnull;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.Group;
-import org.openmrs.Cohort;
+import org.openmrs.CohortMembership;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.FhirGroupService;
-import org.openmrs.module.fhir2.api.dao.FhirGroupDao;
+import org.openmrs.module.fhir2.api.FhirGroupMemberService;
+import org.openmrs.module.fhir2.api.dao.FhirCohortMembershipDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.GroupTranslator;
+import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator_2_1;
+import org.openmrs.module.fhir2.model.GroupMember;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Primary
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.0 - 2.0.*")
-public class FhirGroupServiceImpl extends BaseFhirService<Group, Cohort> implements FhirGroupService {
+@OpenmrsProfile(openmrsPlatformVersion = "2.1.0 - 2.*")
+public class FhirGroupMemberService_2_1 implements FhirGroupMemberService {
 	
 	@Autowired
-	private FhirGroupDao dao;
+	private FhirCohortMembershipDao fhirCohortMembershipDao;
 	
 	@Autowired
-	private GroupTranslator translator;
+	private GroupMemberTranslator_2_1 groupMemberTranslator21;
 	
 	@Autowired
-	private SearchQueryInclude<Group> searchQueryInclude;
+	private SearchQueryInclude<GroupMember> searchQueryInclude;
 	
 	@Autowired
-	private SearchQuery<org.openmrs.Cohort, Group, FhirGroupDao, GroupTranslator, SearchQueryInclude<Group>> searchQuery;
+	private SearchQuery<CohortMembership, GroupMember, FhirCohortMembershipDao, GroupMemberTranslator_2_1, SearchQueryInclude<GroupMember>> searchQuery;
 	
 	@Override
-	public IBundleProvider searchForGroups(ReferenceAndListParam participant) {
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	public IBundleProvider getGroupMembers(@Nonnull String groupUuid) {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.GROUP_MEMBERS_SEARCH_HANDLER,
+		    groupUuid);
+		return searchQuery.getQueryResults(theParams, fhirCohortMembershipDao, groupMemberTranslator21, searchQueryInclude);
 	}
 }

@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
 
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
 <dataset>
-	<global_property property="patient.identifierRegex" property_value="^0*@SEARCH@([A-Z]+-[0-9])?$" uuid="c92cce6d-7e7d-4c53-a3c9-faaac17f8f8b"/>
-	<location location_id="1" name="Test Location" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="92ab9667-4686-49af-8be8-65a4b58fc49c"/>
-	<patient_identifier_type patient_identifier_type_id="1" name="Test Identifier Type" description="Test description" creator="1" date_created="2005-01-01 00:00:00.0" required="false" retired="false" uuid="c5576187-9a67-43a7-9b7c-04db22851211"/>
-	<person person_id="2" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="61b38324-e2fd-4feb-95b7-9e9a2a4400df"/>
-	<person_name person_name_id="2" preferred="true" person_id="2" given_name="John" middle_name="F" family_name="Doe" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="7e2acadc-5073-4a39-914a-debcbec8c1c9"/>
-	<patient patient_id="2" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
-	<patient_identifier patient_identifier_id="1" patient_id="2" identifier="1234-4" identifier_type="1" preferred="1" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="e997ac86-4d8a-40f3-bedb-da84d35917b8"/>
-
 	<cohort cohort_id="1" name="John's patientList" description="cohort voided" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1d64befb-3b2e-48e5-85f5-353d43e23e46"/>
+	<cohort cohort_id="2" name="Moon's patientList" description="Patients from the moon" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="2d64befb-3b2e-48e5-85f5-353d43e23e48"/>
 
 	<cohort_member cohort_member_id="1" cohort_id="1" patient_id="2" start_date="2000-04-16" end_date="2030-04-16" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="745ff1a2-c2ef-49fd-836f-8a1d936d9ef9"/>
+	<cohort_member cohort_member_id="2" cohort_id="2" patient_id="2" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="342ff1a2-c2ef-49fd-836f-8a1d936d9ef4"/>
+	<cohort_member cohort_member_id="3" cohort_id="2" patient_id="3" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="243ff1a2-c2ef-49fd-836f-8a1d936d9ef0"/>
+	<cohort_member cohort_member_id="4" cohort_id="2" patient_id="4" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="344ff1a2-c2ef-49fd-836f-8a1d936d9ef6"/>
+	<cohort_member cohort_member_id="5" cohort_id="2" patient_id="5" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="845ff1a2-c2ef-49fd-836f-8a1d936d9ef5"/>
+	<cohort_member cohort_member_id="6" cohort_id="2" patient_id="6" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="446ff1a2-c2ef-49fd-836f-8a1d936d9ef2"/>
+	<cohort_member cohort_member_id="7" cohort_id="2" patient_id="7" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="947ff1a2-c2ef-49fd-836f-8a1d936d9ef7"/>
 </dataset>

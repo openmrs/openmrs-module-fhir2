@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.stream.Stream;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.spi.ModuleLifecycleListener;
 import org.openmrs.module.fhir2.api.spi.ServiceClassLoader;
 import org.openmrs.module.fhir2.api.translators.FhirTranslator;
+import org.openmrs.module.fhir2.model.GroupMember;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -62,7 +64,7 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 		if (applicationContext == null) {
 			throw new ModuleException("Cannot load FHIR2 module as the main application context is not available");
 		}
-		
+		applicationContext.getBean("forR4", FhirContext.class).registerCustomType(GroupMember.class);
 		loadModules();
 		started = true;
 		log.info("Started FHIR");
@@ -81,7 +83,7 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 		if (!started) {
 			return;
 		}
-		
+		applicationContext.getBean("forR4", FhirContext.class).registerCustomType(GroupMember.class);
 		loadModules();
 		
 		lifecycleListeners.forEach(ModuleLifecycleListener::refreshed);
