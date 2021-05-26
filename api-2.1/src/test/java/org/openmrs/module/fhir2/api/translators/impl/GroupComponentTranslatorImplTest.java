@@ -9,13 +9,21 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.exparity.hamcrest.date.DateMatchers.sameDay;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
 
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.openmrs.module.fhir2.model.GroupMember;
 
 public class GroupComponentTranslatorImplTest {
@@ -65,6 +73,52 @@ public class GroupComponentTranslatorImplTest {
 		component.setInactive(false);
 		
 		assertThat(translator.toOpenmrsType(component).getInactive(), is(false));
+	}
+	
+	@Test
+	public void shouldTranslateEntityTargetToFhirType() {
+		Resource resource = Mockito.mock(Resource.class);
+		member.setEntityTarget(resource);
+		
+		when(resource.getId()).thenReturn(String.valueOf(1));
+		
+		Group.GroupMemberComponent result = translator.toFhirResource(member);
+		assertThat(result.getEntityTarget().getId(), is("1"));
+	}
+	
+	@Test
+	public void shouldTranslatePeriodToFhirType() {
+		Period period = mock(Period.class);
+		member.setPeriod(period);
+		
+		when(period.getStart()).thenReturn(new Date());
+		when(period.getEnd()).thenReturn(new Date());
+		
+		assertThat(translator.toFhirResource(member).getPeriod().getStart(), sameDay(new Date()));
+		assertThat(translator.toFhirResource(member).getPeriod().getEnd(), sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateEntityTargetToOpenmrsType() {
+		Resource resource = Mockito.mock(Resource.class);
+		component.setEntityTarget(resource);
+		
+		when(resource.getId()).thenReturn(String.valueOf(1));
+		
+		GroupMember result = translator.toOpenmrsType(component);
+		assertThat(result.getEntityTarget().getId(), is("1"));
+	}
+	
+	@Test
+	public void shouldTranslatePeriodToOpenmrsType() {
+		Period period = mock(Period.class);
+		component.setPeriod(period);
+		
+		when(period.getStart()).thenReturn(new Date());
+		when(period.getEnd()).thenReturn(new Date());
+		
+		assertThat(translator.toOpenmrsType(component).getPeriod().getStart(), sameDay(new Date()));
+		assertThat(translator.toOpenmrsType(component).getPeriod().getEnd(), sameDay(new Date()));
 	}
 	
 }

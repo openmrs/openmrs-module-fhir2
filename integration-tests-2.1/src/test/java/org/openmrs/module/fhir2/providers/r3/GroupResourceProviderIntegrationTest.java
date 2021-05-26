@@ -40,7 +40,7 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR3IntegrationT
 	private static final String BAD_COHORT_UUID = "5c9d032b-6092-4052-93d2-a04202b98462";
 	
 	private static final String COHORT_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirCohortMemberDaoImplTest_initial_data.xml";
-
+	
 	private static final String PATIENT_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_initial_data.xml";
 	
 	private static final String JSON_CREATE_GROUP_DOCUMENT = "org/openmrs/module/fhir2/providers/GroupWebTest_create.json";
