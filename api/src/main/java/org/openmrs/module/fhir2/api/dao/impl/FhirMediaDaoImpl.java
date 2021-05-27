@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -24,6 +25,7 @@ import lombok.Setter;
 import org.hibernate.Criteria;
 import org.openmrs.Obs;
 import org.openmrs.api.ObsService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMediaDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -33,10 +35,12 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
-	
+
+//	private ObsService obsService = Context.getObsService();
+
 	@Autowired
 	private ObsService obsService;
-	
+
 	@Override
 	public Obs get(@Nonnull String uuid) {
 		return obsService.getObsByUuid(uuid);
@@ -44,7 +48,7 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 	
 	@Override
 	public Obs createOrUpdate(@Nonnull Obs newEntry) {
-		return super.createOrUpdate(newEntry);
+		return obsService.saveObs(newEntry, FhirConstants.SAVED_SUCCESSFULLY);
 	}
 	
 	@Override
@@ -54,7 +58,7 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 	
 	@Override
 	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids) {
-		return super.getSearchResults(theParams, resourceUuids);
+		return resourceUuids.stream().map(obsService::getObsByUuid).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -91,7 +95,7 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 			}
 		});
 	}
-	
+
 	//	private void handleStatus(Criteria criteria, TokenAndListParam status) {
 	//		if(status != null){
 	//			if(lacksAlias(criteria, "st")){

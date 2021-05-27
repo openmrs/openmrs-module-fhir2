@@ -10,24 +10,30 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.Concept;
+import org.openmrs.ConceptDatatype;
 import org.openmrs.Obs;
+import org.openmrs.User;
 import org.openmrs.api.ObsService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirMediaDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
@@ -38,30 +44,49 @@ public class FhirMediaDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String OBS_UUID = "759a0d9e-ccf8-4f00-a045-6a94c43fbd6b";
 	
 	private static final String OBS_CONCEPT_ID = "5242";
-	
-	private ObsService obsService;
-	
+
 	@Autowired
-	FhirMediaDao dao;
+	@Qualifier("obsService")
+	private ObsService obsService;
+
+	private FhirMediaDaoImpl dao;
 	
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(OBS_DATA_XML);
 		dao = new FhirMediaDaoImpl();
+		dao.setObsService(obsService);
 	}
 	
 	@Test
 	public void get_shouldGetComplexObsByUuid() {
-		assertThat(dao.get(OBS_UUID), notNullValue());
+		assertThat(dao.get("OBS_UUID"), notNullValue());
 	}
 	
 	@Test
 	public void get_shouldReturnNullIfObsNotFoundByUuid() {
 		Obs obs = dao.get(OBS_UUID);
-		
-		assertThat(obs, nullValue());
+		assertThat(obs, notNullValue());
+		assertThat(obs.getUuid(), equalTo(OBS_UUID));
 	}
-	
+
+	public void createOrUpdate_shouldcreateOrUpdateObs() {
+		Obs obs = new Obs();
+		Concept concept = new Concept();
+		obs.setObsId(1);
+		obs.setDateCreated(new Date());
+
+		concept.setConceptId(1);
+		concept.setCreator(new User());
+		concept.setDatatype(new ConceptDatatype());
+		obs.setConcept(concept);
+		Context.getObsService().saveObs(obs, "Creating New Obs");
+	}
+
+	public void delete_shouldDeleteObs(){
+
+	}
+
 	@Test
 	public void search_ShouldReturnSearchQuery() {
 		StringAndListParam status = new StringAndListParam();

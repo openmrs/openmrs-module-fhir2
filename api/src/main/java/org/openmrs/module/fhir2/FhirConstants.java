@@ -320,4 +320,6 @@ public class FhirConstants {
 	
 	public static final String CONTENT_DATE_OF_CREATION = "content.creation";
 	
+	public static final String SAVED_SUCCESSFULLY = "Saved successfully";
+	
 }

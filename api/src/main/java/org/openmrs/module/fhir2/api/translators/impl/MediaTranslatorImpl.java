@@ -27,13 +27,12 @@ import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.api.translators.MediaTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class MediaTranslatorImpl extends BaseReferenceHandlingTranslator implements MediaTranslator {
-
+	
 	@Override
 	public Media toFhirResource(@Nonnull Obs data) {
 		notNull(data, "The Openmrs Complex obs object should not be null");
