@@ -80,7 +80,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	
 	public abstract Class<? extends IBaseOperationOutcome> getOperationOutcomeClass();
 	
-	public abstract U removeNarrative(U item);
+	public abstract U removeNarrativeAndContained(U item);
 	
 	@Before
 	public void setup() throws Exception {
@@ -324,7 +324,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		
 		@Override
 		protected boolean matchesSafely(U item) {
-			item = removeNarrative(item);
+			item = removeNarrativeAndContained(item);
 			return getValidator().validateWithResult(item).isSuccessful();
 		}
 		
@@ -335,7 +335,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		
 		@Override
 		protected void describeMismatchSafely(U item, Description mismatchDescription) {
-			item = removeNarrative(item);
+			item = removeNarrativeAndContained(item);
 			mismatchDescription.appendText("was invalid because ");
 			mismatchDescription.appendText(getValidator().validateWithResult(item).getMessages().stream()
 			        .map(SingleValidationMessage::getMessage).collect(Collectors.joining(", ")));

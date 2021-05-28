@@ -45,6 +45,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.narrative2.INarrativeTemplate;
 import ca.uhn.fhir.narrative2.INarrativeTemplateManifest;
 import ca.uhn.fhir.narrative2.TemplateTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.base.Charsets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -60,16 +61,19 @@ import org.openmrs.util.OpenmrsUtil;
 @Slf4j
 public class OpenmrsNarrativeTemplateManifest implements INarrativeTemplateManifest {
 	
-	private final Map<String, List<OpenmrsNarrativeTemplate>> styleToResourceTypeToTemplate;
+	private final Map<String, List<OpenmrsNarrativeTemplate>> resourceTypeToTemplate;
 	
-	private final Map<String, List<OpenmrsNarrativeTemplate>> styleToDatatypeToTemplate;
+	private final Map<String, List<OpenmrsNarrativeTemplate>> datatypeToTemplate;
 	
-	private final Map<String, List<OpenmrsNarrativeTemplate>> styleToNameToTemplate;
+	private final Map<String, List<OpenmrsNarrativeTemplate>> nameToTemplate;
+	
+	private final Map<String, List<OpenmrsNarrativeTemplate>> classToTemplate;
 	
 	private OpenmrsNarrativeTemplateManifest(Collection<OpenmrsNarrativeTemplate> templates) {
 		Map<String, List<OpenmrsNarrativeTemplate>> resourceTypeToTemplate = new HashMap<>();
 		Map<String, List<OpenmrsNarrativeTemplate>> datatypeToTemplate = new HashMap<>();
 		Map<String, List<OpenmrsNarrativeTemplate>> nameToTemplate = new HashMap<>();
+		Map<String, List<OpenmrsNarrativeTemplate>> classToTemplate = new HashMap<>();
 		
 		for (OpenmrsNarrativeTemplate nextTemplate : templates) {
 			nameToTemplate.computeIfAbsent(nextTemplate.getTemplateName(), t -> new ArrayList<>()).add(nextTemplate);
@@ -80,11 +84,15 @@ public class OpenmrsNarrativeTemplateManifest implements INarrativeTemplateManif
 			for (String nextDataType : nextTemplate.getAppliesToDataTypes()) {
 				datatypeToTemplate.computeIfAbsent(nextDataType.toUpperCase(), t -> new ArrayList<>()).add(nextTemplate);
 			}
+			for (Class<? extends IBase> nextAppliesToClass : nextTemplate.getAppliesToClasses()) {
+				classToTemplate.computeIfAbsent(nextAppliesToClass.getName(), t -> new ArrayList<>()).add(nextTemplate);
+			}
 		}
 		
-		styleToNameToTemplate = makeImmutable(nameToTemplate);
-		styleToResourceTypeToTemplate = makeImmutable(resourceTypeToTemplate);
-		styleToDatatypeToTemplate = makeImmutable(datatypeToTemplate);
+		this.nameToTemplate = makeImmutable(nameToTemplate);
+		this.resourceTypeToTemplate = makeImmutable(resourceTypeToTemplate);
+		this.datatypeToTemplate = makeImmutable(datatypeToTemplate);
+		this.classToTemplate = makeImmutable(classToTemplate);
 	}
 	
 	/**
@@ -96,7 +104,7 @@ public class OpenmrsNarrativeTemplateManifest implements INarrativeTemplateManif
 	@Override
 	public List<INarrativeTemplate> getTemplateByResourceName(FhirContext fhirContext, EnumSet<TemplateTypeEnum> styles,
 	        String resourceName) {
-		return getFromMap(styles, resourceName.toUpperCase(), styleToResourceTypeToTemplate);
+		return getFromMap(styles, resourceName.toUpperCase(), resourceTypeToTemplate);
 	}
 	
 	/**
@@ -108,7 +116,7 @@ public class OpenmrsNarrativeTemplateManifest implements INarrativeTemplateManif
 	@Override
 	public List<INarrativeTemplate> getTemplateByName(FhirContext fhirContext, EnumSet<TemplateTypeEnum> styles,
 	        String name) {
-		return getFromMap(styles, name, styleToNameToTemplate);
+		return getFromMap(styles, name, nameToTemplate);
 	}
 	
 	/**
@@ -120,12 +128,17 @@ public class OpenmrsNarrativeTemplateManifest implements INarrativeTemplateManif
 	@Override
 	public List<INarrativeTemplate> getTemplateByElement(FhirContext fhirContext, EnumSet<TemplateTypeEnum> styles,
 	        IBase element) {
-		if (element instanceof IBaseResource) {
-			String resourceName = fhirContext.getResourceDefinition((IBaseResource) element).getName();
-			return getTemplateByResourceName(fhirContext, styles, resourceName);
+		List<INarrativeTemplate> retVal = getFromMap(styles, element.getClass().getName(), classToTemplate);
+		if (retVal.isEmpty()) {
+			if (element instanceof IBaseResource) {
+				String resourceName = fhirContext.getResourceDefinition((IBaseResource) element).getName();
+				retVal = getTemplateByResourceName(fhirContext, styles, resourceName);
+			} else {
+				String datatypeName = fhirContext.getElementDefinition(element.getClass()).getName();
+				retVal = getFromMap(styles, datatypeName.toUpperCase(), datatypeToTemplate);
+			}
 		}
-		String datatypeName = fhirContext.getElementDefinition(element.getClass()).getName();
-		return getFromMap(styles, datatypeName.toUpperCase(), styleToDatatypeToTemplate);
+		return retVal;
 	}
 	
 	/**
@@ -174,10 +187,21 @@ public class OpenmrsNarrativeTemplateManifest implements INarrativeTemplateManif
 			OpenmrsNarrativeTemplate nextTemplate = nameToTemplate.computeIfAbsent(name,
 			    t -> new OpenmrsNarrativeTemplate().setTemplateName(name));
 			
-			Validate.isTrue(!nextKey.endsWith(".class"),
-			    "Narrative manifest does not support specifying templates by class name - Use \"[name].resourceType=[resourceType]\" instead");
-			
-			if (nextKey.endsWith(".profile")) {
+			if (nextKey.endsWith(".class")) {
+				String className = file.getProperty(nextKey);
+				if (isNotBlank(className)) {
+					try {
+						nextTemplate.addAppliesToClass((Class<? extends IBase>) Class.forName(className));
+					}
+					catch (ClassNotFoundException e) {
+						throw new InternalErrorException(
+						        "Could not find class " + className + " declared in narative manifest");
+					}
+					catch (ClassCastException e) {
+						throw new InternalErrorException(className + " is not a valid FHIR class");
+					}
+				}
+			} else if (nextKey.endsWith(".profile")) {
 				String profile = file.getProperty(nextKey);
 				if (isNotBlank(profile)) {
 					nextTemplate.addAppliesToProfile(profile);

@@ -67,10 +67,11 @@ public abstract class BaseFhirR3IntegrationTest<T extends IResourceProvider, U e
 	}
 	
 	@Override
-	public U removeNarrative(U item) {
+	public U removeNarrativeAndContained(U item) {
 		@SuppressWarnings("unchecked")
 		U newItem = (U) item.copy();
 		newItem.setText(null);
+		newItem.setContained(null);
 		return newItem;
 	}
 	
