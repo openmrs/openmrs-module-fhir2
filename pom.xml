@@ -10,19 +10,19 @@
 
     <issueManagement>
         <system>JIRA</system>
-        <url>http://issues.openmrs.org/</url>
+        <url>https://issues.openmrs.org/</url>
     </issueManagement>
 
     <licenses>
         <license>
             <name>OpenMRS Public License</name>
-            <url>http://openmrs.org/wiki/License</url>
+            <url>https://openmrs.org/wiki/License</url>
         </license>
     </licenses>
 
     <organization>
         <name>OpenMRS LLC.</name>
-        <url>http://openmrs.org</url>
+        <url>https://openmrs.org</url>
     </organization>
 
     <url>https://wiki.openmrs.org/display/projects/OpenMRS+FHIR+Module</url>
