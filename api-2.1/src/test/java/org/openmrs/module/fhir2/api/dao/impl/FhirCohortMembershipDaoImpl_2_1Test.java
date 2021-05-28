@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
-public class FhirFhirCohortMembershipDaoImpl_2_1Test extends BaseModuleContextSensitiveTest {
+public class FhirCohortMembershipDaoImpl_2_1Test extends BaseModuleContextSensitiveTest {
 	
 	private static final String COHORT_MEMBER_UUID = "745ff1a2-c2ef-49fd-836f-8a1d936d9ef9";
 	
@@ -33,7 +33,7 @@ public class FhirFhirCohortMembershipDaoImpl_2_1Test extends BaseModuleContextSe
 	
 	private static final String COHORT_MEMBER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirCohortMemberDaoImplTest_initial_data.xml";
 	
-	private FhirFhirCohortMembershipDaoImpl dao;
+	private FhirCohortMembershipDaoImpl dao;
 	
 	@Autowired
 	@Qualifier("sessionFactory")
@@ -41,7 +41,7 @@ public class FhirFhirCohortMembershipDaoImpl_2_1Test extends BaseModuleContextSe
 	
 	@Before
 	public void setup() throws Exception {
-		dao = new FhirFhirCohortMembershipDaoImpl();
+		dao = new FhirCohortMembershipDaoImpl();
 		dao.setSessionFactory(sessionFactory);
 		executeDataSet(COHORT_MEMBER_INITIAL_DATA_XML);
 	}

@@ -19,7 +19,7 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FhirFhirCohortMembershipDaoImpl extends BaseFhirDao<CohortMembership> implements FhirCohortMembershipDao {
+public class FhirCohortMembershipDaoImpl extends BaseFhirDao<CohortMembership> implements FhirCohortMembershipDao {
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
