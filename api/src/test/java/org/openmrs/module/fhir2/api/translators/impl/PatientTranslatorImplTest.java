@@ -55,6 +55,7 @@ import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPersonDao;
+import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
@@ -112,6 +113,8 @@ public class PatientTranslatorImplTest {
 	@Mock
 	private ProvenanceTranslator<org.openmrs.Patient> provenanceTranslator;
 	
+	private BirthDateTranslator birthDateTranslator = new BirthDateTranslatorImpl();
+	
 	private PatientTranslatorImpl patientTranslator;
 	
 	@Before
@@ -125,6 +128,7 @@ public class PatientTranslatorImplTest {
 		patientTranslator.setFhirPersonDao(fhirPersonDao);
 		patientTranslator.setGlobalPropertyService(globalPropertyService);
 		patientTranslator.setProvenanceTranslator(provenanceTranslator);
+		patientTranslator.setBirthDateTranslator(birthDateTranslator);
 	}
 	
 	@Test
@@ -455,7 +459,7 @@ public class PatientTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateToFHIRBirthDate() {
+	public void shouldTranslateToFhirBirthDate() {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		Calendar calendar = Calendar.getInstance();
 		DateType dateType = new DateType();

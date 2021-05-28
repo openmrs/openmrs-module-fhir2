@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -83,6 +84,15 @@ public class FhirPractitionerServiceImpl extends BaseFhirService<Practitioner, P
 		}
 		
 		return result;
+	}
+	
+	@Override
+	public Practitioner create(@Nonnull Practitioner newResource) {
+		if (!newResource.hasIdentifier()) {
+			throw new UnprocessableEntityException("New providers must have at least one identifier");
+		}
+		
+		return super.create(newResource);
 	}
 	
 	@Override

@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +45,7 @@ import org.openmrs.ProviderAttribute;
 import org.openmrs.ProviderAttributeType;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
+import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
@@ -103,6 +105,8 @@ public class PractitionerTranslatorProviderImplTest {
 	@Mock
 	private ProvenanceTranslator<Provider> provenanceTranslator;
 	
+	private BirthDateTranslator birthDateTranslator = new BirthDateTranslatorImpl();
+	
 	private PractitionerTranslatorProviderImpl practitionerTranslator;
 	
 	private Provider provider;
@@ -119,6 +123,7 @@ public class PractitionerTranslatorProviderImplTest {
 		practitionerTranslator.setFhirPractitionerDao(fhirPractitionerDao);
 		practitionerTranslator.setGlobalPropertyService(globalPropertyService);
 		practitionerTranslator.setProvenanceTranslator(provenanceTranslator);
+		practitionerTranslator.setBirthDateTranslator(birthDateTranslator);
 		
 		Person person = new Person();
 		person.setGender(GENDER);
@@ -139,14 +144,16 @@ public class PractitionerTranslatorProviderImplTest {
 		assertThat(practitioner, notNullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
-	public void shouldThrowExceptionWhenPractitionerIsNull() {
-		practitionerTranslator.toOpenmrsType(provider, null);
+	@Test
+	public void shouldReturnNullWhenPractitionerIsNull() {
+		Provider omrsProvider = practitionerTranslator.toOpenmrsType(provider, null);
+		assertThat(omrsProvider, nullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
-	public void shouldThrowExceptionWhenProviderIsNull() {
-		practitionerTranslator.toFhirResource(null);
+	@Test
+	public void shouldReturnNullWhenProviderIsNull() {
+		Practitioner practitioner = practitionerTranslator.toFhirResource(null);
+		assertThat(practitioner, nullValue());
 	}
 	
 	@Test
