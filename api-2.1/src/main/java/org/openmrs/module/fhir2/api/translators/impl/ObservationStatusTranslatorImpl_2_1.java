@@ -14,13 +14,12 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
 import org.openmrs.annotation.OpenmrsProfile;
-import org.springframework.context.annotation.Primary;
+import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.springframework.stereotype.Component;
 
-@Primary
 @Component
 @OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.*")
-public class ObservationStatusTranslatorImpl_2_1 extends ObservationStatusTranslatorImpl {
+public class ObservationStatusTranslatorImpl_2_1 implements ObservationStatusTranslator {
 	
 	@Override
 	public Observation.ObservationStatus toFhirResource(@Nonnull Obs obs) {

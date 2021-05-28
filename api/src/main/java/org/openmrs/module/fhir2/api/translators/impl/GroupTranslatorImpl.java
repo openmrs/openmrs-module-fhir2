@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Setter(AccessLevel.MODULE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.0 - 2.0.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.0.*")
 public class GroupTranslatorImpl extends BaseGroupTranslator implements GroupTranslator {
 	
 	@Autowired

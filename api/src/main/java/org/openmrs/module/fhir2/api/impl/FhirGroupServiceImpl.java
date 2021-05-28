@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.0 - 2.0.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.0.0 - 2.*")
 public class FhirGroupServiceImpl extends BaseFhirService<Group, Cohort> implements FhirGroupService {
 	
 	@Autowired

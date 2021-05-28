@@ -29,11 +29,9 @@ import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator_2_1;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 import org.openmrs.module.fhir2.model.GroupMember;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@Primary
 @Component
 @Setter(AccessLevel.MODULE)
 @OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.*")

@@ -33,11 +33,9 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude_2_2;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Primary
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)

@@ -22,10 +22,6 @@
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>${project.parent.groupId}</groupId>
-                    <artifactId>${project.parent.artifactId}-api-2.1</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
                 </exclusion>

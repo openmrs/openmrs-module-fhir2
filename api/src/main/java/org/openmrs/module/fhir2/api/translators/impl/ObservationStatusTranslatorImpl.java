@@ -13,10 +13,12 @@ import javax.annotation.Nonnull;
 
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
+import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
+@OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.0.*")
 public class ObservationStatusTranslatorImpl implements ObservationStatusTranslator {
 	
 	@Override

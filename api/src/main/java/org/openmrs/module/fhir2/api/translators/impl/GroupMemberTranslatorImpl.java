@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.MODULE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.0 - 2.0.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.0.*")
 public class GroupMemberTranslatorImpl implements GroupMemberTranslator {
 	
 	@Autowired
