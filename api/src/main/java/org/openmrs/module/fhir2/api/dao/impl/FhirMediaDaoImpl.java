@@ -34,12 +34,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
+public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao{
 
-//	private ObsService obsService = Context.getObsService();
-
-	@Autowired
-	private ObsService obsService;
+	private ObsService obsService = Context.getObsService();
 
 	@Override
 	public Obs get(@Nonnull String uuid) {
@@ -53,7 +50,7 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 	
 	@Override
 	public Obs delete(@Nonnull String uuid) {
-		return super.delete(uuid);
+		return delete(uuid);
 	}
 	
 	@Override
@@ -95,15 +92,6 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao {
 			}
 		});
 	}
-
-	//	private void handleStatus(Criteria criteria, TokenAndListParam status) {
-	//		if(status != null){
-	//			if(lacksAlias(criteria, "st")){
-	//				criteria.createAlias("status", "st");
-	//				handleAndListParam(status, (tag) -> Optional.of(eq("st.status", tag.getValue()))).ifPresent(criteria::add);
-	//			}
-	//		}
-	//	}
 	
 	private void handleStatus(Criteria criteria, TokenAndListParam status) {
 		//		handleAndListParam(status, (data) -> propertyLike("status", status)).ifPresent(criteria::add);

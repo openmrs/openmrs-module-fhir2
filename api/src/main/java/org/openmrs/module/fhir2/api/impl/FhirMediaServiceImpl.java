@@ -58,7 +58,11 @@ public class FhirMediaServiceImpl extends BaseFhirService<Media, Obs> implements
 	public Media get(@Nonnull String uuid) {
 		return super.get(uuid);
 	}
-	
+
+	public FhirMediaDao getDao() {
+		return dao;
+	}
+
 	@Override
 	public IBundleProvider searchForMedia(TokenAndListParam status, TokenAndListParam type, ReferenceAndListParam subject,
 	        ReferenceAndListParam encounterReference, DateRangeParam createdDateTime, TokenAndListParam contentType,
