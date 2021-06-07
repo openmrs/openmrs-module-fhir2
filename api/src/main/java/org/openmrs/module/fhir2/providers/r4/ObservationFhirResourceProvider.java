@@ -22,6 +22,8 @@ import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -31,6 +33,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -139,5 +142,22 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		return observationService.searchForObservations(encounterReference, patientReference, hasMemberReference,
 		    valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date, code, category, id, lastUpdated, sort,
 		    includes, revIncludes);
+	}
+
+	@Operation(name = "lastn", idempotent = true, type = Observation.class)
+	public IBundleProvider lastn(
+			@OperationParam(name = "max") NumberParam max,
+			@OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
+			@OperationParam(name = Observation.SP_PATIENT) ReferenceAndListParam patientParam,
+			@OperationParam(name = Observation.SP_CATEGORY) TokenAndListParam category,
+			@OperationParam(name = Observation.SP_CODE) TokenAndListParam code) {
+		if(patientParam != null) {
+			subjectParam = patientParam;
+		}
+		if(max == null)
+		{
+			max = new NumberParam(1);
+		}
+		return observationService.getLastNObservations(max, subjectParam, category, code);
 	}
 }

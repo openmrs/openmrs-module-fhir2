@@ -15,6 +15,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -77,6 +78,21 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes).setSortSpec(sort);
 		
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
+
+	@Transactional(readOnly = true)
+	public IBundleProvider getLastNObservations(NumberParam max, ReferenceAndListParam patientReference, TokenAndListParam category, TokenAndListParam code) {
+
+		SearchParameterMap theParams = new SearchParameterMap()
+				.addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
+				.addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, category)
+				.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
+
+		if(patientReference != null) {
+			theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		}
+
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

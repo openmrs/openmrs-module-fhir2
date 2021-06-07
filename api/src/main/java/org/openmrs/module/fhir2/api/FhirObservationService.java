@@ -17,6 +17,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -33,4 +34,6 @@ public interface FhirObservationService extends FhirService<Observation> {
 	        QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam, DateRangeParam date,
 	        TokenAndListParam code, TokenAndListParam category, TokenAndListParam id, DateRangeParam lastUpdated,
 	        SortSpec sort, HashSet<Include> includes, HashSet<Include> revIncludes);
+
+	IBundleProvider getLastNObservations(NumberParam max, ReferenceAndListParam patientReference, TokenAndListParam category, TokenAndListParam code);
 }

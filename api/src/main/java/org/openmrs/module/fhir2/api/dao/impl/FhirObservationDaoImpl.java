@@ -13,25 +13,42 @@ import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Subqueries;
 import org.hl7.fhir.r4.model.Observation;
+import org.openmrs.Concept;
 import org.openmrs.Obs;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,6 +56,33 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	@Autowired
 	private ObservationCategoryMap categoryMap;
+
+	@Autowired
+	@Getter(AccessLevel.PUBLIC)
+	@Setter(AccessLevel.PUBLIC)
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
+
+	@Override
+	@Authorized(PrivilegeConstants.GET_OBS)
+	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
+		if(!theParams.getParameters(FhirConstants.LASTN_SEARCH_HANDLER).isEmpty()) {
+
+			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
+
+			setupSearchParams(criteria, theParams);
+
+			@SuppressWarnings("unchecked")
+			List<Obs> results = criteria.list();
+
+			HashMap<Concept, List<Obs>> code_groups = new HashMap<>();
+			handleGrouping(code_groups, results);
+
+			return getLastNUuids(code_groups, getMax(theParams)).stream().distinct().collect(Collectors.toList());
+		}
+
+		return super.getSearchResultUuids(theParams);
+	}
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
@@ -174,5 +218,60 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		Obs obs = super.deproxyResult(result);
 		obs.setConcept(deproxyObject(obs.getConcept()));
 		return obs;
+	}
+
+	int getMax(SearchParameterMap theParams) {
+		Object maxParam = theParams.getParameters(FhirConstants.MAX_SEARCH_HANDLER).get(0).getParam();
+		if (maxParam instanceof NumberParam) {
+			return ((NumberParam) maxParam).getValue().intValue();
+		} else {
+			return (int) maxParam;
+		}
+	}
+
+	protected List<String> handleRanking(List<Obs> list, int max) {
+		List<String> results = new ArrayList<>();
+		int cur_rank = 0;
+
+		for (int var = 0; var < list.size() && cur_rank < max; var++) {
+			cur_rank++;
+			results.add(list.get(var).getUuid());
+			Date date = list.get(var).getObsDatetime();
+
+			while (var + 1 < list.size() && list.get(var + 1).getObsDatetime().equals(date)) {
+				results.add(list.get(var + 1).getUuid());
+				var++;
+			}
+		}
+		return results;
+
+	}
+
+	protected void handleGrouping(HashMap<Concept, List<Obs>> groups, List<Obs> observations) {
+		for (Obs obs : observations) {
+			Concept concept = obs.getConcept();
+
+			if (groups.containsKey(concept)) {
+				groups.get(concept).add(obs);
+			} else {
+				List<Obs> list = new ArrayList<>();
+				list.add(obs);
+				groups.put(concept, list);
+			}
+		}
+	}
+
+	protected List<String> getLastNUuids(HashMap<Concept, List<Obs>> groups, int max) {
+		List<String> results = new ArrayList<>();
+		for (HashMap.Entry entry : groups.entrySet()) {
+			System.out.println(entry.getKey());
+			@SuppressWarnings("unchecked")
+			List<Obs> list = (List) entry.getValue();
+			list.sort(Comparator.comparing(Obs::getObsDatetime).reversed());
+			List<String> uuids = handleRanking(list, max);
+			System.out.println(uuids);
+			results.addAll(uuids);
+		}
+		return results;
 	}
 }
