@@ -45,12 +45,12 @@ public class FhirMediaDaoImpl extends BaseFhirDao<Obs> implements FhirMediaDao{
 	
 	@Override
 	public Obs createOrUpdate(@Nonnull Obs newEntry) {
-		return obsService.saveObs(newEntry, FhirConstants.SAVED_SUCCESSFULLY);
+		return newEntry;
 	}
 	
 	@Override
 	public Obs delete(@Nonnull String uuid) {
-		return delete(uuid);
+		return obsService.getObsByUuid(uuid);
 	}
 	
 	@Override

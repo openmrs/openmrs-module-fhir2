@@ -53,15 +53,6 @@ public class FhirMediaServiceImpl extends BaseFhirService<Media, Obs> implements
 	
 	@Autowired
 	private SearchQueryInclude<Media> searchQueryInclude;
-	
-	@Override
-	public Media get(@Nonnull String uuid) {
-		return super.get(uuid);
-	}
-
-	public FhirMediaDao getDao() {
-		return dao;
-	}
 
 	@Override
 	public IBundleProvider searchForMedia(TokenAndListParam status, TokenAndListParam type, ReferenceAndListParam subject,
