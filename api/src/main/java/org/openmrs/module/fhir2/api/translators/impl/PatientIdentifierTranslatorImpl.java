@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Type;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
@@ -30,6 +31,9 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 // TODO Create proper "System" value
 public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTranslator implements PatientIdentifierTranslator {
+	
+	@Autowired
+	private FhirPatientIdentifierSystemService patientIdentifierSystemService;
 	
 	@Autowired
 	private FhirPatientService patientService;
@@ -62,6 +66,11 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 		if (identifier.getLocation() != null) {
 			patientIdentifier.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)
 			        .setValue(createLocationReference(identifier.getLocation()));
+		}
+		
+		if (identifier.getIdentifierType() != null) {
+			patientIdentifier
+			        .setSystem(patientIdentifierSystemService.getUrlByPatientIdentifierType(identifier.getIdentifierType()));
 		}
 		
 		return patientIdentifier;

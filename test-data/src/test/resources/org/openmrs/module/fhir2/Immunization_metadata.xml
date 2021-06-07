@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <!-- Immunizations visit type -->
+    <visit_type visit_type_id="800" name="Immunizations Visit" description="" creator="1" date_created="2020-07-12 14:00:13.0" retired="false" uuid="7fade357-cb1a-45f5-8985-0b9e81c34615"/>
+
+    <!-- Immunizations encounter type -->
+    <encounter_type encounter_type_id="8000" name="Immunizations Encounter" description="An encounter to which immunizations obs groups are attached." creator="1" date_created="2020-07-12 14:00:13.0" retired="false" uuid="29c02aff-9a93-46c9-bf6f-48b552fcb1fa"/>
+
+    <!-- Administering encounter role -->
+    <encounter_role encounter_role_id="2000" name="Administering Encounter Role" description="An encounter role to use when administering medications/vaccines during encounters." creator="1" date_created="2020-07-27 16:19:44.0" retired="false" uuid="546cce2d-6d58-4097-ba92-206c1a2a0462"/>
+
+    <!-- Global Properties -->
+    <global_property property="fhir2.administeringEncounterRoleUuid" property_value="546cce2d-6d58-4097-ba92-206c1a2a0462" uuid="e76a97c9-f54b-4b54-ad28-e61b0236701c"/>
+    <global_property property="fhir2.immunizationsEncounterTypeUuid" property_value="29c02aff-9a93-46c9-bf6f-48b552fcb1fa" uuid="2a5d20df-4843-4046-afb1-e14314d5f7b7"/>
+
+    <!-- CIEL source -->
+    <concept_reference_source concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="CIEL" retired="false" uuid="88e98cff-fbcf-42bf-a074-0ab798555766"/>
+
+    <!-- CIEL:1421 Immunization History -->
+    <concept changed_by="1" class_id="5" concept_id="70000" creator="1" datatype_id="4" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="false" retired="false" uuid="1421AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept_reference_term code="1421" concept_reference_term_id="12000" concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="" retired="false" uuid="b9cc37cc-da83-4f30-b44d-654a87c12f0b"/>
+    <concept_reference_map concept_id="70000" concept_map_id="11000" concept_map_type_id="2" concept_reference_term_id="12000" creator="1" date_created="2020-07-07 19:08:19.0" uuid="6583a2e3-9211-49b1-a3c7-092eb9fcebd9"/>
+    <concept_name concept_id="70000" concept_name_id="70000" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2020-07-07 19:30:26.0" locale="en" locale_preferred="true" name="Immunization history" uuid="ea82d3eb-4c2c-4ccd-acfb-403bd21f5cde" voided="false"/>
+
+    <!-- CIEL:984 Immunization -->
+    <concept changed_by="1" class_id="10" concept_id="70009" creator="1" datatype_id="2" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="false" retired="false" uuid="984AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept_reference_term code="984" concept_reference_term_id="12009" concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="" retired="false" uuid="d76f4608-8d5c-463c-befa-dc74e4697cf3"/>
+    <concept_reference_map concept_id="70009" concept_map_id="11009" concept_map_type_id="2" concept_reference_term_id="12009" creator="1" date_created="2020-07-07 19:08:19.0" uuid="c0860b36-165d-4a74-abb3-83445f5a35b3"/>
+    <concept_name concept_id="70009" concept_name_id="70009" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2020-07-07 19:30:26.0" locale="en" locale_preferred="true" name="Immunization" uuid="e638a02b-d0b3-467e-87ce-4b79204c2b14" voided="false"/>
+
+    <!-- CIEL:1410 Vaccination date -->
+    <concept changed_by="1" class_id="5" concept_id="70010" creator="1" datatype_id="8" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="false" retired="false" uuid="1410AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept_reference_term code="1410" concept_reference_term_id="12010" concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="" retired="false" uuid="a7fc8fe7-9323-4bbc-b2d4-3b6de00c7418"/>
+    <concept_reference_map concept_id="70010" concept_map_id="11010" concept_map_type_id="2" concept_reference_term_id="12010" creator="1" date_created="2020-07-07 19:08:19.0" uuid="a3f3ff1a-97d8-4f3b-a732-5192f0840230"/>
+    <concept_name concept_id="70010" concept_name_id="70010" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2020-07-07 19:30:26.0" locale="en" locale_preferred="true" name="Vaccination date" uuid="668eabef-a1ae-4f80-8915-6c76d59b039d" voided="false"/>
+
+    <!-- CIEL:1418 Immunization sequence number -->
+    <concept changed_by="1" class_id="5" concept_id="70011" creator="1" datatype_id="1" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="false" retired="false" uuid="1418AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept_reference_term code="1418" concept_reference_term_id="12011" concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="" retired="false" uuid="9b7f154e-6530-46e2-b2d8-28859eddfd79"/>
+    <concept_reference_map concept_id="70011" concept_map_id="11011" concept_map_type_id="2" concept_reference_term_id="12011" creator="1" date_created="2020-07-07 19:08:19.0" uuid="f48c9d06-53e8-47b5-b652-b7a99f7af468"/>
+    <concept_name concept_id="70011" concept_name_id="70011" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2020-07-07 19:30:26.0" locale="en" locale_preferred="true" name="Immunization sequence number" uuid="8b3e4651-1c37-4b5f-bd41-4b57a3f1f6a2" voided="false"/>
+    <concept_numeric concept_id="70011" display_precision="0" hi_normal="50.0" low_critical="0.0" precise="false" units=""/>
+
+    <!-- CIEL:1419 Vaccine manufacturer -->
+    <concept changed_by="1" class_id="5" concept_id="70012" creator="1" datatype_id="3" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="false" retired="false" uuid="1419AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept_reference_term code="1419" concept_reference_term_id="12012" concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="" retired="false" uuid="67c162cf-de34-4b2e-bbfa-b76ab5c7d5c5"/>
+    <concept_reference_map concept_id="70012" concept_map_id="11012" concept_map_type_id="2" concept_reference_term_id="12012" creator="1" date_created="2020-07-07 19:08:19.0" uuid="ac349461-66cf-4182-99d0-a96646fbc646"/>
+    <concept_name concept_id="70012" concept_name_id="70012" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2020-07-07 19:30:26.0" locale="en" locale_preferred="true" name="Vaccine manufacturer" uuid="81cf6b39-55c1-4636-ab5d-bf52a7f77b7e" voided="false"/>
+
+    <!-- CIEL:1420 Vaccine lot number -->
+    <concept changed_by="1" class_id="5" concept_id="70013" creator="1" datatype_id="3" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="false" retired="false" uuid="1420AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept_reference_term code="1420" concept_reference_term_id="12013" concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="" retired="false" uuid="bce68ab2-2157-4351-a9be-6db6c6eac5a4"/>
+    <concept_reference_map concept_id="70013" concept_map_id="11013" concept_map_type_id="2" concept_reference_term_id="12013" creator="1" date_created="2020-07-07 19:08:19.0" uuid="8eb6130a-8c9b-4913-9e7e-9560d4eba383"/>
+    <concept_name concept_id="70013" concept_name_id="70013" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2020-07-07 19:30:26.0" locale="en" locale_preferred="true" name="Vaccine lot number" uuid="e6a5b068-f07c-4a45-b00a-0738fc7bcbfc" voided="false"/>
+
+    <!-- CIEL:165907 Vaccine lot expiration date -->
+    <concept changed_by="1" class_id="5" concept_id="70014" creator="1" datatype_id="6" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="false" retired="false" uuid="165907AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept_reference_term code="165907" concept_reference_term_id="12014" concept_source_id="60000" creator="1" date_created="2020-07-07 19:08:19.0" name="" retired="false" uuid="0c6863f7-d439-41ab-b32e-84edafaddeb6"/>
+    <concept_reference_map concept_id="70014" concept_map_id="11014" concept_map_type_id="2" concept_reference_term_id="12014" creator="1" date_created="2020-07-07 19:08:19.0" uuid="ed4768c8-b917-465d-ac69-589cd75cff07"/>
+    <concept_name concept_id="70014" concept_name_id="70014" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2020-07-07 19:30:26.0" locale="en" locale_preferred="true" name=" Vaccine lot expiration date" uuid="a349f90e-f317-4817-ae53-e9430e857f8d" voided="false"/>
+</dataset>

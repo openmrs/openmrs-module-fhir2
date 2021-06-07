@@ -105,7 +105,7 @@ public class FhirUtils {
 	public static OperationOutcome createExceptionErrorOperationOutcome(String diagnostics) {
 		OperationOutcome outcome = new OperationOutcome();
 		OperationOutcome.OperationOutcomeIssueComponent issue = outcome.addIssue();
-		issue.setCode(OperationOutcome.IssueType.EXCEPTION);
+		issue.setCode(OperationOutcome.IssueType.BUSINESSRULE);
 		issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
 		issue.setDiagnostics(diagnostics);
 		return outcome;

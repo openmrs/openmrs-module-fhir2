@@ -46,6 +46,7 @@ import org.openmrs.Relationship;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
@@ -89,6 +90,8 @@ public class RelatedPersonTranslatorImplTest {
 	@Mock
 	private FhirPatientDao patientDao;
 	
+	private BirthDateTranslator birthDateTranslator = new BirthDateTranslatorImpl();
+	
 	private RelatedPersonTranslatorImpl relatedPersonTranslator;
 	
 	private Relationship relationship;
@@ -103,6 +106,7 @@ public class RelatedPersonTranslatorImplTest {
 		relatedPersonTranslator.setAddressTranslator(addressTranslator);
 		relatedPersonTranslator.setPatientDao(patientDao);
 		relatedPersonTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
+		relatedPersonTranslator.setBirthDateTranslator(birthDateTranslator);
 		
 		User user = new User();
 		user.setUuid(USER_UUID);
@@ -291,7 +295,7 @@ public class RelatedPersonTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateToFHIRBirthdate() {
+	public void shouldTranslateToFhirBirthdate() {
 		Person person = new Person();
 		Calendar calendar = Calendar.getInstance();
 		DateType dateType = new DateType();

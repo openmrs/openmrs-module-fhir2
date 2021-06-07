@@ -41,6 +41,8 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR3IntegrationT
 	
 	private static final String COHORT_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirCohortMemberDaoImplTest_initial_data.xml";
 	
+	private static final String PATIENT_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPatientDaoImplTest_initial_data.xml";
+	
 	private static final String JSON_CREATE_GROUP_DOCUMENT = "org/openmrs/module/fhir2/providers/GroupWebTest_create.json";
 	
 	private static final String XML_CREATE_GROUP_DOCUMENT = "org/openmrs/module/fhir2/providers/GroupWebTest_create.xml";
@@ -58,6 +60,7 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR3IntegrationT
 	public void setup() throws Exception {
 		super.setup();
 		executeDataSet(COHORT_DATA_XML);
+		executeDataSet(PATIENT_DATA_XML);
 	}
 	
 	@Test

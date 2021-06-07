@@ -26,6 +26,7 @@ import org.openmrs.Cohort;
 import org.openmrs.Patient;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.model.GroupMember;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GroupMemberTranslatorImplTest {
@@ -42,10 +43,6 @@ public class GroupMemberTranslatorImplTest {
 	
 	private GroupMemberTranslatorImpl groupMemberTranslator;
 	
-	private Cohort cohort;
-	
-	private Group.GroupMemberComponent groupMemberComponent;
-	
 	@Before
 	public void setup() {
 		groupMemberTranslator = new GroupMemberTranslatorImpl();
@@ -55,11 +52,11 @@ public class GroupMemberTranslatorImplTest {
 	
 	@Before
 	public void init() {
-		cohort = new Cohort();
+		Cohort cohort = new Cohort();
 		cohort.setUuid(COHORT_UUID);
 		cohort.setName(COHORT_NAME);
 		
-		groupMemberComponent = new Group.GroupMemberComponent();
+		Group.GroupMemberComponent groupMemberComponent = new Group.GroupMemberComponent();
 		groupMemberComponent.setId(COHORT_UUID);
 	}
 	
@@ -70,7 +67,7 @@ public class GroupMemberTranslatorImplTest {
 		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientReference);
 		when(patientDao.getPatientById(1)).thenReturn(patient);
 		
-		Group.GroupMemberComponent component = groupMemberTranslator.toFhirResource(1);
+		GroupMember component = groupMemberTranslator.toFhirResource(1);
 		assertThat(component, notNullValue());
 		assertThat(component.getEntity(), notNullValue());
 		assertThat(component.hasEntity(), is(true));
@@ -86,7 +83,7 @@ public class GroupMemberTranslatorImplTest {
 		Group.GroupMemberComponent component = new Group.GroupMemberComponent();
 		component.setEntity(patientReference);
 		
-		Integer patientId = groupMemberTranslator.toOpenmrsType(component);
+		Integer patientId = groupMemberTranslator.toOpenmrsType(new GroupMember(component.getEntity()));
 		assertThat(patientId, notNullValue());
 		assertThat(patientId, is(1));
 	}

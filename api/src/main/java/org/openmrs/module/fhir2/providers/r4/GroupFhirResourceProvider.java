@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -33,6 +34,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.openmrs.module.fhir2.api.FhirGroupMemberService;
 import org.openmrs.module.fhir2.api.FhirGroupService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -46,6 +48,9 @@ public class GroupFhirResourceProvider implements IResourceProvider {
 	
 	@Autowired
 	private FhirGroupService groupService;
+	
+	@Autowired
+	private FhirGroupMemberService groupMemberService;
 	
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {
@@ -87,6 +92,15 @@ public class GroupFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find group to update with id " + id.getIdPart());
 		}
 		return FhirProviderUtils.buildDelete(group);
+	}
+	
+	@Operation(name = "$members", idempotent = true)
+	public IBundleProvider getGroupMembers(@IdParam @Nonnull IdType groupId) {
+		Group group = groupService.get(groupId.getIdPart());
+		if (group == null) {
+			throw new ResourceNotFoundException("Could not find group with the id " + groupId.getIdPart());
+		}
+		return groupMemberService.getGroupMembers(groupId.getIdPart());
 	}
 	
 	@Search

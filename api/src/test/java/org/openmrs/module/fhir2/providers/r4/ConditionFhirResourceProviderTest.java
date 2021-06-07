@@ -196,13 +196,12 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		TokenAndListParam clinicalList = new TokenAndListParam();
 		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
 		
-		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("lower date").setUpperBound("upper date");
+		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
 		QuantityAndListParam onsetAge = new QuantityAndListParam();
 		onsetAge.addValue(new QuantityOrListParam().add(new QuantityParam(12)));
 		
-		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
-		        .setUpperBound("upper record date");
+		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
@@ -237,13 +236,12 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		TokenAndListParam clinicalList = new TokenAndListParam();
 		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
 		
-		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("lower date").setUpperBound("upper date");
+		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
 		QuantityAndListParam onsetAge = new QuantityAndListParam();
 		onsetAge.addValue(new QuantityOrListParam().add(new QuantityParam(12)));
 		
-		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
-		        .setUpperBound("upper record date");
+		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		

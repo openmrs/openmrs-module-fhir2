@@ -3,26 +3,26 @@
 
     <groupId>org.openmrs.module</groupId>
     <artifactId>fhir2</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR2</name>
     <description>Implementation of FHIR R4 for OpenMRS</description>
 
     <issueManagement>
         <system>JIRA</system>
-        <url>http://issues.openmrs.org/</url>
+        <url>https://issues.openmrs.org/</url>
     </issueManagement>
 
     <licenses>
         <license>
             <name>OpenMRS Public License</name>
-            <url>http://openmrs.org/wiki/License</url>
+            <url>https://openmrs.org/wiki/License</url>
         </license>
     </licenses>
 
     <organization>
         <name>OpenMRS LLC.</name>
-        <url>http://openmrs.org</url>
+        <url>https://openmrs.org</url>
     </organization>
 
     <url>https://wiki.openmrs.org/display/projects/OpenMRS+FHIR+Module</url>
@@ -284,6 +284,12 @@
                 <groupId>org.fhir</groupId>
                 <artifactId>ucum</artifactId>
                 <version>${ucumVersion}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>xpp3</groupId>
+                        <artifactId>xpp3</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -736,7 +742,7 @@
         <lombokVersion>1.18.16</lombokVersion>
         <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
         <openmrsPlatformToolsVersion>2.4.0</openmrsPlatformToolsVersion>
-        <hapifhirVersion>5.2.1</hapifhirVersion>
+        <hapifhirVersion>5.4.0</hapifhirVersion>
         <ucumVersion>1.0.3</ucumVersion>
     </properties>
 

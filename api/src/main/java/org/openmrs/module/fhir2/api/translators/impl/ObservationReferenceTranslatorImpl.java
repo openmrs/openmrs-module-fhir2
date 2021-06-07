@@ -39,7 +39,7 @@ public class ObservationReferenceTranslatorImpl extends BaseReferenceHandlingTra
 	
 	@Override
 	public Obs toOpenmrsType(@Nonnull Reference obsReference) {
-		if (obsReference == null) {
+		if (obsReference == null || !obsReference.hasReference()) {
 			return null;
 		}
 		

@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -17,9 +19,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +33,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Cohort;
 import org.openmrs.CohortMembership;
 import org.openmrs.User;
-import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
+import org.openmrs.module.fhir2.api.translators.GroupComponentTranslator;
+import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator_2_1;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.openmrs.module.fhir2.model.GroupMember;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GroupTranslatorImpl_2_1Test {
@@ -41,7 +48,10 @@ public class GroupTranslatorImpl_2_1Test {
 	private static final String COHORT_NAME = "Patient with VL > 2";
 	
 	@Mock
-	private GroupMemberTranslator<CohortMembership> groupMemberTranslator;
+	private GroupMemberTranslator_2_1 groupMemberTranslator21;
+	
+	@Mock
+	private GroupComponentTranslator componentTranslator;
 	
 	@Mock
 	private PractitionerReferenceTranslator<User> practitionerReferenceTranslator;
@@ -51,7 +61,8 @@ public class GroupTranslatorImpl_2_1Test {
 	@Before
 	public void setup() {
 		groupTranslator = new GroupTranslatorImpl_2_1();
-		groupTranslator.setGroupMemberTranslator(groupMemberTranslator);
+		groupTranslator.setGroupMemberTranslator21(groupMemberTranslator21);
+		groupTranslator.setComponentTranslator(componentTranslator);
 		groupTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 	}
 	
@@ -151,29 +162,47 @@ public class GroupTranslatorImpl_2_1Test {
 		Cohort cohort = mock(Cohort.class);
 		CohortMembership cohortMembership = mock(CohortMembership.class);
 		Reference patientReference = mock(Reference.class);
-		Group.GroupMemberComponent groupMemberComponent = mock(Group.GroupMemberComponent.class);
+		
+		GroupMember member = new GroupMember();
+		member.setId("12");
+		member.setEntity(mock(Reference.class));
+		member.setEntityTarget(mock(Resource.class));
+		member.setInactive(false);
+		member.setPeriod(mock(Period.class));
+		
+		Group.GroupMemberComponent component = mock(Group.GroupMemberComponent.class);
+		component.setId("12");
+		component.setEntity(mock(Reference.class));
+		component.setEntityTarget(mock(Resource.class));
+		component.setInactive(false);
+		component.setPeriod(mock(Period.class));
 		
 		when(cohort.getMemberships()).thenReturn(Arrays.asList(cohortMembership, cohortMembership));
-		when(groupMemberTranslator.toFhirResource(cohortMembership)).thenReturn(groupMemberComponent);
-		when(groupMemberComponent.hasEntity()).thenReturn(true);
-		when(groupMemberComponent.getEntity()).thenReturn(patientReference);
+		when(groupMemberTranslator21.toFhirResource(cohortMembership)).thenReturn(member);
+		when(componentTranslator.toFhirResource(member)).thenReturn(component);
+		when(component.getEntity()).thenReturn(patientReference);
 		
 		Group group = groupTranslator.toFhirResource(cohort);
 		assertThat(group, notNullValue());
 		assertThat(group.hasMember(), is(true));
-		assertThat(group.getMemberFirstRep().hasEntity(), is(true));
-		assertThat(group.getMemberFirstRep().getEntity(), is(patientReference));
+		
+		List<Group.GroupMemberComponent> members = group.getMember();
+		
+		assertThat(members, hasSize(2));
+		assertThat(members, everyItem(hasProperty("entity", is(patientReference))));
 	}
 	
 	@Test
 	public void shouldTranslateFHIRGroupMembersToOpenMRSCohortMembers() {
 		Group group = mock(Group.class);
 		CohortMembership cohortMembership = mock(CohortMembership.class);
+		GroupMember groupMember = mock(GroupMember.class);
 		Group.GroupMemberComponent groupMemberComponent = mock(Group.GroupMemberComponent.class);
 		
 		when(group.hasMember()).thenReturn(true);
 		when(group.getMember()).thenReturn(Arrays.asList(groupMemberComponent, groupMemberComponent));
-		when(groupMemberTranslator.toOpenmrsType(groupMemberComponent)).thenReturn(cohortMembership);
+		when(groupMemberTranslator21.toOpenmrsType(groupMember)).thenReturn(cohortMembership);
+		when(componentTranslator.toOpenmrsType(groupMemberComponent)).thenReturn(groupMember);
 		
 		Cohort cohort = groupTranslator.toOpenmrsType(group);
 		assertThat(cohort, notNullValue());
@@ -219,7 +248,13 @@ public class GroupTranslatorImpl_2_1Test {
 	@Test
 	public void shouldUpdateMemberList() {
 		CohortMembership cohortMembership = mock(CohortMembership.class);
-		Group.GroupMemberComponent component = mock(Group.GroupMemberComponent.class);
+		GroupMember groupMember = mock(GroupMember.class);
+		Group.GroupMemberComponent component = new Group.GroupMemberComponent();
+		component.setId("12");
+		component.setEntity(mock(Reference.class));
+		component.setEntityTarget(mock(Resource.class));
+		component.setInactive(false);
+		component.setPeriod(mock(Period.class));
 		
 		Cohort existingCohort = new Cohort();
 		existingCohort.setUuid(COHORT_UUID);
@@ -228,8 +263,9 @@ public class GroupTranslatorImpl_2_1Test {
 		
 		Group group = mock(Group.class);
 		when(group.hasMember()).thenReturn(true);
-		when(groupMemberTranslator.toOpenmrsType(component)).thenReturn(cohortMembership);
+		when(groupMemberTranslator21.toOpenmrsType(groupMember)).thenReturn(cohortMembership);
 		when(group.getMember()).thenReturn(Arrays.asList(component, component));
+		when(componentTranslator.toOpenmrsType(component)).thenReturn(groupMember);
 		
 		Cohort updateCohort = groupTranslator.toOpenmrsType(existingCohort, group);
 		assertThat(updateCohort, notNullValue());

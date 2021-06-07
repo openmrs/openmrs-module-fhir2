@@ -22,7 +22,9 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.junit.Before;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
+import org.openmrs.module.fhir2.model.GroupMember;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -45,6 +47,13 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 		return new FhirRestServlet();
 	}
 	
+	@Before
+	@Override
+	public void setup() throws Exception {
+		getFhirContext().registerCustomType(GroupMember.class);
+		super.setup();
+	}
+	
 	@Override
 	public void describeOperationOutcome(Description mismatchDescription, IBaseOperationOutcome baseOperationOutcome) {
 		if (baseOperationOutcome instanceof OperationOutcome) {
@@ -64,10 +73,11 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 	}
 	
 	@Override
-	public U removeNarrative(U item) {
+	public U removeNarrativeAndContained(U item) {
 		@SuppressWarnings("unchecked")
 		U newItem = (U) item.copy();
 		newItem.setText(null);
+		newItem.setContained(null);
 		return newItem;
 	}
 	

@@ -23,17 +23,18 @@ import org.openmrs.Cohort;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
+import org.openmrs.module.fhir2.model.GroupMember;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @Setter(AccessLevel.MODULE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.*")
+@OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.0.*")
 public class GroupTranslatorImpl extends BaseGroupTranslator implements GroupTranslator {
 	
 	@Autowired
-	private GroupMemberTranslator<Integer> groupMemberTranslator;
+	private GroupMemberTranslator groupMemberTranslator;
 	
 	@Override
 	public Group toFhirResource(@Nonnull Cohort cohort) {
@@ -43,7 +44,11 @@ public class GroupTranslatorImpl extends BaseGroupTranslator implements GroupTra
 		Set<Integer> memberIds = cohort.getMemberIds();
 		log.info("Number of members {} ", memberIds.size());
 		group.setQuantity(cohort.size());
-		memberIds.forEach(id -> group.addMember(groupMemberTranslator.toFhirResource(id)));
+		memberIds.forEach(id -> {
+			Group.GroupMemberComponent groupMemberComponent = new Group.GroupMemberComponent();
+			groupMemberComponent.setEntity(groupMemberTranslator.toFhirResource(id).getEntity());
+			group.addMember(groupMemberComponent);
+		});
 		
 		return group;
 	}
@@ -62,7 +67,8 @@ public class GroupTranslatorImpl extends BaseGroupTranslator implements GroupTra
 		Cohort finalExistingCohort = super.toOpenmrsType(existingCohort, group);
 		
 		if (group.hasMember()) {
-			group.getMember().forEach(member -> finalExistingCohort.addMember(groupMemberTranslator.toOpenmrsType(member)));
+			group.getMember().forEach(member -> finalExistingCohort
+			        .addMember(groupMemberTranslator.toOpenmrsType(new GroupMember(member.getEntity()))));
 		}
 		
 		return finalExistingCohort;

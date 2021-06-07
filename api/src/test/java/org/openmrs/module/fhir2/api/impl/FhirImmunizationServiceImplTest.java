@@ -13,17 +13,17 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
+import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER;
 import static org.openmrs.module.fhir2.FhirConstants.PATIENT;
 import static org.openmrs.module.fhir2.FhirConstants.PRACTITIONER;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1410;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1418;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1419;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel1420;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel165907;
-import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.ciel984;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_1410;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_1418;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_1419;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_1420;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_165907;
+import static org.openmrs.module.fhir2.api.translators.impl.ImmunizationTranslatorImpl.CIEL_984;
 
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,18 +37,17 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.GlobalProperty;
 import org.openmrs.Obs;
 import org.openmrs.Provider;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ObsService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.FhirImmunizationService;
-import org.openmrs.module.fhir2.api.translators.impl.ImmunizationObsGroupHelper;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -56,35 +55,31 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveTest {
 	
-	private static final String IMMUNIZATIONS_METADATA_XML = "org/openmrs/module/fhir2/api/translators/ImmunizationTranslator_metadata.xml";
+	private static final String IMMUNIZATIONS_METADATA_XML = "org/openmrs/module/fhir2/Immunization_metadata.xml";
 	
-	private static final String IMMUNIZATIONS_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/FhirImmunizationService_initial_data.xml";
+	private static final String IMMUNIZATIONS_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/services/impl/FhirImmunizationService_initial_data.xml";
 	
 	private static final String PRACTITIONER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPractitionerDaoImplTest_initial_data.xml";
 	
 	@Autowired
-	private FhirImmunizationService service;
+	private FhirImmunizationServiceImpl service;
 	
 	@Autowired
 	private ObsService obsService;
 	
 	@Autowired
-	private AdministrationService adminService;
+	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Autowired
 	private ImmunizationObsGroupHelper helper;
 	
-	private List<Immunization> get(IBundleProvider results) {
-		return results.getResources(0, results.size()).stream().filter(it -> it instanceof Immunization)
-		        .map(it -> (Immunization) it).collect(Collectors.toList());
-	}
-	
 	@Before
 	public void setup() throws Exception {
-		adminService.saveGlobalProperty(
-		    new GlobalProperty(FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY, "29c02aff-9a93-46c9-bf6f-48b552fcb1fa"));
-		adminService.saveGlobalProperty(
-		    new GlobalProperty(FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY, "546cce2d-6d58-4097-ba92-206c1a2a0462"));
+		when(globalPropertyService.getGlobalProperty(FhirConstants.IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY))
+		        .thenReturn("29c02aff-9a93-46c9-bf6f-48b552fcb1fa");
+		when(globalPropertyService.getGlobalProperty(FhirConstants.ADMINISTERING_ENCOUNTER_ROLE_PROPERTY))
+		        .thenReturn("546cce2d-6d58-4097-ba92-206c1a2a0462");
+		
 		executeDataSet(IMMUNIZATIONS_METADATA_XML);
 		executeDataSet(IMMUNIZATIONS_INITIAL_DATA_XML);
 		executeDataSet(PRACTITIONER_INITIAL_DATA_XML);
@@ -92,7 +87,7 @@ public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveT
 	
 	/**
 	 * Asserts the commons parts between the grouping obs and its members.
-	 * 
+	 *
 	 * @param obs The obs to assert.
 	 * @param patientUuid The UUID of the patient to be verified.
 	 * @param visitUuid The UUID of the visit to be verified.
@@ -102,14 +97,15 @@ public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveT
 		assertThat(obs.getPerson().getUuid(), is(patientUuid));
 		assertThat(obs.getEncounter().getEncounterType(), is(helper.getImmunizationsEncounterType()));
 		assertThat(obs.getEncounter().getVisit().getUuid(), is(visitUuid));
+		
 		Set<Provider> providers = obs.getEncounter().getProvidersByRole(helper.getAdministeringEncounterRole());
+		
 		assertThat(providers.size(), is(1));
-		assertThat(providers.stream().findFirst().get().getUuid(), is(providerUuid));
+		assertThat(providers.iterator().next().getUuid(), is(providerUuid));
 	}
 	
 	@Test
-	public void saveImmunization_shouldCreateEncounterAndObsGroupWhenNewImmunization() throws ParseException {
-		
+	public void saveImmunization_shouldCreateEncounterAndObsGroupWhenNewImmunization() {
 		// setup
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
@@ -137,25 +133,22 @@ public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveT
 		assertObsCommons(obs, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
 		    "f9badd80-ab76-11e2-9e96-0800200c9a66");
 		
-		obs.getGroupMembers().forEach(o -> {
-			assertObsCommons(o, "a7e04421-525f-442f-8138-05b619d16def", "7d8c1980-6b78-11e0-93c3-18a905e044dc",
-			    "f9badd80-ab76-11e2-9e96-0800200c9a66");
-		});
+		obs.getGroupMembers().forEach(o -> assertObsCommons(o, "a7e04421-525f-442f-8138-05b619d16def",
+		    "7d8c1980-6b78-11e0-93c3-18a905e044dc", "f9badd80-ab76-11e2-9e96-0800200c9a66"));
 		
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
-		assertThat(members.get(ciel984).getValueCoded().getUuid(), is("15f83cd6-64e9-4e06-a5f9-364d3b14a43d"));
-		assertThat(members.get(ciel1410).getValueDatetime(),
+		assertThat(members.get(CIEL_984).getValueCoded().getUuid(), is("15f83cd6-64e9-4e06-a5f9-364d3b14a43d"));
+		assertThat(members.get(CIEL_1410).getValueDatetime(),
 		    equalTo(new DateTimeType("2020-07-08T18:30:00.000Z").getValue()));
-		assertThat(members.get(ciel1418).getValueNumeric(), equalTo(2.0));
-		assertThat(members.get(ciel1419).getValueText(), is("Acme"));
-		assertThat(members.get(ciel1420).getValueText(), is("FOO1234"));
-		assertThat(members.get(ciel165907).getValueDatetime(),
+		assertThat(members.get(CIEL_1418).getValueNumeric(), equalTo(2.0));
+		assertThat(members.get(CIEL_1419).getValueText(), is("Acme"));
+		assertThat(members.get(CIEL_1420).getValueText(), is("FOO1234"));
+		assertThat(members.get(CIEL_165907).getValueDatetime(),
 		    equalTo(new DateTimeType("2022-07-31T18:30:00.000Z").getValue()));
 	}
 	
 	@Test
-	public void updateImmunization_shouldUpdateImmunizationAccordingly() throws ParseException {
-		
+	public void updateImmunization_shouldUpdateImmunizationAccordingly() {
 		// setup
 		FhirContext ctx = FhirContext.forR4();
 		IParser parser = ctx.newJsonParser();
@@ -191,17 +184,17 @@ public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveT
 		});
 		
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
-		assertThat(members.get(ciel984).getValueCoded().getUuid(), is("d144d24f-6913-4b63-9660-a9108c2bebef"));
-		assertThat(members.get(ciel1410).getValueDatetime(),
+		assertThat(members.get(CIEL_984).getValueCoded().getUuid(), is("d144d24f-6913-4b63-9660-a9108c2bebef"));
+		assertThat(members.get(CIEL_1410).getValueDatetime(),
 		    equalTo(new DateTimeType("2020-07-08T20:30:00+02:00").getValue()));
-		assertThat(members.get(ciel1418).getValueNumeric(), equalTo(4.0));
-		assertThat(members.get(ciel1419).getValueText(), is("Pharma Inc."));
-		assertThat(members.get(ciel1420).getValueText(), is("YU765YT-1"));
-		assertThat(members.get(ciel165907).getValueDatetime(), equalTo(new DateTimeType("2020-10-08").getValue()));
+		assertThat(members.get(CIEL_1418).getValueNumeric(), equalTo(4.0));
+		assertThat(members.get(CIEL_1419).getValueText(), is("Pharma Inc."));
+		assertThat(members.get(CIEL_1420).getValueText(), is("YU765YT-1"));
+		assertThat(members.get(CIEL_165907).getValueDate(), equalTo(new DateType("2020-10-08").getValue()));
 	}
 	
 	@Test
-	public void searchImmunizations_shouldFetchImmunizationsByPatientIdentifier() throws ParseException {
+	public void searchImmunizations_shouldFetchImmunizationsByPatientIdentifier() {
 		// setup
 		ReferenceAndListParam param = new ReferenceAndListParam();
 		param.addValue(new ReferenceOrListParam().add(new ReferenceParam(SP_IDENTIFIER, "12345K")));
@@ -231,6 +224,7 @@ public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveT
 			assertThat(immunization.getProtocolApplied().size(), is(1));
 			assertThat(immunization.getProtocolApplied().get(0).getDoseNumberPositiveIntType().getValue(), is(3));
 		}
+		
 		{
 			Immunization immunization = immunizations.get(1);
 			Coding coding = immunization.getVaccineCode().getCoding().get(0);
@@ -251,7 +245,11 @@ public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveT
 			assertThat(immunization.getProtocolApplied().size(), is(1));
 			assertThat(immunization.getProtocolApplied().get(0).getDoseNumberPositiveIntType().getValue(), is(11));
 		}
-		
+	}
+	
+	private List<Immunization> get(IBundleProvider results) {
+		return results.getResources(0, results.size()).stream().filter(it -> it instanceof Immunization)
+		        .map(it -> (Immunization) it).collect(Collectors.toList());
 	}
 	
 }

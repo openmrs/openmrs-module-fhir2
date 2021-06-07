@@ -240,6 +240,8 @@ public class FhirConstants {
 	
 	public static final String TAG_SEARCH_HANDLER = "tag.search.handler";
 	
+	public static final String GROUP_MEMBERS_SEARCH_HANDLER = "group.members.search.handler";
+	
 	public static final String HAPI_NARRATIVES_PROPERTY_FILE = "classpath:ca/uhn/fhir/narrative/narratives.properties";
 	
 	public static final String OPENMRS_NARRATIVES_PROPERTY_FILE = "classpath:org/openmrs/module/fhir2/narratives.properties";

@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.Calendar;
@@ -37,6 +38,7 @@ import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
@@ -67,6 +69,8 @@ public class PractitionerTranslatorUserImplTest {
 	@Mock
 	private PersonAddressTranslator addressTranslator;
 	
+	private BirthDateTranslator birthDateTranslator = new BirthDateTranslatorImpl();
+	
 	private PractitionerTranslatorUserImpl practitionerTranslatorUser;
 	
 	private User user;
@@ -79,6 +83,7 @@ public class PractitionerTranslatorUserImplTest {
 		practitionerTranslatorUser.setNameTranslator(nameTranslator);
 		practitionerTranslatorUser.setAddressTranslator(addressTranslator);
 		practitionerTranslatorUser.setGenderTranslator(genderTranslator);
+		practitionerTranslatorUser.setBirthDateTranslator(birthDateTranslator);
 		
 		user = new User();
 		user.setUuid(USER_UUID);
@@ -100,9 +105,10 @@ public class PractitionerTranslatorUserImplTest {
 		assertThat(practitioner, notNullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
-	public void shouldThrowExceptionWhenPractitionerIsNull() {
-		practitionerTranslatorUser.toOpenmrsType(user, null);
+	@Test
+	public void shouldReturnNullWhenPractitionerIsNull() {
+		User omrsUser = practitionerTranslatorUser.toOpenmrsType(user, null);
+		assertThat(omrsUser, nullValue());
 	}
 	
 	@Test
@@ -124,7 +130,7 @@ public class PractitionerTranslatorUserImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateFhirPractitionerIdentifierToOpenMrsUserId() {
+	public void shouldTranslateFhirPractitionerIdentifierToOpenmrsUserId() {
 		User result = practitionerTranslatorUser.toOpenmrsType(practitioner);
 		assertThat(result, notNullValue());
 		assertThat(result.getSystemId(), notNullValue());
@@ -202,7 +208,7 @@ public class PractitionerTranslatorUserImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateToFHIRBirthDate() {
+	public void shouldTranslateToFhirBirthDate() {
 		
 		User user = new User();
 		Calendar calendar = Calendar.getInstance();

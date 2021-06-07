@@ -42,7 +42,7 @@ public class OpenmrsNarrativeTemplate implements INarrativeTemplate {
 	
 	private final Set<String> appliesToResourceTypes = new HashSet<>();
 	
-	private final Set<Class<? extends IBase>> appliesToResourceClasses = new HashSet<>();
+	private final Set<Class<? extends IBase>> appliesToClasses = new HashSet<>();
 	
 	private TemplateTypeEnum templateType = TemplateTypeEnum.THYMELEAF;
 	
@@ -92,8 +92,12 @@ public class OpenmrsNarrativeTemplate implements INarrativeTemplate {
 	 * @return set of resource classes which the template is applicable to
 	 */
 	@Override
-	public Set<Class<? extends IBase>> getAppliesToResourceClasses() {
-		return Collections.unmodifiableSet(this.appliesToResourceClasses);
+	public Set<Class<? extends IBase>> getAppliesToClasses() {
+		return Collections.unmodifiableSet(appliesToClasses);
+	}
+	
+	void addAppliesToClass(Class<? extends IBase> theAppliesToClass) {
+		appliesToClasses.add(theAppliesToClass);
 	}
 	
 	/**

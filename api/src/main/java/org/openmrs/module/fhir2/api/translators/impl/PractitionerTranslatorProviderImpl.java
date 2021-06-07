@@ -9,9 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang.Validate.notEmpty;
-import static org.apache.commons.lang3.Validate.notNull;
-
 import javax.annotation.Nonnull;
 
 import java.util.List;
@@ -34,6 +31,7 @@ import org.openmrs.ProviderAttribute;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
+import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
@@ -57,6 +55,9 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	private GenderTranslator genderTranslator;
 	
 	@Autowired
+	private BirthDateTranslator birthDateTranslator;
+	
+	@Autowired
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Autowired
@@ -70,18 +71,25 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	
 	@Override
 	public Provider toOpenmrsType(@Nonnull Provider existingProvider, @Nonnull Practitioner practitioner) {
-		notNull(existingProvider, "The existing Provider object should not be null");
-		notNull(practitioner, "The Practitioner object should not be null");
+		if (existingProvider == null) {
+			return null;
+		}
+		
+		if (practitioner == null) {
+			return null;
+		}
 		
 		existingProvider.setUuid(practitioner.getId());
 		
-		notEmpty(practitioner.getIdentifier(), "Practitioner Identifier cannot be empty");
-		existingProvider.setIdentifier(practitioner.getIdentifier().get(0).getValue());
+		existingProvider.setIdentifier(practitioner.getIdentifierFirstRep().getValue());
 		
 		if (existingProvider.getPerson() == null) {
 			existingProvider.setPerson(new Person());
 		}
-		existingProvider.getPerson().setBirthdate(practitioner.getBirthDate());
+		
+		if (practitioner.hasBirthDateElement()) {
+			birthDateTranslator.toOpenmrsType(existingProvider.getPerson(), practitioner.getBirthDateElement());
+		}
 		
 		for (HumanName name : practitioner.getName()) {
 			existingProvider.getPerson().addName(nameTranslator.toOpenmrsType(name));
@@ -103,7 +111,9 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	
 	@Override
 	public Practitioner toFhirResource(@Nonnull Provider provider) {
-		notNull(provider, "The Provider object should not be null");
+		if (provider == null) {
+			return null;
+		}
 		
 		Practitioner practitioner = new Practitioner();
 		Identifier identifier = new Identifier();
@@ -116,7 +126,8 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 		practitioner.setTelecom(getProviderContactDetails(provider));
 		
 		if (provider.getPerson() != null) {
-			practitioner.setBirthDate(provider.getPerson().getBirthdate());
+			practitioner.setBirthDateElement(birthDateTranslator.toFhirResource(provider.getPerson()));
+			
 			practitioner.setGender(genderTranslator.toFhirResource(provider.getPerson().getGender()));
 			
 			for (PersonName name : provider.getPerson().getNames()) {
@@ -144,7 +155,10 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	
 	@Override
 	public Provider toOpenmrsType(@Nonnull Practitioner practitioner) {
-		notNull(practitioner, "The Practitioner object should not be null");
+		if (practitioner == null) {
+			return null;
+		}
+		
 		return toOpenmrsType(new org.openmrs.Provider(), practitioner);
 	}
 	

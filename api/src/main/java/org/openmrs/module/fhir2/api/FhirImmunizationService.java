@@ -9,22 +9,13 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import org.hl7.fhir.r4.model.Immunization;
-import org.openmrs.Concept;
 
 public interface FhirImmunizationService extends FhirService<Immunization> {
 	
-	/**
-	 * Fetches the OpenMRS concept used to capture immunization obs groups.
-	 * 
-	 * @return The OpenMRS immunization concept.
-	 */
-	Concept getOpenmrsImmunizationConcept();
-	
-	IBundleProvider searchImmunizations(ReferenceAndListParam patientParam, @Sort SortSpec sort);
+	IBundleProvider searchImmunizations(ReferenceAndListParam patientParam, SortSpec sort);
 	
 }

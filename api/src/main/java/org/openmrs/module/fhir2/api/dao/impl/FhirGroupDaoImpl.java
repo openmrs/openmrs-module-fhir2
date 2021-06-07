@@ -26,7 +26,6 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.Cohort;
-import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirGroupDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -34,7 +33,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.0 - 2.0.*")
 public class FhirGroupDaoImpl extends BaseFhirDao<Cohort> implements FhirGroupDao {
 	
 	private static final String NAMES_ALIAS = "ps.names";
