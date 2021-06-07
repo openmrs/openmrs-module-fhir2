@@ -156,7 +156,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *     AND crt.code in (?, ?, ?)
  *   ) OR (
  *         crt.concept_source_id = (select concept_source_id from fhir_concept_source where url = ?)
- *     AND crt.code = ?
+ *     AND crt.code = ?fhir_concept_source
  *   )) AND (
  *         crt.concept_source_id = (select concept_source_id from fhir_concept_source where url = ?)
  *     AND crt.code in (?, ?, ?)
