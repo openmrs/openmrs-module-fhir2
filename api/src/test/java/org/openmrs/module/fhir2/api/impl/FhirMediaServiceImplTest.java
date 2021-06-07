@@ -56,5 +56,4 @@ public class FhirMediaServiceImplTest {
 		lenient().when(dao.get(OBS_UUID)).thenReturn(obs);
 		lenient().when(mediaTranslator.toFhirResource(obs)).thenReturn(media);
 	}
-
 }

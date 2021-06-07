@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.annotation.Nonnull;
-
 import java.util.HashSet;
 
 import ca.uhn.fhir.model.api.Include;
