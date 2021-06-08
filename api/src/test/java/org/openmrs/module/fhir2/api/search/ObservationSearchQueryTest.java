@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.QuantityOrListParam;
@@ -1478,6 +1479,112 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		            hasItem(hasProperty("referenceElement", hasProperty("idPart", equalTo(MEMBER_UUID)))))))));
 	}
 	
+	@Test
+	public void searchForLastNObs_shouldHandleNormalRequest() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
+		
+	}
+	
+	@Test
+	public void searchForLastNObs_shouldHandleNoPatientReferenceRequest() {
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
+	}
+	
+	@Test
+	public void searchForLastNObs_shouldHandleNoCategoryRequest() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
+	}
+	
+	@Test
+	public void searchForLastNObs_shouldHandleNoCodeRequest() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(10));
+		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
+	}
+	
 	private IBundleProvider search(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
@@ -1485,4 +1592,5 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
+	
 }

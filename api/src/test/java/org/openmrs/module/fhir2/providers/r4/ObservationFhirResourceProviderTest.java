@@ -28,6 +28,7 @@ import java.util.List;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -51,11 +52,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Observation> {
+	
+	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
 	
 	private static final String OBSERVATION_UUID = "1223h34-34nj3-34nj34-34nj";
 	
@@ -64,6 +68,10 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
+	
+	private static final String CIEL_DIASTOLIC_BP = "5086";
+	
+	private static final String LOINC_SYSTOLIC_BP = "8480-6";
 	
 	@Mock
 	private FhirObservationService observationService;
@@ -307,6 +315,201 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		when(observationService.delete(WRONG_OBSERVATION_UUID)).thenReturn(null);
 		
 		resourceProvider.deleteObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID));
+	}
+	
+	@Test
+	public void getLastnObservations_shouldReturnRecentNObservations() {
+		NumberParam max = new NumberParam(2);
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+		
+		when(observationService.getLastNObservations(max, referenceParam, categories, code))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		
+		IBundleProvider results = resourceProvider.lastn(max, referenceParam, null, categories, code);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+		
+	}
+	
+	@Test
+	public void getLastN_shouldReturnFirstRecentObservationsWhenMaxIsMissing() {
+		
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+		
+		when(observationService.getLastNObservations(null, referenceParam, categories, code))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		
+		IBundleProvider results = resourceProvider.lastn(null, referenceParam, null, categories, code);
+		
+		System.out.println(results.toString());
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+	}
+	
+	@Test
+	public void getLastnObservations_shouldReturnRecentNObservationsWhenPatientReferenceIsPassedInPatientParameter() {
+		NumberParam max = new NumberParam(2);
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+		
+		when(observationService.getLastNObservations(max, referenceParam, categories, code))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		
+		IBundleProvider results = resourceProvider.lastn(max, null, referenceParam, categories, code);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+	}
+	
+	@Test
+	public void getLastnObservations_shouldReturnRecentNObservationsWhenPatientReferenceIsNotGiven() {
+		NumberParam max = new NumberParam(2);
+		
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+		
+		when(observationService.getLastNObservations(max, null, categories, code))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		
+		IBundleProvider results = resourceProvider.lastn(max, null, null, categories, code);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+	}
+	
+	@Test
+	public void getLastnObservations_shouldReturnRecentNObservationsWhenNoCategoryIsSpecified() {
+		NumberParam max = new NumberParam(2);
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+		
+		when(observationService.getLastNObservations(max, referenceParam, null, code))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		
+		IBundleProvider results = resourceProvider.lastn(max, referenceParam, null, null, code);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+	}
+	
+	@Test
+	public void getLastnObservations_shouldReturnRecentNObservationsWhenNoCodeIsSpecified() {
+		NumberParam max = new NumberParam(2);
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		when(observationService.getLastNObservations(max, referenceParam, categories, null))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		
+		IBundleProvider results = resourceProvider.lastn(max, referenceParam, null, categories, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+	}
+	
+	@Test
+	public void getLastnObservations_shouldReturnRecentNObservationsWhenBothCodeAndCategoryIsNotSpecified() {
+		NumberParam max = new NumberParam(2);
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		when(observationService.getLastNObservations(max, referenceParam, null, null))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		
+		IBundleProvider results = resourceProvider.lastn(max, referenceParam, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
 	
 }
