@@ -34,6 +34,7 @@ public interface FhirObservationService extends FhirService<Observation> {
 	        QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam, DateRangeParam date,
 	        TokenAndListParam code, TokenAndListParam category, TokenAndListParam id, DateRangeParam lastUpdated,
 	        SortSpec sort, HashSet<Include> includes, HashSet<Include> revIncludes);
-
-	IBundleProvider getLastNObservations(NumberParam max, ReferenceAndListParam patientReference, TokenAndListParam category, TokenAndListParam code);
+	
+	IBundleProvider getLastNObservations(NumberParam max, ReferenceAndListParam patientReference, TokenAndListParam category,
+	        TokenAndListParam code);
 }

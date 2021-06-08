@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -80,19 +81,25 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
-
+	
 	@Transactional(readOnly = true)
-	public IBundleProvider getLastNObservations(NumberParam max, ReferenceAndListParam patientReference, TokenAndListParam category, TokenAndListParam code) {
-
-		SearchParameterMap theParams = new SearchParameterMap()
-				.addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
-				.addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, category)
-				.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
-
-		if(patientReference != null) {
+	public IBundleProvider getLastNObservations(NumberParam max, ReferenceAndListParam patientReference,
+	        TokenAndListParam category, TokenAndListParam code) {
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, category)
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		
+		if (patientReference != null) {
 			theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		}
-
+		
+		if (max != null) {
+			theParams.addParameter(FhirConstants.MAX_SEARCH_HANDLER, max);
+		} else {
+			theParams.addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(1));
+		}
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
+	
 }

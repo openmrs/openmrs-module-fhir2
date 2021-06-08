@@ -14,11 +14,9 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.annotation.Nonnull;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -56,31 +54,34 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	@Autowired
 	private ObservationCategoryMap categoryMap;
-
+	
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
 	@Setter(AccessLevel.PUBLIC)
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
-
+	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
-		if(!theParams.getParameters(FhirConstants.LASTN_SEARCH_HANDLER).isEmpty()) {
-
+		if (!theParams.getParameters(FhirConstants.LASTN_SEARCH_HANDLER).isEmpty()) {
+			
 			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
-
+			
 			setupSearchParams(criteria, theParams);
-
+			
+			criteria.setProjection(Projections.projectionList().add(Projections.property("uuid"))
+			        .add(Projections.property("concept")).add(Projections.property("obsDatetime")));
+			
 			@SuppressWarnings("unchecked")
-			List<Obs> results = criteria.list();
-
-			HashMap<Concept, List<Obs>> code_groups = new HashMap<>();
+			List<Object[]> results = criteria.list();
+			
+			HashMap<Concept, List<Object[]>> code_groups = new HashMap<>();
 			handleGrouping(code_groups, results);
-
+			
 			return getLastNUuids(code_groups, getMax(theParams)).stream().distinct().collect(Collectors.toList());
 		}
-
+		
 		return super.getSearchResultUuids(theParams);
 	}
 	
@@ -219,59 +220,53 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		obs.setConcept(deproxyObject(obs.getConcept()));
 		return obs;
 	}
-
+	
 	int getMax(SearchParameterMap theParams) {
-		Object maxParam = theParams.getParameters(FhirConstants.MAX_SEARCH_HANDLER).get(0).getParam();
-		if (maxParam instanceof NumberParam) {
-			return ((NumberParam) maxParam).getValue().intValue();
-		} else {
-			return (int) maxParam;
-		}
+		return ((NumberParam) theParams.getParameters(FhirConstants.MAX_SEARCH_HANDLER).get(0).getParam()).getValue()
+		        .intValue();
+		
 	}
-
-	protected List<String> handleRanking(List<Obs> list, int max) {
+	
+	protected List<String> handleRanking(List<Object[]> list, int max) {
 		List<String> results = new ArrayList<>();
 		int cur_rank = 0;
-
+		
 		for (int var = 0; var < list.size() && cur_rank < max; var++) {
 			cur_rank++;
-			results.add(list.get(var).getUuid());
-			Date date = list.get(var).getObsDatetime();
-
-			while (var + 1 < list.size() && list.get(var + 1).getObsDatetime().equals(date)) {
-				results.add(list.get(var + 1).getUuid());
+			results.add((String) list.get(var)[0]);
+			
+			while (var + 1 < list.size() && list.get(var + 1)[2].equals(list.get(var)[2])) {
+				results.add((String) list.get(var + 1)[0]);
 				var++;
 			}
 		}
 		return results;
-
+		
 	}
-
-	protected void handleGrouping(HashMap<Concept, List<Obs>> groups, List<Obs> observations) {
-		for (Obs obs : observations) {
-			Concept concept = obs.getConcept();
-
-			if (groups.containsKey(concept)) {
-				groups.get(concept).add(obs);
+	
+	protected void handleGrouping(HashMap<Concept, List<Object[]>> groups, List<Object[]> observations) {
+		for (Object[] obs : observations) {
+			
+			if (groups.containsKey(obs[1])) {
+				groups.get(obs[1]).add(obs);
 			} else {
-				List<Obs> list = new ArrayList<>();
+				List<Object[]> list = new ArrayList<>();
 				list.add(obs);
-				groups.put(concept, list);
+				groups.put((Concept) obs[1], list);
 			}
 		}
 	}
-
-	protected List<String> getLastNUuids(HashMap<Concept, List<Obs>> groups, int max) {
+	
+	protected List<String> getLastNUuids(HashMap<Concept, List<Object[]>> groups, int max) {
 		List<String> results = new ArrayList<>();
 		for (HashMap.Entry entry : groups.entrySet()) {
-			System.out.println(entry.getKey());
 			@SuppressWarnings("unchecked")
-			List<Obs> list = (List) entry.getValue();
-			list.sort(Comparator.comparing(Obs::getObsDatetime).reversed());
+			List<Object[]> list = (List) entry.getValue();
+			list.sort((a, b) -> (((Date) b[2]).compareTo((Date) a[2])));
 			List<String> uuids = handleRanking(list, max);
-			System.out.println(uuids);
 			results.addAll(uuids);
 		}
 		return results;
 	}
+	
 }

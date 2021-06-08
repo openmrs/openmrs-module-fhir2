@@ -143,21 +143,18 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		    valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date, code, category, id, lastUpdated, sort,
 		    includes, revIncludes);
 	}
-
+	
 	@Operation(name = "lastn", idempotent = true, type = Observation.class)
-	public IBundleProvider lastn(
-			@OperationParam(name = "max") NumberParam max,
-			@OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
-			@OperationParam(name = Observation.SP_PATIENT) ReferenceAndListParam patientParam,
-			@OperationParam(name = Observation.SP_CATEGORY) TokenAndListParam category,
-			@OperationParam(name = Observation.SP_CODE) TokenAndListParam code) {
-		if(patientParam != null) {
+	public IBundleProvider lastn(@OperationParam(name = "max") NumberParam max,
+	        @OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
+	        @OperationParam(name = Observation.SP_PATIENT) ReferenceAndListParam patientParam,
+	        @OperationParam(name = Observation.SP_CATEGORY) TokenAndListParam category,
+	        @OperationParam(name = Observation.SP_CODE) TokenAndListParam code) {
+		if (patientParam != null) {
 			subjectParam = patientParam;
 		}
-		if(max == null)
-		{
-			max = new NumberParam(1);
-		}
+		
 		return observationService.getLastNObservations(max, subjectParam, category, code);
 	}
+	
 }
