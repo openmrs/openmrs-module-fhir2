@@ -369,8 +369,6 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(null, referenceParam, null, categories, code);
 		
-		System.out.println(results.toString());
-		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
@@ -511,5 +509,4 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
-	
 }
