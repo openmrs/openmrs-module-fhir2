@@ -16,7 +16,6 @@ import javax.annotation.Nonnull;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,7 +62,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			    Projections.projectionList().add(property("uuid")).add(property("concept")).add(property("obsDatetime")));
 			
 			@SuppressWarnings("unchecked")
-			List<LastnObservationResult> results = getFilteredObs(criteria.list());
+			List<LastnObservationResult> results = (List<LastnObservationResult>) criteria.list().stream()
+			        .map(obs -> new LastnObservationResult((Object[]) obs)).collect(Collectors.toList());
 			
 			return getLastnUuids(handleGrouping(results), getMaxParameter(theParams)).stream().distinct()
 			        .collect(Collectors.toList());
@@ -247,34 +247,23 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	private List<String> getLastnUuids(Map<Concept, List<LastnObservationResult>> groupingByObsCode, int max) {
 		List<String> results = new ArrayList<>();
-		for (Map.Entry entry : groupingByObsCode.entrySet()) {
-			@SuppressWarnings("unchecked")
-			List<LastnObservationResult> obsList = (List<LastnObservationResult>) entry.getValue();
+		for (Map.Entry<Concept, List<LastnObservationResult>> entry : groupingByObsCode.entrySet()) {
+			List<LastnObservationResult> obsList = entry.getValue();
 			obsList.sort((a, b) -> (b.getObsDatetime().compareTo(a.getObsDatetime())));
 			List<String> lastnUuidsInGroup = getTopNRankedUuids(obsList, max);
 			results.addAll(lastnUuidsInGroup);
 		}
 		return results;
 	}
-
-	private List<LastnObservationResult> getFilteredObs(List<Object[]> observations)
-	{
-		List<LastnObservationResult> filteredObs = new ArrayList<>();
-		for(Object[] obs: observations)
-		{
-			filteredObs.add(new LastnObservationResult(obs));
-		}
-		return filteredObs;
-	}
-
+	
 	@Value
 	private static class LastnObservationResult {
+		
 		private String uuid;
 		private Concept concept;
 		private Date obsDatetime;
-
-		LastnObservationResult(Object[] obs)
-		{
+		
+		LastnObservationResult(Object[] obs) {
 			uuid = (String) obs[0];
 			concept = (Concept) obs[1];
 			obsDatetime = (Date) obs[2];
