@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import java.util.HashSet;
+import java.util.Optional;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -82,24 +83,17 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
+	@Override
 	@Transactional(readOnly = true)
-	public IBundleProvider getLastNObservations(NumberParam max, ReferenceAndListParam patientReference,
+	public IBundleProvider getLastnObservations(NumberParam max, ReferenceAndListParam patientReference,
 	        TokenAndListParam category, TokenAndListParam code) {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, category)
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
-		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam())
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, Optional.ofNullable(max).orElse(new NumberParam(1)));
 		
-		if (patientReference != null) {
-			theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
-		}
-		
-		if (max != null) {
-			theParams.addParameter(FhirConstants.MAX_SEARCH_HANDLER, max);
-		} else {
-			theParams.addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(1));
-		}
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
-	
 }

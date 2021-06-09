@@ -176,7 +176,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
 		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
-		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
@@ -186,7 +186,7 @@ public class FhirObservationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		IBundleProvider results = fhirObservationService.getLastNObservations(max, referenceParam, categories, code);
+		IBundleProvider results = fhirObservationService.getLastnObservations(max, referenceParam, categories, code);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -199,7 +199,7 @@ public class FhirObservationServiceImplTest {
 	}
 	
 	@Test
-	public void getLastN_shouldReturnFirstRecentObservationsWhenMaxIsMissing() {
+	public void getLastn_shouldReturnFirstRecentObservationsWhenMaxIsMissing() {
 		Obs obs = new Obs();
 		obs.setUuid(OBS_UUID);
 		
@@ -225,7 +225,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
 		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
-		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
@@ -235,7 +235,7 @@ public class FhirObservationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		IBundleProvider results = fhirObservationService.getLastNObservations(null, referenceParam, categories, code);
+		IBundleProvider results = fhirObservationService.getLastnObservations(null, referenceParam, categories, code);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -266,7 +266,7 @@ public class FhirObservationServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
 		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
-		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
@@ -276,7 +276,7 @@ public class FhirObservationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		IBundleProvider results = fhirObservationService.getLastNObservations(max, null, categories, code);
+		IBundleProvider results = fhirObservationService.getLastnObservations(max, null, categories, code);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));

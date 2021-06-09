@@ -1480,7 +1480,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void searchForLastNObs_shouldHandleNormalRequest() {
+	public void searchForLastnObs_shouldHandleNormalRequest() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
 		
@@ -1498,7 +1498,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
-		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		IBundleProvider results = search(theParams);
 		
@@ -1511,7 +1511,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void searchForLastNObs_shouldHandleNoPatientReferenceRequest() {
+	public void searchForLastnObs_shouldHandleNoPatientReferenceRequest() {
 		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
 		
 		TokenAndListParam code = new TokenAndListParam().addAnd(
@@ -1521,7 +1521,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
 		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
-		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		IBundleProvider results = search(theParams);
 		
@@ -1533,7 +1533,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void searchForLastNObs_shouldHandleNoCategoryRequest() {
+	public void searchForLastnObs_shouldHandleNoCategoryRequest() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
 		
@@ -1548,7 +1548,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
-		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		IBundleProvider results = search(theParams);
 		
@@ -1560,7 +1560,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void searchForLastNObs_shouldHandleNoCodeRequest() {
+	public void searchForLastnObs_shouldHandleNoCodeRequest() {
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
 		
@@ -1574,7 +1574,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
-		        .addParameter(FhirConstants.LASTN_SEARCH_HANDLER, new StringParam());
+		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		IBundleProvider results = search(theParams);
 		
@@ -1592,5 +1592,4 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
-	
 }

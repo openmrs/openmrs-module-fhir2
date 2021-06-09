@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
 
 import javax.annotation.Nonnull;
@@ -27,26 +28,18 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Subqueries;
 import org.hl7.fhir.r4.model.Observation;
-import org.openmrs.Concept;
 import org.openmrs.Obs;
-import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -55,31 +48,22 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	@Autowired
 	private ObservationCategoryMap categoryMap;
 	
-	@Autowired
-	@Getter(AccessLevel.PUBLIC)
-	@Setter(AccessLevel.PUBLIC)
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
 	@Override
-	@Authorized(PrivilegeConstants.GET_OBS)
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
-		if (!theParams.getParameters(FhirConstants.LASTN_SEARCH_HANDLER).isEmpty()) {
+		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
 			
-			Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
+			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
 			
 			setupSearchParams(criteria, theParams);
 			
-			criteria.setProjection(Projections.projectionList().add(Projections.property("uuid"))
-			        .add(Projections.property("concept")).add(Projections.property("obsDatetime")));
+			criteria.setProjection(
+			    Projections.projectionList().add(property("uuid")).add(property("concept")).add(property("obsDatetime")));
 			
 			@SuppressWarnings("unchecked")
 			List<Object[]> results = criteria.list();
 			
-			HashMap<Concept, List<Object[]>> code_groups = new HashMap<>();
-			handleGrouping(code_groups, results);
-			
-			return getLastNUuids(code_groups, getMax(theParams)).stream().distinct().collect(Collectors.toList());
+			return getLastnUuids(handleGrouping(results), getMaxParameter(theParams)).stream().distinct()
+			        .collect(Collectors.toList());
 		}
 		
 		return super.getSearchResultUuids(theParams);
@@ -221,52 +205,53 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		return obs;
 	}
 	
-	int getMax(SearchParameterMap theParams) {
+	private int getMaxParameter(SearchParameterMap theParams) {
 		return ((NumberParam) theParams.getParameters(FhirConstants.MAX_SEARCH_HANDLER).get(0).getParam()).getValue()
 		        .intValue();
-		
 	}
 	
-	protected List<String> handleRanking(List<Object[]> list, int max) {
-		List<String> results = new ArrayList<>();
-		int cur_rank = 0;
+	private List<String> getTopNRankedUuids(List<Object[]> list, int max) {
+		List<String> results = new ArrayList<>(list.size());
+		int currentRank = 0;
 		
-		for (int var = 0; var < list.size() && cur_rank < max; var++) {
-			cur_rank++;
+		for (int var = 0; var < list.size() && currentRank < max; var++) {
+			currentRank++;
 			results.add((String) list.get(var)[0]);
+			Date currentObsDate = (Date) list.get(var)[2];
 			
-			while (var + 1 < list.size() && list.get(var + 1)[2].equals(list.get(var)[2])) {
+			if (var == list.size() - 1) {
+				return results;
+			}
+			
+			//Adding all Obs which have the same Datetime as the current Obs Datetime since they will have the same rank
+			Date nextObsDate = (Date) list.get(var + 1)[2];
+			while (nextObsDate.equals(currentObsDate)) {
 				results.add((String) list.get(var + 1)[0]);
 				var++;
+				
+				if (var + 1 == list.size()) {
+					return results;
+				} else {
+					nextObsDate = (Date) list.get(var + 1)[2];
+				}
 			}
 		}
 		return results;
-		
 	}
 	
-	protected void handleGrouping(HashMap<Concept, List<Object[]>> groups, List<Object[]> observations) {
-		for (Object[] obs : observations) {
-			
-			if (groups.containsKey(obs[1])) {
-				groups.get(obs[1]).add(obs);
-			} else {
-				List<Object[]> list = new ArrayList<>();
-				list.add(obs);
-				groups.put((Concept) obs[1], list);
-			}
-		}
+	private HashMap<Object, List<Object[]>> handleGrouping(List<Object[]> observations) {
+		return (HashMap<Object, List<Object[]>>) observations.stream().collect(Collectors.groupingBy(o -> o[1]));
 	}
 	
-	protected List<String> getLastNUuids(HashMap<Concept, List<Object[]>> groups, int max) {
+	private List<String> getLastnUuids(HashMap<Object, List<Object[]>> groupingByObsCode, int max) {
 		List<String> results = new ArrayList<>();
-		for (HashMap.Entry entry : groups.entrySet()) {
+		for (HashMap.Entry entry : groupingByObsCode.entrySet()) {
 			@SuppressWarnings("unchecked")
-			List<Object[]> list = (List) entry.getValue();
-			list.sort((a, b) -> (((Date) b[2]).compareTo((Date) a[2])));
-			List<String> uuids = handleRanking(list, max);
-			results.addAll(uuids);
+			List<Object[]> obsList = (List<Object[]>) entry.getValue();
+			obsList.sort((a, b) -> (((Date) b[2]).compareTo((Date) a[2])));
+			List<String> lastnUuidsInGroup = getTopNRankedUuids(obsList, max);
+			results.addAll(lastnUuidsInGroup);
 		}
 		return results;
 	}
-	
 }
