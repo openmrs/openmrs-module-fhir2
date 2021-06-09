@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,12 +29,14 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Subqueries;
 import org.hl7.fhir.r4.model.Observation;
+import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
@@ -60,7 +63,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			    Projections.projectionList().add(property("uuid")).add(property("concept")).add(property("obsDatetime")));
 			
 			@SuppressWarnings("unchecked")
-			List<Object[]> results = criteria.list();
+			List<LastnObservationResult> results = getFilteredObs(criteria.list());
 			
 			return getLastnUuids(handleGrouping(results), getMaxParameter(theParams)).stream().distinct()
 			        .collect(Collectors.toList());
@@ -210,48 +213,71 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		        .intValue();
 	}
 	
-	private List<String> getTopNRankedUuids(List<Object[]> list, int max) {
+	private List<String> getTopNRankedUuids(List<LastnObservationResult> list, int max) {
 		List<String> results = new ArrayList<>(list.size());
 		int currentRank = 0;
 		
 		for (int var = 0; var < list.size() && currentRank < max; var++) {
 			currentRank++;
-			results.add((String) list.get(var)[0]);
-			Date currentObsDate = (Date) list.get(var)[2];
+			results.add(list.get(var).getUuid());
+			Date currentObsDate = list.get(var).getObsDatetime();
 			
 			if (var == list.size() - 1) {
 				return results;
 			}
 			
 			//Adding all Obs which have the same Datetime as the current Obs Datetime since they will have the same rank
-			Date nextObsDate = (Date) list.get(var + 1)[2];
+			Date nextObsDate = list.get(var + 1).getObsDatetime();
 			while (nextObsDate.equals(currentObsDate)) {
-				results.add((String) list.get(var + 1)[0]);
+				results.add(list.get(var + 1).getUuid());
 				var++;
 				
 				if (var + 1 == list.size()) {
 					return results;
-				} else {
-					nextObsDate = (Date) list.get(var + 1)[2];
 				}
+				nextObsDate = list.get(var + 1).getObsDatetime();
 			}
 		}
 		return results;
 	}
 	
-	private HashMap<Object, List<Object[]>> handleGrouping(List<Object[]> observations) {
-		return (HashMap<Object, List<Object[]>>) observations.stream().collect(Collectors.groupingBy(o -> o[1]));
+	private Map<Concept, List<LastnObservationResult>> handleGrouping(List<LastnObservationResult> observations) {
+		return observations.stream().collect(Collectors.groupingBy(LastnObservationResult::getConcept));
 	}
 	
-	private List<String> getLastnUuids(HashMap<Object, List<Object[]>> groupingByObsCode, int max) {
+	private List<String> getLastnUuids(Map<Concept, List<LastnObservationResult>> groupingByObsCode, int max) {
 		List<String> results = new ArrayList<>();
-		for (HashMap.Entry entry : groupingByObsCode.entrySet()) {
+		for (Map.Entry entry : groupingByObsCode.entrySet()) {
 			@SuppressWarnings("unchecked")
-			List<Object[]> obsList = (List<Object[]>) entry.getValue();
-			obsList.sort((a, b) -> (((Date) b[2]).compareTo((Date) a[2])));
+			List<LastnObservationResult> obsList = (List<LastnObservationResult>) entry.getValue();
+			obsList.sort((a, b) -> (b.getObsDatetime().compareTo(a.getObsDatetime())));
 			List<String> lastnUuidsInGroup = getTopNRankedUuids(obsList, max);
 			results.addAll(lastnUuidsInGroup);
 		}
 		return results;
+	}
+
+	private List<LastnObservationResult> getFilteredObs(List<Object[]> observations)
+	{
+		List<LastnObservationResult> filteredObs = new ArrayList<>();
+		for(Object[] obs: observations)
+		{
+			filteredObs.add(new LastnObservationResult(obs));
+		}
+		return filteredObs;
+	}
+
+	@Value
+	private static class LastnObservationResult {
+		private String uuid;
+		private Concept concept;
+		private Date obsDatetime;
+
+		LastnObservationResult(Object[] obs)
+		{
+			uuid = (String) obs[0];
+			concept = (Concept) obs[1];
+			obsDatetime = (Date) obs[2];
+		}
 	}
 }

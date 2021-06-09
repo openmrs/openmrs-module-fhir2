@@ -304,5 +304,5 @@ public class FhirConstants {
 	
 	public static final String MAX_SEARCH_HANDLER = "max.search.handler";
 	
-	public static final String LASTN_OBSERVATION_SEARCH_HANDLER = "lastn.search.handler";
+	public static final String LASTN_OBSERVATION_SEARCH_HANDLER = "lastn.observation.search.handler";
 }
