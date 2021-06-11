@@ -62,8 +62,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			    Projections.projectionList().add(property("uuid")).add(property("concept")).add(property("obsDatetime")));
 			
 			@SuppressWarnings("unchecked")
-			List<LastnObservationResult> results = (List<LastnObservationResult>) criteria.list().stream()
-			        .map(obs -> new LastnObservationResult((Object[]) obs)).collect(Collectors.toList());
+			List<LastnObservationResult> results = ((List<Object[]>) criteria.list()).stream()
+			        .map(LastnObservationResult::new).collect(Collectors.toList());
 			
 			return getLastnUuids(handleGrouping(results), getMaxParameter(theParams)).stream().distinct()
 			        .collect(Collectors.toList());
@@ -260,7 +260,9 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	private static class LastnObservationResult {
 		
 		private String uuid;
+		
 		private Concept concept;
+		
 		private Date obsDatetime;
 		
 		LastnObservationResult(Object[] obs) {
