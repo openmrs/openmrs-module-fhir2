@@ -805,6 +805,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		verify(observationService).getLastnObservations(maxCaptor.capture(), isNull(), isNull(), isNull());
 		
 		assertThat(maxCaptor.getValue(), notNullValue());
+		assertThat(maxCaptor.getValue().getValue().intValue(), equalTo(3));
 	}
 	
 	@Test
@@ -861,10 +862,25 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		
 		verify(observationService).getLastnObservations(maxCaptor.capture(), patientCaptor.capture(), codeCaptor.capture(),
 		    codeCaptor.capture());
-		
+
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+
 		assertThat(maxCaptor.getValue(), notNullValue());
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(maxCaptor.getValue().getValue().intValue(), equalTo(2));
+
+		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(referenceParam.getChain(), equalTo(null));
+
 		assertThat(codeCaptor.getValue(), notNullValue());
+		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
+		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+
+		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
+		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
+		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5085"));
 	}
 	
 	private void verifyLastnOperation(String uri) throws Exception {
