@@ -341,7 +341,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
 		when(observationService.getLastnObservations(max, referenceParam, categories, code)).thenReturn(
-		    new org.openmrs.module.fhir2.providers.r4.MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		    new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, categories, code);
 		
@@ -372,7 +372,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
 		when(observationService.getLastnObservations(null, referenceParam, categories, code)).thenReturn(
-		    new org.openmrs.module.fhir2.providers.r4.MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		    new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(null, referenceParam, null, categories, code);
 		
@@ -402,7 +402,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
 		when(observationService.getLastnObservations(max, referenceParam, categories, code)).thenReturn(
-		    new org.openmrs.module.fhir2.providers.r4.MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		    new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, null, referenceParam, categories, code);
 		
@@ -426,7 +426,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
 		when(observationService.getLastnObservations(max, null, categories, code)).thenReturn(
-		    new org.openmrs.module.fhir2.providers.r4.MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		    new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, null, null, categories, code);
 		
@@ -454,7 +454,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
 		when(observationService.getLastnObservations(max, referenceParam, null, code)).thenReturn(
-		    new org.openmrs.module.fhir2.providers.r4.MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		    new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, null, code);
 		
@@ -480,7 +480,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
 		
 		when(observationService.getLastnObservations(max, referenceParam, categories, null)).thenReturn(
-		    new org.openmrs.module.fhir2.providers.r4.MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		    new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, categories, null);
 		
@@ -504,7 +504,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		referenceParam.addValue(new ReferenceOrListParam().add(patient));
 		
 		when(observationService.getLastnObservations(max, referenceParam, null, null)).thenReturn(
-		    new org.openmrs.module.fhir2.providers.r4.MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		    new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, null, null);
 		

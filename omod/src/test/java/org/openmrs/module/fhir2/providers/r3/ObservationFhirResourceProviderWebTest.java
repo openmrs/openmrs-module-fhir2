@@ -884,7 +884,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 	}
 	
 	private void verifyLastnOperation(String uri) throws Exception {
-		org.hl7.fhir.r4.model.Observation observation = new org.hl7.fhir.r4.model.Observation();
+		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
 		
 		when(observationService.getLastnObservations(any(), any(), any(), any()))
