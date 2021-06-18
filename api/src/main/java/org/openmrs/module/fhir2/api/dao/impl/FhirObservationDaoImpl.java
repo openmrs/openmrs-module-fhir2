@@ -25,6 +25,8 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -38,6 +40,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -49,6 +52,9 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	@Autowired
 	private ObservationCategoryMap categoryMap;
+	
+	@Autowired
+	private FhirEncounterDao encounterDao;
 	
 	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
@@ -69,6 +75,28 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			        .collect(Collectors.toList());
 		}
 		
+		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
+			ReferenceAndListParam encountersReferences = new ReferenceAndListParam();
+			ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+			
+			List<String> encounters = encounterDao.getSearchResultUuids(theParams);
+			
+			encounters.forEach(encounter -> referenceOrListParam.addOr(new ReferenceParam().setValue(encounter)));
+			encountersReferences.addAnd(referenceOrListParam);
+			
+			theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encountersReferences);
+			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
+			
+			setupSearchParams(criteria, theParams);
+			
+			criteria.setProjection(property("uuid"));
+			
+			@SuppressWarnings("unchecked")
+			List<String> lastnEncountersObservationsUuids = criteria.list();
+			
+			return lastnEncountersObservationsUuids;
+		}
+
 		return super.getSearchResultUuids(theParams);
 	}
 	
