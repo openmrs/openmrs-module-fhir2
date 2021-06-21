@@ -576,11 +576,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 2), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
 	}
 	
 	@Test
@@ -611,11 +608,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 1), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 1), is(true));
 	}
 	
 	@Test
@@ -646,11 +640,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 2), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
 	}
 	
 	@Test
@@ -678,11 +669,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 2), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
 	}
 	
 	@Test
@@ -710,11 +698,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 2), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
 	}
 	
 	@Test
@@ -743,11 +728,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 2), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
 	}
 	
 	@Test
@@ -770,11 +752,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Observation/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 1), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 1), is(true));
 	}
 	
 	@Test
@@ -805,11 +784,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 2), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
 	}
 	
 	@Test
@@ -840,11 +816,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 1), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 1), is(true));
 	}
 	
 	@Test
@@ -875,11 +848,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 2), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
 	}
 	
 	@Test
@@ -907,11 +877,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 2), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
 	}
 	
 	@Test
@@ -939,11 +906,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 2), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
 	}
 	
 	@Test
@@ -971,11 +935,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 2), is(true));
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
 	}
 	
 	@Test
@@ -998,15 +959,14 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/Observation/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
-		
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-		        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(observations, 1), is(true));
-		
+
+		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 1), is(true));
 	}
 	
-	private boolean checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(List<Observation> observations, int max) {
+	private boolean checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(List<Bundle.BundleEntryComponent> entries, int max) {
+		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
+				.filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
+
 		Set<String> codeList = new HashSet<>();
 		
 		for (int var = 0; var < observations.size(); var++) {
