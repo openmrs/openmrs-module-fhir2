@@ -85,18 +85,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			encountersReferences.addAnd(referenceOrListParam);
 			
 			theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encountersReferences);
-			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
-			
-			setupSearchParams(criteria, theParams);
-			
-			criteria.setProjection(property("uuid"));
-			
-			@SuppressWarnings("unchecked")
-			List<String> lastnEncountersObservationsUuids = criteria.list();
-			
-			return lastnEncountersObservationsUuids;
 		}
-
+		
 		return super.getSearchResultUuids(theParams);
 	}
 	

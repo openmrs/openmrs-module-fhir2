@@ -157,6 +157,15 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		return observationService.getLastnObservations(max, subjectParam, category, code);
 	}
 	
+	/*
+	 * The $lastn-encounters operation fetches the observations matching the
+	 * most recent `N` encounters corresponding to the specified patients.
+	 *
+	 * It takes the parameters: max, subject or patient, code, category
+	 * max contains the value of `N`, Default value of max is 1
+	 * If neither patient nor subject is specified, then perform search on all patients
+	 * It returns a bundle of observations whose corresponding encounter is among the recent `N` encounters for the specified patient
+	 */
 	@Operation(name = "lastn-encounters", idempotent = true, type = Observation.class)
 	public IBundleProvider getLastnEncountersObservations(@OperationParam(name = "max") NumberParam max,
 	        @OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,

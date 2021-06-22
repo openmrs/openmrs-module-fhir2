@@ -46,8 +46,8 @@ public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements Fhir
 			criteria.setProjection(Projections.projectionList().add(property("uuid")).add(property("encounterDatetime")));
 			
 			@SuppressWarnings("unchecked")
-			List<LastnEncountersResults> results = (List<LastnEncountersResults>) criteria.list().stream()
-			        .map(obs -> new LastnEncountersResults((Object[]) obs)).collect(Collectors.toList());
+			List<LastnEncountersResults> results = ((List<Object[]>) criteria.list()).stream()
+			        .map(LastnEncountersResults::new).collect(Collectors.toList());
 			
 			return getTopNRankedUuids(results, getMaxParameter(theParams));
 		}
