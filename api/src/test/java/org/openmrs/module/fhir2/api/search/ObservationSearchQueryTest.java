@@ -1742,7 +1742,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		return results.getResources(START_INDEX, END_INDEX);
 	}
 	
-	int getDistinctEncounterDatetime(List<IBaseResource> resultList) {
+	private int getDistinctEncounterDatetime(List<IBaseResource> resultList) {
 		List<Date> results = resultList
 		        .stream().map(result -> encounterDao
 		                .get(((Observation) result).getEncounter().getReferenceElement().getIdPart()).getEncounterDatetime())
