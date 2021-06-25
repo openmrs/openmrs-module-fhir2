@@ -144,73 +144,77 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 			Set<String> codeList = new HashSet<>();
 			
 			for (int var = 0; var < observations.size(); var++) {
-				String currentConcept = observations.get(var).getCode().getCodingFirstRep().getCode();
-				
+				Observation currentObservation = observations.get(var);
+				String currentConcept = currentObservation.getCode().getCodingFirstRep().getCode();
+
 				//check if Bundle is returned grouped code wise
 				// if an observation arrives whose concept wise list is already created, then that means this observation is
 				//out of place
 				//so bundle is not returned grouped wise
 				if (codeList.contains(currentConcept)) {
-					mismatchDescription.appendText("an Observation which was not grouped correctly")
-					        .appendValue(observations.get(var).getId());
+					mismatchDescription.appendText("Observation with id ").appendValue(currentObservation.getId()).
+							appendText(" and code ").appendValue(currentConcept).appendValue(" was not grouped correctly");
 					return false;
-				} else {
-					
-					codeList.add(currentConcept);
-					
-					String currentDateTimeType = observations.get(var).getEffectiveDateTimeType().toString();
-					
-					int distinctObsDateTime = 1;
-					
-					if (var == observations.size() - 1) {
-						return true;
-					}
-					
-					String nextConcept = observations.get(var + 1).getCode().getCodingFirstRep().getCode();
-					String nextDateTimeType = observations.get(var + 1).getEffectiveDateTimeType().toString();
-					
-					while (nextConcept.equals(currentConcept)) {
-						//if nextDatetime is greater than currentDateTime, then the list is not sorted in decreasing order, which was required
-						if (currentDateTimeType.compareTo(nextDateTimeType) < 0) {
-							mismatchDescription.appendText("an Observation which is not placed in sorted order")
-							        .appendValue(observations.get(var + 1).getId());
-							return false;
-						}
-						
-						if (!currentDateTimeType.equals(nextDateTimeType)) {
-							distinctObsDateTime++;
-						}
-						var++;
-						
-						if (var + 1 == observations.size()) {
-							//if count of distinct obsDatetime is within max
-							if (distinctObsDateTime <= max) {
-								return true;
-							}
-							return false;
-						}
-						
-						nextConcept = observations.get(var + 1).getCode().getCodingFirstRep().getCode();
-						
-						currentDateTimeType = nextDateTimeType;
-						nextDateTimeType = observations.get(var + 1).getEffectiveDateTimeType().toString();
-					}
-					
-					if (distinctObsDateTime > max) {
-						mismatchDescription.appendText("a code group which contains more observations than specified in max")
-						        .appendValue(currentConcept);
+				}
+				codeList.add(currentConcept);
+
+				String currentDateTimeType = currentObservation.getEffectiveDateTimeType().toString();
+
+				int distinctObsDateTime = 1;
+
+				if (var == observations.size() - 1) {
+					return true;
+				}
+
+				Observation nextObservation = observations.get(var + 1);
+				String nextConcept = nextObservation.getCode().getCodingFirstRep().getCode();
+				String nextDateTimeType = nextObservation.getEffectiveDateTimeType().toString();
+
+				while (nextConcept.equals(currentConcept)) {
+					//if nextDatetime is greater than currentDateTime, then the list is not sorted in decreasing order, which was required
+					if (currentDateTimeType.compareTo(nextDateTimeType) < 0) {
+						mismatchDescription.appendText("Observation with id ").appendValue(nextObservation.getId()).appendText(" was is not placed in sorted order. Time should be less than ")
+								.appendValue(currentDateTimeType);
 						return false;
 					}
+
+					if (!currentDateTimeType.equals(nextDateTimeType)) {
+						distinctObsDateTime++;
+					}
+					var++;
+
+					if (var + 1 == observations.size()) {
+						//if count of distinct obsDatetime is within max
+						if (distinctObsDateTime <= max) {
+							return true;
+						}
+						mismatchDescription.appendText("Expected upto ").appendValue(max).appendText(" distinct obsDatetime in each concept group, but group with concept ").appendValue(currentConcept)
+								.appendText(" has ").appendValue(distinctObsDateTime).appendText(" distinct observation times");
+						return false;
+					}
+
+					nextObservation = observations.get(var + 1);
+					nextConcept = nextObservation.getCode().getCodingFirstRep().getCode();
+
+					currentDateTimeType = nextDateTimeType;
+					nextDateTimeType = nextObservation.getEffectiveDateTimeType().toString();
+				}
+
+				if (distinctObsDateTime > max) {
+					mismatchDescription.appendText("Expected upto ").appendValue(max).appendText(" distinct obsDatetime in each concept group, but group with concept ").appendValue(currentConcept)
+							.appendText(" has ").appendValue(distinctObsDateTime).appendText(" distinct observation times");
+					return false;
 				}
 			}
-			
+
 			return true;
 		}
 		
 		@Override
 		public void describeTo(Description description) {
 			description.appendText(
-			    "Result is grouped code wise, sorted from recent to older and distinct obsDatetime is within value of max");
+					"Result is grouped by concept and sorted from most recent to oldest with up to ").
+					appendValue(max).appendText(" distinct observation times");
 		}
 	}
 }
