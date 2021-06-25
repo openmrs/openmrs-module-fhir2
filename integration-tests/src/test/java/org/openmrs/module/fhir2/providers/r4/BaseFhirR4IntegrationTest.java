@@ -174,7 +174,7 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 					//if nextDatetime is greater than currentDateTime, then the list is not sorted in decreasing order, which was required
 					if (currentDateTimeType.compareTo(nextDateTimeType) < 0) {
 						mismatchDescription.appendText("Observation with id ").appendValue(nextObservation.getId())
-						        .appendText(" was is not placed in sorted order. Time should be less than ")
+						        .appendText(" was not placed in sorted order. Time should be less than ")
 						        .appendValue(currentDateTimeType);
 						return false;
 					}
@@ -190,7 +190,7 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 							return true;
 						}
 						mismatchDescription.appendText("Expected upto ").appendValue(max)
-						        .appendText(" distinct obsDatetime in each concept group, but group with concept ")
+						        .appendText(" distinct observation times in each concept group, but group with concept ")
 						        .appendValue(currentConcept).appendText(" has ").appendValue(distinctObsDateTime)
 						        .appendText(" distinct observation times");
 						return false;
@@ -205,7 +205,7 @@ public abstract class BaseFhirR4IntegrationTest<T extends IResourceProvider, U e
 				
 				if (distinctObsDateTime > max) {
 					mismatchDescription.appendText("Expected upto ").appendValue(max)
-					        .appendText(" distinct obsDatetime in each concept group, but group with concept ")
+					        .appendText(" distinct observation times in each concept group, but group with concept ")
 					        .appendValue(currentConcept).appendText(" has ").appendValue(distinctObsDateTime)
 					        .appendText(" distinct observation times");
 					return false;
