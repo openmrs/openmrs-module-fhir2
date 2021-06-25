@@ -32,10 +32,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -577,8 +575,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
+		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
 	@Test
@@ -609,8 +606,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 1), is(true));
+		assertThat(entries, isSortedAndWithinMax(1));
 	}
 	
 	@Test
@@ -641,8 +637,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
+		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
 	@Test
@@ -670,8 +665,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
+		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
 	@Test
@@ -699,8 +693,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
-
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
+		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
 	@Test
@@ -729,8 +722,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
+		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
 	@Test
@@ -753,8 +745,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
-
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 1), is(true));
+		assertThat(entries, isSortedAndWithinMax(1));
 	}
 	
 	@Test
@@ -785,8 +776,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
+		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
 	@Test
@@ -817,8 +807,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 1), is(true));
+		assertThat(entries, isSortedAndWithinMax(1));
 	}
 	
 	@Test
@@ -849,8 +838,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
+		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
 	@Test
@@ -878,8 +866,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
+		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
 	@Test
@@ -907,8 +894,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
 		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
+		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
 	@Test
@@ -936,8 +922,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 2), is(true));
+		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
 	@Test
@@ -960,71 +945,6 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
 		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
-		
-		assertThat(checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(entries, 1), is(true));
-	}
-	
-	private boolean checkDistinctObsDateTimeInEachCodeGroupIsSortedAndWithinMax(List<Bundle.BundleEntryComponent> entries, int max) {
-		List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
-				.filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
-
-		Set<String> codeList = new HashSet<>();
-		
-		for (int var = 0; var < observations.size(); var++) {
-			String currentConcept = observations.get(var).getCode().getCodingFirstRep().getCode();
-			
-			//check if Bundle is returned grouped code wise
-			// if an observation arrives whose concept wise list is already created, then that means this observation is
-			//out of place
-			//so bundle is not returned grouped wise
-			if (codeList.contains(currentConcept)) {
-				return false;
-			} else {
-				
-				codeList.add(currentConcept);
-				
-				String currentDateTimeType = observations.get(var).getEffectiveDateTimeType().toString();
-				
-				int distinctObsDateTime = 1;
-				
-				if (var == observations.size() - 1) {
-					return true;
-				}
-				
-				String nextConcept = observations.get(var + 1).getCode().getCodingFirstRep().getCode();
-				String nextDateTimeType = observations.get(var + 1).getEffectiveDateTimeType().toString();
-				
-				while (nextConcept.equals(currentConcept)) {
-					//if nextDatetime is greater than currentDateTime, then the list is not sorted in decreasing order, which was required
-					if (currentDateTimeType.compareTo(nextDateTimeType) < 0) {
-						return false;
-					}
-					
-					if (!currentDateTimeType.equals(nextDateTimeType)) {
-						distinctObsDateTime++;
-					}
-					var++;
-					
-					if (var + 1 == observations.size()) {
-						//if count of distinct obsDatetime is within max
-						if (distinctObsDateTime <= max) {
-							return true;
-						}
-						return false;
-					}
-					
-					nextConcept = observations.get(var + 1).getCode().getCodingFirstRep().getCode();
-					
-					currentDateTimeType = nextDateTimeType;
-					nextDateTimeType = observations.get(var + 1).getEffectiveDateTimeType().toString();
-				}
-				
-				if (distinctObsDateTime > max) {
-					return false;
-				}
-			}
-		}
-		
-		return true;
+		assertThat(entries, isSortedAndWithinMax(1));
 	}
 }

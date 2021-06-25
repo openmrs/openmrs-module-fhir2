@@ -10,15 +10,20 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.DomainResource;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -110,6 +115,100 @@ public abstract class BaseFhirR3IntegrationTest<T extends IResourceProvider, U e
 		@Override
 		protected void describeMismatchSafely(Bundle.BundleEntryComponent item, Description mismatchDescription) {
 			matcher.describeMismatch(item.getResource(), mismatchDescription);
+		}
+	}
+	
+	protected static Matcher<List<Bundle.BundleEntryComponent>> isSortedAndWithinMax(Integer max) {
+		return new IsSortedAndWithinMax(max);
+	}
+	
+	private static class IsSortedAndWithinMax extends TypeSafeDiagnosingMatcher<List<Bundle.BundleEntryComponent>> {
+		
+		private int max;
+		
+		IsSortedAndWithinMax(int max) {
+			this.max = max;
+		}
+		
+		@Override
+		protected boolean matchesSafely(List<Bundle.BundleEntryComponent> entries, Description mismatchDescription) {
+			List<Observation> observations = entries.stream().map(Bundle.BundleEntryComponent::getResource)
+			        .filter(it -> it instanceof Observation).map(it -> (Observation) it).collect(Collectors.toList());
+			
+			Set<String> codeList = new HashSet<>();
+			
+			for (int var = 0; var < observations.size(); var++) {
+				String currentConcept = observations.get(var).getCode().getCodingFirstRep().getCode();
+				
+				//check if Bundle is returned grouped code wise
+				// if an observation arrives whose concept wise list is already created, then that means this observation is
+				//out of place
+				//so bundle is not returned grouped wise
+				if (codeList.contains(currentConcept)) {
+					mismatchDescription.appendText("an Observation which was not grouped correctly")
+					        .appendValue(observations.get(var).getId());
+					return false;
+				} else {
+					
+					codeList.add(currentConcept);
+					
+					String currentDateTimeType = observations.get(var).getEffectiveDateTimeType().toString();
+					
+					int distinctObsDateTime = 1;
+					
+					if (var == observations.size() - 1) {
+						return true;
+					}
+					
+					String nextConcept = observations.get(var + 1).getCode().getCodingFirstRep().getCode();
+					String nextDateTimeType = observations.get(var + 1).getEffectiveDateTimeType().toString();
+					
+					while (nextConcept.equals(currentConcept)) {
+						//if nextDatetime is greater than currentDateTime, then the list is not sorted in decreasing order, which was required
+						if (currentDateTimeType.compareTo(nextDateTimeType) < 0) {
+							mismatchDescription.appendText("an Observation which is not placed in sorted order")
+							        .appendValue(observations.get(var + 1).getId());
+							return false;
+						}
+						
+						if (!currentDateTimeType.equals(nextDateTimeType)) {
+							distinctObsDateTime++;
+						}
+						var++;
+						
+						if (var + 1 == observations.size()) {
+							//if count of distinct obsDatetime is within max
+							if (distinctObsDateTime <= max) {
+								return true;
+							}
+							
+							mismatchDescription
+							        .appendText("a code group which contains more observations than specified in max")
+							        .appendValue(currentConcept);
+							return false;
+						}
+						
+						nextConcept = observations.get(var + 1).getCode().getCodingFirstRep().getCode();
+						
+						currentDateTimeType = nextDateTimeType;
+						nextDateTimeType = observations.get(var + 1).getEffectiveDateTimeType().toString();
+					}
+					
+					if (distinctObsDateTime > max) {
+						mismatchDescription.appendText("a code group which contains more observations than specified in max")
+						        .appendValue(currentConcept);
+						return false;
+					}
+				}
+			}
+			
+			return true;
+		}
+		
+		@Override
+		public void describeTo(Description description) {
+			description.appendText(
+			    "Result is grouped code wise, sorted from recent to older and distinct obsDatetime is within value of max");
 		}
 	}
 }
