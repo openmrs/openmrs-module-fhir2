@@ -11,11 +11,12 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
+import static org.openmrs.module.fhir2.providers.util.LastnResults.getTopNRankedUuids;
 
 import javax.annotation.Nonnull;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +31,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
@@ -44,6 +44,7 @@ import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.providers.util.LastnResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -68,8 +69,11 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			    Projections.projectionList().add(property("uuid")).add(property("concept")).add(property("obsDatetime")));
 			
 			@SuppressWarnings("unchecked")
-			List<LastnObservationResult> results = ((List<Object[]>) criteria.list()).stream()
-			        .map(LastnObservationResult::new).collect(Collectors.toList());
+			List<LastnResults> results = ((List<Object[]>) criteria.list()).stream().map(objects -> {
+				Map<String, Object> attributes = new HashMap<>();
+				attributes.put("concept", objects[1]);
+				return new LastnResults(objects[0], objects[2], attributes);
+			}).collect(Collectors.toList());
 			
 			return getLastnUuids(handleGrouping(results), getMaxParameter(theParams)).stream().distinct()
 			        .collect(Collectors.toList());
@@ -231,62 +235,17 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		        .intValue();
 	}
 	
-	private List<String> getTopNRankedUuids(List<LastnObservationResult> list, int max) {
-		List<String> results = new ArrayList<>(list.size());
-		int currentRank = 0;
-		
-		for (int var = 0; var < list.size() && currentRank < max; var++) {
-			currentRank++;
-			results.add(list.get(var).getUuid());
-			Date currentObsDate = list.get(var).getObsDatetime();
-			
-			if (var == list.size() - 1) {
-				return results;
-			}
-			
-			//Adding all Obs which have the same Datetime as the current Obs Datetime since they will have the same rank
-			Date nextObsDate = list.get(var + 1).getObsDatetime();
-			while (nextObsDate.equals(currentObsDate)) {
-				results.add(list.get(var + 1).getUuid());
-				var++;
-				
-				if (var + 1 == list.size()) {
-					return results;
-				}
-				nextObsDate = list.get(var + 1).getObsDatetime();
-			}
-		}
-		return results;
+	private Map<Concept, List<LastnResults>> handleGrouping(List<LastnResults> observations) {
+		return observations.stream().collect(Collectors.groupingBy(obs -> (Concept) (obs.getAttributes().get("concept"))));
 	}
 	
-	private Map<Concept, List<LastnObservationResult>> handleGrouping(List<LastnObservationResult> observations) {
-		return observations.stream().collect(Collectors.groupingBy(LastnObservationResult::getConcept));
-	}
-	
-	private List<String> getLastnUuids(Map<Concept, List<LastnObservationResult>> groupingByObsCode, int max) {
+	private List<String> getLastnUuids(Map<Concept, List<LastnResults>> groupingByObsCode, int max) {
 		List<String> results = new ArrayList<>();
-		for (Map.Entry<Concept, List<LastnObservationResult>> entry : groupingByObsCode.entrySet()) {
-			List<LastnObservationResult> obsList = entry.getValue();
-			obsList.sort((a, b) -> (b.getObsDatetime().compareTo(a.getObsDatetime())));
+		for (Map.Entry<Concept, List<LastnResults>> entry : groupingByObsCode.entrySet()) {
+			List<LastnResults> obsList = entry.getValue();
 			List<String> lastnUuidsInGroup = getTopNRankedUuids(obsList, max);
 			results.addAll(lastnUuidsInGroup);
 		}
 		return results;
-	}
-	
-	@Value
-	private static class LastnObservationResult {
-		
-		private String uuid;
-		
-		private Concept concept;
-		
-		private Date obsDatetime;
-		
-		LastnObservationResult(Object[] obs) {
-			uuid = (String) obs[0];
-			concept = (Concept) obs[1];
-			obsDatetime = (Date) obs[2];
-		}
 	}
 }

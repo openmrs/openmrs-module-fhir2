@@ -23,13 +23,13 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import lombok.Value;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Projections;
 import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.providers.util.LastnResults;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -46,10 +46,10 @@ public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements Fhir
 			criteria.setProjection(Projections.projectionList().add(property("uuid")).add(property("encounterDatetime")));
 			
 			@SuppressWarnings("unchecked")
-			List<LastnEncountersResults> results = ((List<Object[]>) criteria.list()).stream()
-			        .map(LastnEncountersResults::new).collect(Collectors.toList());
+			List<LastnResults> results = ((List<Object[]>) criteria.list()).stream().map(LastnResults::new)
+			        .collect(Collectors.toList());
 			
-			return getTopNRankedUuids(results, getMaxParameter(theParams));
+			return LastnResults.getTopNRankedUuids(results, getMaxParameter(theParams));
 		}
 		
 		return super.getSearchResultUuids(theParams);
@@ -87,23 +87,23 @@ public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements Fhir
 		        .intValue();
 	}
 	
-	private List<String> getTopNRankedUuids(List<LastnEncountersResults> list, int max) {
+	private List<String> getTopNRankedUuids(List<LastnResults> list, int max) {
 		
-		list.sort((a, b) -> b.getEncounterDatetime().compareTo(a.getEncounterDatetime()));
+		list.sort((a, b) -> b.getDatetime().compareTo(a.getDatetime()));
 		List<String> results = new ArrayList<>(list.size());
 		int currentRank = 0;
 		
 		for (int var = 0; var < list.size() && currentRank < max; var++) {
 			currentRank++;
 			results.add(list.get(var).getUuid());
-			Date currentEncounterDate = list.get(var).getEncounterDatetime();
+			Date currentEncounterDate = list.get(var).getDatetime();
 			
 			if (var == list.size() - 1) {
 				return results;
 			}
 			
 			//Adding all Encounters which have the same Datetime as the current Obs Datetime since they will have the same rank
-			Date nextEncounterDate = list.get(var + 1).getEncounterDatetime();
+			Date nextEncounterDate = list.get(var + 1).getDatetime();
 			while (nextEncounterDate.equals(currentEncounterDate)) {
 				results.add(list.get(var + 1).getUuid());
 				var++;
@@ -111,23 +111,10 @@ public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements Fhir
 				if (var + 1 == list.size()) {
 					return results;
 				}
-				nextEncounterDate = list.get(var + 1).getEncounterDatetime();
+				nextEncounterDate = list.get(var + 1).getDatetime();
 			}
 		}
 		
 		return results;
-	}
-	
-	@Value
-	private static class LastnEncountersResults {
-		
-		private String uuid;
-		
-		private Date encounterDatetime;
-		
-		LastnEncountersResults(Object[] encounter) {
-			uuid = (String) encounter[0];
-			encounterDatetime = (Date) encounter[1];
-		}
 	}
 }
