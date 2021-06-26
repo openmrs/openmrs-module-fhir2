@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
-import static org.openmrs.module.fhir2.providers.util.LastnResults.getTopNRankedUuids;
+import static org.openmrs.module.fhir2.api.util.LastnResults.getTopNRankedUuids;
 
 import javax.annotation.Nonnull;
 
@@ -44,7 +44,7 @@ import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.providers.util.LastnResults;
+import org.openmrs.module.fhir2.api.util.LastnResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

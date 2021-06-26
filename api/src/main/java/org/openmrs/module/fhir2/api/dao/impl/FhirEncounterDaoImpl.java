@@ -10,12 +10,10 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Projections.property;
-import static org.openmrs.module.fhir2.providers.util.LastnResults.getTopNRankedUuids;
+import static org.openmrs.module.fhir2.api.util.LastnResults.getTopNRankedUuids;
 
 import javax.annotation.Nonnull;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +28,7 @@ import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.providers.util.LastnResults;
+import org.openmrs.module.fhir2.api.util.LastnResults;
 import org.springframework.stereotype.Component;
 
 @Component
