@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Projections.property;
+import static org.openmrs.module.fhir2.providers.util.LastnResults.getTopNRankedUuids;
 
 import javax.annotation.Nonnull;
 
@@ -49,7 +50,7 @@ public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements Fhir
 			List<LastnResults> results = ((List<Object[]>) criteria.list()).stream().map(LastnResults::new)
 			        .collect(Collectors.toList());
 			
-			return LastnResults.getTopNRankedUuids(results, getMaxParameter(theParams));
+			return getTopNRankedUuids(results, getMaxParameter(theParams));
 		}
 		
 		return super.getSearchResultUuids(theParams);
@@ -85,36 +86,5 @@ public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements Fhir
 	private int getMaxParameter(SearchParameterMap theParams) {
 		return ((NumberParam) theParams.getParameters(FhirConstants.MAX_SEARCH_HANDLER).get(0).getParam()).getValue()
 		        .intValue();
-	}
-	
-	private List<String> getTopNRankedUuids(List<LastnResults> list, int max) {
-		
-		list.sort((a, b) -> b.getDatetime().compareTo(a.getDatetime()));
-		List<String> results = new ArrayList<>(list.size());
-		int currentRank = 0;
-		
-		for (int var = 0; var < list.size() && currentRank < max; var++) {
-			currentRank++;
-			results.add(list.get(var).getUuid());
-			Date currentEncounterDate = list.get(var).getDatetime();
-			
-			if (var == list.size() - 1) {
-				return results;
-			}
-			
-			//Adding all Encounters which have the same Datetime as the current Obs Datetime since they will have the same rank
-			Date nextEncounterDate = list.get(var + 1).getDatetime();
-			while (nextEncounterDate.equals(currentEncounterDate)) {
-				results.add(list.get(var + 1).getUuid());
-				var++;
-				
-				if (var + 1 == list.size()) {
-					return results;
-				}
-				nextEncounterDate = list.get(var + 1).getDatetime();
-			}
-		}
-		
-		return results;
 	}
 }
