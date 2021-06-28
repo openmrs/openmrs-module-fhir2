@@ -10,7 +10,7 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Projections.property;
-import static org.openmrs.module.fhir2.api.util.LastnResults.getTopNRankedUuids;
+import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedUuids;
 
 import javax.annotation.Nonnull;
 
@@ -28,7 +28,7 @@ import org.openmrs.Encounter;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.util.LastnResults;
+import org.openmrs.module.fhir2.api.util.LastnResult;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -45,7 +45,7 @@ public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements Fhir
 			criteria.setProjection(Projections.projectionList().add(property("uuid")).add(property("encounterDatetime")));
 			
 			@SuppressWarnings("unchecked")
-			List<LastnResults> results = ((List<Object[]>) criteria.list()).stream().map(LastnResults::new)
+			List<LastnResult> results = ((List<Object[]>) criteria.list()).stream().map(LastnResult::new)
 			        .collect(Collectors.toList());
 			
 			return getTopNRankedUuids(results, getMaxParameter(theParams));

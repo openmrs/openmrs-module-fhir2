@@ -12,52 +12,10 @@ package org.openmrs.module.fhir2.api.util;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-public class LastnResults {
+public final class LastnOperationUtils {
 	
-	String uuid;
-	
-	Date datetime;
-	
-	Map<String, Object> attributes;
-	
-	public LastnResults(Object uuid, Object datetime, Map<String, Object> attributes) {
-		this.uuid = (String) uuid;
-		this.datetime = (Date) datetime;
-		this.attributes = attributes;
-	}
-	
-	public LastnResults(Object[] objects) {
-		uuid = (String) objects[0];
-		datetime = (Date) objects[1];
-	}
-	
-	public Map<String, Object> getAttributes() {
-		return attributes;
-	}
-	
-	public String getUuid() {
-		return uuid;
-	}
-	
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
-	
-	public Date getDatetime() {
-		return datetime;
-	}
-	
-	public void setDatetime(Date datetime) {
-		this.datetime = datetime;
-	}
-	
-	public void setAttributes(Map<String, Object> attributes) {
-		this.attributes = attributes;
-	}
-	
-	public static List<String> getTopNRankedUuids(List<LastnResults> list, int max) {
+	public static List<String> getTopNRankedUuids(List<LastnResult> list, int max) {
 		list.sort((a, b) -> b.getDatetime().compareTo(a.getDatetime()));
 		List<String> results = new ArrayList<>(list.size());
 		
@@ -86,4 +44,5 @@ public class LastnResults {
 		}
 		return results;
 	}
+	
 }

@@ -11,7 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
-import static org.openmrs.module.fhir2.api.util.LastnResults.getTopNRankedUuids;
+import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedUuids;
 
 import javax.annotation.Nonnull;
 
@@ -44,7 +44,7 @@ import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.util.LastnResults;
+import org.openmrs.module.fhir2.api.util.LastnResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -69,10 +69,10 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			    Projections.projectionList().add(property("uuid")).add(property("concept")).add(property("obsDatetime")));
 			
 			@SuppressWarnings("unchecked")
-			List<LastnResults> results = ((List<Object[]>) criteria.list()).stream().map(objects -> {
+			List<LastnResult> results = ((List<Object[]>) criteria.list()).stream().map(objects -> {
 				Map<String, Object> attributes = new HashMap<>();
 				attributes.put("concept", objects[1]);
-				return new LastnResults(objects[0], objects[2], attributes);
+				return new LastnResult(objects[0], objects[2], attributes);
 			}).collect(Collectors.toList());
 			
 			return getLastnUuids(handleGrouping(results), getMaxParameter(theParams)).stream().distinct()
@@ -235,14 +235,14 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		        .intValue();
 	}
 	
-	private Map<Concept, List<LastnResults>> handleGrouping(List<LastnResults> observations) {
+	private Map<Concept, List<LastnResult>> handleGrouping(List<LastnResult> observations) {
 		return observations.stream().collect(Collectors.groupingBy(obs -> (Concept) (obs.getAttributes().get("concept"))));
 	}
 	
-	private List<String> getLastnUuids(Map<Concept, List<LastnResults>> groupingByObsCode, int max) {
+	private List<String> getLastnUuids(Map<Concept, List<LastnResult>> groupingByObsCode, int max) {
 		List<String> results = new ArrayList<>();
-		for (Map.Entry<Concept, List<LastnResults>> entry : groupingByObsCode.entrySet()) {
-			List<LastnResults> obsList = entry.getValue();
+		for (Map.Entry<Concept, List<LastnResult>> entry : groupingByObsCode.entrySet()) {
+			List<LastnResult> obsList = entry.getValue();
 			List<String> lastnUuidsInGroup = getTopNRankedUuids(obsList, max);
 			results.addAll(lastnUuidsInGroup);
 		}
