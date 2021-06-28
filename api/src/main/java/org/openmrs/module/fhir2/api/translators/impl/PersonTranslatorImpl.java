@@ -70,7 +70,7 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
 		person.setId(openmrsPerson.getUuid());
-		person.setActive(!openmrsPerson.getVoided());
+		person.setActive(true);
 		
 		for (PersonName name : openmrsPerson.getNames()) {
 			person.addName(nameTranslator.toFhirResource(name));
@@ -111,7 +111,6 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		notNull(person, "The Person object should not be null");
 		
 		openmrsPerson.setUuid(person.getId());
-		openmrsPerson.setVoided(person.getActive());
 		
 		for (HumanName name : person.getName()) {
 			openmrsPerson.addName(nameTranslator.toOpenmrsType(name));

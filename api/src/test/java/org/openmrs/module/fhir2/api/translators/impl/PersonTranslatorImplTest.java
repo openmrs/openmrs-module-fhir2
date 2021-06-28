@@ -264,17 +264,6 @@ public class PersonTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateVoidedPersonToInactive() {
-		Person person = new Person();
-		person.setVoided(true);
-		
-		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getActive(), is(false));
-	}
-	
-	@Test
 	public void shouldTranslateOpenmrsPersonNameToFhirPersonName() {
 		HumanName humanName = new HumanName();
 		humanName.addGiven(PERSON_GIVEN_NAME);
