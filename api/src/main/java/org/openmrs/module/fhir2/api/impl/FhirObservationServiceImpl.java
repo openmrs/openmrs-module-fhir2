@@ -96,4 +96,18 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public IBundleProvider getLastnEncountersObservations(NumberParam max, ReferenceAndListParam patientReference,
+	        TokenAndListParam category, TokenAndListParam code) {
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, category)
+		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER, new StringParam())
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, Optional.ofNullable(max).orElse(new NumberParam(1)));
+		
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
 }

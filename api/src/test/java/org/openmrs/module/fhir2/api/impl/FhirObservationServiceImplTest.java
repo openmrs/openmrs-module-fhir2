@@ -287,5 +287,144 @@ public class FhirObservationServiceImplTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(equalTo(1)));
 	}
+
+	@Test
+	public void getLastnEncountersObservations_shouldReturnRecentNEncountersObservations() {
+		Obs obs = new Obs();
+		obs.setUuid(OBS_UUID);
+
+		Observation observation = new Observation();
+		observation.setId(OBS_UUID);
+
+		NumberParam max = new NumberParam(2);
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+
+		patient.setValue(PATIENT_UUID);
+
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+				new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+				new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+
+		SearchParameterMap theParams = new SearchParameterMap()
+				.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+				.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+				.addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+				.addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
+				.addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
+
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+				new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
+		when(translator.toFhirResource(obs)).thenReturn(observation);
+
+		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(max, referenceParam, categories, code);
+
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		assertThat(results.preferredPageSize(), equalTo(10));
+
+		List<IBaseResource> resultList = results.getResources(1, 10);
+
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
+	}
+
+	@Test
+	public void getLastnEncountersObservations_shouldReturnFirstRecentEncountersObservationsWhenMaxIsMissing() {
+		Obs obs = new Obs();
+		obs.setUuid(OBS_UUID);
+
+		Observation observation = new Observation();
+		observation.setId(OBS_UUID);
+
+		NumberParam max = new NumberParam(1);
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+
+		patient.setValue(PATIENT_UUID);
+
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+				new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+				new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+
+		SearchParameterMap theParams = new SearchParameterMap()
+				.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+				.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+				.addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+				.addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
+				.addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
+
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+				new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
+		when(translator.toFhirResource(obs)).thenReturn(observation);
+
+		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(null, referenceParam, categories, code);
+
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		assertThat(results.preferredPageSize(), equalTo(10));
+
+		List<IBaseResource> resultList = results.getResources(1, 10);
+
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
+	}
+
+	@Test
+	public void getLastnEncountersObservations_shouldReturnRecentNEncountersObservationsForAllPatientsWhenNoPatientIsSpecified() {
+		Obs obs = new Obs();
+		obs.setUuid(OBS_UUID);
+
+		Observation observation = new Observation();
+		observation.setId(OBS_UUID);
+
+		NumberParam max = new NumberParam(2);
+
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+				new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+				new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
+
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+				.addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+				.addParameter(FhirConstants.MAX_SEARCH_HANDLER, max)
+				.addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
+
+		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+				new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
+		when(translator.toFhirResource(obs)).thenReturn(observation);
+
+		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(max, null, categories, code);
+
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		assertThat(results.preferredPageSize(), equalTo(10));
+
+		List<IBaseResource> resultList = results.getResources(1, 10);
+
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(equalTo(1)));
+	}
 	
 }

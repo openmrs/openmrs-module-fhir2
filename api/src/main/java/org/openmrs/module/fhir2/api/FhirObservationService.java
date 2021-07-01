@@ -37,4 +37,7 @@ public interface FhirObservationService extends FhirService<Observation> {
 	
 	IBundleProvider getLastnObservations(NumberParam max, ReferenceAndListParam patientReference, TokenAndListParam category,
 	        TokenAndListParam code);
+	
+	IBundleProvider getLastnEncountersObservations(NumberParam max, ReferenceAndListParam patientReference,
+	        TokenAndListParam category, TokenAndListParam code);
 }
