@@ -25,11 +25,14 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +72,7 @@ import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
@@ -159,6 +163,9 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	@Autowired
 	private SearchQuery<Obs, Observation, FhirObservationDao, ObservationTranslator, SearchQueryInclude<Observation>> searchQuery;
+	
+	@Autowired
+	private FhirEncounterDao encounterDao;
 	
 	@Before
 	public void setup() throws Exception {
@@ -1623,6 +1630,148 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(resultList, isSortedAndWithinMax(1));
 	}
 	
+	@Test
+	public void searchForLastnEncountersObs_shouldHandleNormalRequest() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(OBS_CONCEPT_ID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER, new StringParam());
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(getDistinctEncounterDatetime(resultList), lessThanOrEqualTo(2));
+		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
+		
+	}
+	
+	@Test
+	public void searchForLastnEncountersObs_shouldHandleRequestWhenMaxIsOne() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(OBS_CONCEPT_ID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(1))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER, new StringParam());
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(getDistinctEncounterDatetime(resultList), lessThanOrEqualTo(1));
+		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
+		
+	}
+	
+	@Test
+	public void searchForLastnEncountersObs_shouldHandleNoPatientReferenceRequest() {
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(OBS_CONCEPT_ID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER, new StringParam());
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(getDistinctEncounterDatetime(resultList), lessThanOrEqualTo(2));
+		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
+	}
+	
+	@Test
+	public void searchForLastnEncountersObs_shouldHandleNoCategoryRequest() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam code = new TokenAndListParam().addAnd(
+		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
+		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(OBS_CONCEPT_ID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(2))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER, new StringParam());
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(2));
+		assertThat(getDistinctEncounterDatetime(resultList), lessThanOrEqualTo(2));
+		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
+	}
+	
+	@Test
+	public void searchForLastnEncountersObs_shouldHandleNoCodeRequest() {
+		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
+		ReferenceParam patient = new ReferenceParam();
+		
+		patient.setValue(PATIENT_UUID);
+		
+		referenceParam.addValue(new ReferenceOrListParam().add(patient));
+		
+		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, categories)
+		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, new NumberParam(3))
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, referenceParam)
+		        .addParameter(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER, new StringParam());
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList.size(), equalTo(10));
+		assertThat(getDistinctEncounterDatetime(resultList), lessThanOrEqualTo(3));
+		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
+	}
+	
 	private IBundleProvider search(SearchParameterMap theParams) {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
@@ -1727,5 +1876,35 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 			description.appendText("Result is grouped by concept and sorted from most recent to oldest with up to ")
 			        .appendValue(max).appendText(" distinct observation times");
 		}
+	}
+	
+	private int getDistinctEncounterDatetime(List<IBaseResource> resultList) {
+		List<Date> results = resultList
+		        .stream().map(result -> encounterDao
+		                .get(((Observation) result).getEncounter().getReferenceElement().getIdPart()).getEncounterDatetime())
+		        .sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+		
+		int distinctEncounterDatetime = 0;
+		for (int var = 0; var < results.size(); var++) {
+			Date currentDatetime = results.get(var);
+			distinctEncounterDatetime++;
+			
+			if (var == results.size() - 1) {
+				return distinctEncounterDatetime;
+			}
+			
+			Date nextDatetime = results.get(var + 1);
+			
+			while (nextDatetime.equals(currentDatetime)) {
+				var++;
+				
+				if (var + 1 == results.size()) {
+					return distinctEncounterDatetime;
+				}
+				nextDatetime = results.get(var + 1);
+			}
+		}
+		
+		return distinctEncounterDatetime;
 	}
 }
