@@ -13,8 +13,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * The LastNOperationUtils class has functions which perform the same operations in $lastn and
+ * $lastn-encounters operation
+ */
 public final class LastnOperationUtils {
 	
+	/**
+	 * @param list List of resources
+	 * @param max The value of `N`, which specifies the maximum count of distinct effective datetime
+	 * @return The list of resource uuids
+	 */
 	public static List<String> getTopNRankedUuids(List<LastnResult> list, int max) {
 		list.sort((a, b) -> b.getDatetime().compareTo(a.getDatetime()));
 		List<String> results = new ArrayList<>(list.size());

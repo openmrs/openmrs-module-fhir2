@@ -357,7 +357,6 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 	
 	@Test
 	public void getLastn_shouldReturnFirstRecentObservationsWhenMaxIsMissing() {
-		
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
 		
