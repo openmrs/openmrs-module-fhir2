@@ -50,6 +50,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.Before;
@@ -883,6 +884,93 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5085"));
 	}
 	
+	@Test
+	public void lastnEncounters_shouldHandleRequestWithMaxParameter() throws Exception {
+		verifyLastnEncountersOperation("/Observation/$lastn-encounters?max=3");
+		
+		verify(observationService).getLastnEncountersObservations(maxCaptor.capture(), isNull(), isNull(), isNull());
+		
+		assertThat(maxCaptor.getValue(), notNullValue());
+		assertThat(maxCaptor.getValue().getValue().intValue(), equalTo(3));
+	}
+	
+	@Test
+	public void lastnEncounters_shouldHandleRequestWithPatientId() throws Exception {
+		verifyLastnEncountersOperation("/Observation/$lastn-encounters?subject=" + PATIENT_UUID);
+		
+		verify(observationService).getLastnEncountersObservations(isNull(), patientCaptor.capture(), isNull(), isNull());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(referenceParam.getChain(), equalTo(null));
+	}
+	
+	@Test
+	public void lastnEncounters_shouldHandleRequestWithCategory() throws Exception {
+		verifyLastnEncountersOperation("/Observation/$lastn-encounters?category=laboratory");
+		
+		verify(observationService).getLastnEncountersObservations(isNull(), isNull(), codeCaptor.capture(), isNull());
+		
+		assertThat(codeCaptor.getValue(), notNullValue());
+		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
+		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		
+		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
+		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
+		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("laboratory"));
+	}
+	
+	@Test
+	public void lastnEncounters_shouldHandleRequestWithCode() throws Exception {
+		verifyLastnEncountersOperation("/Observation/$lastn-encounters?code=5085");
+		
+		verify(observationService).getLastnEncountersObservations(isNull(), isNull(), isNull(), codeCaptor.capture());
+		
+		assertThat(codeCaptor.getValue(), notNullValue());
+		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
+		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		
+		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
+		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
+		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5085"));
+	}
+	
+	@Test
+	public void lastnEncounters_shouldHandleRequestWithAllParameters() throws Exception {
+		verifyLastnEncountersOperation(
+		    "/Observation/$lastn-encounters?max=2&subject=" + PATIENT_UUID + "&category=laboratory&code=5085");
+		
+		verify(observationService).getLastnEncountersObservations(maxCaptor.capture(), patientCaptor.capture(),
+		    codeCaptor.capture(), codeCaptor.capture());
+		
+		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
+		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		
+		assertThat(maxCaptor.getValue(), notNullValue());
+		assertThat(maxCaptor.getValue().getValue().intValue(), equalTo(2));
+		
+		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(referenceParam.getChain(), equalTo(null));
+		
+		assertThat(codeCaptor.getValue(), notNullValue());
+		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
+		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		
+		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
+		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
+		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
+		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5085"));
+	}
+	
 	private void verifyLastnOperation(String uri) throws Exception {
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
@@ -894,6 +982,25 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR3ResourcePr
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		
+		Bundle results = readBundleResponse(response);
+		assertThat(results.getEntry(), notNullValue());
+		assertThat(results.getEntry(), not(empty()));
+		assertThat(results.getEntry().get(0).getResource(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(OBS_UUID));
+	}
+	
+	private void verifyLastnEncountersOperation(String uri) throws Exception {
+		Observation observation = new Observation();
+		observation.setId(OBS_UUID);
+		
+		when(observationService.getLastnEncountersObservations(any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
+		
+		MatcherAssert.assertThat(response, isOk());
+		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.getEntry(), notNullValue());
