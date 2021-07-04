@@ -173,12 +173,12 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	 * @return a bundle of observations whose corresponding encounter is among the recent `N` encounters
 	 *         for the specified patient
 	 */
-	@Operation(name = "lastn-encounters", idempotent = true, type = org.hl7.fhir.r4.model.Observation.class)
+	@Operation(name = "lastn-encounters", idempotent = true, type = Observation.class)
 	public IBundleProvider getLastnEncountersObservations(@OperationParam(name = "max") NumberParam max,
-	        @OperationParam(name = org.hl7.fhir.r4.model.Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
-	        @OperationParam(name = org.hl7.fhir.r4.model.Observation.SP_PATIENT) ReferenceAndListParam patientParam,
-	        @OperationParam(name = org.hl7.fhir.r4.model.Observation.SP_CATEGORY) TokenAndListParam category,
-	        @OperationParam(name = org.hl7.fhir.r4.model.Observation.SP_CODE) TokenAndListParam code) {
+	        @OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
+	        @OperationParam(name = Observation.SP_PATIENT) ReferenceAndListParam patientParam,
+	        @OperationParam(name = Observation.SP_CATEGORY) TokenAndListParam category,
+	        @OperationParam(name = Observation.SP_CODE) TokenAndListParam code) {
 		if (patientParam != null) {
 			subjectParam = patientParam;
 		}
