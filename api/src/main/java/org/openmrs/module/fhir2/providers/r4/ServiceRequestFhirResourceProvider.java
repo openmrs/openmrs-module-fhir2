@@ -110,6 +110,7 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
 	        @OptionalParam(name = ServiceRequest.SP_OCCURRENCE) DateRangeParam occurrence,
 	        @OptionalParam(name = ServiceRequest.SP_RES_ID) TokenAndListParam uuid,
+	        @OptionalParam(name = ServiceRequest.SP_IDENTIFIER) TokenAndListParam orderNumber,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(allow = { "ServiceRequest:" + ServiceRequest.SP_PATIENT,
 	                "ServiceRequest:" + ServiceRequest.SP_REQUESTER,
@@ -123,6 +124,6 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return serviceRequestService.searchForServiceRequests(patientReference, code, encounterReference,
-		    participantReference, occurrence, uuid, lastUpdated, includes);
+		    participantReference, occurrence, uuid, orderNumber, lastUpdated, includes);
 	}
 }

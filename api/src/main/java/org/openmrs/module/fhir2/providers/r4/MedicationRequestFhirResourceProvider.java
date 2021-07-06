@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -110,6 +111,7 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	        @OptionalParam(name = MedicationRequest.SP_ENCOUNTER, chainWhitelist = {
 	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
 	        @OptionalParam(name = MedicationRequest.SP_CODE) TokenAndListParam code,
+	        @OptionalParam(name = ServiceRequest.SP_IDENTIFIER) TokenAndListParam orderNumber,
 	        @OptionalParam(name = MedicationRequest.SP_REQUESTER, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
 	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
 	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
@@ -130,6 +132,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		}
 		
 		return fhirMedicationRequestService.searchForMedicationRequests(patientReference, encounterReference, code,
-		    participantReference, medicationReference, id, lastUpdated, includes);
+		    participantReference, medicationReference, orderNumber, id, lastUpdated, includes);
 	}
 }

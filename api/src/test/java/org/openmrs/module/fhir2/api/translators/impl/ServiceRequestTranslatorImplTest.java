@@ -30,6 +30,7 @@ import java.util.List;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
@@ -84,6 +85,12 @@ public class ServiceRequestTranslatorImplTest {
 	private static final int PREFERRED_PAGE_SIZE = 10;
 	
 	private static final int COUNT = 1;
+	
+	private static final String IDENTIFIER_SYSTEM = "http://terminology.hl7.org/CodeSystem/v2-0203";
+	
+	private static final String IDENTIFIER_CODE = "PLAC";
+	
+	private static final String IDENTIFIER_DISPLAY = "Placer Identifier";
 	
 	private ServiceRequestTranslatorImpl translator;
 	
@@ -548,6 +555,34 @@ public class ServiceRequestTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getReference(), containsString(PRACTITIONER_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateOrderNumber() {
+		
+		TestOrder order = new TestOrder();
+		Provider requester = new Provider();
+		Reference requesterReference = new Reference();
+		
+		requester.setUuid(PRACTITIONER_UUID);
+		order.setUuid(SERVICE_REQUEST_UUID);
+		order.setOrderer(requester);
+		setOrderNumberByReflection(order, TEST_ORDER_NUMBER);
+		requesterReference.setType(FhirConstants.PRACTITIONER)
+		        .setReference(FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID);
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
+		when(practitionerReferenceTranslator.toFhirResource(requester)).thenReturn(requesterReference);
+		
+		Identifier result = translator.toFhirResource(order).getIdentifier().get(0);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getValue(), containsString(TEST_ORDER_NUMBER));
+		assertThat(result.getType().getCoding().get(0).getSystem(), equalTo(IDENTIFIER_SYSTEM));
+		assertThat(result.getType().getCoding().get(0).getCode(), equalTo(IDENTIFIER_CODE));
+		assertThat(result.getType().getCoding().get(0).getDisplay(), equalTo(IDENTIFIER_DISPLAY));
+		assertThat(result.getUse().getDisplay(), equalTo("Usual"));
 	}
 	
 	private List<Task> setUpBasedOnScenario(Task.TaskStatus status) {
