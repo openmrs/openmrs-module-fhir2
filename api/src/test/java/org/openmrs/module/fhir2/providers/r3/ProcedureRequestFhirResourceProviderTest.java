@@ -135,13 +135,13 @@ public class ProcedureRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchProcedureRequest_shouldReturnMatchingProcedureRequestByCode() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		TokenAndListParam code = new TokenAndListParam().addAnd(new TokenParam(CODE));
 		
-		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, code, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, code, null, null,null, null, null, null,
 		    null);
 		
 		List<IBaseResource> resources = getResources(results);
@@ -155,14 +155,14 @@ public class ProcedureRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchProcedureRequest_shouldReturnMatchingProcedureRequestWhenPatientParamIsSpecified() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		ReferenceAndListParam patientParam = new ReferenceAndListParam().addAnd(
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
 		
-		IBundleProvider results = resourceProvider.searchForProcedureRequests(patientParam, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForProcedureRequests(patientParam, null,null, null, null, null, null,
 		    null, null, null);
 		
 		List<IBaseResource> resources = getResources(results);
@@ -176,7 +176,7 @@ public class ProcedureRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchProcedureRequest_shouldReturnMatchingProcedureRequestWhenSubjectParamIsSpecified() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
@@ -184,7 +184,7 @@ public class ProcedureRequestFhirResourceProviderTest {
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
 		
 		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, subjectParam, null, null, null, null,
-		    null, null, null);
+		    null, null, null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -197,7 +197,7 @@ public class ProcedureRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchProcedureRequest_shouldReturnMatchingProcedureRequestByRequesterParam() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
@@ -205,7 +205,7 @@ public class ProcedureRequestFhirResourceProviderTest {
 		        .add(new ReferenceParam().setValue(PARTICIPANT_IDENTIFIER).setChain(Practitioner.SP_IDENTIFIER)));
 		
 		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, null, null, practitionerParam,
-		    null, null, null, null);
+		    null, null, null, null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -218,14 +218,14 @@ public class ProcedureRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchProcedureRequest_shouldReturnMatchingProcedureRequestByOccurrence() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		DateRangeParam occurrence = new DateRangeParam().setLowerBound(OCCURRENCE).setUpperBound(OCCURRENCE);
 		
 		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, null, null, null, occurrence, null,
-		    null, null);
+		    null, null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -238,14 +238,14 @@ public class ProcedureRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchProcedureRequest_shouldReturnMatchingProcedureRequestByEncounter() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(serviceRequest), 10, 1));
 		
 		ReferenceAndListParam encounterParam = new ReferenceAndListParam()
 		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID).setChain(null)));
 		
 		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, null, encounterParam, null, null,
-		    null, null, null);
+		    null, null, null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -338,12 +338,12 @@ public class ProcedureRequestFhirResourceProviderTest {
 	public void searchProcedureRequest_shouldReturnMatchingProcedureRequestWhenUUIDIsSpecified() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, null, null, null, null, uuid, null,
-		    null);
+		    null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -358,12 +358,12 @@ public class ProcedureRequestFhirResourceProviderTest {
 	public void searchProcedureRequest_shouldReturnMatchingProcedureRequestWhenLastUpdatedIsSpecified() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, null, null, null, null, null,
-		    lastUpdated, null);
+		    lastUpdated, null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -379,11 +379,11 @@ public class ProcedureRequestFhirResourceProviderTest {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("ProcedureRequest:patient"));
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(),
+		when(serviceRequestService.searchForServiceRequests(any(),  any(),any(), any(), any(), any(), any(), any(),
 		    argThat(is(includes)))).thenReturn(
 		        new MockIBundleProvider<>(Arrays.asList(serviceRequest, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, null, null, null, null, null, null,null,
 		    includes);
 		
 		List<IBaseResource> resources = getResources(results);
@@ -400,11 +400,11 @@ public class ProcedureRequestFhirResourceProviderTest {
 	public void searchProcedureRequest_shouldNotAddRelatedResourcesToResultListForEmptyIncludes() {
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), isNull()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any(), isNull()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForProcedureRequests(null, null, null, null, null, null, null, null,null,
 		    includes);
 		
 		List<IBaseResource> resources = getResources(results);

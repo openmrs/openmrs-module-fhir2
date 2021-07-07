@@ -113,6 +113,10 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
 	
+	private static final String SERVICE_REQUEST_UUID = "1c96f25c-4949-4f72-9931-d808fbc226de";
+	
+	private static final String WRONG_SERVICE_REQUEST_UUID = "2e59f25c-4949-4f72-9931-d808fbc226df";
+	
 	private static final String PATIENT_WRONG_UUID = "c2299800-cca9-11e0-9572-abcdef0c9a66";
 	
 	private static final String PATIENT_GIVEN_NAME = "Collet";
@@ -184,7 +188,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(3));
+		assertThat(results.size(), equalTo(4));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -204,7 +208,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(3));
+		assertThat(results.size(), equalTo(4));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -226,7 +230,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(3));
+		assertThat(results.size(), equalTo(4));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -253,12 +257,51 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(15));
+		assertThat(results.size(), equalTo(16));
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, hasSize(equalTo(10)));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnObsBasedOnServiceRequestUuid() {
+		
+		ReferenceAndListParam ref = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(SERVICE_REQUEST_UUID)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER,
+		    ref);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results.size(), equalTo(1));
+		assertThat(results, notNullValue());
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(1));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnObsBasedOnWrongServiceRequestUuid() {
+		
+		ReferenceAndListParam ref = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(WRONG_SERVICE_REQUEST_UUID)));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER,
+		    ref);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results.size(), equalTo(0));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, empty());
+		assertThat(resultList.size(), equalTo(0));
 	}
 	
 	@Test
@@ -679,7 +722,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(17));
+		assertThat(results.size(), equalTo(18));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -1062,7 +1105,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(16));
+		assertThat(results.size(), equalTo(17));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -1081,7 +1124,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(11));
+		assertThat(results.size(), equalTo(12));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -1100,7 +1143,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(10));
+		assertThat(results.size(), equalTo(11));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -1712,7 +1755,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		List<IBaseResource> resultList = get(results);
 		
-		assertThat(resultList.size(), equalTo(2));
+		assertThat(resultList.size(), equalTo(3));
 		assertThat(getDistinctEncounterDatetime(resultList), lessThanOrEqualTo(2));
 		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
 	}

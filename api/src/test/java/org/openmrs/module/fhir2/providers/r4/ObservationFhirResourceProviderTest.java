@@ -46,6 +46,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -128,7 +129,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	
 	@Test
 	public void searchObservations_shouldReturnMatchingObservations() {
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
 		    any(), any(), any(), any(), any()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
@@ -137,7 +138,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		codingToken.setValue("1000");
 		code.addAnd(codingToken);
 		
-		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, code,
+		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null,null, code,
 		    null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -151,7 +152,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	
 	@Test
 	public void searchObservations_shouldReturnMatchingObservationsWhenPatientParamIsSpecified() {
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
 		    any(), any(), any(), any(), any()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
@@ -159,7 +160,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
-		    null, null, null, null, patientParam, null, null);
+		    null, null, null, null,null, patientParam, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -175,12 +176,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Observation:patient"));
 		
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
 		    any(), any(), any(), any(), any()))
 		            .thenReturn(new MockIBundleProvider<>(Arrays.asList(observation, new Patient()), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
-		    null, null, null, null, null, includes, null);
+		    null, null, null, null, null,null, includes, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -196,12 +197,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	public void searchObservations_shouldNotAddRelatedResourcesForEmptyInclude() {
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		when(observationService.searchForObservations(any(), any(), any(), any(),any(), any(), any(), any(), any(), any(), any(),
 		    any(), any(), any(), isNull(), any()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
-		    null, null, null, null, null, includes, null);
+		    null, null, null, null, null,null, includes, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -217,12 +218,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("DiagnosticReport:result"));
 		
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		when(observationService.searchForObservations(any(), any(),any(), any(), any(), any(), any(), any(), any(), any(), any(),
 		    any(), any(), any(), any(), any()))
 		            .thenReturn(new MockIBundleProvider<>(Arrays.asList(observation, new DiagnosticReport()), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
-		    null, null, null, null, null, includes, null);
+		    null, null, null, null, null,null, includes, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -233,17 +234,38 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		assertThat(resultList.get(1).fhirType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
 	}
+
+	@Test
+	public void searchObservations_shouldReturnMatchingObservationsWhenBasedOnParamIsSpecified() {
+		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		    any(), any(), any(), any(), any(), any()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+
+		ReferenceAndListParam basedOnParam = new ReferenceAndListParam();
+		basedOnParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(ServiceRequest.SP_IDENTIFIER)));
+
+		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
+		    null, null, null, null, null, basedOnParam, null, null);
+
+		List<IBaseResource> resultList = get(results);
+
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+	}
 	
 	@Test
 	public void searchObservations_shouldNotAddRelatedResourcesForEmptyReverseInclude() {
 		HashSet<Include> includes = new HashSet<>();
 		
 		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any(), any(), isNull(), any()))
+		    any(), any(), any(),any(), isNull(), any()))
 		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
-		    null, null, null, null, null, includes, null);
+		    null, null, null, null, null,null, includes, null);
 		
 		List<IBaseResource> resultList = get(results);
 		

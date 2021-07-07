@@ -22,11 +22,28 @@
 	<concept_reference_map concept_map_id="17" concept_id="5089" concept_reference_term_id="21" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" uuid="pob6e712-49d8-99e0-8fed-18a905e055dc"/>
 
 	<order_type order_type_id="100" name="some Order Type" parent="2" java_class_name="org.openmrs.TestOrder" description="Some lab order" creator="1" date_created="2008-08-15 15:49:04.0" retired="1" retired_by="1" retire_reason="None" date_retired="2008-08-15 00:00:00.0" uuid="dd3fb1d0-ae06-22e3-a5e2-0800211c9a66"/>
+    <encounter encounter_id="57" encounter_type="2" patient_id="7" location_id="1" form_id="1" encounter_datetime="2008-07-12 00:00:00.0" creator="1" date_created="2008-07-12 14:09:05.0" voided="false" uuid="6382158d-401e-4190-a75d-347b5f04a893"/>
 
 	<orders order_id="101" order_type_id="2" order_number="ORD-101" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" date_stopped="2008-12-17 00:00:00.0" patient_id="2" care_setting="1" encounter_id="6" uuid="7d96f25c-4949-4f72-9931-d808fbc226de" date_created="2008-11-19 09:24:10.0" creator="1" voided="0" />
 	<orders order_id="102" order_type_id="100" order_number="ORD-102" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" patient_id="2" care_setting="1" encounter_id="6" uuid="02b9d1e4-7619-453e-bd6b-c32286f861df" date_created="2009-11-19 09:24:10.0" creator="1" voided="0" />
 	<orders order_id="103" order_type_id="2" order_number="ORD-103" urgency="ROUTINE" order_action="NEW" concept_id="5089" orderer="1" date_activated="2008-11-19 09:24:10.0" date_stopped="2009-12-17 00:00:00.0" patient_id="7" care_setting="1" encounter_id="5" uuid="02b9d1e4-7619-453e-bd6b-c3228dsn61df" date_voided="2010-09-03 00:00:00.0" date_created="2009-11-19 09:24:10.0" creator="1" voided="1" />
 	<test_order order_id="101"  />
 	<test_order order_id="103"  />
+
+	<orders order_id="104" order_type_id="100" order_number="ORD-101" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" date_stopped="2008-12-17 00:00:00.0" patient_id="2" care_setting="1" encounter_id="57" uuid="8d96f25c-4949-4f72-9931-d808fbc226de" date_created="2008-11-19 09:24:10.0" creator="1" voided="0" />
+	<orders order_id="105" order_type_id="100" order_number="ORD-102" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" patient_id="2" care_setting="1" encounter_id="57" uuid="12b9d1e4-7619-453e-bd6b-c32286f861df" date_created="2009-11-19 09:24:10.0" creator="1" voided="0" />
+	<orders order_id="106" order_type_id="100" order_number="ORD-103" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" date_stopped="2009-12-17 00:00:00.0" patient_id="2" care_setting="1" encounter_id="57" uuid="12b9d1e4-7619-453e-bd6b-c3228dsn61df" date_created="2009-11-19 09:24:10.0" creator="1" voided="0" />
+	<orders order_id="107" order_type_id="100" order_number="ORD-104" urgency="ROUTINE" order_action="NEW" concept_id="5497" orderer="1" date_activated="2008-11-19 09:24:10.0" date_stopped="2009-12-17 00:00:00.0" patient_id="2" care_setting="1" encounter_id="57" uuid="35b9d1e4-7619-453e-bd6b-c3228dsn61df" date_created="2009-11-19 09:24:10.0" creator="1" voided="0" />
+
+	<test_order order_id="104"  />
+	<test_order order_id="105"  />
+	<test_order order_id="106"  />
+	<test_order order_id="107"  />
+
+	<obs obs_id="200" person_id="2" order_id="104" concept_id="5497" encounter_id="57" obs_datetime="2008-08-01 00:00:00.0" location_id="1" value_numeric="150.0" comments="" creator="1" date_created="2008-08-18 14:11:13.0" voided="false" uuid="fe48cdcb-6a76-47e3-9f2e-2635032f3a9a"/>
+	<obs obs_id="201" person_id="2" order_id="105" concept_id="5497" encounter_id="57" obs_datetime="2008-08-15 00:00:00.0" location_id="1" value_numeric="175.0" comments="" creator="1" date_created="2008-08-18 14:25:29.0" voided="false" uuid="e6ec1267-8eac-415f-a3f0-e47be2c8bb67"/>
+	<obs obs_id="202" person_id="2" order_id="106" concept_id="5497" encounter_id="57" obs_datetime="2008-08-15 00:00:00.0" location_id="1" value_text="PB and J" comments="" creator="1" date_created="2008-08-19 12:32:03.0" voided="false" uuid="f26cea2c-1b9f-4afe-b211-f3ef6c88af6f"/>
+	 <obs obs_id="203" person_id="2" order_id="107" concept_id="5497" encounter_id="57" obs_datetime="2008-08-15 00:00:00.0" location_id="1" value_coded="9" comments="" creator="1" date_created="2008-08-19 12:32:20.0" voided="false" uuid="f8421c32-47b6-47da-9c6f-3673ddfb74f9"/> 
+
 </dataset>
 

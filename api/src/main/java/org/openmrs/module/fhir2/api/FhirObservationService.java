@@ -30,7 +30,7 @@ public interface FhirObservationService extends FhirService<Observation> {
 	Observation get(@Nonnull String uuid);
 	
 	IBundleProvider searchForObservations(ReferenceAndListParam encounterReference, ReferenceAndListParam patientReference,
-	        ReferenceAndListParam hasMemberReference, TokenAndListParam valueConcept, DateRangeParam valueDateParam,
+	        ReferenceAndListParam hasMemberReference,ReferenceAndListParam basedOnReference, TokenAndListParam valueConcept, DateRangeParam valueDateParam,
 	        QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam, DateRangeParam date,
 	        TokenAndListParam code, TokenAndListParam category, TokenAndListParam id, DateRangeParam lastUpdated,
 	        SortSpec sort, HashSet<Include> includes, HashSet<Include> revIncludes);

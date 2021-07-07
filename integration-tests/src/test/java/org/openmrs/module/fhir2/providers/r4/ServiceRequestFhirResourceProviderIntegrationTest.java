@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -188,6 +189,198 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 	}
 	
 	@Test
+	public void shouldSearchForExistingServiceRequestsWithHasAsJsonForCodeConcept() throws Exception {
+		MockHttpServletResponse response = get("/ServiceRequest?_has:Observation:based-on:code=5497")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		System.out.println(response.getContentAsString());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasResource(instanceOf(ServiceRequest.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, hasSize(4));
+		
+	}
+	
+	@Test
+	public void shouldSearchForExistingServiceRequestsWithHasAsXmlForCodeConcept() throws Exception {
+		MockHttpServletResponse response = get("/ServiceRequest?_has:Observation:based-on:code=5497")
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		System.out.println(response.getContentAsString());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasResource(instanceOf(ServiceRequest.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, hasSize(4));
+		
+	}
+	
+	@Test
+	public void shouldSearchForExistingServiceRequestsWithHasAsJsonForEncounter() throws Exception {
+		MockHttpServletResponse response = get(
+		    "/ServiceRequest?_has:Patient:based-on:encounter=6382158d-401e-4190-a75d-347b5f04a893")
+		            .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		System.out.println(response.getContentAsString());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasResource(instanceOf(ServiceRequest.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, hasSize(4));
+		
+	}
+	
+	@Test
+	public void shouldSearchForExistingServiceRequestsWithHasAsXmlForEncounter() throws Exception {
+		MockHttpServletResponse response = get(
+		    "/ServiceRequest?_has:Observation:based-on:encounter=6382158d-401e-4190-a75d-347b5f04a893")
+		            .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		System.out.println(response.getContentAsString());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasResource(instanceOf(ServiceRequest.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, hasSize(4));
+		
+	}
+	
+	@Test
+	public void shouldSearchForExistingServiceRequestsWithHasAsJsonForPerson() throws Exception {
+		MockHttpServletResponse response = get(
+		    "/ServiceRequest?_has:Observation:based-on:person=da7f524f-27ce-4bb2-86d6-6d1d05312bd5")
+		            .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasResource(instanceOf(ServiceRequest.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, hasSize(4));
+		
+	}
+	
+	@Test
+	public void shouldSearchForExistingServiceRequestsWithHasAsXmlForPerson() throws Exception {
+		MockHttpServletResponse response = get(
+		    "/ServiceRequest?_has:Observation:based-on:person=da7f524f-27ce-4bb2-86d6-6d1d05312bd5")
+		            .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasResource(instanceOf(ServiceRequest.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, hasSize(4));
+		
+	}
+	
+	@Test
+	public void shouldSearchForExistingServiceRequestsWithHasAsXlmForCategory() throws Exception {
+		MockHttpServletResponse response = get("/ServiceRequest?_has:Observation:based-on:category=Test")
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		System.out.println(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasResource(instanceOf(ServiceRequest.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, hasSize(4));
+	}
+	
+	@Test
+	public void shouldSearchForExistingServiceRequestsWithHasAsJsonForCategory() throws Exception {
+		MockHttpServletResponse response = get("/ServiceRequest?_has:Observation:based-on:category=Test")
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		System.out.println(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasResource(instanceOf(ServiceRequest.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, hasSize(4));
+	}
+	
+	@Test
 	public void shouldReturnCountForServiceRequestAsJson() throws Exception {
 		MockHttpServletResponse response = get("/ServiceRequest?_summary=count").accept(FhirMediaTypes.JSON).go();
 		
@@ -199,7 +392,7 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(4)));
+		assertThat(result, hasProperty("total", equalTo(8)));
 	}
 	
 	@Test
@@ -214,6 +407,6 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(4)));
+		assertThat(result, hasProperty("total", equalTo(8)));
 	}
 }

@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -114,7 +115,8 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
 	        @OptionalParam(name = ProcedureRequest.SP_OCCURRENCE) DateRangeParam occurrence,
 	        @OptionalParam(name = ProcedureRequest.SP_RES_ID) TokenAndListParam uuid,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+			@OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+			@OptionalParam(name = "_has") HasAndListParam has,
 	        @IncludeParam(allow = { "ProcedureRequest:" + ProcedureRequest.SP_PATIENT,
 	                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER,
 	                "ProcedureRequest:" + ProcedureRequest.SP_ENCOUNTER }) HashSet<Include> includes) {
@@ -127,6 +129,6 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return new SearchQueryBundleProviderR3Wrapper(serviceRequestService.searchForServiceRequests(patientReference, code,
-		    encounterReference, participantReference, occurrence, uuid, lastUpdated, includes));
+		    encounterReference, participantReference, occurrence, uuid, lastUpdated,has, includes));
 	}
 }

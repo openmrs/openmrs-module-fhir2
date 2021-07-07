@@ -59,7 +59,7 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForObservations(ReferenceAndListParam encounterReference,
-	        ReferenceAndListParam patientReference, ReferenceAndListParam hasMemberReference, TokenAndListParam valueConcept,
+	        ReferenceAndListParam patientReference, ReferenceAndListParam hasMemberReference,ReferenceAndListParam basedOnReference, TokenAndListParam valueConcept,
 	        DateRangeParam valueDateParam, QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam,
 	        DateRangeParam date, TokenAndListParam code, TokenAndListParam category, TokenAndListParam id,
 	        DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes, HashSet<Include> revIncludes) {
@@ -70,7 +70,8 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
 		        .addParameter(FhirConstants.CATEGORY_SEARCH_HANDLER, category)
 		        .addParameter(FhirConstants.VALUE_CODED_SEARCH_HANDLER, valueConcept)
-		        .addParameter(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, hasMemberReference)
+				.addParameter(FhirConstants.HAS_MEMBER_SEARCH_HANDLER, hasMemberReference)
+				.addParameter(FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER, basedOnReference)
 		        .addParameter(FhirConstants.VALUE_STRING_SEARCH_HANDLER, "valueText", valueStringParam)
 		        .addParameter(FhirConstants.QUANTITY_SEARCH_HANDLER, "valueNumeric", valueQuantityParam)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "obsDatetime", date)
