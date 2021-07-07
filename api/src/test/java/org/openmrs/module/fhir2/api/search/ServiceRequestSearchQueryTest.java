@@ -591,7 +591,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
-		assertThat(resources, hasSize(equalTo(8)));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(
 		    hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID))))));
 	}
@@ -634,7 +634,7 @@ public class ServiceRequestSearchQueryTest extends BaseModuleContextSensitiveTes
 		List<ServiceRequest> resources = get(results);
 		
 		assertThat(resources, not(empty()));
-		assertThat(resources, hasSize(equalTo(8)));
+		assertThat(resources, hasSize(equalTo(4)));
 		assertThat(resources, everyItem(anyOf(
 		    hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID)))),
 		    hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID_TWO)))))));
