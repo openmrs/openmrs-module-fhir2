@@ -109,6 +109,10 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				case FhirConstants.CODED_SEARCH_HANDLER:
 					entry.getValue().forEach(code -> handleCodedConcept(criteria, (TokenAndListParam) code.getParam()));
 					break;
+				case FhirConstants.BASED_ON_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleReference("ord", (ReferenceAndListParam) param.getParam())
+								.ifPresent(c -> criteria.createAlias("order", "ord").add(c)));
+					break;	
 				case FhirConstants.CATEGORY_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(category -> handleConceptClass(criteria, (TokenAndListParam) category.getParam()));
@@ -169,6 +173,14 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				return Optional.empty();
 			}).ifPresent(criteria::add);
 		}
+	}
+
+	private Optional<Criterion> handleReference(@Nonnull String orderAlias, ReferenceAndListParam orderReference) {
+		if (orderReference == null) {
+			return Optional.empty();
+		}
+		return handleAndListParam(orderReference,
+		    param -> Optional.of(eq(String.format("%s.uuid", orderAlias), param.getIdPart())));
 	}
 	
 	private Optional<Criterion> handleValueStringParam(@Nonnull String propertyName, StringAndListParam valueStringParam) {

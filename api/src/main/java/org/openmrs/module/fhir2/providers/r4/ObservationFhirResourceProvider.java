@@ -50,6 +50,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -111,7 +112,9 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	                Patient.SP_FAMILY,
 	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
 	        @OptionalParam(name = Observation.SP_HAS_MEMBER, chainWhitelist = { "",
-	                Observation.SP_CODE }, targetTypes = Observation.class) ReferenceAndListParam hasMemberReference,
+					Observation.SP_CODE }, targetTypes = Observation.class) ReferenceAndListParam hasMemberReference,
+			@OptionalParam(name = Observation.SP_BASED_ON, chainWhitelist = { "",
+	                ServiceRequest.SP_IDENTIFIER }, targetTypes = ServiceRequest.class) ReferenceAndListParam basedOnReference,
 	        @OptionalParam(name = Observation.SP_VALUE_CONCEPT) TokenAndListParam valueConcept,
 	        @OptionalParam(name = Observation.SP_VALUE_DATE) DateRangeParam valueDateParam,
 	        @OptionalParam(name = Observation.SP_VALUE_QUANTITY) QuantityAndListParam valueQuantityParam,
@@ -139,7 +142,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return observationService.searchForObservations(encounterReference, patientReference, hasMemberReference,
+		return observationService.searchForObservations(encounterReference, patientReference, hasMemberReference, basedOnReference,
 		    valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date, code, category, id, lastUpdated, sort,
 		    includes, revIncludes);
 	}

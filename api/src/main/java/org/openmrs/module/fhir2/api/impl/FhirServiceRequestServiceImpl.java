@@ -14,6 +14,7 @@ import java.util.HashSet;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
@@ -53,11 +54,12 @@ public class FhirServiceRequestServiceImpl extends BaseFhirService<ServiceReques
 	@Override
 	public IBundleProvider searchForServiceRequests(ReferenceAndListParam patientReference, TokenAndListParam code,
 	        ReferenceAndListParam encounterReference, ReferenceAndListParam participantReference, DateRangeParam occurrence,
-	        TokenAndListParam uuid, DateRangeParam lastUpdated, HashSet<Include> includes) {
+	        TokenAndListParam uuid, DateRangeParam lastUpdated,HasAndListParam has, HashSet<Include> includes) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference)
-		        .addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+				.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code)
+				.addParameter(FhirConstants.HAS_PROPERTY, has)
 		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participantReference)
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, occurrence)

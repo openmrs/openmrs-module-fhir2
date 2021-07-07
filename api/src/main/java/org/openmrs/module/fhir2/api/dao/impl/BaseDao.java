@@ -27,6 +27,9 @@ import static org.hibernate.criterion.Subqueries.propertyEq;
 
 import javax.annotation.Nonnull;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -71,6 +74,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -164,9 +169,24 @@ import org.springframework.beans.factory.annotation.Autowired;
  * }</pre>
  * </p>
  */
+@Slf4j
 public abstract class BaseDao {
 	
 	private static final BigDecimal APPROX_RANGE = new BigDecimal("0.1");
+
+	private static final MethodHandle detachedCriteria_getCriteriaImpl;
+
+	static {
+		MethodHandle temporaryHandle;
+		try {
+			temporaryHandle = MethodHandles.lookup().findGetter(DetachedCriteria.class, "impl", CriteriaImpl.class);
+		}
+		catch (NoSuchFieldException | IllegalAccessException e) {
+			log.error("Could not find method handle to get impl field from DetachedCriteria", e);
+			temporaryHandle = null;
+		}
+		detachedCriteria_getCriteriaImpl = temporaryHandle;
+	}
 	
 	@Autowired
 	private LocalDateTimeFactory localDateTimeFactory;
@@ -228,6 +248,20 @@ public abstract class BaseDao {
 	protected boolean lacksAlias(@Nonnull Criteria criteria, @Nonnull String alias) {
 		Optional<Iterator<CriteriaImpl.Subcriteria>> subcriteria = asImpl(criteria).map(CriteriaImpl::iterateSubcriteria);
 		
+		return subcriteria.filter(subcriteriaIterator -> containsAlias(subcriteriaIterator, alias)).isPresent();
+	}
+
+	/**
+	 * Determines whether or not the given criteria object already has a given alias. This is useful to
+	 * determine whether a mapping has already been made or whether a given alias is already in use.
+	 *
+	 * @param criteria the {@link DetachedCriteria} object to examine
+	 * @param alias the alias to look for
+	 * @return true if the alias exists in this criteria object, false otherwise
+	 */
+	protected boolean lacksAlias(@Nonnull DetachedCriteria criteria, @Nonnull String alias) {
+		Optional<Iterator<CriteriaImpl.Subcriteria>> subcriteria = asImpl(criteria).map(CriteriaImpl::iterateSubcriteria);
+
 		return subcriteria.filter(subcriteriaIterator -> containsAlias(subcriteriaIterator, alias)).isPresent();
 	}
 	
@@ -1007,6 +1041,15 @@ public abstract class BaseDao {
 	protected Stream<String> tokensToParams(List<TokenParam> tokens) {
 		return tokens.stream().map(TokenParam::getValue);
 	}
+
+	@SneakyThrows
+	protected Optional<CriteriaImpl> asImpl(DetachedCriteria criteria) {
+		if (detachedCriteria_getCriteriaImpl == null) {
+			return Optional.empty();
+		}
+		return asImpl((CriteriaImpl) detachedCriteria_getCriteriaImpl.invokeExact(criteria));
+	}
+
 	
 	private String groupBySystem(@Nonnull TokenParam token) {
 		return StringUtils.trimToEmpty(token.getSystem());

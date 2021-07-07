@@ -156,7 +156,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(patientReference, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -180,7 +180,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, code, null, null, null, null, null,
-		    null);
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -204,7 +204,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, encounterReference, null, null,
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, encounterReference, null, null,
 		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -230,7 +230,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, participantReference,
-		    null, null, null, null);
+		    null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -254,7 +254,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, occurrence, null,
-		    null, null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -278,7 +278,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, uuid, null,
-		    null);
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -302,7 +302,7 @@ public class FhirServiceRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null,
-		    lastUpdated, null);
+		    lastUpdated, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -325,7 +325,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null,
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null, null,
 		    includes);
 		
 		List<IBaseResource> resultList = get(results);
@@ -350,7 +350,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null,
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null, null,
 		    includes);
 		
 		List<IBaseResource> resultList = get(results);
@@ -374,7 +374,7 @@ public class FhirServiceRequestServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null,
+		IBundleProvider results = serviceRequestService.searchForServiceRequests(null, null, null, null, null, null, null, null,
 		    includes);
 		
 		List<IBaseResource> resultList = get(results);

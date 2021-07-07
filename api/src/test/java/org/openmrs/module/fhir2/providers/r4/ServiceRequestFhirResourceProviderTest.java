@@ -131,14 +131,14 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestsByCode() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(),any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		TokenAndListParam code = new TokenAndListParam().addAnd(new TokenParam(CODE));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, code, null, null, null, null, null,
-		    null);
+		    null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -151,7 +151,7 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestsWhenPatientParamIsSpecified() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(),any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
@@ -159,7 +159,7 @@ public class ServiceRequestFhirResourceProviderTest {
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(patientParam, null, null, null, null, null, null,
-		    null, null);
+		    null, null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -172,7 +172,7 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestsWhenSubjectParamIsSpecified() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(),any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
@@ -180,7 +180,7 @@ public class ServiceRequestFhirResourceProviderTest {
 		    new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_GIVEN_NAME).setChain(Patient.SP_NAME)));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, subjectParam, null, null, null, null, null,
-		    null, null);
+		    null, null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -193,7 +193,7 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestsByRequesterParam() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(),any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
@@ -201,7 +201,7 @@ public class ServiceRequestFhirResourceProviderTest {
 		        .add(new ReferenceParam().setValue(PARTICIPANT_IDENTIFIER).setChain(Practitioner.SP_IDENTIFIER)));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, practitionerParam, null,
-		    null, null, null);
+		    null, null, null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -214,14 +214,14 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestsByOccurrence() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(),any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		DateRangeParam occurrence = new DateRangeParam().setLowerBound(OCCURRENCE).setUpperBound(OCCURRENCE);
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, occurrence, null,
-		    null, null);
+		    null, null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -234,14 +234,14 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void searchServiceRequests_shouldReturnMatchingServiceRequestsByEncounter() {
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(),any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(serviceRequest), 10, 1));
 		
 		ReferenceAndListParam encounterParam = new ReferenceAndListParam()
 		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID).setChain(null)));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, encounterParam, null, null,
-		    null, null, null);
+		    null, null,null, null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -256,12 +256,12 @@ public class ServiceRequestFhirResourceProviderTest {
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestWhenUUIDIsSpecified() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(SERVICE_REQUEST_UUID));
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(),any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, uuid, null,
-		    null);
+		    null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -276,12 +276,12 @@ public class ServiceRequestFhirResourceProviderTest {
 	public void searchServiceRequest_shouldReturnMatchingServiceRequestWhenLastUpdatedIsSpecified() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), any()))
+		when(serviceRequestService.searchForServiceRequests(any(),any(), any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, null,
-		    lastUpdated, null);
+		    lastUpdated, null,null);
 		
 		List<IBaseResource> resources = getResources(results);
 		
@@ -364,11 +364,11 @@ public class ServiceRequestFhirResourceProviderTest {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("ServiceRequest:patient"));
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(),
+		when(serviceRequestService.searchForServiceRequests(any(),any(), any(), any(), any(), any(), any(), any(),
 		    argThat(is(includes)))).thenReturn(
 		        new MockIBundleProvider<>(Arrays.asList(serviceRequest, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, null, null,null,
 		    includes);
 		
 		List<IBaseResource> resources = getResources(results);
@@ -385,11 +385,11 @@ public class ServiceRequestFhirResourceProviderTest {
 	public void searchServiceRequest_shouldNotAddRelatedResourcesToResultListForEmptyIncludes() {
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(), any(), any(), any(), isNull()))
+		when(serviceRequestService.searchForServiceRequests(any(), any(), any(), any(),any(), any(), any(), any(), isNull()))
 		        .thenReturn(
 		            new MockIBundleProvider<>(Collections.singletonList(serviceRequest), PREFERRED_PAGE_SIZE, COUNT));
 		
-		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchForServiceRequests(null, null, null, null, null, null, null, null,null,
 		    includes);
 		
 		List<IBaseResource> resources = getResources(results);

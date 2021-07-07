@@ -50,6 +50,7 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
@@ -116,6 +117,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientParam,
 	        @OptionalParam(name = Observation.SP_RELATED_TYPE, chainWhitelist = { "",
 	                Observation.SP_CODE }, targetTypes = Observation.class) ReferenceAndListParam hasMemberReference,
+	        @OptionalParam(name = Observation.SP_BASED_ON, chainWhitelist = { "",
+	                ServiceRequest.SP_IDENTIFIER }, targetTypes = ServiceRequest.class) ReferenceAndListParam basedOnReference,
 	        @OptionalParam(name = Observation.SP_VALUE_CONCEPT) TokenAndListParam valueConcept,
 	        @OptionalParam(name = Observation.SP_VALUE_DATE) DateRangeParam valueDateParam,
 	        @OptionalParam(name = Observation.SP_VALUE_QUANTITY) QuantityAndListParam valueQuantityParam,
@@ -142,8 +145,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return new SearchQueryBundleProviderR3Wrapper(observationService.searchForObservations(encounterReference,
-		    patientReference, hasMemberReference, valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date,
-		    code, category, id, lastUpdated, sort, includes, revIncludes));
+		    patientReference, hasMemberReference, basedOnReference, valueConcept, valueDateParam, valueQuantityParam,
+		    valueStringParam, date, code, category, id, lastUpdated, sort, includes, revIncludes));
 	}
 	
 	@Operation(name = "lastn", idempotent = true, type = Observation.class)
