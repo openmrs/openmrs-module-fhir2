@@ -159,4 +159,31 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		return new SearchQueryBundleProviderR3Wrapper(
 		        observationService.getLastnObservations(max, subjectParam, category, code));
 	}
+	
+	/**
+	 * The $lastn-encounters operation fetches the observations matching the most recent `N` encounters
+	 * corresponding to the specified patients.
+	 *
+	 * @param max The value of `N`, default value should be one
+	 * @param subjectParam The reference to a patient
+	 * @param patientParam Another way to reference to a patient
+	 * @param code The code(s) to which the observation should belong
+	 * @param category The category to which the observation should belong If neither patient nor
+	 *            subject is specified, then perform search on all patients,
+	 * @return a bundle of observations whose corresponding encounter is among the recent `N` encounters
+	 *         for the specified patient
+	 */
+	@Operation(name = "lastn-encounters", idempotent = true, type = Observation.class)
+	public IBundleProvider getLastnEncountersObservations(@OperationParam(name = "max") NumberParam max,
+	        @OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
+	        @OperationParam(name = Observation.SP_PATIENT) ReferenceAndListParam patientParam,
+	        @OperationParam(name = Observation.SP_CATEGORY) TokenAndListParam category,
+	        @OperationParam(name = Observation.SP_CODE) TokenAndListParam code) {
+		if (patientParam != null) {
+			subjectParam = patientParam;
+		}
+		
+		return new SearchQueryBundleProviderR3Wrapper(
+		        observationService.getLastnEncountersObservations(max, subjectParam, category, code));
+	}
 }
