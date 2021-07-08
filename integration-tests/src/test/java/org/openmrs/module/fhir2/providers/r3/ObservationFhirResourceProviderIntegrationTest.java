@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -32,6 +33,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -44,6 +47,7 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -81,6 +85,9 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
 	private ObservationFhirResourceProvider resourceProvider;
+	
+	@Autowired
+	private FhirEncounterDao encounterDao;
 	
 	@Before
 	@Override
@@ -946,5 +953,443 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		assertThat(entries, isSortedAndWithinMax(1));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsAsJson() throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn-encounters?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
+		            .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(2)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
+		assertThat(entries, everyItem(
+		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("category",
+		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenMaxIsMissingAsJson() throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn-encounters?subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
+		            .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(1)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
+		assertThat(entries, everyItem(
+		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("category",
+		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenPatientReferenceIsPassedInPatientParameterAsJson()
+	        throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn-encounters?max=2&patient=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
+		            .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(2)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
+		assertThat(entries, everyItem(
+		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("category",
+		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenPatientReferenceIsMissingAsJson() throws Exception {
+		MockHttpServletResponse response = get("Observation/$lastn-encounters?max=2&category=laboratory&code=5089")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(2)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, everyItem(
+		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("category",
+		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenCategoryIsMissingAsJson() throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn-encounters?max=2&patient=" + OBS_PATIENT_UUID + "&code=5089").accept(FhirMediaTypes.JSON)
+		            .go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(2)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
+		assertThat(entries, everyItem(
+		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenCodeIsMissingAsJson() throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn-encounters?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory")
+		            .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(3)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("category",
+		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenNoParamterIsGivenAsJson() throws Exception {
+		MockHttpServletResponse response = get("Observation/$lastn-encounters?").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(1)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsAsXml() throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn-encounters?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
+		            .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(2)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
+		assertThat(entries, everyItem(
+		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("category",
+		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenMaxIsMissingAsXml() throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn-encounters?subject=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
+		            .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(1)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
+		assertThat(entries, everyItem(
+		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("category",
+		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenPatientReferenceIsPassedInPatientParameterAsXml()
+	        throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn-encounters?max=2&patient=" + OBS_PATIENT_UUID + "&category=laboratory&code=5089")
+		            .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(2)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
+		assertThat(entries, everyItem(
+		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("category",
+		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenPatientReferenceIsMissingAsXml() throws Exception {
+		MockHttpServletResponse response = get("Observation/$lastn-encounters?max=2&category=laboratory&code=5089")
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(2)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries, everyItem(
+		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("category",
+		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenCategoryIsMissingAsXml() throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn-encounters?max=2&patient=" + OBS_PATIENT_UUID + "&code=5089").accept(FhirMediaTypes.XML)
+		            .go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(2)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
+		assertThat(entries, everyItem(
+		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenCodeIsMissingAsXml() throws Exception {
+		MockHttpServletResponse response = get(
+		    "Observation/$lastn-encounters?max=2&subject=" + OBS_PATIENT_UUID + "&category=laboratory")
+		            .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(3)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("category",
+		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
+	}
+	
+	@Test
+	public void shouldReturnLastnEncountersObservationsWhenNoParamterIsGivenAsXml() throws Exception {
+		MockHttpServletResponse response = get("Observation/$lastn-encounters?").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.hasEntry(), is(true));
+		assertThat(results, hasProperty("total", equalTo(1)));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Observation/"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(1));
+	}
+	
+	private int getDistinctEncounterDatetime(List<Bundle.BundleEntryComponent> resultList) {
+		List<Date> results = resultList.stream().map(Bundle.BundleEntryComponent::getResource)
+		        .filter(it -> it instanceof Observation)
+		        .filter(it -> ((Observation) it).getContext().getReferenceElement().getResourceType().equals("Encounter"))
+		        .map(result -> encounterDao.get(((Observation) result).getContext().getReferenceElement().getIdPart())
+		                .getEncounterDatetime())
+		        .sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+		
+		int distinctEncounterDatetime = 0;
+		for (int var = 0; var < results.size(); var++) {
+			Date currentDatetime = results.get(var);
+			distinctEncounterDatetime++;
+			
+			if (var == results.size() - 1) {
+				return distinctEncounterDatetime;
+			}
+			
+			Date nextDatetime = results.get(var + 1);
+			
+			while (nextDatetime.equals(currentDatetime)) {
+				var++;
+				
+				if (var + 1 == results.size()) {
+					return distinctEncounterDatetime;
+				}
+				nextDatetime = results.get(var + 1);
+			}
+		}
+		
+		return distinctEncounterDatetime;
 	}
 }
