@@ -15,18 +15,18 @@ import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.Group;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.model.GroupMember;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.MODULE)
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.1")
-public class GroupMemberTranslatorImpl implements GroupMemberTranslator<Integer> {
+@OpenmrsProfile(openmrsPlatformVersion = "2.0.* - 2.0.*")
+public class GroupMemberTranslatorImpl implements GroupMemberTranslator {
 	
 	@Autowired
 	private FhirPatientDao patientDao;
@@ -35,26 +35,21 @@ public class GroupMemberTranslatorImpl implements GroupMemberTranslator<Integer>
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Override
-	public Group.GroupMemberComponent toFhirResource(@Nonnull Integer memberId) {
+	public GroupMember toFhirResource(@Nonnull Integer memberId) {
 		notNull(memberId, "MemberId should not be null");
-		return new Group.GroupMemberComponent()
-		        .setEntity(patientReferenceTranslator.toFhirResource(patientDao.getPatientById(memberId)));
+		return new GroupMember(patientReferenceTranslator.toFhirResource(patientDao.getPatientById(memberId)));
 	}
 	
 	@Override
-	public Integer toOpenmrsType(@Nonnull Group.GroupMemberComponent groupMemberComponent) {
-		notNull(groupMemberComponent, "GroupComponent object cannot not be null");
-		return toOpenmrsType(-1, groupMemberComponent);
+	public Integer toOpenmrsType(@Nonnull GroupMember groupMember) {
+		notNull(groupMember, "GroupMember object cannot not be null");
+		return toOpenmrsType(-1, groupMember);
 	}
 	
 	@Override
-	public Integer toOpenmrsType(@Nonnull Integer existingMemberId,
-	        @Nonnull Group.GroupMemberComponent groupMemberComponent) {
+	public Integer toOpenmrsType(@Nonnull Integer existingMemberId, @Nonnull GroupMember groupMember) {
 		notNull(existingMemberId, "Existing memberId should not be null");
-		notNull(groupMemberComponent, "GroupMemberComponent Object should not be null");
-		if (groupMemberComponent.hasEntity()) {
-			existingMemberId = patientReferenceTranslator.toOpenmrsType(groupMemberComponent.getEntity()).getPatientId();
-		}
-		return existingMemberId;
+		notNull(groupMember, "GroupMember Object should not be null");
+		return patientReferenceTranslator.toOpenmrsType(groupMember.getEntity()).getPatientId();
 	}
 }

@@ -80,6 +80,7 @@ public class FhirEncounterClassMap implements Auditable, Retireable {
 	private String uuid = UUID.randomUUID().toString();
 	
 	@Override
+	@Deprecated
 	public Boolean isRetired() {
 		return retired;
 	}

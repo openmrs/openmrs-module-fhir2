@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -43,14 +42,12 @@ public class OpenmrsFhirAddressStrategyTest {
 	
 	@Before
 	public void setup() {
-		fhirAddressStrategy = new OpenmrsFhirAddressStrategy();
-		fhirAddressStrategy.setGlobalPropertyService(globalPropertyService);
+		fhirAddressStrategy = new OpenmrsFhirAddressStrategy(globalPropertyService, null);
 	}
 	
 	@Test
 	public void shouldDetermineServerBaseFromGlobalProperty() {
-		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX))
-		        .thenReturn("http://my.openmrs.org/ws/fhir2/");
+		fhirAddressStrategy.setGpPrefix("http://my.openmrs.org/ws/fhir2/");
 		when(httpServletRequest.getContextPath()).thenReturn("");
 		when(httpServletRequest.getRequestURI()).thenReturn("/ws/fhir2/R4");
 		
@@ -61,8 +58,7 @@ public class OpenmrsFhirAddressStrategyTest {
 	
 	@Test
 	public void shouldDetermineServerBaseFromGlobalPropertyWithoutTrailingSlash() {
-		when(globalPropertyService.getGlobalProperty(FhirConstants.GLOBAL_PROPERTY_URI_PREFIX))
-		        .thenReturn("http://my.openmrs.org/ws/fhir2");
+		fhirAddressStrategy.setGpPrefix("http://my.openmrs.org/ws/fhir2");
 		when(httpServletRequest.getContextPath()).thenReturn("");
 		when(httpServletRequest.getRequestURI()).thenReturn("/ws/fhir2/R4");
 		

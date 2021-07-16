@@ -63,6 +63,7 @@
     </changeSet>
 
     <changeSet id="add_loinc_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
+	<validCheckSum>3:f4dec7d10e608fcbd604d17a5e147c64</validCheckSum>
         <preConditions onFail="MARK_RAN" onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source"/>
@@ -83,6 +84,7 @@
     </changeSet>
 
     <changeSet id="add_ciel_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
+	<validCheckSum>3:f540ac5b0cbb385c97531c5fa558a97c</validCheckSum>
         <preConditions onFail="MARK_RAN" onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source"/>
@@ -863,7 +865,7 @@
 		<!-- UUID function taken from here: https://stackoverflow.com/a/21327318 -->
 		<sql><![CDATA[
             insert into fhir_duration_unit_map (concept_id, unit_of_time, creator, date_created, uuid)
-            select concept_id, "S", 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
+            select concept_id, 'S', 1, now(), uuid_in(overlay(overlay(md5(random()::text || ':' || clock_timestamp()::text) placing '4' from 13) placing to_hex(floor(random()*(11-8+1) + 8)::int)::text from 17)::cstring)
             from concept
             where uuid = '162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
         ]]>
@@ -915,4 +917,55 @@
         ]]>
 		</sql>
 	</changeSet>
+
+    <changeSet id="add_fhir_patient_identifier_system_20210507" author="Medhavi">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <not>
+                <tableExists tableName="fhir_patient_identifier_system"/>
+            </not>
+            <tableExists tableName="patient_identifier_type"/>
+        </preConditions>
+        <createTable tableName="fhir_patient_identifier_system">
+            <column name="fhir_patient_identifier_system_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="patient_identifier_type_id" type="int"/>
+            <column name="url" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="fhir_patient_identifier_system" baseColumnNames="patient_identifier_type_id"
+                                 constraintName="fhir_patient_identifier_system_patient_identifier_type_fk"
+                                 referencedTableName="patient_identifier_type" referencedColumnNames="patient_identifier_type_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_patient_identifier_system" baseColumnNames="creator"
+                                 constraintName="fhir_patient_identifier_system_creator_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_patient_identifier_system" baseColumnNames="changed_by"
+                                 constraintName="fhir_patient_identifier_system_changed_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint baseTableName="fhir_patient_identifier_system" baseColumnNames="retired_by"
+                                 constraintName="fhir_patient_identifier_system_retired_by_fk"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
 </databaseChangeLog>

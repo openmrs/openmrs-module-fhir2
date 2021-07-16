@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static lombok.AccessLevel.PACKAGE;
+
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
@@ -20,6 +22,8 @@ import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -29,13 +33,13 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,14 +51,14 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirObservationService;
+import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("observationFhirR4ResourceProvider")
-@Qualifier("fhirResources")
-@Setter(AccessLevel.PACKAGE)
+@R4Provider
+@Setter(PACKAGE)
 @SuppressWarnings("unused")
 public class ObservationFhirResourceProvider implements IResourceProvider {
 	
@@ -138,5 +142,43 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		return observationService.searchForObservations(encounterReference, patientReference, hasMemberReference,
 		    valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date, code, category, id, lastUpdated, sort,
 		    includes, revIncludes);
+	}
+	
+	@Operation(name = "lastn", idempotent = true, type = Observation.class)
+	public IBundleProvider getLastnObservations(@OperationParam(name = "max") NumberParam max,
+	        @OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
+	        @OperationParam(name = Observation.SP_PATIENT) ReferenceAndListParam patientParam,
+	        @OperationParam(name = Observation.SP_CATEGORY) TokenAndListParam category,
+	        @OperationParam(name = Observation.SP_CODE) TokenAndListParam code) {
+		if (patientParam != null) {
+			subjectParam = patientParam;
+		}
+		
+		return observationService.getLastnObservations(max, subjectParam, category, code);
+	}
+	
+	/**
+	 * The $lastn-encounters operation fetches the observations matching the
+	 * most recent `N` encounters corresponding to the specified patients.
+	 *
+	 * @param max The value of `N`, default value should be one
+	 * @param subjectParam The reference to a patient
+	 * @param patientParam Another way to reference to a patient
+	 * @param code The code(s) to which the observation should belong
+	 * @param category The category to which the observation should belong
+	 * If neither patient nor subject is specified, then perform search on all patients,
+	 * @return a bundle of observations whose corresponding encounter is among the recent `N` encounters for the specified patient
+	 */
+	@Operation(name = "lastn-encounters", idempotent = true, type = Observation.class)
+	public IBundleProvider getLastnEncountersObservations(@OperationParam(name = "max") NumberParam max,
+	        @OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
+	        @OperationParam(name = Observation.SP_PATIENT) ReferenceAndListParam patientParam,
+	        @OperationParam(name = Observation.SP_CATEGORY) TokenAndListParam category,
+	        @OperationParam(name = Observation.SP_CODE) TokenAndListParam code) {
+		if (patientParam != null) {
+			subjectParam = patientParam;
+		}
+		
+		return observationService.getLastnEncountersObservations(max, subjectParam, category, code);
 	}
 }

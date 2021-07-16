@@ -17,13 +17,11 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Locale;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -42,7 +40,6 @@ import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
-import org.openmrs.module.fhir2.api.FhirUserDefaultProperties;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 
@@ -60,9 +57,6 @@ public class ConceptTranslatorImplTest {
 	private FhirConceptSourceService conceptSourceService;
 	
 	@Mock
-	private FhirUserDefaultProperties userDefaultProperties;
-	
-	@Mock
 	private Concept concept;
 	
 	private ConceptTranslatorImpl conceptTranslator;
@@ -72,7 +66,6 @@ public class ConceptTranslatorImplTest {
 		conceptTranslator = new ConceptTranslatorImpl();
 		conceptTranslator.setConceptService(conceptService);
 		conceptTranslator.setConceptSourceService(conceptSourceService);
-		conceptTranslator.setUserDefaultProperties(userDefaultProperties);
 	}
 	
 	@Before
@@ -80,8 +73,7 @@ public class ConceptTranslatorImplTest {
 		ConceptName conceptName = mock(ConceptName.class);
 		concept.addName(conceptName);
 		when(conceptName.getName()).thenReturn(CONCEPT_NAME);
-		when(concept.getName(any(Locale.class))).thenReturn(conceptName);
-		when(userDefaultProperties.getDefaultLocale()).thenReturn(Locale.getDefault());
+		when(concept.getName()).thenReturn(conceptName);
 	}
 	
 	@Test
@@ -89,6 +81,7 @@ public class ConceptTranslatorImplTest {
 		when(concept.getUuid()).thenReturn(CONCEPT_UUID);
 		
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), not(empty()));
 		assertThat(result.getCoding().get(0).getSystem(), nullValue());
@@ -103,11 +96,13 @@ public class ConceptTranslatorImplTest {
 		conceptMaps.add(conceptMap);
 		ConceptReferenceTerm conceptReferenceTerm = mock(ConceptReferenceTerm.class);
 		ConceptSource conceptSource = mock(ConceptSource.class);
+		
 		when(conceptMap.getConceptReferenceTerm()).thenReturn(conceptReferenceTerm);
 		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
 		when(conceptReferenceTerm.getCode()).thenReturn("1000-1");
 		when(conceptSource.getName()).thenReturn("LOINC");
 		when(concept.getConceptMappings()).thenReturn(conceptMaps);
+		
 		FhirConceptSource loinc = new FhirConceptSource();
 		ConceptSource loincConceptSource = new ConceptSource();
 		loincConceptSource.setName("LOINC");
@@ -116,6 +111,7 @@ public class ConceptTranslatorImplTest {
 		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.of(loinc));
 		
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), not(empty()));
 		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
@@ -130,11 +126,13 @@ public class ConceptTranslatorImplTest {
 		conceptMaps.add(conceptMap);
 		ConceptReferenceTerm conceptReferenceTerm = mock(ConceptReferenceTerm.class);
 		ConceptSource conceptSource = mock(ConceptSource.class);
+		
 		when(conceptMap.getConceptReferenceTerm()).thenReturn(conceptReferenceTerm);
 		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
 		when(conceptReferenceTerm.getCode()).thenReturn("1650");
 		when(conceptSource.getName()).thenReturn("CIEL");
 		when(concept.getConceptMappings()).thenReturn(conceptMaps);
+		
 		FhirConceptSource ciel = new FhirConceptSource();
 		ConceptSource cielConceptSource = new ConceptSource();
 		cielConceptSource.setName("CIEL");

@@ -9,10 +9,12 @@
  */
 package org.openmrs.module.fhir2.web.servlet;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,11 @@ public class FhirR3RestServlet extends FhirRestServlet {
 	}
 	
 	@Override
+	protected Class<? extends Annotation> getResourceProviderAnnotation() {
+		return R3Provider.class;
+	}
+	
+	@Override
 	@Autowired
 	@Qualifier("fhirR3")
 	public void setFhirContext(FhirContext theFhirContext) {
@@ -35,7 +42,7 @@ public class FhirR3RestServlet extends FhirRestServlet {
 	
 	@Override
 	@Autowired
-	@Qualifier("fhirR3Resources")
+	@R3Provider
 	public void setResourceProviders(Collection<IResourceProvider> theProviders) {
 		super.setResourceProviders(theProviders);
 	}

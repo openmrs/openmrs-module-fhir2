@@ -20,5 +20,4 @@ public interface FhirVisitDao extends FhirDao<Visit> {
 	@Override
 	@Authorized(PrivilegeConstants.GET_VISITS)
 	Visit get(@Nonnull String uuid);
-	
 }

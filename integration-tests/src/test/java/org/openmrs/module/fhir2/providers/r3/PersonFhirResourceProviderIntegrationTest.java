@@ -446,4 +446,33 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
+	@Test
+	public void shouldReturnCountForPersonAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Person?name=voided&_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(1)));
+	}
+	
+	@Test
+	public void shouldReturnCountForPersonAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Person?name=voided&_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(1)));
+	}
 }

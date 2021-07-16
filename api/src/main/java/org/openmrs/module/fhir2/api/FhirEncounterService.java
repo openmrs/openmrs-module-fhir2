@@ -24,6 +24,12 @@ public interface FhirEncounterService extends FhirService<Encounter> {
 	
 	Encounter get(@Nonnull String uuid);
 	
+	Encounter create(@Nonnull Encounter encounter);
+	
+	Encounter update(@Nonnull String uuid, @Nonnull Encounter encounter);
+	
+	Encounter delete(@Nonnull String uuid);
+	
 	IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
 	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam id,
 	        DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes);

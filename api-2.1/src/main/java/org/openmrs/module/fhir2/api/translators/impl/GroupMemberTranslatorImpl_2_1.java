@@ -16,22 +16,24 @@ import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Period;
 import org.openmrs.CohortMembership;
 import org.openmrs.Patient;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
-import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator;
+import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator_2_1;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
+import org.openmrs.module.fhir2.model.GroupMember;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Slf4j
+@Primary
 @Component
 @Setter(AccessLevel.MODULE)
 @OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.*")
-public class GroupMemberTranslatorImpl_2_1 implements GroupMemberTranslator<CohortMembership> {
+public class GroupMemberTranslatorImpl_2_1 implements GroupMemberTranslator_2_1 {
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -40,50 +42,47 @@ public class GroupMemberTranslatorImpl_2_1 implements GroupMemberTranslator<Coho
 	private FhirPatientDao patientDao;
 	
 	@Override
-	public Group.GroupMemberComponent toFhirResource(@Nonnull CohortMembership cohortMember) {
+	public GroupMember toFhirResource(@Nonnull CohortMembership cohortMember) {
 		notNull(cohortMember, "CohortMember object should not be null");
-		Group.GroupMemberComponent groupMemberComponent = new Group.GroupMemberComponent();
-		groupMemberComponent.setId(cohortMember.getUuid());
-		groupMemberComponent.setInactive(!cohortMember.isActive());
+		GroupMember groupMember = new GroupMember();
+		groupMember.setId(cohortMember.getUuid());
+		groupMember.setInactive(!cohortMember.isActive());
 		
 		Patient patient = patientDao.getPatientById(cohortMember.getPatientId());
 		if (patient != null) {
-			groupMemberComponent.setEntity(patientReferenceTranslator.toFhirResource(patient));
+			groupMember.setEntity(patientReferenceTranslator.toFhirResource(patient));
 		}
 		
 		Period period = new Period();
 		period.setStart(cohortMember.getStartDate());
 		period.setEnd(cohortMember.getEndDate());
-		groupMemberComponent.setPeriod(period);
+		groupMember.setPeriod(period);
 		
-		return groupMemberComponent;
+		return groupMember;
 	}
 	
 	@Override
-	public CohortMembership toOpenmrsType(@Nonnull Group.GroupMemberComponent groupMemberComponent) {
-		notNull(groupMemberComponent, "GroupMemberComponent object should not be null");
-		return toOpenmrsType(new CohortMembership(), groupMemberComponent);
+	public CohortMembership toOpenmrsType(@Nonnull GroupMember groupMember) {
+		notNull(groupMember, "GroupMember object should not be null");
+		return toOpenmrsType(new CohortMembership(), groupMember);
 	}
 	
 	@Override
-	public CohortMembership toOpenmrsType(@Nonnull CohortMembership existingCohort,
-	        @Nonnull Group.GroupMemberComponent groupMemberComponent) {
-		notNull(groupMemberComponent, "GroupMemberComponent object should not be null");
+	public CohortMembership toOpenmrsType(@Nonnull CohortMembership existingCohort, @Nonnull GroupMember groupMember) {
+		notNull(groupMember, "groupMemberReference object should not be null");
 		notNull(existingCohort, "ExistingCohort object should not be null");
 		
-		if (groupMemberComponent.hasEntity()) {
-			existingCohort
-			        .setPatientId(patientReferenceTranslator.toOpenmrsType(groupMemberComponent.getEntity()).getPatientId());
+		if (groupMember.hasEntity()) {
+			existingCohort.setPatientId(patientReferenceTranslator.toOpenmrsType(groupMember.getEntity()).getPatientId());
 		}
 		
-		if (groupMemberComponent.hasPeriod()) {
-			existingCohort.setStartDate(groupMemberComponent.getPeriod().getStart());
-			existingCohort.setEndDate(groupMemberComponent.getPeriod().getEnd());
+		if (groupMember.hasPeriod()) {
+			existingCohort.setStartDate(groupMember.getPeriod().getStart());
+			existingCohort.setEndDate(groupMember.getPeriod().getEnd());
 		}
 		
-		if (groupMemberComponent.hasInactive()) {
-			existingCohort.setVoided(groupMemberComponent.getInactive());
-			existingCohort.setVoidReason("Voided via FHIR API");
+		if (groupMember.hasInactive()) {
+			existingCohort.setVoided(groupMember.getInactive());
 		}
 		
 		return existingCohort;

@@ -55,7 +55,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -71,7 +70,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<EncounterFhirResourceProvider, Encounter> {
 	
-	private static final String ENCOUNTER_UUID = "8a849d5e-6011-4279-a124-40ada5a687de";
+	private static final String ENCOUNTER_UUID = "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9";
 	
 	private static final String WRONG_ENCOUNTER_UUID = "9bf0d1ac-62a8-4440-a5a1-eb1015a7cc65";
 	
@@ -769,7 +768,6 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	}
 	
 	@Test
-	@Ignore
 	public void createEncounter_shouldCreateNewEncounter() throws Exception {
 		org.hl7.fhir.r4.model.Encounter encounter = new org.hl7.fhir.r4.model.Encounter();
 		encounter.setId(ENCOUNTER_UUID);
@@ -788,7 +786,6 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	}
 	
 	@Test
-	@Ignore
 	public void updateEncounter_shouldUpdateRequestedEncounter() throws Exception {
 		org.hl7.fhir.r4.model.Encounter encounter = new org.hl7.fhir.r4.model.Encounter();
 		encounter.setId(ENCOUNTER_UUID);
@@ -807,7 +804,6 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	}
 	
 	@Test
-	@Ignore
 	public void updateEncounter_shouldErrorForNoId() throws Exception {
 		String encounterJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ENCOUNTER_NO_ID_PATH)) {
@@ -823,7 +819,6 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	}
 	
 	@Test
-	@Ignore
 	public void updateEncounter_shouldErrorForIdMissMatch() throws Exception {
 		String encounterJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ENCOUNTER_WRONG_ID_PATH)) {
@@ -840,7 +835,6 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	}
 	
 	@Test
-	@Ignore
 	public void deleteEncounter_shouldDeleteEncounter() throws Exception {
 		org.hl7.fhir.r4.model.Encounter encounter = new org.hl7.fhir.r4.model.Encounter();
 		encounter.setId(ENCOUNTER_UUID);
@@ -854,7 +848,6 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	}
 	
 	@Test
-	@Ignore
 	public void deleteEncounter_shouldReturn404ForNonExistingEncounter() throws Exception {
 		when(encounterService.delete(WRONG_ENCOUNTER_UUID)).thenReturn(null);
 		

@@ -52,6 +52,7 @@ import org.openmrs.PersonName;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
@@ -110,6 +111,8 @@ public class PersonTranslatorImplTest {
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
+	private BirthDateTranslator birthDateTranslator = new BirthDateTranslatorImpl();
+	
 	private PersonTranslatorImpl personTranslator;
 	
 	private Person personMock;
@@ -124,6 +127,7 @@ public class PersonTranslatorImplTest {
 		personTranslator.setProvenanceTranslator(provenanceTranslator);
 		personTranslator.setPatientDao(patientDao);
 		personTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
+		personTranslator.setBirthDateTranslator(birthDateTranslator);
 	}
 	
 	@Before
@@ -230,8 +234,7 @@ public class PersonTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateToFHIRBirthDate() {
-		
+	public void shouldTranslateToFhirBirthDate() {
 		Person person = new Person();
 		Calendar calendar = Calendar.getInstance();
 		DateType dateType = new DateType();
@@ -258,17 +261,6 @@ public class PersonTranslatorImplTest {
 		assertThat(result.getBirthDateElement().getPrecision(), equalTo(TemporalPrecisionEnum.MONTH));
 		assertThat(result.getBirthDateElement().getYear(), equalTo(dateType.getYear()));
 		assertThat(result.getBirthDateElement().getMonth(), equalTo(dateType.getMonth()));
-	}
-	
-	@Test
-	public void shouldTranslateVoidedPersonToInactive() {
-		Person person = new Person();
-		person.setVoided(true);
-		
-		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getActive(), is(false));
 	}
 	
 	@Test

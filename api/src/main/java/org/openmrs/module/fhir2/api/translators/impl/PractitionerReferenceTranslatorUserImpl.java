@@ -38,7 +38,7 @@ public class PractitionerReferenceTranslatorUserImpl extends BaseReferenceHandli
 	
 	@Override
 	public User toOpenmrsType(@Nonnull Reference reference) {
-		if (reference == null) {
+		if (reference == null || !reference.hasReference()) {
 			return null;
 		}
 		

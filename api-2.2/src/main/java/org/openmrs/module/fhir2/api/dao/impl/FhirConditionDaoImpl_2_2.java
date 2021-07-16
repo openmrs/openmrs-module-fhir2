@@ -32,10 +32,8 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-@Primary
 @Component
 @Setter(AccessLevel.PROTECTED)
 @OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
@@ -67,9 +65,8 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONDITIONS)
-	public List<Condition> getSearchResults(@Nonnull SearchParameterMap theParams,
-	        @Nonnull List<String> matchingResourceUuids, int firstResult, int lastResult) {
-		return super.getSearchResults(theParams, matchingResourceUuids, firstResult, lastResult);
+	public List<Condition> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids) {
+		return super.getSearchResults(theParams, resourceUuids);
 	}
 	
 	private ConditionClinicalStatus convertStatus(String status) {

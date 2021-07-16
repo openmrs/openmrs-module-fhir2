@@ -34,10 +34,5 @@ public interface FhirDao<T extends OpenmrsObject & Auditable> extends Serializab
 	
 	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
-	default List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids) {
-		return getSearchResults(theParams, matchingResourceUuids, 0, matchingResourceUuids.size());
-	}
-	
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
-	        int firstResult, int lastResult);
+	List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
 }

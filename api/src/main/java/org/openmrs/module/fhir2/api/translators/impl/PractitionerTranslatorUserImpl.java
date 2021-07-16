@@ -13,19 +13,16 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.openmrs.Person;
 import org.openmrs.PersonAddress;
 import org.openmrs.PersonName;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
@@ -41,10 +38,13 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 	private PersonNameTranslator nameTranslator;
 	
 	@Autowired
-	private PersonAddressTranslator addressTranslator;
+	private GenderTranslator genderTranslator;
 	
 	@Autowired
-	private GenderTranslator genderTranslator;
+	private BirthDateTranslator birthDateTranslator;
+	
+	@Autowired
+	private PersonAddressTranslator addressTranslator;
 	
 	@Override
 	public Practitioner toFhirResource(@Nonnull User user) {
@@ -59,32 +59,13 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 		practitioner.addIdentifier(userIdentifier);
 		
 		if (user.getPerson() != null) {
-			
-			if (user.getPerson().getBirthdateEstimated() != null) {
-				if (user.getPerson().getBirthdateEstimated()) {
-					DateType dateType = new DateType();
-					int currentYear = LocalDate.now().getYear();
-					int birthDateYear = LocalDate
-					        .parse(new SimpleDateFormat("yyyy-MM-dd").format(user.getPerson().getBirthdate())).getYear();
-					
-					if ((currentYear - birthDateYear) > 5) {
-						dateType.setValue(user.getPerson().getBirthdate(), TemporalPrecisionEnum.YEAR);
-					} else {
-						dateType.setValue(user.getPerson().getBirthdate(), TemporalPrecisionEnum.MONTH);
-					}
-					
-					practitioner.setBirthDateElement(dateType);
-				} else {
-					practitioner.setBirthDate(user.getPerson().getBirthdate());
-				}
-			} else {
-				practitioner.setBirthDate(user.getPerson().getBirthdate());
-			}
+			practitioner.setBirthDateElement(birthDateTranslator.toFhirResource(user.getPerson()));
 			
 			practitioner.setGender(genderTranslator.toFhirResource(user.getPerson().getGender()));
 			for (PersonName name : user.getPerson().getNames()) {
 				practitioner.addName(nameTranslator.toFhirResource(name));
 			}
+			
 			for (PersonAddress address : user.getPerson().getAddresses()) {
 				practitioner.addAddress(addressTranslator.toFhirResource(address));
 			}
@@ -96,11 +77,27 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 	
 	@Override
 	public User toOpenmrsType(@Nonnull User user, @Nonnull Practitioner practitioner) {
-		notNull(user, "The existing User object should not be null");
-		notNull(practitioner, "The Practitioner object should not be null");
+		if (user == null) {
+			return null;
+		}
+		
+		if (practitioner == null) {
+			return null;
+		}
 		
 		user.setUuid(practitioner.getId());
 		setSystemId(practitioner, user);
+		
+		if (practitioner.hasBirthDateElement()) {
+			birthDateTranslator.toOpenmrsType(user.getPerson(), practitioner.getBirthDateElement());
+		}
+		
+		if (user.getPerson() == null) {
+			user.setPerson(new Person());
+		}
+		
+		user.getPerson().setGender(genderTranslator.toOpenmrsType(practitioner.getGender()));
+		
 		user.setDateChanged(practitioner.getMeta().getLastUpdated());
 		
 		return user;

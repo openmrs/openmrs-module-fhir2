@@ -13,14 +13,10 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Date;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.RelatedPerson;
@@ -30,6 +26,7 @@ import org.openmrs.PersonName;
 import org.openmrs.Relationship;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
+import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
 import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
@@ -46,10 +43,13 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 	private PersonNameTranslator nameTranslator;
 	
 	@Autowired
-	private PersonAddressTranslator addressTranslator;
+	private GenderTranslator genderTranslator;
 	
 	@Autowired
-	private GenderTranslator genderTranslator;
+	private BirthDateTranslator birthDateTranslator;
+	
+	@Autowired
+	private PersonAddressTranslator addressTranslator;
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
@@ -68,27 +68,6 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 		RelatedPerson relatedPerson = new RelatedPerson();
 		relatedPerson.setId(relationship.getUuid());
 		
-		if (omrsRelatedPerson.getBirthdateEstimated() != null) {
-			if (omrsRelatedPerson.getBirthdateEstimated()) {
-				DateType dateType = new DateType();
-				int currentYear = LocalDate.now().getYear();
-				int birthDateYear = LocalDate
-				        .parse(new SimpleDateFormat("yyyy-MM-dd").format(omrsRelatedPerson.getBirthdate())).getYear();
-				
-				if ((currentYear - birthDateYear) > 5) {
-					dateType.setValue(omrsRelatedPerson.getBirthdate(), TemporalPrecisionEnum.YEAR);
-				} else {
-					dateType.setValue(omrsRelatedPerson.getBirthdate(), TemporalPrecisionEnum.MONTH);
-				}
-				
-				relatedPerson.setBirthDateElement(dateType);
-			} else {
-				relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
-			}
-		} else {
-			relatedPerson.setBirthDate(omrsRelatedPerson.getBirthdate());
-		}
-		
 		if (relationship.getPersonB() != null) {
 			if (relationship.getPersonB().getIsPatient()) {
 				relatedPerson.setPatient(
@@ -96,13 +75,15 @@ public class RelatedPersonTranslatorImpl implements RelatedPersonTranslator {
 			}
 		}
 		
+		for (PersonName name : omrsRelatedPerson.getNames()) {
+			relatedPerson.addName(nameTranslator.toFhirResource(name));
+		}
+		
 		if (omrsRelatedPerson.getGender() != null) {
 			relatedPerson.setGender(genderTranslator.toFhirResource(omrsRelatedPerson.getGender()));
 		}
 		
-		for (PersonName name : omrsRelatedPerson.getNames()) {
-			relatedPerson.addName(nameTranslator.toFhirResource(name));
-		}
+		relatedPerson.setBirthDateElement(birthDateTranslator.toFhirResource(omrsRelatedPerson));
 		
 		for (PersonAddress address : omrsRelatedPerson.getAddresses()) {
 			relatedPerson.addAddress(addressTranslator.toFhirResource(address));

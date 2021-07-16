@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Encounter xmlns="http://hl7.org/fhir">
+	<identifier>
+		<use value="temp"/>
+		<value value="Encounter_Roel_20130404"/>
+	</identifier>
+	<status value="in-progress"/>
+	<class>
+		<system value="http://terminology.hl7.org/CodeSystem/v3-ActCode"/>
+		<code value="AMB"/>
+		<display value="ambulatory"/>
+	</class>
+	<meta>
+		<tag>
+			<system value="http://fhir.openmrs.org/ext/encounter-tag"/>
+			<code value="encounter"/>
+			<display value="Encounter"/>
+		</tag>
+	</meta>
+	<type>
+		<coding>
+			<system value="http://fhir.openmrs.org/code-system/encounter-type"/>
+			<code value="c0c579b0-8e59-401d-8a4a-976a0b183519"/>
+			<display value="Consultation"/>
+		</coding>
+	</type>
+	<priority>
+		<coding>
+			<system value="http://snomed.info/sct"/>
+			<code value="17621005"/>
+			<display value="Normal"/>
+		</coding>
+	</priority>
+	<subject>
+		<reference value="Patient/a194be38-271a-44cb-ba3f-f2dbf4831fe9"/>
+		<display value="Mr. John Doe"/>
+	</subject>
+	<participant>
+		<individual>
+			<reference value="Practitioner/c2879800-cca9-11e0-9572-0800200c9a66"/>
+			<type value="Practitioner"/>
+			<identifier>
+				<value value="1000WF"/>
+			</identifier>
+			<display value="John Doe (Identifier: 1000WF)"/>
+		</individual>
+	</participant>
+	<reasonCode>
+		<text value="The patient had fever peaks over the last couple of days"/>
+	</reasonCode>
+	<serviceProvider>
+		<reference value="Organization/f201"/>
+	</serviceProvider>
+	<partOf>
+		<reference value="Encounter/430bbb70-6a9c-4e1e-badb-9d1034b1b5e9"/>
+	</partOf>
+	<location>
+		<location>
+			<reference value="Location/c36006e5-9fbb-4f20-866b-0ece245615a1"/>
+			<type value="test"/>
+			<display value="Test Location"/>
+		</location>
+	</location>
+	<period>
+		<start value="2005-01-01T00:00:00+05:30" />
+	</period>
+</Encounter>

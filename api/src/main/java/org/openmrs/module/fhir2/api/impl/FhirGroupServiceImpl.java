@@ -9,13 +9,20 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Group;
 import org.openmrs.Cohort;
+import org.openmrs.annotation.OpenmrsProfile;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGroupService;
 import org.openmrs.module.fhir2.api.dao.FhirGroupDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
+@OpenmrsProfile(openmrsPlatformVersion = "2.0.0 - 2.*")
 public class FhirGroupServiceImpl extends BaseFhirService<Group, Cohort> implements FhirGroupService {
 	
 	@Autowired
@@ -32,4 +40,17 @@ public class FhirGroupServiceImpl extends BaseFhirService<Group, Cohort> impleme
 	
 	@Autowired
 	private GroupTranslator translator;
+	
+	@Autowired
+	private SearchQueryInclude<Group> searchQueryInclude;
+	
+	@Autowired
+	private SearchQuery<org.openmrs.Cohort, Group, FhirGroupDao, GroupTranslator, SearchQueryInclude<Group>> searchQuery;
+	
+	@Override
+	public IBundleProvider searchForGroups(ReferenceAndListParam participant) {
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
 }
