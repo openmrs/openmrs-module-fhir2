@@ -41,4 +41,6 @@ public interface FhirPatientService extends FhirService<Patient> {
 	        TokenAndListParam deceased, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
 	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
 	        HashSet<Include> revIncludes);
+	
+	IBundleProvider getPatientEverything(TokenAndListParam identifier);
 }

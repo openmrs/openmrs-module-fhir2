@@ -54,6 +54,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -172,6 +173,10 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private List<Patient> get(IBundleProvider results) {
 		return results.getResources(START_INDEX, END_INDEX).stream().filter(it -> it instanceof Patient)
 		        .map(it -> (Patient) it).collect(Collectors.toList());
+	}
+	
+	private List<IBaseResource> getAllResources(IBundleProvider results) {
+		return results.getAllResources();
 	}
 	
 	@Test
@@ -1152,6 +1157,36 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 			assertThat(resultList.get(i - 1).getAddressFirstRep().getCountry(),
 			    greaterThanOrEqualTo(resultList.get(i).getAddressFirstRep().getCountry()));
 		}
+	}
+	
+	@Test
+	public void searchForPatient_shouldReturnPatientEverything() {
+		TokenAndListParam patientId = new TokenAndListParam().addAnd(new TokenParam().setValue(PATIENT_OTHER2_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PATIENT_EVERYTHING_SEARCH_HANDLER, new StringParam())
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, patientId);
+		
+		HashSet<Include> revIncludes = new HashSet<>();
+		
+		revIncludes.add(new Include("Observation:" + Observation.SP_PATIENT));
+		revIncludes.add(new Include("AllergyIntolerance:" + AllergyIntolerance.SP_PATIENT));
+		revIncludes.add(new Include("DiagnosticReport:" + DiagnosticReport.SP_PATIENT));
+		revIncludes.add(new Include("Encounter:" + Encounter.SP_PATIENT));
+		revIncludes.add(new Include("MedicationRequest:" + MedicationRequest.SP_PATIENT));
+		revIncludes.add(new Include("ServiceRequest:" + ServiceRequest.SP_PATIENT));
+		revIncludes.add(new Include("ProcedureRequest:" + Procedure.SP_PATIENT));
+		
+		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(15));
+		
+		List<IBaseResource> resultList = getAllResources(results);
+		
+		assertThat(resultList.size(), equalTo(15));
 	}
 	
 }
