@@ -42,8 +42,14 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -793,7 +799,43 @@ public class FhirPatientServiceImplTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
-	
+
+	@Test
+	public void getPatientEverything_shouldReturnAllInformationAboutSpecifiedPatient() {
+		TokenAndListParam patientId = new TokenAndListParam().addAnd(new TokenParam().setValue(PATIENT_UUID));
+
+		SearchParameterMap theParams = new SearchParameterMap()
+				.addParameter(FhirConstants.PATIENT_EVERYTHING_SEARCH_HANDLER, new StringParam())
+				.addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, patientId);
+
+		HashSet<Include> revIncludes = new HashSet<>();
+
+		revIncludes.add(new Include("Observation:" + Observation.SP_PATIENT));
+		revIncludes.add(new Include("AllergyIntolerance:" + AllergyIntolerance.SP_PATIENT));
+		revIncludes.add(new Include("DiagnosticReport:" + DiagnosticReport.SP_PATIENT));
+		revIncludes.add(new Include("Encounter:" + Encounter.SP_PATIENT));
+		revIncludes.add(new Include("MedicationRequest:" + MedicationRequest.SP_PATIENT));
+		revIncludes.add(new Include("ServiceRequest:" + ServiceRequest.SP_PATIENT));
+		revIncludes.add(new Include("ProcedureRequest:" + Procedure.SP_PATIENT));
+
+		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(patient));
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+				new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
+
+		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
+
+		IBundleProvider results = patientService.getPatientEverything(patientId);
+
+		List<IBaseResource> resultList = get(results);
+
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+
+	}
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(0, 10);
 	}
