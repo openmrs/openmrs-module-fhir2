@@ -21,13 +21,21 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
@@ -103,6 +111,28 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes).setSortSpec(sort);
+		
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public IBundleProvider getPatientEverything(TokenAndListParam patientId) {
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.PATIENT_EVERYTHING_SEARCH_HANDLER, new StringParam())
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, patientId);
+		
+		HashSet<Include> revIncludes = new HashSet<>();
+		
+		revIncludes.add(new Include("Observation:" + Observation.SP_PATIENT));
+		revIncludes.add(new Include("AllergyIntolerance:" + AllergyIntolerance.SP_PATIENT));
+		revIncludes.add(new Include("DiagnosticReport:" + DiagnosticReport.SP_PATIENT));
+		revIncludes.add(new Include("Encounter:" + Encounter.SP_PATIENT));
+		revIncludes.add(new Include("MedicationRequest:" + MedicationRequest.SP_PATIENT));
+		revIncludes.add(new Include("ServiceRequest:" + ServiceRequest.SP_PATIENT));
+		revIncludes.add(new Include("ProcedureRequest:" + Procedure.SP_PATIENT));
+		
+		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
