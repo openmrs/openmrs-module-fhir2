@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
@@ -144,7 +145,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		    includes, revIncludes);
 	}
 	
-	@Operation(name = "lastn", idempotent = true, type = Observation.class)
+	@Operation(name = "lastn", idempotent = true, type = Observation.class, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider getLastnObservations(@OperationParam(name = "max") NumberParam max,
 	        @OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
 	        @OperationParam(name = Observation.SP_PATIENT) ReferenceAndListParam patientParam,
@@ -169,7 +170,7 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	 * If neither patient nor subject is specified, then perform search on all patients,
 	 * @return a bundle of observations whose corresponding encounter is among the recent `N` encounters for the specified patient
 	 */
-	@Operation(name = "lastn-encounters", idempotent = true, type = Observation.class)
+	@Operation(name = "lastn-encounters", idempotent = true, type = Observation.class, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider getLastnEncountersObservations(@OperationParam(name = "max") NumberParam max,
 	        @OperationParam(name = Observation.SP_SUBJECT) ReferenceAndListParam subjectParam,
 	        @OperationParam(name = Observation.SP_PATIENT) ReferenceAndListParam patientParam,
