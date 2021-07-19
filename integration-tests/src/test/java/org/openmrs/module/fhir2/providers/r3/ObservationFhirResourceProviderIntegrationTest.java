@@ -567,7 +567,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(7)));
 		
@@ -598,7 +598,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(2)));
 		
@@ -629,7 +629,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(7)));
 		
@@ -659,7 +659,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(7)));
 		
@@ -687,7 +687,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(7)));
 		
@@ -716,7 +716,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(17)));
 		
@@ -743,7 +743,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(14)));
 		
@@ -768,7 +768,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(7)));
 		
@@ -799,7 +799,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(2)));
 		
@@ -830,7 +830,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(7)));
 		
@@ -860,7 +860,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(7)));
 		
@@ -888,7 +888,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(7)));
 		
@@ -916,7 +916,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(17)));
 		
@@ -943,7 +943,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(14)));
 		
@@ -968,7 +968,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(2)));
 		
@@ -999,7 +999,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(1)));
 		
@@ -1031,7 +1031,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(2)));
 		
@@ -1061,7 +1061,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(2)));
 		
@@ -1090,7 +1090,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(2)));
 		
@@ -1119,7 +1119,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(3)));
 		
@@ -1146,7 +1146,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(1)));
 		
@@ -1171,7 +1171,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(2)));
 		
@@ -1202,7 +1202,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(1)));
 		
@@ -1234,7 +1234,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(2)));
 		
@@ -1264,7 +1264,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(2)));
 		
@@ -1293,7 +1293,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(2)));
 		
@@ -1322,7 +1322,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(3)));
 		
@@ -1349,7 +1349,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		Bundle results = readBundleResponse(response);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.getType(), equalTo(Bundle.BundleType.COLLECTION));
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results, hasProperty("total", equalTo(1)));
 		
