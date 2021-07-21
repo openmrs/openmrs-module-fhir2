@@ -1169,13 +1169,13 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		HashSet<Include> revIncludes = new HashSet<>();
 		
-		revIncludes.add(new Include("Observation:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("AllergyIntolerance:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("DiagnosticReport:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("Encounter:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("MedicationRequest:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("ServiceRequest:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("ProcedureRequest:" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.OBSERVATION + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.ALLERGY_INTOLERANCE + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.DIAGNOSTIC_REPORT + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.MEDICATION_REQUEST+ ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.SERVICE_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.PROCEDURE_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
 		
 		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
 		

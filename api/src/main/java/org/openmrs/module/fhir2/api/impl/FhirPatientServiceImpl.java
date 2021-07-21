@@ -27,15 +27,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
@@ -123,14 +116,14 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, patientId);
 		
 		HashSet<Include> revIncludes = new HashSet<>();
-		
-		revIncludes.add(new Include("Observation:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("AllergyIntolerance:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("DiagnosticReport:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("Encounter:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("MedicationRequest:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("ServiceRequest:" + FhirConstants.INCLUDE_PATIENT_PARAM));
-		revIncludes.add(new Include("ProcedureRequest:" + FhirConstants.INCLUDE_PATIENT_PARAM));
+
+		revIncludes.add(new Include(FhirConstants.OBSERVATION + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.ALLERGY_INTOLERANCE + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.DIAGNOSTIC_REPORT + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.MEDICATION_REQUEST+ ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.SERVICE_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.PROCEDURE_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
 		
 		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
 		
