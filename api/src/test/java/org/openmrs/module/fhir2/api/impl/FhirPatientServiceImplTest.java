@@ -810,13 +810,13 @@ public class FhirPatientServiceImplTest {
 		
 		HashSet<Include> revIncludes = new HashSet<>();
 
-		revIncludes.add(new Include("Observation:" + Observation.SP_PATIENT));
-		revIncludes.add(new Include("AllergyIntolerance:" + AllergyIntolerance.SP_PATIENT));
-		revIncludes.add(new Include("DiagnosticReport:" + DiagnosticReport.SP_PATIENT));
-		revIncludes.add(new Include("Encounter:" + Encounter.SP_PATIENT));
-		revIncludes.add(new Include("MedicationRequest:" + MedicationRequest.SP_PATIENT));
-		revIncludes.add(new Include("ServiceRequest:" + ServiceRequest.SP_PATIENT));
-		revIncludes.add(new Include("ProcedureRequest:" + Procedure.SP_PATIENT));
+		revIncludes.add(new Include("Observation:" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include("AllergyIntolerance:" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include("DiagnosticReport:" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include("Encounter:" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include("MedicationRequest:" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include("ServiceRequest:" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include("ProcedureRequest:" + FhirConstants.INCLUDE_PATIENT_PARAM));
 		
 		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
 		
