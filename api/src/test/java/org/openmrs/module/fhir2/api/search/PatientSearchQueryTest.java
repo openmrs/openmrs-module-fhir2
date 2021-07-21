@@ -1163,7 +1163,7 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 		TokenAndListParam patientId = new TokenAndListParam().addAnd(new TokenParam().setValue(PATIENT_OTHER2_UUID));
 		
 		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, new StringParam())
+		        .addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "")
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, patientId);
 		
 		HashSet<Include> revIncludes = new HashSet<>();

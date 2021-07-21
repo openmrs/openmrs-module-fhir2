@@ -799,7 +799,7 @@ public class FhirPatientServiceImplTest {
 		TokenParam patientId = new TokenParam().setValue(PATIENT_UUID);
 		
 		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, new StringParam())
+		        .addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "")
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, patientId);
 		
 		HashSet<Include> revIncludes = new HashSet<>();
