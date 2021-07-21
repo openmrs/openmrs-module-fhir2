@@ -146,20 +146,20 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		return patientService.searchForPatients(name, given, family, identifier, gender, birthDate, deathDate, deceased,
 		    city, state, postalCode, country, id, lastUpdated, sort, revIncludes);
 	}
-
+	
 	/**
 	 * The $everything operation fetches all the information related the specified patient
+	 * 
 	 * @param patientId The id of the patient
 	 * @return a bundle of resources which reference to or are referenced from the patient
 	 */
 	@Operation(name = "everything", idempotent = true, type = Patient.class, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider getPatientEverything(@IdParam IdType patientId) {
-
-		TokenAndListParam patientReference = new TokenAndListParam();
-		if(patientId != null) {
-			patientReference.addAnd(new TokenParam().setValue(patientId.getIdPart()));
+		
+		TokenParam patientReference = new TokenParam();
+		if (patientId != null) {
+			patientReference.setValue(patientId.getIdPart());
 		}
-
 		
 		return patientService.getPatientEverything(patientReference);
 	}

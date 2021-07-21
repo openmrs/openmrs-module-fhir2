@@ -796,7 +796,7 @@ public class FhirPatientServiceImplTest {
 	
 	@Test
 	public void getPatientEverything_shouldReturnAllInformationAboutSpecifiedPatient() {
-		TokenAndListParam patientId = new TokenAndListParam().addAnd(new TokenParam().setValue(PATIENT_UUID));
+		TokenParam patientId = new TokenParam().setValue(PATIENT_UUID);
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, new StringParam())

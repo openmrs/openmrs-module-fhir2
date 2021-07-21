@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
@@ -104,6 +105,9 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 	
 	@Captor
 	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<TokenParam> tokenCaptor;
 	
 	@Before
 	public void setup() throws ServletException {
@@ -776,12 +780,10 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 	public void getPatientEverything_shouldHandlePatientId() throws Exception {
 		verifyEverythingOperation("/Patient/" + PATIENT_UUID + "/$everything?");
 		
-		verify(patientService).getPatientEverything(tokenAndListCaptor.capture());
+		verify(patientService).getPatientEverything(tokenCaptor.capture());
 		
-		assertThat(tokenAndListCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(PATIENT_UUID));
+		assertThat(tokenCaptor.getValue(), notNullValue());
+		assertThat(tokenCaptor.getValue().getValue(), equalTo(PATIENT_UUID));
 	}
 	
 	private void verifyEverythingOperation(String uri) throws Exception {
