@@ -156,10 +156,11 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	@Operation(name = "everything", idempotent = true, type = Patient.class, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider getPatientEverything(@IdParam IdType patientId) {
 		
-		TokenParam patientReference = new TokenParam();
-		if (patientId != null) {
-			patientReference.setValue(patientId.getIdPart());
+		if (patientId == null || patientId.getIdPart() == null || patientId.getIdPart().isEmpty()) {
+			return null;
 		}
+		
+		TokenParam patientReference = new TokenParam().setValue(patientId.getIdPart());
 		
 		return patientService.getPatientEverything(patientReference);
 	}
