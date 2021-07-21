@@ -542,34 +542,25 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.PATIENT));
 		assertThat(((Patient) resultList.iterator().next()).getId(), equalTo(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnNullForPatientEverythingWhenIdParamIsMissing() {
-		when(patientService.getPatientEverything(any()))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
 		IBundleProvider results = resourceProvider.getPatientEverything(null);
-
+		
 		assertThat(results, nullValue());
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnNullForPatientEverythingWhenIdPartIsMissingInIdParam() {
-		when(patientService.getPatientEverything(any()))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
 		IBundleProvider results = resourceProvider.getPatientEverything(new IdType());
-
+		
 		assertThat(results, nullValue());
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnNullPatientEverythingWhenIdPartIsEmptyInIdParam() {
-		when(patientService.getPatientEverything(any()))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
 		IBundleProvider results = resourceProvider.getPatientEverything(new IdType(""));
-
+		
 		assertThat(results, nullValue());
 	}
 	
