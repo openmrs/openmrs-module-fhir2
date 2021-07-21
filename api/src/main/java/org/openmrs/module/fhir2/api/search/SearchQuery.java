@@ -45,7 +45,7 @@ public class SearchQuery<T extends OpenmrsObject & Auditable, U extends IBaseRes
 	 * @return IBundleProvider
 	 */
 	public IBundleProvider getQueryResults(SearchParameterMap theParams, O dao, V translator, W searchQueryInclude) {
-		if (!theParams.getParameters(FhirConstants.PATIENT_EVERYTHING_SEARCH_HANDLER).isEmpty()) {
+		if (!theParams.getParameters(FhirConstants.EVERYTHING_SEARCH_HANDLER).isEmpty()) {
 			SimpleBundleProvider result = new SimpleBundleProvider(
 			        new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude)
 			                .getAllResources());

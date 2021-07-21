@@ -308,5 +308,5 @@ public class FhirConstants {
 	
 	public static final String LASTN_ENCOUNTERS_SEARCH_HANDLER = "lastn.encounters.search.handler";
 	
-	public static final String PATIENT_EVERYTHING_SEARCH_HANDLER = "everything.patient.search.handler";
+	public static final String EVERYTHING_SEARCH_HANDLER = "everything.search.handler";
 }
