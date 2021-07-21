@@ -805,9 +805,9 @@ public class FhirPatientServiceImplTest {
 		TokenAndListParam patientId = new TokenAndListParam().addAnd(new TokenParam().setValue(PATIENT_UUID));
 
 		SearchParameterMap theParams = new SearchParameterMap()
-				.addParameter(FhirConstants.PATIENT_EVERYTHING_SEARCH_HANDLER, new StringParam())
-				.addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, patientId);
-
+		        .addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, new StringParam())
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, patientId);
+		
 		HashSet<Include> revIncludes = new HashSet<>();
 
 		revIncludes.add(new Include("Observation:" + Observation.SP_PATIENT));
@@ -817,25 +817,26 @@ public class FhirPatientServiceImplTest {
 		revIncludes.add(new Include("MedicationRequest:" + MedicationRequest.SP_PATIENT));
 		revIncludes.add(new Include("ServiceRequest:" + ServiceRequest.SP_PATIENT));
 		revIncludes.add(new Include("ProcedureRequest:" + Procedure.SP_PATIENT));
-
+		
 		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
-
+		
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(patient));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
-				new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-
+		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
+		
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-
+		
 		IBundleProvider results = patientService.getPatientEverything(patientId);
-
+		
 		List<IBaseResource> resultList = get(results);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));
-
+		
 	}
+	
 	private List<IBaseResource> get(IBundleProvider results) {
 		return results.getResources(0, 10);
 	}
