@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
@@ -58,7 +59,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
-import org.openmrs.module.fhir2.providers.r3.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Patient> {
@@ -528,7 +528,47 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 		assertThat(((Patient) resultList.iterator().next()).getId(), equalTo(PATIENT_UUID));
 	}
 	
+	@Test
+	public void searchForPatients_shouldReturnPatientEverything() {
+		when(patientService.getPatientEverything(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		IBundleProvider results = resourceProvider.getPatientEverything(new IdType(PATIENT_UUID));
+		
+		List<IBaseResource> resultList = getAllResources(results);
+		
+		assertThat(resultList, notNullValue());
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.PATIENT));
+		assertThat(((Patient) resultList.iterator().next()).getId(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnNullForPatientEverythingWhenIdParamIsMissing() {
+		IBundleProvider results = resourceProvider.getPatientEverything(null);
+		
+		assertThat(results, nullValue());
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnNullForPatientEverythingWhenIdPartIsMissingInIdParam() {
+		IBundleProvider results = resourceProvider.getPatientEverything(new IdType());
+		
+		assertThat(results, nullValue());
+	}
+	
+	@Test
+	public void searchForPatients_shouldReturnNullPatientEverythingWhenIdPartIsEmptyInIdParam() {
+		IBundleProvider results = resourceProvider.getPatientEverything(new IdType(""));
+		
+		assertThat(results, nullValue());
+	}
+	
 	private List<IBaseResource> getResources(IBundleProvider result) {
 		return result.getResources(0, 10);
+	}
+	
+	private List<IBaseResource> getAllResources(IBundleProvider result) {
+		return result.getAllResources();
 	}
 }

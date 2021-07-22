@@ -17,11 +17,13 @@ import java.util.HashSet;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -34,6 +36,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -142,5 +145,23 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		
 		return patientService.searchForPatients(name, given, family, identifier, gender, birthDate, deathDate, deceased,
 		    city, state, postalCode, country, id, lastUpdated, sort, revIncludes);
+	}
+	
+	/**
+	 * The $everything operation fetches all the information related the specified patient
+	 * 
+	 * @param patientId The id of the patient
+	 * @return a bundle of resources which reference to or are referenced from the patient
+	 */
+	@Operation(name = "everything", idempotent = true, type = Patient.class, bundleType = BundleTypeEnum.SEARCHSET)
+	public IBundleProvider getPatientEverything(@IdParam IdType patientId) {
+		
+		if (patientId == null || patientId.getIdPart() == null || patientId.getIdPart().isEmpty()) {
+			return null;
+		}
+		
+		TokenParam patientReference = new TokenParam().setValue(patientId.getIdPart());
+		
+		return patientService.getPatientEverything(patientReference);
 	}
 }

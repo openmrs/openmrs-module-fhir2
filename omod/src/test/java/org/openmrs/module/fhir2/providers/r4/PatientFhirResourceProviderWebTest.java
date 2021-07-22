@@ -42,10 +42,12 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -63,7 +65,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
-import org.openmrs.module.fhir2.providers.r3.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -104,6 +105,9 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 	
 	@Captor
 	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<TokenParam> tokenCaptor;
 	
 	@Before
 	public void setup() throws ServletException {
@@ -770,6 +774,35 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void getPatientEverything_shouldHandlePatientId() throws Exception {
+		verifyEverythingOperation("/Patient/" + PATIENT_UUID + "/$everything?");
+		
+		verify(patientService).getPatientEverything(tokenCaptor.capture());
+		
+		assertThat(tokenCaptor.getValue(), notNullValue());
+		assertThat(tokenCaptor.getValue().getValue(), equalTo(PATIENT_UUID));
+	}
+	
+	private void verifyEverythingOperation(String uri) throws Exception {
+		Patient patient = new Patient();
+		patient.setId(PATIENT_UUID);
+		
+		when(patientService.getPatientEverything(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
+		
+		MatcherAssert.assertThat(response, isOk());
+		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		
+		Bundle results = readBundleResponse(response);
+		assertThat(results.getEntry(), notNullValue());
+		assertThat(results.getEntry(), not(empty()));
+		assertThat(results.getEntry().get(0).getResource(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(PATIENT_UUID));
 	}
 	
 }
