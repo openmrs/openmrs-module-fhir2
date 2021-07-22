@@ -174,6 +174,10 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 		        .map(it -> (Patient) it).collect(Collectors.toList());
 	}
 	
+	private List<IBaseResource> getAllResources(IBundleProvider results) {
+		return results.getAllResources();
+	}
+	
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByName() {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, "name",
@@ -1152,6 +1156,36 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 			assertThat(resultList.get(i - 1).getAddressFirstRep().getCountry(),
 			    greaterThanOrEqualTo(resultList.get(i).getAddressFirstRep().getCountry()));
 		}
+	}
+	
+	@Test
+	public void searchForPatient_shouldReturnPatientEverything() {
+		TokenAndListParam patientId = new TokenAndListParam().addAnd(new TokenParam().setValue(PATIENT_OTHER2_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "")
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, patientId);
+		
+		HashSet<Include> revIncludes = new HashSet<>();
+		
+		revIncludes.add(new Include(FhirConstants.OBSERVATION + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.ALLERGY_INTOLERANCE + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.DIAGNOSTIC_REPORT + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.MEDICATION_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.SERVICE_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.PROCEDURE_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		
+		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(15));
+		
+		List<IBaseResource> resultList = getAllResources(results);
+		
+		assertThat(resultList.size(), equalTo(15));
 	}
 	
 }

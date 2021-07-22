@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifierType;
@@ -41,4 +42,6 @@ public interface FhirPatientService extends FhirService<Patient> {
 	        TokenAndListParam deceased, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
 	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
 	        HashSet<Include> revIncludes);
+	
+	IBundleProvider getPatientEverything(TokenParam identifier);
 }

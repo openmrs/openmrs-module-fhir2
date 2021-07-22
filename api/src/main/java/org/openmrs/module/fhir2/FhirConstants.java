@@ -307,4 +307,6 @@ public class FhirConstants {
 	public static final String LASTN_OBSERVATION_SEARCH_HANDLER = "lastn.observation.search.handler";
 	
 	public static final String LASTN_ENCOUNTERS_SEARCH_HANDLER = "lastn.encounters.search.handler";
+	
+	public static final String EVERYTHING_SEARCH_HANDLER = "everything.search.handler";
 }
