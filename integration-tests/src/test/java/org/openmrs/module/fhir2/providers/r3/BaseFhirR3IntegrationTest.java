@@ -215,4 +215,55 @@ public abstract class BaseFhirR3IntegrationTest<T extends IResourceProvider, U e
 			        .appendValue(max).appendText(" distinct observation times");
 		}
 	}
+
+	protected static Matcher<List<Bundle.BundleEntryComponent>> hasCorrectResources(Integer resourceCount,
+			Set<String> validResources) {
+		return new HasCorrectResources(resourceCount, validResources);
+	}
+
+	private static class HasCorrectResources extends TypeSafeDiagnosingMatcher<List<Bundle.BundleEntryComponent>> {
+
+		private int resourcesCount;
+
+		private Set<String> validResources;
+
+		HasCorrectResources(int resourcesCount, Set<String> validResources) {
+			this.resourcesCount = resourcesCount;
+			this.validResources = validResources;
+		}
+
+		@Override
+		protected boolean matchesSafely(List<Bundle.BundleEntryComponent> entries, Description mismatchDescription) {
+			int count = 0;
+			for (Bundle.BundleEntryComponent entry : entries) {
+				if (validResources.contains(entry.getResource().getIdElement().getIdPart())) {
+					count++;
+				} else {
+					mismatchDescription.appendText("Result contains an incorrect resource");
+					return false;
+				}
+			}
+
+			if (entries.size() < resourcesCount) {
+				if (count != entries.size()) {
+					mismatchDescription.appendText("Expected ").appendValue(entries.size())
+							.appendText(" resources, but result has ").appendValue(count).appendText(" resources.");
+					return false;
+				}
+				return true;
+			}
+
+			if (count != resourcesCount) {
+				mismatchDescription.appendText("Expected ").appendValue(resourcesCount)
+						.appendText(" resources, but result has ").appendValue(count).appendText(" resources.");
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public void describeTo(Description description) {
+			description.appendText("Result all valid resources.");
+		}
+	}
 }
