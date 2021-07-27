@@ -115,6 +115,21 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY,
 		            new TokenAndListParam().addAnd(patientId));
 		
+		getEverythingReverseInclude(theParams);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public IBundleProvider getPatientEverythingType() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "");
+		
+		getEverythingReverseInclude(theParams);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+		
+	}
+	
+	private void getEverythingReverseInclude(SearchParameterMap theParams) {
 		HashSet<Include> revIncludes = new HashSet<>();
 		
 		revIncludes.add(new Include(FhirConstants.OBSERVATION + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
@@ -126,7 +141,5 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 		revIncludes.add(new Include(FhirConstants.PROCEDURE_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
 		
 		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
-		
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }
