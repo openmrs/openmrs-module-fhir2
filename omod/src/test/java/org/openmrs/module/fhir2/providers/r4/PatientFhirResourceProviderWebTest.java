@@ -790,7 +790,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 	public void getPatientEverything_shouldHandleNoPatientId() throws Exception {
 		verifyEverythingTypeOperation("/Patient/$everything?");
 		
-		verify(patientService).getPatientEverythingType();
+		verify(patientService).getPatientEverything();
 	}
 	
 	private void verifyEverythingOperation(String uri) throws Exception {
@@ -802,8 +802,8 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
-		MatcherAssert.assertThat(response, isOk());
-		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.getEntry(), notNullValue());
@@ -816,7 +816,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
 		
-		when(patientService.getPatientEverythingType())
+		when(patientService.getPatientEverything())
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

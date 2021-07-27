@@ -164,13 +164,14 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		
 		return patientService.getPatientEverything(patientReference);
 	}
+	
 	/**
 	 * The $everything operation fetches all the information related to all the patients
 	 *
 	 * @return a bundle of resources which reference to or are referenced from the patients
 	 */
 	@Operation(name = "everything", idempotent = true, type = Patient.class, bundleType = BundleTypeEnum.SEARCHSET)
-	public IBundleProvider getPatientEverythingType() {
-		return patientService.getPatientEverythingType();
+	public IBundleProvider getPatientEverything() {
+		return patientService.getPatientEverything();
 	}
 }

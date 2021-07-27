@@ -566,10 +566,10 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchForPatients_shouldReturnPatientEverythingForTypeLevel() {
-		when(patientService.getPatientEverythingType())
+		when(patientService.getPatientEverything())
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
-		IBundleProvider results = resourceProvider.getPatientEverythingType();
+		IBundleProvider results = resourceProvider.getPatientEverything();
 		
 		List<IBaseResource> resultList = getAllResources(results);
 		

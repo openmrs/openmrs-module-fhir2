@@ -853,7 +853,7 @@ public class FhirPatientServiceImplTest {
 		
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
 		
-		IBundleProvider results = patientService.getPatientEverythingType();
+		IBundleProvider results = patientService.getPatientEverything();
 		
 		List<IBaseResource> resultList = get(results);
 		

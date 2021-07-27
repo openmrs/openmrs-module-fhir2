@@ -45,5 +45,5 @@ public interface FhirPatientService extends FhirService<Patient> {
 	
 	IBundleProvider getPatientEverything(TokenParam identifier);
 	
-	IBundleProvider getPatientEverythingType();
+	IBundleProvider getPatientEverything();
 }
