@@ -169,7 +169,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		}
 		
 		// create person
-		MockHttpServletResponse response = post("/Person").accept(FhirMediaTypes.XML).xmlContext(xmlPerson).go();
+		MockHttpServletResponse response = post("/Person").accept(FhirMediaTypes.XML).xmlContent(xmlPerson).go();
 		
 		// verify created correctly
 		assertThat(response, isCreated());
@@ -290,7 +290,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		person.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Person/" + PERSON_UUID).xmlContext(toXML(person)).accept(FhirMediaTypes.XML).go();
+		response = put("/Person/" + PERSON_UUID).xmlContent(toXML(person)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -321,7 +321,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR3Integra
 		person.setId(WRONG_PERSON_UUID);
 		
 		// send the update to the server
-		response = put("/Person/" + PERSON_UUID).xmlContext(toXML(person)).accept(FhirMediaTypes.XML).go();
+		response = put("/Person/" + PERSON_UUID).xmlContent(toXML(person)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

@@ -1,0 +1,39 @@
+{
+  "resourceType": "Immunization",
+  "status": "completed",
+  "vaccineCode": {
+    "coding": [
+      {
+        "code": "15f83cd6-64e9-4e06-a5f9-364d3b14a43d",
+        "display": "MEASLES VACCINATION"
+      }
+    ]
+  },
+  "patient": {
+    "type": "Patient",
+    "reference": "Patient/8d703ff2-c3e2-4070-9737-73e713d5a50d"
+  },
+  "encounter": {
+    "type": "Encounter",
+    "reference": "Encounter/814fd8dc-e0be-416b-a7b5-4bac0a4b3297"
+  },
+  "occurrenceDateTime": "2020-07-08T18:30:00.000Z",
+  "expirationDate": "2021-07-28",
+  "location": {
+    "type": "Location",
+    "reference": "Location/6351fcf4-e311-4a19-90f9-35667d99a8af"
+  },
+  "performer": [
+    {
+      "actor": {
+        "type": "Practitioner",
+        "reference": "Practitioner/6f763a67-2bd1-451c-93b9-95caeb36cc24"
+      }
+    }
+  ],
+  "manufacturer": {
+    "display": "Pfizer"
+  },
+  "lotNumber": "22",
+  "protocolApplied": []
+}

@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -49,7 +50,11 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	
 	private static final String JSON_CREATE_IMMUNIZATION_DOCUMENT = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_create.json";
 	
+	private static final String JSON_CREATE_PARTIAL_IMMUNIZATION_DOCUMENT = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_create_partial.json";
+	
 	private static final String XML_CREATE_IMMUNIZATION_DOCUMENT = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_create.xml";
+	
+	private static final String XML_CREATE_PARTIAL_IMMUNIZATION_DOCUMENT = "org/openmrs/module/fhir2/providers/ImmunizationWebTest_create_partial.xml";
 	
 	private static final String IMMUNIZATION_UUID = "28668ca0-d7d7-4314-8a67-70f083bcf8ba";
 	
@@ -178,6 +183,54 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	}
 	
 	@Test
+	public void shouldCreateNewImmunizationWithoutSomeOptionalMembersAsJSON() throws Exception {
+		// read JSON record
+		String jsonImmunization;
+		try (InputStream is = this.getClass().getClassLoader()
+		        .getResourceAsStream(JSON_CREATE_PARTIAL_IMMUNIZATION_DOCUMENT)) {
+			Objects.requireNonNull(is);
+			jsonImmunization = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		// create IMMUNIZATION
+		MockHttpServletResponse response = post("/Immunization").accept(FhirMediaTypes.JSON).jsonContent(jsonImmunization)
+		        .go();
+		
+		// verify created correctly
+		assertThat(response, isCreated());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Immunization immunization = readResponse(response);
+		
+		assertThat(immunization, notNullValue());
+		assertThat(immunization.getResourceType().toString(), equalTo("Immunization"));
+		assertThat(immunization.getStatus().toCode(), equalTo("completed"));
+		assertThat(immunization.getVaccineCode().getCodingFirstRep().getCode(),
+		    equalTo("15f83cd6-64e9-4e06-a5f9-364d3b14a43d"));
+		assertThat(immunization.getPatient().getReferenceElement().getIdPart(),
+		    equalTo("8d703ff2-c3e2-4070-9737-73e713d5a50d"));
+		assertThat(immunization.getOccurrenceDateTimeType().getValueAsCalendar().getTime(),
+		    sameInstant(Date.from(ZonedDateTime.parse("2020-07-08T18:30:00.000Z").toInstant())));
+		assertThat(immunization.hasManufacturer(), is(true));
+		assertThat(immunization.getManufacturer().getDisplay(), equalTo("Pfizer"));
+		assertThat(immunization.getLotNumber(), equalTo("22"));
+		assertThat(immunization.getExpirationDate(), sameDay(LocalDate.parse("2021-07-28")));
+		assertThat(immunization.getPerformer().get(0).getActor().getReferenceElement().getIdPart(),
+		    equalTo("6f763a67-2bd1-451c-93b9-95caeb36cc24"));
+		assertThat(immunization, validResource());
+		
+		// try to get new immunization
+		response = get("/Immunization/" + immunization.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Immunization newImmunization = readResponse(response);
+		
+		assertThat(newImmunization.getId(), equalTo(immunization.getId()));
+	}
+	
+	@Test
 	public void shouldCreateNewImmunizationAsXML() throws Exception {
 		// read XML record
 		String xmlImmunization;
@@ -187,7 +240,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		}
 		
 		// create IMMUNIZATION
-		MockHttpServletResponse response = post("/Immunization").accept(FhirMediaTypes.XML).xmlContext(xmlImmunization).go();
+		MockHttpServletResponse response = post("/Immunization").accept(FhirMediaTypes.XML).xmlContent(xmlImmunization).go();
 		
 		// verify created correctly
 		assertThat(response, isCreated());
@@ -215,6 +268,53 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(immunization, validResource());
 		
 		// try to get new IMMUNIZATION
+		response = get("/Immunization/" + immunization.getIdElement().getIdPart()).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		
+		Immunization newImmunization = readResponse(response);
+		
+		assertThat(newImmunization.getId(), equalTo(immunization.getId()));
+	}
+	
+	@Test
+	public void shouldCreateNewImmunizationWithoutSomeOptionalMembersAsXML() throws Exception {
+		// read XML record
+		String xmlImmunization;
+		try (InputStream is = this.getClass().getClassLoader()
+		        .getResourceAsStream(XML_CREATE_PARTIAL_IMMUNIZATION_DOCUMENT)) {
+			Objects.requireNonNull(is);
+			xmlImmunization = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		// create IMMUNIZATION
+		MockHttpServletResponse response = post("/Immunization").accept(FhirMediaTypes.XML).xmlContent(xmlImmunization).go();
+		
+		// verify created correctly
+		assertThat(response, isCreated());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Immunization immunization = readResponse(response);
+		
+		assertThat(immunization, notNullValue());
+		assertThat(immunization.getResourceType().toString(), equalTo("Immunization"));
+		assertThat(immunization.getStatus().toCode(), equalTo("completed"));
+		assertThat(immunization.getVaccineCode().getCodingFirstRep().getCode(),
+		    equalTo("15f83cd6-64e9-4e06-a5f9-364d3b14a43d"));
+		assertThat(immunization.getPatient().getReferenceElement().getIdPart(),
+		    equalTo("8d703ff2-c3e2-4070-9737-73e713d5a50d"));
+		assertThat(immunization.getOccurrenceDateTimeType().getValueAsCalendar().getTime(),
+		    sameInstant(Date.from(ZonedDateTime.parse("2020-07-08T18:30:00.000Z").toInstant())));
+		assertThat(immunization.hasManufacturer(), is(true));
+		assertThat(immunization.getManufacturer().getDisplay(), equalTo("Pfizer"));
+		assertThat(immunization.getLotNumber(), equalTo("22"));
+		assertThat(immunization.getExpirationDate(), sameDay(LocalDate.parse("2021-07-28")));
+		assertThat(immunization.getPerformer().get(0).getActor().getReferenceElement().getIdPart(),
+		    equalTo("6f763a67-2bd1-451c-93b9-95caeb36cc24"));
+		assertThat(immunization, validResource());
+		
+		// try to get new immunization
 		response = get("/Immunization/" + immunization.getIdElement().getIdPart()).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
@@ -314,7 +414,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		immunization.setExpirationDate(expirationDate);
 		
 		// send the update to the server
-		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContext(toXML(immunization)).accept(FhirMediaTypes.XML).go();
+		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContent(toXML(immunization)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -345,7 +445,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		immunization.setId(UNKNOWN_IMMUNIZATION_UUID);
 		
 		// send the update to the server
-		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContext(toXML(immunization)).accept(FhirMediaTypes.XML).go();
+		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContent(toXML(immunization)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -367,7 +467,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		immunization.setId(UNKNOWN_IMMUNIZATION_UUID);
 		
 		// send the update to the server
-		response = put("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).xmlContext(toXML(immunization))
+		response = put("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).xmlContent(toXML(immunization))
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());

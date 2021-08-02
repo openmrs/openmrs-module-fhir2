@@ -174,7 +174,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		}
 		
 		// create allergy
-		MockHttpServletResponse response = post("/AllergyIntolerance").accept(FhirMediaTypes.XML).xmlContext(jsonAllergy)
+		MockHttpServletResponse response = post("/AllergyIntolerance").accept(FhirMediaTypes.XML).xmlContent(jsonAllergy)
 		        .go();
 		
 		// verify created correctly
@@ -300,7 +300,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		allergy.getCategory().set(0, category);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContext(toXML(allergy)).accept(FhirMediaTypes.XML).go();
+		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContent(toXML(allergy)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -331,7 +331,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		allergy.setId(UNKNOWN_ALLERGY_UUID);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContext(toXML(allergy)).accept(FhirMediaTypes.XML).go();
+		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContent(toXML(allergy)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -353,7 +353,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		allergy.setId(UNKNOWN_ALLERGY_UUID);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + UNKNOWN_ALLERGY_UUID).xmlContext(toXML(allergy)).accept(FhirMediaTypes.XML)
+		response = put("/AllergyIntolerance/" + UNKNOWN_ALLERGY_UUID).xmlContent(toXML(allergy)).accept(FhirMediaTypes.XML)
 		        .go();
 		
 		assertThat(response, isNotFound());

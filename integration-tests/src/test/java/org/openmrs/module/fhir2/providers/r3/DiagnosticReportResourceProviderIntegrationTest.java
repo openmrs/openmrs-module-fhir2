@@ -235,7 +235,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR3I
 			xmlReport = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		MockHttpServletResponse response = post("/DiagnosticReport").accept(FhirMediaTypes.XML).xmlContext(xmlReport).go();
+		MockHttpServletResponse response = post("/DiagnosticReport").accept(FhirMediaTypes.XML).xmlContent(xmlReport).go();
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/DiagnosticReport/"));
@@ -367,7 +367,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR3I
 		diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
 		
 		// send the update to the server
-		response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).xmlContext(toXML(diagnosticReport))
+		response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).xmlContent(toXML(diagnosticReport))
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
@@ -400,7 +400,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR3I
 		diagnosticReport.setId(WRONG_DIAGNOSTIC_REPORT_UUID);
 		
 		// send the update to the server
-		response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).xmlContext(toXML(diagnosticReport))
+		response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).xmlContent(toXML(diagnosticReport))
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
@@ -424,7 +424,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR3I
 		diagnosticReport.setId(WRONG_DIAGNOSTIC_REPORT_UUID);
 		
 		// send the update to the server
-		response = put("/DiagnosticReport/" + WRONG_DIAGNOSTIC_REPORT_UUID).xmlContext(toXML(diagnosticReport))
+		response = put("/DiagnosticReport/" + WRONG_DIAGNOSTIC_REPORT_UUID).xmlContent(toXML(diagnosticReport))
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());

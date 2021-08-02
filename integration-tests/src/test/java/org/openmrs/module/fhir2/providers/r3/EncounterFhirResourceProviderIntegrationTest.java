@@ -438,7 +438,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 			xmlEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		MockHttpServletResponse response = post("/Encounter").accept(FhirMediaTypes.XML).xmlContext(xmlEncounter).go();
+		MockHttpServletResponse response = post("/Encounter").accept(FhirMediaTypes.XML).xmlContent(xmlEncounter).go();
 		
 		assertThat(response, isCreated());
 		assertThat(response.getContentType(), is((FhirMediaTypes.XML.toString())));
@@ -504,7 +504,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 			xmlEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		MockHttpServletResponse response = post("/Encounter").accept(FhirMediaTypes.XML).xmlContext(xmlEncounter).go();
+		MockHttpServletResponse response = post("/Encounter").accept(FhirMediaTypes.XML).xmlContent(xmlEncounter).go();
 		
 		assertThat(response, isCreated());
 		assertThat(response.getContentType(), is((FhirMediaTypes.XML.toString())));

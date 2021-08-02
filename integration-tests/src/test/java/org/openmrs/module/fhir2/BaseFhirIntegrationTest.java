@@ -366,7 +366,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 			return this;
 		}
 		
-		public FhirRequestBuilder xmlContext(@Nonnull String xml) {
+		public FhirRequestBuilder xmlContent(@Nonnull String xml) {
 			request.addHeader(CONTENT_TYPE, FhirMediaTypes.XML.toString());
 			request.setContent(xml.getBytes(StandardCharsets.UTF_8));
 			return this;

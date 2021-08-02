@@ -46,6 +46,7 @@ import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ImmunizationTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
@@ -98,6 +99,9 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
+	
+	@Autowired
+	private LocationReferenceTranslator locationReferenceTranslator;
 	
 	@Autowired
 	private PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
@@ -163,6 +167,12 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		}
 		
 		Location location = visit.getLocation();
+		if (fhirImmunization.hasLocation()) {
+			Location recordedLocation = locationReferenceTranslator.toOpenmrsType(fhirImmunization.getLocation());
+			if (recordedLocation != null) {
+				location = recordedLocation;
+			}
+		}
 		
 		if (!patient.equals(visit.getPatient())) {
 			throw createImmunizationRequestValidationError(
@@ -177,11 +187,12 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		        .max(Comparator.comparing(Encounter::getEncounterDatetime));
 		
 		final Provider encounterProvider = provider;
+		final Location finalLocation = location;
 		Encounter encounter = existingEncounter.orElseGet(() -> {
 			final EncounterRole encounterRole = helper.getAdministeringEncounterRole();
 			final Encounter newEncounter = new Encounter();
 			newEncounter.setVisit(visit);
-			newEncounter.setLocation(location);
+			newEncounter.setLocation(finalLocation);
 			newEncounter.setEncounterType(encounterType);
 			newEncounter.setPatient(patient);
 			if (encounterProvider != null) {
@@ -202,7 +213,7 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 		openmrsImmunization.setEncounter(encounter);
 		openmrsImmunization.getGroupMembers().forEach(obs -> {
 			obs.setPerson(patient);
-			obs.setLocation(location);
+			obs.setLocation(finalLocation);
 			obs.setEncounter(encounter);
 		});
 		
@@ -233,6 +244,10 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 					obs.setValueCoded(newValue);
 				}
 			}
+		}
+		
+		if (!fhirImmunization.hasOccurrenceDateTimeType() || !fhirImmunization.getOccurrenceDateTimeType().hasValue()) {
+			throw createImmunizationRequestValidationError("An Immunization must have a valid occurrenceDateTime value");
 		}
 		
 		{
@@ -282,6 +297,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 					}
 				}
 			}
+		} else {
+			openmrsImmunization.removeGroupMember(members.get(CIEL_1418));
 		}
 		
 		if (fhirImmunization.hasManufacturer() && fhirImmunization.getManufacturer().hasDisplay()) {
@@ -303,6 +320,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 					}
 				}
 			}
+		} else {
+			openmrsImmunization.removeGroupMember(members.get(CIEL_1419));
 		}
 		
 		if (fhirImmunization.hasLotNumber()) {
@@ -324,6 +343,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 					}
 				}
 			}
+		} else {
+			openmrsImmunization.removeGroupMember(members.get(CIEL_1420));
 		}
 		
 		if (fhirImmunization.hasExpirationDate()) {
@@ -345,6 +366,8 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 					}
 				}
 			}
+		} else {
+			openmrsImmunization.removeGroupMember(members.get(CIEL_165907));
 		}
 		
 		return openmrsImmunization;

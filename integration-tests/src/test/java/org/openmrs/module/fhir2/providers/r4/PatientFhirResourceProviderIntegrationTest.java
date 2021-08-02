@@ -185,7 +185,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		}
 		
 		// create patient
-		MockHttpServletResponse response = post("/Patient").accept(FhirMediaTypes.XML).xmlContext(xmlPatient).go();
+		MockHttpServletResponse response = post("/Patient").accept(FhirMediaTypes.XML).xmlContent(xmlPatient).go();
 		
 		// verify created correctly
 		assertThat(response, isCreated());
@@ -312,7 +312,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		patient.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
+		response = put("/Patient/" + PATIENT_UUID).xmlContent(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -343,7 +343,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		// send the update to the server
-		response = put("/Patient/" + PATIENT_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
+		response = put("/Patient/" + PATIENT_UUID).xmlContent(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -365,7 +365,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		patient.setId(WRONG_PATIENT_UUID);
 		
 		// send the update to the server
-		response = put("/Patient/" + WRONG_PATIENT_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
+		response = put("/Patient/" + WRONG_PATIENT_UUID).xmlContent(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

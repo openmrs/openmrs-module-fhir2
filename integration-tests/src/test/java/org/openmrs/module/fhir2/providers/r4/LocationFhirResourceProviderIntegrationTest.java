@@ -166,7 +166,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		}
 		
 		// create location
-		MockHttpServletResponse response = post("/Location").accept(FhirMediaTypes.XML).xmlContext(xmlLocation).go();
+		MockHttpServletResponse response = post("/Location").accept(FhirMediaTypes.XML).xmlContent(xmlLocation).go();
 		
 		// verify created correctly
 		assertThat(response, isCreated());
@@ -278,7 +278,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		location.getAddress().setCountry("France");
 		
 		// send the update to the server
-		response = put("/Location/" + LOCATION_UUID).xmlContext(toXML(location)).accept(FhirMediaTypes.XML).go();
+		response = put("/Location/" + LOCATION_UUID).xmlContent(toXML(location)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -309,7 +309,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		location.setId(UNKNOWN_LOCATION_UUID);
 		
 		// send the update to the server
-		response = put("/Location/" + LOCATION_UUID).xmlContext(toXML(location)).accept(FhirMediaTypes.XML).go();
+		response = put("/Location/" + LOCATION_UUID).xmlContent(toXML(location)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -331,7 +331,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		location.setId(UNKNOWN_LOCATION_UUID);
 		
 		// send the update to the server
-		response = put("/Location/" + UNKNOWN_LOCATION_UUID).xmlContext(toXML(location)).accept(FhirMediaTypes.XML).go();
+		response = put("/Location/" + UNKNOWN_LOCATION_UUID).xmlContent(toXML(location)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

@@ -169,7 +169,7 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR3IntegrationT
 		}
 		
 		// create group
-		MockHttpServletResponse response = post("/Group").accept(FhirMediaTypes.XML).xmlContext(xmlGroup).go();
+		MockHttpServletResponse response = post("/Group").accept(FhirMediaTypes.XML).xmlContent(xmlGroup).go();
 		
 		// verify created correctly
 		assertThat(response, isCreated());
@@ -268,7 +268,7 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR3IntegrationT
 		}
 		
 		//Update
-		response = put("/Group/" + COHORT_UUID).xmlContext(xmlGroup).accept(FhirMediaTypes.XML).go();
+		response = put("/Group/" + COHORT_UUID).xmlContent(xmlGroup).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -302,7 +302,7 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR3IntegrationT
 		group.setId(BAD_COHORT_UUID);
 		
 		// send the update to the server
-		response = put("/Group/" + COHORT_UUID).xmlContext(toXML(group)).accept(FhirMediaTypes.XML).go();
+		response = put("/Group/" + COHORT_UUID).xmlContent(toXML(group)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -324,7 +324,7 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR3IntegrationT
 		group.setId(BAD_COHORT_UUID);
 		
 		// send the update to the server
-		response = put("/Group/" + BAD_COHORT_UUID).xmlContext(toXML(group)).accept(FhirMediaTypes.XML).go();
+		response = put("/Group/" + BAD_COHORT_UUID).xmlContent(toXML(group)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

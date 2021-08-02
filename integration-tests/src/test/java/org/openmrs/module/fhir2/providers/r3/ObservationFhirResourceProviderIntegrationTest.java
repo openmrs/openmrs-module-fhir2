@@ -264,7 +264,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		}
 		
 		// create obs
-		MockHttpServletResponse response = post("/Observation").accept(FhirMediaTypes.XML).xmlContext(xmlObs).go();
+		MockHttpServletResponse response = post("/Observation").accept(FhirMediaTypes.XML).xmlContent(xmlObs).go();
 		
 		// verify created correctly
 		assertThat(response, isCreated());
