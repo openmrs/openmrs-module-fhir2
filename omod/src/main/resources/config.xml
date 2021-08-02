@@ -17,7 +17,7 @@
 	<name>${project.parent.name}</name>
 	<version>${project.parent.version}</version>
 	<package>org.openmrs.module.fhir2</package>
-	<author>ibacher</author>
+	<author>OpenMRS FHIR Squad</author>
 	<description>
 			${project.parent.description}
 	</description>
