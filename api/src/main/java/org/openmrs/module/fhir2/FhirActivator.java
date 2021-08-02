@@ -64,7 +64,9 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 		if (applicationContext == null) {
 			throw new ModuleException("Cannot load FHIR2 module as the main application context is not available");
 		}
-		applicationContext.getBean("forR4", FhirContext.class).registerCustomType(GroupMember.class);
+		
+		applicationContext.getBean("fhirR4", FhirContext.class).registerCustomType(GroupMember.class);
+		
 		loadModules();
 		started = true;
 		log.info("Started FHIR");
@@ -83,7 +85,8 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 		if (!started) {
 			return;
 		}
-		applicationContext.getBean("forR4", FhirContext.class).registerCustomType(GroupMember.class);
+		
+		applicationContext.getBean("fhirR4", FhirContext.class).registerCustomType(GroupMember.class);
 		loadModules();
 		
 		lifecycleListeners.forEach(ModuleLifecycleListener::refreshed);
