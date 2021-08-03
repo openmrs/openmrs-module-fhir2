@@ -821,8 +821,8 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
-		MatcherAssert.assertThat(response, isOk());
-		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 		
 		Bundle results = readBundleResponse(response);
 		assertThat(results.getEntry(), notNullValue());
