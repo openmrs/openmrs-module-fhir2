@@ -44,4 +44,6 @@ public interface FhirPatientService extends FhirService<Patient> {
 	        HashSet<Include> revIncludes);
 	
 	IBundleProvider getPatientEverything(TokenParam identifier);
+	
+	IBundleProvider getPatientEverything();
 }
