@@ -649,6 +649,86 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		assertThat(entries, hasCorrectResources(5, getValidResources()));
 	}
 	
+	@Test
+	public void shouldReturnPatientTypeEverythingAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Patient/$everything").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(41)));
+		assertThat(result.getEntry(), hasSize(41));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+	}
+	
+	@Test
+	public void shouldReturnForPatientTypeEverythingWhenCountIsSpecifiedAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Patient/$everything?_count=5").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(41)));
+		assertThat(result.getEntry(), hasSize(5));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+	}
+	
+	@Test
+	public void shouldReturnPatientTypeEverythingAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Patient/$everything").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(41)));
+		assertThat(result.getEntry(), hasSize(41));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+	}
+	
+	@Test
+	public void shouldReturnForPatientTypeEverythingWhenCountIsSpecifiedAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Patient/$everything?_count=5").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(41)));
+		assertThat(result.getEntry(), hasSize(5));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+	}
+	
 	private Set<String> getValidResources() {
 		Set<String> validResources = new HashSet<>();
 		validResources.add(PATIENT_UUID_2);
