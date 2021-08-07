@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -41,6 +42,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -660,6 +662,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
 	}
 	
 	@Test
@@ -680,6 +683,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
 	}
 	
 	@Test
@@ -700,6 +704,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
 	}
 	
 	@Test
@@ -720,6 +725,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
 	}
 	
 	private Set<String> getValidResources() {
@@ -741,5 +747,20 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		validResources.add(MEDICATION_REQUEST_UUID_2);
 		
 		return validResources;
+	}
+
+	private Set<ResourceType> getEverythingValidResourceTypes() {
+		Set<ResourceType> validTypes = new HashSet<>();
+
+		validTypes.add(ResourceType.Patient);
+		validTypes.add(ResourceType.Observation);
+		validTypes.add(ResourceType.Procedure);
+		validTypes.add(ResourceType.MedicationRequest);
+		validTypes.add(ResourceType.Encounter);
+		validTypes.add(ResourceType.DiagnosticReport);
+		validTypes.add(ResourceType.AllergyIntolerance);
+		validTypes.add(ResourceType.ProcedureRequest);
+
+		return validTypes;
 	}
 }
