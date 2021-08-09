@@ -754,7 +754,6 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 
 		validTypes.add(ResourceType.Patient);
 		validTypes.add(ResourceType.Observation);
-		validTypes.add(ResourceType.Procedure);
 		validTypes.add(ResourceType.MedicationRequest);
 		validTypes.add(ResourceType.Encounter);
 		validTypes.add(ResourceType.DiagnosticReport);
