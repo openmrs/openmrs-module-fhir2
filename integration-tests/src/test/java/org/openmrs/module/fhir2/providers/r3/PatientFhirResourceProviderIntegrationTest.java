@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -41,6 +42,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,35 +62,35 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 	private static final String PATIENT_UUID = "30e2aa2a-4ed1-415d-84c5-ba29016c14b7";
 	
 	private static final String WRONG_PATIENT_UUID = "f090747b-459b-4a13-8c1b-c0567d8aeb63";
-
+	
 	private static final String PATIENT_UUID_2 = "ca17fcc5-ec96-487f-b9ea-42973c8973e3";
-
+	
 	private static final String OBSERVATION_UUID_1 = "99b92980-db62-40cd-8bca-733357c48126";
-
+	
 	private static final String OBSERVATION_UUID_2 = "f6ec1267-8eac-415f-a3f0-e47be2c8bb67";
-
+	
 	private static final String OBSERVATION_UUID_3 = "be48cdcb-6a76-47e3-9f2e-2635032f3a9a";
-
+	
 	private static final String OBSERVATION_UUID_4 = "1ce473c8-3fac-440d-9f92-e10facab194f";
-
+	
 	private static final String OBSERVATION_UUID_5 = "b6521c32-47b6-47da-9c6f-3673ddfb74f9";
-
+	
 	private static final String OBSERVATION_UUID_6 = "2ed1e57d-9f18-41d3-b067-2eeaf4b30fb0";
-
+	
 	private static final String OBSERVATION_UUID_7 = "2f616900-5e7c-4667-9a7f-dcb260abf1de";
-
+	
 	private static final String OBSERVATION_UUID_8 = "39fb7f47-e80a-4056-9285-bd798be13c63";
-
+	
 	private static final String OBSERVATION_UUID_9 = "e26cea2c-1b9f-4afe-b211-f3ef6c88af6f";
-
+	
 	private static final String ENCOUNTER_UUID_1 = "e403fafb-e5e4-42d0-9d11-4f52e89d148c";
-
+	
 	private static final String ENCOUNTER_UUID_2 = "6519d653-393b-4118-9c83-a3715b82d4ac";
-
+	
 	private static final String ENCOUNTER_UUID_3 = "eec646cb-c847-45a7-98bc-91c8c4f70add";
-
+	
 	private static final String MEDICATION_REQUEST_UUID_1 = "e1f95924-697a-11e3-bd76-0800271c1b75";
-
+	
 	private static final String MEDICATION_REQUEST_UUID_2 = "921de0a3-05c4-444a-be03-e01b4c4b9142";
 	
 	@Getter(AccessLevel.PUBLIC)
@@ -565,11 +567,11 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(15)));
 		assertThat(result.getEntry(), hasSize(15));
-
+		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-
+		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
-
+		
 		assertThat(entries, hasCorrectResources(15, getValidResources()));
 	}
 	
@@ -588,11 +590,11 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(15)));
 		assertThat(result.getEntry(), hasSize(5));
-
+		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-
+		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
-
+		
 		assertThat(entries, hasCorrectResources(5, getValidResources()));
 	}
 	
@@ -611,11 +613,11 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(15)));
 		assertThat(result.getEntry(), hasSize(15));
-
+		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-
+		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
-
+		
 		assertThat(entries, hasCorrectResources(15, getValidResources()));
 	}
 	
@@ -634,14 +636,98 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(15)));
 		assertThat(result.getEntry(), hasSize(5));
-
+		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-
+		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
-
+		
 		assertThat(entries, hasCorrectResources(5, getValidResources()));
 	}
-
+	
+	@Test
+	public void shouldReturnPatientTypeEverythingAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Patient/$everything").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(41)));
+		assertThat(result.getEntry(), hasSize(41));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnForPatientTypeEverythingWhenCountIsSpecifiedAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Patient/$everything?_count=5").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(41)));
+		assertThat(result.getEntry(), hasSize(5));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnPatientTypeEverythingAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Patient/$everything").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(41)));
+		assertThat(result.getEntry(), hasSize(41));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnForPatientTypeEverythingWhenCountIsSpecifiedAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Patient/$everything?_count=5").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(41)));
+		assertThat(result.getEntry(), hasSize(5));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
 	private Set<String> getValidResources() {
 		Set<String> validResources = new HashSet<>();
 		validResources.add(PATIENT_UUID_2);
@@ -659,7 +745,21 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		validResources.add(ENCOUNTER_UUID_3);
 		validResources.add(MEDICATION_REQUEST_UUID_1);
 		validResources.add(MEDICATION_REQUEST_UUID_2);
-
+		
 		return validResources;
+	}
+
+	private Set<ResourceType> getEverythingValidResourceTypes() {
+		Set<ResourceType> validTypes = new HashSet<>();
+
+		validTypes.add(ResourceType.Patient);
+		validTypes.add(ResourceType.Observation);
+		validTypes.add(ResourceType.MedicationRequest);
+		validTypes.add(ResourceType.Encounter);
+		validTypes.add(ResourceType.DiagnosticReport);
+		validTypes.add(ResourceType.AllergyIntolerance);
+		validTypes.add(ResourceType.ProcedureRequest);
+
+		return validTypes;
 	}
 }
