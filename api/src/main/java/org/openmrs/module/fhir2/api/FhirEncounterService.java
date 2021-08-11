@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Encounter;
 
 public interface FhirEncounterService extends FhirService<Encounter> {
@@ -33,4 +34,6 @@ public interface FhirEncounterService extends FhirService<Encounter> {
 	IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
 	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam id,
 	        DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes);
+	
+	IBundleProvider getEncounterEverything(TokenParam identifier);
 }

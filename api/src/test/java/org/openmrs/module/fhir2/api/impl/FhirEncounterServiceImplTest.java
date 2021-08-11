@@ -556,4 +556,50 @@ public class FhirEncounterServiceImplTest {
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
+	@Test
+	public void getEncounterEverything_shouldReturnAllInformationAboutSpecifiedEncounter() {
+		TokenParam encounterId = new TokenParam().setValue(ENCOUNTER_UUID);
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "")
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, encounterId);
+		
+		populateIncludeForEverythingOperationParams(theParams);
+		populateReverseIncludeForEverythingOperationParams(theParams);
+		
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
+		
+		IBundleProvider results = encounterService.getEncounterEverything(encounterId);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
+		
+	}
+	
+	private void populateReverseIncludeForEverythingOperationParams(SearchParameterMap theParams) {
+		HashSet<Include> revIncludes = new HashSet<>();
+		
+		revIncludes.add(new Include(FhirConstants.OBSERVATION + ":" + FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		revIncludes.add(new Include(FhirConstants.DIAGNOSTIC_REPORT + ":" + FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		revIncludes.add(new Include(FhirConstants.MEDICATION_REQUEST + ":" + FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		revIncludes.add(new Include(FhirConstants.SERVICE_REQUEST + ":" + FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		
+		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+	}
+	
+	private void populateIncludeForEverythingOperationParams(SearchParameterMap theParams) {
+		HashSet<Include> includes = new HashSet<>();
+		
+		includes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		includes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_LOCATION_PARAM));
+		includes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_PARTICIPANT_PARAM));
+		
+		theParams.addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+	}
 }
