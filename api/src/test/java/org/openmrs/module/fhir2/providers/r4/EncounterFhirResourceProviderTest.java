@@ -338,21 +338,18 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	@Test
 	public void searchForEncounters_shouldReturnNullForEncounterEverythingWhenIdParamIsMissing() {
 		IBundleProvider results = resourceProvider.getEncounterEverything(null);
-		
 		assertThat(results, nullValue());
 	}
 	
 	@Test
 	public void searchForEncounters_shouldReturnNullForEncounterEverythingWhenIdPartIsMissingInIdParam() {
 		IBundleProvider results = resourceProvider.getEncounterEverything(new IdType());
-		
 		assertThat(results, nullValue());
 	}
 	
 	@Test
 	public void searchForEncounters_shouldReturnNullEncounterEverythingWhenIdPartIsEmptyInIdParam() {
 		IBundleProvider results = resourceProvider.getEncounterEverything(new IdType(""));
-		
 		assertThat(results, nullValue());
 	}
 	
