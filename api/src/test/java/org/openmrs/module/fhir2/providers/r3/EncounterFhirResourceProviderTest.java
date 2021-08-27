@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -330,5 +331,42 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	public void deleteEncounter_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentEncounter() {
 		when(encounterService.delete(WRONG_ENCOUNTER_UUID)).thenReturn(null);
 		resourceProvider.deleteEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID));
+	}
+
+	@Test
+	public void searchForEncounters_shouldReturnEncounterEverything() {
+		when(encounterService.getEncounterEverything(any()))
+				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), 10, 1));
+
+		IBundleProvider results = resourceProvider.getEncounterEverything(new IdType(ENCOUNTER_UUID));
+
+		List<IBaseResource> resultList = getAllResources(results);
+
+		assertThat(resultList, notNullValue());
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.ENCOUNTER));
+		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
+	}
+
+	@Test
+	public void searchForEncounters_shouldReturnNullForEncounterEverythingWhenIdParamIsMissing() {
+		IBundleProvider results = resourceProvider.getEncounterEverything(null);
+		assertThat(results, nullValue());
+	}
+
+	@Test
+	public void searchForEncounters_shouldReturnNullForEncounterEverythingWhenIdPartIsMissingInIdParam() {
+		IBundleProvider results = resourceProvider.getEncounterEverything(new IdType());
+		assertThat(results, nullValue());
+	}
+
+	@Test
+	public void searchForEncounters_shouldReturnNullEncounterEverythingWhenIdPartIsEmptyInIdParam() {
+		IBundleProvider results = resourceProvider.getEncounterEverything(new IdType(""));
+		assertThat(results, nullValue());
+	}
+
+	private List<IBaseResource> getAllResources(IBundleProvider result) {
+		return result.getAllResources();
 	}
 }
