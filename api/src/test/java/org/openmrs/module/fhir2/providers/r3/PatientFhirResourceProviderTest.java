@@ -582,16 +582,16 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 		
 		assertThat(results, nullValue());
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnPatientEverythingForTypeLevel() {
 		when(patientService.getPatientEverything())
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.getPatientEverything();
-
+		
 		List<IBaseResource> resultList = getAllResources(results);
-
+		
 		assertThat(resultList, notNullValue());
 		assertThat(resultList, hasSize(1));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.PATIENT));

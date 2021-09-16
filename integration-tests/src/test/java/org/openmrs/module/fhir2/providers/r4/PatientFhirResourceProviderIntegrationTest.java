@@ -756,10 +756,10 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		return validResources;
 		
 	}
-
+	
 	private Set<ResourceType> getEverythingValidResourceTypes() {
 		Set<ResourceType> validTypes = new HashSet<>();
-
+		
 		validTypes.add(ResourceType.Patient);
 		validTypes.add(ResourceType.Observation);
 		validTypes.add(ResourceType.MedicationRequest);
@@ -767,7 +767,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		validTypes.add(ResourceType.DiagnosticReport);
 		validTypes.add(ResourceType.AllergyIntolerance);
 		validTypes.add(ResourceType.ServiceRequest);
-
+		
 		return validTypes;
 	}
 }

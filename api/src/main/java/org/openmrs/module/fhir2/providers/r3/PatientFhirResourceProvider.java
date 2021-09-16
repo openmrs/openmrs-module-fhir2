@@ -170,7 +170,7 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		
 		return new SearchQueryBundleProviderR3Wrapper(patientService.getPatientEverything(patientReference));
 	}
-
+	
 	/**
 	 * The $everything operation fetches all the information related to all the patients
 	 *
