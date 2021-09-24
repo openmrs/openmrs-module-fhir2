@@ -63,6 +63,10 @@ public abstract class BaseReferenceHandlingTranslator {
 		        .setType(FhirConstants.OBSERVATION);
 	}
 	
+	protected Reference createLocationReferenceByUuid(@Nonnull String uuid) {
+		return new Reference().setReference(FhirConstants.LOCATION + "/" + uuid).setType(FhirConstants.LOCATION);
+	}
+	
 	protected Reference createLocationReference(@Nonnull Location location) {
 		return new Reference().setReference(FhirConstants.LOCATION + "/" + location.getUuid())
 		        .setType(FhirConstants.LOCATION).setDisplay(location.getName());
