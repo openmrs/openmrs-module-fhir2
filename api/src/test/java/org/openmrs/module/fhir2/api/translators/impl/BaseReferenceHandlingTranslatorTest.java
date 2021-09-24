@@ -358,4 +358,12 @@ public class BaseReferenceHandlingTranslatorTest {
 		
 		assertThat(reference, nullValue());
 	}
+	
+	@Test
+	public void shouldReturnLocationReferenceForUuid() {
+		Reference reference = referenceHandlingTranslator.createLocationReferenceByUuid(LOCATION_UUID);
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), equalTo(LOCATION_URI));
+		assertThat(reference.getType(), equalTo(FhirConstants.LOCATION));
+	}
 }

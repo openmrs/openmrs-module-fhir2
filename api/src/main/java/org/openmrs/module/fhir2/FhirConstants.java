@@ -82,6 +82,8 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
 	
+	public static final String OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE = OPENMRS_FHIR_EXT_PREFIX + "/obs-location-value";
+	
 	public static final String OPENMRS_FHIR_EXT_NAME = OPENMRS_FHIR_EXT_PREFIX + "/name";
 	
 	public static final String OPENMRS_FHIR_EXT_GROUP_DESCRIPTION = OPENMRS_FHIR_EXT_PREFIX + "/group/description";
