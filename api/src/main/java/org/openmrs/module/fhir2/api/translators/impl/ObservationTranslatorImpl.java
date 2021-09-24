@@ -132,6 +132,7 @@ public class ObservationTranslatorImpl extends BaseReferenceHandlingTranslator i
 			obs.addExtension(FhirConstants.OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE, createLocationReferenceByUuid(observation.getValueText()));
 		}
 		obs.setIssued(observation.getDateCreated());
+
 		obs.setEffective(datetimeTranslator.toFhirResource(observation));
 		obs.addBasedOn(basedOnReferenceTranslator.toFhirResource(observation.getOrder()));
 		
