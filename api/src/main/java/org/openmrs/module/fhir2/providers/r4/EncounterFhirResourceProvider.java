@@ -130,6 +130,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Encounter.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientParam,
 	        @OptionalParam(name = Encounter.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = Encounter.SP_TYPE) CodeableConcept type,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(allow = { "Encounter:" + Encounter.SP_LOCATION, "Encounter:" + Encounter.SP_PATIENT,
 	                "Encounter:" + Encounter.SP_PARTICIPANT }) HashSet<Include> includes,
@@ -149,8 +150,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return encounterService.searchForEncounters(date, location, participantReference, subjectReference, id, lastUpdated,
-		    includes, revIncludes);
+		return encounterService.searchForEncounters(date, location, participantReference, subjectReference, id, type,
+		    lastUpdated, includes, revIncludes);
 	}
 	
 	/**

@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
@@ -141,13 +142,14 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
-	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam id,
+	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam id, CodeableConcept type,
 	        DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes) {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, date)
 		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, location)
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant)
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, subject)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
+		        .addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, type)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);

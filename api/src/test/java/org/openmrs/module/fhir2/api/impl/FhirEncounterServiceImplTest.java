@@ -311,7 +311,7 @@ public class FhirEncounterServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = encounterService.searchForEncounters(dateRangeParam, null, null, null, null, null, null,
-		    null);
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -341,7 +341,8 @@ public class FhirEncounterServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, location, null, null, null, null, null, null);
+		IBundleProvider results = encounterService.searchForEncounters(null, location, null, null, null, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -372,7 +373,7 @@ public class FhirEncounterServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, null, participant, null, null, null, null,
+		IBundleProvider results = encounterService.searchForEncounters(null, null, participant, null, null, null, null, null,
 		    null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -404,7 +405,8 @@ public class FhirEncounterServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, null, null, subject, null, null, null, null);
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, subject, null, null, null, null,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -427,7 +429,7 @@ public class FhirEncounterServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, uuid, null, null, null);
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, uuid, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -450,7 +452,7 @@ public class FhirEncounterServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, lastUpdated, null,
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, lastUpdated, null,
 		    null);
 		
 		List<IBaseResource> resultList = get(results);
@@ -474,7 +476,8 @@ public class FhirEncounterServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Patient()));
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, includes, null);
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null, includes,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -497,7 +500,8 @@ public class FhirEncounterServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, includes, null);
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null, includes,
+		    null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -521,7 +525,7 @@ public class FhirEncounterServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Observation()));
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null,
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null, null,
 		    revIncludes);
 		
 		List<IBaseResource> resultList = get(results);
@@ -546,7 +550,7 @@ public class FhirEncounterServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null,
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null, null,
 		    revIncludes);
 		
 		List<IBaseResource> resultList = get(results);
