@@ -5,6 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 jobs:
@@ -25,6 +26,12 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java-version }}
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
       - name: Cache local Maven repository
         uses: actions/cache@v2
         with:
@@ -34,6 +41,8 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Build with Maven
         run: mvn verify --batch-mode -P integration-test --file pom.xml
+      - name: Send data to Sonar
+        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=openmrs_openmrs-module-fhir2 --batch-mode --file pom.xml
       - name: Send data to Codecov
         uses: codecov/codecov-action@v1
         with:
