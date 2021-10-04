@@ -794,8 +794,6 @@
         <openmrsPlatformToolsVersion>2.4.0</openmrsPlatformToolsVersion>
         <hapifhirVersion>5.4.0</hapifhirVersion>
         <ucumVersion>1.0.3</ucumVersion>
-        <sonar.organization>openmrs</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <profiles>
