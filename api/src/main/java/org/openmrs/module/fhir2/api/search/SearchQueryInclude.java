@@ -200,7 +200,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return locationService.searchForLocations(null, null, null, null, null, null, params, null, null, null, null,
 				    null);
 			case FhirConstants.ENCOUNTER:
-				return encounterService.searchForEncounters(null, params, null, null, null, null, null, null);
+				return encounterService.searchForEncounters(null, params, null, null, null, null, null, null, null);
 		}
 		
 		return null;
@@ -222,7 +222,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	private IBundleProvider handlePractitionerReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.ENCOUNTER:
-				return encounterService.searchForEncounters(null, null, params, null, null, null, null, null);
+				return encounterService.searchForEncounters(null, null, params, null, null, null, null, null, null);
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null,
 				    null);
@@ -275,7 +275,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return allergyIntoleranceService.searchForAllergies(params, null, null, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.ENCOUNTER:
-				return encounterService.searchForEncounters(null, null, null, params, null, null, null, null);
+				return encounterService.searchForEncounters(null, null, null, params, null, null, null, null, null);
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null,
 				    null);

@@ -141,12 +141,13 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
-	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam id,
-	        DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes) {
+	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam encounterType,
+	        TokenAndListParam id, DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes) {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, date)
 		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, location)
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant)
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, subject)
+		        .addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, encounterType)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)

@@ -10,16 +10,19 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Projections.property;
+import static org.hibernate.criterion.Restrictions.eq;
 import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedUuids;
 
 import javax.annotation.Nonnull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
@@ -73,6 +76,12 @@ public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements Fhir
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
+					break;
+				case FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handleAndListParam((TokenAndListParam) param.getParam(),
+					            t -> Optional.of(eq("et.uuid", t.getValue())))
+					                    .ifPresent(t -> criteria.createAlias("encounterType", "et").add(t)));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
