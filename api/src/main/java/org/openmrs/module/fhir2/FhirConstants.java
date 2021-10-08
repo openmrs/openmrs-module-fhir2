@@ -264,6 +264,8 @@ public class FhirConstants {
 	
 	public static final String COMMON_SEARCH_HANDLER = "common.search.handler";
 	
+	public static final String ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER = "type.reference.search.handler";
+	
 	public static final String ID_PROPERTY = "_id.property";
 	
 	public static final String LAST_UPDATED_PROPERTY = "_lastUpdated.property";

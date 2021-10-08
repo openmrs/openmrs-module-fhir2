@@ -111,6 +111,10 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String WRONG_DATE_CREATED = "2008-08-18";
 	
+	private static final String ENCOUNTER_TYPE_UUID = "07000be2-26b6-4cce-8b40-866d8435b613";
+
+	private static final String ENCOUNTER_UUID_2 = "6519d653-393b-4118-9c83-a3715b82d4ac";
+	
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
@@ -151,6 +155,22 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENC_UUID));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByTypeUUID() {
+		TokenAndListParam typeUuid = new TokenAndListParam().addAnd(new TokenParam(ENCOUNTER_TYPE_UUID));
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, typeUuid);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((Encounter) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID_2));
 	}
 	
 	@Test
