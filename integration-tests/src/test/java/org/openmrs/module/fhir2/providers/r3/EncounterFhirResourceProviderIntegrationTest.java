@@ -75,6 +75,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 	
 	private static final String BAD_VISIT_UUID = "78aefd46-883d-4526-00de-93842c80ad86";
 	
+	private static final String ENCOUNTER_TYPE_UUID = "61ae96f4-6afe-4351-b6f8-cd4fc383cce1";
+	
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
 	private EncounterFhirResourceProvider resourceProvider;
@@ -283,6 +285,62 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		assertThat(entries, everyItem(hasResource(validResource())));
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("display", containsString(PATIENT_GIVEN_NAME))))));
+	}
+	
+	@Test
+	public void shouldSearchForEncounterByEncounterTypeAsJson() throws Exception {
+		String uri = String.format("/Encounter/?type=%s", ENCOUNTER_TYPE_UUID);
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries.isEmpty(), not(true));
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Encounter"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Encounter.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		
+		assertThat(entries, everyItem(hasResource(hasProperty("type",
+		    hasItems(hasProperty("coding", hasItems(hasProperty("code", equalTo(ENCOUNTER_TYPE_UUID)))))))));
+		assertThat(entries, everyItem(hasResource(
+		    hasProperty("type", hasItems(hasProperty("coding", hasItems(hasProperty("display", equalTo("Scheduled")))))))));
+	}
+	
+	@Test
+	public void shouldSearchForEncounterByEncounterTypeAsXML() throws Exception {
+		String uri = String.format("/Encounter/?type=%s", ENCOUNTER_TYPE_UUID);
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle results = readBundleResponse(response);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+		
+		List<Bundle.BundleEntryComponent> entries = results.getEntry();
+		
+		assertThat(entries.isEmpty(), not(true));
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R3/Encounter"))));
+		assertThat(entries, everyItem(hasResource(instanceOf(Encounter.class))));
+		assertThat(entries, everyItem(hasResource(validResource())));
+		
+		assertThat(entries, everyItem(hasResource(hasProperty("type",
+		    hasItems(hasProperty("coding", hasItems(hasProperty("code", equalTo(ENCOUNTER_TYPE_UUID)))))))));
+		assertThat(entries, everyItem(hasResource(
+		    hasProperty("type", hasItems(hasProperty("coding", hasItems(hasProperty("display", equalTo("Scheduled")))))))));
 	}
 	
 	@Test
