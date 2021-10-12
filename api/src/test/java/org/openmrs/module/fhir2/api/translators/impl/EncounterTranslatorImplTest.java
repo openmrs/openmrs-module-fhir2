@@ -190,9 +190,9 @@ public class EncounterTranslatorImplTest {
 		assertThat(result.getUuid(), equalTo(ENCOUNTER_UUID));
 	}
 	
-	@Test(expected = NullPointerException.class)
-	public void toFhirResource_shouldThrowExceptionWhenOpenMrsEncounterIsNull() {
-		encounterTranslator.toFhirResource(null);
+	@Test
+	public void toFhirResource_shouldReturnNullWhenOpenMrsEncounterIsNull() {
+		assertThat(encounterTranslator.toFhirResource(null), nullValue());
 	}
 	
 	@Test
@@ -221,20 +221,25 @@ public class EncounterTranslatorImplTest {
 	public void toFhirResource_shouldTranslateToFhirSubjectAsReference() {
 		PatientIdentifier identifier = new PatientIdentifier();
 		identifier.setIdentifier(PATIENT_IDENTIFIER);
+		
 		PatientIdentifierType identifierType = new PatientIdentifierType();
 		identifierType.setName(TEST_IDENTIFIER_TYPE_NAME);
 		identifier.setIdentifierType(identifierType);
+		
 		PersonName name = new PersonName();
 		name.setGivenName(GIVEN_NAME);
 		name.setFamilyName(FAMILY_NAME);
+		
 		Patient patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
 		patient.addIdentifier(identifier);
 		patient.addName(name);
 		omrsEncounter.setUuid(ENCOUNTER_UUID);
 		omrsEncounter.setPatient(patient);
-		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(patientRef);
+		when(patientReferenceTranslator.toFhirResource(patient, null)).thenReturn(patientRef);
+		
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getSubject(), notNullValue());
 		assertThat(result.getSubject().getReference(), equalTo(PATIENT_URI));
@@ -249,13 +254,16 @@ public class EncounterTranslatorImplTest {
 		participantComponent.setIndividual(practitionerRef);
 		participantComponents.add(participantComponent);
 		fhirEncounter.setParticipant(participantComponents);
+		
 		EncounterProvider encounterProvider = new EncounterProvider();
 		Provider provider = new Provider();
 		provider.setUuid(PRACTITIONER_UUID);
 		encounterProvider.setProvider(provider);
+		
 		Patient patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
 		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
+		
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
 		
 		assertThat(result.getEncounterProviders(), not(empty()));
@@ -270,14 +278,16 @@ public class EncounterTranslatorImplTest {
 		provider.setUuid(PRACTITIONER_UUID);
 		encounterProvider.setProvider(provider);
 		providerList.add(encounterProvider);
+		
 		Encounter.EncounterParticipantComponent participantComponent = new Encounter.EncounterParticipantComponent();
 		Reference practitionerRef = new Reference();
 		practitionerRef.setReference(PRACTITIONER_URI);
 		participantComponent.setIndividual(practitionerRef);
 		omrsEncounter.setEncounterProviders(providerList);
-		when(participantTranslator.toFhirResource(encounterProvider)).thenReturn(participantComponent);
+		when(participantTranslator.toFhirResource(encounterProvider, null)).thenReturn(participantComponent);
 		
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getParticipant(), notNullValue());
 		assertThat(result.getParticipant().size(), equalTo(1));
@@ -298,13 +308,16 @@ public class EncounterTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldTranslateLocationToEncounterLocationWithCorrectReference() {
 		omrsEncounter.setLocation(location);
+		
 		Encounter.EncounterLocationComponent locationComponent = new Encounter.EncounterLocationComponent();
 		Reference locationRef = new Reference();
 		locationRef.setReference(LOCATION_URI);
 		locationRef.setDisplay(TEST_LOCATION_NAME);
 		locationComponent.setLocation(locationRef);
-		when(encounterLocationTranslator.toFhirResource(location)).thenReturn(locationComponent);
+		when(encounterLocationTranslator.toFhirResource(location, null)).thenReturn(locationComponent);
+		
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getLocation(), notNullValue());
 		assertThat(result.getLocation().size(), is(1));
@@ -321,11 +334,14 @@ public class EncounterTranslatorImplTest {
 		locationComponent.setLocation(locationRef);
 		locationComponents.add(locationComponent);
 		fhirEncounter.setLocation(locationComponents);
+		
 		Patient patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
 		when(patientReferenceTranslator.toOpenmrsType(patientRef)).thenReturn(patient);
 		when(encounterLocationTranslator.toOpenmrsType(locationComponent)).thenReturn(location);
+		
 		org.openmrs.Encounter result = encounterTranslator.toOpenmrsType(fhirEncounter);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getLocation(), notNullValue());
 		assertThat(result.getLocation().getName(), equalTo(TEST_LOCATION_NAME));
@@ -397,7 +413,7 @@ public class EncounterTranslatorImplTest {
 		Reference reference = new Reference();
 		reference.setReference(VISIT_URI);
 		
-		when(visitReferenceTranslator.toFhirResource(visit)).thenReturn(reference);
+		when(visitReferenceTranslator.toFhirResource(visit, null)).thenReturn(reference);
 		Encounter result = encounterTranslator.toFhirResource(encounter);
 		
 		assertThat(result, notNullValue());
@@ -442,11 +458,12 @@ public class EncounterTranslatorImplTest {
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(new Date());
-		when(provenanceTranslator.getCreateProvenance(encounter)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(encounter)).thenReturn(provenance);
+		when(provenanceTranslator.getCreateProvenance(encounter, null)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(encounter, null)).thenReturn(provenance);
 		
 		Encounter result = encounterTranslator.toFhirResource(encounter);
 		List<Resource> resources = result.getContained();
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, not(empty()));
 		assertThat(resources.stream().findAny().isPresent(), is(true));
@@ -483,7 +500,7 @@ public class EncounterTranslatorImplTest {
 	public void toFhirResource_shouldTranslateEncounterTypeToEncounterTypeField() {
 		CodeableConcept fhirEncounterType = new CodeableConcept();
 		fhirEncounterType.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode("1");
-		when(encounterTypeTranslator.toFhirResource(ArgumentMatchers.any()))
+		when(encounterTypeTranslator.toFhirResource(ArgumentMatchers.any(), ArgumentMatchers.any()))
 		        .thenReturn(Collections.singletonList(fhirEncounterType));
 		
 		EncounterType omrsEncounterType = new EncounterType();
@@ -516,7 +533,7 @@ public class EncounterTranslatorImplTest {
 		
 		period.setStart(encounterDate);
 		
-		when(encounterPeriodTranslator.toFhirResource(ArgumentMatchers.any())).thenReturn(period);
+		when(encounterPeriodTranslator.toFhirResource(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(period);
 		
 		Encounter result = encounterTranslator.toFhirResource(omrsEncounter);
 		

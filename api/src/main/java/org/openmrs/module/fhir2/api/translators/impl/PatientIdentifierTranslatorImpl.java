@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createLocationReference;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
 
 import javax.annotation.Nonnull;
@@ -32,8 +34,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-// TODO Create proper "System" value
-public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTranslator implements PatientIdentifierTranslator {
+public class PatientIdentifierTranslatorImpl implements PatientIdentifierTranslator {
 	
 	@Autowired
 	private FhirPatientIdentifierSystemService patientIdentifierSystemService;

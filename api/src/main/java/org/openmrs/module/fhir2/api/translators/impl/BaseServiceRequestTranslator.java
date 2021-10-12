@@ -19,13 +19,12 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PROTECTED)
-public abstract class BaseServiceRequestTranslator extends BaseReferenceHandlingTranslator {
+public abstract class BaseServiceRequestTranslator {
 	
 	private static final int START_INDEX = 0;
 	
@@ -33,40 +32,6 @@ public abstract class BaseServiceRequestTranslator extends BaseReferenceHandling
 	
 	@Autowired
 	private FhirTaskService taskService;
-	
-	protected ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(String orderUuid) {
-		IBundleProvider results = taskService.searchForTasks(
-		    new ReferenceAndListParam()
-		            .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
-		    null, null, null, null, null, null);
-		
-		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
-		        .collect(Collectors.toList());
-		
-		ServiceRequest.ServiceRequestStatus serviceRequestStatus = ServiceRequest.ServiceRequestStatus.UNKNOWN;
-		
-		if (serviceRequestTasks.size() != 1) {
-			return serviceRequestStatus;
-		}
-		
-		Task serviceRequestTask = serviceRequestTasks.iterator().next();
-		
-		if (serviceRequestTask.hasStatus()) {
-			switch (serviceRequestTask.getStatus()) {
-				case ACCEPTED:
-				case REQUESTED:
-					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.ACTIVE;
-					break;
-				case REJECTED:
-					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.REVOKED;
-					break;
-				case COMPLETED:
-					serviceRequestStatus = ServiceRequest.ServiceRequestStatus.COMPLETED;
-					break;
-			}
-		}
-		return serviceRequestStatus;
-	}
 	
 	protected Reference determineServiceRequestPerformer(String orderUuid) {
 		IBundleProvider results = taskService.searchForTasks(

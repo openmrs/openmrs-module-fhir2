@@ -14,7 +14,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -147,6 +149,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(practitioner, notNullValue());
 		assertThat(practitioner.getIdElement().getIdPart(), notNullValue());
+		assertThat(practitioner.getName(), hasSize(greaterThanOrEqualTo(1)));
 		assertThat(practitioner.getName().get(0).getGiven().get(0).toString(), equalToIgnoringCase("Adam"));
 		assertThat(practitioner.getName().get(0).getFamily(), equalToIgnoringCase("John"));
 		assertThat(practitioner.getGender(), equalTo(Enumerations.AdministrativeGender.MALE));
@@ -191,6 +194,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(practitioner, notNullValue());
 		assertThat(practitioner.getIdElement().getIdPart(), notNullValue());
+		assertThat(practitioner.getName(), hasSize(greaterThanOrEqualTo(1)));
 		assertThat(practitioner.getName().get(0).getGiven().get(0).toString(), equalToIgnoringCase("Adam"));
 		assertThat(practitioner.getName().get(0).getFamily(), equalToIgnoringCase("John"));
 		assertThat(practitioner.getGender(), equalTo(Enumerations.AdministrativeGender.MALE));

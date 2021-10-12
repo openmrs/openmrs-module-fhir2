@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -33,6 +34,7 @@ import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -65,7 +67,28 @@ public class PersonTranslatorImpl implements PersonTranslator {
 	private FhirPatientDao patientDao;
 	
 	@Override
-	public org.hl7.fhir.r4.model.Person toFhirResource(@Nonnull Person openmrsPerson) {
+	public org.hl7.fhir.r4.model.Person toFhirResource(@Nonnull Person person) {
+		if (person == null) {
+			return null;
+		}
+		
+		return toFhirResourceInternal(person, null);
+	}
+	
+	@Override
+	public org.hl7.fhir.r4.model.Person toFhirResource(@Nonnull Person person, @Nullable FhirCache cache) {
+		if (person == null) {
+			return null;
+		}
+		
+		if (cache != null) {
+			return (org.hl7.fhir.r4.model.Person) cache.get(getCacheKey(person), k -> toFhirResourceInternal(person, cache));
+		}
+		
+		return toFhirResourceInternal(person, null);
+	}
+	
+	protected org.hl7.fhir.r4.model.Person toFhirResourceInternal(@Nonnull Person openmrsPerson, @Nullable FhirCache cache) {
 		notNull(openmrsPerson, "The Openmrs Person object should not be null");
 		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
@@ -73,28 +96,29 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		person.setActive(true);
 		
 		for (PersonName name : openmrsPerson.getNames()) {
-			person.addName(nameTranslator.toFhirResource(name));
+			person.addName(nameTranslator.toFhirResource(name, cache));
 		}
 		
 		if (openmrsPerson.getGender() != null) {
-			person.setGender(genderTranslator.toFhirResource(openmrsPerson.getGender()));
+			person.setGender(genderTranslator.toFhirResource(openmrsPerson.getGender(), cache));
 		}
 		
-		person.setBirthDateElement(birthDateTranslator.toFhirResource(openmrsPerson));
+		person.setBirthDateElement(birthDateTranslator.toFhirResource(openmrsPerson, cache));
 		
 		for (PersonAddress address : openmrsPerson.getAddresses()) {
-			person.addAddress(addressTranslator.toFhirResource(address));
+			person.addAddress(addressTranslator.toFhirResource(address, cache));
 		}
 		
-		person.addTelecom(telecomTranslator.toFhirResource(openmrsPerson));
+		person.addTelecom(telecomTranslator.toFhirResource(openmrsPerson, cache));
 		
 		if (openmrsPerson.getIsPatient()) {
 			person.addLink(new org.hl7.fhir.r4.model.Person.PersonLinkComponent()
 			        .setTarget(patientReferenceTranslator.toFhirResource(patientDao.get(openmrsPerson.getUuid()))));
 		}
+		
 		person.getMeta().setLastUpdated(openmrsPerson.getDateChanged());
-		person.addContained(provenanceTranslator.getCreateProvenance(openmrsPerson));
-		person.addContained(provenanceTranslator.getUpdateProvenance(openmrsPerson));
+		person.addContained(provenanceTranslator.getCreateProvenance(openmrsPerson, cache));
+		person.addContained(provenanceTranslator.getUpdateProvenance(openmrsPerson, cache));
 		
 		return person;
 	}

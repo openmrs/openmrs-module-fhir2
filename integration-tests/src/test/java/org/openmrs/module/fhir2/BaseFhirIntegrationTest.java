@@ -38,7 +38,9 @@ import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.junit.After;
 import org.junit.Before;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,9 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	
 	@Autowired
 	private ConfigurableApplicationContext ctx;
+	
+	@Autowired
+	private FhirCache fhirCache;
 	
 	// This must be implemented by subclasses
 	public abstract T getResourceProvider();
@@ -94,6 +99,11 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		servletConfig = new MockServletConfig(servletContext, getServletName());
 		
 		setupFhirServlet();
+	}
+	
+	@After
+	public void tearDown() {
+		fhirCache.invalidateAll();
 	}
 	
 	public void setupFhirServlet() throws ServletException {

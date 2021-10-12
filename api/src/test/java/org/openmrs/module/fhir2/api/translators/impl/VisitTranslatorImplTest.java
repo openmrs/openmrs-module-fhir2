@@ -177,9 +177,9 @@ public class VisitTranslatorImplTest {
 		assertThat(result.getStopDatetime(), nullValue());
 	}
 	
-	@Test(expected = NullPointerException.class)
-	public void toFhirResource_shouldThrowExceptionWhenVisitIsNull() {
-		visitTranslator.toFhirResource(null);
+	@Test
+	public void toFhirResource_shouldReturnNullWhenVisitIsNull() {
+		assertThat(visitTranslator.toFhirResource(null), nullValue());
 	}
 	
 	@Test(expected = NullPointerException.class)

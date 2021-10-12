@@ -111,9 +111,9 @@ public class FhirMedicationRequestServiceImplTest {
 	}
 	
 	@Test
-	public void shouldGetMedicationRequestByUuid() {
+	public void get_shouldGetMedicationRequestByUuid() {
 		when(dao.get(MEDICATION_REQUEST_UUID)).thenReturn(drugOrder);
-		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(medicationRequestTranslator.toFhirResource(drugOrder, null)).thenReturn(medicationRequest);
 		
 		MedicationRequest result = medicationRequestService.get(MEDICATION_REQUEST_UUID);
 		assertThat(result, notNullValue());
@@ -122,7 +122,7 @@ public class FhirMedicationRequestServiceImplTest {
 	}
 	
 	@Test
-	public void shouldThrowResourceNotFoundForBadMedicationRequestUuid() {
+	public void get_shouldThrowResourceNotFoundForBadMedicationRequestUuid() {
 		assertThrows(ResourceNotFoundException.class, () -> medicationRequestService.get(BAD_MEDICATION_REQUEST_UUID));
 	}
 	

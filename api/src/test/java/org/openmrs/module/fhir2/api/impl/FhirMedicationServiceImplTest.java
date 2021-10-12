@@ -116,18 +116,19 @@ public class FhirMedicationServiceImplTest {
 	}
 	
 	@Test
-	public void getMedicationByUuid_shouldGetMedicationByUuid() {
+	public void get_shouldGetMedicationByUuid() {
 		when(medicationDao.get(MEDICATION_UUID)).thenReturn(drug);
-		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toFhirResource(drug, null)).thenReturn(medication);
 		
 		Medication medication = fhirMedicationService.get(MEDICATION_UUID);
+		
 		assertThat(medication, notNullValue());
 		assertThat(medication.getId(), notNullValue());
 		assertThat(medication.getId(), equalTo(MEDICATION_UUID));
 	}
 	
 	@Test
-	public void getMedicationByUuid_shouldThrowResourceNotFoundWhenCalledWithUnknownUuid() {
+	public void get_shouldThrowResourceNotFoundWhenCalledWithUnknownUuid() {
 		assertThrows(ResourceNotFoundException.class, () -> fhirMedicationService.get(WRONG_MEDICATION_UUID));
 	}
 	
@@ -307,7 +308,7 @@ public class FhirMedicationServiceImplTest {
 	}
 	
 	@Test
-	public void saveMedication_shouldSaveNewMedication() {
+	public void create_shouldSaveNewMedication() {
 		Drug drug = new Drug();
 		drug.setUuid(MEDICATION_UUID);
 		
@@ -319,6 +320,7 @@ public class FhirMedicationServiceImplTest {
 		when(medicationDao.createOrUpdate(drug)).thenReturn(drug);
 		
 		Medication result = fhirMedicationService.create(medication);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(MEDICATION_UUID));
 	}
@@ -357,11 +359,12 @@ public class FhirMedicationServiceImplTest {
 		medication.setStatus(Medication.MedicationStatus.INACTIVE);
 		
 		when(medicationDao.get(MEDICATION_UUID)).thenReturn(drug);
-		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
+		when(medicationTranslator.toFhirResource(drug, null)).thenReturn(medication);
 		when(medicationTranslator.toOpenmrsType(drug, medication)).thenReturn(drug);
 		when(medicationDao.createOrUpdate(drug)).thenReturn(drug);
 		
 		Medication result = fhirMedicationService.update(MEDICATION_UUID, medication);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getStatus(), equalTo(Medication.MedicationStatus.INACTIVE));
 	}
@@ -373,6 +376,7 @@ public class FhirMedicationServiceImplTest {
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
 		Medication medication = fhirMedicationService.delete(MEDICATION_UUID);
+		
 		assertThat(medication, notNullValue());
 		assertThat(medication.getId(), equalTo(MEDICATION_UUID));
 		assertThat(medication.getStatus(), equalTo(Medication.MedicationStatus.INACTIVE));

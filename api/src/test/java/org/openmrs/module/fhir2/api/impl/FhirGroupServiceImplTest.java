@@ -107,9 +107,9 @@ public class FhirGroupServiceImplTest {
 	}
 	
 	@Test
-	public void getGroupByUuid_shouldGetGroupByUuid() {
+	public void get_shouldGetGroupByUuid() {
 		when(dao.get(COHORT_UUID)).thenReturn(cohort);
-		when(translator.toFhirResource(cohort)).thenReturn(group);
+		when(translator.toFhirResource(cohort, null)).thenReturn(group);
 		
 		Group group = groupService.get(COHORT_UUID);
 		assertThat(group, notNullValue());
@@ -123,7 +123,7 @@ public class FhirGroupServiceImplTest {
 	}
 	
 	@Test
-	public void shouldSaveNewGroup() {
+	public void create_shouldSaveNewGroup() {
 		Cohort cohort = new Cohort();
 		cohort.setUuid(COHORT_UUID);
 		
@@ -135,6 +135,7 @@ public class FhirGroupServiceImplTest {
 		when(dao.createOrUpdate(cohort)).thenReturn(cohort);
 		
 		Group result = groupService.create(group);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(COHORT_UUID));
 	}
@@ -164,7 +165,7 @@ public class FhirGroupServiceImplTest {
 	}
 	
 	@Test
-	public void shouldUpdateGroup() {
+	public void update_shouldUpdateGroup() {
 		Cohort cohort = new Cohort();
 		cohort.setUuid(COHORT_UUID);
 		cohort.setVoided(false);
@@ -174,17 +175,18 @@ public class FhirGroupServiceImplTest {
 		group.setActive(false);
 		
 		when(dao.get(COHORT_UUID)).thenReturn(cohort);
-		when(translator.toFhirResource(cohort)).thenReturn(group);
+		when(translator.toFhirResource(cohort, null)).thenReturn(group);
 		when(translator.toOpenmrsType(cohort, group)).thenReturn(cohort);
 		when(dao.createOrUpdate(cohort)).thenReturn(cohort);
 		
 		Group result = groupService.update(COHORT_UUID, group);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getActive(), is(false));
 	}
 	
 	@Test
-	public void shouldDeleteGroup() {
+	public void delete_shouldDeleteGroup() {
 		Group group = new Group();
 		group.setId(COHORT_UUID);
 		
@@ -192,6 +194,7 @@ public class FhirGroupServiceImplTest {
 		when(translator.toFhirResource(cohort)).thenReturn(group);
 		
 		Group result = groupService.delete(COHORT_UUID);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(COHORT_UUID));
 		assertThat(result.getActive(), is(false));

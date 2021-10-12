@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -23,6 +24,7 @@ import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,13 +46,34 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			return null;
 		}
 		
+		return toFhirResourceInternal(concept, null);
+	}
+	
+	@Override
+	public CodeableConcept toFhirResource(@Nonnull Concept concept, @Nullable FhirCache cache) {
+		if (concept == null) {
+			return null;
+		}
+		
+		if (cache != null) {
+			return (CodeableConcept) cache.get(getCacheKey(concept), k -> toFhirResourceInternal(concept, cache));
+		}
+		
+		return toFhirResourceInternal(concept, null);
+	}
+	
+	protected CodeableConcept toFhirResourceInternal(@Nonnull Concept concept, @Nullable FhirCache cache) {
+		if (concept == null) {
+			return null;
+		}
+		
 		CodeableConcept codeableConcept = new CodeableConcept();
 		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
 		
 		for (ConceptMap mapping : concept.getConceptMappings()) {
 			ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
 			
-			String sourceUrl = conceptSourceToURL(crt.getConceptSource().getName());
+			String sourceUrl = conceptSourceToURL(crt.getConceptSource().getName(), cache);
 			if (sourceUrl == null) {
 				continue;
 			}
@@ -102,9 +125,9 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		coding.setDisplay(display);
 	}
 	
-	private String conceptSourceToURL(String conceptSourceName) {
-		return conceptSourceService.getFhirConceptSourceByConceptSourceName(conceptSourceName).map(FhirConceptSource::getUrl)
-		        .orElse(null);
+	private String conceptSourceToURL(String conceptSourceName, FhirCache cache) {
+		return conceptSourceService.getFhirConceptSourceByConceptSourceName(conceptSourceName, cache)
+		        .map(FhirConceptSource::getUrl).orElse(null);
 	}
 	
 	private String conceptURLToSource(String url) {

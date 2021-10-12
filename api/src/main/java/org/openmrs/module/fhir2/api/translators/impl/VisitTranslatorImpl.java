@@ -12,20 +12,20 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
-import org.openmrs.EncounterType;
 import org.openmrs.Visit;
 import org.openmrs.VisitType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterPeriodTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
-import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,9 +43,6 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 	private ProvenanceTranslator<Visit> provenanceTranslator;
 	
 	@Autowired
-	private EncounterTypeTranslator<EncounterType> encounterTypeTranslator;
-	
-	@Autowired
 	private VisitTypeTranslatorImpl visitTypeTranslator;
 	
 	@Autowired
@@ -53,8 +50,27 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 	
 	@Override
 	public Encounter toFhirResource(@Nonnull Visit visit) {
-		notNull(visit, "The OpenMrs Visit object should not be null");
+		if (visit == null) {
+			return null;
+		}
 		
+		return toFhirResourceInternal(visit, null);
+	}
+	
+	@Override
+	public Encounter toFhirResource(@Nonnull Visit visit, @Nullable FhirCache cache) {
+		if (visit == null) {
+			return null;
+		}
+		
+		if (cache != null) {
+			return (Encounter) cache.get(getCacheKey(visit), k -> toFhirResourceInternal(visit, cache));
+		}
+		
+		return toFhirResourceInternal(visit, null);
+	}
+	
+	private Encounter toFhirResourceInternal(@Nonnull Visit visit, @Nullable FhirCache cache) {
 		Encounter encounter = new Encounter();
 		encounter.setId(visit.getUuid());
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
@@ -65,7 +81,7 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 			encounterLocationTranslator.toFhirResource(visit.getLocation());
 		}
 		
-		encounter.setClass_(mapLocationToClass(visit.getLocation()));
+		encounter.setClass_(mapLocationToClass(visit.getLocation(), cache));
 		
 		encounter.setPeriod(visitPeriodTranslator.toFhirResource(visit));
 		

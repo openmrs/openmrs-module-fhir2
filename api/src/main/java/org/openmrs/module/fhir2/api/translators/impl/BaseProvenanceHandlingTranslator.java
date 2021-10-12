@@ -20,11 +20,12 @@ import org.openmrs.OpenmrsObject;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PACKAGE)
-public abstract class BaseProvenanceHandlingTranslator<T extends OpenmrsObject & Auditable> {
+public abstract class BaseProvenanceHandlingTranslator<T extends OpenmrsObject & Auditable> implements ProvenanceTranslator<T> {
 	
 	private static final String AGENT_TYPE_CODE = "author";
 	
@@ -39,10 +40,12 @@ public abstract class BaseProvenanceHandlingTranslator<T extends OpenmrsObject &
 	
 	public Provenance getCreateProvenance(T openMrsObject) {
 		Provenance provenance = new Provenance();
+		
 		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(openMrsObject.getDateCreated());
 		provenance.setActivity(createActivity());
 		provenance.addAgent(createAgentComponent(openMrsObject.getCreator()));
+		
 		return provenance;
 	}
 	
@@ -50,11 +53,13 @@ public abstract class BaseProvenanceHandlingTranslator<T extends OpenmrsObject &
 		if (openMrsObject.getDateChanged() == null && openMrsObject.getChangedBy() == null) {
 			return null;
 		}
+		
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.newUuid()));
 		provenance.setRecorded(openMrsObject.getDateChanged());
 		provenance.setActivity(updateActivity());
 		provenance.addAgent(createAgentComponent(openMrsObject.getChangedBy()));
+		
 		return provenance;
 	}
 	
@@ -63,6 +68,7 @@ public abstract class BaseProvenanceHandlingTranslator<T extends OpenmrsObject &
 		coding.setCode("CREATE");
 		coding.setDisplay("create");
 		coding.setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION);
+		
 		return new CodeableConcept().addCoding(coding);
 	}
 	
@@ -71,6 +77,7 @@ public abstract class BaseProvenanceHandlingTranslator<T extends OpenmrsObject &
 		coding.setCode("UPDATE");
 		coding.setDisplay("revise");
 		coding.setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION);
+		
 		return new CodeableConcept().addCoding(coding);
 	}
 	

@@ -164,9 +164,9 @@ public class FhirPatientServiceImplTest {
 	}
 	
 	@Test
-	public void getPatientByUuid_shouldRetrievePatientByUuid() {
+	public void get_shouldRetrievePatientByUuid() {
 		when(dao.get(PATIENT_UUID)).thenReturn(patient);
-		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
+		when(patientTranslator.toFhirResource(patient, null)).thenReturn(fhirPatient);
 		
 		org.hl7.fhir.r4.model.Patient result = patientService.get(PATIENT_UUID);
 		

@@ -30,4 +30,5 @@ public class ObservationInterpretationTranslatorImpl implements ObservationInter
 	public Obs toOpenmrsType(@Nonnull Obs existingObs, @Nonnull CodeableConcept resource) {
 		return existingObs;
 	}
+	
 }

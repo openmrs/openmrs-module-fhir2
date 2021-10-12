@@ -90,7 +90,7 @@ public class DiagnosticReportTranslatorImplTest {
 		diagnosticReport.addResult(obsReference);
 		
 		// Mocks for DiagnosticReport.result
-		when(observationReferenceTranslator.toFhirResource(childObs)).thenReturn(obsReference);
+		when(observationReferenceTranslator.toFhirResource(childObs, null)).thenReturn(obsReference);
 		when(observationReferenceTranslator.toOpenmrsType(obsReference)).thenReturn(childObs);
 	}
 	
@@ -126,7 +126,7 @@ public class DiagnosticReportTranslatorImplTest {
 		Reference subjectReference = new Reference();
 		fhirDiagnosticReport.setSubject(subject);
 		
-		when(patientReferenceTranslator.toFhirResource(subject)).thenReturn(subjectReference);
+		when(patientReferenceTranslator.toFhirResource(subject, null)).thenReturn(subjectReference);
 		
 		DiagnosticReport result = translator.toFhirResource(fhirDiagnosticReport);
 		
@@ -139,7 +139,7 @@ public class DiagnosticReportTranslatorImplTest {
 		Reference encounterReference = new Reference();
 		fhirDiagnosticReport.setEncounter(encounter);
 		
-		when(encounterReferenceTranslator.toFhirResource(encounter)).thenReturn(encounterReference);
+		when(encounterReferenceTranslator.toFhirResource(encounter, null)).thenReturn(encounterReference);
 		
 		DiagnosticReport result = translator.toFhirResource(fhirDiagnosticReport);
 		
@@ -152,7 +152,7 @@ public class DiagnosticReportTranslatorImplTest {
 		CodeableConcept translatedCode = new CodeableConcept();
 		fhirDiagnosticReport.setCode(code);
 		
-		when(conceptTranslator.toFhirResource(code)).thenReturn(translatedCode);
+		when(conceptTranslator.toFhirResource(code, null)).thenReturn(translatedCode);
 		
 		DiagnosticReport result = translator.toFhirResource(fhirDiagnosticReport);
 		

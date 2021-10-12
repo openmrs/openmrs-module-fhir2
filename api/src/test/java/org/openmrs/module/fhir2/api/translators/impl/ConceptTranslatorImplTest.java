@@ -108,7 +108,7 @@ public class ConceptTranslatorImplTest {
 		loincConceptSource.setName("LOINC");
 		loinc.setConceptSource(loincConceptSource);
 		loinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.of(loinc));
+		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC", null)).thenReturn(Optional.of(loinc));
 		
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		
@@ -138,7 +138,7 @@ public class ConceptTranslatorImplTest {
 		cielConceptSource.setName("CIEL");
 		ciel.setConceptSource(cielConceptSource);
 		ciel.setUrl(FhirTestConstants.CIEL_SYSTEM_URN);
-		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("CIEL")).thenReturn(Optional.of(ciel));
+		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("CIEL", null)).thenReturn(Optional.of(ciel));
 		
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		assertThat(result, notNullValue());
@@ -159,7 +159,7 @@ public class ConceptTranslatorImplTest {
 		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
 		when(conceptSource.getName()).thenReturn("Unknown");
 		when(concept.getConceptMappings()).thenReturn(conceptMaps);
-		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("Unknown")).thenReturn(Optional.empty());
+		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("Unknown", null)).thenReturn(Optional.empty());
 		
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		assertThat(result, notNullValue());

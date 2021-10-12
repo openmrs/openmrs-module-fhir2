@@ -108,7 +108,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		diagnosticReport.setId(UUID);
 		
 		when(dao.get(UUID)).thenReturn(fhirDiagnosticReport);
-		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
+		when(translator.toFhirResource(fhirDiagnosticReport, null)).thenReturn(diagnosticReport);
 		
 		DiagnosticReport result = service.get(UUID);
 		
@@ -159,7 +159,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		when(translator.toOpenmrsType(fhirDiagnosticReport, diagnosticReport)).thenReturn(updatedFhirDiagnosticReport);
 		when(dao.createOrUpdate(updatedFhirDiagnosticReport)).thenReturn(updatedFhirDiagnosticReport);
 		when(dao.get(UUID)).thenReturn(fhirDiagnosticReport);
-		when(translator.toFhirResource(updatedFhirDiagnosticReport)).thenReturn(diagnosticReport);
+		when(translator.toFhirResource(updatedFhirDiagnosticReport, null)).thenReturn(diagnosticReport);
 		
 		DiagnosticReport result = service.update(UUID, diagnosticReport);
 		

@@ -184,9 +184,10 @@ public class FhirPractitionerServiceImplTest {
 	@Test
 	public void shouldRetrievePractitionerByUuidWhoIsProvider() {
 		when(practitionerDao.get(UUID)).thenReturn(provider);
-		when(practitionerTranslator.toFhirResource(provider)).thenReturn(practitioner);
+		when(practitionerTranslator.toFhirResource(provider, null)).thenReturn(practitioner);
 		
 		Practitioner result = practitionerService.get(UUID);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(UUID));
@@ -195,10 +196,10 @@ public class FhirPractitionerServiceImplTest {
 	@Test
 	public void shouldRetrievePractitionerByUuidWhoIsUser() {
 		when(practitionerDao.get(UUID2)).thenReturn(null);
-		
 		when(userService.get(UUID2)).thenReturn(practitioner2);
 		
 		Practitioner result = practitionerService.get(UUID2);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), notNullValue());
 		assertThat(result.getId(), equalTo(UUID2));

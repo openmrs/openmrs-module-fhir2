@@ -32,11 +32,9 @@ public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 	
 	@Override
 	public Timing.UnitsOfTime toFhirResource(@Nonnull Concept concept) {
-		
-		if (concept.getUuid() == null) {
+		if (concept == null || concept.getUuid() == null) {
 			return null;
 		}
-		
 		unitsOfTime = durationUnitMap.getDurationUnit(concept.getUuid());
 		
 		if (unitsOfTime == null) {

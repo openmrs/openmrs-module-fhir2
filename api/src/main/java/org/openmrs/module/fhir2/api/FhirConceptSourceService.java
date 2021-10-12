@@ -10,10 +10,12 @@
 package org.openmrs.module.fhir2.api;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
 
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 
 public interface FhirConceptSourceService {
@@ -22,5 +24,6 @@ public interface FhirConceptSourceService {
 	
 	Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url);
 	
-	Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName);
+	Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName,
+	        @Nullable FhirCache cache);
 }

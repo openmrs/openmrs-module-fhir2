@@ -82,9 +82,10 @@ public class DosageTranslatorImplTest {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding().setCode(concept.getConceptId().toString()));
 		drugOrder.setRoute(concept);
-		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
+		when(conceptTranslator.toFhirResource(concept, null)).thenReturn(codeableConcept);
 		
 		Dosage result = dosageTranslator.toFhirResource(drugOrder);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getRoute(), equalTo(codeableConcept));
 		assertThat(result.getRoute().getCodingFirstRep().getCode(), equalTo("1000"));
@@ -112,9 +113,10 @@ public class DosageTranslatorImplTest {
 		Timing timing = new Timing();
 		timing.addEvent(new Date());
 		timing.setRepeat(repeatComponent);
-		when(timingTranslator.toFhirResource(drugOrder)).thenReturn(timing);
+		when(timingTranslator.toFhirResource(drugOrder, null)).thenReturn(timing);
 		
 		Dosage result = dosageTranslator.toFhirResource(drugOrder);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getTiming(), notNullValue());
 		assertThat(result.getTiming().getEvent(), not(empty()));

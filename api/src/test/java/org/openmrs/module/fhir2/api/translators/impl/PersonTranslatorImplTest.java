@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.BaseOpenmrsData;
@@ -176,7 +177,8 @@ public class PersonTranslatorImplTest {
 		personAttribute.setValue(PERSON_ATTRIBUTE_VALUE);
 		personAttribute.setAttributeType(attributeType);
 		
-		when(genderTranslator.toFhirResource(argThat(equalTo("F")))).thenReturn(Enumerations.AdministrativeGender.FEMALE);
+		when(genderTranslator.toFhirResource(argThat(equalTo("F")), ArgumentMatchers.any()))
+		        .thenReturn(Enumerations.AdministrativeGender.FEMALE);
 		person.setGender("F");
 		
 		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
@@ -269,7 +271,7 @@ public class PersonTranslatorImplTest {
 		humanName.addGiven(PERSON_GIVEN_NAME);
 		humanName.setFamily(PERSON_FAMILY_NAME);
 		when(nameTranslator.toFhirResource(argThat(allOf(hasProperty("givenName", equalTo(PERSON_GIVEN_NAME)),
-		    hasProperty("familyName", equalTo(PERSON_FAMILY_NAME)))))).thenReturn(humanName);
+		    hasProperty("familyName", equalTo(PERSON_FAMILY_NAME)))), ArgumentMatchers.any())).thenReturn(humanName);
 		
 		Person person = new Person();
 		PersonName name = new PersonName();
@@ -291,8 +293,8 @@ public class PersonTranslatorImplTest {
 		address.setId(ADDRESS_UUID);
 		address.setCity(ADDRESS_CITY);
 		when(addressTranslator.toFhirResource(
-		    argThat(allOf(hasProperty("uuid", equalTo(ADDRESS_UUID)), hasProperty("cityVillage", equalTo(ADDRESS_CITY))))))
-		            .thenReturn(address);
+		    argThat(allOf(hasProperty("uuid", equalTo(ADDRESS_UUID)), hasProperty("cityVillage", equalTo(ADDRESS_CITY)))),
+		    ArgumentMatchers.any())).thenReturn(address);
 		
 		Person person = new Person();
 		PersonAddress personAddress = new PersonAddress();
@@ -480,9 +482,11 @@ public class PersonTranslatorImplTest {
 	public void shouldAddProvenanceResources() {
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.newUuid()));
-		when(provenanceTranslator.getCreateProvenance(personMock)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(personMock)).thenReturn(provenance);
+		when(provenanceTranslator.getCreateProvenance(personMock, null)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(personMock, null)).thenReturn(provenance);
+		
 		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(personMock);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getContained(), not(empty()));
 		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
@@ -497,10 +501,11 @@ public class PersonTranslatorImplTest {
 		provenance.setId(new IdType(FhirUtils.newUuid()));
 		personMock.setDateChanged(null);
 		personMock.setChangedBy(null);
-		when(provenanceTranslator.getCreateProvenance(personMock)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(personMock)).thenReturn(null);
+		when(provenanceTranslator.getCreateProvenance(personMock, null)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(personMock, null)).thenReturn(null);
 		
 		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(personMock);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getContained(), not(empty()));
 		assertThat(result.getContained().size(), equalTo(1));

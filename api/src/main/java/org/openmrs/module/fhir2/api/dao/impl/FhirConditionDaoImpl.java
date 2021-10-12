@@ -23,7 +23,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.openmrs.Obs;
 import org.openmrs.annotation.Authorized;
@@ -32,18 +31,12 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PUBLIC)
 @OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
 public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirConditionDao<Obs> {
-	
-	@Qualifier("sessionFactory")
-	@Autowired
-	private SessionFactory sessionFactory;
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
@@ -130,5 +123,13 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirCondit
 		}
 		
 		return super.paramToProp(param);
+	}
+	
+	@Override
+	protected Obs deproxyResult(Obs result) {
+		Obs obs = super.deproxyResult(result);
+		obs.setConcept(deproxyObject(obs.getConcept()));
+		obs.setPerson(deproxyObject(obs.getPerson()));
+		return obs;
 	}
 }

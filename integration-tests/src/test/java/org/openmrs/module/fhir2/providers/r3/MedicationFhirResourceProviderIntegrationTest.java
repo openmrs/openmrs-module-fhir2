@@ -68,11 +68,10 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 	
 	@Test
 	public void shouldReturnExistingMedicationAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID)
-		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Medication medication = readResponse(response);
@@ -84,21 +83,19 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 	
 	@Test
 	public void shouldThrow404ForNonExistingMedicationAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Medication/" + WRONG_MEDICATION_UUID)
-		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/Medication/" + WRONG_MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
 	
 	@Test
 	public void shouldReturnExistingMedicationAsXML() throws Exception {
-		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID)
-		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.XML).go();
+		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Medication medication = readResponse(response);
@@ -281,11 +278,10 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR3Int
 	@Test
 	public void shouldUpdateExistingMedicationAsXml() throws Exception {
 		//Before update
-		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID)
-		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.XML).go();
+		MockHttpServletResponse response = get("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Medication medication = readResponse(response);

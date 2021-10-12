@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createLocationReferenceByUuid;
 
 import javax.annotation.Nonnull;
 
@@ -47,7 +48,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ObservationTranslatorImpl extends BaseReferenceHandlingTranslator implements ObservationTranslator {
+public class ObservationTranslatorImpl implements ObservationTranslator {
 	
 	@Autowired
 	private ObservationStatusTranslator observationStatusTranslator;

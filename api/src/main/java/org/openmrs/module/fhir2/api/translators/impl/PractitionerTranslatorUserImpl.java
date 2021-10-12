@@ -18,33 +18,14 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.Person;
-import org.openmrs.PersonAddress;
-import org.openmrs.PersonName;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
-import org.openmrs.module.fhir2.api.translators.GenderTranslator;
-import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
-import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class PractitionerTranslatorUserImpl implements PractitionerTranslator<User> {
-	
-	@Autowired
-	private PersonNameTranslator nameTranslator;
-	
-	@Autowired
-	private GenderTranslator genderTranslator;
-	
-	@Autowired
-	private BirthDateTranslator birthDateTranslator;
-	
-	@Autowired
-	private PersonAddressTranslator addressTranslator;
+public class PractitionerTranslatorUserImpl extends BasePractitionerTranslator implements PractitionerTranslator<User> {
 	
 	@Override
 	public Practitioner toFhirResource(@Nonnull User user) {
@@ -59,17 +40,9 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 		practitioner.addIdentifier(userIdentifier);
 		
 		if (user.getPerson() != null) {
-			practitioner.setBirthDateElement(birthDateTranslator.toFhirResource(user.getPerson()));
-			
-			practitioner.setGender(genderTranslator.toFhirResource(user.getPerson().getGender()));
-			for (PersonName name : user.getPerson().getNames()) {
-				practitioner.addName(nameTranslator.toFhirResource(name));
-			}
-			
-			for (PersonAddress address : user.getPerson().getAddresses()) {
-				practitioner.addAddress(addressTranslator.toFhirResource(address));
-			}
+			personToPractitioner(user.getPerson(), practitioner);
 		}
+		
 		practitioner.getMeta().setLastUpdated(user.getDateChanged());
 		
 		return practitioner;
@@ -88,15 +61,11 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 		user.setUuid(practitioner.getId());
 		setSystemId(practitioner, user);
 		
-		if (practitioner.hasBirthDateElement()) {
-			birthDateTranslator.toOpenmrsType(user.getPerson(), practitioner.getBirthDateElement());
-		}
-		
 		if (user.getPerson() == null) {
 			user.setPerson(new Person());
 		}
 		
-		user.getPerson().setGender(genderTranslator.toOpenmrsType(practitioner.getGender()));
+		practitionerToPerson(practitioner, user.getPerson());
 		
 		user.setDateChanged(practitioner.getMeta().getLastUpdated());
 		

@@ -96,13 +96,13 @@ public class FhirObservationServiceImplTest {
 	}
 	
 	@Test
-	public void getObservationByUuid_shouldReturnObservationByUuid() {
+	public void get_shouldReturnObservationByUuid() {
 		Obs obs = new Obs();
 		obs.setUuid(OBS_UUID);
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
 		when(dao.get(OBS_UUID)).thenReturn(obs);
-		when(translator.toFhirResource(obs)).thenReturn(observation);
+		when(translator.toFhirResource(obs, null)).thenReturn(observation);
 		
 		Observation result = fhirObservationService.get(OBS_UUID);
 		
