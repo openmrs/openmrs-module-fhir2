@@ -38,7 +38,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.transaction.annotation.Transactional;
 
 public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3IntegrationTest<EncounterFhirResourceProvider, Encounter> {
 	
@@ -455,7 +454,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 	}
 	
 	@Test
-	public void shouldCreateEncounterFromOpenMrsEncounterAsJson() throws Exception {
+	public void shouldCreateEncounterFromOpenmrsEncounterAsJson() throws Exception {
 		String jsonEncounter;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(ENCOUNTER_JSON_CREATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
@@ -489,7 +488,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 	}
 	
 	@Test
-	public void shouldCreateEncounterFromOpenMrsEncounterAsXML() throws Exception {
+	public void shouldCreateEncounterFromOpenmrsEncounterAsXML() throws Exception {
 		String xmlEncounter;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(ENCOUNTER_XML_CREATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
@@ -523,7 +522,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 	}
 	
 	@Test
-	public void shouldCreateEncounterFromOpenMrsVisitAsJson() throws Exception {
+	public void shouldCreateEncounterFromOpenmrsVisitAsJson() throws Exception {
 		String jsonEncounter;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(VISIT_JSON_CREATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
@@ -555,7 +554,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 	}
 	
 	@Test
-	public void shouldCreateEncounterFromOpenMrsVisitAsXML() throws Exception {
+	public void shouldCreateEncounterFromOpenmrsVisitAsXML() throws Exception {
 		String xmlEncounter;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(VISIT_XML_CREATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
@@ -587,8 +586,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 	}
 	
 	@Test
-	@Transactional(readOnly = true)
-	public void shouldUpdateExistingEncounterFromOpenMrsEncounterAsJson() throws Exception {
+	public void shouldUpdateExistingEncounterFromOpenmrsEncounterAsJson() throws Exception {
 		// Before Update
 		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -631,8 +629,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 	}
 	
 	@Test
-	@Transactional(readOnly = true)
-	public void shouldUpdateExistingEncounterFromOpenMrsVisitAsJson() throws Exception {
+	public void shouldUpdateExistingEncounterFromOpenmrsVisitAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Encounter/" + VISIT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
