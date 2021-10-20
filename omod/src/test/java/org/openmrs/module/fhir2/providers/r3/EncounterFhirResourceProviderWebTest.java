@@ -73,7 +73,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	private static final String ENCOUNTER_UUID = "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9";
 	
 	private static final String ENCOUNTER_TYPE_UUID = "07000be2-26b6-4cce-8b40-866d8435b613";
-
+	
 	private static final String WRONG_ENCOUNTER_UUID = "9bf0d1ac-62a8-4440-a5a1-eb1015a7cc65";
 	
 	private static final String PATIENT_IDENTIFIER = "h43489-h";
@@ -533,7 +533,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	@Test
 	public void shouldGetEncountersByTypeUUID() throws Exception {
 		verifyUri(String.format("/Encounter?type=%s", ENCOUNTER_TYPE_UUID));
-
+		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(),
 		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull());
 		

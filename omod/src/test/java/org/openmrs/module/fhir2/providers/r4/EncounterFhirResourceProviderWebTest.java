@@ -573,21 +573,21 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		        .getValue(),
 		    equalTo(ENCOUNTER_UUID));
 	}
-
+	
 	@Test
 	public void shouldGetEncountersByTypeUUID() throws Exception {
 		verifyUri(String.format("/Encounter?type=%s", ENCOUNTER_TYPE_UUID));
-
+		
 		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(),
 		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull());
-
+		
 		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
 		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
 		    equalTo(ENCOUNTER_TYPE_UUID));
 	}
-
+	
 	@Test
 	public void shouldGetEncountersByLastUpdatedDate() throws Exception {
 		verifyUri(String.format("/Encounter?_lastUpdated=%s", LAST_UPDATED_DATE));
