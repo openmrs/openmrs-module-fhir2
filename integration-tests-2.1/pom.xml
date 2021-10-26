@@ -112,6 +112,6 @@
 		</plugins>
 	</build>
 	<properties>
-		<openmrsPlatformVersion>2.1.0</openmrsPlatformVersion>
+		<openmrsPlatformVersion>2.1.4</openmrsPlatformVersion>
 	</properties>
 </project>
