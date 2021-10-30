@@ -38,6 +38,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<EncounterFhirResourceProvider, Encounter> {
 	
@@ -592,7 +593,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
-	public void shouldUpdateExistingEncounterFromOpenmrsEncounterAsJson() throws Exception {
+	@Transactional(readOnly = true)
+	public void shouldUpdateExistingEncounterFromOpenMrsEncounterAsJson() throws Exception {
 		// Before Update
 		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -635,7 +637,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
-	public void shouldUpdateExistingEncounterFromOpenmrsVisitAsJson() throws Exception {
+	@Transactional(readOnly = true)
+	public void shouldUpdateExistingEncounterFromOpenMrsVisitAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Encounter/" + VISIT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());

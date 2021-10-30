@@ -41,6 +41,7 @@ import org.openmrs.module.fhir2.model.GroupMember;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 public class GroupResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<GroupFhirResourceProvider, Group> {
@@ -207,6 +208,7 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR4IntegrationT
 	}
 	
 	@Test
+	@Transactional(readOnly = true)
 	public void shouldUpdateExistingGroupAsJson() throws Exception {
 		//Before update
 		MockHttpServletResponse response = get("/Group/" + GROUP_UUID).accept(FhirMediaTypes.JSON).go();
@@ -266,6 +268,7 @@ public class GroupResourceProviderIntegrationTest extends BaseFhirR4IntegrationT
 	}
 	
 	@Test
+	@Transactional(readOnly = true)
 	public void shouldUpdateExistingGroupAsXML() throws Exception {
 		//Before update
 		MockHttpServletResponse response = get("/Group/" + GROUP_UUID).accept(FhirMediaTypes.XML).go();
