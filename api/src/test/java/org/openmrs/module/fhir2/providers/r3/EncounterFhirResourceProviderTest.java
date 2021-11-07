@@ -340,7 +340,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 
 		IBundleProvider results = resourceProvider.getEncounterEverything(new IdType(ENCOUNTER_UUID));
 
-		List<IBaseResource> resultList = getAllResources(results);
+		List<IBaseResource> resultList = results.getAllResources();
 
 		assertThat(resultList, notNullValue());
 		assertThat(resultList.size(), equalTo(1));
@@ -364,9 +364,5 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	public void searchForEncounters_shouldReturnNullEncounterEverythingWhenIdPartIsEmptyInIdParam() {
 		IBundleProvider results = resourceProvider.getEncounterEverything(new IdType(""));
 		assertThat(results, nullValue());
-	}
-
-	private List<IBaseResource> getAllResources(IBundleProvider result) {
-		return result.getAllResources();
 	}
 }
