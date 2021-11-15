@@ -73,6 +73,7 @@ public class PatientIdentifierTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType().getText(), equalTo(IDENTIFIER_TYPE_NAME));
+		assertThat(result.getType().getCodingFirstRep().getCode(), equalTo(IDENTIFIER_TYPE_UUID));
 		assertThat(result.getId(), equalTo(IDENTIFIER_UUID));
 		assertThat(result.getValue(), equalTo(IDENTIFIER));
 		assertThat(result.getSystem(), equalTo(IDENTIFIER_URL));

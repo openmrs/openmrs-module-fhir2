@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Type;
@@ -60,7 +61,8 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 		}
 		
 		if (identifier.getIdentifierType() != null) {
-			patientIdentifier.setType(new CodeableConcept().setText(identifier.getIdentifierType().getName()));
+			patientIdentifier.setType(new CodeableConcept(new Coding().setCode(identifier.getIdentifierType().getUuid()))
+			        .setText(identifier.getIdentifierType().getName()));
 		}
 		
 		if (identifier.getLocation() != null) {
