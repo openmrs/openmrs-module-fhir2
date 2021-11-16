@@ -40,10 +40,12 @@
         <module>api</module>
         <module>api-2.1</module>
         <module>api-2.2</module>
+        <module>api-2.5</module>
         <module>omod</module>
         <module>integration-tests</module>
         <module>integration-tests-2.1</module>
         <module>integration-tests-2.2</module>
+        <module>integration-tests-2.5</module>
     </modules>
 
     <repositories>

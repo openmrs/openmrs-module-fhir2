@@ -33,6 +33,7 @@ import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,9 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	
 	@Autowired
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
+	
+	@Autowired
+	private LocationTypeTranslator locationTypeTranslator;
 	
 	@Autowired
 	private FhirGlobalPropertyService propertyService;
@@ -95,6 +99,8 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		}
 		
 		fhirLocation.setTelecom(getLocationContactDetails(openmrsLocation));
+		
+		fhirLocation.setType(locationTypeTranslator.toFhirResource(openmrsLocation));
 		
 		if (openmrsLocation.getTags() != null) {
 			for (LocationTag tag : openmrsLocation.getTags()) {
@@ -160,6 +166,10 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		fhirLocation.getTelecom().stream().map(
 		    contactPoint -> (LocationAttribute) telecomTranslator.toOpenmrsType(new LocationAttribute(), contactPoint))
 		        .distinct().filter(Objects::nonNull).forEach(openmrsLocation::addAttribute);
+		
+		if (fhirLocation.hasType()) {
+			openmrsLocation = locationTypeTranslator.toOpenmrsType(openmrsLocation, fhirLocation.getType());
+		}
 		
 		if (fhirLocation.getMeta().hasTag()) {
 			for (Coding tag : fhirLocation.getMeta().getTag()) {

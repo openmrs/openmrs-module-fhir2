@@ -160,6 +160,10 @@ public class FhirConstants {
 	
 	public static final String PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE = "fhir2.providerContactPointAttributeTypeUuid";
 	
+	public static final String LOCATION_TYPE_ATTRIBUTE_TYPE = "fhir2.locationTypeAttributeTypeUuid";
+	
+	public static final String LOCATION_TYPE_SYSTEM_URL = "fhir2.locationTypeSystemUrl";
+	
 	public static final String IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY = "fhir2.immunizationsEncounterTypeUuid";
 	
 	public static final String ADMINISTERING_ENCOUNTER_ROLE_PROPERTY = "fhir2.administeringEncounterRoleUuid";

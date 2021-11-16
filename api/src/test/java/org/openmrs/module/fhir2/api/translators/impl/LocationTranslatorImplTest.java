@@ -48,6 +48,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
@@ -95,9 +96,12 @@ public class LocationTranslatorImplTest {
 	
 	@Mock
 	private LocationTagTranslator locationTagTranslator;
-	
+
 	@Mock
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
+	
+	@Mock
+	private LocationTypeTranslator locationTypeTranslator;
 	
 	@Mock
 	private FhirLocationDao fhirLocationDao;
@@ -122,7 +126,7 @@ public class LocationTranslatorImplTest {
 		locationTranslator.setPropertyService(propertyService);
 		locationTranslator.setProvenanceTranslator(provenanceTranslator);
 		locationTranslator.setLocationTagTranslator(locationTagTranslator);
-		
+		locationTranslator.setLocationTypeTranslator(locationTypeTranslator);
 	}
 	
 	@Test
@@ -302,7 +306,7 @@ public class LocationTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shoudTranslateOpenmrsTagsToFhirLocationTags() {
+	public void toFhirResource_shouldTranslateOpenmrsTagsToFhirLocationTags() {
 		LocationTag tag = new LocationTag(LOGIN_TAG_NAME, LOGIN_TAG_DESCRIPTION);
 		omrsLocation.addTag(tag);
 		org.hl7.fhir.r4.model.Location fhirLocation = locationTranslator.toFhirResource(omrsLocation);
