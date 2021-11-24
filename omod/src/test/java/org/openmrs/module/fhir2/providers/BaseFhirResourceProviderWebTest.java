@@ -34,6 +34,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.openmrs.User;
@@ -77,12 +78,11 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 	
 	@Before
 	public void setup() throws ServletException {
+		when(userContext.getAuthenticatedUser()).thenReturn(user);
 		
 		Context.setDAO(contextDAO);
-		Context.setUserContext(userContext);
 		Context.openSession();
-		
-		when(userContext.getAuthenticatedUser()).thenReturn(user);
+		Context.setUserContext(userContext);
 		
 		parser = getFhirContext().newJsonParser();
 		
@@ -93,6 +93,11 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 		servletConfig = new MockServletConfig(servletContext, getServletName());
 		
 		setupFhirServlet();
+	}
+	
+	@After
+	public void tearDown() {
+		Context.closeSession();
 	}
 	
 	// These are expected to be implemented by version-specific sub-classes
