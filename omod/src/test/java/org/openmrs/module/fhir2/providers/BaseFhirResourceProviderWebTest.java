@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
@@ -34,7 +35,12 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
+import org.mockito.Mock;
+import org.openmrs.User;
 import org.openmrs.api.APIException;
+import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UserContext;
+import org.openmrs.api.db.ContextDAO;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.impl.FhirGlobalPropertyServiceImpl;
 import org.openmrs.module.fhir2.web.servlet.FhirRestServlet;
@@ -57,11 +63,27 @@ public abstract class BaseFhirResourceProviderWebTest<T extends IResourceProvide
 	
 	private FhirRestServlet servlet;
 	
+	@Mock
+	private ContextDAO contextDAO;
+	
+	@Mock
+	private UserContext userContext;
+	
+	@Mock
+	private User user;
+	
 	// This must be implemented by subclasses
 	public abstract T getResourceProvider();
 	
 	@Before
 	public void setup() throws ServletException {
+		
+		Context.setDAO(contextDAO);
+		Context.setUserContext(userContext);
+		Context.openSession();
+		
+		when(userContext.getAuthenticatedUser()).thenReturn(user);
+		
 		parser = getFhirContext().newJsonParser();
 		
 		interceptor = new LoggingInterceptor();

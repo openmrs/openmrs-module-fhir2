@@ -9,31 +9,29 @@
  */
 package org.openmrs.module.fhir2.web.authentication;
 
-import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.openmrs.api.context.Context;
+import java.io.IOException;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import org.openmrs.api.context.Context;
 
 @Interceptor
 public class RequireAuthenticationInterceptor {
-
-    @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
-    public boolean ensureUserAuthenticated(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		if (!(request.getRequestURI().contains("/.well-known") 
-				|| request.getRequestURI().endsWith("/metadata"))
-				&& !Context.isAuthenticated()) {
+	
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
+	public boolean ensureUserAuthenticated(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		if (!(request.getRequestURI().contains("/.well-known") || request.getRequestURI().endsWith("/metadata"))
+		        && !Context.isAuthenticated()) {
 			// This sends 401 error if not authenticated
 			HttpServletResponse httpResponse = (HttpServletResponse) response;
 			httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
 			return false;
 		}
 		return true;
-    }
-
+	}
+	
 }
