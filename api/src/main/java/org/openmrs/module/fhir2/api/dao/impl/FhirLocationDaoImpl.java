@@ -25,9 +25,11 @@ import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
+import org.openmrs.LocationTag;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -127,4 +129,17 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		}
 	}
 	
+	@Override
+	public Location createOrUpdate(@Nonnull Location newEntry) {
+		if (newEntry.getUuid() == null) {
+			newEntry.setUuid(FhirUtils.newUuid());
+		}
+		if (!newEntry.getTags().isEmpty()) {
+			for (LocationTag tag : newEntry.getTags()) {
+				getSessionFactory().getCurrentSession().saveOrUpdate(tag);
+			}
+		}
+		getSessionFactory().getCurrentSession().saveOrUpdate(newEntry);
+		return newEntry;
+	}
 }
