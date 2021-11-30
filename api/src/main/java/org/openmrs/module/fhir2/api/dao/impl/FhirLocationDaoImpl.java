@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
@@ -134,7 +135,7 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 		if (newEntry.getUuid() == null) {
 			newEntry.setUuid(FhirUtils.newUuid());
 		}
-		if (!newEntry.getTags().isEmpty()) {
+		if (CollectionUtils.isNotEmpty(newEntry.getTags())) {
 			for (LocationTag tag : newEntry.getTags()) {
 				getSessionFactory().getCurrentSession().saveOrUpdate(tag);
 			}
