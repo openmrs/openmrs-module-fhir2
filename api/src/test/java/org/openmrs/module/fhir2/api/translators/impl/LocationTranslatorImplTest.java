@@ -48,6 +48,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
@@ -93,6 +94,9 @@ public class LocationTranslatorImplTest {
 	private LocationAddressTranslator locationAddressTranslator;
 	
 	@Mock
+	private LocationTagTranslator locationTagTranslator;
+	
+	@Mock
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Mock
@@ -117,6 +121,7 @@ public class LocationTranslatorImplTest {
 		locationTranslator.setFhirLocationDao(fhirLocationDao);
 		locationTranslator.setPropertyService(propertyService);
 		locationTranslator.setProvenanceTranslator(provenanceTranslator);
+		locationTranslator.setLocationTagTranslator(locationTagTranslator);
 		
 	}
 	
@@ -308,6 +313,7 @@ public class LocationTranslatorImplTest {
 	
 	@Test
 	public void toOpenmrsType_shouldTranslateFhirTagsToOpenmrsLocationTags() {
+		LocationTag omrTag = new LocationTag(LAB_TAG_NAME, LAB_TAG_DESCRIPTION);
 		List<Coding> tags = new ArrayList<>();
 		Coding tag = new Coding();
 		tag.setCode(LAB_TAG_NAME);
@@ -315,6 +321,7 @@ public class LocationTranslatorImplTest {
 		tags.add(tag);
 		org.hl7.fhir.r4.model.Location fhirLocation = new org.hl7.fhir.r4.model.Location();
 		fhirLocation.getMeta().setTag(tags);
+		when(locationTagTranslator.toOpenmrsType(tag)).thenReturn(omrTag);
 		omrsLocation = locationTranslator.toOpenmrsType(fhirLocation);
 		assertThat(omrsLocation.getTags(), notNullValue());
 		assertThat(omrsLocation.getTags(), hasSize(greaterThanOrEqualTo(1)));

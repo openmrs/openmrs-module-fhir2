@@ -21,16 +21,13 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
-import org.openmrs.LocationTag;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -128,19 +125,5 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 			default:
 				return super.paramToProp(param);
 		}
-	}
-	
-	@Override
-	public Location createOrUpdate(@Nonnull Location newEntry) {
-		if (newEntry.getUuid() == null) {
-			newEntry.setUuid(FhirUtils.newUuid());
-		}
-		if (CollectionUtils.isNotEmpty(newEntry.getTags())) {
-			for (LocationTag tag : newEntry.getTags()) {
-				getSessionFactory().getCurrentSession().saveOrUpdate(tag);
-			}
-		}
-		getSessionFactory().getCurrentSession().saveOrUpdate(newEntry);
-		return newEntry;
 	}
 }

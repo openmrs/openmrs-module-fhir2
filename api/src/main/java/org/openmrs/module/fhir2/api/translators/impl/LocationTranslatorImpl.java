@@ -31,6 +31,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
@@ -43,6 +44,9 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	
 	@Autowired
 	private LocationAddressTranslator locationAddressTranslator;
+	
+	@Autowired
+	private LocationTagTranslator locationTagTranslator;
 	
 	@Autowired
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
@@ -159,7 +163,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		
 		if (fhirLocation.getMeta().hasTag()) {
 			for (Coding tag : fhirLocation.getMeta().getTag()) {
-				openmrsLocation.addTag(new LocationTag(tag.getCode(), tag.getDisplay()));
+				openmrsLocation.addTag(locationTagTranslator.toOpenmrsType(tag));
 			}
 		}
 		

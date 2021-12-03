@@ -30,6 +30,7 @@ import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.validator.ValidateUtil;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -78,6 +79,9 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U openmrsObj = getTranslator().toOpenmrsType(newResource);
 		
 		validateObject(openmrsObj);
+		if (openmrsObj.getUuid() == null) {
+			openmrsObj.setUuid(FhirUtils.newUuid());
+		}
 		
 		return getTranslator().toFhirResource(getDao().createOrUpdate(openmrsObj));
 	}
