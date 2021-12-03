@@ -66,7 +66,6 @@ public class LocationTagTranslatorImplTest {
 		tag.setDisplay(LAB_TAG_DESCRIPTION);
 		
 		when(locationService.getLocationTagByName(tag.getCode())).thenReturn(omrsTag);
-		when(locationService.saveLocationTag(omrsTag)).thenReturn(omrsTag);
 		LocationTag existingLocationTag = locationTagTranslatorImpl.toOpenmrsType(tag);
 		assertThat(existingLocationTag, notNullValue());
 		assertThat(existingLocationTag.getName(), is(LAB_TAG_NAME));

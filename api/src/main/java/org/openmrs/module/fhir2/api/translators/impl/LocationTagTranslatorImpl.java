@@ -29,7 +29,7 @@ public class LocationTagTranslatorImpl implements LocationTagTranslator {
 	public LocationTag toOpenmrsType(Coding tag) {
 		LocationTag existingTag = locationService.getLocationTagByName(tag.getCode());
 		if (existingTag != null) {
-			return locationService.saveLocationTag(existingTag);
+			return existingTag;
 		} else {
 			return locationService.saveLocationTag(new LocationTag(tag.getCode(), tag.getDisplay()));
 		}
