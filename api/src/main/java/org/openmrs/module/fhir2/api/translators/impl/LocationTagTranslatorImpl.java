@@ -13,7 +13,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.LocationTag;
-import org.openmrs.api.LocationService;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,15 +23,12 @@ import org.springframework.stereotype.Component;
 public class LocationTagTranslatorImpl implements LocationTagTranslator {
 	
 	@Autowired
-	LocationService locationService;
+	private FhirLocationDao fhirLocationDao;
 	
 	@Override
 	public LocationTag toOpenmrsType(Coding tag) {
-		LocationTag existingTag = locationService.getLocationTagByName(tag.getCode());
-		if (existingTag != null) {
-			return existingTag;
-		} else {
-			return locationService.saveLocationTag(new LocationTag(tag.getCode(), tag.getDisplay()));
-		}
+		LocationTag existingTag = fhirLocationDao.getLocationTagByName(tag.getCode());
+		return existingTag != null ? existingTag
+		        : fhirLocationDao.saveLocationTag(new LocationTag(tag.getCode(), tag.getDisplay()));
 	}
 }

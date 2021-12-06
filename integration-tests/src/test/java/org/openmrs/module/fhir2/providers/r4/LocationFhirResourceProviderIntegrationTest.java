@@ -32,6 +32,8 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.LocationTag;
+import org.openmrs.api.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -53,6 +55,9 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private LocationFhirResourceProvider resourceProvider;
+	
+	@Autowired
+	private LocationService locationService;
 	
 	@Before
 	@Override
@@ -121,6 +126,47 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 	
 	@Test
 	public void shouldCreateNewLocationAsJson() throws Exception {
+		// read JSON record
+		String jsonLocation;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_LOCATION_DOCUMENT)) {
+			Objects.requireNonNull(is);
+			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+		}
+		
+		// create location
+		MockHttpServletResponse response = post("/Location").accept(FhirMediaTypes.JSON).jsonContent(jsonLocation).go();
+		
+		// verify created correctly
+		assertThat(response, isCreated());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Location location = readResponse(response);
+		
+		assertThat(location, notNullValue());
+		assertThat(location.getName(), equalTo("Test location"));
+		assertThat(location.getAddress().getCity(), equalTo("kampala"));
+		assertThat(location.getAddress().getCountry(), equalTo("uganda"));
+		assertThat(location.getAddress().getState(), equalTo("MI"));
+		assertThat(location.getAddress().getPostalCode(), equalTo("9105 PZ"));
+		assertThat(location.getMeta().getTagFirstRep().getCode(), equalTo("mCSD_Location"));
+		assertThat(location, validResource());
+		
+		// try to get new location
+		response = get("/Location/" + location.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Location newLocation = readResponse(response);
+		
+		assertThat(newLocation.getId(), equalTo(location.getId()));
+	}
+	
+	@Test
+	public void shouldCreateNewLocationWithExistingTagAsJson() throws Exception {
+		//Create Location Tag Before Posting LOcation
+		LocationTag tag = new LocationTag("mCSD_Location", "mCSD_Location");
+		locationService.saveLocationTag(tag);
 		// read JSON record
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_LOCATION_DOCUMENT)) {

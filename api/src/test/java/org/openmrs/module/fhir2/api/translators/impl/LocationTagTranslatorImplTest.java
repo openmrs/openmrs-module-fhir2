@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.LocationTag;
-import org.openmrs.api.LocationService;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationTagTranslatorImplTest {
@@ -32,14 +32,14 @@ public class LocationTagTranslatorImplTest {
 	private static final String LAB_TAG_DESCRIPTION = "Used to identify lab locations";
 	
 	@Mock
-	LocationService locationService;
+	FhirLocationDao fhirLocationDao;
 	
 	private LocationTagTranslatorImpl locationTagTranslatorImpl;
 	
 	@Before
 	public void setup() {
 		locationTagTranslatorImpl = new LocationTagTranslatorImpl();
-		locationTagTranslatorImpl.setLocationService(locationService);
+		locationTagTranslatorImpl.setFhirLocationDao(fhirLocationDao);
 	}
 	
 	@Test
@@ -50,8 +50,8 @@ public class LocationTagTranslatorImplTest {
 		tag.setCode(LAB_TAG_NAME);
 		tag.setDisplay(LAB_TAG_DESCRIPTION);
 		
-		when(locationService.getLocationTagByName(tag.getCode())).thenReturn(null);
-		when(locationService.saveLocationTag(any(LocationTag.class))).thenReturn(omrsTag);
+		when(fhirLocationDao.getLocationTagByName(tag.getCode())).thenReturn(null);
+		when(fhirLocationDao.saveLocationTag(any(LocationTag.class))).thenReturn(omrsTag);
 		LocationTag newLocationTag = locationTagTranslatorImpl.toOpenmrsType(tag);
 		assertThat(newLocationTag, notNullValue());
 		assertThat(newLocationTag.getName(), is(LAB_TAG_NAME));
@@ -65,7 +65,7 @@ public class LocationTagTranslatorImplTest {
 		tag.setCode(LAB_TAG_NAME);
 		tag.setDisplay(LAB_TAG_DESCRIPTION);
 		
-		when(locationService.getLocationTagByName(tag.getCode())).thenReturn(omrsTag);
+		when(fhirLocationDao.getLocationTagByName(tag.getCode())).thenReturn(omrsTag);
 		LocationTag existingLocationTag = locationTagTranslatorImpl.toOpenmrsType(tag);
 		assertThat(existingLocationTag, notNullValue());
 		assertThat(existingLocationTag.getName(), is(LAB_TAG_NAME));

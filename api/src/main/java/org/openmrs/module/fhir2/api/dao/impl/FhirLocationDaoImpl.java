@@ -25,14 +25,20 @@ import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
+import org.openmrs.LocationTag;
+import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLocationDao {
+	
+	@Autowired
+	LocationService locationService;
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
@@ -125,5 +131,15 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 			default:
 				return super.paramToProp(param);
 		}
+	}
+	
+	@Override
+	public LocationTag getLocationTagByName(String tag) {
+		return locationService.getLocationTagByName(tag);
+	}
+	
+	@Override
+	public LocationTag saveLocationTag(LocationTag tag) {
+		return locationService.saveLocationTag(tag);
 	}
 }
