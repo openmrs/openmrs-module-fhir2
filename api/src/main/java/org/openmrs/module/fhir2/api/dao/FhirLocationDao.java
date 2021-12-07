@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
+import org.openmrs.LocationTag;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
@@ -44,4 +45,10 @@ public interface FhirLocationDao extends FhirDao<Location> {
 	@Override
 	@Authorized(PrivilegeConstants.GET_LOCATIONS)
 	List<Location> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
+	
+	@Authorized({ PrivilegeConstants.GET_LOCATIONS })
+	LocationTag getLocationTagByName(@Nonnull String tag);
+	
+	@Authorized({ PrivilegeConstants.MANAGE_LOCATION_TAGS })
+	LocationTag saveLocationTag(@Nonnull LocationTag tag);
 }

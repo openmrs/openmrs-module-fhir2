@@ -47,7 +47,6 @@ import org.openmrs.Voidable;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,10 +123,6 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	
 	@Override
 	public T createOrUpdate(@Nonnull T newEntry) {
-		if (newEntry.getUuid() == null) {
-			newEntry.setUuid(FhirUtils.newUuid());
-		}
-		
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
 		
 		return newEntry;
