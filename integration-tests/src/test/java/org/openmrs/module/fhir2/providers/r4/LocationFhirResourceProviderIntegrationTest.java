@@ -150,6 +150,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		assertThat(location.getAddress().getState(), equalTo("MI"));
 		assertThat(location.getAddress().getPostalCode(), equalTo("9105 PZ"));
 		assertThat(location.getMeta().getTagFirstRep().getCode(), equalTo("mCSD_Location"));
+		assertThat(location.getMeta().getTagFirstRep().getDisplay(), equalTo("mCSD_Location"));
 		assertThat(location, validResource());
 		
 		// try to get new location
@@ -191,6 +192,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		assertThat(location.getAddress().getState(), equalTo("MI"));
 		assertThat(location.getAddress().getPostalCode(), equalTo("9105 PZ"));
 		assertThat(location.getMeta().getTagFirstRep().getCode(), equalTo("mCSD_Location"));
+		assertThat(location.getMeta().getTagFirstRep().getDisplay(), equalTo("mCSD_Location"));
 		assertThat(location, validResource());
 		
 		// try to get new location

@@ -313,7 +313,7 @@ public class LocationTranslatorImplTest {
 	
 	@Test
 	public void toOpenmrsType_shouldTranslateFhirTagsToOpenmrsLocationTags() {
-		LocationTag omrTag = new LocationTag(LAB_TAG_NAME, LAB_TAG_DESCRIPTION);
+		LocationTag omrsTag = new LocationTag(LAB_TAG_NAME, LAB_TAG_DESCRIPTION);
 		List<Coding> tags = new ArrayList<>();
 		Coding tag = new Coding();
 		tag.setCode(LAB_TAG_NAME);
@@ -321,7 +321,7 @@ public class LocationTranslatorImplTest {
 		tags.add(tag);
 		org.hl7.fhir.r4.model.Location fhirLocation = new org.hl7.fhir.r4.model.Location();
 		fhirLocation.getMeta().setTag(tags);
-		when(locationTagTranslator.toOpenmrsType(tag)).thenReturn(omrTag);
+		when(locationTagTranslator.toOpenmrsType(tag)).thenReturn(omrsTag);
 		omrsLocation = locationTranslator.toOpenmrsType(fhirLocation);
 		assertThat(omrsLocation.getTags(), notNullValue());
 		assertThat(omrsLocation.getTags(), hasSize(greaterThanOrEqualTo(1)));

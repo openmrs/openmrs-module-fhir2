@@ -2,14 +2,8 @@
   "resourceType": "Location",
   "meta": {
     "versionId": "1",
-    "lastUpdated": "2021-11-30T08:43:54.105+00:00",
-    "source": "#DNbZg5doCf3wLAkB",
-    "profile": [
-      "http://ihe.net/fhir/StructureDefinition/IHE.mCSD.FacilityLocation"
-    ],
     "tag": [
       {
-        "system": "http://facility_registry/mcsd_location",
         "code": "mCSD_Location",
         "display": "mCSD_Location"
       }
