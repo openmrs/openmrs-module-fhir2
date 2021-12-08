@@ -15,10 +15,10 @@ import javax.annotation.Nonnull;
 
 import java.util.Date;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Address;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Period;

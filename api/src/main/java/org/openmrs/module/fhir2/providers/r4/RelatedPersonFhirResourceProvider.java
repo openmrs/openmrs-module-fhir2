@@ -42,8 +42,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.openmrs.module.fhir2.api.FhirRelatedPersonService;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
