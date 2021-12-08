@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+	<cohort cohort_id="1" name="John's patientList" description="cohort voided" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1d64befb-3b2e-48e5-85f5-353d43e23e46"/>
+	<cohort cohort_id="2" name="Moon's patientList" description="Patients from the moon" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="2d64befb-3b2e-48e5-85f5-353d43e23e48"/>
+
+	<cohort_member cohort_member_id="1" cohort_id="1" patient_id="2" start_date="2000-04-16" end_date="2030-04-16" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="745ff1a2-c2ef-49fd-836f-8a1d936d9ef9"/>
+	<cohort_member cohort_member_id="2" cohort_id="2" patient_id="2" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="342ff1a2-c2ef-49fd-836f-8a1d936d9ef4"/>
+	<cohort_member cohort_member_id="3" cohort_id="2" patient_id="3" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="243ff1a2-c2ef-49fd-836f-8a1d936d9ef0"/>
+	<cohort_member cohort_member_id="4" cohort_id="2" patient_id="4" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="344ff1a2-c2ef-49fd-836f-8a1d936d9ef6"/>
+	<cohort_member cohort_member_id="5" cohort_id="2" patient_id="5" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="845ff1a2-c2ef-49fd-836f-8a1d936d9ef5"/>
+	<cohort_member cohort_member_id="6" cohort_id="2" patient_id="6" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="446ff1a2-c2ef-49fd-836f-8a1d936d9ef2"/>
+	<cohort_member cohort_member_id="7" cohort_id="2" patient_id="7" start_date="2020-04-16" end_date="2030-04-16" creator="1" date_created="2021-01-01 00:00:00.0" voided="false" uuid="947ff1a2-c2ef-49fd-836f-8a1d936d9ef7"/>
+</dataset>

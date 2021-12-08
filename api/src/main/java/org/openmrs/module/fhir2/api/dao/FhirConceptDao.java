@@ -38,6 +38,5 @@ public interface FhirConceptDao extends FhirDao<Concept> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	List<Concept> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
-	        int firstResult, int lastResult);
+	List<Concept> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
 }

@@ -169,7 +169,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		}
 		
 		// create person
-		MockHttpServletResponse response = post("/Person").accept(FhirMediaTypes.XML).xmlContext(xmlPerson).go();
+		MockHttpServletResponse response = post("/Person").accept(FhirMediaTypes.XML).xmlContent(xmlPerson).go();
 		
 		// verify created correctly
 		assertThat(response, isCreated());
@@ -290,7 +290,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		person.setBirthDate(birthDate);
 		
 		// send the update to the server
-		response = put("/Person/" + PERSON_UUID).xmlContext(toXML(person)).accept(FhirMediaTypes.XML).go();
+		response = put("/Person/" + PERSON_UUID).xmlContent(toXML(person)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -321,7 +321,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		person.setId(WRONG_PERSON_UUID);
 		
 		// send the update to the server
-		response = put("/Person/" + PERSON_UUID).xmlContext(toXML(person)).accept(FhirMediaTypes.XML).go();
+		response = put("/Person/" + PERSON_UUID).xmlContent(toXML(person)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -446,4 +446,33 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
 	
+	@Test
+	public void shouldReturnCountForPersonAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Person?name=voided&_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(1)));
+	}
+	
+	@Test
+	public void shouldReturnCountForPersonAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Person?name=voided&_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(1)));
+	}
 }

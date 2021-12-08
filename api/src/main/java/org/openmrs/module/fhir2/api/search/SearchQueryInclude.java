@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Location;
@@ -199,7 +200,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return locationService.searchForLocations(null, null, null, null, null, null, params, null, null, null, null,
 				    null);
 			case FhirConstants.ENCOUNTER:
-				return encounterService.searchForEncounters(null, params, null, null, null, null, null, null);
+				return encounterService.searchForEncounters(null, params, null, null, null, null, null, null, null);
 		}
 		
 		return null;
@@ -221,7 +222,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	private IBundleProvider handlePractitionerReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.ENCOUNTER:
-				return encounterService.searchForEncounters(null, null, params, null, null, null, null, null);
+				return encounterService.searchForEncounters(null, null, params, null, null, null, null, null, null);
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null,
 				    null);
@@ -274,7 +275,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return allergyIntoleranceService.searchForAllergies(params, null, null, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.ENCOUNTER:
-				return encounterService.searchForEncounters(null, null, null, params, null, null, null, null);
+				return encounterService.searchForEncounters(null, null, null, params, null, null, null, null, null);
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null,
 				    null);
@@ -442,6 +443,10 @@ public class SearchQueryInclude<U extends IBaseResource> {
 			case FhirConstants.SERVICE_REQUEST:
 				resourceList.forEach(
 				    resource -> uniquePatientUUIDs.add(getIdFromReference(((ServiceRequest) resource).getSubject())));
+				break;
+			case FhirConstants.CONDITION:
+				resourceList.forEach(
+				    resource -> uniquePatientUUIDs.add(getIdFromReference(((Condition) resource).getSubject())));
 				break;
 		}
 		

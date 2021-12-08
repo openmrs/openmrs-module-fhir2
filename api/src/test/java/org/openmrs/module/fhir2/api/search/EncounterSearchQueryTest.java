@@ -111,6 +111,10 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String WRONG_DATE_CREATED = "2008-08-18";
 	
+	private static final String ENCOUNTER_TYPE_UUID = "07000be2-26b6-4cce-8b40-866d8435b613";
+	
+	private static final String ENCOUNTER_UUID_2 = "6519d653-393b-4118-9c83-a3715b82d4ac";
+	
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
@@ -135,6 +139,10 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 	
+	private List<IBaseResource> getAllResources(IBundleProvider results) {
+		return results.getAllResources();
+	}
+	
 	@Test
 	public void searchForEncounters_shouldSearchForEncountersByDate() {
 		DateRangeParam date = new DateRangeParam(new DateParam(ENCOUNTER_DATETIME));
@@ -147,6 +155,22 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENC_UUID));
+	}
+	
+	@Test
+	public void searchForEncounters_shouldSearchForEncountersByTypeUUID() {
+		TokenAndListParam typeUuid = new TokenAndListParam().addAnd(new TokenParam(ENCOUNTER_TYPE_UUID));
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, typeUuid);
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+		assertThat(((Encounter) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID_2));
 	}
 	
 	@Test
@@ -1420,5 +1444,46 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(resultList.subList(1, 12),
 		    everyItem(allOf(anyOf(is(instanceOf(MedicationRequest.class)), is(instanceOf(ServiceRequest.class))),
 		        hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID)))))));
+	}
+	
+	@Test
+	public void searchForEncounter_shouldReturnEncounterEverything() {
+		TokenAndListParam encounterId = new TokenAndListParam().addAnd(new TokenParam().setValue(ENCOUNTER_UUID));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "")
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, encounterId);
+		
+		populateIncludeForEverythingOperationParams(theParams);
+		populateReverseIncludeForEverythingOperationParams(theParams);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(15));
+		
+		List<IBaseResource> resultList = getAllResources(results);
+		
+		assertThat(resultList.size(), equalTo(15));
+	}
+	
+	private void populateReverseIncludeForEverythingOperationParams(SearchParameterMap theParams) {
+		HashSet<Include> revIncludes = new HashSet<>();
+		
+		revIncludes.add(new Include(FhirConstants.OBSERVATION + ":" + FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		revIncludes.add(new Include(FhirConstants.DIAGNOSTIC_REPORT + ":" + FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		revIncludes.add(new Include(FhirConstants.MEDICATION_REQUEST + ":" + FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		revIncludes.add(new Include(FhirConstants.SERVICE_REQUEST + ":" + FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		
+		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
+	}
+	
+	private void populateIncludeForEverythingOperationParams(SearchParameterMap theParams) {
+		HashSet<Include> includes = new HashSet<>();
+		
+		includes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		includes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_LOCATION_PARAM));
+		includes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_PARTICIPANT_PARAM));
+		
+		theParams.addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 	}
 }

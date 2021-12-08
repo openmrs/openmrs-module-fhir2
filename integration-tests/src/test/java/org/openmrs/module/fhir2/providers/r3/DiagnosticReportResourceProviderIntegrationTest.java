@@ -235,7 +235,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR3I
 			xmlReport = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		MockHttpServletResponse response = post("/DiagnosticReport").accept(FhirMediaTypes.XML).xmlContext(xmlReport).go();
+		MockHttpServletResponse response = post("/DiagnosticReport").accept(FhirMediaTypes.XML).xmlContent(xmlReport).go();
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/DiagnosticReport/"));
@@ -367,7 +367,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR3I
 		diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
 		
 		// send the update to the server
-		response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).xmlContext(toXML(diagnosticReport))
+		response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).xmlContent(toXML(diagnosticReport))
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
@@ -400,7 +400,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR3I
 		diagnosticReport.setId(WRONG_DIAGNOSTIC_REPORT_UUID);
 		
 		// send the update to the server
-		response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).xmlContext(toXML(diagnosticReport))
+		response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).xmlContent(toXML(diagnosticReport))
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
@@ -424,7 +424,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR3I
 		diagnosticReport.setId(WRONG_DIAGNOSTIC_REPORT_UUID);
 		
 		// send the update to the server
-		response = put("/DiagnosticReport/" + WRONG_DIAGNOSTIC_REPORT_UUID).xmlContext(toXML(diagnosticReport))
+		response = put("/DiagnosticReport/" + WRONG_DIAGNOSTIC_REPORT_UUID).xmlContent(toXML(diagnosticReport))
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
@@ -568,5 +568,37 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR3I
 		        hasResource(hasProperty("meta", hasProperty("lastUpdated", equalTo(
 		            Date.from(LocalDateTime.of(2008, 8, 18, 14, 9, 35).atZone(ZoneId.systemDefault()).toInstant())))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
+	}
+	
+	@Test
+	public void shouldReturnCountForDiagonosticReportAsJson() throws Exception {
+		MockHttpServletResponse response = get("/DiagnosticReport?patient.given=Collet&_summary=count")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(2)));
+	}
+	
+	@Test
+	public void shouldReturnCountForDiagonosticReportAsXml() throws Exception {
+		MockHttpServletResponse response = get("/DiagnosticReport?patient.given=Collet&_summary=count")
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(2)));
 	}
 }

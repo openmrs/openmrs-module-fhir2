@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -206,7 +205,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(fhirDiagnosticReports);
+		when(dao.getSearchResults(any(), any())).thenReturn(fhirDiagnosticReports);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
 		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -238,7 +237,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(diagnosticReportList);
+		when(dao.getSearchResults(any(), any())).thenReturn(diagnosticReportList);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
 		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -272,7 +271,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(diagnosticReportList);
+		when(dao.getSearchResults(any(), any())).thenReturn(diagnosticReportList);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
 		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(

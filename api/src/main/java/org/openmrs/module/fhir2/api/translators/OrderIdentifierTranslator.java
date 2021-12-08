@@ -9,12 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
+import javax.annotation.Nonnull;
+
 import org.hl7.fhir.r4.model.Identifier;
 import org.openmrs.Order;
 
 public interface OrderIdentifierTranslator extends OpenmrsFhirTranslator<Order, Identifier> {
 	
 	@Override
-	public Identifier toFhirResource(Order order);
+	public Identifier toFhirResource(@Nonnull Order order);
 	
 }

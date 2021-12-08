@@ -185,4 +185,34 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 	}
+	
+	@Test
+	public void shouldReturnCountForMedicationRequestAsJson() throws Exception {
+		MockHttpServletResponse response = get("/MedicationRequest?_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(13)));
+	}
+	
+	@Test
+	public void shouldReturnCountForMedicationRequestAsXml() throws Exception {
+		MockHttpServletResponse response = get("/MedicationRequest?_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(13)));
+	}
 }

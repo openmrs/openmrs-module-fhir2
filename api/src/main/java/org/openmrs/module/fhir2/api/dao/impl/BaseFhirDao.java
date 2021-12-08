@@ -47,7 +47,6 @@ import org.openmrs.Voidable;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,13 +100,13 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 			return null;
 		}
 		
-		return deproxyObject(result);
+		return deproxyResult(result);
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	@SuppressWarnings("unchecked")
-	public List<T> get(Collection<String> uuids) {
+	public List<T> get(@Nonnull Collection<String> uuids) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
 		criteria.add(in("uuid", uuids));
 		
@@ -119,15 +118,11 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		
 		List<T> results = criteria.list();
 		
-		return results.stream().filter(Objects::nonNull).map(this::deproxyObject).collect(Collectors.toList());
+		return results.stream().filter(Objects::nonNull).map(this::deproxyResult).collect(Collectors.toList());
 	}
 	
 	@Override
 	public T createOrUpdate(@Nonnull T newEntry) {
-		if (newEntry.getUuid() == null) {
-			newEntry.setUuid(FhirUtils.newUuid());
-		}
-		
 		sessionFactory.getCurrentSession().saveOrUpdate(newEntry);
 		
 		return newEntry;
@@ -174,17 +169,13 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
-	        int firstResult, int lastResult) {
-		List<String> selectedResources = matchingResourceUuids.subList(firstResult, lastResult);
-		
+	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids) {
 		@SuppressWarnings("unchecked")
 		List<T> results = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType())
-		        .add(in("uuid", selectedResources)).list();
+		        .add(in("uuid", resourceUuids)).list();
 		
-		results.sort(Comparator.comparingInt(r -> selectedResources.indexOf(r.getUuid())));
-		
-		return results.stream().map(this::deproxyObject).collect(Collectors.toList());
+		results.sort(Comparator.comparingInt(r -> resourceUuids.indexOf(r.getUuid())));
+		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -262,7 +253,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @param theParams the parameters for this search
 	 */
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-
+		
 	}
 	
 	@Override
@@ -299,14 +290,18 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return super.paramToProp(param);
 	}
 	
-	protected T deproxyObject(T result) {
-		if (result instanceof HibernateProxy) {
-			Hibernate.initialize(result);
+	protected static <V> V deproxyObject(V object) {
+		if (object instanceof HibernateProxy) {
+			Hibernate.initialize(object);
 			@SuppressWarnings("unchecked")
-			T theResult = (T) ((HibernateProxy) result).getHibernateLazyInitializer().getImplementation();
+			V theResult = (V) ((HibernateProxy) object).getHibernateLazyInitializer().getImplementation();
 			return theResult;
 		}
 		
-		return result;
+		return object;
+	}
+	
+	protected T deproxyResult(T result) {
+		return deproxyObject(result);
 	}
 }

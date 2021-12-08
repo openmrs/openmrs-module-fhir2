@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+    <!-- An Immunization -->
+    <concept changed_by="1" class_id="2" concept_id="70015" creator="1" datatype_id="2" date_changed="2020-07-07 19:08:19.0" date_created="2020-07-07 19:08:19.0" is_set="false" retired="false" uuid="36AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+    <concept_name concept_id="70015" concept_name_id="70015" concept_name_type="FULLY_SPECIFIED" creator="1" date_created="2020-07-07 19:30:26.0" locale="en" locale_preferred="true" name="Measles vaccination" uuid="43BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB" voided="false"/>
+
+    <person person_id="6" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="8d703ff2-c3e2-4070-9737-73e713d5a50d"/>
+    <person_name person_name_id="2" preferred="true" person_id="6" given_name="John" middle_name="F" family_name="Doe" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="7e2acadc-5073-4a39-914a-debcbec8c1c9"/>
+    <person_name person_name_id="3" preferred="true" person_id="7" given_name="I" middle_name="am" family_name="voided" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="37e60810-0ba9-4f32-ba80-0af59f59e966"/>
+    <patient patient_id="6" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+
+    <patient_identifier patient_identifier_id="1" patient_id="6" identifier="M4001-1" identifier_type="1" preferred="0" location_id="1" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689f"/>
+    <patient_identifier patient_identifier_id="2" patient_id="7" identifier="M4001-2" identifier_type="1" preferred="0" location_id="1" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689g"/>
+
+    <person person_id="8" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="4b3f42da-2029-4e47-9396-a1b6a969e802"/>
+    <person_name person_name_id="4" preferred="true" person_id="8" given_name="John" middle_name=" " family_name="Doe" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="38f9c631-7168-4944-8e2b-e96b1b0ee882"/>
+    <provider provider_id="8" person_id="8" identifier="3"  creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="6f763a67-2bd1-451c-93b9-95caeb36cc24" />
+
+    <visit visit_id="800" visit_type_id="800" patient_id="6" location_id="1" date_started="2008-08-01 00:00:00.0" creator="1" date_created="2008-08-18 14:09:05.0" voided="false" uuid="814fd8dc-e0be-416b-a7b5-4bac0a4b3297"/>
+    <encounter encounter_id="3" encounter_type="8000" patient_id="6" location_id="1" visit_id="800" encounter_datetime="2008-08-01 00:00:00.0" creator="1" date_created="2008-08-18 14:09:05.0" voided="false" uuid="5ceb573a-7029-4807-9011-a5d55e91ec10"/>
+    <encounter_provider encounter_provider_id="1" encounter_id="3" provider_id="8" encounter_role_id="2000" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="c92be2b5-b167-4c3b-9bab-5f8c01ae727a" />
+
+    <location location_id="301" name="Vaccine Clinic" creator="1" date_created="2008-08-18 14:09:35.0" retired="false" uuid="6351fcf4-e311-4a19-90f9-35667d99a8af" />
+
+    <obs obs_id="101" person_id="6" concept_id="70000" encounter_id="3" obs_datetime="2008-07-01 00:00:00.0" location_id="1" creator="1" date_created="2008-08-18 14:09:35.0" voided="false" value_numeric="[NULL]" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="[NULL]" value_drug="[NULL]" uuid="28668ca0-d7d7-4314-8a67-70f083bcf8ba"/>
+    <obs obs_id="102" person_id="6" concept_id="70009" encounter_id="3" obs_datetime="2008-07-01 00:00:00.0" location_id="1" obs_group_id="101" creator="1" date_created="2008-08-18 14:09:35.0" voided="false" value_numeric="[NULL]" value_coded="70013" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="[NULL]" value_drug="[NULL]" uuid="3e061a75-3e0a-4139-8e6b-a4f7f24615da"/>
+    <obs obs_id="103" person_id="6" concept_id="70010" encounter_id="3" obs_datetime="2008-07-01 00:00:00.0" location_id="1" obs_group_id="101" creator="1" date_created="2008-08-18 14:09:35.0" voided="false" value_numeric="[NULL]" value_coded="[NULL]" value_coded_name_id="[NULL]" value_complex="[NULL]" value_text="[NULL]" value_datetime="2008-07-01 00:00:00.0" value_drug="[NULL]" uuid="7ee232d3-d2d6-4c17-91d0-7760189be9a9"/>
+</dataset>

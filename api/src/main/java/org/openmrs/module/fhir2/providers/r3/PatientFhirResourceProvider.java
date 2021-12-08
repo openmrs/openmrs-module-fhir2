@@ -9,17 +9,21 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static lombok.AccessLevel.PACKAGE;
+
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -32,10 +36,10 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.Patient30_40;
@@ -51,15 +55,15 @@ import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirPatientService;
+import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("patientFhirR3ResourceProvider")
-@Qualifier("fhirR3Resources")
-@Setter(AccessLevel.PACKAGE)
+@R3Provider
+@Setter(PACKAGE)
 public class PatientFhirResourceProvider implements IResourceProvider {
 	
 	@Autowired
@@ -149,4 +153,31 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		    gender, birthDate, deathDate, deceased, city, state, postalCode, country, id, lastUpdated, sort, revIncludes));
 	}
 	
+	/**
+	 * The $everything operation fetches all the information related the specified patient
+	 *
+	 * @param patientId The id of the patient
+	 * @return a bundle of resources which reference to or are referenced from the patient
+	 */
+	@Operation(name = "everything", idempotent = true, type = Patient.class, bundleType = BundleTypeEnum.SEARCHSET)
+	public IBundleProvider getPatientEverything(@IdParam IdType patientId) {
+		
+		if (patientId == null || patientId.getIdPart() == null || patientId.getIdPart().isEmpty()) {
+			return null;
+		}
+		
+		TokenParam patientReference = new TokenParam().setValue(patientId.getIdPart());
+		
+		return new SearchQueryBundleProviderR3Wrapper(patientService.getPatientEverything(patientReference));
+	}
+	
+	/**
+	 * The $everything operation fetches all the information related to all the patients
+	 *
+	 * @return a bundle of resources which reference to or are referenced from the patients
+	 */
+	@Operation(name = "everything", idempotent = true, type = Patient.class, bundleType = BundleTypeEnum.SEARCHSET)
+	public IBundleProvider getPatientEverything() {
+		return new SearchQueryBundleProviderR3Wrapper(patientService.getPatientEverything());
+	}
 }

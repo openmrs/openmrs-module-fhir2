@@ -22,7 +22,6 @@ import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
-import org.openmrs.module.fhir2.api.FhirUserDefaultProperties;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,6 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	
 	@Autowired
 	private FhirConceptSourceService conceptSourceService;
-	
-	@Autowired
-	private FhirUserDefaultProperties userDefaultProperties;
 	
 	@Override
 	public CodeableConcept toFhirResource(@Nonnull Concept concept) {
@@ -99,11 +95,8 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	private void addConceptCoding(Coding coding, String system, String code, Concept concept) {
 		coding.setSystem(system);
 		coding.setCode(code);
-		ConceptName conceptName = concept.getName(userDefaultProperties.getDefaultLocale());
-		if (conceptName == null || conceptName.getName() == null) {
-			conceptName = concept.getName();
-		}
 		
+		ConceptName conceptName = concept.getName();
 		String display = (conceptName == null || conceptName.getName() == null) ? "" : conceptName.getName();
 		coding.setDisplay(display);
 	}

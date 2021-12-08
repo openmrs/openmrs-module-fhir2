@@ -9,15 +9,16 @@
  */
 package org.openmrs.module.fhir2;
 
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 
-@NoArgsConstructor
 public class FhirConstants {
 	
-	public static final String OPENMRS_FHIR_SERVER_NAME = "OpenMRS FHIR Server";
+	private FhirConstants() {
+	}
 	
-	public static final String OPENMRS_URI = "http://openmrs.org";
+	public static final String FHIR2_MODULE_ID = "fhir2";
+	
+	public static final String OPENMRS_FHIR_SERVER_NAME = "OpenMRS FHIR Server";
 	
 	public static final String HL7_FHIR_CODE_SYSTEM_PREFIX = "http://terminology.hl7.org/CodeSystem";
 	
@@ -62,6 +63,8 @@ public class FhirConstants {
 	
 	public static final String OBSERVATION_REFERENCE_TREATMENT = "treatment";
 	
+	public static final String OBSERVATION_REFERENCE_ABSOLUTE = "absolute";
+	
 	public static final String OBSERVATION_CATEGORY_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/observation-category";
 	
 	public static final String ENCOUNTER_CLASS_VALUE_SET_URI = HL7_FHIR_CODE_SYSTEM_PREFIX + "/v3-ActCode";
@@ -71,15 +74,27 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_PREFIX = "http://fhir.openmrs.org";
 	
+	public static final String OPENMRS_CODE_SYSTEM_PREFIX = OPENMRS_FHIR_PREFIX + "/code-system";
+	
+	public static final String ENCOUNTER_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/encounter-type";
+	
+	public static final String VISIT_TYPE_SYSTEM_URI = OPENMRS_CODE_SYSTEM_PREFIX + "/visit-type";
+	
 	public static final String OPENMRS_FHIR_EXT_PREFIX = OPENMRS_FHIR_PREFIX + "/ext";
 	
+	public static final String OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE = OPENMRS_FHIR_EXT_PREFIX + "/obs-location-value";
+	
 	public static final String OPENMRS_FHIR_EXT_NAME = OPENMRS_FHIR_EXT_PREFIX + "/name";
+	
+	public static final String OPENMRS_FHIR_EXT_GROUP_DESCRIPTION = OPENMRS_FHIR_EXT_PREFIX + "/group/description";
 	
 	public static final String OPENMRS_FHIR_EXT_ADDRESS = OPENMRS_FHIR_EXT_PREFIX + "/address";
 	
 	public static final String OPENMRS_FHIR_EXT_NON_CODED_CONDITION = OPENMRS_FHIR_EXT_PREFIX + "/non-coded-condition";
 	
 	public static final String OPENMRS_FHIR_EXT_MEDICINE = OPENMRS_FHIR_EXT_PREFIX + "/medicine";
+	
+	public static final String OPENMRS_FHIR_EXT_TASK_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/task/identifier";
 	
 	public static final String OPENMRS_FHIR_EXT_USER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/user/identifier";
 	
@@ -91,6 +106,11 @@ public class FhirConstants {
 	
 	public static final String OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION = OPENMRS_FHIR_EXT_PREFIX
 	        + "/patient/identifier#location";
+	
+	public static final String OPENMRS_FHIR_EXT_ENCOUNTER_TAG = OPENMRS_FHIR_EXT_PREFIX + "/encounter-tag";
+	
+	public static final String OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE = OPENMRS_FHIR_EXT_PREFIX
+	        + "/obs/reference-range";
 	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
@@ -105,6 +125,8 @@ public class FhirConstants {
 	public static final String ENCOUNTER = "Encounter";
 	
 	public static final String IDENTIFIER = "Identifier";
+	
+	public static final String IMMUNIZATION = "Immunization";
 	
 	public static final String LOCATION = "Location";
 	
@@ -218,6 +240,8 @@ public class FhirConstants {
 	
 	public static final String TAG_SEARCH_HANDLER = "tag.search.handler";
 	
+	public static final String GROUP_MEMBERS_SEARCH_HANDLER = "group.members.search.handler";
+	
 	public static final String HAPI_NARRATIVES_PROPERTY_FILE = "classpath:ca/uhn/fhir/narrative/narratives.properties";
 	
 	public static final String OPENMRS_NARRATIVES_PROPERTY_FILE = "classpath:org/openmrs/module/fhir2/narratives.properties";
@@ -239,6 +263,8 @@ public class FhirConstants {
 	public static final String RESULT_SEARCH_HANDLER = "result.search.handler";
 	
 	public static final String COMMON_SEARCH_HANDLER = "common.search.handler";
+	
+	public static final String ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER = "type.reference.search.handler";
 	
 	public static final String ID_PROPERTY = "_id.property";
 	
@@ -277,4 +303,14 @@ public class FhirConstants {
 	public static final String INCLUDE_RESULT_PARAM = "result";
 	
 	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
+	
+	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	public static final String MAX_SEARCH_HANDLER = "max.search.handler";
+	
+	public static final String LASTN_OBSERVATION_SEARCH_HANDLER = "lastn.observation.search.handler";
+	
+	public static final String LASTN_ENCOUNTERS_SEARCH_HANDLER = "lastn.encounters.search.handler";
+	
+	public static final String EVERYTHING_SEARCH_HANDLER = "everything.search.handler";
 }

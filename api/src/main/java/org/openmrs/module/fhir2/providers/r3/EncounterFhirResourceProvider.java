@@ -9,12 +9,16 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static lombok.AccessLevel.PACKAGE;
+
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -22,6 +26,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -30,7 +35,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.Encounter30_40;
@@ -47,15 +51,15 @@ import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
+import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("encounterFhirR3ResourceProvider")
-@Qualifier("fhirR3Resources")
-@Setter(AccessLevel.PACKAGE)
+@R3Provider
+@Setter(PACKAGE)
 public class EncounterFhirResourceProvider implements IResourceProvider {
 	
 	@Autowired
@@ -77,12 +81,14 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		return Encounter30_40.convertEncounter(encounter);
 	}
 	
+	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createEncounter(@ResourceParam Encounter encounter) {
 		return FhirProviderUtils.buildCreate(
 		    Encounter30_40.convertEncounter(encounterService.create(Encounter30_40.convertEncounter(encounter))));
 	}
 	
+	@Update
 	@SuppressWarnings("unused")
 	public MethodOutcome updateEncounter(@IdParam IdType id, @ResourceParam Encounter encounter) {
 		if (id == null || id.getIdPart() == null) {
@@ -95,6 +101,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		        .convertEncounter(encounterService.update(id.getIdPart(), Encounter30_40.convertEncounter(encounter))));
 	}
 	
+	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteEncounter(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.Encounter encounter = encounterService.delete(id.getIdPart());
@@ -127,6 +134,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
 	        @OptionalParam(name = Encounter.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientParam,
+	        @OptionalParam(name = Encounter.SP_TYPE) TokenAndListParam encounterType,
 	        @OptionalParam(name = Encounter.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(allow = { "Encounter:" + Encounter.SP_LOCATION, "Encounter:" + Encounter.SP_PATIENT,
@@ -147,7 +155,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return new SearchQueryBundleProviderR3Wrapper(encounterService.searchForEncounters(date, location,
-		    participantReference, subjectReference, id, lastUpdated, includes, revIncludes));
+		    participantReference, subjectReference, encounterType, id, lastUpdated, includes, revIncludes));
 	}
 	
 }

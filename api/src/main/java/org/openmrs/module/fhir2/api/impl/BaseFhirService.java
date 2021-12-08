@@ -30,6 +30,7 @@ import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
+import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.validator.ValidateUtil;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -64,7 +65,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	@Override
-	public List<T> get(Collection<String> uuids) {
+	public List<T> get(@Nonnull Collection<String> uuids) {
 		OpenmrsFhirTranslator<U, T> translator = getTranslator();
 		return getDao().get(uuids).stream().map(translator::toFhirResource).collect(Collectors.toList());
 	}
@@ -78,6 +79,9 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		U openmrsObj = getTranslator().toOpenmrsType(newResource);
 		
 		validateObject(openmrsObj);
+		if (openmrsObj.getUuid() == null) {
+			openmrsObj.setUuid(FhirUtils.newUuid());
+		}
 		
 		return getTranslator().toFhirResource(getDao().createOrUpdate(openmrsObj));
 	}
@@ -191,7 +195,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		}
 	}
 	
-	private ResourceNotFoundException resourceNotFound(String uuid) {
+	protected ResourceNotFoundException resourceNotFound(String uuid) {
 		return new ResourceNotFoundException(
 		        "Resource of type " + resourceClass.getSimpleName() + " with ID " + uuid + " is not known");
 	}

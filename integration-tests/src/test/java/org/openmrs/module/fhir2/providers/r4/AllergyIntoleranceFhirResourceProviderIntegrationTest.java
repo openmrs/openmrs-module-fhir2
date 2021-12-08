@@ -180,7 +180,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		}
 		
 		// create allergy
-		MockHttpServletResponse response = post("/AllergyIntolerance").accept(FhirMediaTypes.XML).xmlContext(jsonAllergy)
+		MockHttpServletResponse response = post("/AllergyIntolerance").accept(FhirMediaTypes.XML).xmlContent(jsonAllergy)
 		        .go();
 		
 		// verify created correctly
@@ -312,7 +312,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		allergy.getCategory().set(0, category);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContext(toXML(allergy)).accept(FhirMediaTypes.XML).go();
+		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContent(toXML(allergy)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -343,7 +343,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		allergy.setId(UNKNOWN_ALLERGY_UUID);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContext(toXML(allergy)).accept(FhirMediaTypes.XML).go();
+		response = put("/AllergyIntolerance/" + ALLERGY_UUID).xmlContent(toXML(allergy)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -365,7 +365,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		allergy.setId(UNKNOWN_ALLERGY_UUID);
 		
 		// send the update to the server
-		response = put("/AllergyIntolerance/" + UNKNOWN_ALLERGY_UUID).xmlContext(toXML(allergy)).accept(FhirMediaTypes.XML)
+		response = put("/AllergyIntolerance/" + UNKNOWN_ALLERGY_UUID).xmlContent(toXML(allergy)).accept(FhirMediaTypes.XML)
 		        .go();
 		
 		assertThat(response, isNotFound());
@@ -524,6 +524,36 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		        hasResource(hasProperty("criticality", equalTo(null))))); // null
 		assertThat(entries, everyItem(hasResource(validResource())));
 		
+	}
+	
+	@Test
+	public void shouldReturnCountForAllergyIntoleranceAsJson() throws Exception {
+		MockHttpServletResponse response = get("/AllergyIntolerance?_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(6)));
+	}
+	
+	@Test
+	public void shouldReturnCountForAllergyIntoleranceAsXml() throws Exception {
+		MockHttpServletResponse response = get("/AllergyIntolerance?_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(6)));
 	}
 	
 }

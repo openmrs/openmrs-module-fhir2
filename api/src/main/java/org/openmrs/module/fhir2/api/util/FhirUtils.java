@@ -9,16 +9,26 @@
  */
 package org.openmrs.module.fhir2.api.util;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.module.fhir2.FhirConstants;
 
 public class FhirUtils {
+	
+	public enum OpenmrsEncounterType {
+		ENCOUNTER,
+		VISIT,
+		AMBIGUOUS
+	}
 	
 	// see https://www.hl7.org/fhir/references.html#literal
 	private static final Pattern FHIR_URL = Pattern.compile("(?:(?:http|https)://(?:[A-Za-z0-9\\-.:%$\\\\]*/)+)?"
@@ -95,9 +105,30 @@ public class FhirUtils {
 	public static OperationOutcome createExceptionErrorOperationOutcome(String diagnostics) {
 		OperationOutcome outcome = new OperationOutcome();
 		OperationOutcome.OperationOutcomeIssueComponent issue = outcome.addIssue();
-		issue.setCode(OperationOutcome.IssueType.EXCEPTION);
+		issue.setCode(OperationOutcome.IssueType.BUSINESSRULE);
 		issue.setSeverity(OperationOutcome.IssueSeverity.ERROR);
 		issue.setDiagnostics(diagnostics);
 		return outcome;
+	}
+	
+	public static Optional<OpenmrsEncounterType> getOpenmrsEncounterType(Encounter encounter) {
+		List<OpenmrsEncounterType> openmrsEncounterTypes = encounter.getType().stream().flatMap(
+		    it -> it.getCoding().stream().filter(coding -> FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI.equals(coding.getSystem())
+		            || FhirConstants.VISIT_TYPE_SYSTEM_URI.equals(coding.getSystem())).map(coding -> {
+			            if (FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI.equals(coding.getSystem())) {
+				            return OpenmrsEncounterType.ENCOUNTER;
+			            } else {
+				            return OpenmrsEncounterType.VISIT;
+			            }
+		            }))
+		        .distinct().collect(Collectors.toList());
+		
+		if (openmrsEncounterTypes.isEmpty()) {
+			return Optional.empty();
+		} else if (openmrsEncounterTypes.size() == 1) {
+			return Optional.of(openmrsEncounterTypes.get(0));
+		} else {
+			return Optional.of(OpenmrsEncounterType.AMBIGUOUS);
+		}
 	}
 }

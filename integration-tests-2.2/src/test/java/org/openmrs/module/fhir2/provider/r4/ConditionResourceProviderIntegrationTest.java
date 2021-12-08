@@ -209,7 +209,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 			assertThat(xmlCondition, notNullValue());
 		}
 		
-		MockHttpServletResponse response = post("/Condition").accept(FhirMediaTypes.XML).xmlContext(xmlCondition).go();
+		MockHttpServletResponse response = post("/Condition").accept(FhirMediaTypes.XML).xmlContent(xmlCondition).go();
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Condition/"));
@@ -336,7 +336,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		condition.getVerificationStatus().getCodingFirstRep().setCode("provisional");
 		
-		response = put("/Condition/" + CONDITION_UUID).xmlContext(toXML(condition)).accept(FhirMediaTypes.XML).go();
+		response = put("/Condition/" + CONDITION_UUID).xmlContent(toXML(condition)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -371,7 +371,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		condition.setId(WRONG_CONDITION_UUID);
 		
-		response = put("/Condition/" + CONDITION_UUID).xmlContext(toXML(condition)).accept(FhirMediaTypes.XML).go();
+		response = put("/Condition/" + CONDITION_UUID).xmlContent(toXML(condition)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -395,7 +395,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		condition.setId(WRONG_CONDITION_UUID);
 		
-		response = put("/Condition/" + WRONG_CONDITION_UUID).xmlContext(toXML(condition)).accept(FhirMediaTypes.XML).go();
+		response = put("/Condition/" + WRONG_CONDITION_UUID).xmlContent(toXML(condition)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

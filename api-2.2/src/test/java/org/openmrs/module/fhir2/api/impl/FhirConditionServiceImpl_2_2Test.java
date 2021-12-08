@@ -18,7 +18,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -232,13 +231,12 @@ public class FhirConditionServiceImpl_2_2Test {
 		TokenAndListParam clinicalList = new TokenAndListParam();
 		clinicalList.addValue(new TokenOrListParam().add(new TokenParam("test clinical")));
 		
-		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("lower date").setUpperBound("upper date");
+		DateRangeParam onsetDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
 		QuantityAndListParam onsetAge = new QuantityAndListParam();
 		onsetAge.addValue(new QuantityOrListParam().add(new QuantityParam(12)));
 		
-		DateRangeParam recordDate = new DateRangeParam().setLowerBound("lower record date")
-		        .setUpperBound("upper record date");
+		DateRangeParam recordDate = new DateRangeParam().setLowerBound("gt2020-05-01").setUpperBound("lt2021-05-01");
 		
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(CONDITION_UUID));
 		
@@ -260,7 +258,7 @@ public class FhirConditionServiceImpl_2_2Test {
 		        .setSortSpec(sort);
 		
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(CONDITION_UUID));
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(Collections.singletonList(openmrsCondition));
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openmrsCondition));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, conditionTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

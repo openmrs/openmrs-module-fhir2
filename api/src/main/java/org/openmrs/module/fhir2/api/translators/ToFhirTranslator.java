@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
  * @param <T> OpenMRS data type
  * @param <U> FHIR resource type
  */
-public interface ToFhirTranslator<T, U> {
+public interface ToFhirTranslator<T, U> extends FhirTranslator {
 	
 	/**
 	 * Maps an OpenMRS data element to a FHIR resource

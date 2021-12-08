@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Immunization xmlns="http://hl7.org/fhir">
+    <status value="completed"/>
+    <vaccineCode>
+        <coding>
+            <code value="15f83cd6-64e9-4e06-a5f9-364d3b14a43d"/>
+            <display value="COVAX"/>
+        </coding>
+    </vaccineCode>
+    <patient>
+        <reference value="Patient/8d703ff2-c3e2-4070-9737-73e713d5a50d"/>
+    </patient>
+    <encounter>
+        <reference value="Encounter/814fd8dc-e0be-416b-a7b5-4bac0a4b3297"/>
+    </encounter>
+    <occurrenceDateTime value="2020-07-08T18:30:00.000Z"/>
+    <manufacturer>
+        <display value="ACME"/>
+    </manufacturer>
+    <lotNumber value="FOO1234"/>
+    <expirationDate value="2022-07-31"/>
+    <performer>
+        <actor>
+            <reference value="Practitioner/f9badd80-ab76-11e2-9e96-0800200c9a66"/>
+            <type value="Practitioner"/>
+        </actor>
+    </performer>
+    <protocolApplied>
+        <doseNumberPositiveInt value="2"/>
+        <series value="COVAX"/>
+    </protocolApplied>
+</Immunization>

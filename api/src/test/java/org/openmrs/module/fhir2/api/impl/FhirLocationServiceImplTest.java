@@ -17,7 +17,6 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -154,7 +153,7 @@ public class FhirLocationServiceImplTest {
 		
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-		when(locationDao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(locations);
+		when(locationDao.getSearchResults(any(), any())).thenReturn(locations);
 		
 		IBundleProvider results = fhirLocationService.searchForLocations(null, null, null, null, null, null, null, null,
 		    null, null, null, null);

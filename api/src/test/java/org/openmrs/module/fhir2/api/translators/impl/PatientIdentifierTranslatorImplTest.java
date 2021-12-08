@@ -26,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.FhirPatientService;
+import org.openmrs.module.fhir2.api.impl.FhirPatientIdentifierSystemServiceImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientIdentifierTranslatorImplTest {
@@ -38,7 +39,12 @@ public class PatientIdentifierTranslatorImplTest {
 	
 	private static final String IDENTIFIER = "M10000RN";
 	
+	private static final String IDENTIFIER_URL = "www.example.com";
+	
 	private PatientIdentifierTranslatorImpl identifierTranslator;
+	
+	@Mock
+	private FhirPatientIdentifierSystemServiceImpl patientIdentifierSystemService;
 	
 	@Mock
 	private FhirPatientService patientService;
@@ -47,6 +53,7 @@ public class PatientIdentifierTranslatorImplTest {
 	public void setup() {
 		identifierTranslator = new PatientIdentifierTranslatorImpl();
 		identifierTranslator.setPatientService(patientService);
+		identifierTranslator.setPatientIdentifierSystemService(patientIdentifierSystemService);
 	}
 	
 	@Test
@@ -60,12 +67,16 @@ public class PatientIdentifierTranslatorImplTest {
 		patientIdentifier.setUuid(IDENTIFIER_UUID);
 		patientIdentifier.setIdentifier(IDENTIFIER);
 		
+		when(patientIdentifierSystemService.getUrlByPatientIdentifierType(identifierType)).thenReturn(IDENTIFIER_URL);
+		
 		Identifier result = identifierTranslator.toFhirResource(patientIdentifier);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType().getText(), equalTo(IDENTIFIER_TYPE_NAME));
+		assertThat(result.getType().getCodingFirstRep().getCode(), equalTo(IDENTIFIER_TYPE_UUID));
 		assertThat(result.getId(), equalTo(IDENTIFIER_UUID));
 		assertThat(result.getValue(), equalTo(IDENTIFIER));
+		assertThat(result.getSystem(), equalTo(IDENTIFIER_URL));
 	}
 	
 	@Test
@@ -74,6 +85,9 @@ public class PatientIdentifierTranslatorImplTest {
 		PatientIdentifierType identifierType = new PatientIdentifierType();
 		identifierType.setUuid(IDENTIFIER_TYPE_UUID);
 		identifierType.setName(IDENTIFIER_TYPE_NAME);
+		
+		when(patientIdentifierSystemService.getUrlByPatientIdentifierType(identifierType)).thenReturn(IDENTIFIER_URL);
+		
 		patientIdentifier.setPreferred(true);
 		patientIdentifier.setIdentifierType(identifierType);
 		patientIdentifier.setUuid(IDENTIFIER_UUID);
@@ -91,6 +105,8 @@ public class PatientIdentifierTranslatorImplTest {
 		patientIdentifier.setIdentifierType(identifierType);
 		patientIdentifier.setUuid(IDENTIFIER_UUID);
 		patientIdentifier.setIdentifier(IDENTIFIER);
+		
+		when(patientIdentifierSystemService.getUrlByPatientIdentifierType(identifierType)).thenReturn(IDENTIFIER_URL);
 		
 		assertThat(identifierTranslator.toFhirResource(patientIdentifier).getUse(), is(Identifier.IdentifierUse.USUAL));
 	}

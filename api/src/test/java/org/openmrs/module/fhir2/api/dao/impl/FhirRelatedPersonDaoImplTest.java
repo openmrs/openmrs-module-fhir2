@@ -31,7 +31,11 @@ public class FhirRelatedPersonDaoImplTest extends BaseModuleContextSensitiveTest
 	
 	private static final String BAD_RELATIONSHIP_UUID = "d4c91630-8563-481b-8efa-48e10c139w6e";
 	
-	private static final String RELATIONSHIP_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirRelatedPersonDaoImplTest_intial_data.xml";
+	private static final String RELATIONSHIP_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirRelatedPersonDaoImplTest_initial_data.xml";
+	
+	private static final String PERSON_A_UUID = "61b38324-e2fd-4feb-95b7-9e9a2a4400df";
+	
+	private static final String PERSON_B_UUID = "5c521595-4e12-46b0-8248-b8f2d3697766";
 	
 	@Autowired
 	@Qualifier("sessionFactory")
@@ -58,6 +62,16 @@ public class FhirRelatedPersonDaoImplTest extends BaseModuleContextSensitiveTest
 	public void getRelationshipWithWrongUuid_shouldReturnNull() {
 		Relationship relationship = relatedPersonDao.get(BAD_RELATIONSHIP_UUID);
 		assertThat(relationship, nullValue());
+	}
+	
+	@Test
+	public void getRelationshipWithUuid_shouldReturnPersonAAndPersonB() {
+		Relationship relationship = relatedPersonDao.get(RELATIONSHIP_UUID);
+		assertThat(relationship, notNullValue());
+		assertThat(relationship.getPersonA(), notNullValue());
+		assertThat(relationship.getPersonB(), notNullValue());
+		assertThat(relationship.getPersonA().getUuid(), equalTo(PERSON_A_UUID));
+		assertThat(relationship.getPersonB().getUuid(), equalTo(PERSON_B_UUID));
 	}
 	
 }

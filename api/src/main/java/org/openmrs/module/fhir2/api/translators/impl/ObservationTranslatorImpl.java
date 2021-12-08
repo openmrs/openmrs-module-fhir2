@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
@@ -27,6 +28,7 @@ import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.api.db.hibernate.HibernateUtil;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationBasedOnReferenceTranslator;
@@ -45,7 +47,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ObservationTranslatorImpl implements ObservationTranslator {
+public class ObservationTranslatorImpl extends BaseReferenceHandlingTranslator implements ObservationTranslator {
 	
 	@Autowired
 	private ObservationStatusTranslator observationStatusTranslator;
@@ -124,6 +126,11 @@ public class ObservationTranslatorImpl implements ObservationTranslator {
 			if (concept instanceof ConceptNumeric) {
 				obs.setReferenceRange(referenceRangeTranslator.toFhirResource((ConceptNumeric) concept));
 			}
+		}
+		
+		if (observation.getValueText() != null && StringUtils.equals(observation.getComment(), "org.openmrs.Location")) {
+			obs.addExtension(FhirConstants.OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE,
+			    createLocationReferenceByUuid(observation.getValueText()));
 		}
 		
 		obs.setIssued(observation.getDateCreated());

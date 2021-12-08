@@ -17,7 +17,6 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -208,7 +207,7 @@ public class FhirTaskServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(TASK_UUID));
-		when(dao.getSearchResults(any(), any(), anyInt(), anyInt())).thenReturn(openmrsTasks);
+		when(dao.getSearchResults(any(), any())).thenReturn(openmrsTasks);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, fhirGlobalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

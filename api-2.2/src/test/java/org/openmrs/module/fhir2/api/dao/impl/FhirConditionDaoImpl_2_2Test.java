@@ -20,7 +20,6 @@ import java.util.Date;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.openmrs.CodedOrFreeText;
 import org.openmrs.Condition;
 import org.openmrs.ConditionClinicalStatus;
@@ -28,7 +27,6 @@ import org.openmrs.ConditionVerificationStatus;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.util.LocalDateTimeFactory;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -64,16 +62,12 @@ public class FhirConditionDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 	@Autowired
 	private ConceptService conceptService;
 	
-	@Mock
-	private LocalDateTimeFactory localDateTimeFactory;
-	
 	private FhirConditionDaoImpl_2_2 dao;
 	
 	@Before
 	public void setUp() {
 		dao = new FhirConditionDaoImpl_2_2();
 		dao.setSessionFactory(sessionFactory);
-		dao.setLocalDateTimeFactory(localDateTimeFactory);
 		
 		executeDataSet(CONDITION_INITIAL_DATA_XML);
 	}

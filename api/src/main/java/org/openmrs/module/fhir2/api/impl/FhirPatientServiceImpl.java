@@ -9,7 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.annotation.Nonnull;
+
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -17,6 +22,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -54,6 +60,17 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	private SearchQuery<org.openmrs.Patient, Patient, FhirPatientDao, PatientTranslator, SearchQueryInclude<Patient>> searchQuery;
 	
 	@Override
+	public List<Patient> getPatientsByIds(@Nonnull Collection<Integer> ids) {
+		List<org.openmrs.Patient> patients = dao.getPatientsByIds(ids);
+		return patients.stream().map(translator::toFhirResource).collect(Collectors.toList());
+	}
+	
+	@Override
+	public Patient getById(@Nonnull Integer id) {
+		return translator.toFhirResource(dao.getPatientById(id));
+	}
+	
+	@Override
 	@Transactional(readOnly = true)
 	public PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier) {
 		if (identifier.getType() == null || StringUtils.isBlank(identifier.getType().getText())) {
@@ -89,5 +106,39 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes).setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public IBundleProvider getPatientEverything(TokenParam patientId) {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "")
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY,
+		            new TokenAndListParam().addAnd(patientId));
+		
+		populateEverythingOperationParams(theParams);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public IBundleProvider getPatientEverything() {
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.EVERYTHING_SEARCH_HANDLER, "");
+		
+		populateEverythingOperationParams(theParams);
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
+	
+	private void populateEverythingOperationParams(SearchParameterMap theParams) {
+		HashSet<Include> revIncludes = new HashSet<>();
+		
+		revIncludes.add(new Include(FhirConstants.OBSERVATION + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.ALLERGY_INTOLERANCE + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.DIAGNOSTIC_REPORT + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.MEDICATION_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.SERVICE_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		revIncludes.add(new Include(FhirConstants.PROCEDURE_REQUEST + ":" + FhirConstants.INCLUDE_PATIENT_PARAM));
+		
+		theParams.addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
 	}
 }

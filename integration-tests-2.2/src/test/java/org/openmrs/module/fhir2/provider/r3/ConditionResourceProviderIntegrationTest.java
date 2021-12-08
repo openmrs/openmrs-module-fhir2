@@ -182,6 +182,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
 		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getOnsetDateTimeType(), notNullValue());
 		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
 		assertThat(condition.getCode(), notNullValue());
 		assertThat(condition.getCode().getCoding(),
@@ -209,7 +210,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 			assertThat(xmlCondition, notNullValue());
 		}
 		
-		MockHttpServletResponse response = post("/Condition").accept(FhirMediaTypes.XML).xmlContext(xmlCondition).go();
+		MockHttpServletResponse response = post("/Condition").accept(FhirMediaTypes.XML).xmlContent(xmlCondition).go();
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Condition/"));
@@ -221,6 +222,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		assertThat(condition, notNullValue());
 		assertThat(condition.getIdElement().getIdPart(), notNullValue());
 		assertThat(condition.getClinicalStatus(), notNullValue());
+		assertThat(condition.getOnsetDateTimeType(), notNullValue());
 		assertThat(condition.getClinicalStatus().toCode(), equalTo("active"));
 		assertThat(condition.getCode().getCoding(),
 		    hasItem(hasProperty("code", equalTo("116128AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))));
@@ -336,7 +338,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		condition.setVerificationStatus(Condition.ConditionVerificationStatus.PROVISIONAL);
 		
-		response = put("/Condition/" + CONDITION_UUID).xmlContext(toXML(condition)).accept(FhirMediaTypes.XML).go();
+		response = put("/Condition/" + CONDITION_UUID).xmlContent(toXML(condition)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -371,7 +373,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		condition.setId(WRONG_CONDITION_UUID);
 		
-		response = put("/Condition/" + CONDITION_UUID).xmlContext(toXML(condition)).accept(FhirMediaTypes.XML).go();
+		response = put("/Condition/" + CONDITION_UUID).xmlContent(toXML(condition)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -395,7 +397,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR3Integrat
 		
 		condition.setId(WRONG_CONDITION_UUID);
 		
-		response = put("/Condition/" + WRONG_CONDITION_UUID).xmlContext(toXML(condition)).accept(FhirMediaTypes.XML).go();
+		response = put("/Condition/" + WRONG_CONDITION_UUID).xmlContent(toXML(condition)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -33,6 +34,7 @@ import java.util.List;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Provenance;
@@ -78,6 +80,8 @@ public class ObservationTranslatorImplTest {
 	private static final String PATIENT_UUID = "12345-edcba-12345";
 	
 	private static final String ORDER_UUID = "12344-edcba-12345";
+	
+	private static final String LOCATION_UUID = "2321gh23-kj34h45-34jk3-34k34k";
 	
 	private static final Double LOW_NORMAL_VALUE = 1.0;
 	
@@ -240,6 +244,8 @@ public class ObservationTranslatorImplTest {
 		assertThat(result.getReferenceRange(), notNullValue());
 		assertThat(result.getReferenceRange(),
 		    hasItem(hasProperty("low", hasProperty("value", equalTo(BigDecimal.valueOf(LOW_NORMAL_VALUE))))));
+		assertThat(result.getReferenceRange(),
+		    hasItem(hasProperty("high", hasProperty("value", equalTo(BigDecimal.valueOf(HIGH_NORMAL_VALUE))))));
 	}
 	
 	@Test
@@ -346,6 +352,24 @@ public class ObservationTranslatorImplTest {
 		assertThat(result.getBasedOn(), notNullValue());
 		assertThat(result.getBasedOn().get(0).getType(), equalTo("Order"));
 		assertThat(result.getBasedOn().get(0).getId(), equalTo(ORDER_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldAddLoationExtensionToObsWithTextValue() {
+		Obs observation = new Obs();
+		observation.setValueText(LOCATION_UUID);
+		observation.setComment("org.openmrs.Location");
+		
+		Observation result = observationTranslator.toFhirResource(observation);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getExtension(), is(notNullValue()));
+		
+		Extension extension = result.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_OBS_LOCATION_VALUE);
+		assertThat(extension, is(notNullValue()));
+		assertThat(extension.getValue(), instanceOf(Reference.class));
+		assertThat(((Reference) extension.getValue()).getType(), equalTo(FhirConstants.LOCATION));
+		assertThat(((Reference) extension.getValue()).getReference(), equalTo(FhirConstants.LOCATION + "/" + LOCATION_UUID));
 	}
 	
 	@Test

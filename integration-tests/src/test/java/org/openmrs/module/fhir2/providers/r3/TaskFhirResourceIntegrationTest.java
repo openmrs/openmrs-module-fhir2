@@ -177,7 +177,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 			xmlTask = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		MockHttpServletResponse response = post("/Task").accept(FhirMediaTypes.XML).xmlContext(xmlTask).go();
+		MockHttpServletResponse response = post("/Task").accept(FhirMediaTypes.XML).xmlContent(xmlTask).go();
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Task/"));
@@ -298,7 +298,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		task.setStatus(Task.TaskStatus.COMPLETED);
 		
-		response = put("/Task/" + TASK_UUID).xmlContext(toXML(task)).accept(FhirMediaTypes.XML).go();
+		response = put("/Task/" + TASK_UUID).xmlContent(toXML(task)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -330,7 +330,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		task.setId(WRONG_TASK_UUID);
 		
-		response = put("/Task/" + TASK_UUID).xmlContext(toXML(task)).accept(FhirMediaTypes.XML).go();
+		response = put("/Task/" + TASK_UUID).xmlContent(toXML(task)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -352,7 +352,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		patient.setId(WRONG_TASK_UUID);
 		
-		response = put("/Task/" + WRONG_TASK_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
+		response = put("/Task/" + WRONG_TASK_UUID).xmlContent(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -489,5 +489,35 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		                    Date.from(LocalDateTime.of(2012, 5, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant()))))),
 		        hasResource(hasProperty("meta", hasProperty("lastUpdated", equalTo(
 		            Date.from(LocalDateTime.of(2012, 7, 1, 0, 0, 0).atZone(ZoneId.systemDefault()).toInstant())))))));
+	}
+	
+	@Test
+	public void shouldReturnCountForTaskAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Task?status=requested&_summary=count").accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(2)));
+	}
+	
+	@Test
+	public void shouldReturnCountForTaskAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Task?status=requested&_summary=count").accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(2)));
 	}
 }

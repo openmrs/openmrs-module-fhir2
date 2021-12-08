@@ -9,27 +9,42 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
+import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedUuids;
 
 import javax.annotation.Nonnull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Subqueries;
 import org.hl7.fhir.r4.model.Observation;
+import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.util.LastnResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +53,46 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	
 	@Autowired
 	private ObservationCategoryMap categoryMap;
+	
+	@Autowired
+	private FhirEncounterDao encounterDao;
+	
+	@Override
+	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
+		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
+			
+			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
+			
+			setupSearchParams(criteria, theParams);
+			
+			criteria.setProjection(
+			    Projections.projectionList().add(property("uuid")).add(property("concept")).add(property("obsDatetime")));
+			
+			@SuppressWarnings("unchecked")
+			List<LastnResult> results = ((List<Object[]>) criteria.list()).stream().map(objects -> {
+				Map<String, Object> attributes = new HashMap<>();
+				attributes.put("concept", objects[1]);
+				return new LastnResult(objects[0], objects[2], attributes);
+			}).collect(Collectors.toList());
+			
+			return getLastnUuids(handleGrouping(results), getMaxParameter(theParams)).stream().distinct()
+			        .collect(Collectors.toList());
+		}
+		
+		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
+			ReferenceAndListParam encountersReferences = new ReferenceAndListParam();
+			ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+			
+			List<String> encounters = encounterDao.getSearchResultUuids(theParams);
+			
+			encounters.forEach(encounter -> referenceOrListParam.addOr(new ReferenceParam().setValue(encounter)));
+			encountersReferences.addAnd(referenceOrListParam);
+			
+			theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encountersReferences);
+		}
+		
+		return super.getSearchResultUuids(theParams);
+	}
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
@@ -146,13 +201,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 				return Optional.empty();
 			}
 			
-			String conceptClass = categoryMap.getConceptClassUuid(param.getValue());
-			
-			if (conceptClass == null) {
-				return Optional.empty();
-			}
-			
-			return Optional.of(eq("cc.uuid", conceptClass));
+			return Optional.of(Subqueries.propertyIn("cc.uuid", categoryMap.queryConceptClassByCategory(param.getValue())));
 		}).ifPresent(criteria::add);
 	}
 	
@@ -172,5 +221,31 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		}
 		
 		return null;
+	}
+	
+	@Override
+	protected Obs deproxyResult(Obs result) {
+		Obs obs = super.deproxyResult(result);
+		obs.setConcept(deproxyObject(obs.getConcept()));
+		return obs;
+	}
+	
+	private int getMaxParameter(SearchParameterMap theParams) {
+		return ((NumberParam) theParams.getParameters(FhirConstants.MAX_SEARCH_HANDLER).get(0).getParam()).getValue()
+		        .intValue();
+	}
+	
+	private Map<Concept, List<LastnResult>> handleGrouping(List<LastnResult> observations) {
+		return observations.stream().collect(Collectors.groupingBy(obs -> (Concept) (obs.getAttributes().get("concept"))));
+	}
+	
+	private List<String> getLastnUuids(Map<Concept, List<LastnResult>> groupingByObsCode, int max) {
+		List<String> results = new ArrayList<>();
+		for (Map.Entry<Concept, List<LastnResult>> entry : groupingByObsCode.entrySet()) {
+			List<LastnResult> obsList = entry.getValue();
+			List<String> lastnUuidsInGroup = getTopNRankedUuids(obsList, max);
+			results.addAll(lastnUuidsInGroup);
+		}
+		return results;
 	}
 }

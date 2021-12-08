@@ -14,12 +14,14 @@ import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Type;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
@@ -30,6 +32,9 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 // TODO Create proper "System" value
 public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTranslator implements PatientIdentifierTranslator {
+	
+	@Autowired
+	private FhirPatientIdentifierSystemService patientIdentifierSystemService;
 	
 	@Autowired
 	private FhirPatientService patientService;
@@ -56,12 +61,18 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 		}
 		
 		if (identifier.getIdentifierType() != null) {
-			patientIdentifier.setType(new CodeableConcept().setText(identifier.getIdentifierType().getName()));
+			patientIdentifier.setType(new CodeableConcept(new Coding().setCode(identifier.getIdentifierType().getUuid()))
+			        .setText(identifier.getIdentifierType().getName()));
 		}
 		
 		if (identifier.getLocation() != null) {
 			patientIdentifier.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)
 			        .setValue(createLocationReference(identifier.getLocation()));
+		}
+		
+		if (identifier.getIdentifierType() != null) {
+			patientIdentifier
+			        .setSystem(patientIdentifierSystemService.getUrlByPatientIdentifierType(identifier.getIdentifierType()));
 		}
 		
 		return patientIdentifier;

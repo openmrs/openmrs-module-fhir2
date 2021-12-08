@@ -15,21 +15,29 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import lombok.SneakyThrows;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.CoreMatchers;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Location;
@@ -38,6 +46,7 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.Visit;
+import org.openmrs.VisitType;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
@@ -64,6 +73,10 @@ public class VisitTranslatorImplTest {
 	
 	private static final String TEST_FHIR_CLASS = "Test Class";
 	
+	private static final String TYPE_CODE = "visit";
+	
+	private static final String TYPE_DISPLAY = "Visit";
+	
 	@Mock
 	private EncounterLocationTranslator encounterLocationTranslator;
 	
@@ -74,10 +87,19 @@ public class VisitTranslatorImplTest {
 	private ProvenanceTranslator<org.openmrs.Visit> provenanceTranslator;
 	
 	@Mock
+	private VisitTypeTranslatorImpl visitTypeTranslator;
+	
+	@Mock
+	private VisitPeriodTranslatorImpl visitPeriodTranslator;
+	
+	@Mock
 	private EncounterClassMap encounterClassMap;
 	
 	private VisitTranslatorImpl visitTranslator;
 	
+	private Date periodStart, periodEnd;
+	
+	@SneakyThrows
 	@Before
 	public void setup() {
 		visitTranslator = new VisitTranslatorImpl();
@@ -85,6 +107,11 @@ public class VisitTranslatorImplTest {
 		visitTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		visitTranslator.setProvenanceTranslator(provenanceTranslator);
 		visitTranslator.setEncounterClassMap(encounterClassMap);
+		visitTranslator.setVisitTypeTranslator(visitTypeTranslator);
+		visitTranslator.setVisitPeriodTranslator(visitPeriodTranslator);
+		
+		periodStart = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse("10-Jan-2019 10:11:00");
+		periodEnd = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").parse("10-Jan-2019 11:00:00");
 	}
 	
 	@Test
@@ -114,6 +141,40 @@ public class VisitTranslatorImplTest {
 		Visit result = visitTranslator.toOpenmrsType(encounter);
 		
 		assertThat(result.getUuid(), equalTo(VISIT_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertPeriodToStartStopDatetime() {
+		Encounter encounter = new Encounter();
+		
+		Period period = new Period();
+		period.setStart(periodStart);
+		period.setEnd(periodEnd);
+		encounter.setPeriod(period);
+		
+		when(visitPeriodTranslator.toOpenmrsType(any(), any())).thenCallRealMethod();
+		
+		Visit result = visitTranslator.toOpenmrsType(new Visit(), encounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStartDatetime(), equalTo(periodStart));
+		assertThat(result.getStopDatetime(), equalTo(periodEnd));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldConvertPeriodWithNullValues() {
+		Encounter encounter = new Encounter();
+		
+		Period period = new Period();
+		encounter.setPeriod(period);
+		
+		when(visitPeriodTranslator.toOpenmrsType(any(), any())).thenCallRealMethod();
+		
+		Visit result = visitTranslator.toOpenmrsType(new Visit(), encounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getStartDatetime(), nullValue());
+		assertThat(result.getStopDatetime(), nullValue());
 	}
 	
 	@Test(expected = NullPointerException.class)
@@ -243,5 +304,74 @@ public class VisitTranslatorImplTest {
 		assertThat(resources.stream().findAny().isPresent(), CoreMatchers.is(true));
 		assertThat(resources.stream().findAny().get().isResource(), CoreMatchers.is(true));
 		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldTranslateTypeToVisitType() {
+		Encounter encounter = new Encounter();
+		encounter.setId(VISIT_UUID);
+		
+		VisitType visitType = new VisitType();
+		visitType.setName(TYPE_DISPLAY);
+		visitType.setUuid(TYPE_CODE);
+		when(visitTypeTranslator.toOpenmrsType(ArgumentMatchers.any())).thenReturn(visitType);
+		
+		Visit result = visitTranslator.toOpenmrsType(encounter);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getVisitType(), equalTo(visitType));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateTypeToEncounterType() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode("1");
+		
+		Visit visit = new Visit();
+		visit.setUuid(VISIT_UUID);
+		
+		when(visitTypeTranslator.toFhirResource(ArgumentMatchers.any()))
+		        .thenReturn(Collections.singletonList(codeableConcept));
+		
+		Encounter result = visitTranslator.toFhirResource(visit);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), not(empty()));
+		assertThat(result.getTypeFirstRep(), equalTo(codeableConcept));
+	}
+	
+	@Test
+	public void toFhirResource_shouldHaveEncounterTag() {
+		Visit visit = new Visit();
+		visit.setUuid(VISIT_UUID);
+		
+		Encounter result = visitTranslator.toFhirResource(visit);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getMeta().getTag(), notNullValue());
+		assertThat(result.getMeta().getTag().get(0).getSystem(), equalTo(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG));
+		assertThat(result.getMeta().getTag().get(0).getCode(), equalTo(TYPE_CODE));
+		assertThat(result.getMeta().getTag().get(0).getDisplay(), equalTo(TYPE_DISPLAY));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateDateStartedStoppedToPeriod() {
+		Visit visit = new Visit();
+		visit.setUuid(VISIT_UUID);
+		
+		Period period = new Period();
+		period.setStart(periodStart);
+		period.setEnd(periodEnd);
+		
+		visit.setStartDatetime(periodStart);
+		visit.setStartDatetime(periodEnd);
+		
+		when(visitPeriodTranslator.toFhirResource(ArgumentMatchers.any())).thenReturn(period);
+		
+		Encounter result = visitTranslator.toFhirResource(visit);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getPeriod().getStart(), equalTo(periodStart));
+		assertThat(result.getPeriod().getEnd(), equalTo(periodEnd));
 	}
 }

@@ -186,7 +186,7 @@ public class ConditionTranslatorImpl_2_2Test {
 	@Test
 	public void shouldTranslateConditionClinicalStatusToOpenMrsType() {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode(ACTIVE).setSystem(FhirConstants.OPENMRS_URI));
+		codeableConcept.addCoding(new Coding().setCode(ACTIVE).setSystem(FhirConstants.OPENMRS_FHIR_PREFIX));
 		fhirCondition.setClinicalStatus(codeableConcept);
 		when(clinicalStatusTranslator.toOpenmrsType(codeableConcept)).thenReturn(ConditionClinicalStatus.ACTIVE);
 		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
@@ -200,7 +200,7 @@ public class ConditionTranslatorImpl_2_2Test {
 	@Test
 	public void shouldTranslateConditionClinicalStatusToFhirType() {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode(ACTIVE).setSystem(FhirConstants.OPENMRS_URI));
+		codeableConcept.addCoding(new Coding().setCode(ACTIVE).setSystem(FhirConstants.OPENMRS_FHIR_PREFIX));
 		openmrsCondition.setClinicalStatus(ConditionClinicalStatus.ACTIVE);
 		when(clinicalStatusTranslator.toFhirResource(ConditionClinicalStatus.ACTIVE)).thenReturn(codeableConcept);
 		
@@ -213,7 +213,7 @@ public class ConditionTranslatorImpl_2_2Test {
 	@Test
 	public void shouldTranslateConditionVerificationStatusToFhirType() {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode(CONFIRMED).setSystem(FhirConstants.OPENMRS_URI));
+		codeableConcept.addCoding(new Coding().setCode(CONFIRMED).setSystem(FhirConstants.OPENMRS_FHIR_PREFIX));
 		openmrsCondition.setVerificationStatus(ConditionVerificationStatus.CONFIRMED);
 		when(verificationStatusTranslator.toFhirResource(ConditionVerificationStatus.CONFIRMED)).thenReturn(codeableConcept);
 		Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
@@ -225,7 +225,7 @@ public class ConditionTranslatorImpl_2_2Test {
 	@Test
 	public void shouldTranslateConditionVerificationStatusToOpenMrsType() {
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode(PROVISIONAL).setSystem(FhirConstants.OPENMRS_URI));
+		codeableConcept.addCoding(new Coding().setCode(PROVISIONAL).setSystem(FhirConstants.OPENMRS_FHIR_PREFIX));
 		fhirCondition.setVerificationStatus(codeableConcept);
 		when(verificationStatusTranslator.toOpenmrsType(codeableConcept))
 		        .thenReturn(ConditionVerificationStatus.PROVISIONAL);

@@ -38,6 +38,5 @@ public interface FhirMedicationDao extends FhirDao<Drug> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	List<Drug> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> matchingResourceUuids,
-	        int firstResult, int lastResult);
+	List<Drug> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
 }
