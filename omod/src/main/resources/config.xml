@@ -160,10 +160,4 @@
 		<description>The UUID for the Location Attribute Type representing the Location Type</description>
 	</globalProperty>
 
-	<globalProperty>
-		<property>${project.parent.artifactId}.locationTypeSystemUrl</property>
-		<defaultValue>https://terminology.hl7.org/CodeSystem/v3-RoleCode</defaultValue>
-		<description>The reference to the Value Set used for Location Types. See mCSD Location Resource Profile</description>
-	</globalProperty>
-
 </module>

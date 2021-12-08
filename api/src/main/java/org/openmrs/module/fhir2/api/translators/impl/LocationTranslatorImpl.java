@@ -102,6 +102,8 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		
 		fhirLocation.setType(locationTypeTranslator.toFhirResource(openmrsLocation));
 		
+		fhirLocation.setType(locationTypeTranslator.toFhirResource(openmrsLocation));
+		
 		if (openmrsLocation.getTags() != null) {
 			for (LocationTag tag : openmrsLocation.getTags()) {
 				fhirLocation.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_LOCATION_TAG, tag.getName(),

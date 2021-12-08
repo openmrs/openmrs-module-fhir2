@@ -38,3 +38,4 @@ public interface LocationTypeTranslator extends ToFhirTranslator<Location, List<
 	@Override
 	Location toOpenmrsType(@Nonnull Location location, @Nonnull List<CodeableConcept> type);
 }
+

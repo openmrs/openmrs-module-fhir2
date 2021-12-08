@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -31,10 +32,10 @@ import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
+import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,10 +55,10 @@ public class LocationTypeTranslatorImplTest {
 	private ConceptTranslator conceptTranslator;
 	
 	@Mock
-	private ConceptService conceptService;
+	private FhirLocationDao locationDao;
 	
 	@Mock
-	LocationService locationService;
+	private FhirConceptDao conceptDao;
 	
 	@Mock
 	FhirGlobalPropertyService globalPropertyService;
@@ -70,8 +71,8 @@ public class LocationTypeTranslatorImplTest {
 	public void setup() {
 		omrsLocation = new Location();
 		locationTypeTranslator = new LocationTypeTranslatorImpl();
-		locationTypeTranslator.setConceptService(conceptService);
-		locationTypeTranslator.setLocationService(locationService);
+		locationTypeTranslator.setConceptDao(conceptDao);
+		locationTypeTranslator.setLocationDao(locationDao);
 		locationTypeTranslator.setConceptTranslator(conceptTranslator);
 		locationTypeTranslator.setGlobalPropertyService(globalPropertyService);
 	}
@@ -92,8 +93,8 @@ public class LocationTypeTranslatorImplTest {
 		omrsLocation.setAttribute(typeAttribute);
 		
 		when(conceptTranslator.toFhirResource(eq(typeConcept))).thenReturn(fhirTypeConcept);
-		when(conceptService.getConceptByUuid(eq(TYPE_CONCEPT_UUID))).thenReturn(typeConcept);
-		when(locationService.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(typeAttributeType);
+		when(conceptDao.get(eq(TYPE_CONCEPT_UUID))).thenReturn(typeConcept);
+		when(locationDao.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(typeAttributeType);
 		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_ATTRIBUTE_TYPE))
 		        .thenReturn(LOCATION_ATTRIBUTE_TYPE_UUID);
 		
@@ -112,7 +113,7 @@ public class LocationTypeTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateFhirTypeCodeableConceptToLocationAttribute() {
+	public void toOpenmrsType_shouldTranslateFhirTypeCodeableConceptToNewLocationAttribute() {
 		LocationAttribute typeAttribute = new LocationAttribute();
 		LocationAttributeType typeAttributeType = new LocationAttributeType();
 		Concept typeConcept = new Concept();
@@ -125,13 +126,39 @@ public class LocationTypeTranslatorImplTest {
 		typeAttribute.setAttributeType(typeAttributeType);
 		typeAttribute.setValue(TYPE_CONCEPT_UUID);
 		
-		when(locationService.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(typeAttributeType);
+		when(locationDao.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(typeAttributeType);
 		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_ATTRIBUTE_TYPE))
 		        .thenReturn(LOCATION_ATTRIBUTE_TYPE_UUID);
-		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_SYSTEM_URL))
-		        .thenReturn(LOCATION_TYPE_SYSTEM_URL);
 		when(conceptTranslator.toOpenmrsType(eq(fhirTypeConcept))).thenReturn(typeConcept);
 		
+		Location result = locationTypeTranslator.toOpenmrsType(omrsLocation, Collections.singletonList(fhirTypeConcept));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getActiveAttributes(), hasSize(greaterThan(0)));
+		assertThat(result.getActiveAttributes().stream().findFirst().get().getValue(), equalTo(TYPE_CONCEPT_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateFhirTypeCodeableConceptToExistingLocationAttribute() {
+		LocationAttribute typeAttribute = new LocationAttribute();
+		LocationAttributeType typeAttributeType = new LocationAttributeType();
+		Concept typeConcept = new Concept();
+		CodeableConcept fhirTypeConcept = new CodeableConcept();
+		
+		fhirTypeConcept.setId(FHIR_TYPE_CONCEPT_UUID);
+		fhirTypeConcept.setCoding(Collections.singletonList(new Coding().setSystem(LOCATION_TYPE_SYSTEM_URL)));
+		typeConcept.setUuid(TYPE_CONCEPT_UUID);
+		typeAttribute.setUuid(TYPE_ATTRIBUTE_UUID);
+		typeAttribute.setAttributeType(typeAttributeType);
+		typeAttribute.setValue(TYPE_CONCEPT_UUID);
+		omrsLocation.addAttribute(typeAttribute);
+		
+		when(locationDao.getLocationAttributeTypeByUuid(LOCATION_ATTRIBUTE_TYPE_UUID)).thenReturn(typeAttributeType);
+		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_ATTRIBUTE_TYPE))
+		        .thenReturn(LOCATION_ATTRIBUTE_TYPE_UUID);
+		when(conceptTranslator.toOpenmrsType(eq(fhirTypeConcept))).thenReturn(typeConcept);
+		when(locationDao.getActiveAttributesByLocationAndAttributeTypeUuid(any(), any())).thenReturn(Collections.singletonList(typeAttribute));
+
 		Location result = locationTypeTranslator.toOpenmrsType(omrsLocation, Collections.singletonList(fhirTypeConcept));
 		
 		assertThat(result, notNullValue());

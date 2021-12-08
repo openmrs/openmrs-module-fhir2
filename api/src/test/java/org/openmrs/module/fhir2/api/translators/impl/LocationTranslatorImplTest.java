@@ -24,16 +24,12 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,8 +44,8 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
-import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
@@ -96,7 +92,7 @@ public class LocationTranslatorImplTest {
 	
 	@Mock
 	private LocationTagTranslator locationTagTranslator;
-
+	
 	@Mock
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
@@ -330,6 +326,27 @@ public class LocationTranslatorImplTest {
 		assertThat(omrsLocation.getTags(), notNullValue());
 		assertThat(omrsLocation.getTags(), hasSize(greaterThanOrEqualTo(1)));
 		assertThat(omrsLocation.getTags().iterator().next().getName(), is(LAB_TAG_NAME));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateFhirTypeToOpenmrsLocationAttributes() {
+		LocationAttribute omrsAttr = new LocationAttribute();
+		CodeableConcept typeConcept = new CodeableConcept();
+		typeConcept.setId(LOCATION_ATTRIBUTE_TYPE_UUID);
+		
+		org.hl7.fhir.r4.model.Location fhirLocation = new org.hl7.fhir.r4.model.Location();
+		
+		fhirLocation.setType(Collections.singletonList(typeConcept));
+		
+		omrsLocation.addAttribute(omrsAttr);
+		
+		when(locationTypeTranslator.toOpenmrsType(any(), any())).thenReturn(omrsLocation);
+		
+		Location result = locationTranslator.toOpenmrsType(fhirLocation);
+		
+		assertThat(result.getActiveAttributes(), notNullValue());
+		assertThat(omrsLocation.getActiveAttributes(), hasSize(greaterThanOrEqualTo(1)));
+		assertThat(omrsLocation.getActiveAttributes().stream().findFirst().get(), is(omrsAttr));
 	}
 	
 	@Test

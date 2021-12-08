@@ -11,36 +11,49 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.openmrs.Location;
+import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@OpenmrsProfile(openmrsPlatformVersion = "2.5.* - 2.*")
 @Setter(AccessLevel.PACKAGE)
-public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
+public class LocationTypeTranslatorImpl_2_5 implements LocationTypeTranslator {
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
 	@Override
-	public CodeableConcept toFhirResource(@Nonnull Location location) {
+	public List<CodeableConcept> toFhirResource(@Nonnull Location location) {
 		CodeableConcept type = null;
 		
 		if (location.getType() != null) {
 			type = conceptTranslator.toFhirResource(location.getType());
 		}
 		
-		return type;
+		return Collections.singletonList(type);
 	}
 	
 	@Override
-	public Location toOpenmrsType(@Nonnull Location location, @Nonnull CodeableConcept type) {
-		location.setType(conceptTranslator.toOpenmrsType(type));
+	public Location toOpenmrsType(@Nonnull Location location, @Nonnull List<CodeableConcept> types) {
+		Optional<CodeableConcept> typeConcept = types.stream().filter(Objects::nonNull).filter(t -> t.hasCoding())
+		        .findFirst();
+		
+		if (typeConcept.isPresent()) {
+			location.setType(conceptTranslator.toOpenmrsType(typeConcept.get()));
+		}
+		
 		return location;
 	}
 }
