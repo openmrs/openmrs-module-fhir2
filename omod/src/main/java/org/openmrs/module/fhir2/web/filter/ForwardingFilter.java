@@ -56,6 +56,8 @@ public class ForwardingFilter implements Filter {
 					return;
 			}
 			
+			chain.doFilter(req, res);
+			
 			String newURI = requestURI.replace(prefix.toString(), replacement);
 			req.getRequestDispatcher(newURI).forward(req, res);
 			return;
