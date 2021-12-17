@@ -304,8 +304,6 @@ public class FhirConstants {
 	
 	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
 	
-	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-	
 	public static final String MAX_SEARCH_HANDLER = "max.search.handler";
 	
 	public static final String LASTN_OBSERVATION_SEARCH_HANDLER = "lastn.observation.search.handler";
@@ -313,4 +311,6 @@ public class FhirConstants {
 	public static final String LASTN_ENCOUNTERS_SEARCH_HANDLER = "lastn.encounters.search.handler";
 	
 	public static final String EVERYTHING_SEARCH_HANDLER = "everything.search.handler";
+	
+	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 }
