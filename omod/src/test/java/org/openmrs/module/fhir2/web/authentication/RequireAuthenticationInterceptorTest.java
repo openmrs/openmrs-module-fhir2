@@ -9,9 +9,8 @@
  */
 package org.openmrs.module.fhir2.web.authentication;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
@@ -54,7 +53,7 @@ public class RequireAuthenticationInterceptorTest {
 		request.setRequestURI("/.well-known");
 		
 		// replay and verify
-		assertTrue(interceptor.ensureUserAuthenticated(request, response));
+		assertThat(interceptor.ensureUserAuthenticated(request, response), is(true));
 	}
 	
 	@Test
@@ -63,7 +62,7 @@ public class RequireAuthenticationInterceptorTest {
 		request.setRequestURI("/metadata");
 		
 		// replay and verify
-		assertTrue(interceptor.ensureUserAuthenticated(request, response));
+		assertThat(interceptor.ensureUserAuthenticated(request, response), is(true));
 	}
 	
 	@Test
@@ -72,9 +71,9 @@ public class RequireAuthenticationInterceptorTest {
 		request.setRequestURI("/ws/fhir2/R4/Someresource");
 		
 		// replay and verify
-		assertFalse(interceptor.ensureUserAuthenticated(request, response));
-		assertEquals("Not authenticated", response.getErrorMessage());
-		assertEquals(HttpServletResponse.SC_UNAUTHORIZED, response.getStatus());
+		assertThat(interceptor.ensureUserAuthenticated(request, response), is(false));
+		assertThat(response.getErrorMessage(), is("Not authenticated"));
+		assertThat(response.getStatus(), is(HttpServletResponse.SC_UNAUTHORIZED));
 	}
 	
 	@Test
@@ -84,6 +83,6 @@ public class RequireAuthenticationInterceptorTest {
 		when(Context.isAuthenticated()).thenReturn(true);
 		
 		// replay and verify
-		assertTrue(interceptor.ensureUserAuthenticated(request, response));
+		assertThat(interceptor.ensureUserAuthenticated(request, response), is(true));
 	}
 }
