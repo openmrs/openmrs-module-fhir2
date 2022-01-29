@@ -28,8 +28,10 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -131,7 +133,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientParam,
 	        @OptionalParam(name = Encounter.SP_TYPE) TokenAndListParam encounterType,
 	        @OptionalParam(name = Encounter.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
 	        @IncludeParam(allow = { "Encounter:" + Encounter.SP_LOCATION, "Encounter:" + Encounter.SP_PATIENT,
 	                "Encounter:" + Encounter.SP_PARTICIPANT }) HashSet<Include> includes,
 	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_ENCOUNTER,
@@ -151,7 +153,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return encounterService.searchForEncounters(date, location, participantReference, subjectReference, encounterType,
-		    id, lastUpdated, includes, revIncludes);
+		    id, lastUpdated, sort, includes, revIncludes);
 	}
 	
 	/**
