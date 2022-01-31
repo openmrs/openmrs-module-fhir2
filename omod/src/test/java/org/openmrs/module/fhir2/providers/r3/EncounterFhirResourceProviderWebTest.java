@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
@@ -131,6 +132,9 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	
 	@Captor
 	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<TokenParam> tokenCaptor;
 	
 	@Before
 	@Override
@@ -870,5 +874,34 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 		MockHttpServletResponse response = delete("/Encounter/" + WRONG_ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
+	}
+	
+	@Test
+	public void getEncounterEverything_shouldHandleEncounterId() throws Exception {
+		verifyEverythingOperation("/Encounter/" + ENCOUNTER_UUID + "/$everything?");
+		
+		verify(encounterService).getEncounterEverything(tokenCaptor.capture());
+		
+		assertThat(tokenCaptor.getValue(), notNullValue());
+		assertThat(tokenCaptor.getValue().getValue(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	private void verifyEverythingOperation(String uri) throws Exception {
+		Encounter encounter = new Encounter();
+		encounter.setId(ENCOUNTER_UUID);
+		
+		when(encounterService.getEncounterEverything(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), 10, 1));
+		
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+		
+		Bundle results = readBundleResponse(response);
+		assertThat(results.getEntry(), notNullValue());
+		assertThat(results.getEntry(), not(empty()));
+		assertThat(results.getEntry().get(0).getResource(), notNullValue());
+		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
 	}
 }
