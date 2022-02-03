@@ -336,7 +336,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	}
 	
 	@Test
-	public void searchForEncounters_shouldReturnEncounterEverything() {
+	public void getEncounterEverything_shouldReturnEncounterEverything() {
 		when(encounterService.getEncounterEverything(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), 10, 1));
 		
@@ -351,19 +351,19 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	}
 	
 	@Test
-	public void searchForEncounters_shouldReturnNullForEncounterEverythingWhenIdParamIsMissing() {
+	public void getEncounterEverything_shouldReturnNullForEncounterEverythingWhenIdParamIsMissing() {
 		IBundleProvider results = resourceProvider.getEncounterEverything(null);
 		assertThat(results, nullValue());
 	}
 	
 	@Test
-	public void searchForEncounters_shouldReturnNullForEncounterEverythingWhenIdPartIsMissingInIdParam() {
+	public void getEncounterEverything_shouldReturnNullForEncounterEverythingWhenIdPartIsMissingInIdParam() {
 		IBundleProvider results = resourceProvider.getEncounterEverything(new IdType());
 		assertThat(results, nullValue());
 	}
 	
 	@Test
-	public void searchForEncounters_shouldReturnNullEncounterEverythingWhenIdPartIsEmptyInIdParam() {
+	public void getEncounterEverything_shouldReturnNullEncounterEverythingWhenIdPartIsEmptyInIdParam() {
 		IBundleProvider results = resourceProvider.getEncounterEverything(new IdType(""));
 		assertThat(results, nullValue());
 	}

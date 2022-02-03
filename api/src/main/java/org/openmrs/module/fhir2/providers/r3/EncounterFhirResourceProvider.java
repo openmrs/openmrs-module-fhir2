@@ -162,7 +162,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	}
 	
 	/**
-	 * The $everything operation fetches all the information related the specified encounter
+	 * The $everything operation fetches all the information related to the specified encounter
 	 *
 	 * @param encounterId The id of the encounter
 	 * @return a bundle of resources which reference to or are referenced from the encounter
