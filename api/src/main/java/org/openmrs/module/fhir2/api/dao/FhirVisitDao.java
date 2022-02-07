@@ -11,8 +11,11 @@ package org.openmrs.module.fhir2.api.dao;
 
 import javax.annotation.Nonnull;
 
+import java.util.List;
+
 import org.openmrs.Visit;
 import org.openmrs.annotation.Authorized;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirVisitDao extends FhirDao<Visit> {
@@ -20,4 +23,12 @@ public interface FhirVisitDao extends FhirDao<Visit> {
 	@Override
 	@Authorized(PrivilegeConstants.GET_VISITS)
 	Visit get(@Nonnull String uuid);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_VISITS)
+	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
+	
+	@Override
+	@Authorized(PrivilegeConstants.GET_VISITS)
+	List<Visit> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
 }

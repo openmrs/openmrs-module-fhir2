@@ -1206,10 +1206,10 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(41));
+		assertThat(results.size(), equalTo(46));
 		
 		List<IBaseResource> resultList = getAllResources(results);
 		
-		assertThat(resultList, hasSize(41));
+		assertThat(resultList, hasSize(46));
 	}
 }

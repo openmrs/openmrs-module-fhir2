@@ -19,9 +19,13 @@
                         creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="e997ac86-4d8a-40f3-bedb-da84d35917b8"/>
     <patient patient_id="12" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
 
-    <visit_attribute_type visit_attribute_type_id="1" name="Two or Three" uuid="9516cc50-6f9f-11e0-8414-001e378eb67e"
+    <visit_attribute_type visit_attribute_type_id="1" name="Two or Three" uuid="9516cc50-6f9f-11e0-8414-001e378esb67e"
                           creator="1" date_created="2005-01-01 00:00:00.0" retired="false" min_occurs="2" max_occurs="3" />
     <visit visit_id="1" patient_id="12" visit_type_id="1" date_started="2020-01-04 00:00:00.0" date_stopped="2020-01-10 00:00:00.0"
            location_id="1" indication_concept_id="5497" creator="1" date_created="2014-01-04 00:00:00.0" voided="false"
            uuid="65aefd46-973d-4526-89de-93842c80ad11"/>
+    <encounter encounter_id="10" encounter_type="2" patient_id="12" location_id="1" visit_id="1" encounter_datetime="2020-01-04 00:00:00.0" creator="1"
+               date_created="2020-01-04 00:00:00.0" voided="false" uuid="9514u653-393b-4228-9o83-a3425b92d4ac"/>
+    <encounter_provider encounter_provider_id="1" encounter_id="10" provider_id="1" encounter_role_id="1" creator="1"
+                        date_created="2020-01-04 00:00:00.0" voided="false" uuid="19e0bbd8-10ee-45b7-akl6-9l68f457b7a9" />
 </dataset>
