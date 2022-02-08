@@ -968,4 +968,12 @@
                                  constraintName="fhir_patient_identifier_system_retired_by_fk"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
+
+     <changeSet id="update_target_uuid_column_length" author="moses_mutesa" dbms="mysql,mariadb,postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_reference"/>
+                <columnExists tableName="fhir_reference" columnName="target_uuid"/>
+        </preConditions>
+        <modifyDataType columnName="target_uuid" newDataType="char(38)" tableName="fhir_reference"/>
+    </changeSet>
 </databaseChangeLog>
