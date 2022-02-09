@@ -93,9 +93,11 @@ public class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_NON_CODED_CONDITION = OPENMRS_FHIR_EXT_PREFIX + "/non-coded-condition";
 	
 	public static final String OPENMRS_FHIR_EXT_MEDICINE = OPENMRS_FHIR_EXT_PREFIX + "/medicine";
-	
+
 	public static final String OPENMRS_FHIR_EXT_TASK_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/task/identifier";
-	
+
+	public static final String OPENMRS_FHIR_EXT_BATCH_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/bundle/identifier";
+
 	public static final String OPENMRS_FHIR_EXT_USER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/user/identifier";
 	
 	public static final String OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER = OPENMRS_FHIR_EXT_PREFIX + "/provider/identifier";
