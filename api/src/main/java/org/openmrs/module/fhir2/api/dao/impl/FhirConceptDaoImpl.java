@@ -13,11 +13,16 @@ import javax.annotation.Nonnull;
 
 import java.util.Optional;
 
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
 import org.openmrs.Concept;
 import org.openmrs.api.ConceptService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,5 +41,22 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	@Override
 	public Optional<Concept> getConceptBySourceNameAndCode(String sourceName, String code) {
 		return Optional.ofNullable(conceptService.getConceptByMapping(code, sourceName, false));
+	}
+	
+	@Override
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case FhirConstants.TITLE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleTitle(criteria, (StringAndListParam) param.getParam()));
+					break;
+			}
+		});
+	}
+	
+	private void handleTitle(Criteria criteria, StringAndListParam titlePattern) {
+		criteria.add(Restrictions.eq("set", true));
+		criteria.createAlias("names", "csn");
+		handleAndListParam(titlePattern, (title) -> propertyLike("csn.name", title)).ifPresent(criteria::add);
 	}
 }
