@@ -19,4 +19,6 @@ public class FhirTestConstants {
 	
 	public static final String PRACTITIONER = "Practitioner";
 	
+	public static final String NARROWER_THAN_MAP_TYPE_UUID = "43ac5109-7d8c-11e1-909d-c80aa9edcf4e";
+	
 }

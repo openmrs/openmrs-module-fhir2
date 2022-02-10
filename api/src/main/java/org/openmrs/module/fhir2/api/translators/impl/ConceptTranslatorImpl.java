@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
+import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.module.fhir2.api.FhirConceptService;
@@ -26,6 +27,8 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -48,13 +51,16 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
 		
 		for (ConceptMap mapping : concept.getConceptMappings()) {
-			ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
-			String sourceUrl = conceptSourceToURL(crt.getConceptSource().getName());
-			if (sourceUrl == null) {
-				continue;
+			if (mapping.getConceptMapType() != null
+			        && Objects.equals(mapping.getConceptMapType().getUuid(), ConceptMapType.SAME_AS_MAP_TYPE_UUID)) {
+				ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
+				String sourceUrl = conceptSourceToURL(crt.getConceptSource().getName());
+				if (sourceUrl == null) {
+					continue;
+				}
+
+				addConceptCoding(codeableConcept.addCoding(), sourceUrl, crt.getCode(), concept);
 			}
-			
-			addConceptCoding(codeableConcept.addCoding(), sourceUrl, crt.getCode(), concept);
 		}
 		
 		return codeableConcept;
