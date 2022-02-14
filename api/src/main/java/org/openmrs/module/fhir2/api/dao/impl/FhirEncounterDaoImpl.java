@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
+import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
 import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedUuids;
 
 import javax.annotation.Nonnull;
@@ -93,5 +94,15 @@ public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements Fhir
 	private int getMaxParameter(SearchParameterMap theParams) {
 		return ((NumberParam) theParams.getParameters(FhirConstants.MAX_SEARCH_HANDLER).get(0).getParam()).getValue()
 		        .intValue();
+	}
+	
+	@Override
+	protected String paramToProp(@Nonnull String param) {
+		switch (param) {
+			case SP_DATE:
+				return "encounterDatetime";
+			default:
+				return null;
+		}
 	}
 }
