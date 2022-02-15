@@ -15,12 +15,15 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Bundle;
-import org.openmrs.BaseOpenmrsData;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirBatchService;
-import org.openmrs.module.fhir2.api.dao.FhirDao;
+import org.openmrs.module.fhir2.api.dao.FhirBatchDao;
+import org.openmrs.module.fhir2.api.search.SearchQuery;
+import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
+import org.openmrs.module.fhir2.api.translators.BatchTranslator;
+import org.openmrs.module.fhir2.model.FhirBatch;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +31,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
-public class FhirBatchServiceImpl extends BaseFhirService<Bundle, org.openmrs.BaseOpenmrsData> implements FhirBatchService {
+public class FhirBatchServiceImpl extends BaseFhirService<Bundle, FhirBatch> implements FhirBatchService {
+
+	@Autowired
+	private FhirBatchDao dao;
+
+	@Autowired
+	private SearchQueryInclude<Bundle> searchQueryInclude;
+
+	@Autowired
+	private BatchTranslator translator;
+
+	@Autowired
+	private SearchQuery<FhirBatch, Bundle, FhirBatchDao, BatchTranslator, SearchQueryInclude<Bundle>> searchQuery;
+
 
 	@Override
 	public IBundleProvider searchBatches(TokenAndListParam identifier, TokenAndListParam batchType) {
@@ -36,16 +52,6 @@ public class FhirBatchServiceImpl extends BaseFhirService<Bundle, org.openmrs.Ba
 				.addParameter(FhirConstants.OPENMRS_FHIR_EXT_BATCH_IDENTIFIER, identifier)
 				.addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, batchType);
 
-		return null;
-	}
-
-	@Override
-	protected FhirDao<BaseOpenmrsData> getDao() {
-		return null;
-	}
-
-	@Override
-	protected OpenmrsFhirTranslator<BaseOpenmrsData, Bundle> getTranslator() {
-		return null;
+		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
 }

@@ -33,8 +33,8 @@ public class FhirBatchDaoImpl extends BaseFhirDao<FhirBatch> implements FhirBatc
 				case FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
 							.forEach(param -> handleAndListParam((TokenAndListParam) param.getParam(),
-									t -> Optional.of(eq("et.uuid", t.getValue())))
-									.ifPresent(t -> criteria.createAlias("encounterType", "et").add(t)));
+									t -> Optional.of(eq("bh.uuid", t.getValue()))));
+
 					break;
 			}
 		});
