@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedPerson;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
@@ -187,6 +188,12 @@ public class SearchQueryInclude<U extends IBaseResource> {
 					break;
 				case FhirConstants.INCLUDE_LINK_PARAM:
 					includedResourcesSet.addAll(handlePersonLinkInclude(resourceList, includeParam.getParamTargetType()));
+					break;
+				case FhirConstants.INCLUDE_BASED_0N_PARAM:
+					includedResourcesSet.addAll(handleServiceRequestInclude(resourceList, includeParam.getParamType()));
+					break;
+				case FhirConstants.INCLUDE_OWNER_PARAM:
+					includedResourcesSet.addAll(handlePractitionerInclude(resourceList, includeParam.getParamType()));
 					break;
 			}
 		});
@@ -448,6 +455,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				resourceList.forEach(
 				    resource -> uniquePatientUUIDs.add(getIdFromReference(((Condition) resource).getSubject())));
 				break;
+			case FhirConstants.TASK:
+				resourceList.forEach(resource -> uniquePatientUUIDs.add(getIdFromReference(((Task) resource).getFor())));
+				break;
 		}
 		
 		uniquePatientUUIDs.removeIf(Objects::isNull);
@@ -478,10 +488,50 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				resourceList.forEach(
 				    resource -> uniqueEncounterUUIDs.add(getIdFromReference(((ServiceRequest) resource).getEncounter())));
 				break;
+			case FhirConstants.TASK:
+				resourceList
+				        .forEach(resource -> uniqueEncounterUUIDs.add(getIdFromReference(((Task) resource).getEncounter())));
+				break;
 		}
 		
 		uniqueEncounterUUIDs.removeIf(Objects::isNull);
 		includedResources.addAll(encounterService.get(uniqueEncounterUUIDs));
+		
+		return includedResources;
+	}
+	
+	private Set<IBaseResource> handleServiceRequestInclude(List<U> resourceList, String paramType) {
+		Set<IBaseResource> includedResources = new HashSet<>();
+		Set<String> uniqueServiceRequestUUIDs = new HashSet<>();
+		
+		switch (paramType) {
+			case FhirConstants.TASK:
+				resourceList.forEach(resource -> {
+					List<Reference> serviceRequestReferenceList = new ArrayList<>();
+					((Task) resource).getBasedOn()
+					        .forEach(serviceRequest -> serviceRequestReferenceList.add(serviceRequest));
+					uniqueServiceRequestUUIDs.addAll(getIdsFromReferenceList(serviceRequestReferenceList));
+				});
+				break;
+		}
+		uniqueServiceRequestUUIDs.removeIf(Objects::isNull);
+		includedResources.addAll(serviceRequestService.get(uniqueServiceRequestUUIDs));
+		return includedResources;
+	}
+	
+	private Set<IBaseResource> handlePractitionerInclude(List<U> resourceList, String paramType) {
+		Set<IBaseResource> includedResources = new HashSet<>();
+		Set<String> uniquePractitionerUUIDs = new HashSet<>();
+		
+		switch (paramType) {
+			case FhirConstants.TASK:
+				resourceList
+				        .forEach(resource -> uniquePractitionerUUIDs.add(getIdFromReference(((Task) resource).getOwner())));
+				break;
+		}
+		
+		uniquePractitionerUUIDs.removeIf(Objects::isNull);
+		includedResources.addAll(practitionerService.get(uniquePractitionerUUIDs));
 		
 		return includedResources;
 	}
