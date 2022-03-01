@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collections;
@@ -41,7 +43,7 @@ public class VisitTypeTranslatorImpl implements VisitTypeTranslator<VisitType> {
 		
 		CodeableConcept code = new CodeableConcept();
 		code.addCoding().setSystem(FhirConstants.VISIT_TYPE_SYSTEM_URI).setCode(visitType.getUuid())
-		        .setDisplay(visitType.getName());
+		        .setDisplay(getMetadataTranslation(visitType));
 		return Collections.singletonList(code);
 	}
 	

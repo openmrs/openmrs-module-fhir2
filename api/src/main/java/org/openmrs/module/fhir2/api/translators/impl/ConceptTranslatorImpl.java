@@ -49,6 +49,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		
 		for (ConceptMap mapping : concept.getConceptMappings()) {
 			ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
+			
 			String sourceUrl = conceptSourceToURL(crt.getConceptSource().getName());
 			if (sourceUrl == null) {
 				continue;

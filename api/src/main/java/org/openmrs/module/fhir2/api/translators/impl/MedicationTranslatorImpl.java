@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang3.Validate.notNull;
-
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
@@ -39,7 +37,9 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 	
 	@Override
 	public Medication toFhirResource(@Nonnull Drug drug) {
-		notNull(drug, "The Drug object should not be null");
+		if (drug == null) {
+			return null;
+		}
 		
 		Medication medication = new Medication();
 		medication.setId(drug.getUuid());
@@ -73,31 +73,35 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 	
 	@Override
 	public Drug toOpenmrsType(@Nonnull Medication medication) {
-		notNull(medication, "The Medication object should not be null");
+		if (medication == null) {
+			return null;
+		}
+		
 		return toOpenmrsType(new Drug(), medication);
 	}
 	
 	@Override
-	public Drug toOpenmrsType(@Nonnull Drug existingDrug, @Nonnull Medication med) {
-		notNull(existingDrug, "The existing Drug object should not be null");
-		notNull(med, "The Medication object should not be null");
-		
-		if (med.getId() != null) {
-			existingDrug.setUuid(med.getId());
+	public Drug toOpenmrsType(@Nonnull Drug existingDrug, @Nonnull Medication medication) {
+		if (existingDrug == null || medication == null) {
+			return null;
 		}
 		
-		if (med.hasCode()) {
-			existingDrug.setConcept(conceptTranslator.toOpenmrsType(med.getCode()));
+		if (medication.getId() != null) {
+			existingDrug.setUuid(medication.getId());
 		}
 		
-		if (med.hasForm()) {
-			existingDrug.setConcept(conceptTranslator.toOpenmrsType(med.getForm()));
+		if (medication.hasCode()) {
+			existingDrug.setConcept(conceptTranslator.toOpenmrsType(medication.getCode()));
+		}
+		
+		if (medication.hasForm()) {
+			existingDrug.setConcept(conceptTranslator.toOpenmrsType(medication.getForm()));
 		}
 		
 		Collection<DrugIngredient> ingredients = new LinkedHashSet<>();
 		
-		if (med.hasIngredient()) {
-			for (Medication.MedicationIngredientComponent ingredient : med.getIngredient()) {
+		if (medication.hasIngredient()) {
+			for (Medication.MedicationIngredientComponent ingredient : medication.getIngredient()) {
 				DrugIngredient omrsIngredient = new DrugIngredient();
 				omrsIngredient.setDrug(existingDrug);
 				omrsIngredient.setIngredient(conceptTranslator.toOpenmrsType(ingredient.getItemCodeableConcept()));
@@ -106,7 +110,7 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 			existingDrug.setIngredients(ingredients);
 		}
 		
-		getOpenmrsMedicineExtension(med).ifPresent(ext -> ext.getExtension()
+		getOpenmrsMedicineExtension(medication).ifPresent(ext -> ext.getExtension()
 		        .forEach(e -> addMedicineComponent(existingDrug, e.getUrl(), ((StringType) e.getValue()).getValue())));
 		
 		return existingDrug;
