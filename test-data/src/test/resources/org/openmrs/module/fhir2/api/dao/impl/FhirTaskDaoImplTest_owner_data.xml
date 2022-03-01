@@ -9,20 +9,17 @@
     graphic logo is a trademark of OpenMRS Inc.
 -->
 <dataset>
-    <encounter encounter_id="10" encounter_type="2" patient_id="6" location_id="1" form_id="1" encounter_datetime="2008-08-01 00:00:00.0" creator="1" date_created="2008-08-18 14:09:05.0" voided="false" uuid="6519d653-393b-4118-9c83-a3715b82d4a1"/> 
+	<encounter encounter_id="10" encounter_type="2" patient_id="6" location_id="1" form_id="1" encounter_datetime="2008-08-01 00:00:00.0" creator="1" date_created="2008-08-18 14:09:05.0" voided="false" uuid="6519d653-393b-4118-9c83-a3715b82d4a1"/>
 	<fhir_reference reference_id="100" name="owner reference" target_type="Practitioner" reference="7f8aec9d-8269-4bb4-8bc5-1820bb31092c" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3d5" creator="1" date_created="2015-01-01 00:00:00.0" retired="false"/>
-
 	<!-- Task.owner -->
 	<fhir_task task_id="101" owner_reference_id="100" name="owner Requested Task" status="REQUESTED" intent="ORDER" creator="1" date_created="2012-03-01 00:00:00.0" date_changed="2015-05-01 00:00:00.0" retired="false" uuid="c1a3af38-c0a9-4c2e-9cc0-8e0440e357e5" />
 	<fhir_task task_id="102" owner_reference_id="100" name="owner Accepted Task" status="ACCEPTED" intent="ORDER" creator="1" date_created="2012-03-01 00:00:00.0" date_changed="2015-02-01 00:00:00.0" retired="false" uuid="c0a3cf35-c0a9-4c2e-9cc0-8e0440e357e5" />
 	<fhir_task task_id="103" owner_reference_id="100" name="owner Rejected Task" status="REJECTED" intent="ORDER" creator="1" date_created="2012-03-01 00:00:00.0" date_changed="2015-06-01 00:00:00.0" retired="false" uuid="cab3af32-c0a9-4c2e-9cc0-8e0440e357e5" />
-
-    <fhir_reference reference_id="101" name="For reference" target_type="Patient" reference="a7e04421-525f-442f-8138-05b619d16def" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3d6" creator="1" date_created="2015-01-01 00:00:00.0" retired="false"/>
-    <fhir_reference reference_id="102" name="owner reference" target_type="Practitioner" reference="c2299800-cca9-11e0-9572-0800200c9a66" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3d7" creator="1" date_created="2015-01-01 00:00:00.0" retired="false"/>
-    <fhir_reference reference_id="103" name="Encounter reference" target_type="Encounter" reference="6519d653-393b-4118-9c83-a3715b82d4a1" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3d8" creator="1" date_created="2015-01-01 00:00:00.0" retired="false"/>
-    <fhir_reference reference_id="104" name="basedOn reference" target_type="ServiceRequest" reference="1c96f25c-4949-4f72-9931-d808fbc226de" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3d9" creator="1" date_created="2012-01-01 00:00:00.0" retired="false"/>
-	
-    <!-- Task with References -->
+	<fhir_reference reference_id="101" name="For reference" target_type="Patient" reference="a7e04421-525f-442f-8138-05b619d16def" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3d6" creator="1" date_created="2015-01-01 00:00:00.0" retired="false"/>
+	<fhir_reference reference_id="102" name="owner reference" target_type="Practitioner" reference="c2299800-cca9-11e0-9572-0800200c9a66" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3d7" creator="1" date_created="2015-01-01 00:00:00.0" retired="false"/>
+	<fhir_reference reference_id="103" name="Encounter reference" target_type="Encounter" reference="6519d653-393b-4118-9c83-a3715b82d4a1" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3d8" creator="1" date_created="2015-01-01 00:00:00.0" retired="false"/>
+	<fhir_reference reference_id="104" name="basedOn reference" target_type="ServiceRequest" reference="1c96f25c-4949-4f72-9931-d808fbc226de" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3d9" creator="1" date_created="2012-01-01 00:00:00.0" retired="false"/>
+	<!-- Task with References -->
 	<fhir_task task_id="200" for_reference_id="101" owner_reference_id="102" encounter_reference_id="103" name="owner Requested Task" status="REQUESTED" intent="ORDER" creator="1" date_created="2012-03-01 00:00:00.0" date_changed="2015-05-01 00:00:00.0" retired="false" uuid="c1a3af38-c0a9-4c2e-9cc0-8e0440e357e6" />
 	<fhir_task_based_on_reference task_id="200" reference_id="104" />
 </dataset>
