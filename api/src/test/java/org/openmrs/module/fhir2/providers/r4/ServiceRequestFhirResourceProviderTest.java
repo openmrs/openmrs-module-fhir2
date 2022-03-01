@@ -360,6 +360,7 @@ public class ServiceRequestFhirResourceProviderTest {
 		assertThat(result.getResource(), equalTo(serviceRequest));
 	}
 	
+	@Test
 	public void searchServiceRequest_shouldAddRelatedResourcesToResultListWhenIncluded() {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("ServiceRequest:patient"));

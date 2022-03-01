@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.search;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrBefore;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
@@ -19,12 +20,16 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -36,6 +41,10 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,6 +78,8 @@ public class TaskSearchQueryTest extends BaseModuleContextSensitiveTest {
 	private static final String OWNER_TASK_UUID = "c1a3af38-c0a9-4c2e-9cc0-8e0440e357e5";
 	
 	private static final String OWNER_USER_UUID = "7f8aec9d-8269-4bb4-8bc5-1820bb31092c";
+	
+	private static final String TASK_REFF_UUID = "c1a3af38-c0a9-4c2e-9cc0-8e0440e357e6";
 	
 	private static final String DATE_CREATED = "2012-03-01";
 	
@@ -494,4 +505,143 @@ public class TaskSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 	}
 	
+	@Test
+	public void searchForTasks_shouldAddPatientsToResultListWhenIncluded() throws Exception {
+		executeDataSet(TASK_DATA_OWNER_XML);
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(TASK_REFF_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Task:patient"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(TASK_REFF_UUID));
+		
+		Task returnedTask = (Task) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedTask.getFor().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForTasks_shouldAddPractitionerToResultListWhenIncluded() throws Exception {
+		executeDataSet(TASK_DATA_OWNER_XML);
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(TASK_REFF_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Task:owner"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(TASK_REFF_UUID));
+		
+		Task returnedTask = (Task) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Practitioner.class)),
+		    hasProperty("id", equalTo(returnedTask.getOwner().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForTasks_shouldAddEncounterToResultListWhenIncluded() throws Exception {
+		executeDataSet(TASK_DATA_OWNER_XML);
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(TASK_REFF_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Task:encounter"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(TASK_REFF_UUID));
+		
+		Task returnedTask = (Task) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("id", equalTo(returnedTask.getEncounter().getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForTasks_shouldAddServiceRequestToResultListWhenIncluded() throws Exception {
+		executeDataSet(TASK_DATA_OWNER_XML);
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(TASK_REFF_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Task:based-on"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(2)); // included resource added as part of result list
+		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(TASK_REFF_UUID));
+		
+		Task returnedTask = (Task) resultList.iterator().next();
+		assertThat(resultList, hasItem(allOf(is(instanceOf(ServiceRequest.class)),
+		    hasProperty("id", equalTo(returnedTask.getBasedOn().get(0).getReferenceElement().getIdPart())))));
+	}
+	
+	@Test
+	public void searchForTasks_shouldHandleMultipleIncludes() throws Exception {
+		executeDataSet(TASK_DATA_OWNER_XML);
+		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(TASK_REFF_UUID));
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Task:patient"));
+		includes.add(new Include("Task:owner"));
+		includes.add(new Include("Task:encounter"));
+		includes.add(new Include("Task:based-on"));
+		
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, uuid)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+		
+		IBundleProvider results = search(theParams);
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(1));
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), equalTo(5)); // included resource added as part of result list
+		assertThat(((Task) resultList.iterator().next()).getIdElement().getIdPart(), equalTo(TASK_REFF_UUID));
+		
+		Task returnedTask = (Task) resultList.iterator().next();
+		
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Patient.class)),
+		    hasProperty("id", equalTo(returnedTask.getFor().getReferenceElement().getIdPart())))));
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Practitioner.class)),
+		    hasProperty("id", equalTo(returnedTask.getOwner().getReferenceElement().getIdPart())))));
+		assertThat(resultList, hasItem(allOf(is(instanceOf(Encounter.class)),
+		    hasProperty("id", equalTo(returnedTask.getEncounter().getReferenceElement().getIdPart())))));
+		assertThat(resultList, hasItem(allOf(is(instanceOf(ServiceRequest.class)),
+		    hasProperty("id", equalTo(returnedTask.getBasedOn().get(0).getReferenceElement().getIdPart())))));
+	}
 }
