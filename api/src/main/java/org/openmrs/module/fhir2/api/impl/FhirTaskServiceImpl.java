@@ -74,7 +74,8 @@ public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> impleme
 		        .addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .setSortSpec(sort).addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+			.addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
+		        .setSortSpec(sort);
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}
