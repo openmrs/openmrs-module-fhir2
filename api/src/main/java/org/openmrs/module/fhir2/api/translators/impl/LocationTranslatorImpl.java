@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
 
 import javax.annotation.Nonnull;
 
@@ -65,12 +66,14 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	 */
 	@Override
 	public Location toFhirResource(@Nonnull org.openmrs.Location openmrsLocation) {
-		notNull(openmrsLocation, "The Openmrs Location object should not be null");
+		if (openmrsLocation == null) {
+			return null;
+		}
 		
 		Location fhirLocation = new Location();
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent();
 		fhirLocation.setId(openmrsLocation.getUuid());
-		fhirLocation.setName(openmrsLocation.getName());
+		fhirLocation.setName(getMetadataTranslation(openmrsLocation));
 		fhirLocation.setDescription(openmrsLocation.getDescription());
 		fhirLocation.setAddress(locationAddressTranslator.toFhirResource(openmrsLocation));
 		
@@ -125,7 +128,10 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	 */
 	@Override
 	public org.openmrs.Location toOpenmrsType(@Nonnull Location fhirLocation) {
-		notNull(fhirLocation, "The Location object should not be null");
+		if (fhirLocation == null) {
+			return null;
+		}
+		
 		return toOpenmrsType(new org.openmrs.Location(), fhirLocation);
 	}
 	

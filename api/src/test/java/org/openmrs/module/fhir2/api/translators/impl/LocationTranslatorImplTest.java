@@ -160,16 +160,6 @@ public class LocationTranslatorImplTest {
 		assertThat(fhirLocation.getDescription(), equalTo(LOCATION_DESCRIPTION));
 	}
 	
-	@Test(expected = NullPointerException.class)
-	public void toFhirResource_shouldThrowExceptionWhenCalledWithEmptyOmrsLocation() {
-		locationTranslator.toFhirResource(null);
-	}
-	
-	@Test(expected = NullPointerException.class)
-	public void toOpenmrsType_shouldThrowExceptionWhenCalledWithEmptyFhirLocation() {
-		locationTranslator.toOpenmrsType(null);
-	}
-	
 	@Test
 	public void shouldTranslateFhirLocationToOmrsLocation() {
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();

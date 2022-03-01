@@ -77,11 +77,6 @@ public class MedicationTranslatorImplTest {
 		drug.setDosageForm(dosageConcept);
 	}
 	
-	@Test(expected = NullPointerException.class)
-	public void toFhirResource_shouldThrowExceptionWhenCalledWithNullObject() {
-		medicationTranslator.toFhirResource(null);
-	}
-	
 	@Test
 	public void toFhirResource_shouldTranslateUuidToId() {
 		drug.setUuid(MEDICATION_UUID);
@@ -140,11 +135,6 @@ public class MedicationTranslatorImplTest {
 		org.hl7.fhir.r4.model.Medication medication = medicationTranslator.toFhirResource(drug);
 		assertThat(medication, notNullValue());
 		assertThat(medication.getStatus(), equalTo(Medication.MedicationStatus.ACTIVE));
-	}
-	
-	@Test(expected = NullPointerException.class)
-	public void toOpenmrsType_shouldThrowExceptionIfCalledWithNull() {
-		medicationTranslator.toOpenmrsType(drug, null);
 	}
 	
 	@Test
