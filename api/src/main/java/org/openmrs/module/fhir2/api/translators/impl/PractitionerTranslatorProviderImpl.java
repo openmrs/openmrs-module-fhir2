@@ -17,24 +17,16 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Person;
-import org.openmrs.PersonAddress;
-import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.ProviderAttribute;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirPractitionerDao;
-import org.openmrs.module.fhir2.api.translators.BirthDateTranslator;
-import org.openmrs.module.fhir2.api.translators.GenderTranslator;
-import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
-import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
@@ -43,19 +35,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class PractitionerTranslatorProviderImpl implements PractitionerTranslator<Provider> {
-	
-	@Autowired
-	private PersonNameTranslator nameTranslator;
-	
-	@Autowired
-	private PersonAddressTranslator addressTranslator;
-	
-	@Autowired
-	private GenderTranslator genderTranslator;
-	
-	@Autowired
-	private BirthDateTranslator birthDateTranslator;
+public class PractitionerTranslatorProviderImpl extends BasePractitionerTranslator implements PractitionerTranslator<Provider> {
 	
 	@Autowired
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
@@ -68,6 +48,42 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	
 	@Autowired
 	private ProvenanceTranslator<Provider> provenanceTranslator;
+	
+	@Override
+	public Practitioner toFhirResource(@Nonnull Provider provider) {
+		if (provider == null) {
+			return null;
+		}
+		
+		Practitioner practitioner = new Practitioner();
+		Identifier identifier = new Identifier();
+		identifier.setSystem(FhirConstants.OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER);
+		identifier.setValue(provider.getIdentifier());
+		practitioner.addIdentifier(identifier);
+		
+		practitioner.setId(provider.getUuid());
+		practitioner.setActive(provider.getRetired());
+		practitioner.setTelecom(getProviderContactDetails(provider));
+		
+		if (provider.getPerson() != null) {
+			personToPractitioner(provider.getPerson(), practitioner);
+		}
+		
+		practitioner.getMeta().setLastUpdated(provider.getDateChanged());
+		practitioner.addContained(provenanceTranslator.getCreateProvenance(provider));
+		practitioner.addContained(provenanceTranslator.getUpdateProvenance(provider));
+		
+		return practitioner;
+	}
+	
+	@Override
+	public Provider toOpenmrsType(@Nonnull Practitioner practitioner) {
+		if (practitioner == null) {
+			return null;
+		}
+		
+		return toOpenmrsType(new org.openmrs.Provider(), practitioner);
+	}
 	
 	@Override
 	public Provider toOpenmrsType(@Nonnull Provider existingProvider, @Nonnull Practitioner practitioner) {
@@ -87,21 +103,8 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 			existingProvider.setPerson(new Person());
 		}
 		
-		if (practitioner.hasBirthDateElement()) {
-			birthDateTranslator.toOpenmrsType(existingProvider.getPerson(), practitioner.getBirthDateElement());
-		}
+		practitionerToPerson(practitioner, existingProvider.getPerson());
 		
-		for (HumanName name : practitioner.getName()) {
-			existingProvider.getPerson().addName(nameTranslator.toOpenmrsType(name));
-		}
-		
-		if (practitioner.hasGender()) {
-			existingProvider.getPerson().setGender(genderTranslator.toOpenmrsType(practitioner.getGender()));
-		}
-		
-		for (Address address : practitioner.getAddress()) {
-			existingProvider.getPerson().addAddress(addressTranslator.toOpenmrsType(address));
-		}
 		practitioner.getTelecom().stream().map(
 		    contactPoint -> (ProviderAttribute) telecomTranslator.toOpenmrsType(new ProviderAttribute(), contactPoint))
 		        .filter(Objects::nonNull).forEach(existingProvider::addAttribute);
@@ -109,57 +112,11 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 		return existingProvider;
 	}
 	
-	@Override
-	public Practitioner toFhirResource(@Nonnull Provider provider) {
-		if (provider == null) {
-			return null;
-		}
-		
-		Practitioner practitioner = new Practitioner();
-		Identifier identifier = new Identifier();
-		identifier.setSystem(FhirConstants.OPENMRS_FHIR_EXT_PROVIDER_IDENTIFIER);
-		identifier.setValue(provider.getIdentifier());
-		practitioner.addIdentifier(identifier);
-		
-		practitioner.setId(provider.getUuid());
-		practitioner.setActive(provider.getRetired());
-		practitioner.setTelecom(getProviderContactDetails(provider));
-		
-		if (provider.getPerson() != null) {
-			practitioner.setBirthDateElement(birthDateTranslator.toFhirResource(provider.getPerson()));
-			
-			practitioner.setGender(genderTranslator.toFhirResource(provider.getPerson().getGender()));
-			
-			for (PersonName name : provider.getPerson().getNames()) {
-				practitioner.addName(nameTranslator.toFhirResource(name));
-			}
-			
-			for (PersonAddress address : provider.getPerson().getAddresses()) {
-				practitioner.addAddress(addressTranslator.toFhirResource(address));
-			}
-		}
-		
-		practitioner.getMeta().setLastUpdated(provider.getDateChanged());
-		practitioner.addContained(provenanceTranslator.getCreateProvenance(provider));
-		practitioner.addContained(provenanceTranslator.getUpdateProvenance(provider));
-		
-		return practitioner;
-	}
-	
-	public List<ContactPoint> getProviderContactDetails(@Nonnull Provider provider) {
+	protected List<ContactPoint> getProviderContactDetails(@Nonnull Provider provider) {
 		return fhirPractitionerDao
 		        .getActiveAttributesByPractitionerAndAttributeTypeUuid(provider,
 		            globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE))
 		        .stream().map(telecomTranslator::toFhirResource).collect(Collectors.toList());
-	}
-	
-	@Override
-	public Provider toOpenmrsType(@Nonnull Practitioner practitioner) {
-		if (practitioner == null) {
-			return null;
-		}
-		
-		return toOpenmrsType(new org.openmrs.Provider(), practitioner);
 	}
 	
 }

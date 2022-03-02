@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.createPractitionerReference;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import javax.annotation.Nonnull;
 
@@ -24,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class EncounterParticipantTranslatorImpl extends BaseReferenceHandlingTranslator implements EncounterParticipantTranslator {
+public class EncounterParticipantTranslatorImpl implements EncounterParticipantTranslator {
 	
 	@Autowired
 	private FhirPractitionerDao practitionerDao;

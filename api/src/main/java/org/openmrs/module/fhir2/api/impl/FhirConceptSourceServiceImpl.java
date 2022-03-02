@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -18,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,7 +47,18 @@ public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
+	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName,
+	        @Nullable FhirCache cache) {
+		if (sourceName == null) {
+			return Optional.empty();
+		}
+		
+		if (cache != null) {
+			String cacheKey = "fhir-concept-source-" + sourceName;
+			return (Optional<FhirConceptSource>) cache.get(cacheKey,
+			    k -> dao.getFhirConceptSourceByConceptSourceName(sourceName));
+		}
+		
 		return dao.getFhirConceptSourceByConceptSourceName(sourceName);
 	}
 }

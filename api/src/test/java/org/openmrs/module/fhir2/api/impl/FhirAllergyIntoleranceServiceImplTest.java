@@ -122,9 +122,9 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	}
 	
 	@Test
-	public void getAllergyIntoleranceByUuid_shouldGetAllergyIntoleranceByUuid() {
+	public void get_shouldGetAllergyIntoleranceByUuid() {
 		when(allergyIntoleranceDao.get(ALLERGY_UUID)).thenReturn(omrsAllergy);
-		when(translator.toFhirResource(omrsAllergy)).thenReturn(fhirAllergy);
+		when(translator.toFhirResource(omrsAllergy, null)).thenReturn(fhirAllergy);
 		
 		AllergyIntolerance result = service.get(ALLERGY_UUID);
 		assertThat(result, notNullValue());
@@ -133,7 +133,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	}
 	
 	@Test
-	public void getAllergyIntoleranceByUuid_shouldResourceNotFoundWhenCalledWithWrongUuid() {
+	public void get_shouldResourceNotFoundWhenCalledWithWrongUuid() {
 		assertThrows(ResourceNotFoundException.class, () -> service.get(WRONG_ALLERGY_UUID));
 	}
 	
@@ -494,7 +494,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 	}
 	
 	@Test
-	public void saveAllergy_shouldSaveNewAllergy() {
+	public void create_shouldSaveNewAllergy() {
 		Allergy allergy = new Allergy();
 		allergy.setUuid(ALLERGY_UUID);
 		
@@ -506,6 +506,7 @@ public class FhirAllergyIntoleranceServiceImplTest {
 		when(allergyIntoleranceDao.createOrUpdate(allergy)).thenReturn(allergy);
 		
 		AllergyIntolerance result = service.create(allergyIntolerance);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getId(), equalTo(ALLERGY_UUID));
 	}

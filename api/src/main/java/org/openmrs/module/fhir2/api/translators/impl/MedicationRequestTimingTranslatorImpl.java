@@ -32,6 +32,7 @@ public class MedicationRequestTimingTranslatorImpl implements MedicationRequestT
 		if (drugOrder == null) {
 			return null;
 		}
+		
 		Timing timing = new Timing();
 		timing.addEvent(drugOrder.getScheduledDate());
 		timing.setRepeat(timingComponentTranslator.toFhirResource(drugOrder));

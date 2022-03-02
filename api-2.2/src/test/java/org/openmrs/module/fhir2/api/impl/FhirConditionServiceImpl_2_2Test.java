@@ -116,9 +116,9 @@ public class FhirConditionServiceImpl_2_2Test {
 	}
 	
 	@Test
-	public void shouldGetConditionByUuid() {
+	public void get_shouldGetConditionByUuid() {
 		when(dao.get(CONDITION_UUID)).thenReturn(openmrsCondition);
-		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(fhirCondition);
+		when(conditionTranslator.toFhirResource(openmrsCondition, null)).thenReturn(fhirCondition);
 		
 		org.hl7.fhir.r4.model.Condition condition = conditionService.get(CONDITION_UUID);
 		
@@ -128,7 +128,7 @@ public class FhirConditionServiceImpl_2_2Test {
 	}
 	
 	@Test
-	public void shouldThrowExceptionWhenGetMissingUuid() {
+	public void get_shouldThrowExceptionForMissingUuid() {
 		assertThrows(ResourceNotFoundException.class, () -> conditionService.get(WRONG_CONDITION_UUID));
 	}
 	
@@ -160,7 +160,7 @@ public class FhirConditionServiceImpl_2_2Test {
 		condition.setId(CONDITION_UUID);
 		
 		when(dao.get(CONDITION_UUID)).thenReturn(openmrsCondition);
-		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(condition);
+		when(conditionTranslator.toFhirResource(openmrsCondition, null)).thenReturn(condition);
 		when(dao.createOrUpdate(openmrsCondition)).thenReturn(openmrsCondition);
 		when(conditionTranslator.toOpenmrsType(any(Condition.class), any(org.hl7.fhir.r4.model.Condition.class)))
 		        .thenReturn(openmrsCondition);

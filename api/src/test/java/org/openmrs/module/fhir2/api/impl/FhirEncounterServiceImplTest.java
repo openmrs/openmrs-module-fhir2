@@ -134,7 +134,7 @@ public class FhirEncounterServiceImplTest {
 	@Test
 	public void get_shouldGetEncounterByUuid() {
 		when(dao.get(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
-		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		when(encounterTranslator.toFhirResource(openMrsEncounter, null)).thenReturn(fhirEncounter);
 		
 		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.get(ENCOUNTER_UUID);
 		
@@ -211,7 +211,7 @@ public class FhirEncounterServiceImplTest {
 		when(encounterTranslator.toOpenmrsType(openMrsEncounter, fhirEncounter)).thenReturn(openMrsEncounter);
 		when(dao.createOrUpdate(openMrsEncounter)).thenReturn(openMrsEncounter);
 		when(dao.get(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
-		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		when(encounterTranslator.toFhirResource(openMrsEncounter, null)).thenReturn(fhirEncounter);
 		
 		org.hl7.fhir.r4.model.Encounter encounter = encounterService.update(ENCOUNTER_UUID, fhirEncounter);
 		

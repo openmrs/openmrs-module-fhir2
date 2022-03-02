@@ -10,6 +10,12 @@
 package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import java.util.Locale;
+
+import org.openmrs.OpenmrsObject;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 
 /**
  * Generic interface for a translator between OpenMRS data and FHIR resources
@@ -21,9 +27,52 @@ public interface ToFhirTranslator<T, U> extends FhirTranslator {
 	
 	/**
 	 * Maps an OpenMRS data element to a FHIR resource
-	 * 
+	 *
 	 * @param data the OpenMRS data element to translate
 	 * @return the corresponding FHIR resource
 	 */
 	U toFhirResource(@Nonnull T data);
+	
+	/**
+	 * Maps an OpenMRS data element to a FHIR resource
+	 * 
+	 * @param data the OpenMRS data element to translate
+	 * @param cache contextual cache
+	 * @return the corresponding FHIR resource
+	 */
+	default U toFhirResource(@Nonnull T data, @Nullable FhirCache cache) {
+		if (cache != null) {
+			String cacheKey = getCacheKey(data);
+			if (cacheKey != null) {
+				try {
+					@SuppressWarnings("unchecked")
+					U cached = (U) cache.get(cacheKey, k -> toFhirResource(data));
+					return cached;
+				}
+				catch (ClassCastException e) {
+					// we shouldn't really get here, but...
+					return toFhirResource(data);
+				}
+			}
+		}
+		
+		return toFhirResource(data);
+	}
+	
+	default void invalidate(@Nonnull T data, FhirCache fhirCache) {
+		fhirCache.invalidate(getCacheKey(data));
+	}
+	
+	default String getCacheKey(@Nonnull T data) {
+		if (data == null) {
+			return null;
+		}
+		
+		if (data instanceof OpenmrsObject) {
+			return this.getClass().getSimpleName().toLowerCase(Locale.ROOT) + "-"
+			        + data.getClass().getSimpleName().toLowerCase(Locale.ROOT) + "-" + ((OpenmrsObject) data).getUuid();
+		}
+		
+		return null;
+	}
 }

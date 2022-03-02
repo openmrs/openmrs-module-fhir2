@@ -90,7 +90,7 @@ public class FhirConceptSourceServiceImplTest {
 		FhirConceptSource source = new FhirConceptSource();
 		when(dao.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.of(source));
 		
-		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC");
+		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC", null);
 		
 		assertThat(result.isPresent(), is(true));
 		assertThat(result.get(), equalTo(source));
@@ -100,7 +100,7 @@ public class FhirConceptSourceServiceImplTest {
 	public void getFhirConceptSourceByConceptSourceName_shouldReturnEmptyWhenNoConceptSourceFound() {
 		when(dao.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.empty());
 		
-		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC");
+		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC", null);
 		
 		assertThat(result.isPresent(), is(false));
 	}

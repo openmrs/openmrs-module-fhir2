@@ -9,12 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Location;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PACKAGE)
@@ -23,7 +27,16 @@ public abstract class BaseEncounterTranslator {
 	@Autowired
 	private EncounterClassMap encounterClassMap;
 	
-	protected Coding mapLocationToClass(Location location) {
+	protected Coding mapLocationToClass(@Nonnull Location location, @Nullable FhirCache cache) {
+		if (location != null && cache != null) {
+			return (Coding) cache.get("encounter-class-location-" + location.getUuid(),
+			    k -> mapLocationToClassInternal(location));
+		}
+		
+		return mapLocationToClassInternal(location);
+	}
+	
+	private Coding mapLocationToClassInternal(@Nonnull Location location) {
 		Coding coding = new Coding();
 		coding.setSystem(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI);
 		// The default code for anything that cannot be matched with FHIR codes.
@@ -31,6 +44,7 @@ public abstract class BaseEncounterTranslator {
 		if (location == null) {
 			return coding;
 		}
+		
 		String classCode = encounterClassMap.getFhirClass(location.getUuid());
 		if (classCode != null) {
 			coding.setCode(classCode);

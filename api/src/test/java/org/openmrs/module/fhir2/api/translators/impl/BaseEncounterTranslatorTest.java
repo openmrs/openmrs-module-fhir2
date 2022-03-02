@@ -46,7 +46,7 @@ public class BaseEncounterTranslatorTest {
 		location.setUuid(LOCATION_UUID);
 		when(encounterClassMap.getFhirClass(LOCATION_UUID)).thenReturn("AMB");
 		
-		Coding result = baseEncounterTranslator.mapLocationToClass(location);
+		Coding result = baseEncounterTranslator.mapLocationToClass(location, null);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, notNullValue());
@@ -56,7 +56,7 @@ public class BaseEncounterTranslatorTest {
 	
 	@Test
 	public void shouldMapLocationToAMBCodeWhenLocationIsNull() {
-		Coding result = baseEncounterTranslator.mapLocationToClass(null);
+		Coding result = baseEncounterTranslator.mapLocationToClass(null, null);
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getSystem(), is(FhirConstants.ENCOUNTER_CLASS_VALUE_SET_URI));

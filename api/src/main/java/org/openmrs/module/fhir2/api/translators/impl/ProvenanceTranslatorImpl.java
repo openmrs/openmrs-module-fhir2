@@ -13,11 +13,10 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class ProvenanceTranslatorImpl<T extends OpenmrsObject & Auditable> extends BaseProvenanceHandlingTranslator<T> implements ProvenanceTranslator<T> {
+public class ProvenanceTranslatorImpl<T extends OpenmrsObject & Auditable> extends BaseProvenanceHandlingTranslator<T> {
 	
 }

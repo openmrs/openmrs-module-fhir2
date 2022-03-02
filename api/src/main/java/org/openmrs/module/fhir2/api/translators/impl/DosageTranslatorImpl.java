@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -19,6 +20,7 @@ import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,14 +36,24 @@ public class DosageTranslatorImpl implements DosageTranslator {
 	
 	@Override
 	public Dosage toFhirResource(@Nonnull DrugOrder drugOrder) {
+		return toFhirResourceInternal(drugOrder, null);
+	}
+	
+	@Override
+	public Dosage toFhirResource(@Nonnull DrugOrder drugOrder, @Nullable FhirCache cache) {
+		return toFhirResourceInternal(drugOrder, cache);
+	}
+	
+	protected Dosage toFhirResourceInternal(@Nonnull DrugOrder drugOrder, @Nullable FhirCache cache) {
 		if (drugOrder == null) {
 			return null;
 		}
+		
 		Dosage dosage = new Dosage();
 		dosage.setText(drugOrder.getDosingInstructions());
 		dosage.setAsNeeded(new BooleanType(drugOrder.getAsNeeded()));
-		dosage.setRoute(conceptTranslator.toFhirResource(drugOrder.getRoute()));
-		dosage.setTiming(timingTranslator.toFhirResource(drugOrder));
+		dosage.setRoute(conceptTranslator.toFhirResource(drugOrder.getRoute(), cache));
+		dosage.setTiming(timingTranslator.toFhirResource(drugOrder, cache));
 		
 		return dosage;
 	}

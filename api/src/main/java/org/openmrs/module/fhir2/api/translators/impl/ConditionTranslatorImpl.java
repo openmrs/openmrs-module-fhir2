@@ -12,14 +12,15 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import java.util.Date;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
@@ -28,13 +29,13 @@ import org.openmrs.Person;
 import org.openmrs.User;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.api.ConceptService;
-import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,27 +62,32 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 	@Override
 	public org.hl7.fhir.r4.model.Condition toFhirResource(@Nonnull Obs obsCondition) {
 		notNull(obsCondition, "The Openmrs Condition object should not be null");
-		
+		return toFhirResourceInternal(obsCondition, null);
+	}
+	
+	@Override
+	public Condition toFhirResource(@Nonnull Obs obsCondition, @Nullable FhirCache cache) {
+		notNull(obsCondition, "The Openmrs Condition object should not be null");
+		return toFhirResourceInternal(obsCondition, cache);
+	}
+	
+	protected Condition toFhirResourceInternal(@Nonnull Obs obsCondition, @Nullable FhirCache cache) {
 		org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
 		fhirCondition.setId(obsCondition.getUuid());
 		
 		Person obsPerson = obsCondition.getPerson();
 		if (obsPerson != null) {
-			if (obsPerson instanceof HibernateProxy) {
-				obsPerson = HibernateUtil.getRealObjectFromProxy(obsPerson);
-			}
-			
 			if (obsPerson instanceof Patient) {
-				fhirCondition.setSubject(patientReferenceTranslator.toFhirResource((Patient) obsPerson));
+				fhirCondition.setSubject(patientReferenceTranslator.toFhirResource((Patient) obsPerson, cache));
 			}
 		}
 		
 		if (obsCondition.getValueCoded() != null) {
-			fhirCondition.setCode(conceptTranslator.toFhirResource(obsCondition.getValueCoded()));
+			fhirCondition.setCode(conceptTranslator.toFhirResource(obsCondition.getValueCoded(), cache));
 		}
 		
 		fhirCondition.setOnset(new DateTimeType().setValue(obsCondition.getObsDatetime()));
-		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(obsCondition.getCreator()));
+		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(obsCondition.getCreator(), cache));
 		fhirCondition.setRecordedDate(obsCondition.getDateCreated());
 		fhirCondition.getMeta().setLastUpdated(obsCondition.getDateChanged());
 		fhirCondition.addContained(provenanceTranslator.getCreateProvenance(obsCondition));
@@ -100,17 +106,20 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 	public Obs toOpenmrsType(@Nonnull Obs existingObsCondition, @Nonnull org.hl7.fhir.r4.model.Condition condition) {
 		notNull(existingObsCondition, "The existing Openmrs Obs Condition object should not be null");
 		notNull(condition, "The Condition object should not be null");
+		
 		existingObsCondition.setUuid(condition.getIdElement().getIdPart());
 		CodeableConcept codeableConcept = condition.getCode();
 		existingObsCondition.setValueCoded(conceptTranslator.toOpenmrsType(codeableConcept));
 		existingObsCondition.setPerson(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));
 		Concept problemList = conceptService.getConceptByUuid(FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID);
+		
 		if (problemList != null) {
 			existingObsCondition.setConcept(problemList);
 		} else {
 			throw new InternalErrorException(
 			        "Concept " + FhirConstants.CONDITION_OBSERVATION_CONCEPT_UUID + " ProblemList Not found");
 		}
+		
 		Date onsetTime = condition.getOnsetDateTimeType().getValue();
 		Date recordTime = condition.getRecordedDateElement().getValue();
 		if (onsetTime != null) {

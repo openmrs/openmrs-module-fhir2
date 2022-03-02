@@ -130,7 +130,7 @@ public class FhirLocationServiceImplTest {
 	@Test
 	public void getLocationByUuid_shouldGetLocationByUuid() {
 		when(locationDao.get(LOCATION_UUID)).thenReturn(location);
-		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
+		when(locationTranslator.toFhirResource(location, null)).thenReturn(fhirLocation);
 		
 		org.hl7.fhir.r4.model.Location result = fhirLocationService.get(LOCATION_UUID);
 		

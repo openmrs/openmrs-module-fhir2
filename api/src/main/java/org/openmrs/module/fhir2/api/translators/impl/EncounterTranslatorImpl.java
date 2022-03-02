@@ -9,9 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang3.Validate.notNull;
-
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -32,6 +31,7 @@ import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,48 +61,75 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
 	
 	@Override
-	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openMrsEncounter) {
-		notNull(openMrsEncounter, "The Openmrs Encounter object should not be null");
-		
-		Encounter encounter = new Encounter();
-		encounter.setId(openMrsEncounter.getUuid());
-		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
-		encounter.setType(encounterTypeTranslator.toFhirResource(openMrsEncounter.getEncounterType()));
-		
-		encounter.setSubject(patientReferenceTranslator.toFhirResource(openMrsEncounter.getPatient()));
-		encounter.setParticipant(openMrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource)
-		        .collect(Collectors.toList()));
-		
-		// add visit as part of encounter
-		encounter.setPartOf(visitReferenceTranlator.toFhirResource(openMrsEncounter.getVisit()));
-		
-		if (openMrsEncounter.getLocation() != null) {
-			encounter.setLocation(
-			    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
+	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter omrsEncounter) {
+		if (omrsEncounter == null) {
+			return null;
 		}
 		
-		encounter.setPeriod(encounterPeriodTranslator.toFhirResource(openMrsEncounter));
+		return toFhirResourceInternal(omrsEncounter, null);
+	}
+	
+	@Override
+	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter omrsEncounter, @Nullable FhirCache cache) {
+		if (omrsEncounter == null) {
+			return null;
+		}
+		
+		if (cache != null) {
+			return (Encounter) cache.get(getCacheKey(omrsEncounter), k -> toFhirResourceInternal(omrsEncounter, cache));
+		}
+		
+		return toFhirResourceInternal(omrsEncounter, null);
+	}
+	
+	protected Encounter toFhirResourceInternal(@Nonnull org.openmrs.Encounter omrsEncounter, @Nullable FhirCache cache) {
+		Encounter encounter = new Encounter();
+		encounter.setId(omrsEncounter.getUuid());
+		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
+		encounter.setType(encounterTypeTranslator.toFhirResource(omrsEncounter.getEncounterType(), cache));
+		
+		encounter.setSubject(patientReferenceTranslator.toFhirResource(omrsEncounter.getPatient(), cache));
+		encounter.setParticipant(omrsEncounter.getEncounterProviders().stream()
+		        .map(p -> participantTranslator.toFhirResource(p, cache)).collect(Collectors.toList()));
+		
+		// add visit as part of encounter
+		encounter.setPartOf(visitReferenceTranlator.toFhirResource(omrsEncounter.getVisit(), cache));
+		
+		if (omrsEncounter.getLocation() != null) {
+			encounter.setLocation(
+			    Collections.singletonList(encounterLocationTranslator.toFhirResource(omrsEncounter.getLocation(), cache)));
+		}
+		
+		encounter.setPeriod(encounterPeriodTranslator.toFhirResource(omrsEncounter, cache));
 		
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "encounter", "Encounter");
-		encounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());
-		encounter.addContained(provenanceTranslator.getCreateProvenance(openMrsEncounter));
-		encounter.addContained(provenanceTranslator.getUpdateProvenance(openMrsEncounter));
-		encounter.setClass_(mapLocationToClass(openMrsEncounter.getLocation()));
+		encounter.getMeta().setLastUpdated(omrsEncounter.getDateChanged());
+		encounter.addContained(provenanceTranslator.getCreateProvenance(omrsEncounter, cache));
+		encounter.addContained(provenanceTranslator.getUpdateProvenance(omrsEncounter, cache));
+		encounter.setClass_(mapLocationToClass(omrsEncounter.getLocation(), cache));
 		
 		return encounter;
 	}
 	
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(@Nonnull Encounter fhirEncounter) {
-		notNull(fhirEncounter, "The Encounter object should not be null");
+		if (fhirEncounter == null) {
+			return null;
+		}
+		
 		return this.toOpenmrsType(new org.openmrs.Encounter(), fhirEncounter);
 	}
 	
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(@Nonnull org.openmrs.Encounter existingEncounter,
 	        @Nonnull Encounter encounter) {
-		notNull(existingEncounter, "The existing Openmrs Encounter object should not be null");
-		notNull(encounter, "The Encounter object should not be null");
+		if (encounter == null) {
+			return null;
+		}
+		
+		if (existingEncounter == null) {
+			existingEncounter = new org.openmrs.Encounter();
+		}
 		
 		existingEncounter.setUuid(encounter.getId());
 		

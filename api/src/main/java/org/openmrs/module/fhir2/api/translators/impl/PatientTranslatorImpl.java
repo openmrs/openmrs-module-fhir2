@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +44,7 @@ import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,26 +80,49 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	private ProvenanceTranslator<org.openmrs.Patient> provenanceTranslator;
 	
 	@Override
-	public Patient toFhirResource(@Nonnull org.openmrs.Patient openmrsPatient) {
-		notNull(openmrsPatient, "The Openmrs Patient object should not be null");
+	public Patient toFhirResource(@Nonnull org.openmrs.Patient patient) {
+		if (patient == null) {
+			return null;
+		}
+		
+		return toFhirResourceInternal(patient, null);
+	}
+	
+	@Override
+	public Patient toFhirResource(@Nonnull org.openmrs.Patient patient, @Nullable FhirCache cache) {
+		if (patient == null) {
+			return null;
+		}
+		
+		if (cache != null) {
+			return (Patient) cache.get(getCacheKey(patient), k -> toFhirResourceInternal(patient, cache));
+		}
+		
+		return toFhirResourceInternal(patient, null);
+	}
+	
+	protected Patient toFhirResourceInternal(@Nonnull org.openmrs.Patient openmrsPatient, @Nullable FhirCache cache) {
+		if (openmrsPatient == null) {
+			return null;
+		}
 		
 		Patient patient = new Patient();
 		patient.setId(openmrsPatient.getUuid());
 		patient.setActive(!openmrsPatient.getVoided());
 		
 		for (PatientIdentifier identifier : openmrsPatient.getActiveIdentifiers()) {
-			patient.addIdentifier(identifierTranslator.toFhirResource(identifier));
+			patient.addIdentifier(identifierTranslator.toFhirResource(identifier, cache));
 		}
 		
 		for (PersonName name : openmrsPatient.getNames()) {
-			patient.addName(nameTranslator.toFhirResource(name));
+			patient.addName(nameTranslator.toFhirResource(name, cache));
 		}
 		
 		if (openmrsPatient.getGender() != null) {
-			patient.setGender(genderTranslator.toFhirResource(openmrsPatient.getGender()));
+			patient.setGender(genderTranslator.toFhirResource(openmrsPatient.getGender(), cache));
 		}
 		
-		patient.setBirthDateElement(birthDateTranslator.toFhirResource(openmrsPatient));
+		patient.setBirthDateElement(birthDateTranslator.toFhirResource(openmrsPatient, cache));
 		
 		if (openmrsPatient.getDead()) {
 			if (openmrsPatient.getDeathDate() != null) {
@@ -110,13 +135,13 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		}
 		
 		for (PersonAddress address : openmrsPatient.getAddresses()) {
-			patient.addAddress(addressTranslator.toFhirResource(address));
+			patient.addAddress(addressTranslator.toFhirResource(address, cache));
 		}
 		
 		patient.setTelecom(getPatientContactDetails(openmrsPatient));
 		patient.getMeta().setLastUpdated(openmrsPatient.getDateChanged());
-		patient.addContained(provenanceTranslator.getCreateProvenance(openmrsPatient));
-		patient.addContained(provenanceTranslator.getUpdateProvenance(openmrsPatient));
+		patient.addContained(provenanceTranslator.getCreateProvenance(openmrsPatient, cache));
+		patient.addContained(provenanceTranslator.getUpdateProvenance(openmrsPatient, cache));
 		
 		return patient;
 	}

@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceId;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -328,7 +329,7 @@ public class LocationTranslatorImplTest {
 		assertThat(locationReference, notNullValue());
 		assertThat(locationReference.getType(), is(FhirConstants.LOCATION));
 		assertThat(locationReference.getDisplay(), is(PARENT_LOCATION_NAME));
-		assertThat(locationTranslator.getReferenceId(locationReference).orElse(null), equalTo(PARENT_LOCATION_UUID));
+		assertThat(getReferenceId(locationReference).orElse(null), equalTo(PARENT_LOCATION_UUID));
 	}
 	
 	@Test

@@ -20,6 +20,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.reflect.TypeToken;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
@@ -30,13 +32,19 @@ import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.validator.ValidateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @SuppressWarnings("UnstableApiUsage")
 public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsObject & Auditable> implements FhirService<T> {
 	
 	protected final Class<? super T> resourceClass;
+	
+	@Autowired
+	@Getter(AccessLevel.PROTECTED)
+	private FhirCache fhirCache;
 	
 	protected BaseFhirService() {
 		// @formatter:off
@@ -61,13 +69,13 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 			        "Resource of type " + resourceClass.getSimpleName() + " with ID " + uuid + " is gone/deleted");
 		}
 		
-		return getTranslator().toFhirResource(openmrsObj);
+		return getTranslator().toFhirResource(openmrsObj, fhirCache);
 	}
 	
 	@Override
 	public List<T> get(@Nonnull Collection<String> uuids) {
 		OpenmrsFhirTranslator<U, T> translator = getTranslator();
-		return getDao().get(uuids).stream().map(translator::toFhirResource).collect(Collectors.toList());
+		return getDao().get(uuids).stream().map(r -> translator.toFhirResource(r, fhirCache)).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -125,7 +133,9 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		
 		validateObject(updatedObject);
 		
-		return translator.toFhirResource(getDao().createOrUpdate(updatedObject));
+		translator.invalidate(updatedObject, fhirCache);
+		
+		return translator.toFhirResource(getDao().createOrUpdate(updatedObject), fhirCache);
 	}
 	
 	@Override

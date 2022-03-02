@@ -62,6 +62,10 @@ public class FhirUtils {
 	        + "|VerificationResult|VisionPrescription)"
 	        + "/(?<id>[A-Za-z0-9\\-.]{1,64})(?:/_history/(?<version>[A-Za-z0-9\\-.]{1,64}))?");
 	
+	private FhirUtils() {
+		
+	}
+	
 	public static String newUuid() {
 		return UUID.randomUUID().toString();
 	}

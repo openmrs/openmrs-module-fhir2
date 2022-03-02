@@ -45,6 +45,7 @@ import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.BaseOpenmrsData;
@@ -185,8 +186,8 @@ public class PatientTranslatorImplTest {
 	public void shouldTranslatePatientIdentifierToFhirIdentifier() {
 		Identifier id = new Identifier();
 		id.setValue(PATIENT_IDENTIFIER_UUID);
-		when(identifierTranslator.toFhirResource(argThat(hasProperty("uuid", equalTo(PATIENT_IDENTIFIER_UUID)))))
-		        .thenReturn(id);
+		when(identifierTranslator.toFhirResource(argThat(hasProperty("uuid", equalTo(PATIENT_IDENTIFIER_UUID))),
+		    ArgumentMatchers.any())).thenReturn(id);
 		
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		PatientIdentifier patientIdentifier = new PatientIdentifier();
@@ -194,6 +195,7 @@ public class PatientTranslatorImplTest {
 		patient.addIdentifier(patientIdentifier);
 		
 		Patient result = patientTranslator.toFhirResource(patient);
+		
 		assertThat(result.getIdentifier(), not(empty()));
 		assertThat(result.getIdentifier(), hasItem(hasProperty("value", equalTo(PATIENT_IDENTIFIER_UUID))));
 	}
@@ -204,7 +206,7 @@ public class PatientTranslatorImplTest {
 		humanName.addGiven(PATIENT_GIVEN_NAME);
 		humanName.setFamily(PATIENT_FAMILY_NAME);
 		when(nameTranslator.toFhirResource(argThat(allOf(hasProperty("givenName", equalTo(PATIENT_GIVEN_NAME)),
-		    hasProperty("familyName", equalTo(PATIENT_FAMILY_NAME)))))).thenReturn(humanName);
+		    hasProperty("familyName", equalTo(PATIENT_FAMILY_NAME)))), ArgumentMatchers.any())).thenReturn(humanName);
 		
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		PersonName name = new PersonName();
@@ -213,6 +215,7 @@ public class PatientTranslatorImplTest {
 		patient.setNames(Sets.newHashSet(name));
 		
 		Patient result = patientTranslator.toFhirResource(patient);
+		
 		assertThat(result.getName(), not(empty()));
 		assertThat(result.getName().get(0), notNullValue());
 		assertThat(result.getName().get(0).getGivenAsSingleString(), equalTo(PATIENT_GIVEN_NAME));
@@ -221,7 +224,8 @@ public class PatientTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateOpenMRSPatientGenderToFhirGender() {
-		when(genderTranslator.toFhirResource(argThat(equalTo("M")))).thenReturn(Enumerations.AdministrativeGender.MALE);
+		when(genderTranslator.toFhirResource(argThat(equalTo("M")), ArgumentMatchers.any()))
+		        .thenReturn(Enumerations.AdministrativeGender.MALE);
 		
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setGender("M");
@@ -235,7 +239,8 @@ public class PatientTranslatorImplTest {
 		Address address = new Address();
 		address.setId(ADDRESS_UUID);
 		address.setCity(ADDRESS_CITY);
-		when(addressTranslator.toFhirResource(argThat(hasProperty("uuid", equalTo(ADDRESS_UUID))))).thenReturn(address);
+		when(addressTranslator.toFhirResource(argThat(hasProperty("uuid", equalTo(ADDRESS_UUID))), ArgumentMatchers.any()))
+		        .thenReturn(address);
 		
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		PersonAddress personAddress = new PersonAddress();
@@ -244,6 +249,7 @@ public class PatientTranslatorImplTest {
 		patient.addAddress(personAddress);
 		
 		Patient result = patientTranslator.toFhirResource(patient);
+		
 		assertThat(result.getAddress(), not(empty()));
 		assertThat(result.getAddress(), hasItem(hasProperty("id", equalTo(ADDRESS_UUID))));
 		assertThat(result.getAddress(), hasItem(hasProperty("city", equalTo(ADDRESS_CITY))));
@@ -387,11 +393,14 @@ public class PatientTranslatorImplTest {
 	public void shouldAddProvenanceResources() {
 		org.openmrs.Patient patient = new org.openmrs.Patient();
 		patient.setUuid(PATIENT_UUID);
+		
 		Provenance provenance = new Provenance();
 		provenance.setId(new IdType(FhirUtils.newUuid()));
-		when(provenanceTranslator.getCreateProvenance(patient)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(patient)).thenReturn(provenance);
+		when(provenanceTranslator.getCreateProvenance(patient, null)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(patient, null)).thenReturn(provenance);
+		
 		org.hl7.fhir.r4.model.Patient result = patientTranslator.toFhirResource(patient);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getContained(), not(empty()));
 		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
@@ -409,10 +418,11 @@ public class PatientTranslatorImplTest {
 		patient.setUuid(PATIENT_UUID);
 		patient.setDateChanged(null);
 		patient.setChangedBy(null);
-		when(provenanceTranslator.getCreateProvenance(patient)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(patient)).thenReturn(null);
+		when(provenanceTranslator.getCreateProvenance(patient, null)).thenReturn(provenance);
+		when(provenanceTranslator.getUpdateProvenance(patient, null)).thenReturn(null);
 		
 		org.hl7.fhir.r4.model.Patient result = patientTranslator.toFhirResource(patient);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getContained(), not(empty()));
 		assertThat(result.getContained().size(), equalTo(1));

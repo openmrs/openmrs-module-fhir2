@@ -10,8 +10,10 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.ReferenceHandlingTranslator.getReferenceType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -28,7 +30,7 @@ import org.openmrs.module.fhir2.api.translators.DiagnosticReportTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.api.util.FhirCache;
 import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,7 +54,17 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 	@Override
 	public DiagnosticReport toFhirResource(@Nonnull FhirDiagnosticReport fhirDiagnosticReport) {
 		notNull(fhirDiagnosticReport, "The diagnostic report should not be null");
-		
+		return toFhirResourceInternal(fhirDiagnosticReport, null);
+	}
+	
+	@Override
+	public DiagnosticReport toFhirResource(@Nonnull FhirDiagnosticReport fhirDiagnosticReport, @Nullable FhirCache cache) {
+		notNull(fhirDiagnosticReport, "The diagnostic report should not be null");
+		return toFhirResourceInternal(fhirDiagnosticReport, cache);
+	}
+	
+	protected DiagnosticReport toFhirResourceInternal(@Nonnull FhirDiagnosticReport fhirDiagnosticReport,
+	        @Nullable FhirCache cache) {
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
 		
 		diagnosticReport.setId(fhirDiagnosticReport.getUuid());
@@ -71,16 +83,17 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		}
 		
 		if (fhirDiagnosticReport.getEncounter() != null) {
-			diagnosticReport.setEncounter(encounterReferenceTranslator.toFhirResource(fhirDiagnosticReport.getEncounter()));
+			diagnosticReport
+			        .setEncounter(encounterReferenceTranslator.toFhirResource(fhirDiagnosticReport.getEncounter(), cache));
 		}
 		
 		if (fhirDiagnosticReport.getSubject() != null) {
-			diagnosticReport.setSubject(patientReferenceTranslator.toFhirResource(fhirDiagnosticReport.getSubject()));
+			diagnosticReport.setSubject(patientReferenceTranslator.toFhirResource(fhirDiagnosticReport.getSubject(), cache));
 		}
 		
 		Concept code = fhirDiagnosticReport.getCode();
 		if (code != null) {
-			diagnosticReport.setCode(conceptTranslator.toFhirResource(code));
+			diagnosticReport.setCode(conceptTranslator.toFhirResource(code, cache));
 		}
 		
 		diagnosticReport.addCategory().addCoding().setSystem(FhirConstants.DIAGNOSTIC_REPORT_SERVICE_SYSTEM_URI)
@@ -89,7 +102,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		diagnosticReport.setIssued(fhirDiagnosticReport.getIssued());
 		
 		for (Obs obs : fhirDiagnosticReport.getResults()) {
-			diagnosticReport.addResult(observationReferenceTranslator.toFhirResource(obs));
+			diagnosticReport.addResult(observationReferenceTranslator.toFhirResource(obs, cache));
 		}
 		
 		return diagnosticReport;
@@ -127,7 +140,7 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		}
 		
 		if (diagnosticReport.hasSubject()) {
-			FhirUtils.getReferenceType(diagnosticReport.getSubject()).ifPresent(t -> {
+			getReferenceType(diagnosticReport.getSubject()).ifPresent(t -> {
 				if (FhirConstants.PATIENT.equals(t)) {
 					existingDiagnosticReport
 					        .setSubject(patientReferenceTranslator.toOpenmrsType(diagnosticReport.getSubject()));

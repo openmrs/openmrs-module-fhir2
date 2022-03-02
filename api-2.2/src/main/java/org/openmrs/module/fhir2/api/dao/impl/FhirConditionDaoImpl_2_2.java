@@ -138,4 +138,9 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 		
 		return super.paramToProp(param);
 	}
+	
+	@Override
+	protected Condition deproxyResult(Condition result) {
+		return super.deproxyResult(result);
+	}
 }
