@@ -7,7 +7,7 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.fhir-server.validation.rest;
+package org.openmrs.module.fhir2.validation.rest;
 
 import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.web.client.RestTemplate;

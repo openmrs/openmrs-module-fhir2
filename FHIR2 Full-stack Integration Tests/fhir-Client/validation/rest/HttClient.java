@@ -18,7 +18,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 package org.openmrs.module.fhir2.fhir-server.validation.rest;
-
+/**
+ * This interface provides a client API for invoking the FHIR Server's REST API.
+ */
 public class HttClient {
 
     private final RestTemplate restTemplate;
