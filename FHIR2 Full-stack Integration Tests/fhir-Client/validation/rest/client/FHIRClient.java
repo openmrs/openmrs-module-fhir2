@@ -11,6 +11,7 @@
 package org.openmrs.module.fhir2.validation.rest.client;
 
 import com.ibm.fhir.model.resource.Bundle;
+import javax.ws.rs.client.WebTarget;
 /**
  * This interface provides a client API for invoking the FHIR Server's.
  *  Note that in this case openmrs instance is our fhir server REST API.
