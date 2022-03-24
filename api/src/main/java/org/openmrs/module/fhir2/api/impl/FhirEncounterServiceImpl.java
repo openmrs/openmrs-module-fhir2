@@ -28,9 +28,12 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
+import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
+import org.openmrs.module.fhir2.api.FhirVisitService;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.TwoSearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
@@ -51,13 +54,16 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	private EncounterTranslator<org.openmrs.Encounter> translator;
 	
 	@Autowired
-	private FhirVisitServiceImpl visitService;
-	
-	@Autowired
 	private SearchQueryInclude<Encounter> searchQueryInclude;
 	
 	@Autowired
+	private FhirGlobalPropertyService globalPropertyService;
+	
+	@Autowired
 	private SearchQuery<org.openmrs.Encounter, Encounter, FhirEncounterDao, EncounterTranslator<org.openmrs.Encounter>, SearchQueryInclude<Encounter>> searchQuery;
+	
+	@Autowired
+	private FhirVisitService visitService;
 	
 	@Override
 	public Encounter get(@Nonnull String uuid) {
@@ -154,7 +160,17 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes).setSortSpec(sort);
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+		
+		IBundleProvider visitBundle = visitService.searchForVisits(theParams);
+		IBundleProvider encounterBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+		
+		if (!encounterBundle.isEmpty() && !visitBundle.isEmpty()) {
+			return new TwoSearchQueryBundleProvider(visitBundle, encounterBundle, globalPropertyService);
+		} else if (encounterBundle.isEmpty() && !visitBundle.isEmpty()) {
+			return visitBundle;
+		}
+		
+		return encounterBundle;
 	}
 	
 	@Override
@@ -166,7 +182,17 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		
 		populateReverseIncludeForEverythingOperationParams(theParams);
 		populateIncludeForEverythingOperationParams(theParams);
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+		
+		IBundleProvider visitBundle = visitService.searchForVisits(theParams);
+		IBundleProvider encounterBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+		
+		if (!encounterBundle.isEmpty() && !visitBundle.isEmpty()) {
+			return new TwoSearchQueryBundleProvider(encounterBundle, visitBundle, globalPropertyService);
+		} else if (encounterBundle.isEmpty() && !visitBundle.isEmpty()) {
+			return visitBundle;
+		}
+		
+		return encounterBundle;
 	}
 	
 	private void populateReverseIncludeForEverythingOperationParams(SearchParameterMap theParams) {

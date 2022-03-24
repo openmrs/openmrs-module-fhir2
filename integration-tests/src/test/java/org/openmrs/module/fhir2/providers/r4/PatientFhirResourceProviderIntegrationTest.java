@@ -663,8 +663,8 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(41)));
-		assertThat(result.getEntry(), hasSize(41));
+		assertThat(result, hasProperty("total", equalTo(46)));
+		assertThat(result.getEntry(), hasSize(46));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
@@ -684,7 +684,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(41)));
+		assertThat(result, hasProperty("total", equalTo(46)));
 		assertThat(result.getEntry(), hasSize(5));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -705,8 +705,8 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(41)));
-		assertThat(result.getEntry(), hasSize(41));
+		assertThat(result, hasProperty("total", equalTo(46)));
+		assertThat(result.getEntry(), hasSize(46));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
@@ -726,7 +726,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(41)));
+		assertThat(result, hasProperty("total", equalTo(46)));
 		assertThat(result.getEntry(), hasSize(5));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();

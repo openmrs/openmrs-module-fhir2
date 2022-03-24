@@ -13,6 +13,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Encounter;
@@ -62,7 +64,8 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		
 		encounter.setSubject(patientReferenceTranslator.toFhirResource(visit.getPatient()));
 		if (visit.getLocation() != null) {
-			encounterLocationTranslator.toFhirResource(visit.getLocation());
+			encounter
+			        .setLocation(Collections.singletonList(encounterLocationTranslator.toFhirResource(visit.getLocation())));
 		}
 		
 		encounter.setClass_(mapLocationToClass(visit.getLocation()));

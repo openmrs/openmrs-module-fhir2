@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements FhirEncounterDao {
+public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements FhirEncounterDao {
 	
 	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
@@ -58,42 +58,26 @@ public class FhirEncounterDaoImpl extends BaseFhirDao<Encounter> implements Fhir
 		return super.getSearchResultUuids(theParams);
 	}
 	
-	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
-		theParams.getParameters().forEach(entry -> {
-			switch (entry.getKey()) {
-				case FhirConstants.DATE_RANGE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleDateRange("encounterDatetime", (DateRangeParam) param.getParam())
-					        .ifPresent(criteria::add));
-					break;
-				case FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(param -> handleLocationReference("l", (ReferenceAndListParam) param.getParam())
-					        .ifPresent(l -> criteria.createAlias("location", "l").add(l)));
-					break;
-				case FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(
-					    param -> handleParticipantReference(criteria, (ReferenceAndListParam) param.getParam()));
-					break;
-				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
-					break;
-				case FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER:
-					entry.getValue()
-					        .forEach(param -> handleAndListParam((TokenAndListParam) param.getParam(),
-					            t -> Optional.of(eq("et.uuid", t.getValue())))
-					                    .ifPresent(t -> criteria.createAlias("encounterType", "et").add(t)));
-					break;
-				case FhirConstants.COMMON_SEARCH_HANDLER:
-					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
-					break;
-			}
-		});
-	}
-	
 	private int getMaxParameter(SearchParameterMap theParams) {
 		return ((NumberParam) theParams.getParameters(FhirConstants.MAX_SEARCH_HANDLER).get(0).getParam()).getValue()
 		        .intValue();
+	}
+	
+	@Override
+	protected void handleDate(Criteria criteria, DateRangeParam dateRangeParam) {
+		handleDateRange("encounterDatetime", dateRangeParam).ifPresent(criteria::add);
+	}
+	
+	@Override
+	protected void handleEncounterType(Criteria criteria, TokenAndListParam tokenAndListParam) {
+		handleAndListParam((TokenAndListParam) tokenAndListParam, t -> Optional.of(eq("et.uuid", t.getValue())))
+		        .ifPresent(t -> criteria.createAlias("encounterType", "et").add(t));
+	}
+	
+	@Override
+	protected void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam) {
+		criteria.createAlias("encounterProviders", "ep");
+		handleParticipantReference(criteria, (ReferenceAndListParam) referenceAndListParam);
 	}
 	
 	@Override
