@@ -540,7 +540,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(8)));
+		assertThat(result, hasProperty("total", equalTo(9)));
 	}
 	
 	@Test
@@ -555,6 +555,6 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR3Integ
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(8)));
+		assertThat(result, hasProperty("total", equalTo(9)));
 	}
 }
