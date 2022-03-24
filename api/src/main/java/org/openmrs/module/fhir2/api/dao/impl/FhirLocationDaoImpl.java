@@ -84,7 +84,10 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	}
 	
 	private void handleName(Criteria criteria, StringAndListParam namePattern) {
-		handleAndListParam(namePattern, (name) -> propertyLike("name", name)).ifPresent(criteria::add);
+		handleAndListParam(namePattern,
+		    (name) -> propertyLike("name",
+		        name.setValue(new StringBuilder("%").append(name.getValue()).append("%").toString())))
+		                .ifPresent(criteria::add);
 	}
 	
 	private void handleCity(Criteria criteria, StringAndListParam cityPattern) {

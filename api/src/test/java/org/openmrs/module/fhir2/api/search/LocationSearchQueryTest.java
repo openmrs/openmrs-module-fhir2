@@ -66,6 +66,10 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String LOCATION_NAME = "Test location 7";
 	
+	private static final String LOCATION_NAME_2 = "Testing location 76";
+	
+	private static final String LOCATION_NAME_SUBSTRING = "location 7";
+	
 	private static final String UNKNOWN_LOCATION_NAME = "Location2";
 	
 	private static final String LOCATION_CITY = "Artuor";
@@ -149,6 +153,21 @@ public class LocationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(locations, notNullValue());
 		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(resultList.get(0).getName(), equalTo(LOCATION_NAME));
+	}
+	
+	@Test
+	public void searchForLocations_shouldReturnLocationsMatchingNameSubstring() {
+		StringAndListParam location = new StringAndListParam()
+		        .addAnd(new StringOrListParam().add(new StringParam(LOCATION_NAME_SUBSTRING)));
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, location);
+		IBundleProvider locations = search(theParams);
+		
+		List<Location> resultList = get(locations);
+		
+		assertThat(locations, notNullValue());
+		assertThat(resultList, hasSize(equalTo(2)));
+		assertThat(resultList.get(0).getName(), equalTo(LOCATION_NAME));
+		assertThat(resultList.get(1).getName(), equalTo(LOCATION_NAME_2));
 	}
 	
 	@Test

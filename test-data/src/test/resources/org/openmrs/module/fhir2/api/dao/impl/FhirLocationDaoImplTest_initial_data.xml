@@ -18,6 +18,7 @@
     <location location_id="7"  name="Test location 7" description="Test description" city_village="Kerio" country="India" parent_location="5" date_created="2005-01-01 00:00:00.0" retired="false" uuid="5db6ae3c-867e-45a0-a1ce-f86219b64e1c"/>
     <location location_id="8"  name="Test location 8" description="Test description" city_village="Kerio" country="India" parent_location="4" date_changed="2010-03-31 00:00:00.0" date_created="2005-01-01 00:00:00.0" retired="false" uuid="cb82ab6d-9db2-451f-9ce2-0afc2b16eb13"/>
     <location location_id="9"  name="Test location 9" description="Test description" city_village="Kerio" country="India" parent_location="4" date_changed="2010-03-31 00:00:00.0" date_retired="2010-09-03 00:00:00.0" date_created="2005-01-01 00:00:00.0" retired="true" uuid="689f6212-95da-466b-aac7-acdef0689fef"/>
+    <location location_id="10"  name="Testing location 76" description="Test description" date_created="2022-03-23 00:00:00.0" retired="false" uuid="1fcbe331-e601-4953-977e-cc068ebe3eae"/>
     <location_tag location_tag_id="7" name="login" description="Identify login locations" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="89f4f6f9-d0e7-4ff9-b8d1-994d69f035db"/>
     <location_tag location_tag_id="8" name="test" description="Identify test locations" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="c04a4bbb-0843-4a39-9d40-c105e05f0aac"/>
     <location_tag_map location_id="2" location_tag_id="7"/>
