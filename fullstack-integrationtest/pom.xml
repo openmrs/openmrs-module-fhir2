@@ -7,9 +7,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>fhir2-integration-tests</artifactId>
-    <name>fullstack-integrationtests</name>
-    <description>Integration Tests for the FHIR2 Module</description>
+    <artifactId>fhir2-integration-tests-rest</artifactId>
+    <name>fullstack-IntegrationTest</name>
+    <description>Integration Tests for the FHIR2 Module for rest</description>
 
     <dependencies>
         <dependency>
