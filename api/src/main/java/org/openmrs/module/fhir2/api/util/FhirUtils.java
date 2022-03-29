@@ -159,7 +159,8 @@ public class FhirUtils {
 		
 		try {
 			localization = Context.getMessageSourceService().getMessage(code);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			log.info("Caught exception while attempting to localize code [{}]", code, e);
 		}
 		

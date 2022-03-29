@@ -48,6 +48,15 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
 		
 		for (ConceptMap mapping : concept.getConceptMappings()) {
+			if (mapping.getConceptMapType() == null) {
+				continue;
+			}
+			
+			String mappingType = mapping.getConceptMapType().getName();
+			if (mappingType == null || !mappingType.equalsIgnoreCase("SAME-AS")) {
+				continue;
+			}
+			
 			ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
 			
 			String sourceUrl = conceptSourceToURL(crt.getConceptSource().getName());
