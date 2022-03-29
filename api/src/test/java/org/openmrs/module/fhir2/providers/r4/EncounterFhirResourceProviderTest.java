@@ -13,11 +13,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
@@ -37,15 +35,12 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -237,27 +232,6 @@ public class EncounterFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(resultList.size(), equalTo(1));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.ENCOUNTER));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
-	}
-	
-	@Test
-	public void getEncounterHistory_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(ENCOUNTER_UUID);
-		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
-		
-		List<Resource> resources = resourceProvider.getEncounterHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(),
-		    Matchers.equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getEncounterHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_ENCOUNTER_UUID);
-		assertThat(resourceProvider.getEncounterHistoryById(idType).isEmpty(), is(true));
-		assertThat(resourceProvider.getEncounterHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 	
 	@Test

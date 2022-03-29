@@ -14,12 +14,10 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -45,7 +43,6 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
@@ -75,15 +72,6 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return Condition30_40.convertCondition(condition);
-	}
-	
-	@History
-	public List<Resource> getConditionHistoryById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Condition condition = conditionService.get(id.getIdPart());
-		if (condition == null) {
-			throw new ResourceNotFoundException("Could not find condition with Id " + id.getIdPart());
-		}
-		return Condition30_40.convertCondition(condition).getContained();
 	}
 	
 	@Create

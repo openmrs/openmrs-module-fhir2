@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 
 import javax.annotation.Nonnull;
 
@@ -31,7 +32,6 @@ import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,9 +49,6 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Autowired
-	private ProvenanceTranslator<org.openmrs.Encounter> provenanceTranslator;
-	
-	@Autowired
 	private EncounterReferenceTranslator<Visit> visitReferenceTranlator;
 	
 	@Autowired
@@ -61,33 +58,31 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	private EncounterPeriodTranslator<org.openmrs.Encounter> encounterPeriodTranslator;
 	
 	@Override
-	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openMrsEncounter) {
-		notNull(openMrsEncounter, "The Openmrs Encounter object should not be null");
+	public Encounter toFhirResource(@Nonnull org.openmrs.Encounter openmrsEncounter) {
+		notNull(openmrsEncounter, "The Openmrs Encounter object should not be null");
 		
 		Encounter encounter = new Encounter();
-		encounter.setId(openMrsEncounter.getUuid());
+		encounter.setId(openmrsEncounter.getUuid());
 		encounter.setStatus(Encounter.EncounterStatus.UNKNOWN);
-		encounter.setType(encounterTypeTranslator.toFhirResource(openMrsEncounter.getEncounterType()));
+		encounter.setType(encounterTypeTranslator.toFhirResource(openmrsEncounter.getEncounterType()));
 		
-		encounter.setSubject(patientReferenceTranslator.toFhirResource(openMrsEncounter.getPatient()));
-		encounter.setParticipant(openMrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource)
+		encounter.setSubject(patientReferenceTranslator.toFhirResource(openmrsEncounter.getPatient()));
+		encounter.setParticipant(openmrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource)
 		        .collect(Collectors.toList()));
 		
 		// add visit as part of encounter
-		encounter.setPartOf(visitReferenceTranlator.toFhirResource(openMrsEncounter.getVisit()));
+		encounter.setPartOf(visitReferenceTranlator.toFhirResource(openmrsEncounter.getVisit()));
 		
-		if (openMrsEncounter.getLocation() != null) {
+		if (openmrsEncounter.getLocation() != null) {
 			encounter.setLocation(
-			    Collections.singletonList(encounterLocationTranslator.toFhirResource(openMrsEncounter.getLocation())));
+			    Collections.singletonList(encounterLocationTranslator.toFhirResource(openmrsEncounter.getLocation())));
 		}
 		
-		encounter.setPeriod(encounterPeriodTranslator.toFhirResource(openMrsEncounter));
+		encounter.setPeriod(encounterPeriodTranslator.toFhirResource(openmrsEncounter));
 		
 		encounter.getMeta().addTag(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "encounter", "Encounter");
-		encounter.getMeta().setLastUpdated(openMrsEncounter.getDateChanged());
-		encounter.addContained(provenanceTranslator.getCreateProvenance(openMrsEncounter));
-		encounter.addContained(provenanceTranslator.getUpdateProvenance(openMrsEncounter));
-		encounter.setClass_(mapLocationToClass(openMrsEncounter.getLocation()));
+		encounter.getMeta().setLastUpdated(getLastUpdated(openmrsEncounter));
+		encounter.setClass_(mapLocationToClass(openmrsEncounter.getLocation()));
 		
 		return encounter;
 	}

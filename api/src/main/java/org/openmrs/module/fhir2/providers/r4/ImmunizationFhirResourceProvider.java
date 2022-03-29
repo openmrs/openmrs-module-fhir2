@@ -13,11 +13,8 @@ import static lombok.AccessLevel.PACKAGE;
 
 import javax.annotation.Nonnull;
 
-import java.util.List;
-
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -38,7 +35,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirImmunizationService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -65,16 +61,6 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find Immunization with Id " + id.getIdPart());
 		}
 		return immunization;
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getImmunizationHistoryById(@IdParam @Nonnull IdType id) {
-		Immunization immunization = immunizationService.get(id.getIdPart());
-		if (immunization == null) {
-			throw new ResourceNotFoundException("Could not find Immunization with Id " + id.getIdPart());
-		}
-		return immunization.getContained();
 	}
 	
 	@Create

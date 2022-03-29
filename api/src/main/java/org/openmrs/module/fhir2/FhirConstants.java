@@ -174,10 +174,6 @@ public class FhirConstants {
 	
 	public static final String GLOBAL_PROPERTY_URI_PREFIX = "fhir2.uriPrefix";
 	
-	public static final String AUTHOR = "author";
-	
-	public static final String AUT = "AUT";
-	
 	public static final String ENCOUNTER_REFERENCE_SEARCH_HANDLER = "encounter.reference.search.handler";
 	
 	public static final String PATIENT_REFERENCE_SEARCH_HANDLER = "patient.reference.search.handler";

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.util.ImmunizationObsGroupHelper.createImmunizationRequestValidationError;
 
 import javax.annotation.Nonnull;
@@ -431,6 +432,9 @@ public class ImmunizationTranslatorImpl implements ImmunizationTranslator {
 				immunization.setExpirationDate(obs.getValueDate());
 			}
 		}
+		
+		immunization.getMeta().setLastUpdated(getLastUpdated(openmrsImmunization));
+		
 		return immunization;
 	}
 }

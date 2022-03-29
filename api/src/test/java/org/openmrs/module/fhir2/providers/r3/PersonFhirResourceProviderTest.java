@@ -10,12 +10,10 @@
 package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,12 +44,10 @@ import org.hl7.fhir.convertors.conv30_40.Person30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Person;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -345,38 +341,6 @@ public class PersonFhirResourceProviderTest extends BaseFhirR3ProvenanceResource
 		assertThat(results, notNullValue());
 		assertThat(resultList.get(0).fhirType(), is(FhirConstants.PERSON));
 		assertThat(resultList.size(), equalTo(1));
-	}
-	
-	@Test
-	public void getPatientResourceHistory_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(PERSON_UUID);
-		when(fhirPersonService.get(PERSON_UUID)).thenReturn(person);
-		
-		List<Resource> resources = resourceProvider.getPersonHistoryById(id);
-		assertThat(resources, notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(2));
-	}
-	
-	@Test
-	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(PERSON_UUID);
-		when(fhirPersonService.get(PERSON_UUID)).thenReturn(person);
-		
-		List<Resource> resources = resourceProvider.getPersonHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_PERSON_UUID);
-		assertThat(resourceProvider.getPersonHistoryById(idType).isEmpty(), is(true));
-		assertThat(resourceProvider.getPersonHistoryById(idType).size(), equalTo(0));
 	}
 	
 	@Test

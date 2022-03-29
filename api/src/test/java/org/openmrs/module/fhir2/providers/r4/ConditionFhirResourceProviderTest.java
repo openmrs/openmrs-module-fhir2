@@ -13,11 +13,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -46,8 +44,6 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -117,27 +113,6 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		id.setValue(WRONG_CONDITION_UUID);
 		Condition result = resourceProvider.getConditionByUuid(id);
 		assertThat(result, nullValue());
-	}
-	
-	@Test
-	public void getConditionHistory_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(CONDITION_UUID);
-		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
-		
-		List<Resource> resources = resourceProvider.getConditionHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(),
-		    Matchers.equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getConditionHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_CONDITION_UUID);
-		assertThat(resourceProvider.getConditionHistoryById(idType).isEmpty(), is(true));
-		assertThat(resourceProvider.getConditionHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 	
 	@Test

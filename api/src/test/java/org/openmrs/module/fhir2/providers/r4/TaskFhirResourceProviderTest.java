@@ -14,10 +14,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
@@ -45,8 +43,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
@@ -125,39 +121,6 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		
 		assertThat(resourceProvider.getTaskById(idType).isResource(), is(true));
 		assertThat(resourceProvider.getTaskById(idType), nullValue());
-	}
-	
-	@Test
-	public void getTaskHistoryById_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(TASK_UUID);
-		when(taskService.get(TASK_UUID)).thenReturn(task);
-		
-		List<Resource> resources = resourceProvider.getTaskHistoryById(id);
-		assertThat(resources, Matchers.notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), Matchers.equalTo(2));
-	}
-	
-	@Test
-	public void getTaskHistoryById_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(TASK_UUID);
-		when(taskService.get(TASK_UUID)).thenReturn(task);
-		
-		List<Resource> resources = resourceProvider.getTaskHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), Matchers.is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(),
-		    Matchers.equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getTaskHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_TASK_UUID);
-		assertThat(resourceProvider.getTaskHistoryById(idType).isEmpty(), Matchers.is(true));
-		assertThat(resourceProvider.getTaskHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 	
 	@Test

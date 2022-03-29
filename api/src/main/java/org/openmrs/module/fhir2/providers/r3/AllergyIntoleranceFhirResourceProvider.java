@@ -14,13 +14,10 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -41,15 +38,12 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.AllergyIntolerance30_40;
-import org.hl7.fhir.convertors.conv30_40.Provenance30_40;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Provenance;
 import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
@@ -79,18 +73,6 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 		}
 		
 		return AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance);
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getAllergyIntoleranceHistoryById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.AllergyIntolerance allergyIntolerance = allergyIntoleranceService.get(id.getIdPart());
-		if (allergyIntolerance == null) {
-			throw new ResourceNotFoundException("Could not find allergy with Id " + id.getIdPart());
-		}
-		
-		return allergyIntolerance.getContained().stream().filter(r -> r instanceof Provenance).map(r -> (Provenance) r)
-		        .map(Provenance30_40::convertProvenance).collect(Collectors.toList());
 	}
 	
 	@Create

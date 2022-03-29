@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
@@ -67,6 +69,8 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		if (drug.getStrength() != null) {
 			addMedicineExtension(medication, "strength", drug.getStrength());
 		}
+		
+		medication.getMeta().setLastUpdated(getLastUpdated(drug));
 		
 		return medication;
 	}

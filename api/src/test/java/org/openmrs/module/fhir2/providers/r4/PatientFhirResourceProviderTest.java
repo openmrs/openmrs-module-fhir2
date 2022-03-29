@@ -10,12 +10,10 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,8 +47,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -144,39 +140,6 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 		idType.setValue(WRONG_PATIENT_UUID);
 		assertThat(resourceProvider.getPatientById(idType).isResource(), is(true));
 		assertThat(resourceProvider.getPatientById(idType), nullValue());
-	}
-	
-	@Test
-	public void getPatientResourceHistory_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(PATIENT_UUID);
-		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
-		
-		List<Resource> resources = resourceProvider.getPatientResourceHistory(id);
-		assertThat(resources, notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(2));
-	}
-	
-	@Test
-	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(PATIENT_UUID);
-		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
-		
-		List<Resource> resources = resourceProvider.getPatientResourceHistory(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_PATIENT_UUID);
-		
-		assertThat(resourceProvider.getPatientResourceHistory(idType).isEmpty(), is(true));
-		assertThat(resourceProvider.getPatientResourceHistory(idType).size(), equalTo(0));
 	}
 	
 	@Test

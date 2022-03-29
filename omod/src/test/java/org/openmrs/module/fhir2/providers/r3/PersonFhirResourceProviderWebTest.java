@@ -25,13 +25,10 @@ import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -46,10 +43,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Person;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +52,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPersonService;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -77,10 +69,6 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 	private static final String ADDRESS_FIELD = "Washington";
 	
 	private static final String POSTAL_CODE = "98136";
-	
-	private static final String AUTHOR = "author";
-	
-	private static final String AUT = "AUT";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
 	
@@ -423,71 +411,6 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		assertThat(results.hasEntry(), is(true));
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(PERSON_UUID));
-	}
-	
-	@Test
-	public void shouldVerifyGetPersonHistoryByIdUri() throws Exception {
-		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
-		person.setId(PERSON_UUID);
-		when(personService.get(PERSON_UUID)).thenReturn(person);
-		
-		MockHttpServletResponse response = getPersonHistoryByIdRequest();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-	}
-	
-	@Test
-	public void shouldGetPersonHistoryById() throws IOException, ServletException {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		provenance.setRecorded(new Date());
-		provenance.setActivity(new CodeableConcept().addCoding(
-		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
-		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
-		        .setType(new CodeableConcept().addCoding(new Coding().setCode(AUT).setDisplay(AUTHOR)
-		                .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
-		        .addRole(new CodeableConcept().addCoding(
-		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
-		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
-		person.setId(PERSON_UUID);
-		person.addContained(provenance);
-		
-		when(personService.get(PERSON_UUID)).thenReturn(person);
-		
-		MockHttpServletResponse response = getPersonHistoryByIdRequest();
-		
-		Bundle results = readBundleResponse(response);
-		assertThat(results, notNullValue());
-		assertThat(results.hasEntry(), is(true));
-		assertThat(results.getEntry().get(0).getResource(), notNullValue());
-		assertThat(results.getEntry().get(0).getResource().getResourceType().name(),
-		    equalTo(Provenance.class.getSimpleName()));
-		
-	}
-	
-	@Test
-	public void getPersonHistoryById_shouldReturnBundleWithEmptyEntriesIfPersonContainedIsEmpty() throws Exception {
-		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
-		person.setId(PERSON_UUID);
-		person.setContained(new ArrayList<>());
-		when(personService.get(PERSON_UUID)).thenReturn(person);
-		
-		MockHttpServletResponse response = getPersonHistoryByIdRequest();
-		Bundle results = readBundleResponse(response);
-		assertThat(results.hasEntry(), is(false));
-	}
-	
-	@Test
-	public void getPersonHistoryById_shouldReturn404IfObservationIdIsWrong() throws Exception {
-		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID + "/_history").accept(FhirMediaTypes.JSON)
-		        .go();
-		
-		assertThat(response, isNotFound());
-	}
-	
-	private MockHttpServletResponse getPersonHistoryByIdRequest() throws IOException, ServletException {
-		return get("/Person/" + PERSON_UUID + "/_history").accept(FhirMediaTypes.JSON).go();
 	}
 	
 	@Test

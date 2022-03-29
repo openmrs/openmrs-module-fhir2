@@ -27,13 +27,10 @@ import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -50,10 +47,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,7 +56,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -715,72 +707,6 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 		assertThat(results.getEntry(), not(empty()));
 		assertThat(results.getEntry().get(0).getResource(), notNullValue());
 		assertThat(results.getEntry().get(0).getResource().getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
-	}
-	
-	@Test
-	public void shouldVerifyEncounterHistoryByIdUri() throws Exception {
-		org.hl7.fhir.r4.model.Encounter encounter = new org.hl7.fhir.r4.model.Encounter();
-		encounter.setId(ENCOUNTER_UUID);
-		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
-		
-		MockHttpServletResponse response = getEncounterHistoryRequest();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-	}
-	
-	@Test
-	public void shouldGetEncounterHistoryById() throws IOException, ServletException {
-		org.hl7.fhir.r4.model.Provenance provenance = new org.hl7.fhir.r4.model.Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		provenance.setRecorded(new Date());
-		provenance.setActivity(new CodeableConcept().addCoding(
-		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
-		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
-		        .setType(
-		            new CodeableConcept().addCoding(new Coding().setCode(FhirConstants.AUT).setDisplay(FhirConstants.AUTHOR)
-		                    .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
-		        .addRole(new CodeableConcept().addCoding(
-		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
-		org.hl7.fhir.r4.model.Encounter encounter = new org.hl7.fhir.r4.model.Encounter();
-		encounter.setId(ENCOUNTER_UUID);
-		encounter.addContained(provenance);
-		
-		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
-		
-		MockHttpServletResponse response = getEncounterHistoryRequest();
-		
-		Bundle results = readBundleResponse(response);
-		assertThat(results, notNullValue());
-		assertThat(results.hasEntry(), is(true));
-		assertThat(results.getEntry().get(0).getResource(), notNullValue());
-		assertThat(results.getEntry().get(0).getResource().getResourceType().name(),
-		    equalTo(Provenance.class.getSimpleName()));
-		
-	}
-	
-	@Test
-	public void getEncounterHistoryById_shouldReturnBundleWithEmptyEntriesIfPractitionerContainedIsEmpty() throws Exception {
-		org.hl7.fhir.r4.model.Encounter encounter = new org.hl7.fhir.r4.model.Encounter();
-		encounter.setId(ENCOUNTER_UUID);
-		encounter.setContained(new ArrayList<>());
-		when(encounterService.get(ENCOUNTER_UUID)).thenReturn(encounter);
-		
-		MockHttpServletResponse response = getEncounterHistoryRequest();
-		Bundle results = readBundleResponse(response);
-		assertThat(results.hasEntry(), is(false));
-	}
-	
-	@Test
-	public void getEncounterHistoryById_shouldReturn404IfEncounterIdIsWrong() throws Exception {
-		MockHttpServletResponse response = get("/Encounter/" + WRONG_ENCOUNTER_UUID + "/_history")
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isNotFound());
-	}
-	
-	private MockHttpServletResponse getEncounterHistoryRequest() throws IOException, ServletException {
-		return get("/Encounter/" + ENCOUNTER_UUID + "/_history").accept(FhirMediaTypes.JSON).go();
 	}
 	
 	@Test

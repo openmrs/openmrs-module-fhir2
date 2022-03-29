@@ -14,13 +14,11 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -51,7 +49,6 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
@@ -107,16 +104,6 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find patient to delete with id " + id.getIdPart());
 		}
 		return FhirProviderUtils.buildDelete(patient);
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getPatientResourceHistory(@IdParam @Nonnull IdType id) {
-		Patient patient = patientService.get(id.getIdPart());
-		if (patient == null) {
-			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
-		}
-		return patient.getContained();
 	}
 	
 	@Search

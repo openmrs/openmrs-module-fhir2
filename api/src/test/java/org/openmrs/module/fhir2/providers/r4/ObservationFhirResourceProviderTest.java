@@ -12,10 +12,8 @@ package org.openmrs.module.fhir2.providers.r4;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
@@ -37,15 +35,12 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -252,39 +247,6 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		assertThat(resultList.get(0), notNullValue());
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
-	}
-	
-	@Test
-	public void getPatientResourceHistory_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(OBSERVATION_UUID);
-		when(observationService.get(OBSERVATION_UUID)).thenReturn(observation);
-		
-		List<Resource> resources = resourceProvider.getObservationHistoryById(id);
-		assertThat(resources, Matchers.notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), Matchers.equalTo(2));
-	}
-	
-	@Test
-	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(OBSERVATION_UUID);
-		when(observationService.get(OBSERVATION_UUID)).thenReturn(observation);
-		
-		List<Resource> resources = resourceProvider.getObservationHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(),
-		    Matchers.equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_OBSERVATION_UUID);
-		assertThat(resourceProvider.getObservationHistoryById(idType).isEmpty(), is(true));
-		assertThat(resourceProvider.getObservationHistoryById(idType).size(), Matchers.equalTo(0));
 	}
 	
 	@Test

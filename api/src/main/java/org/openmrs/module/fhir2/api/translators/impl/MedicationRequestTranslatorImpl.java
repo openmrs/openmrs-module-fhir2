@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 
 import javax.annotation.Nonnull;
 
@@ -94,6 +95,8 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 			medicationRequest.setBasedOn(Collections.singletonList(createOrderReference(drugOrder.getPreviousOrder())
 			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder()))));
 		}
+		
+		medicationRequest.getMeta().setLastUpdated(getLastUpdated(drugOrder));
 		
 		return medicationRequest;
 	}

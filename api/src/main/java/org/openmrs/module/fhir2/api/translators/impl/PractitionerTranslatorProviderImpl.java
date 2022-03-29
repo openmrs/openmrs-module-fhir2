@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+
 import javax.annotation.Nonnull;
 
 import java.util.List;
@@ -36,7 +38,6 @@ import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,9 +66,6 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 	
 	@Autowired
 	private FhirGlobalPropertyService globalPropertyService;
-	
-	@Autowired
-	private ProvenanceTranslator<Provider> provenanceTranslator;
 	
 	@Override
 	public Provider toOpenmrsType(@Nonnull Provider existingProvider, @Nonnull Practitioner practitioner) {
@@ -102,6 +100,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 		for (Address address : practitioner.getAddress()) {
 			existingProvider.getPerson().addAddress(addressTranslator.toOpenmrsType(address));
 		}
+		
 		practitioner.getTelecom().stream().map(
 		    contactPoint -> (ProviderAttribute) telecomTranslator.toOpenmrsType(new ProviderAttribute(), contactPoint))
 		        .filter(Objects::nonNull).forEach(existingProvider::addAttribute);
@@ -139,9 +138,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 			}
 		}
 		
-		practitioner.getMeta().setLastUpdated(provider.getDateChanged());
-		practitioner.addContained(provenanceTranslator.getCreateProvenance(provider));
-		practitioner.addContained(provenanceTranslator.getUpdateProvenance(provider));
+		practitioner.getMeta().setLastUpdated(getLastUpdated(provider));
 		
 		return practitioner;
 	}

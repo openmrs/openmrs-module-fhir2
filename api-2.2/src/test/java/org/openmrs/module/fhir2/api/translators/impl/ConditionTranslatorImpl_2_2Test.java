@@ -13,25 +13,18 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,8 +43,6 @@ import org.openmrs.module.fhir2.api.translators.ConditionClinicalStatusTranslato
 import org.openmrs.module.fhir2.api.translators.ConditionVerificationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConditionTranslatorImpl_2_2Test {
@@ -82,9 +73,6 @@ public class ConditionTranslatorImpl_2_2Test {
 	
 	@Mock
 	private PatientReferenceTranslator patientReferenceTranslator;
-	
-	@Mock
-	private ProvenanceTranslator<org.openmrs.Condition> provenanceTranslator;
 	
 	private static final String CONFIRMED = "confirmed";
 	
@@ -120,7 +108,6 @@ public class ConditionTranslatorImpl_2_2Test {
 		conditionTranslator.setVerificationStatusTranslator(verificationStatusTranslator);
 		conditionTranslator.setConceptTranslator(conceptTranslator);
 		conditionTranslator.setPractitionerReferenceTranslator(creatorReferenceTranslator);
-		conditionTranslator.setProvenanceTranslator(provenanceTranslator);
 		
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
@@ -377,22 +364,5 @@ public class ConditionTranslatorImpl_2_2Test {
 		assertThat(condition, notNullValue());
 		assertThat(condition.getRecorder(), notNullValue());
 		assertThat(condition.getRecorder().getReference(), equalTo(PRACTITIONER_REFERENCE));
-	}
-	
-	@Test
-	public void shouldAddProvenanceToConditionResource() {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		when(provenanceTranslator.getCreateProvenance(openmrsCondition)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(openmrsCondition)).thenReturn(provenance);
-		
-		org.hl7.fhir.r4.model.Condition result = conditionTranslator.toFhirResource(openmrsCondition);
-		List<Resource> resources = result.getContained();
-		assertThat(resources, Matchers.notNullValue());
-		assertThat(resources, Matchers.not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), CoreMatchers.is(true));
-		assertThat(resources.stream().findAny().get().isResource(), CoreMatchers.is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(),
-		    Matchers.equalTo(Provenance.class.getSimpleName()));
 	}
 }

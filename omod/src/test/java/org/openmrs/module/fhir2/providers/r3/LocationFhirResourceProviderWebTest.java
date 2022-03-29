@@ -28,13 +28,10 @@ import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -47,13 +44,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.hamcrest.Matchers;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Location;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,7 +54,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -418,72 +408,6 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		MockHttpServletResponse response = get("/Location/" + WRONG_LOCATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isNotFound());
-	}
-	
-	@Test
-	public void shouldVerifyGetLocationHistoryByIdUri() throws Exception {
-		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
-		location.setId(LOCATION_UUID);
-		when(locationService.get(LOCATION_UUID)).thenReturn(location);
-		
-		MockHttpServletResponse response = getLocationHistoryByIdRequest();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-	}
-	
-	@Test
-	public void shouldGetLocationHistoryById() throws IOException, ServletException {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		provenance.setRecorded(new Date());
-		provenance.setActivity(new CodeableConcept().addCoding(
-		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
-		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
-		        .setType(
-		            new CodeableConcept().addCoding(new Coding().setCode(FhirConstants.AUT).setDisplay(FhirConstants.AUTHOR)
-		                    .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
-		        .addRole(new CodeableConcept().addCoding(
-		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
-		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
-		location.setId(LOCATION_UUID);
-		location.addContained(provenance);
-		
-		when(locationService.get(LOCATION_UUID)).thenReturn(location);
-		
-		MockHttpServletResponse response = getLocationHistoryByIdRequest();
-		
-		Bundle results = readBundleResponse(response);
-		assertThat(results, Matchers.notNullValue());
-		assertThat(results.hasEntry(), is(true));
-		assertThat(results.getEntry().get(0).getResource(), Matchers.notNullValue());
-		assertThat(results.getEntry().get(0).getResource().getResourceType().name(),
-		    equalTo(Provenance.class.getSimpleName()));
-		
-	}
-	
-	@Test
-	public void getLocationHistoryById_shouldReturnBundleWithEmptyEntriesIfPractitionerContainedIsEmpty() throws Exception {
-		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
-		location.setId(LOCATION_UUID);
-		location.setContained(new ArrayList<>());
-		when(locationService.get(LOCATION_UUID)).thenReturn(location);
-		
-		MockHttpServletResponse response = getLocationHistoryByIdRequest();
-		Bundle results = readBundleResponse(response);
-		assertThat(results.hasEntry(), is(false));
-	}
-	
-	@Test
-	public void getLocationHistoryById_shouldReturn404IfPractitionerIdIsWrong() throws Exception {
-		MockHttpServletResponse response = get("/Location/" + WRONG_LOCATION_UUID + "/_history").accept(FhirMediaTypes.JSON)
-		        .go();
-		
-		assertThat(response, isNotFound());
-	}
-	
-	private MockHttpServletResponse getLocationHistoryByIdRequest() throws IOException, ServletException {
-		return get("/Location/" + LOCATION_UUID + "/_history").accept(FhirMediaTypes.JSON).go();
 	}
 	
 	private void verifyURI(String uri) throws Exception {

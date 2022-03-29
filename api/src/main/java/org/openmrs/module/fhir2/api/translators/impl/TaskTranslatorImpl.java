@@ -26,7 +26,6 @@ import org.hl7.fhir.r4.model.Task;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.ReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 import org.openmrs.module.fhir2.model.FhirReference;
@@ -41,9 +40,6 @@ import org.springframework.stereotype.Component;
 public class TaskTranslatorImpl implements TaskTranslator {
 	
 	@Autowired
-	private ProvenanceTranslator<FhirTask> provenanceTranslator;
-	
-	@Autowired
 	private ReferenceTranslator referenceTranslator;
 	
 	@Autowired
@@ -55,8 +51,6 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		
 		Task fhirTask = new Task();
 		setFhirTaskFields(openmrsTask, fhirTask);
-		fhirTask.addContained(provenanceTranslator.getCreateProvenance(openmrsTask));
-		fhirTask.addContained(provenanceTranslator.getUpdateProvenance(openmrsTask));
 		
 		return fhirTask;
 	}

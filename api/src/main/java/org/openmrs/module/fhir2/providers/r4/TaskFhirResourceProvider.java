@@ -12,12 +12,10 @@ package org.openmrs.module.fhir2.providers.r4;
 import static lombok.AccessLevel.PACKAGE;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -39,7 +37,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
@@ -67,15 +64,6 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find Task with Id " + id.getIdPart());
 		}
 		return task;
-	}
-	
-	@History
-	public List<Resource> getTaskHistoryById(@IdParam IdType id) {
-		Task task = service.get(id.getIdPart());
-		if (task == null) {
-			throw new ResourceNotFoundException("Could not find Task with Id " + id.getIdPart());
-		}
-		return task.getContained();
 	}
 	
 	@Create

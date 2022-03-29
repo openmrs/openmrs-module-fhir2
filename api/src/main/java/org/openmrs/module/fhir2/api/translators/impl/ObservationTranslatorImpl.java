@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 
 import javax.annotation.Nonnull;
 
@@ -41,7 +42,6 @@ import org.openmrs.module.fhir2.api.translators.ObservationStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.openmrs.module.fhir2.api.translators.ObservationValueTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -75,9 +75,6 @@ public class ObservationTranslatorImpl extends BaseReferenceHandlingTranslator i
 	
 	@Autowired
 	private ObservationReferenceRangeTranslator referenceRangeTranslator;
-	
-	@Autowired
-	private ProvenanceTranslator<Obs> provenanceTranslator;
 	
 	@Autowired
 	private ObservationBasedOnReferenceTranslator basedOnReferenceTranslator;
@@ -137,9 +134,7 @@ public class ObservationTranslatorImpl extends BaseReferenceHandlingTranslator i
 		obs.setEffective(datetimeTranslator.toFhirResource(observation));
 		obs.addBasedOn(basedOnReferenceTranslator.toFhirResource(observation.getOrder()));
 		
-		obs.getMeta().setLastUpdated(observation.getDateChanged());
-		obs.addContained(provenanceTranslator.getCreateProvenance(observation));
-		obs.addContained(provenanceTranslator.getUpdateProvenance(observation));
+		obs.getMeta().setLastUpdated(getLastUpdated(observation));
 		
 		return obs;
 	}

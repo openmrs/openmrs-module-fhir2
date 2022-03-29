@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 
 import javax.annotation.Nonnull;
 
@@ -57,12 +58,6 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		
 		diagnosticReport.setId(fhirDiagnosticReport.getUuid());
 		
-		if (fhirDiagnosticReport.getDateChanged() != null) {
-			diagnosticReport.getMeta().setLastUpdated(fhirDiagnosticReport.getDateChanged());
-		} else {
-			diagnosticReport.getMeta().setLastUpdated(fhirDiagnosticReport.getDateCreated());
-		}
-		
 		if (fhirDiagnosticReport.getStatus() != null) {
 			diagnosticReport
 			        .setStatus(DiagnosticReport.DiagnosticReportStatus.valueOf(fhirDiagnosticReport.getStatus().toString()));
@@ -91,6 +86,8 @@ public class DiagnosticReportTranslatorImpl implements DiagnosticReportTranslato
 		for (Obs obs : fhirDiagnosticReport.getResults()) {
 			diagnosticReport.addResult(observationReferenceTranslator.toFhirResource(obs));
 		}
+		
+		diagnosticReport.getMeta().setLastUpdated(getLastUpdated(fhirDiagnosticReport));
 		
 		return diagnosticReport;
 	}

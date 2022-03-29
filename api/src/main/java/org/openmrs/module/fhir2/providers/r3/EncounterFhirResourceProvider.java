@@ -14,12 +14,10 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -50,7 +48,6 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
@@ -111,16 +108,6 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException("Could not find encounter to delete with id " + id.getIdPart());
 		}
 		return FhirProviderUtils.buildDelete(Encounter30_40.convertEncounter(encounter));
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getEncounterHistoryById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Encounter encounter = encounterService.get(id.getIdPart());
-		if (encounter == null) {
-			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());
-		}
-		return Encounter30_40.convertEncounter(encounter).getContained();
 	}
 	
 	@Search
