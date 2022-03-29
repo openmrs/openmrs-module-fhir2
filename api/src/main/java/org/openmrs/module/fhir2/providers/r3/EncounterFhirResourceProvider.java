@@ -17,11 +17,13 @@ import java.util.HashSet;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -34,6 +36,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -159,5 +162,22 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		return new SearchQueryBundleProviderR3Wrapper(encounterService.searchForEncounters(date, location,
 		    participantReference, subjectReference, encounterType, id, lastUpdated, sort, includes, revIncludes));
 	}
-	
+
+	/**
+	 * The $everything operation fetches all the information related the specified encounter
+	 *
+	 * @param encounterId The id of the encounter
+	 * @return a bundle of resources which reference to or are referenced from the encounter
+	 */
+	@Operation(name = "everything", idempotent = true, type = Encounter.class, bundleType = BundleTypeEnum.SEARCHSET)
+	public IBundleProvider getEncounterEverything(@IdParam IdType encounterId) {
+
+		if (encounterId == null || encounterId.getIdPart() == null || encounterId.getIdPart().isEmpty()) {
+			return null;
+		}
+
+		TokenParam encounterReference = new TokenParam().setValue(encounterId.getIdPart());
+
+		return new SearchQueryBundleProviderR3Wrapper(encounterService.getEncounterEverything(encounterReference));
+	}
 }
