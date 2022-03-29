@@ -23,4 +23,8 @@ public interface FhirServiceRequestService extends FhirService<ServiceRequest> {
 	IBundleProvider searchForServiceRequests(ReferenceAndListParam patientReference, TokenAndListParam code,
 	        ReferenceAndListParam encounterReference, ReferenceAndListParam participantReference, DateRangeParam occurrence,
 	        TokenAndListParam uuid, DateRangeParam lastUpdated, HashSet<Include> includes);
+	
+	IBundleProvider searchForServiceRequests(ReferenceAndListParam patientReference, TokenAndListParam code,
+	        ReferenceAndListParam encounterReference, ReferenceAndListParam participantReference, DateRangeParam occurrence,
+	        TokenAndListParam uuid, TokenAndListParam identifier, DateRangeParam lastUpdated, HashSet<Include> includes);
 }

@@ -76,6 +76,10 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 		
 		serviceRequest.setId(order.getUuid());
 		
+		if (order.getOrderNumber() != null) {
+			serviceRequest.addIdentifier(orderIdentifierTranslator.toFhirResource(order));
+		}
+		
 		serviceRequest.setStatus(determineServiceRequestStatus(order));
 		
 		serviceRequest.setCode(conceptTranslator.toFhirResource(order.getConcept()));

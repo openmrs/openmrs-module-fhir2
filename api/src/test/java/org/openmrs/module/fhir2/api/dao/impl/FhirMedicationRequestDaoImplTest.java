@@ -36,6 +36,8 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	
 	private static final String DRUG_ORDER_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
 	
+	private static final String DRUG_ORDER_NUMBER = "ORD-22";
+	
 	private static final String BAD_DRUG_ORDER_UUID = "uie3b9a2-4de5-4b12-ac40-jk90sdh";
 	
 	private static final String MEDICATION_REQUEST_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationRequestDaoImpl_initial_data.xml";
@@ -85,4 +87,23 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 		assertThat(drugOrder, notNullValue());
 	}
 	
+	@Test
+	public void search_shouldReturnResultsBasedOnOrderNumber() {
+		// Settup
+		TokenAndListParam ordrNumber = new TokenAndListParam();
+		TokenParam token = new TokenParam();
+		token.setValue(DRUG_ORDER_NUMBER);
+		ordrNumber.addAnd(token);
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.IDENTIFIER, ordrNumber);
+		
+		// Replay
+		List<String> matchingResourceUuids = medicationRequestDao.getSearchResultUuids(theParams);
+		List<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(theParams, matchingResourceUuids);
+		
+		// Verify
+		assertThat(drugOrders, notNullValue());
+		assertThat(drugOrders.get(0).getOrderNumber(), equalTo(DRUG_ORDER_NUMBER));
+	}
 }

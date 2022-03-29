@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
@@ -57,6 +59,8 @@ import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 public class MedicationRequestFhirResourceProviderTest {
 	
 	private static final String MEDICATION_REQUEST_UUID = "d7f5a4dd-019e-4221-85fa-e084505b9695";
+	
+	private static final String MEDICATION_REQUEST_ORDER_NUMBER = "ORD-1";
 	
 	private static final String WRONG_MEDICATION_REQUEST_UUID = "862e20a1-e73c-4c92-a4e8-9f922e0cd7f4";
 	
@@ -111,9 +115,8 @@ public class MedicationRequestFhirResourceProviderTest {
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestUsingCode() {
 		
-		when(
-		    fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
@@ -121,7 +124,7 @@ public class MedicationRequestFhirResourceProviderTest {
 		code.addAnd(codingToken);
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, code, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -135,15 +138,14 @@ public class MedicationRequestFhirResourceProviderTest {
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenPatientParamIsSpecified() {
 		
-		when(
-		    fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(patientParam, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -157,15 +159,14 @@ public class MedicationRequestFhirResourceProviderTest {
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenMedicationParamIsSpecified() {
 		
-		when(
-		    fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		ReferenceAndListParam medicationParam = new ReferenceAndListParam();
 		medicationParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Medication.SP_IDENTIFIER)));
 		
-		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, medicationParam,
-		    null, null, null);
+		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null,
+		    medicationParam, null, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -179,15 +180,14 @@ public class MedicationRequestFhirResourceProviderTest {
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenParticipantParamIsSpecified() {
 		
-		when(
-		    fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		ReferenceAndListParam participantParam = new ReferenceAndListParam();
 		participantParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Practitioner.SP_NAME)));
 		
-		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, participantParam,
-		    null, null, null, null);
+		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null,
+		    participantParam, null, null, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -201,15 +201,14 @@ public class MedicationRequestFhirResourceProviderTest {
 	@Test
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenEncounterParamIsSpecified() {
 		
-		when(
-		    fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		ReferenceAndListParam encounterParam = new ReferenceAndListParam();
 		encounterParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Encounter.SP_IDENTIFIER)));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, encounterParam, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -224,12 +223,11 @@ public class MedicationRequestFhirResourceProviderTest {
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenUUIDIsSpecified() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_UUID));
 		
-		when(
-		    fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
-		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, uuid,
-		    null, null);
+		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
+		    uuid, null, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -244,12 +242,11 @@ public class MedicationRequestFhirResourceProviderTest {
 	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenLastUpdatedIsSpecified() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
 		
-		when(
-		    fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
-		    lastUpdated, null);
+		    null, lastUpdated, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -265,12 +262,11 @@ public class MedicationRequestFhirResourceProviderTest {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("MedicationRequest:requester"));
 		
-		when(
-		    fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Arrays.asList(medicationRequest, new Practitioner()), 10, 1));
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Arrays.asList(medicationRequest, new Practitioner()), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
-		    null, includes);
+		    null, null, includes);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -286,11 +282,11 @@ public class MedicationRequestFhirResourceProviderTest {
 	public void searchMedicationRequest_shouldNotAddRelatedMedicationsForEmptyInclude() {
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(),
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
 		    isNull())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
-		    null, includes);
+		    null, null, includes);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
@@ -368,6 +364,26 @@ public class MedicationRequestFhirResourceProviderTest {
 	public void deleteMedicationRequest_shouldThrowResourceNotFoundException() {
 		when(fhirMedicationRequestService.delete(WRONG_MEDICATION_REQUEST_UUID)).thenReturn(null);
 		resourceProvider.deleteMedicationRequest(new IdType().setValue(WRONG_MEDICATION_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchServiceRequest_shouldReturnMatchingServiceRequestWhenOrderNumberSpecified() {
+		TokenAndListParam orderNumber = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_ORDER_NUMBER));
+		
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(),
+		    argThat(is(orderNumber)), any(), any(), any()))
+		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 1, 1));
+		
+		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, orderNumber, null,
+		    null, null, null, null);
+		
+		List<IBaseResource> resources = getResources(results, 1, 5);
+		
+		assertThat(results, notNullValue());
+		assertThat(resources, hasSize(Matchers.equalTo(1)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), Matchers.equalTo(FhirConstants.MEDICATION_REQUEST));
+		assertThat(resources.get(0).getIdElement().getIdPart(), Matchers.equalTo(MEDICATION_REQUEST_UUID));
 	}
 	
 }
