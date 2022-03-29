@@ -202,9 +202,6 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 	
 	@Test
 	public void deletePatient_shouldDeleteRequestedPatient() {
-		
-		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
-		
 		OperationOutcome result = patientFhirResourceProvider.deletePatient(new IdType().setValue(PATIENT_UUID));
 		
 		assertThat(result, notNullValue());
@@ -213,13 +210,6 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
 		    equalTo("This resource has been deleted"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deletePatient_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentPatient() {
-		when(patientService.delete(WRONG_PATIENT_UUID)).thenReturn(null);
-		
-		patientFhirResourceProvider.deletePatient(new IdType().setValue(WRONG_PATIENT_UUID));
 	}
 	
 	@Test

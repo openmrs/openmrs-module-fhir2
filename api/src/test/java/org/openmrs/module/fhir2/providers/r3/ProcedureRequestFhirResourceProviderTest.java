@@ -315,8 +315,6 @@ public class ProcedureRequestFhirResourceProviderTest {
 	
 	@Test
 	public void deleteProcedureRequest_shouldDeleteProcedureRequest() {
-		when(serviceRequestService.delete(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);
-		
 		OperationOutcome result = resourceProvider.deleteProcedureRequest(new IdType().setValue(SERVICE_REQUEST_UUID));
 		
 		assertThat(result, notNullValue());
@@ -325,13 +323,6 @@ public class ProcedureRequestFhirResourceProviderTest {
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
 		    equalTo("This resource has been deleted"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteProcedureRequest_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentProcedureRequest() {
-		when(serviceRequestService.delete(WRONG_SERVICE_REQUEST_UUID)).thenReturn(null);
-		
-		resourceProvider.deleteProcedureRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID));
 	}
 	
 	@Test

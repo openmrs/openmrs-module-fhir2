@@ -103,11 +103,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteEncounter(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Encounter encounter = encounterService.delete(id.getIdPart());
-		if (encounter == null) {
-			throw new ResourceNotFoundException("Could not find encounter to delete with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(Encounter30_40.convertEncounter(encounter));
+		encounterService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR3();
 	}
 	
 	@Search

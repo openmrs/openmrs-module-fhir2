@@ -128,21 +128,17 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	}
 	
 	@Override
-	public Encounter delete(@Nonnull String uuid) {
-		
+	public void delete(@Nonnull String uuid) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
 		
-		Encounter result;
 		try {
-			result = super.delete(uuid);
+			super.delete(uuid);
 		}
 		catch (ResourceNotFoundException e) {
-			result = visitService.delete(uuid);
+			visitService.delete(uuid);
 		}
-		
-		return result;
 	}
 	
 	@Override

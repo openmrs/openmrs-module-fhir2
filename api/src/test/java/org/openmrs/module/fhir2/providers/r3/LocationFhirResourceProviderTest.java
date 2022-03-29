@@ -526,9 +526,6 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 	
 	@Test
 	public void deleteLocation_shouldDeleteLocation() {
-		
-		when(locationService.delete(LOCATION_UUID)).thenReturn(location);
-		
 		OperationOutcome result = resourceProvider.deleteLocation(new IdType().setValue(LOCATION_UUID));
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
@@ -536,14 +533,6 @@ public class LocationFhirResourceProviderTest extends BaseFhirR3ProvenanceResour
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
 		    equalTo("This resource has been deleted"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteLocation_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentLocation() {
-		
-		when(locationService.delete(WRONG_LOCATION_UUID)).thenReturn(null);
-		
-		resourceProvider.deleteLocation(new IdType().setValue(WRONG_LOCATION_UUID));
 	}
 	
 	@Test

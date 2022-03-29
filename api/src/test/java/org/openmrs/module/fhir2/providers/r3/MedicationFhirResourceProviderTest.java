@@ -302,20 +302,11 @@ public class MedicationFhirResourceProviderTest {
 	
 	@Test
 	public void deleteMedication_shouldDeleteRequestedMedication() {
-		when(fhirMedicationService.delete(MEDICATION_UUID)).thenReturn(medication);
-		
 		OperationOutcome result = resourceProvider.deleteMedication(new IdType().setValue(MEDICATION_UUID));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteMedication_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantMedication() {
-		when(fhirMedicationService.delete(WRONG_MEDICATION_UUID)).thenReturn(null);
-		
-		resourceProvider.deleteMedication(new IdType().setValue(WRONG_MEDICATION_UUID));
 	}
 }

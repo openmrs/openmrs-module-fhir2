@@ -275,24 +275,15 @@ public class FhirEncounterServiceImplTest {
 	@Test
 	public void delete_shouldDeleteEncounter() {
 		when(dao.delete(ENCOUNTER_UUID)).thenReturn(openMrsEncounter);
-		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		
-		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.delete(ENCOUNTER_UUID);
-		
-		assertThat(fhirEncounter, notNullValue());
-		assertThat(fhirEncounter.getId(), notNullValue());
-		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));
+		encounterService.delete(ENCOUNTER_UUID);
 	}
 	
 	@Test
 	public void delete_shouldDeleteEncounterFromOpenMrsVisit() {
-		when(visitService.delete(ENCOUNTER_UUID)).thenReturn(fhirEncounter);
+		when(dao.delete(ENCOUNTER_UUID)).thenReturn(null);
 		
-		org.hl7.fhir.r4.model.Encounter fhirEncounter = encounterService.delete(ENCOUNTER_UUID);
-		
-		assertThat(fhirEncounter, notNullValue());
-		assertThat(fhirEncounter.getId(), notNullValue());
-		assertThat(fhirEncounter.getId(), equalTo(ENCOUNTER_UUID));
+		encounterService.delete(ENCOUNTER_UUID);
 	}
 	
 	@Test

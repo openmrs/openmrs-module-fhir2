@@ -129,7 +129,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	@Override
-	public T delete(@Nonnull String uuid) {
+	public void delete(@Nonnull String uuid) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
@@ -139,8 +139,6 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		if (openmrsObj == null) {
 			throw resourceNotFound(uuid);
 		}
-		
-		return getTranslator().toFhirResource(openmrsObj);
 	}
 	
 	/**

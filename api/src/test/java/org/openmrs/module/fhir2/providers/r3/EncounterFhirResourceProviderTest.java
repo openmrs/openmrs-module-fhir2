@@ -293,18 +293,11 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	
 	@Test
 	public void deleteEncounter_shouldDeleteRequestedEncounter() {
-		when(encounterService.delete(ENCOUNTER_UUID)).thenReturn(encounter);
-		
 		OperationOutcome result = resourceProvider.deleteEncounter(new IdType().setValue(ENCOUNTER_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteEncounter_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentEncounter() {
-		when(encounterService.delete(WRONG_ENCOUNTER_UUID)).thenReturn(null);
-		resourceProvider.deleteEncounter(new IdType().setValue(WRONG_ENCOUNTER_UUID));
 	}
 }

@@ -84,12 +84,8 @@ public class ImmunizationFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteImmunization(@IdParam @Nonnull IdType id) {
-		Immunization immunization = immunizationService.delete(id.getIdPart());
-		if (immunization == null) {
-			throw new ResourceNotFoundException("Could not find observation to delete with id" + id.getIdPart());
-		}
-		
-		return FhirProviderUtils.buildDelete(immunization);
+		immunizationService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search

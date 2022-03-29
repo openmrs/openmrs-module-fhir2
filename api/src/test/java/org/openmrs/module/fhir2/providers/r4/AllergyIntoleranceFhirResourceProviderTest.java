@@ -455,18 +455,11 @@ public class AllergyIntoleranceFhirResourceProviderTest extends BaseFhirProvenan
 	
 	@Test
 	public void deleteAllergyIntolerance_shouldDeleteRequestedAllergyIntolerance() {
-		when(service.delete(ALLERGY_UUID)).thenReturn(allergyIntolerance);
-		
 		OperationOutcome result = resourceProvider.deleteAllergy(new IdType().setValue(ALLERGY_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteAllergyIntolerance_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentAllergyIntolerance() {
-		when(service.delete(WRONG_ALLERGY_UUID)).thenReturn(null);
-		resourceProvider.deleteAllergy(new IdType().setValue(WRONG_ALLERGY_UUID));
 	}
 }

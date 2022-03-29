@@ -89,11 +89,8 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	public OperationOutcome deleteCondition(@IdParam IdType id) {
-		Condition condition = conditionService.delete(id.getIdPart());
-		if (condition == null) {
-			throw new ResourceNotFoundException("Could not find condition to delete with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(condition);
+		conditionService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search

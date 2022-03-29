@@ -90,11 +90,8 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteLocation(@IdParam @Nonnull IdType id) {
-		Location location = fhirLocationService.delete(id.getIdPart());
-		if (location == null) {
-			throw new ResourceNotFoundException("Could not find location to delete with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(location);
+		fhirLocationService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search

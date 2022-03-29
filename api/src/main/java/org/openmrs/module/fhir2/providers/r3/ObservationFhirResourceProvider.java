@@ -87,12 +87,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	public OperationOutcome deleteObservationResource(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Observation observation = observationService.delete(id.getIdPart());
-		if (observation == null) {
-			throw new ResourceNotFoundException("Could not find observation to delete with id" + id.getIdPart());
-		}
-		
-		return FhirProviderUtils.buildDelete(Observation30_40.convertObservation(observation));
+		observationService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR3();
 	}
 	
 	@Search

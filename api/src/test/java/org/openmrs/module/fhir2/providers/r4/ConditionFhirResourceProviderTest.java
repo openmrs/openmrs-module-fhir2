@@ -16,7 +16,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -138,8 +137,6 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 	
 	@Test
 	public void deleteCondition_shouldDeleteCondition() {
-		when(conditionService.delete(CONDITION_UUID)).thenReturn(condition);
-		
 		OperationOutcome result = resourceProvider.deleteCondition(new IdType().setValue(CONDITION_UUID));
 		
 		assertThat(result, Matchers.notNullValue());
@@ -147,14 +144,6 @@ public class ConditionFhirResourceProviderTest extends BaseFhirProvenanceResourc
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), Matchers.equalTo("MSG_DELETED"));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
 		    Matchers.equalTo("This resource has been deleted"));
-	}
-	
-	@Test
-	public void deleteCondition_shouldThrowResourceNotFoundExceptionWhenConditionNotFound() {
-		when(conditionService.delete(WRONG_CONDITION_UUID)).thenReturn(null);
-		
-		assertThrows(ResourceNotFoundException.class,
-		    () -> resourceProvider.deleteCondition(new IdType().setValue(WRONG_CONDITION_UUID)));
 	}
 	
 	@Test

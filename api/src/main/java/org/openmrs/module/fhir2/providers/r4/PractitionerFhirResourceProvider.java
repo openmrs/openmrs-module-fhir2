@@ -91,11 +91,8 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deletePractitioner(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Practitioner practitioner = practitionerService.delete(id.getIdPart());
-		if (practitioner == null) {
-			throw new ResourceNotFoundException("Could not find practitioner to delete with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(practitioner);
+		practitionerService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search

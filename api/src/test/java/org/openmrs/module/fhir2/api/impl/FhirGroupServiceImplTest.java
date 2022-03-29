@@ -189,12 +189,8 @@ public class FhirGroupServiceImplTest {
 		group.setId(COHORT_UUID);
 		
 		when(dao.delete(COHORT_UUID)).thenReturn(cohort);
-		when(translator.toFhirResource(cohort)).thenReturn(group);
 		
-		Group result = groupService.delete(COHORT_UUID);
-		assertThat(result, notNullValue());
-		assertThat(result.getId(), equalTo(COHORT_UUID));
-		assertThat(result.getActive(), is(false));
+		groupService.delete(COHORT_UUID);
 	}
 	
 	@Test

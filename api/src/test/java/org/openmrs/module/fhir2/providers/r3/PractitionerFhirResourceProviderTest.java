@@ -557,26 +557,6 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 	}
 	
 	@Test
-	public void deletePractitioner_shouldDeletePractitioner() {
-		
-		when(practitionerService.delete(PRACTITIONER_UUID)).thenReturn(practitioner);
-		
-		OperationOutcome result = resourceProvider.deletePractitioner(new IdType().setValue(PRACTITIONER_UUID));
-		assertThat(result, notNullValue());
-		assertThat(result.getIssue(), notNullValue());
-		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
-		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
-		    equalTo("This resource has been deleted"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deletePractitioner_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentPractitioner() {
-		when(practitionerService.delete(WRONG_PRACTITIONER_UUID)).thenReturn(null);
-		resourceProvider.deletePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID));
-	}
-	
-	@Test
 	public void updatePractitioner_shouldUpdatePractitioner() {
 		when(practitionerService.update(eq(PRACTITIONER_UUID), any(org.hl7.fhir.r4.model.Practitioner.class)))
 		        .thenReturn(practitioner);
@@ -618,5 +598,17 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		
 		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID),
 		    Practitioner30_40.convertPractitioner(wrongPractitioner));
+	}
+	
+	@Test
+	public void deletePractitioner_shouldDeletePractitioner() {
+		OperationOutcome result = resourceProvider.deletePractitioner(new IdType().setValue(PRACTITIONER_UUID));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
 	}
 }

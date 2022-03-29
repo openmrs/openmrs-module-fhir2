@@ -378,23 +378,13 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Test
 	public void deletePerson_shouldDeletePerson() {
-		
-		when(fhirPersonService.delete(PERSON_UUID)).thenReturn(person);
-		
 		OperationOutcome result = resourceProvider.deletePerson(new IdType().setValue(PERSON_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
 		    equalTo("This resource has been deleted"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deletePerson_shouldThrowResourceNotFoundException() {
-		
-		when(fhirPersonService.delete(WRONG_PERSON_UUID)).thenReturn(null);
-		
-		resourceProvider.deletePerson(new IdType().setValue(WRONG_PERSON_UUID));
 	}
 	
 	@Test
@@ -406,5 +396,4 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(person));
 	}
-	
 }

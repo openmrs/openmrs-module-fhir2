@@ -78,11 +78,8 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	public OperationOutcome deleteTask(@IdParam IdType id) {
-		Task task = service.delete(id.getIdPart());
-		if (task == null) {
-			throw new ResourceNotFoundException("Could not find task resource with id " + id.getIdPart() + "to delete");
-		}
-		return FhirProviderUtils.buildDelete(task);
+		service.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search

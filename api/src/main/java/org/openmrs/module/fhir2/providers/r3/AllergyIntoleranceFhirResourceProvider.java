@@ -98,11 +98,8 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteAllergyIntolerance(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.AllergyIntolerance allergyIntolerance = allergyIntoleranceService.delete(id.getIdPart());
-		if (allergyIntolerance == null) {
-			throw new ResourceNotFoundException("Could not find allergyIntolerance to delete with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(AllergyIntolerance30_40.convertAllergyIntolerance(allergyIntolerance));
+		allergyIntoleranceService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR3();
 	}
 	
 	@Search

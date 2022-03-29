@@ -268,21 +268,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 	
 	@Test
 	public void deleteObservation_shouldDeleteObservation() {
-		when(observationService.delete(OBSERVATION_UUID)).thenReturn(observation);
-		
 		OperationOutcome result = resourceProvider.deleteObservationResource(new IdType().setValue(OBSERVATION_UUID));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteObservation_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentObservation() {
-		when(observationService.delete(WRONG_OBSERVATION_UUID)).thenReturn(null);
-		
-		resourceProvider.deleteObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID));
 	}
 	
 	@Test
@@ -506,12 +497,10 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(resultList.get(0), notNullValue());
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
-		
 	}
 	
 	@Test
 	public void getLastnEncounters_shouldReturnFirstRecentEncountersObservationsWhenMaxIsMissing() {
-		
 		ReferenceAndListParam referenceParam = new ReferenceAndListParam();
 		ReferenceParam patient = new ReferenceParam();
 		

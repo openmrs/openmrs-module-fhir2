@@ -543,6 +543,16 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	}
 	
 	@Test
+	public void createPractitioner_shouldCreateNewPractitioner() {
+		when(practitionerService.create(practitioner)).thenReturn(practitioner);
+		
+		MethodOutcome result = resourceProvider.createPractitioner(practitioner);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(practitioner));
+	}
+	
+	@Test
 	public void updatePractitioner_shouldUpdatePractitioner() {
 		Practitioner newPractitioner = practitioner;
 		
@@ -583,9 +593,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	
 	@Test
 	public void deletePractitioner_shouldDeletePractitioner() {
-		when(practitionerService.delete(PRACTITIONER_UUID)).thenReturn(practitioner);
-		
 		OperationOutcome result = resourceProvider.deletePractitioner(new IdType().setValue(PRACTITIONER_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
@@ -593,21 +602,4 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
 		    equalTo("This resource has been deleted"));
 	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deletePractitioner_shouldThrowResourceNotFoundException() {
-		when(practitionerService.delete(WRONG_PRACTITIONER_UUID)).thenReturn(null);
-		resourceProvider.deletePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID));
-	}
-	
-	@Test
-	public void createPractitioner_shouldCreateNewPractitioner() {
-		when(practitionerService.create(practitioner)).thenReturn(practitioner);
-		
-		MethodOutcome result = resourceProvider.createPractitioner(practitioner);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getResource(), equalTo(practitioner));
-	}
-	
 }

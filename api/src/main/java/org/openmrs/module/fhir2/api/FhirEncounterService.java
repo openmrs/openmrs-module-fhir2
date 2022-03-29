@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import javax.annotation.Nonnull;
-
 import java.util.HashSet;
 
 import ca.uhn.fhir.model.api.Include;
@@ -23,14 +21,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Encounter;
 
 public interface FhirEncounterService extends FhirService<Encounter> {
-	
-	Encounter get(@Nonnull String uuid);
-	
-	Encounter create(@Nonnull Encounter encounter);
-	
-	Encounter update(@Nonnull String uuid, @Nonnull Encounter encounter);
-	
-	Encounter delete(@Nonnull String uuid);
 	
 	IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
 	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam encounterType,

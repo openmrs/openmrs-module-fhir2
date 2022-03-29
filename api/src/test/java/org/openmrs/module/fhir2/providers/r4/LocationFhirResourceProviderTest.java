@@ -517,6 +517,16 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	}
 	
 	@Test
+	public void createLocation_shouldCreateNewLocation() {
+		when(locationService.create(location)).thenReturn(location);
+		
+		MethodOutcome result = resourceProvider.createLocation(location);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getResource(), equalTo(location));
+	}
+	
+	@Test
 	public void updateLocation_shouldUpdateLocation() {
 		Location newLocation = location;
 		
@@ -556,9 +566,8 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 	
 	@Test
 	public void deleteLocation_shouldDeleteLocation() {
-		when(locationService.delete(LOCATION_UUID)).thenReturn(location);
-		
 		OperationOutcome result = resourceProvider.deleteLocation(new IdType().setValue(LOCATION_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
@@ -566,22 +575,4 @@ public class LocationFhirResourceProviderTest extends BaseFhirProvenanceResource
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
 		    equalTo("This resource has been deleted"));
 	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteLocation_shouldThrowResourceNotFoundException() {
-		when(locationService.delete(WRONG_LOCATION_UUID)).thenReturn(null);
-		
-		resourceProvider.deleteLocation(new IdType().setValue(WRONG_LOCATION_UUID));
-	}
-	
-	@Test
-	public void createLocation_shouldCreateNewLocation() {
-		when(locationService.create(location)).thenReturn(location);
-		
-		MethodOutcome result = resourceProvider.createLocation(location);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getResource(), equalTo(location));
-	}
-	
 }

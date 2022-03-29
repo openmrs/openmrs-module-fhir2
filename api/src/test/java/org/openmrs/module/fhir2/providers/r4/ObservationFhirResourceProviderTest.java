@@ -262,21 +262,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 	
 	@Test
 	public void deleteObservation_shouldDeleteObservation() {
-		when(observationService.delete(OBSERVATION_UUID)).thenReturn(observation);
-		
 		OperationOutcome result = resourceProvider.deleteObservationResource(new IdType().setValue(OBSERVATION_UUID));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteObservation_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentObservation() {
-		when(observationService.delete(WRONG_OBSERVATION_UUID)).thenReturn(null);
-		
-		resourceProvider.deleteObservationResource(new IdType().setValue(WRONG_OBSERVATION_UUID));
 	}
 	
 	@Test
