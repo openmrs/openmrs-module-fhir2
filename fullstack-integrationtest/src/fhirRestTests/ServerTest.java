@@ -25,10 +25,10 @@ import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 
 public class ServerTest {
 
+	private static IGenericClient client;
+
 	private static final String PATIENT_UUID = "9a79b2e3-b2f3-4d01-8304-4193f273dee8";
-
-      private static IGenericClient client;
-
+       
 	@Before
 	public void setup() {
 		FhirContext context = FhirContext.forR4();
