@@ -32,9 +32,4 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/openmrs/"]
       timeout: 20s
-          volumes:
-      - openmrs-referenceapplication-data:/usr/local/tomcat/.OpenMRS
-      - ./activemq-data:/usr/local/tomcat/.OpenMRS/activemq-data
-
-volumes:
-  openmrs-referenceapplication-data:
+      
