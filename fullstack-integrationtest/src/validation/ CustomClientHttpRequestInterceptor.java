@@ -21,7 +21,7 @@ public class  CustomClientHttpRequestInterceptor implements ClientHttpRequestInt
             HttpRequest request, byte[] body,
             ClientHttpRequestExecution execution) throws IOException {
 
-    //logRequestDetails(request);
+        //logRequestDetails(request);
         return execution.execute(request, body);
     }
 

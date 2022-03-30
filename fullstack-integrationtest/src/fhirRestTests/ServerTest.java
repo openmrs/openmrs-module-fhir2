@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.fullstack-integrationtest.fhirRestTests;
 
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.IOException;
 
@@ -38,8 +39,8 @@ public class ServerTest {
 
 	@Test
 	public void shouldLoadExistingPatientAsJson() throws IOException {
-		
 		client.read().resource(Patient.class).withId(PATIENT_UUID).accept("application/json").execute();
+		assertThat(patient, notNullValue());
 		assertThat(patient.getId(), equalTo(PATIENT_UUID));
 	}
     
