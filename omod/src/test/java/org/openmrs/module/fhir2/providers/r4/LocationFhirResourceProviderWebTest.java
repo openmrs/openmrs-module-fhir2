@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +41,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
@@ -513,15 +515,19 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR4ResourceProvi
 	
 	@Test
 	public void deleteLocation_shouldDeleteLocation() throws Exception {
-		Location location = new Location();
-		location.setId(LOCATION_UUID);
-		
-		when(locationService.delete(LOCATION_UUID)).thenReturn(location);
-		
 		MockHttpServletResponse response = delete("/Location/" + LOCATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
 	
+	@Test
+	public void deleteLocation_shouldReturn404WhenLocationNotFound() throws Exception {
+		doThrow(new ResourceNotFoundException("")).when(locationService).delete(WRONG_LOCATION_UUID);
+		
+		MockHttpServletResponse response = delete("/Location/" + WRONG_LOCATION_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
 }

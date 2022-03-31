@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,13 +38,13 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.Before;
 import org.junit.Test;
@@ -449,19 +450,20 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	
 	@Test
 	public void deletePractitioner_shouldDeletePractitioner() throws Exception {
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(PRACTITIONER_UUID);
-		retVal.getText().setDivAsString("Deleted successfully");
-		
-		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
-		practitioner.setId(PRACTITIONER_UUID);
-		
-		when(practitionerService.delete(PRACTITIONER_UUID)).thenReturn(practitioner);
-		
 		MockHttpServletResponse response = delete("/Practitioner/" + PRACTITIONER_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
 	
+	@Test
+	public void deletePractitioner_shouldReturn404IfPractitionerNotFound() throws Exception {
+		doThrow(new ResourceNotFoundException("")).when(practitionerService).delete(WRONG_PRACTITIONER_UUID);
+		
+		MockHttpServletResponse response = delete("/Practitioner/" + WRONG_PRACTITIONER_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
 }

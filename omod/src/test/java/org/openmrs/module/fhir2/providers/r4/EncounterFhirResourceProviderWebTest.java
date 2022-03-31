@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,6 +43,7 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
@@ -818,8 +820,6 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	
 	@Test
 	public void deleteEncounter_shouldDeleteEncounter() throws Exception {
-		when(encounterService.delete(ENCOUNTER_UUID)).thenReturn(encounter);
-		
 		MockHttpServletResponse response = delete("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -828,7 +828,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	
 	@Test
 	public void deleteEncounter_shouldReturn404ForNonExistingEncounter() throws Exception {
-		when(encounterService.delete(WRONG_ENCOUNTER_UUID)).thenReturn(null);
+		doThrow(new ResourceNotFoundException("")).when(encounterService).delete(WRONG_ENCOUNTER_UUID);
 		
 		MockHttpServletResponse response = delete("/Encounter/" + WRONG_ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
 		

@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +47,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
@@ -183,8 +185,6 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	
 	@Test
 	public void deleteObservation_shouldDeleteObservation() throws Exception {
-		when(observationService.delete(OBS_UUID)).thenReturn(observation);
-		
 		MockHttpServletResponse response = delete("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -193,7 +193,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	
 	@Test
 	public void deleteObservation_shouldReturn404ForNonExistingObservation() throws Exception {
-		when(observationService.delete(BAD_OBS_UUID)).thenReturn(null);
+		doThrow(new ResourceNotFoundException("")).when(observationService).delete(BAD_OBS_UUID);
 		
 		MockHttpServletResponse response = delete("/Observation/" + BAD_OBS_UUID).accept(FhirMediaTypes.JSON).go();
 		

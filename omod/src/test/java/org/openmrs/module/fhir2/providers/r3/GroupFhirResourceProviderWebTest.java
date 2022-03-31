@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.ServletException;
@@ -22,17 +23,14 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Group;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirGroupService;
@@ -56,9 +54,6 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR3ResourceProvider
 	
 	@Getter(AccessLevel.PUBLIC)
 	private GroupFhirResourceProvider resourceProvider;
-	
-	@Captor
-	private ArgumentCaptor<ReferenceAndListParam> managingEntityCaptor;
 	
 	@Before
 	@Override
@@ -142,18 +137,19 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR3ResourceProvider
 	
 	@Test
 	public void deleteGroup_shouldDeleteGroup() throws Exception {
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(COHORT_UUID);
-		retVal.getText().setDivAsString("Deleted Successfully");
-		
-		org.hl7.fhir.r4.model.Group group = new org.hl7.fhir.r4.model.Group();
-		group.setId(COHORT_UUID);
-		
-		when(groupService.delete(COHORT_UUID)).thenReturn(group);
-		
 		MockHttpServletResponse response = delete("/Group/" + COHORT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deleteGroup_shouldReturn404ForNonExistingGroup() throws Exception {
+		doThrow(new ResourceNotFoundException("")).when(groupService).delete(BAD_COHORT_UUID);
+		
+		MockHttpServletResponse response = delete("/Group/" + BAD_COHORT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
 }

@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +37,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
@@ -323,12 +325,6 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	
 	@Test
 	public void deleteTask_shouldDeleteTask() throws Exception {
-		Task task = new Task();
-		task.setId(TASK_UUID);
-		task.setStatus(Task.TaskStatus.ACCEPTED);
-		
-		when(service.delete(any(String.class))).thenReturn(task);
-		
 		MockHttpServletResponse response = delete("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -337,7 +333,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	
 	@Test
 	public void deleteTask_shouldReturn404ForNonExistingTask() throws Exception {
-		when(service.delete(WRONG_TASK_UUID)).thenReturn(null);
+		doThrow(new ResourceNotFoundException("")).when(service).delete(WRONG_TASK_UUID);
 		
 		MockHttpServletResponse response = delete("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		

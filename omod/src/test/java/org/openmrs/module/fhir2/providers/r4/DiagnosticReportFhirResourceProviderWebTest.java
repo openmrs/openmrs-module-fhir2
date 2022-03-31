@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +42,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
@@ -558,12 +560,6 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	
 	@Test
 	public void shouldDeleteDiagnosticReport() throws Exception {
-		DiagnosticReport diagnosticReport = new DiagnosticReport();
-		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
-		diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.CANCELLED);
-		
-		when(service.delete(any(String.class))).thenReturn(diagnosticReport);
-		
 		MockHttpServletResponse response = delete("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
 		
@@ -573,7 +569,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	
 	@Test
 	public void deleteDiagnosticReport_shouldReturn404ForNonExistingDiagnosticReport() throws Exception {
-		when(service.delete(WRONG_UUID)).thenReturn(null);
+		doThrow(new ResourceNotFoundException("")).when(service).delete(WRONG_UUID);
 		
 		MockHttpServletResponse response = delete("/DiagnosticReport/" + WRONG_UUID).accept(FhirMediaTypes.JSON).go();
 		

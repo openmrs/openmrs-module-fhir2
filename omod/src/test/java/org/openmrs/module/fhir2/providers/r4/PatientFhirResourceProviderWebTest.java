@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,12 +41,12 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
@@ -683,18 +684,19 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 	
 	@Test
 	public void deletePatient_shouldDeletePatient() throws Exception {
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(PATIENT_UUID);
-		retVal.getText().setDivAsString("Deleted successfully");
-		
-		Patient patient = new Patient();
-		patient.setId(PATIENT_UUID);
-		
-		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
-		
 		MockHttpServletResponse response = delete("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deletePatient_shouldReturn404WhenPatientNotFound() throws Exception {
+		doThrow(new ResourceNotFoundException("")).when(patientService).delete(BAD_PATIENT_UUID);
+		
+		MockHttpServletResponse response = delete("/Patient/" + BAD_PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
 	

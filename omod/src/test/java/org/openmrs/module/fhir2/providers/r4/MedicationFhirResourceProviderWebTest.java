@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +37,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -312,8 +314,6 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	
 	@Test
 	public void deleteMedication_shouldDeleteRequestedMedication() throws Exception {
-		when(fhirMedicationService.delete(any(String.class))).thenReturn(medication);
-		
 		MockHttpServletResponse response = delete("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -322,7 +322,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 	
 	@Test
 	public void deleteMedication_shouldReturn404ForNonExistingMedication() throws Exception {
-		when(fhirMedicationService.delete(WRONG_MEDICATION_UUID)).thenReturn(null);
+		doThrow(new ResourceNotFoundException("")).when(fhirMedicationService).delete(WRONG_MEDICATION_UUID);
 		
 		MockHttpServletResponse response = delete("/Medication/" + WRONG_MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		

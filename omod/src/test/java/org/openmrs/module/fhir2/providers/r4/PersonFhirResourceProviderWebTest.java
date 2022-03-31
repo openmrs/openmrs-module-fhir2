@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,13 +37,13 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Person;
 import org.junit.Before;
 import org.junit.Test;
@@ -482,18 +483,19 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	
 	@Test
 	public void deletePerson_shouldDeletePerson() throws Exception {
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(PERSON_UUID);
-		retVal.getText().setDivAsString("Deleted successfully");
-		
-		Person person = new Person();
-		person.setId(PERSON_UUID);
-		
-		when(personService.delete(PERSON_UUID)).thenReturn(person);
-		
 		MockHttpServletResponse response = delete("/Person/" + PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deletePerson_shouldReturn404WhenPersonNotFound() throws Exception {
+		doThrow(new ResourceNotFoundException("")).when(personService).delete(WRONG_PERSON_UUID);
+		
+		MockHttpServletResponse response = delete("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
 }

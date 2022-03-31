@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +42,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
@@ -502,9 +504,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	}
 	
 	@Test
-	public void deleteAllergyIntolerance_shouldDeleteRequestedAllergyIntolerance() throws Exception {
-		when(allergyService.delete(any(String.class))).thenReturn(allergyIntolerance);
-		
+	public void deleteAllergyIntolerance_shouldDeleteAllergyIntolerance() throws Exception {
 		MockHttpServletResponse response = delete("/AllergyIntolerance/" + ALLERGY_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -513,12 +513,11 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 	
 	@Test
 	public void deleteAllergyIntolerance_shouldReturn404ForNonExistingAllergyIntolerance() throws Exception {
-		when(allergyService.delete(WRONG_ALLERGY_UUID)).thenReturn(null);
+		doThrow(new ResourceNotFoundException("")).when(allergyService).delete(WRONG_ALLERGY_UUID);
 		
 		MockHttpServletResponse response = delete("/AllergyIntolerance/" + WRONG_ALLERGY_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
 		
 		assertThat(response, isNotFound());
 	}
-	
 }
