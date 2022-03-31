@@ -27,8 +27,7 @@ public class RequireAuthenticationInterceptor {
 		if (!(request.getRequestURI().contains("/.well-known") || request.getRequestURI().endsWith("/metadata"))
 		        && !Context.isAuthenticated()) {
 			// This sends 401 error if not authenticated
-			HttpServletResponse httpResponse = (HttpServletResponse) response;
-			httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
 			return false;
 		}
 		return true;
