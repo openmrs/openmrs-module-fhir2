@@ -977,4 +977,12 @@
         <modifyDataType columnName="target_uuid" newDataType="char(38)" tableName="fhir_reference"/>
         <dropUniqueConstraint constraintName="target_uuid"  tableName="fhir_reference" uniqueColumns="target_uuid"/>  
     </changeSet>
+
+    <changeSet id="drop_fhir_duration_unit_map_20220412" author="mseaton">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_duration_unit_map"/>
+        </preConditions>
+        <dropTable tableName="fhir_duration_unit_map" />
+    </changeSet>
+
 </databaseChangeLog>
