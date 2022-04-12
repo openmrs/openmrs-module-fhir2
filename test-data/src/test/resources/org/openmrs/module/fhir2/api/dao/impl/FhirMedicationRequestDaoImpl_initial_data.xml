@@ -63,6 +63,12 @@
     <concept_reference_map concept_map_id="16" concept_id="4021" concept_reference_term_id="21" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" uuid="23b6e712-49d8-99e0-8fed-18a905e055cd"/>
     <concept_reference_map concept_map_id="17" concept_id="4022" concept_reference_term_id="22" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" uuid="23b6e712-49d8-99e0-8def-18a905e087cd"/>
 
+    <concept_reference_term concept_reference_term_id="162583" uuid="46b2fffe-b67d-11ec-8065-0242ac110002" concept_source_id="2" code="257997001" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" />
+    <concept_reference_map concept_map_id="162583" uuid="613d6e0f-b67d-11ec-8065-0242ac110002" concept_id="162583" concept_reference_term_id="162583" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" />
+
+    <concept_reference_term concept_reference_term_id="1733" uuid="ad7bdcc9-ba86-11ec-b759-0242ac110002" concept_source_id="2" code="258701004" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" />
+    <concept_reference_map concept_map_id="1733" uuid="ca85058c-ba86-11ec-b759-0242ac110002" concept_id="1733" concept_reference_term_id="1733" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" />
+
     <orders order_id="1005" order_type_id="1" encounter_id="890" urgency="ROUTINE" concept_id="4020" orderer="1"
             care_setting="1" order_action="NEW" order_number="1" date_activated="2016-02-01 00:30:00.0"
             auto_expire_date="2017-09-30 00:00:00.0" creator="1"
