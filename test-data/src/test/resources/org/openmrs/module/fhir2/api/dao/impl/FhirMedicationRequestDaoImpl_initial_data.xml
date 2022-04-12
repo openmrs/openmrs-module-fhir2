@@ -98,10 +98,4 @@
     <drug_order order_id="8" drug_inventory_id="2003" duration="8" duration_units="1733" dispense_as_written="true"
                 as_needed="false" frequency="3"/>
 
-    <fhir_duration_unit_map duration_unit_map_id="1" concept_id="162583" unit_of_time="S" creator="1"
-                            date_created="2020-12-18 00:00:00" retired="0" uuid="dd12f704-411a-11eb-81d3-84fdd1f54722"/>
-
-    <fhir_duration_unit_map duration_unit_map_id="2" concept_id="1733" unit_of_time="MIN" creator="1"
-                            date_created="2020-12-18 00:00:00" retired="0" uuid="dd130d5e-411a-11eb-81d3-84fdd1f54722"/>
-
 </dataset>

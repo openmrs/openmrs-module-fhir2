@@ -2,18 +2,38 @@
 
 <dataset>
 	<concept concept_id = "162583" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2014-09-18 15:14:53" changed_by= "1" date_changed= "2016-01-27 01:41:48" retired_by= "1" uuid= "162583AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
-	<concept concept_id = "1733" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2009-06-24 16:57:06" changed_by= "1" date_changed= "2014-12-01 21:22:02" retired_by= "1" uuid= "1733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
-	<concept concept_id = "1822" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2009-07-06 17:27:04" changed_by= "1" date_changed= "2014-12-01 21:22:19" retired_by= "1" uuid= "1822AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
-	<concept concept_id = "1072" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2005-01-06 00:00:00" changed_by= "1" date_changed= "2016-04-07 04:19:51" retired_by= "1" uuid= "1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
-	<concept concept_id = "1073" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2005-01-06 00:00:00" changed_by= "1" date_changed= "2016-04-07 04:19:51" retired_by= "1" uuid= "1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
-	<concept concept_id = "1074" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2005-01-06 00:00:00" changed_by= "1" date_changed= "2016-04-07 04:18:42" retired_by= "1" uuid= "1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
-	<concept concept_id = "1734" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2009-06-24 16:57:26" changed_by= "1" date_changed= "2016-07-21 02:13:50" retired_by= "1" uuid= "1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+	<concept_name concept_name_id="162583" uuid="a7cc2d1f-b67c-11ec-8065-0242ac110002" concept_id="162583" name="Seconds" locale="en" creator="1" date_created="2008-08-18 12:32:35.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" />
+	<concept_reference_term concept_reference_term_id="162583" uuid="46b2fffe-b67d-11ec-8065-0242ac110002" concept_source_id="2" code="257997001" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" />
+	<concept_reference_map concept_map_id="162583" uuid="613d6e0f-b67d-11ec-8065-0242ac110002" concept_id="162583" concept_reference_term_id="162583" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" />
 
-	<fhir_duration_unit_map duration_unit_map_id= "1" concept_id= "162583" unit_of_time= "S" creator= "1" date_created= "2020-12-18 00:00:00" retired= "0" uuid= "dd12f704-411a-11eb-81d3-84fdd1f54722" />
-	<fhir_duration_unit_map duration_unit_map_id= "2" concept_id= "1733" unit_of_time= "MIN" creator= "1" date_created= "2020-12-18 00:00:00" retired= "0" uuid= "dd130d5e-411a-11eb-81d3-84fdd1f54722" />
-	<fhir_duration_unit_map duration_unit_map_id= "3" concept_id= "1822" unit_of_time= "H" creator= "1" date_created= "2020-12-18 00:00:00" retired= "0" uuid= "dd131c04-411a-11eb-81d3-84fdd1f54722" />
-	<fhir_duration_unit_map duration_unit_map_id= "4" concept_id= "1072" unit_of_time= "D" creator= "1" date_created= "2020-12-18 00:00:00" retired= "0" uuid= "dd137515-411a-11eb-81d3-84fdd1f54722" />
-	<fhir_duration_unit_map duration_unit_map_id= "5" concept_id= "1073" unit_of_time= "WK" creator= "1" date_created= "2020-12-18 00:00:00" retired= "0" uuid= "dd137eb6-411a-11eb-81d3-84fdd1f54722" />
-	<fhir_duration_unit_map duration_unit_map_id= "6" concept_id= "1074" unit_of_time= "MO" creator= "1" date_created= "2020-12-18 00:00:00" retired= "0" uuid= "dd138741-411a-11eb-81d3-84fdd1f54722" />
-	<fhir_duration_unit_map duration_unit_map_id= "7" concept_id= "1734" unit_of_time= "A" creator= "1" date_created= "2020-12-18 00:00:00" retired= "0" uuid= "dd138fa6-411a-11eb-81d3-84fdd1f54722" />
+	<concept concept_id = "1733" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2009-06-24 16:57:06" changed_by= "1" date_changed= "2014-12-01 21:22:02" retired_by= "1" uuid= "1733AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+	<concept_name concept_name_id="1733" uuid="92c9f5fa-ba86-11ec-b759-0242ac110002" concept_id="1733" name="Minutes" locale="en" creator="1" date_created="2008-08-18 12:32:35.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" />
+	<concept_reference_term concept_reference_term_id="1733" uuid="ad7bdcc9-ba86-11ec-b759-0242ac110002" concept_source_id="2" code="258701004" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" />
+	<concept_reference_map concept_map_id="1733" uuid="ca85058c-ba86-11ec-b759-0242ac110002" concept_id="1733" concept_reference_term_id="1733" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" />
+
+	<concept concept_id = "1822" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2009-07-06 17:27:04" changed_by= "1" date_changed= "2014-12-01 21:22:19" retired_by= "1" uuid= "1822AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+	<concept_name concept_name_id="1822" uuid="988be6e2-ba86-11ec-b759-0242ac110002" concept_id="1822" name="Hours" locale="en" creator="1" date_created="2008-08-18 12:32:35.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" />
+	<concept_reference_term concept_reference_term_id="1822" uuid="b0c967a7-ba86-11ec-b759-0242ac110002" concept_source_id="2" code="258702006" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" />
+	<concept_reference_map concept_map_id="1822" uuid="cd794793-ba86-11ec-b759-0242ac110002" concept_id="1822" concept_reference_term_id="1822" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" />
+
+	<concept concept_id = "1072" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2005-01-06 00:00:00" changed_by= "1" date_changed= "2016-04-07 04:19:51" retired_by= "1" uuid= "1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+	<concept_name concept_name_id="1072" uuid="9c455161-ba86-11ec-b759-0242ac110002" concept_id="1072" name="Days" locale="en" creator="1" date_created="2008-08-18 12:32:35.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" />
+	<concept_reference_term concept_reference_term_id="1072" uuid="b3be7d97-ba86-11ec-b759-0242ac110002" concept_source_id="2" code="258703001" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" />
+	<concept_reference_map concept_map_id="1072" uuid="d159c2e8-ba86-11ec-b759-0242ac110002" concept_id="1072" concept_reference_term_id="1072" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" />
+
+	<concept concept_id = "1073" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2005-01-06 00:00:00" changed_by= "1" date_changed= "2016-04-07 04:19:51" retired_by= "1" uuid= "1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+	<concept_name concept_name_id="1073" uuid="9fa8a51f-ba86-11ec-b759-0242ac110002" concept_id="1073" name="Weeks" locale="en" creator="1" date_created="2008-08-18 12:32:35.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" />
+	<concept_reference_term concept_reference_term_id="1073" uuid="b6ed2430-ba86-11ec-b759-0242ac110002" concept_source_id="2" code="258705008" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" />
+	<concept_reference_map concept_map_id="1073" uuid="d42e892e-ba86-11ec-b759-0242ac110002" concept_id="1073" concept_reference_term_id="1073" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" />
+
+	<concept concept_id = "1074" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2005-01-06 00:00:00" changed_by= "1" date_changed= "2016-04-07 04:18:42" retired_by= "1" uuid= "1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+	<concept_name concept_name_id="1074" uuid="a2dfaeaf-ba86-11ec-b759-0242ac110002" concept_id="1074" name="Months" locale="en" creator="1" date_created="2008-08-18 12:32:35.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" />
+	<concept_reference_term concept_reference_term_id="1074" uuid="b9e5a082-ba86-11ec-b759-0242ac110002" concept_source_id="2" code="258706009" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" />
+	<concept_reference_map concept_map_id="1074" uuid="d83fae97-ba86-11ec-b759-0242ac110002" concept_id="1074" concept_reference_term_id="1074" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" />
+
+	<concept concept_id = "1734" retired= "0" datatype_id= "4" class_id= "11" is_set= "0" creator= "1" date_created= "2009-06-24 16:57:26" changed_by= "1" date_changed= "2016-07-21 02:13:50" retired_by= "1" uuid= "1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+	<concept_name concept_name_id="1734" uuid="a6900c2e-ba86-11ec-b759-0242ac110002" concept_id="1734" name="Years" locale="en" creator="1" date_created="2008-08-18 12:32:35.0" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" />
+	<concept_reference_term concept_reference_term_id="1734" uuid="beff0bf1-ba86-11ec-b759-0242ac110002" concept_source_id="2" code="258707000" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" />
+	<concept_reference_map concept_map_id="1734" uuid="dbf430cd-ba86-11ec-b759-0242ac110002" concept_id="1734" concept_reference_term_id="1734" concept_map_type_id="2" creator="1" date_created="2004-08-12 00:00:00.0" />
+
 </dataset>
