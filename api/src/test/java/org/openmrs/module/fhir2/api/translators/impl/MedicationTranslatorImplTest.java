@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.translators.impl.MedicationTranslatorImpl.DRUG_NAME_EXTENSION;
 
 import java.util.Collections;
 import java.util.Date;
@@ -52,6 +53,8 @@ public class MedicationTranslatorImplTest {
 	
 	private static final String DOSE_STRENGTH = "500mg";
 	
+	private static final String DRUG_NAME = "Example Drug Name";
+	
 	@Mock
 	private ConceptTranslator conceptTranslator;
 	
@@ -67,6 +70,7 @@ public class MedicationTranslatorImplTest {
 		
 		Concept drugConcept = new Concept();
 		drugConcept.setUuid(DRUG_CONCEPT_UUID);
+		drug.setName(DRUG_NAME);
 		drug.setConcept(drugConcept);
 		drug.setMaximumDailyDose(MAX_DAILY_DOSE);
 		drug.setMinimumDailyDose(MIN_DAILY_DOSE);
@@ -251,6 +255,14 @@ public class MedicationTranslatorImplTest {
 	}
 	
 	@Test
+	public void addMedicineExtension_shouldAddExtensionForName() {
+		assertThat(
+		    medicationTranslator.toFhirResource(drug).getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE)
+		            .getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#" + DRUG_NAME_EXTENSION),
+		    hasProperty("value", hasProperty("value", equalTo(DRUG_NAME))));
+	}
+	
+	@Test
 	public void addMedicineComponent_shouldSetMaximumDailyDoseCorrectly() {
 		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#maximumDailyDose",
 		    "3.5");
@@ -272,6 +284,14 @@ public class MedicationTranslatorImplTest {
 		    DOSE_STRENGTH);
 		assertThat(drug.getStrength(), notNullValue());
 		assertThat(drug.getStrength(), equalTo(DOSE_STRENGTH));
+	}
+	
+	@Test
+	public void addMedicineComponent_shouldSetDrugNameCorrectly() {
+		medicationTranslator.addMedicineComponent(drug, FhirConstants.OPENMRS_FHIR_EXT_MEDICINE + "#" + DRUG_NAME_EXTENSION,
+		    DRUG_NAME);
+		assertThat(drug.getName(), notNullValue());
+		assertThat(drug.getName(), equalTo(DRUG_NAME));
 	}
 	
 	@Test
