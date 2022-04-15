@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.DrugOrder;
-import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingComponentTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingRepeatComponentTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestTimingTranslatorImplTest {
@@ -36,7 +36,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 	private static final int PERIOD = 1;
 	
 	@Mock
-	private MedicationRequestTimingComponentTranslator timingComponentTranslator;
+	private MedicationRequestTimingRepeatComponentTranslator timingRepeatComponentTranslator;
 	
 	private MedicationRequestTimingTranslatorImpl timingTranslator;
 	
@@ -45,7 +45,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 	@Before
 	public void setup() {
 		timingTranslator = new MedicationRequestTimingTranslatorImpl();
-		timingTranslator.setTimingComponentTranslator(timingComponentTranslator);
+		timingTranslator.setTimingRepeatComponentTranslator(timingRepeatComponentTranslator);
 		
 		drugOrder = new DrugOrder();
 	}
@@ -65,7 +65,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 		Timing.TimingRepeatComponent repeatComponent = new Timing.TimingRepeatComponent();
 		repeatComponent.setPeriod(PERIOD);
 		repeatComponent.setPeriodUnit(Timing.UnitsOfTime.D);
-		when(timingComponentTranslator.toFhirResource(drugOrder)).thenReturn(repeatComponent);
+		when(timingRepeatComponentTranslator.toFhirResource(drugOrder)).thenReturn(repeatComponent);
 		
 		Timing result = timingTranslator.toFhirResource(drugOrder);
 		assertThat(result, notNullValue());

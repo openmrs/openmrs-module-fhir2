@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -19,8 +21,6 @@ import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Nonnull;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -34,14 +34,18 @@ public class DosageTranslatorImpl implements DosageTranslator {
 	
 	@Override
 	public Dosage toFhirResource(@Nonnull DrugOrder drugOrder) {
+		if (drugOrder == null) {
+			return null;
+		}
 		Dosage dosage = new Dosage();
 		dosage.setText(drugOrder.getDosingInstructions());
 		dosage.setAsNeeded(new BooleanType(drugOrder.getAsNeeded()));
 		dosage.setRoute(conceptTranslator.toFhirResource(drugOrder.getRoute()));
 		dosage.setTiming(timingTranslator.toFhirResource(drugOrder));
+		
 		return dosage;
 	}
-
+	
 	@Override
 	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Dosage dosage) {
 		drugOrder.setDosingInstructions(dosage.getText());

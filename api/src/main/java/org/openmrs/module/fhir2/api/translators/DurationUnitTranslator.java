@@ -18,7 +18,7 @@ public interface DurationUnitTranslator extends ToFhirTranslator<Concept, Timing
 	
 	@Override
 	Timing.UnitsOfTime toFhirResource(@Nonnull Concept concept);
-
+	
 	@Override
 	Concept toOpenmrsType(@Nonnull Timing.UnitsOfTime resource);
 }

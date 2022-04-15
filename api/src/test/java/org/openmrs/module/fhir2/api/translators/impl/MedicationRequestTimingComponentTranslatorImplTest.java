@@ -54,7 +54,7 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	
 	private static final double FREQUENCY_PER_DAY = 3.0;
 	
-	private MedicationRequestTimingComponentTranslatorImpl requestTimingComponentTranslator;
+	private MedicationRequestTimingRepeatComponentTranslatorImpl requestTimingComponentTranslator;
 	
 	private DrugOrder drugOrder;
 	
@@ -62,7 +62,7 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 	
 	@Before
 	public void setup() {
-		requestTimingComponentTranslator = new MedicationRequestTimingComponentTranslatorImpl();
+		requestTimingComponentTranslator = new MedicationRequestTimingRepeatComponentTranslatorImpl();
 		requestTimingComponentTranslator.setDurationUnitTranslator(durationUnitTranslator);
 		
 		concept = new Concept();
@@ -80,23 +80,6 @@ public class MedicationRequestTimingComponentTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getDuration(), notNullValue());
 		assertThat(result.getDuration(), equalTo(new BigDecimal(2)));
-	}
-	
-	@Test
-	public void toFhirResource_shouldTranslateFrequencyToFhirType() {
-		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
-		assertThat(result, notNullValue());
-		assertThat(result.getFrequency(), notNullValue());
-		assertThat(result.getFrequency(), equalTo(3));
-	}
-	
-	@Test
-	public void toFhirResource_shouldSetPeriodAndItsUnitsIfFrequencyPerDayIsNotNull() {
-		Timing.TimingRepeatComponent result = requestTimingComponentTranslator.toFhirResource(drugOrder);
-		assertThat(result, notNullValue());
-		assertThat(result.getPeriod(), notNullValue());
-		assertThat(result.getPeriod(), equalTo(new BigDecimal(1)));
-		assertThat(result.getPeriodUnit(), equalTo(Timing.UnitsOfTime.D));
 	}
 	
 	@Test

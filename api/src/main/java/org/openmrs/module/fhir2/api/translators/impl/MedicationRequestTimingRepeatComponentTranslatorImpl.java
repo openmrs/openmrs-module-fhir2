@@ -9,28 +9,29 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.DrugOrder;
-import org.openmrs.OrderFrequency;
 import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
-import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingComponentTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingRepeatComponentTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
-
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class MedicationRequestTimingComponentTranslatorImpl implements MedicationRequestTimingComponentTranslator {
+public class MedicationRequestTimingRepeatComponentTranslatorImpl implements MedicationRequestTimingRepeatComponentTranslator {
 	
 	@Autowired
 	private DurationUnitTranslator durationUnitTranslator;
 	
 	@Override
 	public Timing.TimingRepeatComponent toFhirResource(@Nonnull DrugOrder drugOrder) {
-
+		if (drugOrder == null) {
+			return null;
+		}
 		Timing.TimingRepeatComponent repeatComponent = new Timing.TimingRepeatComponent();
 		if (drugOrder.getDuration() != null) {
 			repeatComponent.setDuration(drugOrder.getDuration());
@@ -39,29 +40,10 @@ public class MedicationRequestTimingComponentTranslatorImpl implements Medicatio
 		if (drugOrder.getDurationUnits() != null) {
 			repeatComponent.setDurationUnit(durationUnitTranslator.toFhirResource(drugOrder.getDurationUnits()));
 		}
-
-		OrderFrequency frequency = drugOrder.getFrequency();
-		if (frequency != null) {
-			Double frequencyPerDay = frequency.getFrequencyPerDay();
-			if (frequencyPerDay != null) {
-				// If the frequency per day translates into an even frequency per hour, default to once every X hours
-				if (frequencyPerDay > 1 && 24 % frequencyPerDay == 0) {
-					repeatComponent.setFrequency(1);
-					repeatComponent.setPeriod(24/frequencyPerDay);
-					repeatComponent.setPeriodUnit(Timing.UnitsOfTime.H);
-				}
-				// Otherwise, set to once every X days
-				else {
-					repeatComponent.setFrequency(1);
-					repeatComponent.setPeriod(1/frequencyPerDay);
-					repeatComponent.setPeriodUnit(Timing.UnitsOfTime.D);
-				}
-			}
-		}
-
+		
 		return repeatComponent;
 	}
-
+	
 	@Override
 	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing.TimingRepeatComponent repeatComponent) {
 		if (repeatComponent.getDuration() != null) {
@@ -70,7 +52,6 @@ public class MedicationRequestTimingComponentTranslatorImpl implements Medicatio
 		if (repeatComponent.getDurationUnit() != null) {
 			drugOrder.setDurationUnits(durationUnitTranslator.toOpenmrsType(repeatComponent.getDurationUnit()));
 		}
-		// TODO: This isn't really possible to implement as-is
 		return drugOrder;
 	}
 }
