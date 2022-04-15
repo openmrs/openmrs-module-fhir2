@@ -9,12 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.DrugOrder;
 
-public interface MedicationRequestTimingComponentTranslator extends ToFhirTranslator<DrugOrder, Timing.TimingRepeatComponent> {
+import javax.annotation.Nonnull;
+
+public interface MedicationRequestTimingComponentTranslator extends ToFhirTranslator<DrugOrder, Timing.TimingRepeatComponent>, UpdatableOpenmrsTranslator<DrugOrder, Timing.TimingRepeatComponent> {
 	
 	/**
 	 * Maps a {@link org.openmrs.DrugOrder} to a {@link Timing.TimingRepeatComponent} Fhir Type
@@ -24,4 +24,14 @@ public interface MedicationRequestTimingComponentTranslator extends ToFhirTransl
 	 */
 	@Override
 	Timing.TimingRepeatComponent toFhirResource(@Nonnull DrugOrder drugOrder);
+
+	/**
+	 * Populates a {@link DrugOrder} with dosing information from a {@link Timing.TimingRepeatComponent}
+	 *
+	 * @param drugOrder the OpenMRS drugOrder to update
+	 * @param resource the Timing.TimingRepeatComponent FHIR resource that the drugOrder should be updated with
+	 * @return the updated {@link DrugOrder}
+	 */
+	@Override
+	DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing.TimingRepeatComponent resource);
 }

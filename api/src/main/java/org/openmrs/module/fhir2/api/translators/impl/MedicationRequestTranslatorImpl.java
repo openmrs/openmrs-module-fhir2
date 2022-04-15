@@ -122,8 +122,8 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		existingDrugOrder.setCommentToFulfiller(medicationRequest.getNoteFirstRep().getText());
 		existingDrugOrder.setOrderReason(conceptTranslator.toOpenmrsType(medicationRequest.getReasonCodeFirstRep()));
-		
+		dosageTranslator.toOpenmrsType(existingDrugOrder, medicationRequest.getDosageInstructionFirstRep());
+
 		return existingDrugOrder;
-		
 	}
 }

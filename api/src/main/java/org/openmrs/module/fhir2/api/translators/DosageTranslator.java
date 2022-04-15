@@ -9,19 +9,30 @@
  */
 package org.openmrs.module.fhir2.api.translators;
 
-import javax.annotation.Nonnull;
-
 import org.hl7.fhir.r4.model.Dosage;
 import org.openmrs.DrugOrder;
 
-public interface DosageTranslator extends ToFhirTranslator<DrugOrder, Dosage> {
-	
-	/**
-	 * Maps an {@link org.openmrs.DrugOrder} to a {@link org.hl7.fhir.r4.model.Dosage}
-	 *
-	 * @param drugOrder the OpenMRS drugOrder to translate
-	 * @return the corresponding Dosage FHIR resource
-	 */
-	@Override
-	Dosage toFhirResource(@Nonnull DrugOrder drugOrder);
+import javax.annotation.Nonnull;
+
+public interface DosageTranslator extends ToFhirTranslator<DrugOrder, Dosage>, UpdatableOpenmrsTranslator<DrugOrder, Dosage> {
+
+		/**
+		 * Maps an {@link DrugOrder} to a {@link Dosage}
+		 * Maps an {@link org.openmrs.DrugOrder} to a {@link org.hl7.fhir.r4.model.Dosage}
+		 *
+		 * @param drugOrder the OpenMRS drugOrder to translate
+		 * @return the corresponding Dosage FHIR resource
+		 */
+		@Override
+		Dosage toFhirResource(@Nonnull DrugOrder drugOrder);
+
+		/**
+		 * Populates a {@link DrugOrder} with dosing information from a {@link Dosage}
+		 *
+		 * @param drugOrder the OpenMRS drugOrder to update
+		 * @param dosage the Dosage FHIR resource that the drugOrder should be updated with
+		 * @return the updated {@link DrugOrder}
+		 */
+		@Override
+		DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Dosage dosage);
 }

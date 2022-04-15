@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.annotation.Nonnull;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Timing;
@@ -19,6 +17,8 @@ import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingComponent
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
@@ -29,13 +29,18 @@ public class MedicationRequestTimingTranslatorImpl implements MedicationRequestT
 	
 	@Override
 	public Timing toFhirResource(@Nonnull DrugOrder drugOrder) {
-		if (drugOrder == null) {
-			return null;
-		}
 		Timing timing = new Timing();
 		timing.addEvent(drugOrder.getScheduledDate());
 		timing.setRepeat(timingComponentTranslator.toFhirResource(drugOrder));
-		
 		return timing;
+	}
+
+	@Override
+	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing timing) {
+		if (timing.getEvent() != null && !timing.getEvent().isEmpty()) {
+			drugOrder.setScheduledDate(timing.getEvent().get(0).getValue());
+		}
+		timingComponentTranslator.toOpenmrsType(drugOrder, timing.getRepeat());
+		return drugOrder;
 	}
 }
