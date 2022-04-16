@@ -17,8 +17,7 @@ import org.openmrs.DrugOrder;
 public interface DosageTranslator extends ToFhirTranslator<DrugOrder, Dosage>, UpdatableOpenmrsTranslator<DrugOrder, Dosage> {
 	
 	/**
-	 * Maps an {@link DrugOrder} to a {@link Dosage} Maps an {@link org.openmrs.DrugOrder} to a
-	 * {@link org.hl7.fhir.r4.model.Dosage}
+	 * Maps an {@link DrugOrder} to a {@link Dosage}
 	 *
 	 * @param drugOrder the OpenMRS drugOrder to translate
 	 * @return the corresponding Dosage FHIR resource
