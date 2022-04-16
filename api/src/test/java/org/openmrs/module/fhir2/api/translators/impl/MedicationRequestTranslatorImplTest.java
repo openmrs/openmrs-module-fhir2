@@ -43,11 +43,11 @@ import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
@@ -103,7 +103,9 @@ public class MedicationRequestTranslatorImplTest {
 	private ConceptTranslator conceptTranslator;
 	
 	@Mock
-	private DosageTranslator dosageTranslator;
+	private MedicationRequestTimingTranslator timingTranslator;
+	
+	private DosageTranslatorImpl dosageTranslator;
 	
 	private MedicationRequestTranslatorImpl medicationRequestTranslator;
 	
@@ -115,6 +117,10 @@ public class MedicationRequestTranslatorImplTest {
 	
 	@Before
 	public void setup() {
+		dosageTranslator = new DosageTranslatorImpl();
+		dosageTranslator.setConceptTranslator(conceptTranslator);
+		dosageTranslator.setTimingTranslator(timingTranslator);
+		
 		medicationRequestTranslator = new MedicationRequestTranslatorImpl();
 		medicationRequestTranslator.setStatusTranslator(medicationRequestStatusTranslator);
 		medicationRequestTranslator.setPractitionerReferenceTranslator(providerPractitionerReferenceTranslator);
@@ -141,7 +147,6 @@ public class MedicationRequestTranslatorImplTest {
 		
 		medicationRequest = new MedicationRequest();
 		medicationRequest.setId(DRUG_ORDER_UUID);
-		
 	}
 	
 	@Test
@@ -455,23 +460,13 @@ public class MedicationRequestTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldAddDosageInstructions() {
-		Concept concept = new Concept();
-		concept.setUuid(CONCEPT_UUID);
-		concept.setConceptId(10023);
-		
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode(concept.getConceptId().toString()));
-		
-		Dosage dosage = new Dosage();
-		dosage.setRoute(codeableConcept);
-		dosage.setAsNeeded(new BooleanType(true));
-		dosage.setText(DOSING_INSTRUCTIONS);
+		CodeableConcept routeFhirConcept = new CodeableConcept();
+		Concept routeConcept = new Concept();
+		when(conceptTranslator.toFhirResource(routeConcept)).thenReturn(routeFhirConcept);
 		
 		drugOrder.setAsNeeded(true);
-		drugOrder.setRoute(concept);
+		drugOrder.setRoute(routeConcept);
 		drugOrder.setDosingInstructions(DOSING_INSTRUCTIONS);
-		
-		when(dosageTranslator.toFhirResource(drugOrder)).thenReturn(dosage);
 		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
 		
@@ -479,7 +474,26 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result.getDosageInstructionFirstRep(), notNullValue());
 		assertThat(result.getDosageInstructionFirstRep().getText(), equalTo(DOSING_INSTRUCTIONS));
 		assertThat(result.getDosageInstructionFirstRep().getAsNeededBooleanType().booleanValue(), is(true));
-		assertThat(result.getDosageInstructionFirstRep().getRoute(), equalTo(codeableConcept));
+		assertThat(result.getDosageInstructionFirstRep().getRoute(), equalTo(routeFhirConcept));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldAddDosageInstructions() {
+		CodeableConcept routeFhirConcept = new CodeableConcept();
+		Concept routeConcept = new Concept();
+		when(conceptTranslator.toOpenmrsType(routeFhirConcept)).thenReturn(routeConcept);
+		
+		Dosage dosage = new Dosage();
+		dosage.setRoute(routeFhirConcept);
+		dosage.setAsNeeded(new BooleanType(true));
+		dosage.setText(DOSING_INSTRUCTIONS);
+		medicationRequest.addDosageInstruction(dosage);
+		
+		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		assertThat(result, notNullValue());
+		assertThat(result.getRoute(), equalTo(routeConcept));
+		assertThat(result.getAsNeeded(), is(true));
+		assertThat(result.getDosingInstructions(), equalTo(DOSING_INSTRUCTIONS));
 	}
 	
 	@SneakyThrows

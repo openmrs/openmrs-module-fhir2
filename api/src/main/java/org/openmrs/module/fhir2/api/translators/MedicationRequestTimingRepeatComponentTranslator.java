@@ -35,4 +35,5 @@ public interface MedicationRequestTimingRepeatComponentTranslator extends ToFhir
 	 */
 	@Override
 	DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing.TimingRepeatComponent resource);
+	
 }

@@ -10,18 +10,13 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
-import org.exparity.hamcrest.date.DateMatchers;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
@@ -33,8 +28,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
+import org.openmrs.OrderFrequency;
+import org.openmrs.api.OrderService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DosageTranslatorImplTest {
@@ -49,7 +45,9 @@ public class DosageTranslatorImplTest {
 	private ConceptTranslator conceptTranslator;
 	
 	@Mock
-	private MedicationRequestTimingTranslator timingTranslator;
+	private OrderService orderService;
+	
+	private MedicationRequestTimingTranslatorImpl timingTranslator;
 	
 	private DosageTranslatorImpl dosageTranslator;
 	
@@ -57,6 +55,11 @@ public class DosageTranslatorImplTest {
 	
 	@Before
 	public void setup() {
+		timingTranslator = new MedicationRequestTimingTranslatorImpl();
+		timingTranslator.setConceptTranslator(conceptTranslator);
+		timingTranslator.setOrderService(orderService);
+		timingTranslator.setTimingRepeatComponentTranslator(new MedicationRequestTimingRepeatComponentTranslatorImpl());
+		
 		dosageTranslator = new DosageTranslatorImpl();
 		dosageTranslator.setConceptTranslator(conceptTranslator);
 		dosageTranslator.setTimingTranslator(timingTranslator);
@@ -74,7 +77,7 @@ public class DosageTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateDrugOrderAsNeededToAsNeeded() {
+	public void toFhirResource_shouldTranslateDrugOrderRouteToRoute() {
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
 		concept.setConceptId(1000);
@@ -91,7 +94,7 @@ public class DosageTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateDrugOrderRouteToRoute() {
+	public void toFhirResource_shouldTranslateDrugOrderAsNeededToAsNeeded() {
 		drugOrder.setAsNeeded(true);
 		Dosage result = dosageTranslator.toFhirResource(drugOrder);
 		assertThat(result, notNullValue());
@@ -105,21 +108,63 @@ public class DosageTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldSetDosageTiming() {
-		Timing.TimingRepeatComponent repeatComponent = new Timing.TimingRepeatComponent();
-		repeatComponent.setPeriod(1);
-		repeatComponent.setPeriodUnit(Timing.UnitsOfTime.D);
+		Concept timingConcept = new Concept();
+		CodeableConcept timingFhirConcept = new CodeableConcept();
+		OrderFrequency timingFrequency = new OrderFrequency();
+		timingFrequency.setConcept(timingConcept);
+		when(conceptTranslator.toFhirResource(timingConcept)).thenReturn(timingFhirConcept);
 		
-		Timing timing = new Timing();
-		timing.addEvent(new Date());
-		timing.setRepeat(repeatComponent);
-		when(timingTranslator.toFhirResource(drugOrder)).thenReturn(timing);
+		drugOrder.setFrequency(timingFrequency);
 		
 		Dosage result = dosageTranslator.toFhirResource(drugOrder);
 		assertThat(result, notNullValue());
 		assertThat(result.getTiming(), notNullValue());
-		assertThat(result.getTiming().getEvent(), not(empty()));
-		assertThat(result.getTiming().getEvent().get(0).getValue(), DateMatchers.sameDay(new Date()));
-		assertThat(result.getTiming().getRepeat().getPeriod(), equalTo(new BigDecimal(1)));
-		assertThat(result.getTiming().getRepeat().getPeriodUnit(), equalTo(Timing.UnitsOfTime.D));
+		assertThat(result.getTiming().getCode(), equalTo(timingFhirConcept));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateTextToDosingInstruction() {
+		Dosage dosage = new Dosage();
+		dosage.setText(DOSING_INSTRUCTION);
+		DrugOrder result = dosageTranslator.toOpenmrsType(new DrugOrder(), dosage);
+		assertThat(result.getDosingInstructions(), equalTo(DOSING_INSTRUCTION));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateAsNeededToAsNeeded() {
+		Dosage dosage = new Dosage();
+		dosage.setAsNeeded(new BooleanType(true));
+		DrugOrder result = dosageTranslator.toOpenmrsType(new DrugOrder(), dosage);
+		assertThat(result.getAsNeeded(), is(true));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateRouteToRoute() {
+		Concept routeConcept = new Concept();
+		CodeableConcept routeFhirConcept = new CodeableConcept();
+		when(conceptTranslator.toOpenmrsType(routeFhirConcept)).thenReturn(routeConcept);
+		
+		Dosage dosage = new Dosage();
+		dosage.setRoute(routeFhirConcept);
+		DrugOrder result = dosageTranslator.toOpenmrsType(new DrugOrder(), dosage);
+		assertThat(result.getRoute(), is(routeConcept));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetDosageTiming() {
+		Concept timingConcept = new Concept();
+		CodeableConcept timingFhirConcept = new CodeableConcept();
+		OrderFrequency timingFrequency = new OrderFrequency();
+		when(conceptTranslator.toOpenmrsType(timingFhirConcept)).thenReturn(timingConcept);
+		when(orderService.getOrderFrequencyByConcept(timingConcept)).thenReturn(timingFrequency);
+		
+		Dosage dosage = new Dosage();
+		Timing timing = new Timing();
+		timing.setCode(timingFhirConcept);
+		dosage.setTiming(timing);
+		
+		DrugOrder result = dosageTranslator.toOpenmrsType(new DrugOrder(), dosage);
+		assertThat(result, notNullValue());
+		assertThat(result.getFrequency(), equalTo(timingFrequency));
 	}
 }
