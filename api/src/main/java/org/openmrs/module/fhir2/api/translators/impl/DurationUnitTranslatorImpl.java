@@ -20,12 +20,17 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.Concept;
 import org.openmrs.Duration;
+import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
+	
+	@Autowired
+	ConceptService conceptService;
 	
 	private static Map<String, Timing.UnitsOfTime> codeMap;
 	static {
@@ -47,5 +52,16 @@ public class DurationUnitTranslatorImpl implements DurationUnitTranslator {
 			return Timing.UnitsOfTime.NULL;
 		}
 		return unitsOfTime;
+	}
+	
+	@Override
+	public Concept toOpenmrsType(@Nonnull Timing.UnitsOfTime unitsOfTime) {
+		for (String durationCode : codeMap.keySet()) {
+			Timing.UnitsOfTime units = codeMap.get(durationCode);
+			if (units == unitsOfTime) {
+				return conceptService.getConceptByMapping(durationCode, Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
+			}
+		}
+		return null;
 	}
 }

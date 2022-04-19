@@ -45,4 +45,15 @@ public class DosageTranslatorImpl implements DosageTranslator {
 		
 		return dosage;
 	}
+	
+	@Override
+	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Dosage dosage) {
+		drugOrder.setDosingInstructions(dosage.getText());
+		if (dosage.getAsNeededBooleanType() != null) {
+			drugOrder.setAsNeeded(dosage.getAsNeededBooleanType().getValue());
+		}
+		drugOrder.setRoute(conceptTranslator.toOpenmrsType(dosage.getRoute()));
+		timingTranslator.toOpenmrsType(drugOrder, dosage.getTiming());
+		return drugOrder;
+	}
 }

@@ -15,15 +15,14 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.DrugOrder;
-import org.openmrs.OrderFrequency;
 import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
-import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingComponentTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingRepeatComponentTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-public class MedicationRequestTimingComponentTranslatorImpl implements MedicationRequestTimingComponentTranslator {
+public class MedicationRequestTimingRepeatComponentTranslatorImpl implements MedicationRequestTimingRepeatComponentTranslator {
 	
 	@Autowired
 	private DurationUnitTranslator durationUnitTranslator;
@@ -41,15 +40,18 @@ public class MedicationRequestTimingComponentTranslatorImpl implements Medicatio
 		if (drugOrder.getDurationUnits() != null) {
 			repeatComponent.setDurationUnit(durationUnitTranslator.toFhirResource(drugOrder.getDurationUnits()));
 		}
-		OrderFrequency frequency = drugOrder.getFrequency();
-		if (frequency != null) {
-			if (frequency.getFrequencyPerDay() != null) {
-				repeatComponent.setFrequency(frequency.getFrequencyPerDay().intValue());
-				repeatComponent.setPeriod(1);
-				repeatComponent.setPeriodUnit(Timing.UnitsOfTime.D);
-			}
-		}
 		
 		return repeatComponent;
+	}
+	
+	@Override
+	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing.TimingRepeatComponent repeatComponent) {
+		if (repeatComponent.getDuration() != null) {
+			drugOrder.setDuration(repeatComponent.getDuration().intValue());
+		}
+		if (repeatComponent.getDurationUnit() != null) {
+			drugOrder.setDurationUnits(durationUnitTranslator.toOpenmrsType(repeatComponent.getDurationUnit()));
+		}
+		return drugOrder;
 	}
 }

@@ -14,8 +14,12 @@ import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Timing;
+import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
-import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingComponentTranslator;
+import org.openmrs.OrderFrequency;
+import org.openmrs.api.OrderService;
+import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingRepeatComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,7 +29,13 @@ import org.springframework.stereotype.Component;
 public class MedicationRequestTimingTranslatorImpl implements MedicationRequestTimingTranslator {
 	
 	@Autowired
-	private MedicationRequestTimingComponentTranslator timingComponentTranslator;
+	private MedicationRequestTimingRepeatComponentTranslator timingRepeatComponentTranslator;
+	
+	@Autowired
+	private ConceptTranslator conceptTranslator;
+	
+	@Autowired
+	private OrderService orderService;
 	
 	@Override
 	public Timing toFhirResource(@Nonnull DrugOrder drugOrder) {
@@ -34,8 +44,27 @@ public class MedicationRequestTimingTranslatorImpl implements MedicationRequestT
 		}
 		Timing timing = new Timing();
 		timing.addEvent(drugOrder.getScheduledDate());
-		timing.setRepeat(timingComponentTranslator.toFhirResource(drugOrder));
-		
+		if (drugOrder.getFrequency() != null) {
+			timing.setCode(conceptTranslator.toFhirResource(drugOrder.getFrequency().getConcept()));
+		}
+		timing.setRepeat(timingRepeatComponentTranslator.toFhirResource(drugOrder));
 		return timing;
+	}
+	
+	@Override
+	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Timing timing) {
+		if (timing.getEvent() != null && !timing.getEvent().isEmpty()) {
+			drugOrder.setScheduledDate(timing.getEvent().get(0).getValue());
+		}
+		if (timing.getCode() != null) {
+			OrderFrequency frequency = null;
+			Concept frequencyConcept = conceptTranslator.toOpenmrsType(timing.getCode());
+			if (frequencyConcept != null) {
+				frequency = orderService.getOrderFrequencyByConcept(frequencyConcept);
+			}
+			drugOrder.setFrequency(frequency);
+		}
+		timingRepeatComponentTranslator.toOpenmrsType(drugOrder, timing.getRepeat());
+		return drugOrder;
 	}
 }
