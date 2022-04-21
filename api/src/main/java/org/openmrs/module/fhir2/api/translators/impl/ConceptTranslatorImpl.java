@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +28,6 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Nonnull;
 
 @Slf4j
 @Component
@@ -53,9 +53,9 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			if (mapping.getConceptMapType() == null) {
 				continue;
 			}
-
+			
 			ConceptMapType mapType = mapping.getConceptMapType();
-			boolean sameAs = mapType.getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID);
+			boolean sameAs = mapType.getUuid() != null && mapType.getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID);
 			sameAs = sameAs || (mapType.getName() != null && mapType.getName().equalsIgnoreCase("SAME-AS"));
 			if (!sameAs) {
 				continue;
