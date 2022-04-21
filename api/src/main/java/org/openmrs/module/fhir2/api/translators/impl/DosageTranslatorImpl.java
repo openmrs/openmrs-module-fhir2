@@ -9,12 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.annotation.Nonnull;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Dosage;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
@@ -22,16 +22,18 @@ import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslato
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
+
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class DosageTranslatorImpl implements DosageTranslator {
-	
+
 	@Autowired
 	private ConceptTranslator conceptTranslator;
-	
+
 	@Autowired
 	private MedicationRequestTimingTranslator timingTranslator;
-	
+
 	@Override
 	public Dosage toFhirResource(@Nonnull DrugOrder drugOrder) {
 		if (drugOrder == null) {
@@ -42,10 +44,23 @@ public class DosageTranslatorImpl implements DosageTranslator {
 		dosage.setAsNeeded(new BooleanType(drugOrder.getAsNeeded()));
 		dosage.setRoute(conceptTranslator.toFhirResource(drugOrder.getRoute()));
 		dosage.setTiming(timingTranslator.toFhirResource(drugOrder));
-		
+
+		if (drugOrder.getDose() != null || drugOrder.getDoseUnits() != null) {
+			Dosage.DosageDoseAndRateComponent doseAndRate = new Dosage.DosageDoseAndRateComponent();
+			Quantity quantity = new SimpleQuantity();
+			quantity.setValue(drugOrder.getDose());
+			quantity.setUnit(drugOrder.getDoseUnits().getDisplayString());
+			quantity.setCode(drugOrder.getDoseUnits().getUuid());
+
+			doseAndRate.setDose(quantity);
+			dosage.addDoseAndRate(doseAndRate);
+		}
+
+		// SNOMED_CT_CONCEPT_SOURCE_HL7_CODE,
+
 		return dosage;
 	}
-	
+
 	@Override
 	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Dosage dosage) {
 		drugOrder.setDosingInstructions(dosage.getText());

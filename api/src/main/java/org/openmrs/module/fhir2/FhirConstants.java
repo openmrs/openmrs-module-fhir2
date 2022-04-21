@@ -313,4 +313,8 @@ public class FhirConstants {
 	public static final String EVERYTHING_SEARCH_HANDLER = "everything.search.handler";
 	
 	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	public static final String SNOMED_CT_CONCEPT_SOURCE_HL7_CODE = "SCT";
+	
+	public static final String SNOMED_SYSTEM_URI = "http://snomed.info/sct";
 }
