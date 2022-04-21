@@ -9,31 +9,35 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import javax.annotation.Nonnull;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.openmrs.DrugOrder;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
+import org.openmrs.util.OpenmrsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Nonnull;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class DosageTranslatorImpl implements DosageTranslator {
-
+	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
-
+	
 	@Autowired
 	private MedicationRequestTimingTranslator timingTranslator;
-
+	
 	@Override
 	public Dosage toFhirResource(@Nonnull DrugOrder drugOrder) {
 		if (drugOrder == null) {
@@ -44,23 +48,36 @@ public class DosageTranslatorImpl implements DosageTranslator {
 		dosage.setAsNeeded(new BooleanType(drugOrder.getAsNeeded()));
 		dosage.setRoute(conceptTranslator.toFhirResource(drugOrder.getRoute()));
 		dosage.setTiming(timingTranslator.toFhirResource(drugOrder));
-
+		
 		if (drugOrder.getDose() != null || drugOrder.getDoseUnits() != null) {
 			Dosage.DosageDoseAndRateComponent doseAndRate = new Dosage.DosageDoseAndRateComponent();
-			Quantity quantity = new SimpleQuantity();
-			quantity.setValue(drugOrder.getDose());
-			quantity.setUnit(drugOrder.getDoseUnits().getDisplayString());
-			quantity.setCode(drugOrder.getDoseUnits().getUuid());
-
-			doseAndRate.setDose(quantity);
+			Quantity dose = new SimpleQuantity();
+			dose.setValue(drugOrder.getDose());
+			if (drugOrder.getDoseUnits() != null) {
+				CodeableConcept doseUnits = conceptTranslator.toFhirResource(drugOrder.getDoseUnits());
+				if (doseUnits != null) {
+					Coding coding = getCodingForSystem(doseUnits, FhirConstants.RX_NORM_SYSTEM_URI);
+					if (coding == null) {
+						coding = getCodingForSystem(doseUnits, FhirConstants.SNOMED_SYSTEM_URI);
+					}
+					if (coding == null) {
+						coding = getCodingForSystem(doseUnits, null);
+					}
+					if (coding == null) {
+						coding = doseUnits.getCodingFirstRep();
+					}
+					dose.setSystem(coding.getSystem());
+					dose.setCode(coding.getCode());
+					dose.setUnit(coding.getDisplay());
+				}
+			}
+			doseAndRate.setDose(dose);
 			dosage.addDoseAndRate(doseAndRate);
 		}
-
-		// SNOMED_CT_CONCEPT_SOURCE_HL7_CODE,
-
+		
 		return dosage;
 	}
-
+	
 	@Override
 	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder, @Nonnull Dosage dosage) {
 		drugOrder.setDosingInstructions(dosage.getText());
@@ -70,5 +87,19 @@ public class DosageTranslatorImpl implements DosageTranslator {
 		drugOrder.setRoute(conceptTranslator.toOpenmrsType(dosage.getRoute()));
 		timingTranslator.toOpenmrsType(drugOrder, dosage.getTiming());
 		return drugOrder;
+	}
+	
+	/**
+	 * @return the coding on the CodeableConcept with the given system, or null if none found.
+	 */
+	private Coding getCodingForSystem(CodeableConcept codeableConcept, String system) {
+		if (codeableConcept != null && codeableConcept.getCoding() != null) {
+			for (Coding coding : codeableConcept.getCoding()) {
+				if (OpenmrsUtil.nullSafeEqualsIgnoreCase(system, coding.getSystem())) {
+					return coding;
+				}
+			}
+		}
+		return null;
 	}
 }

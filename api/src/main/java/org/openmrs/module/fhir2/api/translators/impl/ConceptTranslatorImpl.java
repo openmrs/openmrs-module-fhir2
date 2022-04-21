@@ -18,8 +18,9 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
-import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
+import org.openmrs.Duration;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
@@ -61,6 +62,11 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			
 			String sourceUrl = conceptSourceToURL(crt.getConceptSource().getName());
 			if (sourceUrl == null) {
+				if (Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(crt.getConceptSource().getHl7Code())) {
+					sourceUrl = FhirConstants.SNOMED_SYSTEM_URI;
+				}
+			}
+			if (sourceUrl == null) {
 				continue;
 			}
 			
@@ -86,6 +92,11 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			
 			String codingSource = conceptURLToSource(coding.getSystem());
 			if (codingSource == null) {
+				if (FhirConstants.SNOMED_SYSTEM_URI.equals(coding.getSystem())) {
+					codingSource = Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE;
+				}
+			}
+			if (codingSource == null) {
 				continue;
 			}
 			
@@ -105,10 +116,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	private void addConceptCoding(Coding coding, String system, String code, Concept concept) {
 		coding.setSystem(system);
 		coding.setCode(code);
-		
-		ConceptName conceptName = concept.getName();
-		String display = (conceptName == null || conceptName.getName() == null) ? "" : conceptName.getName();
-		coding.setDisplay(display);
+		coding.setDisplay(concept.getDisplayString());
 	}
 	
 	private String conceptSourceToURL(String conceptSourceName) {
