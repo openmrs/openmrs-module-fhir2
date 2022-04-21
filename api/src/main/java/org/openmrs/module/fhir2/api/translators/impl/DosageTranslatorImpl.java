@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
@@ -86,6 +87,17 @@ public class DosageTranslatorImpl implements DosageTranslator {
 		}
 		drugOrder.setRoute(conceptTranslator.toOpenmrsType(dosage.getRoute()));
 		timingTranslator.toOpenmrsType(drugOrder, dosage.getTiming());
+		Dosage.DosageDoseAndRateComponent doseAndRate = dosage.getDoseAndRateFirstRep();
+		Quantity dose = doseAndRate.getDoseQuantity();
+		if (dose != null) {
+			if (dose.getValue() != null) {
+				drugOrder.setDose(dose.getValue().doubleValue());
+			}
+			CodeableConcept doseUnits = new CodeableConcept();
+			doseUnits.addCoding(new Coding(dose.getSystem(), dose.getCode(), dose.getDisplay()));
+			Concept doseUnitsConcept = conceptTranslator.toOpenmrsType(doseUnits);
+			drugOrder.setDoseUnits(doseUnitsConcept);
+		}
 		return drugOrder;
 	}
 	

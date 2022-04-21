@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import javax.annotation.Nonnull;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +16,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
+import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.Duration;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -27,6 +26,8 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
 
 @Slf4j
 @Component
@@ -52,9 +53,11 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			if (mapping.getConceptMapType() == null) {
 				continue;
 			}
-			
-			String mappingType = mapping.getConceptMapType().getName();
-			if (mappingType == null || !mappingType.equalsIgnoreCase("SAME-AS")) {
+
+			ConceptMapType mapType = mapping.getConceptMapType();
+			boolean sameAs = mapType.getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID);
+			sameAs = sameAs || (mapType.getName() != null && mapType.getName().equalsIgnoreCase("SAME-AS"));
+			if (!sameAs) {
 				continue;
 			}
 			
