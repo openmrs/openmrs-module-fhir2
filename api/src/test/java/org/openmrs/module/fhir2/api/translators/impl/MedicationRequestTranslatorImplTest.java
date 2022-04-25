@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
@@ -105,6 +106,8 @@ public class MedicationRequestTranslatorImplTest {
 	@Mock
 	private MedicationRequestTimingTranslator timingTranslator;
 	
+	private MedicationRequestDispenseRequestComponentTranslatorImpl dispenseRequestComponentTranslator;
+	
 	private DosageTranslatorImpl dosageTranslator;
 	
 	private MedicationRequestTranslatorImpl medicationRequestTranslator;
@@ -121,6 +124,9 @@ public class MedicationRequestTranslatorImplTest {
 		dosageTranslator.setConceptTranslator(conceptTranslator);
 		dosageTranslator.setTimingTranslator(timingTranslator);
 		
+		dispenseRequestComponentTranslator = new MedicationRequestDispenseRequestComponentTranslatorImpl();
+		dispenseRequestComponentTranslator.setConceptTranslator(conceptTranslator);
+		
 		medicationRequestTranslator = new MedicationRequestTranslatorImpl();
 		medicationRequestTranslator.setStatusTranslator(medicationRequestStatusTranslator);
 		medicationRequestTranslator.setPractitionerReferenceTranslator(providerPractitionerReferenceTranslator);
@@ -131,6 +137,8 @@ public class MedicationRequestTranslatorImplTest {
 		medicationRequestTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		medicationRequestTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		medicationRequestTranslator.setOrderIdentifierTranslator(new OrderIdentifierTranslatorImpl());
+		medicationRequestTranslator
+		        .setMedicationRequestDispenseRequestComponentTranslator(dispenseRequestComponentTranslator);
 		
 		drugOrder = new DrugOrder();
 		drugOrder.setUuid(DRUG_ORDER_UUID);
@@ -494,6 +502,31 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result.getRoute(), equalTo(routeConcept));
 		assertThat(result.getAsNeeded(), is(true));
 		assertThat(result.getDosingInstructions(), equalTo(DOSING_INSTRUCTIONS));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateDispenseRequest() {
+		drugOrder.setQuantity(100.0);
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDispenseRequest(), notNullValue());
+		assertThat(result.getDispenseRequest().getQuantity().getValue().doubleValue(), equalTo(100.0));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldTranslateDispenseRequest() {
+		MedicationRequest.MedicationRequestDispenseRequestComponent dispenseRequestComponent = new MedicationRequest.MedicationRequestDispenseRequestComponent();
+		Quantity quantity = new Quantity();
+		quantity.setValue(200.0);
+		dispenseRequestComponent.setQuantity(quantity);
+		medicationRequest.setDispenseRequest(dispenseRequestComponent);
+		
+		DrugOrder result = medicationRequestTranslator.toOpenmrsType(drugOrder, medicationRequest);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getQuantity(), equalTo(200.0));
 	}
 	
 	@SneakyThrows
