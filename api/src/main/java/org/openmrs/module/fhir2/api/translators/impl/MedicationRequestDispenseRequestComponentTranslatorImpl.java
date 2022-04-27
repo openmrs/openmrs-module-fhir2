@@ -13,13 +13,11 @@ import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Quantity;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
-import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestDispenseRequestComponentTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,7 +27,7 @@ import org.springframework.stereotype.Component;
 public class MedicationRequestDispenseRequestComponentTranslatorImpl implements MedicationRequestDispenseRequestComponentTranslator {
 	
 	@Autowired
-	private ConceptTranslator conceptTranslator;
+	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
 	
 	@Override
 	public MedicationRequest.MedicationRequestDispenseRequestComponent toFhirResource(@Nonnull DrugOrder drugOrder) {
@@ -38,8 +36,7 @@ public class MedicationRequestDispenseRequestComponentTranslatorImpl implements 
 			Quantity quantity = new Quantity();
 			quantity.setValue(drugOrder.getQuantity());
 			if (drugOrder.getQuantityUnits() != null) {
-				CodeableConcept units = conceptTranslator.toFhirResource(drugOrder.getQuantityUnits());
-				Coding coding = units.getCodingFirstRep();
+				Coding coding = quantityCodingTranslator.toFhirResource(drugOrder.getQuantityUnits());
 				quantity.setSystem(coding.getSystem());
 				quantity.setCode(coding.getCode());
 				quantity.setUnit(coding.getDisplay());
@@ -58,12 +55,8 @@ public class MedicationRequestDispenseRequestComponentTranslatorImpl implements 
 		Quantity quantity = resource.getQuantity();
 		if (quantity != null && quantity.getValue() != null) {
 			drugOrder.setQuantity(quantity.getValue().doubleValue());
-			if (quantity.getCode() != null) {
-				CodeableConcept codeableConcept = new CodeableConcept();
-				codeableConcept.addCoding(new Coding(quantity.getSystem(), quantity.getCode(), quantity.getDisplay()));
-				Concept units = conceptTranslator.toOpenmrsType(codeableConcept);
-				drugOrder.setQuantityUnits(units);
-			}
+			Concept units = quantityCodingTranslator.toOpenmrsType(quantity);
+			drugOrder.setQuantityUnits(units);
 		}
 		drugOrder.setNumRefills(resource.getNumberOfRepeatsAllowed());
 		return drugOrder;

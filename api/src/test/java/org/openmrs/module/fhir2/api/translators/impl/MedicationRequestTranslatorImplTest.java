@@ -112,6 +112,8 @@ public class MedicationRequestTranslatorImplTest {
 	
 	private MedicationRequestTranslatorImpl medicationRequestTranslator;
 	
+	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
+	
 	private MedicationRequest medicationRequest;
 	
 	private DrugOrder drugOrder;
@@ -120,12 +122,16 @@ public class MedicationRequestTranslatorImplTest {
 	
 	@Before
 	public void setup() {
+		quantityCodingTranslator = new MedicationQuantityCodingTranslatorImpl();
+		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
+		
 		dosageTranslator = new DosageTranslatorImpl();
 		dosageTranslator.setConceptTranslator(conceptTranslator);
 		dosageTranslator.setTimingTranslator(timingTranslator);
+		dosageTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
 		
 		dispenseRequestComponentTranslator = new MedicationRequestDispenseRequestComponentTranslatorImpl();
-		dispenseRequestComponentTranslator.setConceptTranslator(conceptTranslator);
+		dispenseRequestComponentTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
 		
 		medicationRequestTranslator = new MedicationRequestTranslatorImpl();
 		medicationRequestTranslator.setStatusTranslator(medicationRequestStatusTranslator);

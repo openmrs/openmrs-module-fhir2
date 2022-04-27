@@ -14,18 +14,15 @@ import javax.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
-import org.openmrs.util.OpenmrsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +32,9 @@ public class DosageTranslatorImpl implements DosageTranslator {
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
+	
+	@Autowired
+	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
 	
 	@Autowired
 	private MedicationRequestTimingTranslator timingTranslator;
@@ -55,18 +55,8 @@ public class DosageTranslatorImpl implements DosageTranslator {
 			Quantity dose = new SimpleQuantity();
 			dose.setValue(drugOrder.getDose());
 			if (drugOrder.getDoseUnits() != null) {
-				CodeableConcept doseUnits = conceptTranslator.toFhirResource(drugOrder.getDoseUnits());
-				if (doseUnits != null) {
-					Coding coding = getCodingForSystem(doseUnits, FhirConstants.RX_NORM_SYSTEM_URI);
-					if (coding == null) {
-						coding = getCodingForSystem(doseUnits, FhirConstants.SNOMED_SYSTEM_URI);
-					}
-					if (coding == null) {
-						coding = getCodingForSystem(doseUnits, null);
-					}
-					if (coding == null) {
-						coding = doseUnits.getCodingFirstRep();
-					}
+				Coding coding = quantityCodingTranslator.toFhirResource(drugOrder.getDoseUnits());
+				if (coding != null) {
 					dose.setSystem(coding.getSystem());
 					dose.setCode(coding.getCode());
 					dose.setUnit(coding.getDisplay());
@@ -93,25 +83,10 @@ public class DosageTranslatorImpl implements DosageTranslator {
 			if (dose.getValue() != null) {
 				drugOrder.setDose(dose.getValue().doubleValue());
 			}
-			CodeableConcept doseUnits = new CodeableConcept();
-			doseUnits.addCoding(new Coding(dose.getSystem(), dose.getCode(), dose.getDisplay()));
-			Concept doseUnitsConcept = conceptTranslator.toOpenmrsType(doseUnits);
+			Concept doseUnitsConcept = quantityCodingTranslator.toOpenmrsType(dose);
 			drugOrder.setDoseUnits(doseUnitsConcept);
 		}
 		return drugOrder;
 	}
 	
-	/**
-	 * @return the coding on the CodeableConcept with the given system, or null if none found.
-	 */
-	private Coding getCodingForSystem(CodeableConcept codeableConcept, String system) {
-		if (codeableConcept != null && codeableConcept.getCoding() != null) {
-			for (Coding coding : codeableConcept.getCoding()) {
-				if (OpenmrsUtil.nullSafeEqualsIgnoreCase(system, coding.getSystem())) {
-					return coding;
-				}
-			}
-		}
-		return null;
-	}
 }

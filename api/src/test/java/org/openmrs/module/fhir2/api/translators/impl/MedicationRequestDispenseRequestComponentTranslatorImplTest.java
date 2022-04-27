@@ -45,6 +45,8 @@ public class MedicationRequestDispenseRequestComponentTranslatorImplTest {
 	
 	private ConceptTranslatorImpl conceptTranslator;
 	
+	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
+	
 	private MedicationRequestDispenseRequestComponentTranslatorImpl requestTimingComponentTranslator;
 	
 	private DrugOrder drugOrder;
@@ -60,8 +62,12 @@ public class MedicationRequestDispenseRequestComponentTranslatorImplTest {
 		conceptTranslator = new ConceptTranslatorImpl();
 		conceptTranslator.setConceptService(conceptService);
 		conceptTranslator.setConceptSourceService(conceptSourceService);
+		
+		quantityCodingTranslator = new MedicationQuantityCodingTranslatorImpl();
+		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
+		
 		requestTimingComponentTranslator = new MedicationRequestDispenseRequestComponentTranslatorImpl();
-		requestTimingComponentTranslator.setConceptTranslator(conceptTranslator);
+		requestTimingComponentTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
 		
 		unitsConcept = new Concept();
 		unitsConcept.setUuid(CONCEPT_UUID);

@@ -59,6 +59,8 @@ public class DosageTranslatorImplTest {
 	
 	private ConceptTranslatorImpl conceptTranslator;
 	
+	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
+	
 	@Mock
 	private FhirConceptService conceptService;
 	
@@ -80,6 +82,9 @@ public class DosageTranslatorImplTest {
 		conceptTranslator.setConceptService(conceptService);
 		conceptTranslator.setConceptSourceService(conceptSourceService);
 		
+		quantityCodingTranslator = new MedicationQuantityCodingTranslatorImpl();
+		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
+		
 		timingTranslator = new MedicationRequestTimingTranslatorImpl();
 		timingTranslator.setConceptTranslator(conceptTranslator);
 		timingTranslator.setOrderService(orderService);
@@ -88,6 +93,7 @@ public class DosageTranslatorImplTest {
 		dosageTranslator = new DosageTranslatorImpl();
 		dosageTranslator.setConceptTranslator(conceptTranslator);
 		dosageTranslator.setTimingTranslator(timingTranslator);
+		dosageTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
 		
 		drugOrder = new DrugOrder();
 		drugOrder.setUuid(DRUG_ORDER_UUID);
