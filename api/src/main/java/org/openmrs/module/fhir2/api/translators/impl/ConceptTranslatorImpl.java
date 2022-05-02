@@ -20,6 +20,7 @@ import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptReferenceTerm;
+import org.openmrs.ConceptSource;
 import org.openmrs.Duration;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
@@ -63,12 +64,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			
 			ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
 			
-			String sourceUrl = conceptSourceToURL(crt.getConceptSource().getName());
-			if (sourceUrl == null) {
-				if (Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(crt.getConceptSource().getHl7Code())) {
-					sourceUrl = FhirConstants.SNOMED_SYSTEM_URI;
-				}
-			}
+			String sourceUrl = conceptSourceToURL(crt.getConceptSource());
 			if (sourceUrl == null) {
 				continue;
 			}
@@ -93,12 +89,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 				continue;
 			}
 			
-			String codingSource = conceptURLToSource(coding.getSystem());
-			if (codingSource == null) {
-				if (FhirConstants.SNOMED_SYSTEM_URI.equals(coding.getSystem())) {
-					codingSource = Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE;
-				}
-			}
+			String codingSource = conceptURLToSourceNameOrHl7Code(coding.getSystem());
 			if (codingSource == null) {
 				continue;
 			}
@@ -122,12 +113,16 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		coding.setDisplay(concept.getDisplayString());
 	}
 	
-	private String conceptSourceToURL(String conceptSourceName) {
-		return conceptSourceService.getFhirConceptSourceByConceptSourceName(conceptSourceName).map(FhirConceptSource::getUrl)
-		        .orElse(null);
+	private String conceptSourceToURL(ConceptSource conceptSource) {
+		return conceptSourceService.getFhirConceptSourceByConceptSourceName(conceptSource.getName())
+		        .map(FhirConceptSource::getUrl)
+		        .orElseGet(() -> Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
+		                ? FhirConstants.SNOMED_SYSTEM_URI
+		                : null);
 	}
 	
-	private String conceptURLToSource(String url) {
-		return conceptSourceService.getFhirConceptSourceByUrl(url).map(cs -> cs.getConceptSource().getName()).orElse(null);
+	private String conceptURLToSourceNameOrHl7Code(String url) {
+		return conceptSourceService.getFhirConceptSourceByUrl(url).map(cs -> cs.getConceptSource().getName()).orElseGet(
+		    () -> FhirConstants.SNOMED_SYSTEM_URI.equals(url) ? Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE : null);
 	}
 }
