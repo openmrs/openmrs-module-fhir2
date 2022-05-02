@@ -52,11 +52,13 @@ public class MedicationRequestDispenseRequestComponentTranslatorImpl implements 
 	@Override
 	public DrugOrder toOpenmrsType(@Nonnull DrugOrder drugOrder,
 	        @Nonnull MedicationRequest.MedicationRequestDispenseRequestComponent resource) {
-		Quantity quantity = resource.getQuantity();
-		if (quantity != null && quantity.getValue() != null) {
-			drugOrder.setQuantity(quantity.getValue().doubleValue());
-			Concept units = quantityCodingTranslator.toOpenmrsType(quantity);
-			drugOrder.setQuantityUnits(units);
+		if (resource.hasQuantity()) {
+			Quantity quantity = resource.getQuantity();
+			if (quantity.hasValue()) {
+				drugOrder.setQuantity(quantity.getValue().doubleValue());
+				Concept units = quantityCodingTranslator.toOpenmrsType(quantity);
+				drugOrder.setQuantityUnits(units);
+			}
 		}
 		drugOrder.setNumRefills(resource.getNumberOfRepeatsAllowed());
 		return drugOrder;
