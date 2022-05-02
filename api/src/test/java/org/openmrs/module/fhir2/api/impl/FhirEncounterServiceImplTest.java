@@ -31,6 +31,9 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -308,7 +311,7 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(dateRangeParam, null, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -339,7 +342,7 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(null, location, null, null, null, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -373,7 +376,7 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(null, null, participant, null, null, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -407,7 +410,7 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(null, null, null, subject, null, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -433,7 +436,7 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, uuid, null, null, null,
-		    null);
+		    null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -463,7 +466,7 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, typeUuid, null, null, null,
-		    null, null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -489,7 +492,7 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, lastUpdated, null,
-		    null, null);
+		    null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -515,7 +518,7 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null, null,
-		    includes, null);
+		    includes, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -541,7 +544,7 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null, null,
-		    includes, null);
+		    includes, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -568,7 +571,7 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null, null, null,
-		    revIncludes);
+		    revIncludes, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -595,7 +598,35 @@ public class FhirEncounterServiceImplTest {
 		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
 		
 		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null, null, null,
-		    revIncludes);
+		    revIncludes, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+	}
+	
+	@Test
+	public void searchForEncounter_shouldOnlyReturnEncountersThatHaveAtLeastOneHasParamResourceIfNoValueIsSpecified() {
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", null, null));
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
+		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
+		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
+		
+		when(visitService.searchForVisits(any())).thenReturn(new SimpleBundleProvider());
+		
+		IBundleProvider results = encounterService.searchForEncounters(null, null, null, null, null, null, null, null, null,
+		    null, hasAndListParam);
 		
 		List<IBaseResource> resultList = get(results);
 		

@@ -11,11 +11,17 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER;
 
+import java.util.Optional;
+
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
 import org.openmrs.Auditable;
+import org.openmrs.DrugOrder;
+import org.openmrs.Encounter;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -46,8 +52,41 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
+				case FhirConstants.HAS_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleHasAndListParam(criteria, (HasAndListParam) param.getParam()));
+					break;
 			}
 		});
+	}
+	
+	/**
+	 * Currently this only supports matching against the existence of orders, not specific order
+	 * properties
+	 */
+	protected void handleHasAndListParam(Criteria criteria, HasAndListParam hasAndListParam) {
+		if (hasAndListParam != null) {
+			handleAndListParam(hasAndListParam, hasParam -> {
+				if (hasParam != null) {
+					if (FhirConstants.MEDICATION_REQUEST.equals(hasParam.getTargetResourceType())) {
+						if (FhirConstants.INCLUDE_ENCOUNTER_PARAM.equals(hasParam.getReferenceFieldName())) {
+							if (lacksAlias(criteria, "orders")) {
+								if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
+									criteria.createAlias("orders", "orders");
+								} else {
+									if (lacksAlias(criteria, "en")) {
+										criteria.createAlias("encounters", "en");
+									}
+									criteria.createAlias("en.orders", "orders");
+								}
+							}
+							criteria.add(Restrictions.eq("orders.class", DrugOrder.class));
+							criteria.add(Restrictions.eq("orders.voided", false));
+						}
+					}
+				}
+				return Optional.empty();
+			}).ifPresent(criteria::add);
+		}
 	}
 	
 	protected abstract void handleDate(Criteria criteria, DateRangeParam dateRangeParam);

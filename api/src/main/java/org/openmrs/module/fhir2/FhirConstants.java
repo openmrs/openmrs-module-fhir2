@@ -313,4 +313,6 @@ public class FhirConstants {
 	public static final String EVERYTHING_SEARCH_HANDLER = "everything.search.handler";
 	
 	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	public static final String HAS_SEARCH_HANDLER = "_has";
 }

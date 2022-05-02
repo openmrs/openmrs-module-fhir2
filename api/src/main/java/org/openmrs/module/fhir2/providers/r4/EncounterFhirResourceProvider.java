@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -51,6 +52,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -118,6 +120,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Encounter.SP_TYPE) TokenAndListParam encounterType,
 	        @OptionalParam(name = Encounter.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
+	        @OptionalParam(name = FhirConstants.HAS_SEARCH_HANDLER) HasAndListParam hasAndListParam,
 	        @IncludeParam(allow = { "Encounter:" + Encounter.SP_LOCATION, "Encounter:" + Encounter.SP_PATIENT,
 	                "Encounter:" + Encounter.SP_PARTICIPANT }) HashSet<Include> includes,
 	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_ENCOUNTER,
@@ -137,7 +140,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return encounterService.searchForEncounters(date, location, participantReference, subjectReference, encounterType,
-		    id, lastUpdated, sort, includes, revIncludes);
+		    id, lastUpdated, sort, includes, revIncludes, hasAndListParam);
 	}
 	
 	/**
