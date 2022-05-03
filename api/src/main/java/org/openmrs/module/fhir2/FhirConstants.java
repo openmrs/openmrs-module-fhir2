@@ -302,10 +302,6 @@ public class FhirConstants {
 	
 	public static final String INCLUDE_OWNER_PARAM = "owner";
 	
-	public static final String INCLUDE_INTENT_PARAM = "intent";
-	
-	public static final String INCLUDE_STATUS_PARAM = "status";
-	
 	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
 	
 	public static final String MAX_SEARCH_HANDLER = "max.search.handler";

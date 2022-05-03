@@ -71,7 +71,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 			handleAndListParam(hasAndListParam, hasParam -> {
 				if (hasParam != null) {
 					if (FhirConstants.MEDICATION_REQUEST.equals(hasParam.getTargetResourceType())) {
-						if (FhirConstants.INCLUDE_ENCOUNTER_PARAM.equals(hasParam.getReferenceFieldName())) {
+						if (MedicationRequest.SP_ENCOUNTER.equals(hasParam.getReferenceFieldName())) {
 							if (lacksAlias(criteria, "orders")) {
 								if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
 									criteria.createAlias("orders", "orders");
@@ -89,12 +89,12 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 							String paramName = hasParam.getParameterName();
 							String paramValue = hasParam.getParameterValue();
 							if (StringUtils.isNotBlank(paramName) && StringUtils.isNotBlank(paramValue)) {
-								if (FhirConstants.INCLUDE_INTENT_PARAM.equals(paramName)) {
+								if (MedicationRequest.SP_INTENT.equals(paramName)) {
 									if (MedicationRequest.MedicationRequestIntent.ORDER.toCode().equals(paramValue)) {
 										// Do not constrain, all Orders are given this intent
 									}
 								}
-								if (FhirConstants.INCLUDE_STATUS_PARAM.equals(paramName)) {
+								if (MedicationRequest.SP_STATUS.equals(paramName)) {
 									Date now = new Date();
 									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toCode().equals(paramValue)) {
 										criteria.add(Restrictions.ne("orders.action", Order.Action.DISCONTINUE));
