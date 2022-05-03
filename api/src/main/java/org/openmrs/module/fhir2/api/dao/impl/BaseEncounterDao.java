@@ -11,18 +11,22 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER;
 
+import java.util.Date;
 import java.util.Optional;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.Auditable;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.OpenmrsObject;
+import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
@@ -60,8 +64,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	}
 	
 	/**
-	 * Currently this only supports matching against the existence of orders, not specific order
-	 * properties
+	 * TODO: This is a spike / work in progress.  We need to consider how we want to design / handle this
 	 */
 	protected void handleHasAndListParam(Criteria criteria, HasAndListParam hasAndListParam) {
 		if (hasAndListParam != null) {
@@ -81,6 +84,32 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 							}
 							criteria.add(Restrictions.eq("orders.class", DrugOrder.class));
 							criteria.add(Restrictions.eq("orders.voided", false));
+							
+							// Handle specific medication request properties
+							String paramName = hasParam.getParameterName();
+							String paramValue = hasParam.getParameterValue();
+							if (StringUtils.isNotBlank(paramName) && StringUtils.isNotBlank(paramValue)) {
+								if (FhirConstants.INCLUDE_INTENT_PARAM.equals(paramName)) {
+									if (MedicationRequest.MedicationRequestIntent.ORDER.toCode().equals(paramValue)) {
+										// Do not constrain, all Orders are given this intent
+									}
+								}
+								if (FhirConstants.INCLUDE_STATUS_PARAM.equals(paramName)) {
+									Date now = new Date();
+									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toCode().equals(paramValue)) {
+										criteria.add(Restrictions.ne("orders.action", Order.Action.DISCONTINUE));
+										criteria.add(Restrictions.le("orders.dateActivated", now));
+										criteria.add(Restrictions.or(Restrictions.isNull("orders.dateStopped"),
+										    Restrictions.gt("orders.dateStopped", now)));
+										criteria.add(Restrictions.or(Restrictions.isNull("orders.autoExpireDate"),
+										    Restrictions.gt("orders.autoExpireDate", now)));
+									} else if (MedicationRequest.MedicationRequestStatus.CANCELLED.toCode()
+									        .equals(paramValue)) {
+										criteria.add(Restrictions.le("orders.dateActivated", now));
+										criteria.add(Restrictions.le("orders.dateStopped", now));
+									}
+								}
+							}
 						}
 					}
 				}

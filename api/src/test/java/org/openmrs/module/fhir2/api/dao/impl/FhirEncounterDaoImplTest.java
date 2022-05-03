@@ -9,6 +9,14 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.List;
+import java.util.Properties;
+
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
@@ -25,14 +33,6 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
-
-import java.util.List;
-import java.util.Properties;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
@@ -95,16 +95,11 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		}
 		
 		HasOrListParam hasOrListParam = new HasOrListParam();
-		hasOrListParam.add(new HasParam(
-				"MedicationRequest",
-				"encounter",
-				"meta:tag:code",
-				"Encounter")
-		);
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "meta:tag:code", "Encounter"));
 		HasAndListParam hasAndListParam = new HasAndListParam();
 		hasAndListParam.addAnd(hasOrListParam);
-		SearchParameterMap theParams = new SearchParameterMap()
-				.addParameter(FhirConstants.HAS_SEARCH_HANDLER, hasAndListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
 		
 		List<String> matchingUuids = dao.getSearchResultUuids(theParams);
 		assertThat("Encounter with Drug Orders is returned", matchingUuids.contains(ENCOUNTER_WITH_DRUG_ORDERS));
