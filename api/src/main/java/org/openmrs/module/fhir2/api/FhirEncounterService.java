@@ -26,7 +26,7 @@ public interface FhirEncounterService extends FhirService<Encounter> {
 	IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
 	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam encounterType,
 	        TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes,
-	        HashSet<Include> revIncludes, HasAndListParam hasMedicationRequestParam);
+	        HashSet<Include> revIncludes, HasAndListParam hasAndListParam);
 	
 	IBundleProvider getEncounterEverything(TokenParam identifier);
 }
