@@ -82,7 +82,7 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void shouldOnlyReturnEncountersThatHaveAtLeastOneHasParamResource() {
+	public void shouldOnlyReturnEncountersThatHaveAssociatedMedicationRequests() {
 		Encounter withNoDrugOrders = dao.get(ENCOUNTER_WITH_NO_DRUG_ORDERS);
 		assertThat(withNoDrugOrders, notNullValue());
 		assertThat("Orders is empty", withNoDrugOrders.getOrders().isEmpty());

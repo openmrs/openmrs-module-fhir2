@@ -30,6 +30,9 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -229,6 +232,27 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		
 		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, null, null, null, null, null,
 		    null, null, revIncludes);
+		
+		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList.size(), equalTo(1));
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.ENCOUNTER));
+		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void searchEncounters_shouldIncludeAddResourcesThatMatchHasAndListParam() {
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "intent", "order"));
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		
+		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), PREFERRED_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, null, null, null, null, null,
+		    hasAndListParam, null, null);
 		
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		

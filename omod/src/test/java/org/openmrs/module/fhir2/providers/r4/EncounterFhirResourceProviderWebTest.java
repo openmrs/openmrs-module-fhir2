@@ -30,6 +30,7 @@ import javax.servlet.ServletException;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -38,6 +39,8 @@ import java.util.Objects;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -129,6 +132,9 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	
 	@Captor
 	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	
+	@Captor
+	private ArgumentCaptor<HasAndListParam> hasAndListParamArgumentCaptor;
 	
 	@Captor
 	private ArgumentCaptor<TokenParam> tokenCaptor;
@@ -735,6 +741,39 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		assertThat(includeArgumentCaptor.getValue(),
 		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM)),
 		        hasProperty("paramType", equalTo(FhirConstants.DIAGNOSTIC_REPORT)))));
+	}
+	
+	@Test
+	public void shouldHandleHasAndListParameter() throws Exception {
+		verifyUri(
+		    "/Encounter?_has:MedicationRequest:encounter:intent=order&_has:MedicationRequest:encounter:status=active,draft");
+		
+		verify(encounterService).searchForEncounters(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
+		    isNull(), isNull(), isNull(), hasAndListParamArgumentCaptor.capture());
+		
+		assertThat(hasAndListParamArgumentCaptor.getValue(), notNullValue());
+		
+		HasAndListParam hasAndListParam = hasAndListParamArgumentCaptor.getValue();
+		assertThat(hasAndListParam.size(), equalTo(2));
+		
+		List<HasOrListParam> hasOrListParams = hasAndListParam.getValuesAsQueryTokens();
+		assertThat(hasOrListParams.size(), equalTo(2));
+		
+		List<String> valuesFound = new ArrayList<>();
+		
+		for (HasOrListParam hasOrListParam : hasOrListParams) {
+			hasOrListParam.getValuesAsQueryTokens().forEach(hasParam -> {
+				assertThat(hasParam.getTargetResourceType(), equalTo(FhirConstants.MEDICATION_REQUEST));
+				assertThat(hasParam.getReferenceFieldName(), equalTo("encounter"));
+				valuesFound.add(hasParam.getParameterName() + "=" + hasParam.getParameterValue());
+			});
+		}
+		Collections.sort(valuesFound);
+		
+		assertThat(valuesFound.size(), equalTo(3));
+		assertThat(valuesFound.get(0), equalTo("intent=order"));
+		assertThat(valuesFound.get(1), equalTo("status=active"));
+		assertThat(valuesFound.get(2), equalTo("status=draft"));
 	}
 	
 	private void verifyUri(String uri) throws Exception {
