@@ -95,7 +95,7 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		}
 		
 		HasOrListParam hasOrListParam = new HasOrListParam();
-		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "meta:tag:code", "Encounter"));
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "intent", "order"));
 		HasAndListParam hasAndListParam = new HasAndListParam();
 		hasAndListParam.addAnd(hasOrListParam);
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,

@@ -11,14 +11,15 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER;
 
-import java.util.Date;
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.apache.commons.lang.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.hl7.fhir.r4.model.MedicationRequest;
@@ -26,10 +27,10 @@ import org.openmrs.Auditable;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.OpenmrsObject;
-import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
+@Slf4j
 public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	@Override
@@ -64,12 +65,27 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	}
 	
 	/**
-	 * TODO: This is a spike / work in progress.  We need to consider how we want to design / handle this
+	 * Handle _has parameters that are passed in to constrain the Encounter resource on properties of
+	 * dependent resources
 	 */
 	protected void handleHasAndListParam(Criteria criteria, HasAndListParam hasAndListParam) {
 		if (hasAndListParam != null) {
-			handleAndListParam(hasAndListParam, hasParam -> {
-				if (hasParam != null) {
+			log.debug("Handling hasAndListParam");
+			hasAndListParam.getValuesAsQueryTokens().forEach(hasOrListParam -> {
+				if (!hasOrListParam.getValuesAsQueryTokens().isEmpty()) {
+					
+					log.debug("Handling hasOrListParam");
+					// Making the assumption that any "orListParams" match everything except for the value
+					HasParam hasParam = hasOrListParam.getValuesAsQueryTokens().get(0);
+					Set<String> values = new HashSet<>();
+					hasOrListParam.getValuesAsQueryTokens().forEach(orParam -> values.add(orParam.getParameterValue()));
+					
+					log.debug("Handling hasParam = " + hasParam.getQueryParameterQualifier());
+					log.debug("With value in " + values);
+					
+					boolean handled = false;
+					
+					// Support constraining encounter resources to those that contain only certain Medication Requests
 					if (FhirConstants.MEDICATION_REQUEST.equals(hasParam.getTargetResourceType())) {
 						if (MedicationRequest.SP_ENCOUNTER.equals(hasParam.getReferenceFieldName())) {
 							if (lacksAlias(criteria, "orders")) {
@@ -82,39 +98,26 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 									criteria.createAlias("en.orders", "orders");
 								}
 							}
+							// Constrain only on non-voided Drug Orders
 							criteria.add(Restrictions.eq("orders.class", DrugOrder.class));
 							criteria.add(Restrictions.eq("orders.voided", false));
 							
-							// Handle specific medication request properties
 							String paramName = hasParam.getParameterName();
 							String paramValue = hasParam.getParameterValue();
-							if (StringUtils.isNotBlank(paramName) && StringUtils.isNotBlank(paramValue)) {
-								if (MedicationRequest.SP_INTENT.equals(paramName)) {
-									if (MedicationRequest.MedicationRequestIntent.ORDER.toCode().equals(paramValue)) {
-										// Do not constrain, all Orders are given this intent
-									}
-								}
-								if (MedicationRequest.SP_STATUS.equals(paramName)) {
-									Date now = new Date();
-									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toCode().equals(paramValue)) {
-										criteria.add(Restrictions.ne("orders.action", Order.Action.DISCONTINUE));
-										criteria.add(Restrictions.le("orders.dateActivated", now));
-										criteria.add(Restrictions.or(Restrictions.isNull("orders.dateStopped"),
-										    Restrictions.gt("orders.dateStopped", now)));
-										criteria.add(Restrictions.or(Restrictions.isNull("orders.autoExpireDate"),
-										    Restrictions.gt("orders.autoExpireDate", now)));
-									} else if (MedicationRequest.MedicationRequestStatus.CANCELLED.toCode()
-									        .equals(paramValue)) {
-										criteria.add(Restrictions.le("orders.dateActivated", now));
-										criteria.add(Restrictions.le("orders.dateStopped", now));
-									}
+							if (MedicationRequest.SP_INTENT.equals(paramName)) {
+								if (values.contains(MedicationRequest.MedicationRequestIntent.ORDER.toCode())) {
+									// No additional constraints needed, all Orders are given/assumed intent=order
+									handled = true;
 								}
 							}
 						}
 					}
+					if (!handled) {
+						log.warn("_has parameter not supported: " + hasParam.getQueryParameterQualifier());
+					}
+					
 				}
-				return Optional.empty();
-			}).ifPresent(criteria::add);
+			});
 		}
 	}
 	

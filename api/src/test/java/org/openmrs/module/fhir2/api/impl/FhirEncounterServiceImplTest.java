@@ -608,9 +608,9 @@ public class FhirEncounterServiceImplTest {
 	}
 	
 	@Test
-	public void searchForEncounter_shouldOnlyReturnEncountersThatHaveAtLeastOneHasParamResourceIfNoValueIsSpecified() {
+	public void searchForEncounter_shouldOnlyReturnEncountersThatHaveAtLeastOneHasParamResource() {
 		HasOrListParam hasOrListParam = new HasOrListParam();
-		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", null, null));
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "intent", "order"));
 		HasAndListParam hasAndListParam = new HasAndListParam();
 		hasAndListParam.addAnd(hasOrListParam);
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,

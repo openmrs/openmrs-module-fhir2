@@ -148,7 +148,6 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam encounterType,
 	        TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes,
 	        HashSet<Include> revIncludes, HasAndListParam hasAndListParam) {
-		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, date)
 		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, location)
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant)
@@ -161,7 +160,6 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		        .addParameter(FhirConstants.HAS_SEARCH_HANDLER, hasAndListParam).setSortSpec(sort);
 		
 		IBundleProvider visitBundle = visitService.searchForVisits(theParams);
-		
 		IBundleProvider encounterBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 		
 		if (!encounterBundle.isEmpty() && !visitBundle.isEmpty()) {
