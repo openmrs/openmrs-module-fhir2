@@ -28,6 +28,7 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestDispenseRequestComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
@@ -68,6 +69,9 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 	@Autowired
 	private OrderIdentifierTranslator orderIdentifierTranslator;
 	
+	@Autowired
+	private MedicationRequestDispenseRequestComponentTranslator medicationRequestDispenseRequestComponentTranslator;
+	
 	@Override
 	public MedicationRequest toFhirResource(@Nonnull DrugOrder drugOrder) {
 		notNull(drugOrder, "The DrugOrder object should not be null");
@@ -86,6 +90,8 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		medicationRequest.addNote(new Annotation().setText(drugOrder.getCommentToFulfiller()));
 		medicationRequest.addReasonCode(conceptTranslator.toFhirResource(drugOrder.getOrderReason()));
 		medicationRequest.addDosageInstruction(dosageTranslator.toFhirResource(drugOrder));
+		
+		medicationRequest.setDispenseRequest(medicationRequestDispenseRequestComponentTranslator.toFhirResource(drugOrder));
 		
 		if (drugOrder.getPreviousOrder() != null
 		        && (drugOrder.getAction() == Order.Action.DISCONTINUE || drugOrder.getAction() == Order.Action.REVISE)) {
@@ -123,6 +129,9 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		existingDrugOrder.setCommentToFulfiller(medicationRequest.getNoteFirstRep().getText());
 		existingDrugOrder.setOrderReason(conceptTranslator.toOpenmrsType(medicationRequest.getReasonCodeFirstRep()));
 		dosageTranslator.toOpenmrsType(existingDrugOrder, medicationRequest.getDosageInstructionFirstRep());
+		
+		medicationRequestDispenseRequestComponentTranslator.toOpenmrsType(existingDrugOrder,
+		    medicationRequest.getDispenseRequest());
 		
 		return existingDrugOrder;
 		

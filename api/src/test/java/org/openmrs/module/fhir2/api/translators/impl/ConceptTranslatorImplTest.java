@@ -35,7 +35,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
-import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.FhirTestConstants;
@@ -71,10 +70,7 @@ public class ConceptTranslatorImplTest {
 	
 	@Before
 	public void setupMocks() {
-		ConceptName conceptName = mock(ConceptName.class);
-		concept.addName(conceptName);
-		when(conceptName.getName()).thenReturn(CONCEPT_NAME);
-		when(concept.getName()).thenReturn(conceptName);
+		when(concept.getDisplayString()).thenReturn(CONCEPT_NAME);
 	}
 	
 	@Test

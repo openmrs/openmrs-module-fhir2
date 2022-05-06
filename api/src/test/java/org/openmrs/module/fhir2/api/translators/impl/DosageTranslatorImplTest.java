@@ -14,12 +14,18 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Optional;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
+import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.Timing;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,10 +33,20 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
+import org.openmrs.ConceptMap;
+import org.openmrs.ConceptMapType;
+import org.openmrs.ConceptName;
+import org.openmrs.ConceptReferenceTerm;
+import org.openmrs.ConceptSource;
 import org.openmrs.DrugOrder;
+import org.openmrs.Duration;
 import org.openmrs.OrderFrequency;
 import org.openmrs.api.OrderService;
-import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhir2.api.FhirConceptService;
+import org.openmrs.module.fhir2.api.FhirConceptSourceService;
+import org.openmrs.module.fhir2.model.FhirConceptSource;
+import org.openmrs.util.LocaleUtility;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DosageTranslatorImplTest {
@@ -41,8 +57,15 @@ public class DosageTranslatorImplTest {
 	
 	private static final String DOSING_INSTRUCTION = "dosing instructions";
 	
+	private ConceptTranslatorImpl conceptTranslator;
+	
+	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
+	
 	@Mock
-	private ConceptTranslator conceptTranslator;
+	private FhirConceptService conceptService;
+	
+	@Mock
+	private FhirConceptSourceService conceptSourceService;
 	
 	@Mock
 	private OrderService orderService;
@@ -55,6 +78,13 @@ public class DosageTranslatorImplTest {
 	
 	@Before
 	public void setup() {
+		conceptTranslator = new ConceptTranslatorImpl();
+		conceptTranslator.setConceptService(conceptService);
+		conceptTranslator.setConceptSourceService(conceptSourceService);
+		
+		quantityCodingTranslator = new MedicationQuantityCodingTranslatorImpl();
+		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
+		
 		timingTranslator = new MedicationRequestTimingTranslatorImpl();
 		timingTranslator.setConceptTranslator(conceptTranslator);
 		timingTranslator.setOrderService(orderService);
@@ -63,9 +93,12 @@ public class DosageTranslatorImplTest {
 		dosageTranslator = new DosageTranslatorImpl();
 		dosageTranslator.setConceptTranslator(conceptTranslator);
 		dosageTranslator.setTimingTranslator(timingTranslator);
+		dosageTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
 		
 		drugOrder = new DrugOrder();
 		drugOrder.setUuid(DRUG_ORDER_UUID);
+		
+		LocaleUtility.setLocalesAllowedListCache(Arrays.asList(Locale.ENGLISH));
 	}
 	
 	@Test
@@ -80,17 +113,11 @@ public class DosageTranslatorImplTest {
 	public void toFhirResource_shouldTranslateDrugOrderRouteToRoute() {
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
-		concept.setConceptId(1000);
-		
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode(concept.getConceptId().toString()));
 		drugOrder.setRoute(concept);
-		when(conceptTranslator.toFhirResource(concept)).thenReturn(codeableConcept);
 		
 		Dosage result = dosageTranslator.toFhirResource(drugOrder);
 		assertThat(result, notNullValue());
-		assertThat(result.getRoute(), equalTo(codeableConcept));
-		assertThat(result.getRoute().getCodingFirstRep().getCode(), equalTo("1000"));
+		assertThat(result.getRoute().getCodingFirstRep().getCode(), equalTo(CONCEPT_UUID));
 	}
 	
 	@Test
@@ -109,17 +136,16 @@ public class DosageTranslatorImplTest {
 	@Test
 	public void toFhirResource_shouldSetDosageTiming() {
 		Concept timingConcept = new Concept();
-		CodeableConcept timingFhirConcept = new CodeableConcept();
+		timingConcept.setUuid(CONCEPT_UUID);
+		
 		OrderFrequency timingFrequency = new OrderFrequency();
 		timingFrequency.setConcept(timingConcept);
-		when(conceptTranslator.toFhirResource(timingConcept)).thenReturn(timingFhirConcept);
-		
 		drugOrder.setFrequency(timingFrequency);
 		
 		Dosage result = dosageTranslator.toFhirResource(drugOrder);
 		assertThat(result, notNullValue());
 		assertThat(result.getTiming(), notNullValue());
-		assertThat(result.getTiming().getCode(), equalTo(timingFhirConcept));
+		assertThat(result.getTiming().getCode().getCodingFirstRep().getCode(), equalTo(CONCEPT_UUID));
 	}
 	
 	@Test
@@ -142,7 +168,8 @@ public class DosageTranslatorImplTest {
 	public void toOpenmrsType_shouldTranslateRouteToRoute() {
 		Concept routeConcept = new Concept();
 		CodeableConcept routeFhirConcept = new CodeableConcept();
-		when(conceptTranslator.toOpenmrsType(routeFhirConcept)).thenReturn(routeConcept);
+		routeFhirConcept.addCoding(new Coding(null, CONCEPT_UUID, "route"));
+		when(conceptService.get(CONCEPT_UUID)).thenReturn(routeConcept);
 		
 		Dosage dosage = new Dosage();
 		dosage.setRoute(routeFhirConcept);
@@ -154,8 +181,9 @@ public class DosageTranslatorImplTest {
 	public void toOpenmrsType_shouldSetDosageTiming() {
 		Concept timingConcept = new Concept();
 		CodeableConcept timingFhirConcept = new CodeableConcept();
+		timingFhirConcept.addCoding(new Coding(null, CONCEPT_UUID, "timing"));
+		when(conceptService.get(CONCEPT_UUID)).thenReturn(timingConcept);
 		OrderFrequency timingFrequency = new OrderFrequency();
-		when(conceptTranslator.toOpenmrsType(timingFhirConcept)).thenReturn(timingConcept);
 		when(orderService.getOrderFrequencyByConcept(timingConcept)).thenReturn(timingFrequency);
 		
 		Dosage dosage = new Dosage();
@@ -166,5 +194,108 @@ public class DosageTranslatorImplTest {
 		DrugOrder result = dosageTranslator.toOpenmrsType(new DrugOrder(), dosage);
 		assertThat(result, notNullValue());
 		assertThat(result.getFrequency(), equalTo(timingFrequency));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateDrugOrderDoseToDoseQuantity() {
+		Concept mg = new Concept();
+		mg.addName(new ConceptName("mg", Locale.ENGLISH));
+		mg.setUuid(CONCEPT_UUID);
+		
+		drugOrder.setDose(20.0);
+		drugOrder.setDoseUnits(mg);
+		Dosage result = dosageTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getValue().doubleValue(), equalTo(20.0));
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getUnit(), is("mg"));
+		assertNull(result.getDoseAndRate().get(0).getDoseQuantity().getSystem());
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getCode(), is(CONCEPT_UUID));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateDrugOrderDoseToDoseQuantityPreferringRxNormIfPresent() {
+		ConceptMapType sameAs = new ConceptMapType();
+		sameAs.setUuid(ConceptMapType.SAME_AS_MAP_TYPE_UUID);
+		
+		ConceptSource snomed = new ConceptSource();
+		snomed.setHl7Code(Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
+		ConceptSource rxNorm = new ConceptSource();
+		rxNorm.setName("rxnorm");
+		
+		Concept mg = new Concept();
+		mg.addName(new ConceptName("mg", Locale.ENGLISH));
+		mg.addConceptMapping(new ConceptMap(new ConceptReferenceTerm(snomed, "snomed-ct-mg-code", "snomed"), sameAs));
+		mg.addConceptMapping(new ConceptMap(new ConceptReferenceTerm(rxNorm, "rx-norm-mg-code", "rxnorm"), sameAs));
+		
+		FhirConceptSource rxNormFhir = new FhirConceptSource();
+		rxNormFhir.setUrl(FhirConstants.RX_NORM_SYSTEM_URI);
+		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("rxnorm")).thenReturn(Optional.of(rxNormFhir));
+		
+		drugOrder.setDose(20.0);
+		drugOrder.setDoseUnits(mg);
+		Dosage result = dosageTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getValue().doubleValue(), equalTo(20.0));
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getUnit(), is("mg"));
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getSystem(), is(FhirConstants.RX_NORM_SYSTEM_URI));
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getCode(), is("rx-norm-mg-code"));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateDrugOrderDoseToDoseQuantityPreferringSnomedCtIfPresent() {
+		ConceptMapType sameAs = new ConceptMapType();
+		sameAs.setUuid(ConceptMapType.SAME_AS_MAP_TYPE_UUID);
+		
+		ConceptSource snomed = new ConceptSource();
+		snomed.setHl7Code(Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
+		ConceptSource rxNorm = new ConceptSource();
+		rxNorm.setName("rxnorm");
+		
+		Concept mg = new Concept();
+		mg.addName(new ConceptName("mg", Locale.ENGLISH));
+		mg.addConceptMapping(new ConceptMap(new ConceptReferenceTerm(snomed, "snomed-ct-mg-code", "snomed"), sameAs));
+		
+		drugOrder.setDose(20.0);
+		drugOrder.setDoseUnits(mg);
+		Dosage result = dosageTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getValue().doubleValue(), equalTo(20.0));
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getUnit(), is("mg"));
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getSystem(), is(FhirConstants.SNOMED_SYSTEM_URI));
+		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getCode(), is("snomed-ct-mg-code"));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateDoseQuantityToDrugOrderDose() {
+		double dosageValue = 12345.0;
+		Dosage dosage = new Dosage();
+		Dosage.DosageDoseAndRateComponent doseAndRateComponent = new Dosage.DosageDoseAndRateComponent();
+		SimpleQuantity doseQuantity = new SimpleQuantity();
+		doseQuantity.setValue(dosageValue);
+		doseAndRateComponent.setDose(doseQuantity);
+		dosage.addDoseAndRate(doseAndRateComponent);
+		
+		DrugOrder result = dosageTranslator.toOpenmrsType(new DrugOrder(), dosage);
+		assertThat(result, notNullValue());
+		assertThat(result.getDose(), equalTo(dosageValue));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateDoseQuantityUnitsToDrugOrderDoseUnits() {
+		Concept mg = new Concept();
+		when(conceptService.get(CONCEPT_UUID)).thenReturn(mg);
+		
+		Dosage dosage = new Dosage();
+		Dosage.DosageDoseAndRateComponent doseAndRateComponent = new Dosage.DosageDoseAndRateComponent();
+		SimpleQuantity doseQuantity = new SimpleQuantity();
+		doseQuantity.setValue(12345.0);
+		doseQuantity.setSystem(null);
+		doseQuantity.setCode(CONCEPT_UUID);
+		doseAndRateComponent.setDose(doseQuantity);
+		dosage.addDoseAndRate(doseAndRateComponent);
+		
+		DrugOrder result = dosageTranslator.toOpenmrsType(new DrugOrder(), dosage);
+		assertThat(result, notNullValue());
+		assertThat(result.getDoseUnits(), equalTo(mg));
 	}
 }
