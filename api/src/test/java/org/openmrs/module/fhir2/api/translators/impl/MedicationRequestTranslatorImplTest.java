@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -410,6 +412,97 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getMedication(), notNullValue());
 		assertThat(result.getMedication(), equalTo(medicationRef));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldTranslateMedicationToOpenMrsConcept() {
+		CodeableConcept fhirConcept = new CodeableConcept();
+		fhirConcept.setId(CONCEPT_UUID);
+		fhirConcept.setText("Test Concept");
+		
+		Concept openmrsConcept = new Concept();
+		openmrsConcept.setUuid(CONCEPT_UUID);
+		
+		when(conceptTranslator.toOpenmrsType(fhirConcept)).thenReturn(openmrsConcept);
+		when(conceptTranslator.toFhirResource(openmrsConcept)).thenReturn(fhirConcept);
+		
+		medicationRequest.setMedication(fhirConcept);
+		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDrug(), nullValue());
+		assertThat(result.getConcept(), notNullValue());
+		assertThat(result.getConcept().getUuid(), equalTo(CONCEPT_UUID));
+		assertThat(result.getDrugNonCoded(), nullValue());
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToMedicationCodeableConcept() {
+		CodeableConcept fhirConcept = new CodeableConcept();
+		fhirConcept.setId(CONCEPT_UUID);
+		fhirConcept.setText("Test Concept");
+		
+		Concept openmrsConcept = new Concept();
+		openmrsConcept.setUuid(CONCEPT_UUID);
+		
+		when(conceptTranslator.toFhirResource(openmrsConcept)).thenReturn(fhirConcept);
+		
+		drugOrder.setConcept(openmrsConcept);
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getMedication(), equalTo(fhirConcept));
+		assertThat(result.hasMedicationReference(), is(false));
+		assertThat(result.getMedicationCodeableConcept(), equalTo(fhirConcept));
+		assertThat(result.getMedicationCodeableConcept().getText(), equalTo(fhirConcept.getText()));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldTranslateMedicationToOpenMrsConceptWithDrugNonCodedText() {
+		CodeableConcept fhirConcept = new CodeableConcept();
+		fhirConcept.setId(CONCEPT_UUID);
+		fhirConcept.setText("Test Concept");
+		
+		CodeableConcept fhirConceptWithNonCoded = new CodeableConcept();
+		fhirConceptWithNonCoded.setId(CONCEPT_UUID);
+		fhirConceptWithNonCoded.setText("Non-Coded Drug Formulation");
+		
+		Concept openmrsConcept = new Concept();
+		openmrsConcept.setUuid(CONCEPT_UUID);
+		
+		when(conceptTranslator.toOpenmrsType(any())).thenReturn(openmrsConcept);
+		when(conceptTranslator.toFhirResource(any())).thenReturn(fhirConcept);
+		
+		medicationRequest.setMedication(fhirConceptWithNonCoded);
+		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDrug(), nullValue());
+		assertThat(result.getConcept(), notNullValue());
+		assertThat(result.getConcept().getUuid(), equalTo(CONCEPT_UUID));
+		assertThat(result.getDrugNonCoded(), equalTo("Non-Coded Drug Formulation"));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToMedicationCodeableConceptWithDrugNonCoded() {
+		CodeableConcept fhirConcept = new CodeableConcept();
+		fhirConcept.setId(CONCEPT_UUID);
+		fhirConcept.setText("Test Concept");
+		
+		Concept openmrsConcept = new Concept();
+		openmrsConcept.setUuid(CONCEPT_UUID);
+		
+		when(conceptTranslator.toFhirResource(openmrsConcept)).thenReturn(fhirConcept);
+		
+		drugOrder.setConcept(openmrsConcept);
+		drugOrder.setDrugNonCoded("Non-Coded Drug Formulation");
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getMedication(), equalTo(fhirConcept));
+		assertThat(result.hasMedicationReference(), is(false));
+		assertThat(result.getMedicationCodeableConcept().getId(), equalTo(fhirConcept.getId()));
+		assertThat(result.getMedicationCodeableConcept().getText(), equalTo("Non-Coded Drug Formulation"));
 	}
 	
 	@Test
