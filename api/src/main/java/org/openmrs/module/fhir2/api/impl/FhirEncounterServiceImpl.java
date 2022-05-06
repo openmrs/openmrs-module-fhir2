@@ -12,15 +12,13 @@ package org.openmrs.module.fhir2.api.impl;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.HasAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -35,6 +33,7 @@ import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.TwoSearchQueryBundleProvider;
+import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
@@ -144,23 +143,28 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	
 	@Override
 	@Transactional(readOnly = true)
-	public IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
-	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam encounterType,
-	        TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes,
-	        HashSet<Include> revIncludes, HasAndListParam hasAndListParam) {
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, date)
-		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, location)
-		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant)
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, subject)
-		        .addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, encounterType)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
-		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes)
-		        .addParameter(FhirConstants.HAS_SEARCH_HANDLER, hasAndListParam).setSortSpec(sort);
+	public IBundleProvider searchForEncounters(EncounterSearchParams esp) {
+		SearchParameterMap theParams = new SearchParameterMap()
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, esp.getDate())
+		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, esp.getLocation())
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, esp.getParticipant())
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, esp.getSubject())
+		        .addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, esp.getEncounterType())
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, esp.getId())
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, esp.getLastUpdated())
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, esp.getIncludes())
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, esp.getRevIncludes())
+		        .addParameter(FhirConstants.HAS_SEARCH_HANDLER, esp.getHasAndListParam()).setSortSpec(esp.getSort());
 		
-		IBundleProvider visitBundle = visitService.searchForVisits(theParams);
-		IBundleProvider encounterBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+		IBundleProvider visitBundle = new SimpleBundleProvider();
+		IBundleProvider encounterBundle = new SimpleBundleProvider();
+		
+		if (shouldIncludeResourceBasedOnEncounterTag(esp.getTag(), "visit")) {
+			visitBundle = visitService.searchForVisits(theParams);
+		}
+		if (shouldIncludeResourceBasedOnEncounterTag(esp.getTag(), "encounter")) {
+			encounterBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+		}
 		
 		if (!encounterBundle.isEmpty() && !visitBundle.isEmpty()) {
 			return new TwoSearchQueryBundleProvider(visitBundle, encounterBundle, globalPropertyService);
@@ -169,6 +173,24 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		}
 		
 		return encounterBundle;
+	}
+	
+	/**
+	 * @return true if the given tokenAndListParam contains the valueToCheck or the given
+	 *         tokenAndListParam does not restrict on the encounter-tag system
+	 */
+	protected boolean shouldIncludeResourceBasedOnEncounterTag(TokenAndListParam tokenAndListParam, String valueToCheck) {
+		final Set<String> tagsToInclude = new HashSet<>();
+		if (tokenAndListParam != null && tokenAndListParam.getValuesAsQueryTokens() != null) {
+			tokenAndListParam.getValuesAsQueryTokens().forEach(tokenOrListParam -> {
+				tokenOrListParam.getValuesAsQueryTokens().forEach(tokenParam -> {
+					if (tokenParam.getSystem().equals(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG)) {
+						tagsToInclude.add(tokenParam.getValue());
+					}
+				});
+			});
+		}
+		return tagsToInclude.isEmpty() || tagsToInclude.contains(valueToCheck);
 	}
 	
 	@Override

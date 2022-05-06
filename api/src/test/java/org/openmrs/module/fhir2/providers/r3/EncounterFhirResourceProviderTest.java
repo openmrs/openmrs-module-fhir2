@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -49,10 +51,13 @@ import org.hl7.fhir.r4.model.Observation;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
+import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -76,6 +81,9 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	private EncounterFhirResourceProvider resourceProvider;
 	
 	private org.hl7.fhir.r4.model.Encounter encounter;
+	
+	@Captor
+	private ArgumentCaptor<EncounterSearchParams> paramCaptor;
 	
 	@Before
 	public void setup() {
@@ -126,14 +134,14 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	public void searchEncounters_shouldReturnMatchingEncounters() {
 		List<org.hl7.fhir.r4.model.Encounter> encounters = new ArrayList<>();
 		encounters.add(encounter);
-		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any())).thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
+		when(encounterService.searchForEncounters(any()))
+		        .thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
 		
 		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
 		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
 		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, subjectReference, null, null, null,
-		    null, null, null, null, null);
+		    null, null, null, null, null, null);
 		
 		List<Encounter> resultList = get(results);
 		
@@ -147,14 +155,14 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	public void searchEncounters_shouldReturnMatchingEncountersWhenPatientParamIsSpecified() {
 		List<org.hl7.fhir.r4.model.Encounter> encounters = new ArrayList<>();
 		encounters.add(encounter);
-		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any())).thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
+		when(encounterService.searchForEncounters(any()))
+		        .thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
 		
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
 		
 		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, patientParam, null, null, null,
-		    null, null, null, null);
+		    null, null, null, null, null);
 		
 		List<Encounter> resultList = get(results);
 		
@@ -166,14 +174,14 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	
 	@Test
 	public void searchEncounters_shouldAddRelatedResourcesForInclude() {
-		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any())).thenReturn(new MockIBundleProvider<>(Arrays.asList(encounter, new Patient()), PREFERRED_SIZE, COUNT));
+		when(encounterService.searchForEncounters(any()))
+		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(encounter, new Patient()), PREFERRED_SIZE, COUNT));
 		
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Encounter:patient"));
 		
 		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, null, null, null, null, null,
-		    null, includes, null);
+		    null, null, includes, null);
 		
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
@@ -186,13 +194,13 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	
 	@Test
 	public void searchEncounters_shouldNotAddResourcesForEmptyInclude() {
-		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any(), any(), isNull(), any(),
-		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), PREFERRED_SIZE, COUNT));
+		when(encounterService.searchForEncounters(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), PREFERRED_SIZE, COUNT));
 		
 		HashSet<Include> includes = new HashSet<>();
 		
 		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, null, null, null, null, null,
-		    null, includes, null);
+		    null, null, includes, null);
 		
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
@@ -204,15 +212,14 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	
 	@Test
 	public void searchEncounters_shouldAddRelatedResourcesForRevInclude() {
-		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any())).thenReturn(
-		        new MockIBundleProvider<>(Arrays.asList(encounter, new Observation()), PREFERRED_SIZE, COUNT));
+		when(encounterService.searchForEncounters(any()))
+		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(encounter, new Observation()), PREFERRED_SIZE, COUNT));
 		
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("Observation:encounter"));
 		
 		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, null, null, null, null, null,
-		    null, null, revIncludes);
+		    null, null, null, revIncludes);
 		
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
@@ -225,13 +232,13 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 	
 	@Test
 	public void searchEncounters_shouldNotAddResourcesForEmptyRevInclude() {
-		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any(), any(), any(), isNull(),
-		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), PREFERRED_SIZE, COUNT));
+		when(encounterService.searchForEncounters(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), PREFERRED_SIZE, COUNT));
 		
 		HashSet<Include> revIncludes = new HashSet<>();
 		
 		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, null, null, null, null, null,
-		    null, null, revIncludes);
+		    null, null, null, revIncludes);
 		
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
@@ -248,11 +255,11 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		HasAndListParam hasAndListParam = new HasAndListParam();
 		hasAndListParam.addAnd(hasOrListParam);
 		
-		when(encounterService.searchForEncounters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), PREFERRED_SIZE, COUNT));
+		when(encounterService.searchForEncounters(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), PREFERRED_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, null, null, null, null, null,
-		    hasAndListParam, null, null);
+		    null, hasAndListParam, null, null);
 		
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
@@ -260,6 +267,24 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		assertThat(resultList.size(), equalTo(1));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.ENCOUNTER));
 		assertThat(((Encounter) resultList.iterator().next()).getId(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void searchEncounters_shouldIncludeAddResourcesThatMatchTagParam() {
+		TokenAndListParam tokenAndListParam = new TokenAndListParam();
+		tokenAndListParam.addAnd(new TokenParam(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, "encounter"));
+		
+		when(encounterService.searchForEncounters(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(encounter), 10, 1));
+		
+		resourceProvider.searchEncounter(null, null, null, null, null, null, null, tokenAndListParam, null, null, null, null,
+		    null);
+		
+		verify(encounterService).searchForEncounters(paramCaptor.capture());
+		
+		TokenAndListParam tagParam = paramCaptor.getValue().getTag();
+		assertThat(tagParam, notNullValue());
+		assertThat(tagParam, equalTo(tokenAndListParam));
 	}
 	
 	@Test

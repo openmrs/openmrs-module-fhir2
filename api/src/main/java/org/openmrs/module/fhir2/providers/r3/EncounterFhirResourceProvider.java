@@ -54,6 +54,7 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -124,6 +125,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientParam,
 	        @OptionalParam(name = Encounter.SP_TYPE) TokenAndListParam encounterType,
 	        @OptionalParam(name = Encounter.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_tag") TokenAndListParam tag,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
 	        @OptionalParam(name = FhirConstants.HAS_SEARCH_HANDLER) HasAndListParam hasAndListParam,
 	        @IncludeParam(allow = { "Encounter:" + Encounter.SP_LOCATION, "Encounter:" + Encounter.SP_PATIENT,
@@ -143,9 +145,9 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(
-		        encounterService.searchForEncounters(date, location, participantReference, subjectReference, encounterType,
-		            id, lastUpdated, sort, includes, revIncludes, hasAndListParam));
+		return new SearchQueryBundleProviderR3Wrapper(encounterService
+		        .searchForEncounters(new EncounterSearchParams(date, location, participantReference, subjectReference,
+		                encounterType, id, lastUpdated, sort, includes, revIncludes, hasAndListParam, tag)));
 	}
 	
 }
