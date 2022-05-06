@@ -184,8 +184,10 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 		if (tokenAndListParam != null && tokenAndListParam.getValuesAsQueryTokens() != null) {
 			tokenAndListParam.getValuesAsQueryTokens().forEach(tokenOrListParam -> {
 				tokenOrListParam.getValuesAsQueryTokens().forEach(tokenParam -> {
-					if (tokenParam.getSystem().equals(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG)) {
-						tagsToInclude.add(tokenParam.getValue());
+					if (tokenParam != null && tokenParam.getSystem() != null && tokenParam.getValue() != null) {
+						if (tokenParam.getSystem().equals(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG)) {
+							tagsToInclude.add(tokenParam.getValue());
+						}
 					}
 				});
 			});

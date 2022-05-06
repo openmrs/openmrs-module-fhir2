@@ -315,8 +315,8 @@ public class FhirConstants {
 	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
 	public static final String HAS_SEARCH_HANDLER = "_has";
-
+	
 	public static final String SNOMED_SYSTEM_URI = "http://snomed.info/sct";
-
+	
 	public static final String RX_NORM_SYSTEM_URI = "http://www.nlm.nih.gov/research/umls/rxnorm";
 }
