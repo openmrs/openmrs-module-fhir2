@@ -133,8 +133,6 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String MEMBER_UUID = "744b91f8-bdbc-4950-833b-002244e9fa2b";
 	
-	private static final String SNOMED_SYSTEM_URI = "http://snomed.info/sct";
-	
 	private static final String OBS_SNOMED_CODE = "2332523";
 	
 	private static final String DATE_CREATED = "2008-08-18";
@@ -217,7 +215,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	public void searchForObs_shouldReturnObsByConceptMapping() {
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
-		codingToken.setSystem(SNOMED_SYSTEM_URI);
+		codingToken.setSystem(FhirConstants.SNOMED_SYSTEM_URI);
 		codingToken.setValue(OBS_SNOMED_CODE);
 		code.addAnd(codingToken);
 		

@@ -203,8 +203,10 @@ a browser.
                             </th:block>
                         </td>
                         <td>
-                            <th:block th:if="${resource.dispenseRequest.dispenseInterval}"
-                                      th:narrative="${resource.dispenseRequest.dispenseInterval}"></th:block>
+                            <th:block th:unless="${fhirVersion} eq 'DSTU3'">
+                                <th:block th:if="${resource.dispenseRequest.dispenseInterval}"
+                                          th:narrative="${resource.dispenseRequest.dispenseInterval}"></th:block>
+                            </th:block>
                         </td>
                         <td>
                             <th:block th:if="${resource.dispenseRequest.validityPeriod}"
