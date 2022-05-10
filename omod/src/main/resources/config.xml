@@ -39,6 +39,10 @@
             <openmrsVersion>2.2.* - 2.*</openmrsVersion>
         </conditionalResource>
 		<conditionalResource>
+			<path>/lib/fhir2-api-2.6-${project.parent.version}.jar</path>
+			<openmrsVersion>2.6.* - 2.*</openmrsVersion>
+		</conditionalResource>
+		<conditionalResource>
 			<path>/lib/jackson-.*.jar</path>
 			<openmrsVersion>2.0.5 - 2.1.2</openmrsVersion>
 		</conditionalResource>
