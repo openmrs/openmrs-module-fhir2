@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 
 public interface FhirConceptSourceService {
@@ -22,5 +23,11 @@ public interface FhirConceptSourceService {
 	
 	Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url);
 	
-	Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName);
+	Optional<FhirConceptSource> getFhirConceptSource(@Nonnull ConceptSource conceptSource);
+	
+	String getUrlForConceptSource(@Nonnull ConceptSource conceptSource);
+	
+	ConceptSource getConceptSourceByUrl(@Nonnull String url);
+	
+	ConceptSource getConceptSourceByHl7Code(@Nonnull String hl7Code);
 }

@@ -9,18 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Optional;
-
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -45,8 +33,18 @@ import org.openmrs.api.OrderService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
-import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.openmrs.util.LocaleUtility;
+
+import java.util.Arrays;
+import java.util.Locale;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DosageTranslatorImplTest {
@@ -219,17 +217,15 @@ public class DosageTranslatorImplTest {
 		
 		ConceptSource snomed = new ConceptSource();
 		snomed.setHl7Code(Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
+		
 		ConceptSource rxNorm = new ConceptSource();
 		rxNorm.setName("rxnorm");
+		when(conceptSourceService.getUrlForConceptSource(rxNorm)).thenReturn(FhirConstants.RX_NORM_SYSTEM_URI);
 		
 		Concept mg = new Concept();
 		mg.addName(new ConceptName("mg", Locale.ENGLISH));
 		mg.addConceptMapping(new ConceptMap(new ConceptReferenceTerm(snomed, "snomed-ct-mg-code", "snomed"), sameAs));
 		mg.addConceptMapping(new ConceptMap(new ConceptReferenceTerm(rxNorm, "rx-norm-mg-code", "rxnorm"), sameAs));
-		
-		FhirConceptSource rxNormFhir = new FhirConceptSource();
-		rxNormFhir.setUrl(FhirConstants.RX_NORM_SYSTEM_URI);
-		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("rxnorm")).thenReturn(Optional.of(rxNormFhir));
 		
 		drugOrder.setDose(20.0);
 		drugOrder.setDoseUnits(mg);
@@ -248,6 +244,8 @@ public class DosageTranslatorImplTest {
 		
 		ConceptSource snomed = new ConceptSource();
 		snomed.setHl7Code(Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
+		when(conceptSourceService.getUrlForConceptSource(snomed)).thenReturn(FhirConstants.SNOMED_SYSTEM_URI);
+		
 		ConceptSource rxNorm = new ConceptSource();
 		rxNorm.setName("rxnorm");
 		

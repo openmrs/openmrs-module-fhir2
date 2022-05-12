@@ -16,6 +16,9 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.openmrs.ConceptSource;
+import org.openmrs.Duration;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
@@ -45,7 +48,38 @@ public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
-		return dao.getFhirConceptSourceByConceptSourceName(sourceName);
+	public Optional<FhirConceptSource> getFhirConceptSource(@Nonnull ConceptSource conceptSource) {
+		return dao.getFhirConceptSourceByConceptSource(conceptSource);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public String getUrlForConceptSource(@Nonnull ConceptSource conceptSource) {
+		return getFhirConceptSource(conceptSource).map(FhirConceptSource::getUrl)
+		        .orElseGet(() -> Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
+		                ? FhirConstants.SNOMED_SYSTEM_URI
+		                : null);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public ConceptSource getConceptSourceByUrl(@Nonnull String url) {
+		if (url == null) {
+			return null;
+		}
+		Optional<FhirConceptSource> fhirConceptSource = getFhirConceptSourceByUrl(url);
+		if (fhirConceptSource.isPresent()) {
+			return fhirConceptSource.get().getConceptSource();
+		}
+		if (url.equals(FhirConstants.SNOMED_SYSTEM_URI)) {
+			return dao.getConceptSourceByHl7Code(Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
+		}
+		return null;
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public ConceptSource getConceptSourceByHl7Code(@Nonnull String hl7Code) {
+		return dao.getConceptSourceByHl7Code(hl7Code);
 	}
 }

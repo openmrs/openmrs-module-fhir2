@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 
@@ -86,22 +88,35 @@ public class FhirConceptSourceServiceImplTest {
 	}
 	
 	@Test
-	public void getFhirConceptSourceByConceptSourceName_shouldReturnConceptSourceForName() {
-		FhirConceptSource source = new FhirConceptSource();
-		when(dao.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.of(source));
+	public void getFhirConceptSourceByConceptSource_shouldReturnSourceWherePresent() {
+		FhirConceptSource fhirSource = new FhirConceptSource();
+		ConceptSource source = new ConceptSource();
+		when(dao.getFhirConceptSourceByConceptSource(source)).thenReturn(Optional.of(fhirSource));
 		
-		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC");
-		
+		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSource(source);
 		assertThat(result.isPresent(), is(true));
-		assertThat(result.get(), equalTo(source));
+		assertThat(result.get(), equalTo(fhirSource));
 	}
 	
 	@Test
-	public void getFhirConceptSourceByConceptSourceName_shouldReturnEmptyWhenNoConceptSourceFound() {
-		when(dao.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.empty());
-		
-		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC");
-		
+	public void getFhirConceptSourceByConceptSource_shouldReturnEmptyOptionalWhereNoFhirConceptSourceExists() {
+		ConceptSource conceptSource = new ConceptSource();
+		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSource(conceptSource);
 		assertThat(result.isPresent(), is(false));
+	}
+	
+	@Test
+	public void getConceptSourceByHl7Code_shouldReturnSourceForHl7Code() {
+		ConceptSource source = new ConceptSource();
+		when(dao.getConceptSourceByHl7Code("SCT")).thenReturn(source);
+		ConceptSource result = fhirConceptSourceService.getConceptSourceByHl7Code("SCT");
+		assertThat(result, notNullValue());
+		assertThat(result, equalTo(source));
+	}
+	
+	@Test
+	public void getFhirConceptSourceByHl7Code_shouldReturnNullForMissingSourceName() {
+		ConceptSource result = fhirConceptSourceService.getConceptSourceByHl7Code("SNOMED CT");
+		assertThat(result, nullValue());
 	}
 }

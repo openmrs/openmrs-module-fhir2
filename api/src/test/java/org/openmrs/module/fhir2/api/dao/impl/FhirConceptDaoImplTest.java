@@ -11,17 +11,16 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;
+import org.openmrs.ConceptSource;
 import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,15 +43,13 @@ public class FhirConceptDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Qualifier("conceptService")
 	private ConceptService conceptService;
 	
-	private FhirConceptDaoImpl dao;
+	@Autowired
+	private FhirConceptDao dao;
 	
 	@Before
 	public void setup() throws Exception {
 		executeDataSet(CONCEPT_DATA_XML);
 		executeDataSet(CONCEPT_FHIR_DATA_XML);
-		
-		dao = new FhirConceptDaoImpl();
-		dao.setConceptService(conceptService);
 	}
 	
 	@Test
@@ -69,21 +66,37 @@ public class FhirConceptDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void getConceptBySourceNameAndCode_shouldGetConceptBySystemAndName() {
-		Optional<Concept> result = dao.getConceptBySourceNameAndCode("LOINC", "1000-1");
-		assertThat(result.isPresent(), is(true));
-		assertThat(result.get().getUuid(), equalTo(MAPPED_CONCEPT_UUID));
+	public void getConceptWithSameAsMappingInSource_shouldGetConceptBySourceAndMapping() {
+		ConceptSource loinc = conceptService.getConceptSourceByName("LOINC");
+		Concept result = dao.getConceptWithSameAsMappingInSource(loinc, "1000-1");
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(MAPPED_CONCEPT_UUID));
 	}
 	
 	@Test
-	public void getConceptBySourceNameAndCode_shouldReturnNullIfConceptSystemDoesNotMatch() {
-		Optional<Concept> result = dao.getConceptBySourceNameAndCode("PIH", "1000-1");
-		assertThat(result.isPresent(), is(false));
+	public void getConceptWithSameAsMappingInSource_shouldReturnNullIfSourceIsNull() {
+		Concept result = dao.getConceptWithSameAsMappingInSource(null, "1000-1");
+		assertThat(result, nullValue());
 	}
 	
 	@Test
-	public void getConceptBySourceNameAndCode_shouldReturnNullIfConceptCodeDoesNotMatch() {
-		Optional<Concept> result = dao.getConceptBySourceNameAndCode("LOINC", "1000-2");
-		assertThat(result.isPresent(), is(false));
+	public void getConceptWithSameAsMappingInSource_shouldReturnNullIfMappingDoesNotExistInSource() {
+		ConceptSource loinc = conceptService.getConceptSourceByName("LOINC");
+		Concept result = dao.getConceptWithSameAsMappingInSource(loinc, "not-exists");
+		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void getConceptWithSameAsMappingInSource_shouldReturnNullIfMappingIsNull() {
+		ConceptSource loinc = conceptService.getConceptSourceByName("LOINC");
+		Concept result = dao.getConceptWithSameAsMappingInSource(loinc, null);
+		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void getConceptWithSameAsMappingInSource_shouldReturnNullIfMappingIsNotSameAs() {
+		ConceptSource loinc = conceptService.getConceptSourceByName("LOINC");
+		Concept result = dao.getConceptWithSameAsMappingInSource(loinc, "not-same-as");
+		assertThat(result, nullValue());
 	}
 }

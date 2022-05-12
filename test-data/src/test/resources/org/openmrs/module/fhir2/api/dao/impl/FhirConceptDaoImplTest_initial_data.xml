@@ -12,5 +12,7 @@
     <concept concept_id="3" retired="0" datatype_id="3" class_id="7" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="378e63b1-6c75-46ed-95e3-797b48ddc9f8" />
     <concept_reference_source concept_source_id="6" name="LOINC" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="2b3c1ff8-768a-102f-83f4-12313b04a615" />
     <concept_reference_term concept_reference_term_id="1" concept_source_id="6" code="1000-1" creator="1" date_created="2005-01-01 00:00:00.0" uuid="d471950d-0ef5-424c-b72a-3fff29af6b0b" />
-    <concept_reference_map concept_map_id="1" concept_reference_term_id="1" concept_map_type_id="1" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="3" uuid="2f7e0cd7-5866-4345-a24a-9c75cd3a876f" />
+    <concept_reference_map concept_map_id="1" concept_reference_term_id="1" concept_map_type_id="2" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="3" uuid="2f7e0cd7-5866-4345-a24a-9c75cd3a876f" />
+    <concept_reference_term concept_reference_term_id="2" concept_source_id="6" code="not-same-as" creator="1" date_created="2005-01-01 00:00:00.0" uuid="aaa1950d-0ef5-424c-b72a-3fff29af6b0b" />
+    <concept_reference_map concept_map_id="2" concept_reference_term_id="2" concept_map_type_id="1" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="3" uuid="bbbe0cd7-5866-4345-a24a-9c75cd3a876f" />
 </dataset>

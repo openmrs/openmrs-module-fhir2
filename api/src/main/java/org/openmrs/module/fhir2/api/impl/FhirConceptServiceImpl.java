@@ -9,11 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.Optional;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.Concept;
+import org.openmrs.ConceptMap;
+import org.openmrs.ConceptMapType;
+import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,26 @@ public class FhirConceptServiceImpl implements FhirConceptService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<Concept> getConceptBySourceNameAndCode(String sourceName, String code) {
-		return dao.getConceptBySourceNameAndCode(sourceName, code);
+	public Concept getConceptWithSameAsMappingInSource(ConceptSource conceptSource, String mappingCode) {
+		return dao.getConceptWithSameAsMappingInSource(conceptSource, mappingCode);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public String getSameAsMappingForConceptInSource(ConceptSource source, Concept concept) {
+		if (source != null && concept != null) {
+			for (ConceptMap mapping : concept.getConceptMappings()) {
+				if (source.equals(mapping.getConceptReferenceTerm().getConceptSource())) {
+					ConceptMapType mapType = mapping.getConceptMapType();
+					if (mapType != null) {
+						if (mapType.getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID)
+						        || mapType.getName().equalsIgnoreCase("SAME-AS")) {
+							return mapping.getConceptReferenceTerm().getCode();
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 }

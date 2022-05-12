@@ -11,13 +11,9 @@ package org.openmrs.module.fhir2.api.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
+import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -67,21 +64,20 @@ public class FhirConceptServiceImplTest {
 	}
 	
 	@Test
-	public void getConceptBySourceNameAndCode_shouldGetConceptBySourceNameAndCode() {
+	public void getConceptWithSameAsMappingInSource_shouldGetConceptBySourceNameAndCode() {
+		ConceptSource loinc = new ConceptSource();
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
-		when(conceptDao.getConceptBySourceNameAndCode("LOINC", "1000-1")).thenReturn(Optional.of(concept));
+		when(conceptDao.getConceptWithSameAsMappingInSource(loinc, "1000-1")).thenReturn(concept);
 		
-		Optional<Concept> result = fhirConceptService.getConceptBySourceNameAndCode("LOINC", "1000-1");
-		assertThat(result.isPresent(), is(true));
-		assertThat(result.get().getUuid(), equalTo(CONCEPT_UUID));
+		Concept result = fhirConceptService.getConceptWithSameAsMappingInSource(loinc, "1000-1");
+		assertThat(result, notNullValue());
+		assertThat(result, equalTo(concept));
 	}
 	
 	@Test
-	public void getConceptBySourceNameAndCode_shouldReturnNullIfMappingNotFound() {
-		when(conceptDao.getConceptBySourceNameAndCode(any(), any())).thenReturn(Optional.empty());
-		
-		Optional<Concept> result = fhirConceptService.getConceptBySourceNameAndCode("LAINK", "999999");
-		assertThat(result.isPresent(), is(false));
+	public void getConceptWithSameAsMappingInSource_shouldReturnNullIfSourceIsNull() {
+		Concept result = fhirConceptService.getConceptWithSameAsMappingInSource(null, "1000-1");
+		assertThat(result, nullValue());
 	}
 }
