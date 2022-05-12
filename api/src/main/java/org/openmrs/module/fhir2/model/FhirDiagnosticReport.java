@@ -67,6 +67,7 @@ public class FhirDiagnosticReport extends BaseOpenmrsData {
 	@JoinColumn(name = "encounter_id", referencedColumnName = "encounter_id")
 	private Encounter encounter;
 	
+	@Column(name = "issued")
 	private Date issued;
 	
 	@OneToMany
