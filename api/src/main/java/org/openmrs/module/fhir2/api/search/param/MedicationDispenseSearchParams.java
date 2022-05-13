@@ -9,6 +9,9 @@
  */
 package org.openmrs.module.fhir2.api.search.param;
 
+import java.io.Serializable;
+import java.util.HashSet;
+
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -17,9 +20,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.HashSet;
 
 @Data
 @NoArgsConstructor

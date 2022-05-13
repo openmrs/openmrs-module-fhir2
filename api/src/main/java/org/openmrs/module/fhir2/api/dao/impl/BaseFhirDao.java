@@ -9,6 +9,23 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.in;
+import static org.hibernate.criterion.Restrictions.isNull;
+import static org.hibernate.criterion.Restrictions.or;
+
+import javax.annotation.Nonnull;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
@@ -33,22 +50,6 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
-import static org.hibernate.criterion.Restrictions.isNull;
-import static org.hibernate.criterion.Restrictions.or;
 
 /**
  * This is a base class for FHIR2 Dao objects providing default implementations for the
@@ -303,7 +304,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	protected T deproxyResult(T result) {
 		return deproxyObject(result);
 	}
-
+	
 	protected Criteria createAlias(Criteria criteria, String referencedEntity, String alias) {
 		return criteria.createAlias(referencedEntity, alias);
 	}

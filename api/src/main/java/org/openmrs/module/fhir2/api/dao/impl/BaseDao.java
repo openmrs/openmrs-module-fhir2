@@ -843,15 +843,15 @@ public abstract class BaseDao {
 		return handleAndListParam(medicationReference,
 		    token -> Optional.of(eq(String.format("%s.uuid", medicationAlias), token.getIdPart())));
 	}
-
+	
 	protected Optional<Criterion> handleMedicationRequestReference(@Nonnull String drugOrderAlias,
-														   ReferenceAndListParam drugOrderReference) {
+	        ReferenceAndListParam drugOrderReference) {
 		if (drugOrderReference == null) {
 			return Optional.empty();
 		}
-
+		
 		return handleAndListParam(drugOrderReference,
-				token -> Optional.of(eq(String.format("%s.uuid", drugOrderAlias), token.getIdPart())));
+		    token -> Optional.of(eq(String.format("%s.uuid", drugOrderAlias), token.getIdPart())));
 	}
 	
 	/**

@@ -48,10 +48,10 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 	
 	@Autowired
 	private PatientService patientService;
-
+	
 	@Autowired
 	private EncounterService encounterService;
-
+	
 	@Autowired
 	private OrderService orderService;
 	
@@ -130,7 +130,7 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 		assertThat(results.contains("7a0282eb-b686-11ec-8065-0242ac110002"), is(true));
 		assertThat(results.contains("1bcb299c-b687-11ec-8065-0242ac110002"), is(true));
 	}
-
+	
 	@Test
 	public void shouldGetSearchResultUuidsForMatchingEncounters() {
 		String encounterUuid = encounterService.getEncounter(3).getUuid();
@@ -138,12 +138,12 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 		param.addValue(new ReferenceOrListParam().add(new ReferenceParam(encounterUuid)));
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, param);
-
+		
 		List<String> results = dao.getSearchResultUuids(theParams);
 		assertThat(results.size(), equalTo(1));
 		assertThat(results.contains("7a0282eb-b686-11ec-8065-0242ac110002"), is(true));
 	}
-
+	
 	@Test
 	public void shouldGetSearchResultUuidsForMatchingDrugOrders() {
 		String drugOrderUuid = orderService.getOrder(2).getUuid();
@@ -151,7 +151,7 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 		param.addValue(new ReferenceOrListParam().add(new ReferenceParam(drugOrderUuid)));
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, param);
-
+		
 		List<String> results = dao.getSearchResultUuids(theParams);
 		assertThat(results.size(), equalTo(1));
 		assertThat(results.contains("b75c5c9e-b66c-11ec-8065-0242ac110002"), is(true));

@@ -7,7 +7,7 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.providers.r4;
+package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -35,11 +35,12 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.convertors.conv30_40.MedicationDispense30_40;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.MedicationDispense;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.MedicationDispense;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,7 +61,7 @@ public class MedicationDispenseFhirResourceProviderTest {
 	
 	private MedicationDispenseFhirResourceProvider resourceProvider;
 	
-	private MedicationDispense medicationDispense;
+	private org.hl7.fhir.r4.model.MedicationDispense medicationDispense;
 	
 	private TokenAndListParam idParam;
 	
@@ -83,7 +84,7 @@ public class MedicationDispenseFhirResourceProviderTest {
 		resourceProvider = new MedicationDispenseFhirResourceProvider();
 		resourceProvider.setFhirMedicationDispenseService(fhirMedicationDispenseService);
 		
-		medicationDispense = new MedicationDispense();
+		medicationDispense = new org.hl7.fhir.r4.model.MedicationDispense();
 		medicationDispense.setId(MEDICATION_DISPENSE_UUID);
 		
 		when(fhirMedicationDispenseService.get(MEDICATION_DISPENSE_UUID)).thenReturn(medicationDispense);
@@ -126,8 +127,10 @@ public class MedicationDispenseFhirResourceProviderTest {
 	
 	@Test
 	public void createMedicationDispense_shouldCreateMedicationDispense() {
-		when(fhirMedicationDispenseService.create(any(MedicationDispense.class))).thenReturn(medicationDispense);
-		MethodOutcome result = resourceProvider.createMedicationDispense(medicationDispense);
+		when(fhirMedicationDispenseService.create(any(org.hl7.fhir.r4.model.MedicationDispense.class)))
+		        .thenReturn(medicationDispense);
+		MethodOutcome result = resourceProvider
+		        .createMedicationDispense(MedicationDispense30_40.convertMedicationDispense(medicationDispense));
 		assertThat(result, notNullValue());
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationDispense.getId()));
@@ -135,11 +138,11 @@ public class MedicationDispenseFhirResourceProviderTest {
 	
 	@Test
 	public void updateMedicationDispense_shouldUpdateMedicationDispense() {
-		when(fhirMedicationDispenseService.update(eq(MEDICATION_DISPENSE_UUID), any(MedicationDispense.class)))
-		        .thenReturn(medicationDispense);
+		when(fhirMedicationDispenseService.update(eq(MEDICATION_DISPENSE_UUID),
+		    any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenReturn(medicationDispense);
 		
 		MethodOutcome result = resourceProvider.updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID),
-		    medicationDispense);
+		    MedicationDispense30_40.convertMedicationDispense(medicationDispense));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), notNullValue());
@@ -148,18 +151,19 @@ public class MedicationDispenseFhirResourceProviderTest {
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateMedicationDispense_shouldThrowInvalidRequestForUuidMismatch() {
-		when(fhirMedicationDispenseService.update(eq(WRONG_MEDICATION_DISPENSE_UUID), any(MedicationDispense.class)))
-		        .thenThrow(InvalidRequestException.class);
+		when(fhirMedicationDispenseService.update(eq(WRONG_MEDICATION_DISPENSE_UUID),
+		    any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
 		
-		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID), medicationDispense);
+		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
+		    MedicationDispense30_40.convertMedicationDispense(medicationDispense));
 	}
 	
 	@Test(expected = InvalidRequestException.class)
 	public void updateMedicationDispense_shouldThrowInvalidRequestForMissingId() {
 		MedicationDispense noIdMedicationDispense = new MedicationDispense();
 		
-		when(fhirMedicationDispenseService.update(eq(MEDICATION_DISPENSE_UUID), any(MedicationDispense.class)))
-		        .thenThrow(InvalidRequestException.class);
+		when(fhirMedicationDispenseService.update(eq(MEDICATION_DISPENSE_UUID),
+		    any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(InvalidRequestException.class);
 		
 		resourceProvider.updateMedicationDispense(new IdType().setValue(MEDICATION_DISPENSE_UUID), noIdMedicationDispense);
 	}
@@ -169,8 +173,8 @@ public class MedicationDispenseFhirResourceProviderTest {
 		MedicationDispense wrongMedicationDispense = new MedicationDispense();
 		wrongMedicationDispense.setId(WRONG_MEDICATION_DISPENSE_UUID);
 		
-		when(fhirMedicationDispenseService.update(eq(WRONG_MEDICATION_DISPENSE_UUID), any(MedicationDispense.class)))
-		        .thenThrow(MethodNotAllowedException.class);
+		when(fhirMedicationDispenseService.update(eq(WRONG_MEDICATION_DISPENSE_UUID),
+		    any(org.hl7.fhir.r4.model.MedicationDispense.class))).thenThrow(MethodNotAllowedException.class);
 		
 		resourceProvider.updateMedicationDispense(new IdType().setValue(WRONG_MEDICATION_DISPENSE_UUID),
 		    wrongMedicationDispense);

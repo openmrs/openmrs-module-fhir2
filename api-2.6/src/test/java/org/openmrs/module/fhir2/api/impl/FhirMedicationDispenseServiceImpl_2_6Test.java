@@ -9,6 +9,21 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -37,21 +52,6 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude_2_6;
 import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationDispenseTranslator;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirMedicationDispenseServiceImpl_2_6Test {
@@ -208,13 +208,13 @@ public class FhirMedicationDispenseServiceImpl_2_6Test {
 		
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam(patientReference)));
-
+		
 		ReferenceAndListParam encounterParam = new ReferenceAndListParam();
 		encounterParam.addValue(new ReferenceOrListParam().addOr(new ReferenceParam(encounterReference)));
-
+		
 		ReferenceAndListParam medicationRequestParam = new ReferenceAndListParam();
 		encounterParam.addValue(new ReferenceOrListParam().addOr(new ReferenceParam(medicationRequestRef)));
-
+		
 		TokenAndListParam idParam = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_DISPENSE_UUID));
 		
 		DateRangeParam lastUpdatedParam = new DateRangeParam().setLowerBound(lastUpdatedDate).setUpperBound(lastUpdatedDate);
@@ -224,13 +224,12 @@ public class FhirMedicationDispenseServiceImpl_2_6Test {
 		HashSet<Include> includes = new HashSet<>();
 		
 		SearchParameterMap theParams = new SearchParameterMap()
-				.addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, idParam)
-				.addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdatedParam)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, idParam)
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdatedParam)
 		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientParam)
-				.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterParam)
-				.addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, medicationRequestParam)
-				.addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
-		        .setSortSpec(sortParam);
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterParam)
+		        .addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, medicationRequestParam)
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sortParam);
 		
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_DISPENSE_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openmrsDispense));
