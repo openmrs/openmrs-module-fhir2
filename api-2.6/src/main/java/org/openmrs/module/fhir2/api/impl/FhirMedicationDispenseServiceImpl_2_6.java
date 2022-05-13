@@ -9,15 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.HashSet;
-
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +20,7 @@ import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationDispenseDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationDispenseTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,14 +47,16 @@ public class FhirMedicationDispenseServiceImpl_2_6 extends BaseFhirService<Medic
 	private SearchQuery<org.openmrs.MedicationDispense, MedicationDispense, FhirMedicationDispenseDao<org.openmrs.MedicationDispense>, MedicationDispenseTranslator<org.openmrs.MedicationDispense>, SearchQueryInclude<MedicationDispense>> searchQuery;
 	
 	@Override
-	public IBundleProvider searchMedicationDispenses(ReferenceAndListParam patientParam, TokenAndListParam id,
-	        DateRangeParam lastUpdated, @Sort SortSpec sort, HashSet<Include> includes) {
+	public IBundleProvider searchMedicationDispenses(MedicationDispenseSearchParams params) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientParam)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sort);
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, params.getId())
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY,
+		            params.getLastUpdated())
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, params.getPatient())
+		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, params.getEncounter())
+		        .addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, params.getMedicationRequest())
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, params.getIncludes()).setSortSpec(params.getSort());
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 	}

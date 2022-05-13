@@ -180,6 +180,8 @@ public class FhirConstants {
 	
 	public static final String PATIENT_REFERENCE_SEARCH_HANDLER = "patient.reference.search.handler";
 	
+	public static final String MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER = "medicationRequest.reference.search.handler";
+	
 	public static final String MEDICATION_REFERENCE_SEARCH_HANDLER = "medication.reference.search.handler";
 	
 	public static final String CODED_SEARCH_HANDLER = "coded.search.handler";

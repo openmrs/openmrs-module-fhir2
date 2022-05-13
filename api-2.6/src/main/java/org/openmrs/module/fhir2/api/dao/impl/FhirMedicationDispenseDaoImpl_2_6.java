@@ -9,11 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import javax.annotation.Nonnull;
-
-import java.util.List;
-import java.util.Optional;
-
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import lombok.AccessLevel;
@@ -28,6 +23,10 @@ import org.openmrs.module.fhir2.api.dao.FhirMedicationDispenseDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.util.PrivilegeConstants;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @Setter(AccessLevel.PROTECTED)
@@ -72,6 +71,14 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()
 					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
+					break;
+				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(e -> handleEncounterReference("e", (ReferenceAndListParam) e.getParam())
+							.ifPresent(c -> createAlias(criteria, "encounter", "e").add(c)));
+					break;
+				case FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER:
+					entry.getValue().forEach(e -> handleMedicationRequestReference("drugOrder", (ReferenceAndListParam) e.getParam())
+							.ifPresent(c -> createAlias(criteria, "drugOrder", "drugOrder").add(c)));
 					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);

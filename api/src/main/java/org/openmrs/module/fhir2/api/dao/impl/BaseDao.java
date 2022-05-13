@@ -843,6 +843,16 @@ public abstract class BaseDao {
 		return handleAndListParam(medicationReference,
 		    token -> Optional.of(eq(String.format("%s.uuid", medicationAlias), token.getIdPart())));
 	}
+
+	protected Optional<Criterion> handleMedicationRequestReference(@Nonnull String drugOrderAlias,
+														   ReferenceAndListParam drugOrderReference) {
+		if (drugOrderReference == null) {
+			return Optional.empty();
+		}
+
+		return handleAndListParam(drugOrderReference,
+				token -> Optional.of(eq(String.format("%s.uuid", drugOrderAlias), token.getIdPart())));
+	}
 	
 	/**
 	 * Use this method to properly implement sorting for your query. Note that for this method to work,
