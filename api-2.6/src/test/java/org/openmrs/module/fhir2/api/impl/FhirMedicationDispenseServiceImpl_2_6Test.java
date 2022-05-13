@@ -200,7 +200,7 @@ public class FhirMedicationDispenseServiceImpl_2_6Test {
 	}
 	
 	@Test
-	public void searchMedicationDispenses_shouldGetSearchResultsForMatchingPatients() {
+	public void searchMedicationDispenses_shouldGetSearchResults() {
 		String patientReference = "patient-ref";
 		String encounterReference = "encounter-ref";
 		String medicationRequestRef = "medication-request-ref";
