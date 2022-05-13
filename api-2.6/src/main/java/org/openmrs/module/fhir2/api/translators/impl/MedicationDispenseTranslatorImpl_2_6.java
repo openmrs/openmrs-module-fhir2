@@ -19,6 +19,7 @@ import lombok.Setter;
 import org.hl7.fhir.r4.model.MedicationDispense.MedicationDispensePerformerComponent;
 import org.hl7.fhir.r4.model.MedicationDispense.MedicationDispenseSubstitutionComponent;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Reference;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.MedicationDispense;
@@ -142,6 +143,75 @@ public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseT
 		
 		openmrsObject.setUuid(fhirObject.getIdElement().getIdPart());
 		openmrsObject.setPatient(patientReferenceTranslator.toOpenmrsType(fhirObject.getSubject()));
+		if (fhirObject.hasContext()) {
+			openmrsObject.setEncounter(encounterReferenceTranslator.toOpenmrsType(fhirObject.getContext()));
+		}
+		if (fhirObject.hasAuthorizingPrescription()) {
+			Reference prescription = fhirObject.getAuthorizingPrescriptionFirstRep();
+			openmrsObject.setDrugOrder(medicationRequestReferenceTranslator.toOpenmrsType(prescription));
+		}
+		if (fhirObject.hasStatus()) {
+			openmrsObject.setStatus(medicationDispenseStatusTranslator.toOpenmrsType(fhirObject.getStatus()));
+		}
+		if (fhirObject.hasStatusReasonCodeableConcept()) {
+			openmrsObject.setStatusReason(conceptTranslator.toOpenmrsType(fhirObject.getStatusReasonCodeableConcept()));
+		}
+		if (fhirObject.hasLocation()) {
+			openmrsObject.setLocation(locationReferenceTranslator.toOpenmrsType(fhirObject.getLocation()));
+		}
+		if (fhirObject.hasType()) {
+			openmrsObject.setType(conceptTranslator.toOpenmrsType(fhirObject.getType()));
+		}
+		openmrsObject.setDatePrepared(fhirObject.getWhenPrepared());
+		openmrsObject.setDateHandedOver(fhirObject.getWhenHandedOver());
+		
+		// There is significant overlap in translating between MedicationRequests and Drug Orders.
+		// Use the logic in the translator for this object to translate these properties
+		MedicationRequest medicationRequest = new MedicationRequest();
+		if (fhirObject.hasMedication()) {
+			medicationRequest.setMedication(fhirObject.getMedication());
+		}
+		if (fhirObject.hasDosageInstruction()) {
+			medicationRequest.setDosageInstruction(fhirObject.getDosageInstruction());
+		}
+		if (fhirObject.hasQuantity()) {
+			MedicationRequest.MedicationRequestDispenseRequestComponent dispenseRequest = new MedicationRequest.MedicationRequestDispenseRequestComponent();
+			dispenseRequest.setQuantity(fhirObject.getQuantity());
+			medicationRequest.setDispenseRequest(dispenseRequest);
+		}
+		DrugOrder drugOrder = medicationRequestTranslator.toOpenmrsType(medicationRequest);
+		openmrsObject.setConcept(drugOrder.getConcept());
+		openmrsObject.setDrug(drugOrder.getDrug());
+		openmrsObject.setDose(drugOrder.getDose());
+		openmrsObject.setDoseUnits(drugOrder.getDoseUnits());
+		openmrsObject.setRoute(drugOrder.getRoute());
+		openmrsObject.setFrequency(drugOrder.getFrequency());
+		openmrsObject.setAsNeeded(drugOrder.getAsNeeded());
+		openmrsObject.setDosingInstructions(drugOrder.getDosingInstructions());
+		openmrsObject.setQuantity(drugOrder.getQuantity());
+		openmrsObject.setQuantityUnits(drugOrder.getQuantityUnits());
+		
+		if (fhirObject.hasPerformer()) {
+			MedicationDispensePerformerComponent performerComponent = fhirObject.getPerformerFirstRep();
+			if (performerComponent != null && performerComponent.hasActor()) {
+				openmrsObject.setDispenser(practitionerReferenceTranslator.toOpenmrsType(performerComponent.getActor()));
+			}
+		}
+		
+		if (fhirObject.hasSubstitution()) {
+			MedicationDispenseSubstitutionComponent substitution = fhirObject.getSubstitution();
+			openmrsObject.setWasSubstituted(substitution.getWasSubstituted());
+			if (substitution.hasType()) {
+				openmrsObject.setSubstitutionType(conceptTranslator.toOpenmrsType(substitution.getType()));
+			}
+			if (substitution.hasReason()) {
+				openmrsObject.setSubstitutionReason(conceptTranslator.toOpenmrsType(substitution.getReasonFirstRep()));
+			}
+		}
+		
+		if (fhirObject.getMeta() != null) {
+			openmrsObject.setDateCreated(fhirObject.getMeta().getLastUpdated());
+		}
 		
 		return openmrsObject;
 	}

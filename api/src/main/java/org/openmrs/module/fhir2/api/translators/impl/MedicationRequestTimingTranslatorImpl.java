@@ -56,7 +56,7 @@ public class MedicationRequestTimingTranslatorImpl implements MedicationRequestT
 		if (timing.getEvent() != null && !timing.getEvent().isEmpty()) {
 			drugOrder.setScheduledDate(timing.getEvent().get(0).getValue());
 		}
-		if (timing.getCode() != null) {
+		if (timing.hasCode()) {
 			OrderFrequency frequency = null;
 			Concept frequencyConcept = conceptTranslator.toOpenmrsType(timing.getCode());
 			if (frequencyConcept != null) {
