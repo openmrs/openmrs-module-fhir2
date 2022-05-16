@@ -9,6 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -45,13 +52,6 @@ import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @NoArgsConstructor
@@ -337,7 +337,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				break;
 			case FhirConstants.MEDICATION_DISPENSE:
 				resourceList.forEach(resource -> uniqueMedicationUUIDs
-						.add(getIdFromReference(((MedicationDispense) resource).getMedicationReference())));
+				        .add(getIdFromReference(((MedicationDispense) resource).getMedicationReference())));
 				break;
 		}
 		
@@ -389,7 +389,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				resourceList.forEach(resource -> {
 					List<Reference> performerReferenceList = new ArrayList<>();
 					((MedicationDispense) resource).getPerformer()
-							.forEach(performer -> performerReferenceList.add(performer.getActor()));
+					        .forEach(performer -> performerReferenceList.add(performer.getActor()));
 					uniqueParticipantUUIDs.addAll(getIdsFromReferenceList(performerReferenceList));
 				});
 				break;
@@ -399,7 +399,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				    resource -> uniqueParticipantUUIDs.add(getIdFromReference(((ServiceRequest) resource).getRequester())));
 				break;
 		}
-
+		
 		uniqueParticipantUUIDs.removeIf(Objects::isNull);
 		includedResources.addAll(practitionerService.get(uniqueParticipantUUIDs));
 		
@@ -454,7 +454,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				break;
 			case FhirConstants.MEDICATION_DISPENSE:
 				resourceList.forEach(
-					resource -> uniquePatientUUIDs.add(getIdFromReference(((MedicationDispense) resource).getSubject())));
+				    resource -> uniquePatientUUIDs.add(getIdFromReference(((MedicationDispense) resource).getSubject())));
 				break;
 			case FhirConstants.PERSON:
 				resourceList.forEach(resource -> {
@@ -506,7 +506,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				break;
 			case FhirConstants.MEDICATION_DISPENSE:
 				resourceList.forEach(
-					resource -> uniqueEncounterUUIDs.add(getIdFromReference(((MedicationDispense) resource).getContext())));
+				    resource -> uniqueEncounterUUIDs.add(getIdFromReference(((MedicationDispense) resource).getContext())));
 				break;
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
@@ -560,24 +560,21 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		
 		return includedResources;
 	}
-
+	
 	private Set<IBaseResource> handleMedicationRequestInclude(List<U> resourceList, String paramType) {
 		Set<IBaseResource> includedResources = new HashSet<>();
 		Set<String> uniqueUuids = new HashSet<>();
-
+		
 		switch (paramType) {
 			case FhirConstants.MEDICATION_DISPENSE:
-				resourceList.forEach(
-						resource -> uniqueUuids.addAll(
-								getIdsFromReferenceList((((MedicationDispense) resource).getAuthorizingPrescription()))
-						)
-				);
+				resourceList.forEach(resource -> uniqueUuids
+				        .addAll(getIdsFromReferenceList((((MedicationDispense) resource).getAuthorizingPrescription()))));
 				break;
 		}
-
+		
 		uniqueUuids.removeIf(Objects::isNull);
 		includedResources.addAll(medicationRequestService.get(uniqueUuids));
-
+		
 		return includedResources;
 	}
 	

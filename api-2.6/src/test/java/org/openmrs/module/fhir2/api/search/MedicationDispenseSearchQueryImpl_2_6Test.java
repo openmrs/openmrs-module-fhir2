@@ -9,6 +9,15 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
+
+import java.util.List;
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -33,15 +42,6 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
-
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class MedicationDispenseSearchQueryImpl_2_6Test extends BaseModuleContextSensitiveTest {
 	
@@ -62,23 +62,23 @@ public class MedicationDispenseSearchQueryImpl_2_6Test extends BaseModuleContext
 	
 	@Autowired
 	PatientService patientService;
-
+	
 	@Autowired
 	EncounterService encounterService;
-
+	
 	@Autowired
 	OrderService orderService;
 	
 	private Patient patient2;
 	
 	private Patient patient7;
-
+	
 	private Encounter encounter3;
-
+	
 	private Encounter encounter6;
-
+	
 	private Order order1;
-
+	
 	private Order order2;
 	
 	private SearchParameterMap theParams;
@@ -158,85 +158,84 @@ public class MedicationDispenseSearchQueryImpl_2_6Test extends BaseModuleContext
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), equalTo(3));
 		for (IBaseResource result : resultList) {
-			org.hl7.fhir.r4.model.MedicationDispense dispense = (org.hl7.fhir.r4.model.MedicationDispense)result;
-			assertThat(dispense.getSubject().getReference(), anyOf(endsWith(patient2.getUuid()), endsWith(patient7.getUuid())));
+			org.hl7.fhir.r4.model.MedicationDispense dispense = (org.hl7.fhir.r4.model.MedicationDispense) result;
+			assertThat(dispense.getSubject().getReference(),
+			    anyOf(endsWith(patient2.getUuid()), endsWith(patient7.getUuid())));
 		}
 	}
-
+	
 	@Test
 	public void shouldReturnMedicationDispensesByEncounterUuid() {
-
+		
 		ReferenceAndListParam param = new ReferenceAndListParam();
 		param.addAnd(new ReferenceOrListParam().addOr(new ReferenceParam(encounter6.getUuid())));
 		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, param);
-
+		
 		IBundleProvider results = search(theParams);
 		List<IBaseResource> resultList = get(results);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), equalTo(1));
 		for (IBaseResource result : resultList) {
-			org.hl7.fhir.r4.model.MedicationDispense dispense = (org.hl7.fhir.r4.model.MedicationDispense)result;
+			org.hl7.fhir.r4.model.MedicationDispense dispense = (org.hl7.fhir.r4.model.MedicationDispense) result;
 			assertThat(dispense.getContext().getReference(), endsWith(encounter6.getUuid()));
 		}
 	}
-
+	
 	@Test
 	public void shouldReturnMedicationDispensesByEncounterWithOrMatches() {
 		ReferenceAndListParam param = new ReferenceAndListParam();
-		param.addAnd(new ReferenceOrListParam()
-				.addOr(new ReferenceParam(encounter3.getUuid()))
-				.addOr(new ReferenceParam(encounter6.getUuid())));
+		param.addAnd(new ReferenceOrListParam().addOr(new ReferenceParam(encounter3.getUuid()))
+		        .addOr(new ReferenceParam(encounter6.getUuid())));
 		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, param);
-
+		
 		IBundleProvider results = search(theParams);
 		List<IBaseResource> resultList = get(results);
 		org.hl7.fhir.r4.model.MedicationDispense firstResult = firstResult(resultList);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), equalTo(2));
 		for (IBaseResource result : resultList) {
-			org.hl7.fhir.r4.model.MedicationDispense dispense = (org.hl7.fhir.r4.model.MedicationDispense)result;
-			assertThat(dispense.getContext().getReference(), anyOf(endsWith(encounter3.getUuid()), endsWith(encounter6.getUuid())));
+			org.hl7.fhir.r4.model.MedicationDispense dispense = (org.hl7.fhir.r4.model.MedicationDispense) result;
+			assertThat(dispense.getContext().getReference(),
+			    anyOf(endsWith(encounter3.getUuid()), endsWith(encounter6.getUuid())));
 		}
 	}
-
+	
 	@Test
 	public void shouldReturnMedicationDispensesByDrugOrderUuid() {
-
+		
 		ReferenceAndListParam param = new ReferenceAndListParam();
 		param.addAnd(new ReferenceOrListParam().addOr(new ReferenceParam(order1.getUuid())));
 		theParams.addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, param);
-
+		
 		IBundleProvider results = search(theParams);
 		List<IBaseResource> resultList = get(results);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), equalTo(1));
 		for (IBaseResource result : resultList) {
-			org.hl7.fhir.r4.model.MedicationDispense dispense = (org.hl7.fhir.r4.model.MedicationDispense)result;
+			org.hl7.fhir.r4.model.MedicationDispense dispense = (org.hl7.fhir.r4.model.MedicationDispense) result;
 			assertThat(dispense.getAuthorizingPrescriptionFirstRep().getReference(), endsWith(order1.getUuid()));
 		}
 	}
-
+	
 	@Test
 	public void shouldReturnMedicationDispensesByDrugOrderWithOrMatches() {
 		ReferenceAndListParam param = new ReferenceAndListParam();
-		param.addAnd(new ReferenceOrListParam()
-				.addOr(new ReferenceParam(order1.getUuid()))
-				.addOr(new ReferenceParam(order2.getUuid())));
+		param.addAnd(new ReferenceOrListParam().addOr(new ReferenceParam(order1.getUuid()))
+		        .addOr(new ReferenceParam(order2.getUuid())));
 		theParams.addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, param);
-
+		
 		IBundleProvider results = search(theParams);
 		List<IBaseResource> resultList = get(results);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), equalTo(2));
 		for (IBaseResource result : resultList) {
-			org.hl7.fhir.r4.model.MedicationDispense dispense = (org.hl7.fhir.r4.model.MedicationDispense)result;
+			org.hl7.fhir.r4.model.MedicationDispense dispense = (org.hl7.fhir.r4.model.MedicationDispense) result;
 			assertThat(dispense.getAuthorizingPrescriptionFirstRep().getReference(),
-					anyOf(endsWith(order1.getUuid()), endsWith(order2.getUuid()))
-			);
+			    anyOf(endsWith(order1.getUuid()), endsWith(order2.getUuid())));
 		}
 	}
 }

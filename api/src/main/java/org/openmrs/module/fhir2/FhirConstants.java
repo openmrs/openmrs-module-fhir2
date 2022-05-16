@@ -291,9 +291,9 @@ public class FhirConstants {
 	public static final String INCLUDE_CONTEXT_PARAM = "context";
 	
 	public static final String INCLUDE_REQUESTER_PARAM = "requester";
-
+	
 	public static final String INCLUDE_PERFORMER_PARAM = "performer";
-
+	
 	public static final String INCLUDE_PRESCRIPTION_PARAM = "prescription";
 	
 	public static final String INCLUDE_MEDICATION_PARAM = "medication";
