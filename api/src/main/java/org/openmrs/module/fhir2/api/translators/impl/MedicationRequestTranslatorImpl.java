@@ -18,8 +18,12 @@ import java.util.Collections;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Annotation;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.openmrs.Concept;
+import org.openmrs.Drug;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
@@ -80,7 +84,16 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		medicationRequest.setId(drugOrder.getUuid());
 		medicationRequest.setStatus(statusTranslator.toFhirResource(drugOrder));
 		
-		medicationRequest.setMedication(medicationReferenceTranslator.toFhirResource(drugOrder.getDrug()));
+		if (drugOrder.getDrug() != null) {
+			medicationRequest.setMedication(medicationReferenceTranslator.toFhirResource(drugOrder.getDrug()));
+		} else {
+			CodeableConcept medicationConcept = conceptTranslator.toFhirResource(drugOrder.getConcept());
+			if (StringUtils.isNotBlank(drugOrder.getDrugNonCoded())) {
+				medicationConcept.setText(drugOrder.getDrugNonCoded());
+			}
+			medicationRequest.setMedication(medicationConcept);
+		}
+		
 		medicationRequest.setPriority(medicationRequestPriorityTranslator.toFhirResource(drugOrder.getUrgency()));
 		medicationRequest.setRequester(practitionerReferenceTranslator.toFhirResource(drugOrder.getOrderer()));
 		medicationRequest.setEncounter(encounterReferenceTranslator.toFhirResource(drugOrder.getEncounter()));
@@ -120,7 +133,21 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		existingDrugOrder.setUuid(medicationRequest.getId());
 		
-		existingDrugOrder.setDrug(medicationReferenceTranslator.toOpenmrsType(medicationRequest.getMedicationReference()));
+		if (medicationRequest.hasMedicationReference()) {
+			Drug drug = medicationReferenceTranslator.toOpenmrsType(medicationRequest.getMedicationReference());
+			existingDrugOrder.setDrug(drug);
+		} else {
+			CodeableConcept codeableConcept = medicationRequest.getMedicationCodeableConcept();
+			Concept concept = conceptTranslator.toOpenmrsType(codeableConcept);
+			existingDrugOrder.setConcept(concept);
+			if (codeableConcept.getText() != null) {
+				CodeableConcept referenceConcept = conceptTranslator.toFhirResource(concept);
+				if (!codeableConcept.getText().equals(referenceConcept.getText())) {
+					existingDrugOrder.setDrugNonCoded(codeableConcept.getText());
+				}
+			}
+		}
+		
 		existingDrugOrder.setUrgency(medicationRequestPriorityTranslator.toOpenmrsType(medicationRequest.getPriority()));
 		existingDrugOrder.setOrderer(practitionerReferenceTranslator.toOpenmrsType(medicationRequest.getRequester()));
 		existingDrugOrder.setEncounter(encounterReferenceTranslator.toOpenmrsType(medicationRequest.getEncounter()));
