@@ -9,23 +9,14 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.HashSet;
-
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Encounter;
+import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 
 public interface FhirEncounterService extends FhirService<Encounter> {
 	
-	IBundleProvider searchForEncounters(DateRangeParam date, ReferenceAndListParam location,
-	        ReferenceAndListParam participant, ReferenceAndListParam subject, TokenAndListParam encounterType,
-	        TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes,
-	        HashSet<Include> revIncludes);
+	IBundleProvider searchForEncounters(EncounterSearchParams encounterSearchParams);
 	
 	IBundleProvider getEncounterEverything(TokenParam identifier);
 }

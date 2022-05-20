@@ -47,6 +47,7 @@ import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
+import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,7 +208,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return locationService.searchForLocations(null, null, null, null, null, null, params, null, null, null, null,
 				    null);
 			case FhirConstants.ENCOUNTER:
-				return encounterService.searchForEncounters(null, params, null, null, null, null, null, null, null, null);
+				EncounterSearchParams encounterSearchParams = new EncounterSearchParams();
+				encounterSearchParams.setLocation(params);
+				return encounterService.searchForEncounters(encounterSearchParams);
 		}
 		
 		return null;
@@ -229,7 +232,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	private IBundleProvider handlePractitionerReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.ENCOUNTER:
-				return encounterService.searchForEncounters(null, null, params, null, null, null, null, null, null, null);
+				EncounterSearchParams encounterSearchParams = new EncounterSearchParams();
+				encounterSearchParams.setParticipant(params);
+				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null,
 				    null);
@@ -282,7 +287,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return allergyIntoleranceService.searchForAllergies(params, null, null, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.ENCOUNTER:
-				return encounterService.searchForEncounters(null, null, null, params, null, null, null, null, null, null);
+				EncounterSearchParams encounterSearchParams = new EncounterSearchParams();
+				encounterSearchParams.setSubject(params);
+				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null,
 				    null);
