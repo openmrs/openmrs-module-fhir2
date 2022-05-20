@@ -53,13 +53,6 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private FhirEncounterDaoImpl dao;
 	
-	@Override
-	public Properties getRuntimeProperties() {
-		Properties p = super.getRuntimeProperties();
-		//p.put("hibernate.show_sql", "true");
-		return p;
-	}
-	
 	@Before
 	public void setUp() throws Exception {
 		dao = new FhirEncounterDaoImpl();

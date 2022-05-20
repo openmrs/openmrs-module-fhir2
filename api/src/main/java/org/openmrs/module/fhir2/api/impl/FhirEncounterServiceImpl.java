@@ -11,11 +11,12 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.InternalCodingDt;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -143,56 +144,52 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	
 	@Override
 	@Transactional(readOnly = true)
-	public IBundleProvider searchForEncounters(EncounterSearchParams esp) {
+	public IBundleProvider searchForEncounters(EncounterSearchParams searchParameters) {
 		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, esp.getDate())
-		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, esp.getLocation())
-		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, esp.getParticipant())
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, esp.getSubject())
-		        .addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, esp.getEncounterType())
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, esp.getId())
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, esp.getLastUpdated())
-		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, esp.getIncludes())
-		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, esp.getRevIncludes())
-		        .addParameter(FhirConstants.HAS_SEARCH_HANDLER, esp.getHasAndListParam()).setSortSpec(esp.getSort());
+		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, searchParameters.getDate())
+		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, searchParameters.getLocation())
+		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, searchParameters.getParticipant())
+		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, searchParameters.getSubject())
+		        .addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, searchParameters.getEncounterType())
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, searchParameters.getId())
+		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY,
+		            searchParameters.getLastUpdated())
+		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, searchParameters.getIncludes())
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, searchParameters.getRevIncludes())
+		        .addParameter(FhirConstants.HAS_SEARCH_HANDLER, searchParameters.getHasAndListParam())
+		        .setSortSpec(searchParameters.getSort());
 		
-		IBundleProvider visitBundle = new SimpleBundleProvider();
-		IBundleProvider encounterBundle = new SimpleBundleProvider();
+		IBundleProvider visitBundle = null;
+		IBundleProvider encounterBundle = null;
 		
-		if (shouldIncludeResourceBasedOnEncounterTag(esp.getTag(), "visit")) {
+		if (shouldSearchExplicitlyFor(searchParameters.getTag(), "visit")) {
 			visitBundle = visitService.searchForVisits(theParams);
 		}
-		if (shouldIncludeResourceBasedOnEncounterTag(esp.getTag(), "encounter")) {
+		
+		if (shouldSearchExplicitlyFor(searchParameters.getTag(), "encounter")) {
 			encounterBundle = searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
 		}
 		
-		if (!encounterBundle.isEmpty() && !visitBundle.isEmpty()) {
+		if (encounterBundle != null && visitBundle != null) {
 			return new TwoSearchQueryBundleProvider(visitBundle, encounterBundle, globalPropertyService);
-		} else if (encounterBundle.isEmpty() && !visitBundle.isEmpty()) {
+		} else if (encounterBundle == null && visitBundle != null) {
 			return visitBundle;
 		}
 		
-		return encounterBundle;
+		return encounterBundle == null ? new SimpleBundleProvider() : encounterBundle;
 	}
 	
 	/**
-	 * @return true if the given tokenAndListParam contains the valueToCheck or the given
-	 *         tokenAndListParam does not restrict on the encounter-tag system
+	 * @return true if the given tokenAndListParam contains the matching OpenMRS encounter type tag.
 	 */
-	protected boolean shouldIncludeResourceBasedOnEncounterTag(TokenAndListParam tokenAndListParam, String valueToCheck) {
-		final Set<String> tagsToInclude = new HashSet<>();
-		if (tokenAndListParam != null && tokenAndListParam.getValuesAsQueryTokens() != null) {
-			tokenAndListParam.getValuesAsQueryTokens().forEach(tokenOrListParam -> {
-				tokenOrListParam.getValuesAsQueryTokens().forEach(tokenParam -> {
-					if (tokenParam != null && tokenParam.getSystem() != null && tokenParam.getValue() != null) {
-						if (tokenParam.getSystem().equals(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG)) {
-							tagsToInclude.add(tokenParam.getValue());
-						}
-					}
-				});
-			});
+	protected boolean shouldSearchExplicitlyFor(TokenAndListParam tokenAndListParam, @Nonnull String valueToCheck) {
+		if (tokenAndListParam == null || tokenAndListParam.size() == 0 || valueToCheck.isEmpty()) {
+			return true;
 		}
-		return tagsToInclude.isEmpty() || tagsToInclude.contains(valueToCheck);
+		
+		return tokenAndListParam.getValuesAsQueryTokens().stream()
+		        .anyMatch(tokenOrListParam -> tokenOrListParam.doesCodingListMatch(Collections
+		                .singletonList(new InternalCodingDt(FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG, valueToCheck))));
 	}
 	
 	@Override

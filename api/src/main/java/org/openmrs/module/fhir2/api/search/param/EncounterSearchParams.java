@@ -19,12 +19,14 @@ import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class EncounterSearchParams implements Serializable {
 	
 	private DateRangeParam date;
@@ -41,13 +43,13 @@ public class EncounterSearchParams implements Serializable {
 	
 	private DateRangeParam lastUpdated;
 	
+	private TokenAndListParam tag;
+	
+	private HasAndListParam hasAndListParam;
+	
 	private SortSpec sort;
 	
 	private HashSet<Include> includes;
 	
 	private HashSet<Include> revIncludes;
-	
-	private HasAndListParam hasAndListParam;
-	
-	private TokenAndListParam tag;
 }

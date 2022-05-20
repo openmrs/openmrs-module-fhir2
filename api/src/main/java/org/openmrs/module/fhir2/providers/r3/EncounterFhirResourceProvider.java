@@ -147,7 +147,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		
 		return new SearchQueryBundleProviderR3Wrapper(encounterService
 		        .searchForEncounters(new EncounterSearchParams(date, location, participantReference, subjectReference,
-		                encounterType, id, lastUpdated, sort, includes, revIncludes, hasAndListParam, tag)));
+		                encounterType, id, lastUpdated, tag, hasAndListParam, sort, includes, revIncludes)));
 	}
 	
 }
