@@ -57,7 +57,7 @@ public abstract class BaseReferenceHandlingTranslator {
 	
 	protected Reference createMedicationReference(@Nonnull Drug drug) {
 		return new Reference().setReference(FhirConstants.MEDICATION + "/" + drug.getUuid())
-		        .setType(FhirConstants.MEDICATION);
+		        .setType(FhirConstants.MEDICATION).setDisplay(drug.getDisplayName());
 	}
 	
 	protected Reference createObservationReference(@Nonnull Obs obs) {
