@@ -48,6 +48,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		}
 		
 		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.setText(concept.getDisplayString());
 		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
 		
 		for (ConceptMap mapping : concept.getConceptMappings()) {
