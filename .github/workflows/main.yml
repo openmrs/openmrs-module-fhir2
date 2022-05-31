@@ -33,8 +33,45 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Build with Maven
-        run: mvn verify --batch-mode -P integration-test --file pom.xml
+        id: build_with_maven
+        run: |
+          mvn verify --batch-mode -P integration-test --file pom.xml
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build_artifact
+          path: ${{ github.workspace }}/omod/target
       - name: Send data to Codecov
         uses: codecov/codecov-action@v1
         with:
           env_vars: PLATFORM, JAVA_VERSION
+  test:
+    name: Run e2e tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - uses: actions/download-artifact@v3
+        with:
+          name: build_artifact
+          path: ${{ github.workspace }}/omod/target
+      - name: run db and web containers
+        run: |
+          docker-compose -f docker/docker-compose-refqa.yml up -d
+      - name: wait for openmrs instance to start
+        run: while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:8080/openmrs/login.htm)" != "200" ]]; do sleep 1; done
+      - name: Run End to End tests
+        run: mvn verify --batch-mode -P e2e-test --file pom.xml
+      - name: Stop db and web containers
+        if: always()
+        run: docker-compose -f "docker/docker-compose-refqa.yml" down
