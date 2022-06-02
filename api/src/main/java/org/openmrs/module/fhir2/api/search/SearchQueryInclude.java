@@ -48,6 +48,7 @@ import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
+import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,13 +217,14 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
-	private IBundleProvider handleObservationReverseInclude(ReferenceAndListParam params, String targetType) {
+	private IBundleProvider handleObservationReverseInclude(ReferenceAndListParam param, String targetType) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
-				return observationService.searchForObservations(null, null, params, null, null, null, null, null, null, null,
-				    null, null, null, null, null);
+				ObservationSearchParams observationSearchParams = new ObservationSearchParams();
+				observationSearchParams.setHasMember(param);
+				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
-				return diagnosticReportService.searchForDiagnosticReports(null, null, null, null, params, null, null, null,
+				return diagnosticReportService.searchForDiagnosticReports(null, null, null, null, param, null, null, null,
 				    null);
 		}
 		
@@ -246,20 +248,22 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
-	private IBundleProvider handleEncounterReverseInclude(ReferenceAndListParam params, String targetType) {
+	private IBundleProvider handleEncounterReverseInclude(ReferenceAndListParam encounterParam, String targetType) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
-				return observationService.searchForObservations(params, null, null, null, null, null, null, null, null, null,
-				    null, null, null, null, null);
+				ObservationSearchParams observationSearchParams = new ObservationSearchParams();
+				observationSearchParams.setEncounter(encounterParam);
+				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
-				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
-				    null);
+				return diagnosticReportService.searchForDiagnosticReports(encounterParam, null, null, null, null, null, null,
+				    null, null);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null,
-				    null);
+				return medicationRequestService.searchForMedicationRequests(null, encounterParam, null, null, null, null,
+				    null, null);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
-				return serviceRequestService.searchForServiceRequests(null, null, params, null, null, null, null, null);
+				return serviceRequestService.searchForServiceRequests(null, null, encounterParam, null, null, null, null,
+				    null);
 		}
 		
 		return null;
@@ -275,27 +279,29 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
-	private IBundleProvider handlePatientReverseInclude(ReferenceAndListParam params, String targetType) {
+	private IBundleProvider handlePatientReverseInclude(ReferenceAndListParam patientParam, String targetType) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
-				return observationService.searchForObservations(null, params, null, null, null, null, null, null, null, null,
-				    null, null, null, null, null);
+				ObservationSearchParams observationSearchParams = new ObservationSearchParams();
+				observationSearchParams.setPatient(patientParam);
+				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
-				return diagnosticReportService.searchForDiagnosticReports(null, params, null, null, null, null, null, null,
-				    null);
+				return diagnosticReportService.searchForDiagnosticReports(null, patientParam, null, null, null, null, null,
+				    null, null);
 			case FhirConstants.ALLERGY_INTOLERANCE:
-				return allergyIntoleranceService.searchForAllergies(params, null, null, null, null, null, null, null, null,
-				    null);
+				return allergyIntoleranceService.searchForAllergies(patientParam, null, null, null, null, null, null, null,
+				    null, null);
 			case FhirConstants.ENCOUNTER:
 				EncounterSearchParams encounterSearchParams = new EncounterSearchParams();
-				encounterSearchParams.setSubject(params);
+				encounterSearchParams.setSubject(patientParam);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null,
+				return medicationRequestService.searchForMedicationRequests(patientParam, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.SERVICE_REQUEST:
 			case FhirConstants.PROCEDURE_REQUEST:
-				return serviceRequestService.searchForServiceRequests(params, null, null, null, null, null, null, null);
+				return serviceRequestService.searchForServiceRequests(patientParam, null, null, null, null, null, null,
+				    null);
 		}
 		
 		return null;

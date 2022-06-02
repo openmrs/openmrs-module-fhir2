@@ -11,33 +11,19 @@ package org.openmrs.module.fhir2.api;
 
 import javax.annotation.Nonnull;
 
-import java.util.HashSet;
-
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.QuantityAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Observation;
+import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 
 public interface FhirObservationService extends FhirService<Observation> {
 	
 	@Override
 	Observation get(@Nonnull String uuid);
 	
-	IBundleProvider searchForObservations(ReferenceAndListParam encounterReference, ReferenceAndListParam patientReference,
-	        ReferenceAndListParam hasMemberReference, TokenAndListParam valueConcept, DateRangeParam valueDateParam,
-	        QuantityAndListParam valueQuantityParam, StringAndListParam valueStringParam, DateRangeParam date,
-	        TokenAndListParam code, TokenAndListParam category, TokenAndListParam id, DateRangeParam lastUpdated,
-	        SortSpec sort, HashSet<Include> includes, HashSet<Include> revIncludes);
+	IBundleProvider searchForObservations(ObservationSearchParams observationSearchParams);
 	
-	IBundleProvider getLastnObservations(NumberParam max, ReferenceAndListParam patientReference, TokenAndListParam category,
-	        TokenAndListParam code);
+	IBundleProvider getLastnObservations(NumberParam max, ObservationSearchParams observationSearchParams);
 	
-	IBundleProvider getLastnEncountersObservations(NumberParam max, ReferenceAndListParam patientReference,
-	        TokenAndListParam category, TokenAndListParam code);
+	IBundleProvider getLastnEncountersObservations(NumberParam max, ObservationSearchParams observationSearchParams);
 }

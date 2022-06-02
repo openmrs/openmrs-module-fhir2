@@ -47,6 +47,7 @@ import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 
@@ -136,8 +137,9 @@ public class FhirObservationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		IBundleProvider results = fhirObservationService.searchForObservations(null, patientReference, null, null, null,
-		    null, null, null, null, null, null, null, null, null, null);
+		ObservationSearchParams observationSearchParams = new ObservationSearchParams();
+		observationSearchParams.setPatient(patientReference);
+		IBundleProvider results = fhirObservationService.searchForObservations(observationSearchParams);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -186,7 +188,11 @@ public class FhirObservationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		IBundleProvider results = fhirObservationService.getLastnObservations(max, referenceParam, categories, code);
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		IBundleProvider results = fhirObservationService.getLastnObservations(max, searchParams);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -235,7 +241,11 @@ public class FhirObservationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		IBundleProvider results = fhirObservationService.getLastnObservations(null, referenceParam, categories, code);
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		IBundleProvider results = fhirObservationService.getLastnObservations(null, searchParams);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -276,7 +286,10 @@ public class FhirObservationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		IBundleProvider results = fhirObservationService.getLastnObservations(max, null, categories, code);
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		IBundleProvider results = fhirObservationService.getLastnObservations(max, searchParams);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -325,8 +338,11 @@ public class FhirObservationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(max, referenceParam, categories,
-		    code);
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(max, searchParams);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -375,8 +391,11 @@ public class FhirObservationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(null, referenceParam, categories,
-		    code);
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(null, searchParams);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
@@ -417,7 +436,10 @@ public class FhirObservationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(obs)).thenReturn(observation);
 		
-		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(max, null, categories, code);
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		IBundleProvider results = fhirObservationService.getLastnEncountersObservations(max, searchParams);
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));

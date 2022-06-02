@@ -18,13 +18,12 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -54,11 +53,14 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
+import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTest<org.hl7.fhir.r4.model.Observation> {
@@ -80,6 +82,9 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 	private ObservationFhirResourceProvider resourceProvider;
 	
 	private org.hl7.fhir.r4.model.Observation observation;
+	
+	@Captor
+	private ArgumentCaptor<ObservationSearchParams> searchParamsCaptor;
 	
 	@Before
 	public void setup() {
@@ -128,9 +133,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 	
 	@Test
 	public void searchObservations_shouldReturnMatchingObservations() {
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		when(observationService.searchForObservations(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
@@ -151,9 +155,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 	
 	@Test
 	public void searchObservations_shouldReturnMatchingObservationsWhenPatientParamIsSpecified() {
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		when(observationService.searchForObservations(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		ReferenceAndListParam patientParam = new ReferenceAndListParam();
 		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
@@ -175,9 +178,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Observation:patient"));
 		
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any(), any(), any(), any())).thenReturn(
-		        new MockIBundleProvider<>(Arrays.asList(observation, new org.hl7.fhir.r4.model.Patient()), 10, 1));
+		when(observationService.searchForObservations(any())).thenReturn(
+		    new MockIBundleProvider<>(Arrays.asList(observation, new org.hl7.fhir.r4.model.Patient()), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
 		    null, null, null, null, null, includes, null);
@@ -196,9 +198,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 	public void searchObservations_shouldNotAddRelatedResourcesForEmptyInclude() {
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any(), any(), isNull(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		when(observationService.searchForObservations(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
 		    null, null, null, null, null, includes, null);
@@ -217,9 +218,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("DiagnosticReport:result"));
 		
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Arrays.asList(observation, new DiagnosticReport()), 10, 1));
+		when(observationService.searchForObservations(any()))
+		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(observation, new DiagnosticReport()), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
 		    null, null, null, null, null, includes, null);
@@ -238,13 +238,13 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 	public void searchObservations_shouldNotAddRelatedResourcesForEmptyReverseInclude() {
 		HashSet<Include> includes = new HashSet<>();
 		
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any(), any(), isNull(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		when(observationService.searchForObservations(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
 		    null, null, null, null, null, includes, null);
 		
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		List<IBaseResource> resultList = get(results, 1, 5);
 		
 		assertThat(results, notNullValue());
@@ -252,6 +252,9 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		assertThat(resultList.get(0), notNullValue());
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+		
+		HashSet<Include> includesParam = searchParamsCaptor.getValue().getIncludes();
+		assertThat(includesParam, nullValue());
 	}
 	
 	@Test
@@ -292,7 +295,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
-		when(observationService.getLastnObservations(max, referenceParam, categories, code))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		
+		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, categories, code);
@@ -322,7 +330,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
-		when(observationService.getLastnObservations(null, referenceParam, categories, code))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		
+		when(observationService.getLastnObservations(null, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(null, referenceParam, null, categories, code);
@@ -352,7 +365,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
-		when(observationService.getLastnObservations(max, referenceParam, categories, code))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		
+		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, null, referenceParam, categories, code);
@@ -376,7 +394,11 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
-		when(observationService.getLastnObservations(max, null, categories, code))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		
+		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, null, null, categories, code);
@@ -404,7 +426,11 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
-		when(observationService.getLastnObservations(max, referenceParam, null, code))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCode(code);
+		
+		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, null, code);
@@ -430,7 +456,11 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		
 		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
 		
-		when(observationService.getLastnObservations(max, referenceParam, categories, null))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		
+		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, categories, null);
@@ -454,7 +484,10 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		
 		referenceParam.addValue(new ReferenceOrListParam().add(patient));
 		
-		when(observationService.getLastnObservations(max, referenceParam, null, null))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		
+		when(observationService.getLastnObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnObservations(max, referenceParam, null, null, null);
@@ -484,7 +517,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
-		when(observationService.getLastnEncountersObservations(max, referenceParam, categories, code))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		
+		when(observationService.getLastnEncountersObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnEncountersObservations(max, referenceParam, null, categories,
@@ -514,7 +552,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
-		when(observationService.getLastnEncountersObservations(null, referenceParam, categories, code))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		
+		when(observationService.getLastnEncountersObservations(null, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnEncountersObservations(null, referenceParam, null, categories,
@@ -545,7 +588,12 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
-		when(observationService.getLastnEncountersObservations(max, referenceParam, categories, code))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		
+		when(observationService.getLastnEncountersObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnEncountersObservations(max, null, referenceParam, categories,
@@ -570,7 +618,11 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
-		when(observationService.getLastnEncountersObservations(max, null, categories, code))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setCategory(categories);
+		searchParams.setCode(code);
+		
+		when(observationService.getLastnEncountersObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnEncountersObservations(max, null, null, categories, code);
@@ -598,7 +650,11 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		    new TokenParam().setSystem(FhirTestConstants.LOINC_SYSTEM_URL).setValue(LOINC_SYSTOLIC_BP),
 		    new TokenParam().setSystem(FhirTestConstants.CIEL_SYSTEM_URN).setValue(CIEL_DIASTOLIC_BP));
 		
-		when(observationService.getLastnEncountersObservations(max, referenceParam, null, code))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCode(code);
+		
+		when(observationService.getLastnEncountersObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnEncountersObservations(max, referenceParam, null, null, code);
@@ -624,7 +680,11 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		
 		TokenAndListParam categories = new TokenAndListParam().addAnd(new TokenParam().setValue("laboratory"));
 		
-		when(observationService.getLastnEncountersObservations(max, referenceParam, categories, null))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		searchParams.setCategory(categories);
+		
+		when(observationService.getLastnEncountersObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnEncountersObservations(max, referenceParam, null, categories,
@@ -649,7 +709,10 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		
 		referenceParam.addValue(new ReferenceOrListParam().add(patient));
 		
-		when(observationService.getLastnEncountersObservations(max, referenceParam, null, null))
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(referenceParam);
+		
+		when(observationService.getLastnEncountersObservations(max, searchParams))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		IBundleProvider results = resourceProvider.getLastnEncountersObservations(max, referenceParam, null, null, null);
