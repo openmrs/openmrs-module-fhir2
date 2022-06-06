@@ -62,7 +62,10 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslator implement
 			return personAddress;
 		}
 		
-		personAddress.setUuid(address.getId());
+		if (address.hasId()) {
+			personAddress.setUuid(address.getId());
+		}
+		
 		personAddress.setCityVillage(address.getCity());
 		personAddress.setStateProvince(address.getState());
 		personAddress.setCountry(address.getCountry());
