@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.Concept;
@@ -37,13 +39,13 @@ public class FhirConceptServiceImpl implements FhirConceptService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Concept getConceptWithSameAsMappingInSource(ConceptSource conceptSource, String mappingCode) {
+	public Optional<Concept> getConceptWithSameAsMappingInSource(ConceptSource conceptSource, String mappingCode) {
 		return dao.getConceptWithSameAsMappingInSource(conceptSource, mappingCode);
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
-	public String getSameAsMappingForConceptInSource(ConceptSource source, Concept concept) {
+	public Optional<String> getSameAsMappingForConceptInSource(ConceptSource source, Concept concept) {
 		if (source != null && concept != null) {
 			for (ConceptMap mapping : concept.getConceptMappings()) {
 				if (source.equals(mapping.getConceptReferenceTerm().getConceptSource())) {
@@ -51,12 +53,13 @@ public class FhirConceptServiceImpl implements FhirConceptService {
 					if (mapType != null) {
 						if (mapType.getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID)
 						        || mapType.getName().equalsIgnoreCase("SAME-AS")) {
-							return mapping.getConceptReferenceTerm().getCode();
+							return Optional.of(mapping.getConceptReferenceTerm().getCode());
 						}
 					}
 				}
 			}
 		}
-		return null;
+		
+		return Optional.empty();
 	}
 }

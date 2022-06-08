@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static co.unruly.matchers.OptionalMatchers.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -17,11 +18,11 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 
 import java.util.Collection;
 import java.util.Optional;
 
+import co.unruly.matchers.OptionalMatchers;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,23 +102,27 @@ public class FhirConceptSourceDaoImplTest extends BaseModuleContextSensitiveTest
 	
 	@Test
 	public void getConceptSourceByHl7Code_shouldReturnSourceForHl7Code() {
-		ConceptSource result = fhirConceptSourceDao.getConceptSourceByHl7Code("SCT");
-		assertThat(result, notNullValue());
-		assertThat(result.getName(), equalTo("SNOMED CT"));
+		Optional<ConceptSource> result = fhirConceptSourceDao.getConceptSourceByHl7Code("SCT");
+		
+		assertThat(result, not(OptionalMatchers.empty()));
+		
+		assertThat(result, contains(hasProperty("name", equalTo("SNOMED CT"))));
 	}
 	
 	@Test
 	public void getConceptSourceByHl7Code_shouldReturnNonRetiredOverRetiredSourceForHl7Code() {
-		ConceptSource result = fhirConceptSourceDao.getConceptSourceByHl7Code("I10");
-		assertThat(result, notNullValue());
-		assertThat(result.getName(), equalTo("ICD-10"));
-		assertThat(result.getUuid(), equalTo("75f5b378-5065-11de-80cb-001e378eb67e"));
-		assertThat(result.getRetired(), equalTo(false));
+		Optional<ConceptSource> result = fhirConceptSourceDao.getConceptSourceByHl7Code("I10");
+		
+		assertThat(result, not(OptionalMatchers.empty()));
+		assertThat(result, contains(hasProperty("name", equalTo("ICD-10"))));
+		assertThat(result, contains(hasProperty("uuid", equalTo("75f5b378-5065-11de-80cb-001e378eb67e"))));
+		assertThat(result, contains(hasProperty("retired", equalTo(false))));
 	}
 	
 	@Test
 	public void getFhirConceptSourceByHl7Code_shouldReturnNullForMissingSourceName() {
-		ConceptSource result = fhirConceptSourceDao.getConceptSourceByHl7Code("SNOMED CT");
-		assertThat(result, nullValue());
+		Optional<ConceptSource> result = fhirConceptSourceDao.getConceptSourceByHl7Code("SNOMED CT");
+		
+		assertThat(result, OptionalMatchers.empty());
 	}
 }

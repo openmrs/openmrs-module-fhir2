@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FhirMedicationDispenseServiceImpl_2_6 extends BaseFhirService<MedicationDispense, org.openmrs.MedicationDispense> implements FhirMedicationDispenseService {
 	
 	@Autowired
-	private FhirMedicationDispenseDao dao;
+	private FhirMedicationDispenseDao<org.openmrs.MedicationDispense> dao;
 	
 	@Autowired
 	private MedicationDispenseTranslator<org.openmrs.MedicationDispense> translator;

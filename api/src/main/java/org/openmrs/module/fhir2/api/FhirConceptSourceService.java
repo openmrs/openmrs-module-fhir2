@@ -27,7 +27,7 @@ public interface FhirConceptSourceService {
 	
 	String getUrlForConceptSource(@Nonnull ConceptSource conceptSource);
 	
-	ConceptSource getConceptSourceByUrl(@Nonnull String url);
+	Optional<ConceptSource> getConceptSourceByUrl(@Nonnull String url);
 	
-	ConceptSource getConceptSourceByHl7Code(@Nonnull String hl7Code);
+	Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code);
 }

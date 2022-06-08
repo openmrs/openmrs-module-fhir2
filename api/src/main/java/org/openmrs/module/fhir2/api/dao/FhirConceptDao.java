@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.dao;
 import javax.annotation.Nonnull;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.openmrs.Concept;
 import org.openmrs.ConceptSource;
@@ -26,7 +27,7 @@ public interface FhirConceptDao extends FhirDao<Concept> {
 	Concept get(@Nonnull String uuid);
 	
 	@Authorized(PrivilegeConstants.GET_CONCEPTS)
-	Concept getConceptWithSameAsMappingInSource(ConceptSource conceptSource, String mappingCode);
+	Optional<Concept> getConceptWithSameAsMappingInSource(ConceptSource conceptSource, String mappingCode);
 	
 	@Override
 	@Authorized(PrivilegeConstants.MANAGE_CONCEPTS)

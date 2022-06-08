@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -101,13 +102,13 @@ public class ConceptTranslatorImplTest {
 		fhirLoinc = new FhirConceptSource();
 		fhirLoinc.setConceptSource(loinc);
 		fhirLoinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		when(conceptSourceService.getConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL)).thenReturn(loinc);
+		when(conceptSourceService.getConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL)).thenReturn(Optional.of(loinc));
 		when(conceptSourceService.getUrlForConceptSource(loinc)).thenReturn(FhirTestConstants.LOINC_SYSTEM_URL);
 		
 		FhirConceptSource fhirCiel = new FhirConceptSource();
 		fhirCiel.setConceptSource(ciel);
 		fhirCiel.setUrl(FhirTestConstants.CIEL_SYSTEM_URN);
-		when(conceptSourceService.getConceptSourceByUrl(FhirTestConstants.CIEL_SYSTEM_URN)).thenReturn(ciel);
+		when(conceptSourceService.getConceptSourceByUrl(FhirTestConstants.CIEL_SYSTEM_URN)).thenReturn(Optional.of(ciel));
 		when(conceptSourceService.getUrlForConceptSource(ciel)).thenReturn(FhirTestConstants.CIEL_SYSTEM_URN);
 	}
 	
@@ -172,7 +173,7 @@ public class ConceptTranslatorImplTest {
 		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
 		loincCoding.setCode("1000-1");
 		
-		when(conceptService.getConceptWithSameAsMappingInSource(loinc, "1000-1")).thenReturn(concept);
+		when(conceptService.getConceptWithSameAsMappingInSource(loinc, "1000-1")).thenReturn(Optional.of(concept));
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());
@@ -202,7 +203,7 @@ public class ConceptTranslatorImplTest {
 		Coding cielCoding = codeableConcept.addCoding();
 		cielCoding.setSystem(FhirTestConstants.CIEL_SYSTEM_URN);
 		cielCoding.setCode("1650");
-		when(conceptService.getConceptWithSameAsMappingInSource(ciel, "1650")).thenReturn(concept);
+		when(conceptService.getConceptWithSameAsMappingInSource(ciel, "1650")).thenReturn(Optional.of(concept));
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());

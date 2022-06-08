@@ -12,8 +12,11 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.openmrs.Concept;
 import org.openmrs.ConceptSource;
@@ -37,25 +40,33 @@ public class MedicationDispenseStatusTranslatorImpl implements MedicationDispens
 	
 	@Override
 	public MedicationDispense.MedicationDispenseStatus toFhirResource(@Nonnull Concept concept) {
-		ConceptSource conceptSource = conceptSourceService.getConceptSourceByUrl(CONCEPT_SOURCE_URI);
-		String conceptCode = conceptService.getSameAsMappingForConceptInSource(conceptSource, concept);
-		try {
-			return MedicationDispense.MedicationDispenseStatus.fromCode(conceptCode);
+		Optional<ConceptSource> conceptSource = conceptSourceService.getConceptSourceByUrl(CONCEPT_SOURCE_URI);
+		if (conceptSource.isPresent()) {
+			Optional<String> conceptCode = conceptService.getSameAsMappingForConceptInSource(conceptSource.get(), concept);
+			if (conceptCode.isPresent()) {
+				try {
+					return MedicationDispense.MedicationDispenseStatus.fromCode(conceptCode.get());
+				}
+				catch (FHIRException ignored) {
+					// unknown status code
+				}
+			}
 		}
-		catch (Exception e) {
-			return null;
-		}
+		
+		return null;
 	}
 	
 	@Override
 	public Concept toOpenmrsType(@Nonnull MedicationDispense.MedicationDispenseStatus status) {
-		Concept concept = null;
+		Optional<Concept> concept = Optional.empty();
+		
 		if (status != null) {
-			ConceptSource conceptSource = conceptSourceService.getConceptSourceByUrl(CONCEPT_SOURCE_URI);
-			if (conceptSource != null) {
-				concept = conceptService.getConceptWithSameAsMappingInSource(conceptSource, status.toCode());
+			Optional<ConceptSource> conceptSource = conceptSourceService.getConceptSourceByUrl(CONCEPT_SOURCE_URI);
+			if (conceptSource.isPresent()) {
+				concept = conceptService.getConceptWithSameAsMappingInSource(conceptSource.get(), status.toCode());
 			}
 		}
-		return concept;
+		
+		return concept.orElse(null);
 	}
 }

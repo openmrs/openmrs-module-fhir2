@@ -9,19 +9,20 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static co.unruly.matchers.OptionalMatchers.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
+import co.unruly.matchers.OptionalMatchers;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,15 +109,18 @@ public class FhirConceptSourceServiceImplTest {
 	@Test
 	public void getConceptSourceByHl7Code_shouldReturnSourceForHl7Code() {
 		ConceptSource source = new ConceptSource();
-		when(dao.getConceptSourceByHl7Code("SCT")).thenReturn(source);
-		ConceptSource result = fhirConceptSourceService.getConceptSourceByHl7Code("SCT");
-		assertThat(result, notNullValue());
-		assertThat(result, equalTo(source));
+		when(dao.getConceptSourceByHl7Code("SCT")).thenReturn(Optional.of(source));
+		
+		Optional<ConceptSource> result = fhirConceptSourceService.getConceptSourceByHl7Code("SCT");
+		
+		assertThat(result, not(OptionalMatchers.empty()));
+		assertThat(result, contains(equalTo(source)));
 	}
 	
 	@Test
 	public void getFhirConceptSourceByHl7Code_shouldReturnNullForMissingSourceName() {
-		ConceptSource result = fhirConceptSourceService.getConceptSourceByHl7Code("SNOMED CT");
-		assertThat(result, nullValue());
+		Optional<ConceptSource> result = fhirConceptSourceService.getConceptSourceByHl7Code("SNOMED CT");
+		
+		assertThat(result, OptionalMatchers.empty());
 	}
 }

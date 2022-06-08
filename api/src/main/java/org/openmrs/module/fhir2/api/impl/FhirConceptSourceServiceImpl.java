@@ -63,23 +63,26 @@ public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public ConceptSource getConceptSourceByUrl(@Nonnull String url) {
+	public Optional<ConceptSource> getConceptSourceByUrl(@Nonnull String url) {
 		if (url == null) {
-			return null;
+			return Optional.empty();
 		}
+		
 		Optional<FhirConceptSource> fhirConceptSource = getFhirConceptSourceByUrl(url);
 		if (fhirConceptSource.isPresent()) {
-			return fhirConceptSource.get().getConceptSource();
+			return Optional.ofNullable(fhirConceptSource.get().getConceptSource());
 		}
+		
 		if (url.equals(FhirConstants.SNOMED_SYSTEM_URI)) {
 			return dao.getConceptSourceByHl7Code(Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE);
 		}
-		return null;
+		
+		return Optional.empty();
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
-	public ConceptSource getConceptSourceByHl7Code(@Nonnull String hl7Code) {
+	public Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code) {
 		return dao.getConceptSourceByHl7Code(hl7Code);
 	}
 }

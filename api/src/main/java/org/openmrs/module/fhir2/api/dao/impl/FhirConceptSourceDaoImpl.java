@@ -61,7 +61,7 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
-	public ConceptSource getConceptSourceByHl7Code(@Nonnull String hl7Code) {
+	public Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(ConceptSource.class);
 		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
 			criteria.add(eq("hl7Code", hl7Code).ignoreCase());
@@ -69,10 +69,12 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 			criteria.add(eq("hl7Code", hl7Code));
 		}
 		criteria.addOrder(Order.asc("retired"));
+		
 		List<ConceptSource> matchingSources = criteria.list();
 		if (matchingSources.isEmpty()) {
-			return null;
+			return Optional.empty();
 		}
-		return matchingSources.get(0);
+		
+		return Optional.ofNullable(matchingSources.get(0));
 	}
 }

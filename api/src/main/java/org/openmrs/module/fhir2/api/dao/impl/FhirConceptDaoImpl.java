@@ -9,17 +9,18 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Order.asc;
+import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
 
+import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.DistinctRootEntityResultTransformer;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
@@ -44,24 +45,29 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	@Override
-	public Concept getConceptWithSameAsMappingInSource(@Nonnull ConceptSource conceptSource, @Nonnull String mappingCode) {
+	public Optional<Concept> getConceptWithSameAsMappingInSource(@Nonnull ConceptSource conceptSource,
+	        @Nonnull String mappingCode) {
 		if (conceptSource == null || mappingCode == null) {
-			return null;
+			return Optional.empty();
 		}
+		
 		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(ConceptMap.class);
-		criteria.setProjection(Projections.property("concept"));
+		criteria.setProjection(property("concept"));
 		criteria.createAlias("conceptReferenceTerm", "term");
 		criteria.createAlias("conceptMapType", "mapType");
 		criteria.createAlias("concept", "concept");
+		
 		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
-			criteria.add(Restrictions.eq("term.code", mappingCode).ignoreCase());
+			criteria.add(eq("term.code", mappingCode).ignoreCase());
 		} else {
-			criteria.add(Restrictions.eq("term.code", mappingCode));
+			criteria.add(eq("term.code", mappingCode));
 		}
+		
 		criteria.add(eq("term.conceptSource", conceptSource));
 		criteria.add(or(eq("mapType.uuid", ConceptMapType.SAME_AS_MAP_TYPE_UUID), eq("mapType.name", "SAME-AS")));
-		criteria.addOrder(Order.asc("concept.retired"));
+		criteria.addOrder(asc("concept.retired"));
 		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
-		return (Concept) criteria.uniqueResult();
+		
+		return Optional.ofNullable((Concept) criteria.uniqueResult());
 	}
 }

@@ -9,11 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static co.unruly.matchers.OptionalMatchers.contains;
+import static co.unruly.matchers.OptionalMatchers.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,16 +73,18 @@ public class FhirConceptServiceImplTest {
 		ConceptSource loinc = new ConceptSource();
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
-		when(conceptDao.getConceptWithSameAsMappingInSource(loinc, "1000-1")).thenReturn(concept);
+		when(conceptDao.getConceptWithSameAsMappingInSource(loinc, "1000-1")).thenReturn(Optional.of(concept));
 		
-		Concept result = fhirConceptService.getConceptWithSameAsMappingInSource(loinc, "1000-1");
-		assertThat(result, notNullValue());
-		assertThat(result, equalTo(concept));
+		Optional<Concept> result = fhirConceptService.getConceptWithSameAsMappingInSource(loinc, "1000-1");
+		
+		assertThat(result, not(empty()));
+		assertThat(result, contains(equalTo(concept)));
 	}
 	
 	@Test
 	public void getConceptWithSameAsMappingInSource_shouldReturnNullIfSourceIsNull() {
-		Concept result = fhirConceptService.getConceptWithSameAsMappingInSource(null, "1000-1");
-		assertThat(result, nullValue());
+		Optional<Concept> result = fhirConceptService.getConceptWithSameAsMappingInSource(null, "1000-1");
+		
+		assertThat(result, empty());
 	}
 }

@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -83,17 +85,20 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 							return c;
 						}
 					} else {
-						ConceptSource conceptSource = conceptSourceService.getConceptSourceByUrl(coding.getSystem());
-						if (conceptSource != null) {
-							Concept c = conceptService.getConceptWithSameAsMappingInSource(conceptSource, coding.getCode());
-							if (c != null) {
-								return c;
+						Optional<ConceptSource> conceptSource = conceptSourceService
+						        .getConceptSourceByUrl(coding.getSystem());
+						if (conceptSource.isPresent()) {
+							Optional<Concept> c = conceptService.getConceptWithSameAsMappingInSource(conceptSource.get(),
+							    coding.getCode());
+							if (c.isPresent()) {
+								return c.get();
 							}
 						}
 					}
 				}
 			}
 		}
+		
 		return null;
 	}
 	
