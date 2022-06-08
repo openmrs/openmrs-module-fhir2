@@ -9,11 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Restrictions.eq;
+
+import java.util.Optional;
+
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
@@ -47,10 +53,30 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					entry.getValue().forEach(d -> handleMedicationReference("d", (ReferenceAndListParam) d.getParam())
 					        .ifPresent(c -> criteria.createAlias("drug", "d").add(c)));
 					break;
+				case FhirConstants.STATUS_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleMedicationRequestStatus((TokenAndListParam) param.getParam())
+					        .ifPresent(criteria::add));
+					break;
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
 			}
+		});
+	}
+	
+	private Optional<Criterion> handleMedicationRequestStatus(TokenAndListParam tokenAndListParam) {
+		return handleAndListParam(tokenAndListParam, token -> {
+			if (token.getValue() != null) {
+				try {
+					return Optional.of(
+					    eq("status", MedicationRequest.MedicationRequestStatus.valueOf(token.getValue().toUpperCase())));
+				}
+				catch (IllegalArgumentException e) {
+					return Optional.empty();
+				}
+			}
+			
+			return Optional.empty();
 		});
 	}
 	

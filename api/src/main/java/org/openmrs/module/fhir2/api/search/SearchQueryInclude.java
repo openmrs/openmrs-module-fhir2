@@ -236,7 +236,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				encounterSearchParams.setParticipant(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null,
+				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null, null,
 				    null);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
@@ -255,7 +255,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null,
+				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
@@ -268,7 +268,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	private IBundleProvider handleMedicationReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null,
+				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null, null,
 				    null);
 		}
 		
@@ -291,7 +291,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				encounterSearchParams.setSubject(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null,
+				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.SERVICE_REQUEST:
 			case FhirConstants.PROCEDURE_REQUEST:
