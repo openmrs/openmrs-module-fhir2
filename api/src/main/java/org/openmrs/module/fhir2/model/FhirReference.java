@@ -50,6 +50,7 @@ public class FhirReference extends BaseOpenmrsMetadata {
 	@Column(name = "target_uuid")
 	private String targetUuid;
 	
+	@EqualsAndHashCode.Include
 	@Column(name = "reference")
 	private String reference;
 	
