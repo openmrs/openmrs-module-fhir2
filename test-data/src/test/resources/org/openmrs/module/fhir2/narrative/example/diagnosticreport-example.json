@@ -66,5 +66,9 @@
       "reference": "Observation/f005"
     }
   ],
-  "conclusion": "Core lab"
+  "conclusion": "Core lab",
+  "presentedForm": [{
+    "url": "labReport.pdf",
+    "title": "Lab Report"
+  }]
 }
