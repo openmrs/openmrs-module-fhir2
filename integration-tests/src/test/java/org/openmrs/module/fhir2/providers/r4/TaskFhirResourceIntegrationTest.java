@@ -154,7 +154,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(task.getAuthoredOn(), within(1, ChronoUnit.MINUTES, new Date()));
 		assertThat(task.getLastModified(), within(1, ChronoUnit.MINUTES, new Date()));
 		assertThat(task, validResource());
-		assertThat(task.getBasedOn().size(),is(2));
+		assertThat(task.getBasedOn().size(), is(2));
 		
 		response = get("/Task/" + task.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		
