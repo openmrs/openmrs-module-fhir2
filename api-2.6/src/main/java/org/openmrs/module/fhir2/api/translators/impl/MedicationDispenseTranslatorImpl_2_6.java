@@ -107,10 +107,8 @@ public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseT
 		}
 		
 		if (openmrsObject.getDispenser() != null) {
-			MedicationDispensePerformerComponent performerComponent = new MedicationDispensePerformerComponent();
-			performerComponent.setActor(practitionerReferenceTranslator.toFhirResource(openmrsObject.getDispenser()));
-			performerComponent.setFunction(null);
-			fhirObject.addPerformer(performerComponent);
+			fhirObject.addPerformer()
+					.setActor(practitionerReferenceTranslator.toFhirResource(openmrsObject.getDispenser()));
 		}
 		
 		if (openmrsObject.getWasSubstituted() != null || openmrsObject.getSubstitutionType() != null
@@ -141,7 +139,10 @@ public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseT
 		notNull(openmrsObject, "The existing Openmrs MedicationDispense object should not be null");
 		notNull(fhirObject, "The FHIR MedicationDispense object should not be null");
 		
-		openmrsObject.setUuid(fhirObject.getIdElement().getIdPart());
+		if (fhirObject.hasId()) {
+			openmrsObject.setUuid(fhirObject.getIdElement().getIdPart());
+		}
+		
 		openmrsObject.setPatient(patientReferenceTranslator.toOpenmrsType(fhirObject.getSubject()));
 		if (fhirObject.hasContext()) {
 			openmrsObject.setEncounter(encounterReferenceTranslator.toOpenmrsType(fhirObject.getContext()));
@@ -179,6 +180,7 @@ public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseT
 			dispenseRequest.setQuantity(fhirObject.getQuantity());
 			medicationRequest.setDispenseRequest(dispenseRequest);
 		}
+		
 		DrugOrder drugOrder = medicationRequestTranslator.toOpenmrsType(medicationRequest);
 		openmrsObject.setConcept(drugOrder.getConcept());
 		openmrsObject.setDrug(drugOrder.getDrug());
