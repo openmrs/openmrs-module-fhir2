@@ -27,6 +27,7 @@ import org.openmrs.module.fhir2.api.util.FhirUtils;
  * FHIR Reference - https://www.hl7.org/fhir/references.html
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @Entity
 @Table(name = "fhir_reference")
 public class FhirReference extends BaseOpenmrsMetadata {
@@ -37,6 +38,7 @@ public class FhirReference extends BaseOpenmrsMetadata {
 		setName("");
 	}
 	
+	@EqualsAndHashCode.Include
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "reference_id")
