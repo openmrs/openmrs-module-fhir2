@@ -64,6 +64,8 @@ public class MedicationRequestFhirResourceProviderTest {
 	
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
 	
+	private static final String MEDICATION_REQUEST_STATUS = "ACTIVE";
+	
 	@Mock
 	private FhirMedicationRequestService fhirMedicationRequestService;
 	
@@ -125,6 +127,25 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, code, null, null, null,
 		    null, null, null);
+		
+		List<MedicationRequest> resources = get(results, 1, 5);
+		
+		assertThat(results, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
+		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenStatusParamIsSpecified() {
+		TokenAndListParam status = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_STATUS));
+		
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
+		    null, status, null);
 		
 		List<MedicationRequest> resources = get(results, 1, 5);
 		

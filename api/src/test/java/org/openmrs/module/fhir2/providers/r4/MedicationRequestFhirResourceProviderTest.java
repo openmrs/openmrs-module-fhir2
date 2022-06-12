@@ -52,6 +52,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
+import org.openmrs.module.fhir2.providers.r3.MockIBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestFhirResourceProviderTest {
@@ -61,6 +62,8 @@ public class MedicationRequestFhirResourceProviderTest {
 	private static final String WRONG_MEDICATION_REQUEST_UUID = "862e20a1-e73c-4c92-a4e8-9f922e0cd7f4";
 	
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
+	
+	private static final String MEDICATION_REQUEST_STATUS = "ACTIVE";
 	
 	@Mock
 	private FhirMedicationRequestService fhirMedicationRequestService;
@@ -121,6 +124,25 @@ public class MedicationRequestFhirResourceProviderTest {
 		
 		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, code, null, null, null,
 		    null, null, null);
+		
+		List<IBaseResource> resources = getResources(results, 1, 5);
+		
+		assertThat(results, notNullValue());
+		assertThat(resources, hasSize(equalTo(1)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
+		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchMedicationRequest_shouldReturnMatchingMedicationRequestWhenStatusParamIsSpecified() {
+		TokenAndListParam status = new TokenAndListParam().addAnd(new TokenParam(MEDICATION_REQUEST_STATUS));
+		
+		when(fhirMedicationRequestService.searchForMedicationRequests(any(), any(), any(), any(), any(), any(), any(), any(),
+		    any())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(medicationRequest), 10, 1));
+		
+		IBundleProvider results = resourceProvider.searchForMedicationRequests(null, null, null, null, null, null, null,
+		    null, status, null);
 		
 		List<IBaseResource> resources = getResources(results, 1, 5);
 		
