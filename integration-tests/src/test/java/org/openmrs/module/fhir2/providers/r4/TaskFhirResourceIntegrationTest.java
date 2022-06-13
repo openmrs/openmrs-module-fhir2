@@ -50,7 +50,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	
 	private static final String WRONG_TASK_UUID = "097c8573-b26d-4893-a3e3-ea5c21c3cc94";
 	
-	private static final String JSON_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create.json";
+	private static final String JSON_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create_r4.json";
 	
 	private static final String XML_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create.xml";
 	

@@ -62,7 +62,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	
 	private static final String WRONG_TASK_UUID = "df34a1c1-f57b-4c33-bee5-e601b56b9d5b";
 	
-	private static final String JSON_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_create.json";
+	private static final String JSON_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_create_r3.json";
 	
 	private static final String JSON_TASK_NO_ID_PATH = "org/openmrs/module/fhir2/providers/Task_create_no_id.json";
 	

@@ -1,0 +1,18 @@
+{
+  "resourceType": "Task",
+  "id": "55616228-dc6d-446f-ab50-4ec711ea9243",
+  "basedOn": [
+    {
+      "reference": "7d96f25c-4949-4f72-9931-d808fbc226de",
+      "type": "ServiceRequest"
+    },
+    {
+      "reference": "a7fd2d2a-e068-4c45-b613-8261d70b29b7",
+      "type": "ServiceRequest"
+    }
+  ],
+  "status": "accepted",
+  "intent": "order",
+  "authoredOn": "2016-10-31T08:25:05+10:00",
+  "lastModified": "2016-10-31T09:45:05+10:00"
+}
