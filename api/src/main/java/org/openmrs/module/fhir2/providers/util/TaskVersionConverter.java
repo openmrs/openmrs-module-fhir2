@@ -503,17 +503,17 @@ public class TaskVersionConverter {
 	}
 	
 	public static void convertTaskInput(org.hl7.fhir.dstu3.model.Task src, org.hl7.fhir.r4.model.Task tgt) {
-		src.getOutput().forEach(ti -> tgt.addOutput().setType(VersionConvertor_30_40.convertCodeableConcept(ti.getType()))
+		src.getInput().forEach(ti -> tgt.addInput().setType(VersionConvertor_30_40.convertCodeableConcept(ti.getType()))
 		        .setValue(VersionConvertor_30_40.convertType(ti.getValue())));
 	}
 	
 	public static void convertTaskOutput(org.hl7.fhir.r4.model.Task src, org.hl7.fhir.dstu3.model.Task tgt) {
-		tgt.addInput().setType(VersionConvertor_30_40.convertCodeableConcept(src.getInput().iterator().next().getType()));
-		tgt.addInput().setValue(VersionConvertor_30_40.convertType(src.getInput().iterator().next().getValue()));
+		src.getOutput().forEach(to -> tgt.addOutput().setType(VersionConvertor_30_40.convertCodeableConcept(to.getType()))
+		        .setValue(VersionConvertor_30_40.convertType(to.getValue())));
 	}
 	
 	public static void convertTaskOutput(org.hl7.fhir.dstu3.model.Task src, org.hl7.fhir.r4.model.Task tgt) {
-		tgt.addOutput().setType(VersionConvertor_30_40.convertCodeableConcept(src.getInput().iterator().next().getType()));
-		tgt.addOutput().setValue(VersionConvertor_30_40.convertType(src.getInput().iterator().next().getValue()));
+		src.getOutput().forEach(to -> tgt.addOutput().setType(VersionConvertor_30_40.convertCodeableConcept(to.getType()))
+		        .setValue(VersionConvertor_30_40.convertType(to.getValue())));
 	}
 }
