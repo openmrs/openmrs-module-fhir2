@@ -96,7 +96,9 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 			return null;
 		}
 		
-		patientIdentifier.setUuid(identifier.getId());
+		if (identifier.hasId()) {
+			patientIdentifier.setUuid(identifier.getId());
+		}
 		
 		patientIdentifier.setIdentifier(identifier.getValue());
 		

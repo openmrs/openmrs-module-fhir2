@@ -69,7 +69,10 @@ public class PersonNameTranslatorImpl implements PersonNameTranslator {
 			return personName;
 		}
 		
-		personName.setUuid(name.getId());
+		if (name.hasId()) {
+			personName.setUuid(name.getId());
+		}
+		
 		List<StringType> givenNames = name.getGiven();
 		if (!givenNames.isEmpty()) {
 			personName.setGivenName(givenNames.get(0).getValue());
