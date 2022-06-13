@@ -31,6 +31,7 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslator implement
 		fhirAddress.setCity(address.getCityVillage());
 		fhirAddress.setState(address.getStateProvince());
 		fhirAddress.setCountry(address.getCountry());
+		fhirAddress.setDistrict(address.getCountyDistrict());
 		fhirAddress.setPostalCode(address.getPostalCode());
 		
 		// TODO is this the right mapping?
