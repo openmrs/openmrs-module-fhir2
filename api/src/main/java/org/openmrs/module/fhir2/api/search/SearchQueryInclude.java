@@ -255,15 +255,14 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				observationSearchParams.setEncounter(params);
 				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
-				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null,
-				    null, null);
+				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
+				    null);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null,
-				    null, null);
+				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null,
+				    null);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
-				return serviceRequestService.searchForServiceRequests(null, null, params, null, null, null, null,
-				    null);
+				return serviceRequestService.searchForServiceRequests(null, null, params, null, null, null, null, null);
 		}
 		
 		return null;
@@ -286,11 +285,11 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				observationSearchParams.setPatient(params);
 				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
-				return diagnosticReportService.searchForDiagnosticReports(null, params, null, null, null, null, null,
-				    null, null);
+				return diagnosticReportService.searchForDiagnosticReports(null, params, null, null, null, null, null, null,
+				    null);
 			case FhirConstants.ALLERGY_INTOLERANCE:
-				return allergyIntoleranceService.searchForAllergies(params, null, null, null, null, null, null, null,
-				    null, null);
+				return allergyIntoleranceService.searchForAllergies(params, null, null, null, null, null, null, null, null,
+				    null);
 			case FhirConstants.ENCOUNTER:
 				EncounterSearchParams encounterSearchParams = new EncounterSearchParams();
 				encounterSearchParams.setSubject(params);
@@ -300,8 +299,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				    null);
 			case FhirConstants.SERVICE_REQUEST:
 			case FhirConstants.PROCEDURE_REQUEST:
-				return serviceRequestService.searchForServiceRequests(params, null, null, null, null, null, null,
-				    null);
+				return serviceRequestService.searchForServiceRequests(params, null, null, null, null, null, null, null);
 		}
 		
 		return null;

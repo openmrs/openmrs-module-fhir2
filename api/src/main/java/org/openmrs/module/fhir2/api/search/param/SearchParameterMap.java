@@ -59,7 +59,7 @@ public class SearchParameterMap implements Serializable {
 		if (key == null || param == null) {
 			return this;
 		}
-
+		
 		List<PropParam<?>> params = this.params.getOrDefault(key, new ArrayList<>());
 		params.add(PropParam.builder().param(param).propertyName(propertyName).build());
 		this.params.put(key, params);
