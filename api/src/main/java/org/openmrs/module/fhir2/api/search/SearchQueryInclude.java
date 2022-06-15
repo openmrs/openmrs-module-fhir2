@@ -48,6 +48,7 @@ import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
+import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -219,8 +220,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	private IBundleProvider handleObservationReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
-				return observationService.searchForObservations(null, null, params, null, null, null, null, null, null, null,
-				    null, null, null, null, null);
+				ObservationSearchParams observationSearchParams = new ObservationSearchParams();
+				observationSearchParams.setHasMember(params);
+				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
 				return diagnosticReportService.searchForDiagnosticReports(null, null, null, null, params, null, null, null,
 				    null);
@@ -249,8 +251,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	private IBundleProvider handleEncounterReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
-				return observationService.searchForObservations(params, null, null, null, null, null, null, null, null, null,
-				    null, null, null, null, null);
+				ObservationSearchParams observationSearchParams = new ObservationSearchParams();
+				observationSearchParams.setEncounter(params);
+				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
 				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
 				    null);
@@ -278,8 +281,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	private IBundleProvider handlePatientReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
-				return observationService.searchForObservations(null, params, null, null, null, null, null, null, null, null,
-				    null, null, null, null, null);
+				ObservationSearchParams observationSearchParams = new ObservationSearchParams();
+				observationSearchParams.setPatient(params);
+				return observationService.searchForObservations(observationSearchParams);
 			case FhirConstants.DIAGNOSTIC_REPORT:
 				return diagnosticReportService.searchForDiagnosticReports(null, params, null, null, null, null, null, null,
 				    null);

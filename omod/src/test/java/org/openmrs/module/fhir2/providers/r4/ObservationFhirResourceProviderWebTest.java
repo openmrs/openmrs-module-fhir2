@@ -34,15 +34,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -64,6 +63,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
+import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -101,37 +101,10 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	private FhirObservationService observationService;
 	
 	@Captor
-	private ArgumentCaptor<ReferenceAndListParam> patientCaptor;
-	
-	@Captor
-	private ArgumentCaptor<ReferenceAndListParam> encounterCaptor;
-	
-	@Captor
-	private ArgumentCaptor<TokenAndListParam> codeCaptor;
-	
-	@Captor
-	private ArgumentCaptor<ReferenceAndListParam> memberCaptor;
-	
-	@Captor
-	private ArgumentCaptor<TokenAndListParam> valueCodeCaptor;
-	
-	@Captor
-	private ArgumentCaptor<DateRangeParam> dateCaptor;
-	
-	@Captor
-	private ArgumentCaptor<QuantityAndListParam> valueQuantityCaptor;
-	
-	@Captor
-	private ArgumentCaptor<StringAndListParam> stringAndListCaptor;
-	
-	@Captor
-	private ArgumentCaptor<DateRangeParam> valueDateCaptor;
-	
-	@Captor
-	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
-	
-	@Captor
 	private ArgumentCaptor<NumberParam> maxCaptor;
+	
+	@Captor
+	private ArgumentCaptor<ObservationSearchParams> searchParamsCaptor;
 	
 	private Observation observation;
 	
@@ -202,16 +175,65 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	}
 	
 	@Test
+	public void shouldGetObservationsWithoutSearchParams() throws Exception {
+		verifyUri("/Observation");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
+		
+		ReferenceAndListParam encounter = searchParamsCaptor.getValue().getEncounter();
+		assertThat(encounter, nullValue());
+		
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		assertThat(patient, nullValue());
+		
+		ReferenceAndListParam hasMember = searchParamsCaptor.getValue().getHasMember();
+		assertThat(hasMember, nullValue());
+		
+		TokenAndListParam valueConcept = searchParamsCaptor.getValue().getValueConcept();
+		assertThat(valueConcept, nullValue());
+		
+		DateRangeParam valueDate = searchParamsCaptor.getValue().getValueDate();
+		assertThat(valueDate, nullValue());
+		
+		QuantityAndListParam valueQuantity = searchParamsCaptor.getValue().getValueQuantity();
+		assertThat(valueQuantity, nullValue());
+		
+		StringAndListParam valueString = searchParamsCaptor.getValue().getValueString();
+		assertThat(valueString, nullValue());
+		
+		DateRangeParam date = searchParamsCaptor.getValue().getDate();
+		assertThat(date, nullValue());
+		
+		TokenAndListParam code = searchParamsCaptor.getValue().getCode();
+		assertThat(code, nullValue());
+		
+		TokenAndListParam category = searchParamsCaptor.getValue().getCategory();
+		assertThat(category, nullValue());
+		
+		TokenAndListParam id = searchParamsCaptor.getValue().getId();
+		assertThat(id, nullValue());
+		
+		DateRangeParam lastUpdated = searchParamsCaptor.getValue().getLastUpdated();
+		assertThat(lastUpdated, nullValue());
+		
+		SortSpec sort = searchParamsCaptor.getValue().getSort();
+		assertThat(sort, nullValue());
+		
+		HashSet<Include> includes = searchParamsCaptor.getValue().getIncludes();
+		assertThat(includes, nullValue());
+		
+		HashSet<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
+		assertThat(revIncludes, nullValue());
+	}
+	
+	@Test
 	public void shouldGetObservationsBySubjectUuid() throws Exception {
 		verifyUri("/Observation?subject=" + PATIENT_UUID);
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
 		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
 		assertThat(referenceParam.getChain(), equalTo(null));
 	}
@@ -220,13 +242,12 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	public void shouldGetObservationsByPatientUuid() throws Exception {
 		verifyUri("/Observation?subject:Patient=" + PATIENT_UUID);
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
 		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
 		assertThat(referenceParam.getResourceType(), equalTo("Patient"));
 		assertThat(referenceParam.getChain(), equalTo(null));
@@ -235,14 +256,12 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByPatientIdentifier() throws Exception {
 		verifyUri("/Observation?subject.identifier=M4001-1");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
 		assertThat(referenceParam.getChain(), equalTo("identifier"));
 		assertThat(referenceParam.getValue(), equalTo("M4001-1"));
 	}
@@ -250,49 +269,41 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByPatientIdentifierWithOr() throws Exception {
 		verifyUri("/Observation?subject.identifier=M4001-1,ABS098,YT56RE,IU23O");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
-		assertThat(patientCaptor.getAllValues().iterator().next().getValuesAsQueryTokens().iterator().next()
-		        .getValuesAsQueryTokens().iterator().next().getChain(),
-		    equalTo("identifier"));
+		assertThat(patient, notNullValue());
+		assertThat(patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size(), equalTo(4));
+		assertThat(referenceParam.getChain(), equalTo("identifier"));
 		assertThat(referenceParam.getValue(), equalTo("M4001-1"));
-		assertThat(orListParams.get(0).getValuesAsQueryTokens().size(), equalTo(4));
 	}
 	
 	@Test
 	public void shouldGetObservationsByPatientIdentifierWithAnd() throws Exception {
 		verifyUri(
 		    "/Observation?subject.identifier=M4001-1&subject.identifier=ABS098&subject.identifier=YT56RE&subject.identifier=IU23O");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
+		assertThat(patient.getValuesAsQueryTokens().size(), equalTo(4));
 		assertThat(referenceParam.getChain(), equalTo("identifier"));
 		assertThat(referenceParam.getValue(), equalTo("M4001-1"));
-		assertThat(patientCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(4));
 	}
 	
 	@Test
 	public void shouldGetObservationsByPatientName() throws Exception {
 		verifyUri("/Observation?subject.name=Hannibal Lector");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
 		assertThat(referenceParam.getChain(), equalTo("name"));
 		assertThat(referenceParam.getValue(), equalTo("Hannibal Lector"));
 	}
@@ -300,14 +311,12 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByPatientGivenName() throws Exception {
 		verifyUri("/Observation?subject.given=Hannibal");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
 		assertThat(referenceParam.getChain(), equalTo("given"));
 		assertThat(referenceParam.getValue(), equalTo("Hannibal"));
 	}
@@ -315,46 +324,40 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByPatientGivenNameWithOr() throws Exception {
 		verifyUri("/Observation?subject.given=Hannibal,Smith");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
+		assertThat(patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size(), equalTo(2));
 		assertThat(referenceParam.getChain(), equalTo("given"));
 		assertThat(referenceParam.getValue(), equalTo("Hannibal"));
-		assertThat(orListParams.get(0).getValuesAsQueryTokens().size(), equalTo(2));
 	}
 	
 	@Test
 	public void shouldGetObservationsByPatientGivenNameWithAnd() throws Exception {
 		verifyUri("/Observation?subject.given=Hannibal&subject.given=Smith");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
+		assertThat(patient.getValuesAsQueryTokens().size(), equalTo(2));
 		assertThat(referenceParam.getChain(), equalTo("given"));
 		assertThat(referenceParam.getValue(), equalTo("Hannibal"));
-		assertThat(patientCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(2));
 	}
 	
 	@Test
 	public void shouldGetObservationsByPatientFamilyName() throws Exception {
 		verifyUri("/Observation?subject.family=Lector");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
 		assertThat(referenceParam.getChain(), equalTo("family"));
 		assertThat(referenceParam.getValue(), equalTo("Lector"));
 	}
@@ -362,46 +365,40 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByPatientFamilyNameWithOr() throws Exception {
 		verifyUri("/Observation?subject.family=Lector,Rick,Tom");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
+		assertThat(patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size(), equalTo(3));
 		assertThat(referenceParam.getChain(), equalTo("family"));
 		assertThat(referenceParam.getValue(), equalTo("Lector"));
-		assertThat(orListParams.get(0).getValuesAsQueryTokens().size(), equalTo(3));
 	}
 	
 	@Test
 	public void shouldGetObservationsByPatientFamilyNameWithAnd() throws Exception {
 		verifyUri("/Observation?subject.family=Lector&subject.family=Rick&subject.family=Tom");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
+		assertThat(patient.getValuesAsQueryTokens().size(), equalTo(3));
 		assertThat(referenceParam.getChain(), equalTo("family"));
 		assertThat(referenceParam.getValue(), equalTo("Lector"));
-		assertThat(patientCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(3));
 	}
 	
 	@Test
 	public void shouldGetObservationsByEncounterUuid() throws Exception {
 		verifyUri("/Observation?encounter=c4aa5682-90cf-48e8-87c9-a6066ffd3a3f");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(encounterCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam encounter = searchParamsCaptor.getValue().getEncounter();
+		ReferenceParam referenceParam = encounter.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = encounterCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(encounterCaptor.getValue(), notNullValue());
+		assertThat(encounter, notNullValue());
 		assertThat(referenceParam.getIdPart(), equalTo("c4aa5682-90cf-48e8-87c9-a6066ffd3a3f"));
 		assertThat(referenceParam.getChain(), equalTo(null));
 	}
@@ -409,45 +406,42 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByEncounterUuidWithOr() throws Exception {
 		verifyUri("/Observation?encounter=c4aa5682-90cf-48e8-87c9-a6066ffd3a3f,c4aa5682-90cf-48e8-87c9-auyt23ffd3a3f");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(encounterCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam encounter = searchParamsCaptor.getValue().getEncounter();
+		ReferenceParam referenceParam = encounter.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = encounterCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(encounterCaptor.getValue(), notNullValue());
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size(), equalTo(2));
 		assertThat(referenceParam.getIdPart(), equalTo("c4aa5682-90cf-48e8-87c9-a6066ffd3a3f"));
-		assertThat(orListParams.get(0).getValuesAsQueryTokens().size(), equalTo(2));
 	}
 	
 	@Test
 	public void shouldGetObservationsByEncounterUuidWithAnd() throws Exception {
 		verifyUri(
 		    "/Observation?encounter=c4aa5682-90cf-48e8-87c9-a6066ffd3a3f&encounter=c4aa5682-90cf-48e8-87c9-auyt23ffd3a3f");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(encounterCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam encounter = searchParamsCaptor.getValue().getEncounter();
+		ReferenceParam referenceParam = encounter.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = encounterCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(encounterCaptor.getValue(), notNullValue());
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getValuesAsQueryTokens().size(), equalTo(2));
 		assertThat(referenceParam.getIdPart(), equalTo("c4aa5682-90cf-48e8-87c9-a6066ffd3a3f"));
-		assertThat(encounterCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(2));
 	}
 	
 	@Test
 	public void shouldGetObservationsByConceptId() throws Exception {
 		verifyUri("/Observation?code=5098");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		TokenAndListParam code = searchParamsCaptor.getValue().getCode();
+		TokenOrListParam orListParam = code.getValuesAsQueryTokens().get(0);
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
+		assertThat(code, notNullValue());
+		assertThat(code.getValuesAsQueryTokens(), notNullValue());
+		assertThat(code.getValuesAsQueryTokens().size(), equalTo(1));
+		
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
@@ -457,14 +451,15 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByCategory() throws Exception {
 		verifyUri("/Observation?category=laboratory");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		TokenAndListParam category = searchParamsCaptor.getValue().getCategory();
+		TokenOrListParam orListParam = category.getValuesAsQueryTokens().get(0);
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
+		assertThat(category, notNullValue());
+		assertThat(category.getValuesAsQueryTokens(), notNullValue());
+		assertThat(category.getValuesAsQueryTokens().size(), equalTo(1));
+		
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
@@ -474,14 +469,15 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByConceptAndSystem() throws Exception {
 		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		TokenAndListParam code = searchParamsCaptor.getValue().getCode();
+		TokenOrListParam orListParam = code.getValuesAsQueryTokens().get(0);
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
+		assertThat(code, notNullValue());
+		assertThat(code.getValuesAsQueryTokens(), notNullValue());
+		assertThat(code.getValuesAsQueryTokens().size(), equalTo(1));
+		
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
@@ -491,14 +487,15 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByConceptsAndSystem() throws Exception {
 		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098," + URL_ENCODED_CIEL_URI + "|5001");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		TokenAndListParam code = searchParamsCaptor.getValue().getCode();
+		TokenOrListParam orListParam = code.getValuesAsQueryTokens().get(0);
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
+		assertThat(code, notNullValue());
+		assertThat(code.getValuesAsQueryTokens(), notNullValue());
+		assertThat(code.getValuesAsQueryTokens().size(), equalTo(1));
+		
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(2));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
@@ -510,136 +507,132 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByPatientAndConcept() throws Exception {
 		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098&subject:Patient=" + PATIENT_UUID);
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), patientCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		TokenAndListParam code = searchParamsCaptor.getValue().getCode();
+		ReferenceParam patientReferenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
+		TokenOrListParam codeOrListParam = code.getValuesAsQueryTokens().get(0);
 		
 		// verify patient parameter
-		assertThat(patientCaptor.getValue(), notNullValue());
-		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
-		assertThat(referenceParam.getResourceType(), equalTo("Patient"));
+		assertThat(patient, notNullValue());
+		assertThat(patientReferenceParam.getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(patientReferenceParam.getResourceType(), equalTo("Patient"));
 		
 		// verify code parameter
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(code, notNullValue());
+		assertThat(code.getValuesAsQueryTokens(), notNullValue());
+		assertThat(code.getValuesAsQueryTokens().size(), equalTo(1));
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
-		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
-		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5098"));
+		assertThat(codeOrListParam.getValuesAsQueryTokens(), notNullValue());
+		assertThat(codeOrListParam.getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(codeOrListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
+		assertThat(codeOrListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5098"));
 	}
 	
 	@Test
 	public void shouldGetObservationsByMemberAndConcept() throws Exception {
 		verifyUri("/Observation?code=" + URL_ENCODED_CIEL_URI + "|5098&has-member=" + MEMBER_UUID);
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), memberCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam member = searchParamsCaptor.getValue().getHasMember();
+		TokenAndListParam code = searchParamsCaptor.getValue().getCode();
+		ReferenceParam memberReferenceParam = member.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
+		TokenOrListParam codeOrListParam = code.getValuesAsQueryTokens().get(0);
 		
 		// verify member parameter
-		assertThat(memberCaptor.getValue(), notNullValue());
-		assertThat(memberCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getIdPart(),
-		    equalTo(MEMBER_UUID));
+		assertThat(member, notNullValue());
+		assertThat(memberReferenceParam.getIdPart(), equalTo(MEMBER_UUID));
 		
 		// verify code parameter
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(code, notNullValue());
+		assertThat(code.getValuesAsQueryTokens(), notNullValue());
+		assertThat(code.getValuesAsQueryTokens().size(), equalTo(1));
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
-		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
-		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5098"));
+		assertThat(codeOrListParam.getValuesAsQueryTokens(), notNullValue());
+		assertThat(codeOrListParam.getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(codeOrListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
+		assertThat(codeOrListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5098"));
 	}
 	
 	@Test
 	public void shouldGetObservationsByMemberCode() throws Exception {
 		verifyUri("/Observation?has-member.code=5098");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), memberCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		ReferenceAndListParam member = searchParamsCaptor.getValue().getHasMember();
+		ReferenceParam memberReferenceParam = member.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		assertThat(memberCaptor.getValue(), notNullValue());
-		assertThat(memberCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
-		    equalTo(Observation.SP_CODE));
-		assertThat(memberCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo("5098"));
+		assertThat(member, notNullValue());
+		assertThat(memberReferenceParam.getChain(), equalTo(org.hl7.fhir.dstu3.model.Observation.SP_CODE));
+		assertThat(memberReferenceParam.getValue(), equalTo("5098"));
 	}
 	
 	@Test
 	public void shouldGetObservationsByValueDate() throws Exception {
 		verifyUri("/Observation?value-date=ge1975-02-02");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), valueDateCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		DateRangeParam valueDate = searchParamsCaptor.getValue().getValueDate();
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(valueDateCaptor.getValue().getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(valueDateCaptor.getValue().getUpperBound(), nullValue());
+		assertThat(valueDate.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(valueDate.getUpperBound(), nullValue());
 	}
 	
 	@Test
 	public void shouldGetObservationsByValueQuantity() throws Exception {
 		verifyUri("/Observation?value-quantity=134.0");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    valueQuantityCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull());
+		QuantityAndListParam valueQuantity = searchParamsCaptor.getValue().getValueQuantity();
 		
-		assertThat(valueQuantityCaptor.getValue(), notNullValue());
-		assertThat(valueQuantityCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(valueQuantityCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(valueQuantity, notNullValue());
+		assertThat(valueQuantity.getValuesAsQueryTokens(), not(empty()));
+		assertThat(valueQuantity.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(BigDecimal.valueOf(134.0)));
 	}
 	
 	@Test
 	public void shouldGetObservationsByValueString() throws Exception {
 		verifyUri("/Observation?value-string=AFH56");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		StringAndListParam valueString = searchParamsCaptor.getValue().getValueString();
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo("AFH56"));
+		assertThat(valueString, notNullValue());
+		assertThat(valueString.getValuesAsQueryTokens(), not(empty()));
+		assertThat(valueString.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo("AFH56"));
 	}
 	
 	@Test
 	public void shouldGetObservationsByDate() throws Exception {
 		verifyUri("/Observation?date=ge1975-02-02");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), dateCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		DateRangeParam date = searchParamsCaptor.getValue().getDate();
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateCaptor.getValue().getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateCaptor.getValue().getUpperBound(), nullValue());
+		assertThat(date.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(date.getUpperBound(), nullValue());
 	}
 	
 	@Test
 	public void shouldGetObservationsByValueConcept() throws Exception {
 		verifyUri("/Observation?value-concept=5098");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), valueCodeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(valueCodeCaptor.getValue(), notNullValue());
-		assertThat(valueCodeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(valueCodeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		TokenAndListParam valueConcept = searchParamsCaptor.getValue().getValueConcept();
+		TokenOrListParam orListParam = valueConcept.getValuesAsQueryTokens().get(0);
 		
-		TokenOrListParam orListParam = valueCodeCaptor.getValue().getValuesAsQueryTokens().get(0);
+		assertThat(valueConcept, notNullValue());
+		assertThat(valueConcept.getValuesAsQueryTokens(), notNullValue());
+		assertThat(valueConcept.getValuesAsQueryTokens().size(), equalTo(1));
+		
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
@@ -649,14 +642,15 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByValueConceptsAndSystem() throws Exception {
 		verifyUri("/Observation?value-concept=" + URL_ENCODED_CIEL_URI + "|5098," + URL_ENCODED_CIEL_URI + "|5001");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), valueCodeCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(valueCodeCaptor.getValue(), notNullValue());
-		assertThat(valueCodeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(valueCodeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		TokenAndListParam valueConcept = searchParamsCaptor.getValue().getValueConcept();
+		TokenOrListParam orListParam = valueConcept.getValuesAsQueryTokens().get(0);
 		
-		TokenOrListParam orListParam = valueCodeCaptor.getValue().getValuesAsQueryTokens().get(0);
+		assertThat(valueConcept, notNullValue());
+		assertThat(valueConcept.getValuesAsQueryTokens(), notNullValue());
+		assertThat(valueConcept.getValuesAsQueryTokens().size(), equalTo(1));
+		
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(2));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), equalTo(CIEL_URI));
@@ -668,146 +662,136 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void shouldGetObservationsByUUID() throws Exception {
 		verifyUri(String.format("/Observation?_id=%s", OBS_UUID));
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), codeCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		TokenAndListParam uuid = searchParamsCaptor.getValue().getId();
 		
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(OBS_UUID));
+		assertThat(uuid, notNullValue());
+		assertThat(uuid.getValuesAsQueryTokens(), not(empty()));
+		assertThat(uuid.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(OBS_UUID));
 	}
 	
 	@Test
 	public void shouldGetObservationsByLastUpdatedDate() throws Exception {
 		verifyUri(String.format("/Observation?_lastUpdated=%s", LAST_UPDATED_DATE));
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), dateCaptor.capture(), isNull(), isNull(), isNull());
+		DateRangeParam lastUpdated = searchParamsCaptor.getValue().getLastUpdated();
 		
-		assertThat(dateCaptor.getValue(), notNullValue());
+		assertThat(lastUpdated, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2020, Calendar.SEPTEMBER, 3);
 		
-		assertThat(dateCaptor.getValue().getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateCaptor.getValue().getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(lastUpdated.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(lastUpdated.getUpperBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
 	public void shouldIncludeEncounterWithReturnedObservations() throws Exception {
 		verifyUri("/Observation?_include=Observation:encounter");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
+		HashSet<Include> includes = searchParamsCaptor.getValue().getIncludes();
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(includes, notNullValue());
+		assertThat(includes.size(), equalTo(1));
+		assertThat(includes.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM));
+		assertThat(includes.iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
 	}
 	
 	@Test
 	public void shouldIncludePatientWithReturnedObservations() throws Exception {
 		verifyUri("/Observation?_include=Observation:patient");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
+		HashSet<Include> includes = searchParamsCaptor.getValue().getIncludes();
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(includes, notNullValue());
+		assertThat(includes.size(), equalTo(1));
+		assertThat(includes.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
+		assertThat(includes.iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
 	}
 	
 	@Test
 	public void shouldIncludeObservationGroupMembersWithReturnedObservations() throws Exception {
 		verifyUri("/Observation?_include=Observation:has-member");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
+		HashSet<Include> includes = searchParamsCaptor.getValue().getIncludes();
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_HAS_MEMBER_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(includes, notNullValue());
+		assertThat(includes.size(), equalTo(1));
+		assertThat(includes.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_HAS_MEMBER_PARAM));
+		assertThat(includes.iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
 	}
 	
 	@Test
 	public void shouldHandleMultipleIncludes() throws Exception {
 		verifyUri("/Observation?_include=Observation:has-member&_include=Observation:encounter");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull());
+		HashSet<Include> includes = searchParamsCaptor.getValue().getIncludes();
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
+		assertThat(includes, notNullValue());
+		assertThat(includes.size(), equalTo(2));
 		
-		assertThat(includeArgumentCaptor.getValue(),
-		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_HAS_MEMBER_PARAM)),
-		        hasProperty("paramType", equalTo(FhirConstants.OBSERVATION)))));
-		assertThat(includeArgumentCaptor.getValue(),
-		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM)),
-		        hasProperty("paramType", equalTo(FhirConstants.OBSERVATION)))));
+		assertThat(includes, hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_HAS_MEMBER_PARAM)),
+		    hasProperty("paramType", equalTo(FhirConstants.OBSERVATION)))));
+		assertThat(includes, hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM)),
+		    hasProperty("paramType", equalTo(FhirConstants.OBSERVATION)))));
 	}
 	
 	@Test
 	public void shouldReverseIncludeObservationsWithReturnedObservations() throws Exception {
 		verifyUri("/Observation?_revinclude=Observation:has-member");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		HashSet<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_HAS_MEMBER_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(revIncludes, notNullValue());
+		assertThat(revIncludes.size(), equalTo(1));
+		assertThat(revIncludes.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_HAS_MEMBER_PARAM));
+		assertThat(revIncludes.iterator().next().getParamType(), equalTo(FhirConstants.OBSERVATION));
 	}
 	
 	@Test
 	public void shouldReverseIncludeDiagnosticReportsWithReturnedObservations() throws Exception {
 		verifyUri("/Observation?_revinclude=DiagnosticReport:result");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		HashSet<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_RESULT_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
-		    equalTo(FhirConstants.DIAGNOSTIC_REPORT));
+		assertThat(revIncludes, notNullValue());
+		assertThat(revIncludes.size(), equalTo(1));
+		assertThat(revIncludes.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_RESULT_PARAM));
+		assertThat(revIncludes.iterator().next().getParamType(), equalTo(FhirConstants.DIAGNOSTIC_REPORT));
 	}
 	
 	@Test
 	public void shouldHandleMultipleReverseIncludes() throws Exception {
 		verifyUri("/Observation?_revinclude=Observation:has-member&_revinclude=DiagnosticReport:result");
+		verify(observationService).searchForObservations(searchParamsCaptor.capture());
 		
-		verify(observationService).searchForObservations(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture());
+		HashSet<Include> revIncludes = searchParamsCaptor.getValue().getRevIncludes();
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
+		assertThat(revIncludes, notNullValue());
+		assertThat(revIncludes.size(), equalTo(2));
 		
-		assertThat(includeArgumentCaptor.getValue(),
-		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_HAS_MEMBER_PARAM)),
-		        hasProperty("paramType", equalTo(FhirConstants.OBSERVATION)))));
-		assertThat(includeArgumentCaptor.getValue(),
-		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_RESULT_PARAM)),
-		        hasProperty("paramType", equalTo(FhirConstants.DIAGNOSTIC_REPORT)))));
+		assertThat(revIncludes, hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_HAS_MEMBER_PARAM)),
+		    hasProperty("paramType", equalTo(FhirConstants.OBSERVATION)))));
+		assertThat(revIncludes, hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_RESULT_PARAM)),
+		    hasProperty("paramType", equalTo(FhirConstants.DIAGNOSTIC_REPORT)))));
 	}
 	
 	@Test
 	public void lastn_shouldHandleRequestWithMaxParameter() throws Exception {
 		verifyLastnOperation("/Observation/$lastn?max=3");
+		verify(observationService).getLastnObservations(maxCaptor.capture(), searchParamsCaptor.capture());
 		
-		verify(observationService).getLastnObservations(maxCaptor.capture(), isNull(), isNull(), isNull());
+		assertThat(searchParamsCaptor.getValue().getPatient(), nullValue());
+		assertThat(searchParamsCaptor.getValue().getCategory(), nullValue());
+		assertThat(searchParamsCaptor.getValue().getCode(), nullValue());
 		
 		assertThat(maxCaptor.getValue(), notNullValue());
 		assertThat(maxCaptor.getValue().getValue().intValue(), equalTo(3));
@@ -816,13 +800,12 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void lastn_shouldHandleRequestWithPatientId() throws Exception {
 		verifyLastnOperation("/Observation/$lastn?subject=" + PATIENT_UUID);
+		verify(observationService).getLastnObservations(isNull(), searchParamsCaptor.capture());
 		
-		verify(observationService).getLastnObservations(isNull(), patientCaptor.capture(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
 		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
 		assertThat(referenceParam.getChain(), equalTo(null));
 	}
@@ -830,14 +813,15 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void lastn_shouldHandleRequestWithCategory() throws Exception {
 		verifyLastnOperation("/Observation/$lastn?category=laboratory");
+		verify(observationService).getLastnObservations(isNull(), searchParamsCaptor.capture());
 		
-		verify(observationService).getLastnObservations(isNull(), isNull(), codeCaptor.capture(), isNull());
+		TokenAndListParam category = searchParamsCaptor.getValue().getCategory();
+		TokenOrListParam orListParam = category.getValuesAsQueryTokens().get(0);
 		
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(category, notNullValue());
+		assertThat(category.getValuesAsQueryTokens(), notNullValue());
+		assertThat(category.getValuesAsQueryTokens().size(), equalTo(1));
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
@@ -847,14 +831,15 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void lastn_shouldHandleRequestWithCode() throws Exception {
 		verifyLastnOperation("/Observation/$lastn?code=5085");
+		verify(observationService).getLastnObservations(isNull(), searchParamsCaptor.capture());
 		
-		verify(observationService).getLastnObservations(isNull(), isNull(), isNull(), codeCaptor.capture());
+		TokenAndListParam code = searchParamsCaptor.getValue().getCode();
+		TokenOrListParam orListParam = code.getValuesAsQueryTokens().get(0);
 		
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(code, notNullValue());
+		assertThat(code.getValuesAsQueryTokens(), notNullValue());
+		assertThat(code.getValuesAsQueryTokens().size(), equalTo(1));
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
@@ -864,36 +849,52 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void lastn_shouldHandleRequestWithAllParameters() throws Exception {
 		verifyLastnOperation("/Observation/$lastn?max=2&subject=" + PATIENT_UUID + "&category=laboratory&code=5085");
+		verify(observationService).getLastnObservations(maxCaptor.capture(), searchParamsCaptor.capture());
 		
-		verify(observationService).getLastnObservations(maxCaptor.capture(), patientCaptor.capture(), codeCaptor.capture(),
-		    codeCaptor.capture());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		TokenAndListParam category = searchParamsCaptor.getValue().getCategory();
+		TokenAndListParam code = searchParamsCaptor.getValue().getCode();
+		ReferenceParam patientParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
+		TokenOrListParam codeOrListParam = code.getValuesAsQueryTokens().get(0);
+		TokenOrListParam categoryOrListParam = category.getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
+		// verify max parameter
 		assertThat(maxCaptor.getValue(), notNullValue());
 		assertThat(maxCaptor.getValue().getValue().intValue(), equalTo(2));
 		
-		assertThat(patientCaptor.getValue(), notNullValue());
-		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
-		assertThat(referenceParam.getChain(), equalTo(null));
+		// verify patient
+		assertThat(patientParam.getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(patientParam.getChain(), equalTo(null));
 		
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(code, notNullValue());
+		assertThat(code.getValuesAsQueryTokens(), notNullValue());
+		assertThat(code.getValuesAsQueryTokens().size(), equalTo(1));
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
-		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
-		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5085"));
+		// verify category
+		assertThat(category, notNullValue());
+		assertThat(category.getValuesAsQueryTokens(), notNullValue());
+		assertThat(category.getValuesAsQueryTokens().size(), equalTo(1));
+		
+		assertThat(categoryOrListParam.getValuesAsQueryTokens(), notNullValue());
+		assertThat(categoryOrListParam.getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(categoryOrListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
+		assertThat(categoryOrListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("laboratory"));
+		
+		// verify code
+		assertThat(codeOrListParam.getValuesAsQueryTokens(), notNullValue());
+		assertThat(codeOrListParam.getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(codeOrListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
+		assertThat(codeOrListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5085"));
 	}
 	
 	@Test
 	public void lastnEncounters_shouldHandleRequestWithMaxParameter() throws Exception {
 		verifyLastnEncountersOperation("/Observation/$lastn-encounters?max=3");
+		verify(observationService).getLastnEncountersObservations(maxCaptor.capture(), searchParamsCaptor.capture());
 		
-		verify(observationService).getLastnEncountersObservations(maxCaptor.capture(), isNull(), isNull(), isNull());
+		assertThat(searchParamsCaptor.getValue().getPatient(), nullValue());
+		assertThat(searchParamsCaptor.getValue().getCategory(), nullValue());
+		assertThat(searchParamsCaptor.getValue().getCode(), nullValue());
 		
 		assertThat(maxCaptor.getValue(), notNullValue());
 		assertThat(maxCaptor.getValue().getValue().intValue(), equalTo(3));
@@ -902,13 +903,12 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void lastnEncounters_shouldHandleRequestWithPatientId() throws Exception {
 		verifyLastnEncountersOperation("/Observation/$lastn-encounters?subject=" + PATIENT_UUID);
+		verify(observationService).getLastnEncountersObservations(isNull(), searchParamsCaptor.capture());
 		
-		verify(observationService).getLastnEncountersObservations(isNull(), patientCaptor.capture(), isNull(), isNull());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		ReferenceParam referenceParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
-		assertThat(patientCaptor.getValue(), notNullValue());
+		assertThat(patient, notNullValue());
 		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
 		assertThat(referenceParam.getChain(), equalTo(null));
 	}
@@ -916,14 +916,15 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void lastnEncounters_shouldHandleRequestWithCategory() throws Exception {
 		verifyLastnEncountersOperation("/Observation/$lastn-encounters?category=laboratory");
+		verify(observationService).getLastnEncountersObservations(isNull(), searchParamsCaptor.capture());
 		
-		verify(observationService).getLastnEncountersObservations(isNull(), isNull(), codeCaptor.capture(), isNull());
+		TokenAndListParam category = searchParamsCaptor.getValue().getCategory();
+		TokenOrListParam orListParam = category.getValuesAsQueryTokens().get(0);
 		
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(category, notNullValue());
+		assertThat(category.getValuesAsQueryTokens(), notNullValue());
+		assertThat(category.getValuesAsQueryTokens().size(), equalTo(1));
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
@@ -933,14 +934,15 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	@Test
 	public void lastnEncounters_shouldHandleRequestWithCode() throws Exception {
 		verifyLastnEncountersOperation("/Observation/$lastn-encounters?code=5085");
+		verify(observationService).getLastnEncountersObservations(isNull(), searchParamsCaptor.capture());
 		
-		verify(observationService).getLastnEncountersObservations(isNull(), isNull(), isNull(), codeCaptor.capture());
+		TokenAndListParam code = searchParamsCaptor.getValue().getCode();
+		TokenOrListParam orListParam = code.getValuesAsQueryTokens().get(0);
 		
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(code, notNullValue());
+		assertThat(code.getValuesAsQueryTokens(), notNullValue());
+		assertThat(code.getValuesAsQueryTokens().size(), equalTo(1));
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
 		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
 		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
 		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
@@ -951,36 +953,49 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	public void lastnEncounters_shouldHandleRequestWithAllParameters() throws Exception {
 		verifyLastnEncountersOperation(
 		    "/Observation/$lastn-encounters?max=2&subject=" + PATIENT_UUID + "&category=laboratory&code=5085");
+		verify(observationService).getLastnEncountersObservations(maxCaptor.capture(), searchParamsCaptor.capture());
 		
-		verify(observationService).getLastnEncountersObservations(maxCaptor.capture(), patientCaptor.capture(),
-		    codeCaptor.capture(), codeCaptor.capture());
+		ReferenceAndListParam patient = searchParamsCaptor.getValue().getPatient();
+		TokenAndListParam category = searchParamsCaptor.getValue().getCategory();
+		TokenAndListParam code = searchParamsCaptor.getValue().getCode();
+		ReferenceParam patientParam = patient.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
+		TokenOrListParam codeOrListParam = code.getValuesAsQueryTokens().get(0);
+		TokenOrListParam categoryOrListParam = category.getValuesAsQueryTokens().get(0);
 		
-		List<ReferenceOrListParam> orListParams = patientCaptor.getValue().getValuesAsQueryTokens();
-		ReferenceParam referenceParam = orListParams.get(0).getValuesAsQueryTokens().get(0);
-		
+		// verify max parameter
 		assertThat(maxCaptor.getValue(), notNullValue());
 		assertThat(maxCaptor.getValue().getValue().intValue(), equalTo(2));
 		
-		assertThat(patientCaptor.getValue(), notNullValue());
-		assertThat(referenceParam.getIdPart(), equalTo(PATIENT_UUID));
-		assertThat(referenceParam.getChain(), equalTo(null));
+		// verify patient
+		assertThat(patientParam.getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(patientParam.getChain(), equalTo(null));
 		
-		assertThat(codeCaptor.getValue(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens(), notNullValue());
-		assertThat(codeCaptor.getValue().getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(code, notNullValue());
+		assertThat(code.getValuesAsQueryTokens(), notNullValue());
+		assertThat(code.getValuesAsQueryTokens().size(), equalTo(1));
 		
-		TokenOrListParam orListParam = codeCaptor.getValue().getValuesAsQueryTokens().get(0);
-		assertThat(orListParam.getValuesAsQueryTokens(), notNullValue());
-		assertThat(orListParam.getValuesAsQueryTokens().size(), equalTo(1));
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
-		assertThat(orListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5085"));
+		// verify category
+		assertThat(category, notNullValue());
+		assertThat(category.getValuesAsQueryTokens(), notNullValue());
+		assertThat(category.getValuesAsQueryTokens().size(), equalTo(1));
+		
+		assertThat(categoryOrListParam.getValuesAsQueryTokens(), notNullValue());
+		assertThat(categoryOrListParam.getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(categoryOrListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
+		assertThat(categoryOrListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("laboratory"));
+		
+		// verify code
+		assertThat(codeOrListParam.getValuesAsQueryTokens(), notNullValue());
+		assertThat(codeOrListParam.getValuesAsQueryTokens().size(), equalTo(1));
+		assertThat(codeOrListParam.getValuesAsQueryTokens().get(0).getSystem(), nullValue());
+		assertThat(codeOrListParam.getValuesAsQueryTokens().get(0).getValue(), equalTo("5085"));
 	}
 	
 	private void verifyLastnOperation(String uri) throws Exception {
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
 		
-		when(observationService.getLastnObservations(any(), any(), any(), any()))
+		when(observationService.getLastnObservations(any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
@@ -999,7 +1014,7 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
 		
-		when(observationService.getLastnEncountersObservations(any(), any(), any(), any()))
+		when(observationService.getLastnEncountersObservations(any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
@@ -1017,9 +1032,8 @@ public class ObservationFhirResourceProviderWebTest extends BaseFhirR4ResourcePr
 	private void verifyUri(String uri) throws Exception {
 		Observation observation = new Observation();
 		observation.setId(OBS_UUID);
-		when(observationService.searchForObservations(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
-		    any(), any(), any(), any(), any()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		when(observationService.searchForObservations(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
