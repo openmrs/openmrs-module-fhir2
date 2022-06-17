@@ -19,7 +19,7 @@ public interface CodingTranslator extends ToFhirTranslator<Concept, Coding>, ToO
 	
 	/**
 	 * Maps {@link Concept} to a {@link Coding}
-	 * 
+	 *
 	 * @param concept to translate
 	 * @return the corresponding FHIR {@link Coding}
 	 */
@@ -28,7 +28,7 @@ public interface CodingTranslator extends ToFhirTranslator<Concept, Coding>, ToO
 	
 	/**
 	 * Maps a {@link ICoding} to an OpenMRS {@link Concept}
-	 * 
+	 *
 	 * @param coding the FHIR Coding to translate
 	 * @return the corresponding OpenMRS {@link Concept}
 	 */
