@@ -10,18 +10,18 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.everyItem;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -682,10 +682,11 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter, validResource());
 		assertThat(encounter.getIdElement().getIdPart(), equalTo(VISIT_UUID));
 	}
-
+	
 	@Test
 	public void shouldReturnEncounterEverythingAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Encounter/"+ENCOUNTER_UUID+"/$everything").accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything").accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -697,82 +698,82 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(7)));
 		assertThat(result.getEntry(), hasSize(7));
-
+		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-
+		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
 		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
 	}
-
+	
 	@Test
 	public void shouldReturnForEncounterEverythingWhenCountIsSpecifiedAsJson() throws Exception {
-		MockHttpServletResponse response = get("/Encounter/"+ENCOUNTER_UUID+"/$everything?_count=5")
-				.accept(FhirMediaTypes.JSON).go();
-
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything?_count=5")
+		        .accept(FhirMediaTypes.JSON).go();
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-
+		
 		Bundle result = readBundleResponse(response);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(7)));
 		assertThat(result.getEntry(), hasSize(5));
-
+		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-
+		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
 		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
 	}
-
+	
 	@Test
 	public void shouldReturnEncounterEverythingAsXml() throws Exception {
-		MockHttpServletResponse response = get("/Encounter/"+ENCOUNTER_UUID+"/$everything")
-				.accept(FhirMediaTypes.XML).go();
-
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything").accept(FhirMediaTypes.XML)
+		        .go();
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-
+		
 		Bundle result = readBundleResponse(response);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(7)));
 		assertThat(result.getEntry(), hasSize(7));
-
+		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-
+		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
 		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
 	}
-
+	
 	@Test
 	public void shouldReturnForEncounterEverythingWhenCountIsSpecifiedAsXml() throws Exception {
-		MockHttpServletResponse response = get("/Encounter/"+ENCOUNTER_UUID+"/$everything?_count=5")
-				.accept(FhirMediaTypes.XML).go();
-
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything?_count=5")
+		        .accept(FhirMediaTypes.XML).go();
+		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
-
+		
 		Bundle result = readBundleResponse(response);
-
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(7)));
 		assertThat(result.getEntry(), hasSize(5));
-
+		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-
+		
 		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
 		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
 	}
-
+	
 	private Set<ResourceType> getEverythingValidResourceTypes() {
 		Set<ResourceType> validTypes = new HashSet<>();
-
+		
 		validTypes.add(ResourceType.Patient);
 		validTypes.add(ResourceType.Encounter);
 		validTypes.add(ResourceType.Observation);
@@ -781,10 +782,10 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		validTypes.add(ResourceType.MedicationRequest);
 		validTypes.add(ResourceType.DiagnosticReport);
 		validTypes.add(ResourceType.ServiceRequest);
-
+		
 		return validTypes;
 	}
-
+	
 	@Test
 	public void shouldThrow404WhenUpdatingNonExistingEncounterAsJson() throws Exception {
 		String jsonEncounter;

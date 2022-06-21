@@ -107,8 +107,7 @@ public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseT
 		}
 		
 		if (openmrsObject.getDispenser() != null) {
-			fhirObject.addPerformer()
-					.setActor(practitionerReferenceTranslator.toFhirResource(openmrsObject.getDispenser()));
+			fhirObject.addPerformer().setActor(practitionerReferenceTranslator.toFhirResource(openmrsObject.getDispenser()));
 		}
 		
 		if (openmrsObject.getWasSubstituted() != null || openmrsObject.getSubstitutionType() != null
