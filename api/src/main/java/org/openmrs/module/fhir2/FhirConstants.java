@@ -132,6 +132,8 @@ public class FhirConstants {
 	
 	public static final String MEDICATION = "Medication";
 	
+	public static final String MEDICATION_DISPENSE = "MedicationDispense";
+	
 	public static final String MEDICATION_REQUEST = "MedicationRequest";
 	
 	public static final String OBSERVATION = "Observation";
@@ -177,6 +179,8 @@ public class FhirConstants {
 	public static final String ENCOUNTER_REFERENCE_SEARCH_HANDLER = "encounter.reference.search.handler";
 	
 	public static final String PATIENT_REFERENCE_SEARCH_HANDLER = "patient.reference.search.handler";
+	
+	public static final String MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER = "medicationRequest.reference.search.handler";
 	
 	public static final String MEDICATION_REFERENCE_SEARCH_HANDLER = "medication.reference.search.handler";
 	
@@ -287,6 +291,10 @@ public class FhirConstants {
 	public static final String INCLUDE_CONTEXT_PARAM = "context";
 	
 	public static final String INCLUDE_REQUESTER_PARAM = "requester";
+	
+	public static final String INCLUDE_PERFORMER_PARAM = "performer";
+	
+	public static final String INCLUDE_PRESCRIPTION_PARAM = "prescription";
 	
 	public static final String INCLUDE_MEDICATION_PARAM = "medication";
 	

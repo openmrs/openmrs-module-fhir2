@@ -40,10 +40,12 @@
         <module>api</module>
         <module>api-2.1</module>
         <module>api-2.2</module>
+        <module>api-2.6</module>
         <module>omod</module>
         <module>integration-tests</module>
         <module>integration-tests-2.1</module>
         <module>integration-tests-2.2</module>
+        <module>integration-tests-2.6</module>
     </modules>
 
     <repositories>
@@ -435,6 +437,12 @@
                 <version>2.0.7</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>co.unruly</groupId>
+                <artifactId>java-8-matchers</artifactId>
+                <version>1.6</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -466,6 +474,10 @@
         <dependency>
             <groupId>org.exparity</groupId>
             <artifactId>hamcrest-date</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>co.unruly</groupId>
+            <artifactId>java-8-matchers</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

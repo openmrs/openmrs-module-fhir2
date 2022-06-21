@@ -22,6 +22,7 @@ import java.util.Date;
 
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Timing;
 import org.junit.Before;
@@ -79,6 +80,7 @@ public class MedicationRequestTimingTranslatorImplTest {
 		
 		oncePerDayConcept = new Concept();
 		oncePerDayFhirConcept = new CodeableConcept();
+		oncePerDayFhirConcept.addCoding(new Coding("system", "code", "display"));
 		oncePerDayFrequency = new OrderFrequency();
 		oncePerDayFrequency.setConcept(oncePerDayConcept);
 		when(conceptTranslator.toFhirResource(oncePerDayConcept)).thenReturn(oncePerDayFhirConcept);
