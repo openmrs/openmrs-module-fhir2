@@ -121,7 +121,7 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 		practitioner.addIdentifier(identifier);
 		
 		practitioner.setId(provider.getUuid());
-		practitioner.setActive(provider.getRetired());
+		practitioner.setActive(!provider.getRetired());
 		practitioner.setTelecom(getProviderContactDetails(provider));
 		
 		if (provider.getPerson() != null) {
