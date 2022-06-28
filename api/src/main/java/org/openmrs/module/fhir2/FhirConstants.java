@@ -327,4 +327,6 @@ public class FhirConstants {
 	public static final String SNOMED_SYSTEM_URI = "http://snomed.info/sct";
 	
 	public static final String RX_NORM_SYSTEM_URI = "http://www.nlm.nih.gov/research/umls/rxnorm";
+	
+	public static final String UCUM_SYSTEM_URI = "http://unitsofmeasure.org";
 }
