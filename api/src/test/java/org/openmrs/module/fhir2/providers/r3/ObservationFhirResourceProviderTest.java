@@ -184,7 +184,7 @@ public class ObservationFhirResourceProviderTest extends BaseFhirR3ProvenanceRes
 		ReferenceAndListParam encounterParam = new ReferenceAndListParam();
 		encounterParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Encounter.SP_TYPE)));
 		
-		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
+		IBundleProvider results = resourceProvider.searchObservations(encounterParam, null, null, null, null, null, null, null, null,
 		    null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results, 1, 5);
