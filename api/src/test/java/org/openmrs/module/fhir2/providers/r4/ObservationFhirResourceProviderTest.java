@@ -37,11 +37,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -160,6 +156,26 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		
 		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
 		    null, null, null, null, patientParam, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(equalTo(1)));
+		assertThat(resultList.get(0), notNullValue());
+		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.OBSERVATION));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(OBSERVATION_UUID));
+	}
+	
+	@Test
+	public void searchObservations_shouldReturnMatchingObservationsWhenEncounterParamIsSpecified() {
+		when(observationService.searchForObservations(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(observation), 10, 1));
+		
+		ReferenceAndListParam encounterParam = new ReferenceAndListParam();
+		encounterParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Encounter.SP_TYPE)));
+		
+		IBundleProvider results = resourceProvider.searchObservations(null, null, null, null, null, null, null, null, null,
+		    null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
