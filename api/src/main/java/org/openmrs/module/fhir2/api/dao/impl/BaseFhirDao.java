@@ -304,4 +304,8 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	protected T deproxyResult(T result) {
 		return deproxyObject(result);
 	}
+	
+	protected Criteria createAlias(Criteria criteria, String referencedEntity, String alias) {
+		return criteria.createAlias(referencedEntity, alias);
+	}
 }

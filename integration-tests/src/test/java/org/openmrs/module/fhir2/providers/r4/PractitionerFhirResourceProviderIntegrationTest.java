@@ -79,6 +79,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		assertThat(practitioner, notNullValue());
 		assertThat(practitioner.getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
 		assertThat(practitioner, validResource());
+		assertThat(practitioner.getActive(), is(true));
 	}
 	
 	@Test

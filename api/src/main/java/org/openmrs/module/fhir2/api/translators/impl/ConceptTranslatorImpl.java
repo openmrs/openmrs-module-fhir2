@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +23,9 @@ import org.openmrs.ConceptMap;
 import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSource;
-import org.openmrs.Duration;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -65,7 +64,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			
 			ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
 			
-			String sourceUrl = conceptSourceToURL(crt.getConceptSource());
+			String sourceUrl = conceptSourceService.getUrlForConceptSource(crt.getConceptSource());
 			if (sourceUrl == null) {
 				continue;
 			}
@@ -78,52 +77,35 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	
 	@Override
 	public Concept toOpenmrsType(@Nonnull CodeableConcept concept) {
-		if (concept == null) {
-			return null;
-		}
-		
-		Concept concept_ = null;
-		
-		for (Coding coding : concept.getCoding()) {
-			if (!coding.hasSystem()) {
-				concept_ = coding.getCode() != null ? conceptService.get(coding.getCode()) : null;
-				continue;
-			}
-			
-			String codingSource = conceptURLToSourceNameOrHl7Code(coding.getSystem());
-			if (codingSource == null) {
-				continue;
-			}
-			
-			Concept codedConcept = coding.getCode() != null
-			        ? conceptService.getConceptBySourceNameAndCode(codingSource, coding.getCode()).orElse(null)
-			        : null;
-			
-			if (codedConcept != null) {
-				concept_ = codedConcept;
-				break;
+		if (concept != null) {
+			for (Coding coding : concept.getCoding()) {
+				if (coding.getCode() != null) {
+					if (!coding.hasSystem()) {
+						Concept c = conceptService.get(coding.getCode());
+						if (c != null) {
+							return c;
+						}
+					} else {
+						Optional<ConceptSource> conceptSource = conceptSourceService
+						        .getConceptSourceByUrl(coding.getSystem());
+						if (conceptSource.isPresent()) {
+							Optional<Concept> c = conceptService.getConceptWithSameAsMappingInSource(conceptSource.get(),
+							    coding.getCode());
+							if (c.isPresent()) {
+								return c.get();
+							}
+						}
+					}
+				}
 			}
 		}
 		
-		return concept_;
+		return null;
 	}
 	
 	private void addConceptCoding(Coding coding, String system, String code, Concept concept) {
 		coding.setSystem(system);
 		coding.setCode(code);
 		coding.setDisplay(concept.getDisplayString());
-	}
-	
-	private String conceptSourceToURL(ConceptSource conceptSource) {
-		return conceptSourceService.getFhirConceptSourceByConceptSourceName(conceptSource.getName())
-		        .map(FhirConceptSource::getUrl)
-		        .orElseGet(() -> Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE.equals(conceptSource.getHl7Code())
-		                ? FhirConstants.SNOMED_SYSTEM_URI
-		                : null);
-	}
-	
-	private String conceptURLToSourceNameOrHl7Code(String url) {
-		return conceptSourceService.getFhirConceptSourceByUrl(url).map(cs -> cs.getConceptSource().getName()).orElseGet(
-		    () -> FhirConstants.SNOMED_SYSTEM_URI.equals(url) ? Duration.SNOMED_CT_CONCEPT_SOURCE_HL7_CODE : null);
 	}
 }

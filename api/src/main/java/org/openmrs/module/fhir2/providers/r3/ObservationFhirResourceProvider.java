@@ -51,6 +51,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -126,9 +127,9 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(observationService.searchForObservations(encounterReference,
-		    patientReference, hasMemberReference, valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date,
-		    code, category, id, lastUpdated, sort, includes, revIncludes));
+		return new SearchQueryBundleProviderR3Wrapper(observationService.searchForObservations(new ObservationSearchParams(
+		        encounterReference, patientReference, hasMemberReference, valueConcept, valueDateParam, valueQuantityParam,
+		        valueStringParam, date, code, category, id, lastUpdated, sort, includes, revIncludes)));
 	}
 	
 	@Operation(name = "lastn", idempotent = true, type = Observation.class, bundleType = BundleTypeEnum.SEARCHSET)
@@ -141,8 +142,12 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			subjectParam = patientParam;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(
-		        observationService.getLastnObservations(max, subjectParam, category, code));
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(subjectParam);
+		searchParams.setCategory(category);
+		searchParams.setCode(code);
+		
+		return new SearchQueryBundleProviderR3Wrapper(observationService.getLastnObservations(max, searchParams));
 	}
 	
 	/**
@@ -168,7 +173,11 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			subjectParam = patientParam;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(
-		        observationService.getLastnEncountersObservations(max, subjectParam, category, code));
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(subjectParam);
+		searchParams.setCategory(category);
+		searchParams.setCode(code);
+		
+		return new SearchQueryBundleProviderR3Wrapper(observationService.getLastnEncountersObservations(max, searchParams));
 	}
 }

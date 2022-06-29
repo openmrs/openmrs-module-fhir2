@@ -68,6 +68,7 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslator implement
 		}
 		
 		personAddress.setCityVillage(address.getCity());
+		personAddress.setCountyDistrict(address.getDistrict());
 		personAddress.setStateProvince(address.getState());
 		personAddress.setCountry(address.getCountry());
 		personAddress.setPostalCode(address.getPostalCode());

@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -23,8 +25,10 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -32,6 +36,7 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -630,7 +635,6 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		encounter = readResponse(response);
-		
 		assertThat(encounter, notNullValue());
 		assertThat(encounter, validResource());
 		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
@@ -677,6 +681,109 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter, notNullValue());
 		assertThat(encounter, validResource());
 		assertThat(encounter.getIdElement().getIdPart(), equalTo(VISIT_UUID));
+	}
+	
+	@Test
+	public void shouldReturnEncounterEverythingAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything").accept(FhirMediaTypes.JSON)
+		        .go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(7)));
+		assertThat(result.getEntry(), hasSize(7));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnForEncounterEverythingWhenCountIsSpecifiedAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything?_count=5")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(7)));
+		assertThat(result.getEntry(), hasSize(5));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnEncounterEverythingAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything").accept(FhirMediaTypes.XML)
+		        .go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(7)));
+		assertThat(result.getEntry(), hasSize(7));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnForEncounterEverythingWhenCountIsSpecifiedAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything?_count=5")
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(7)));
+		assertThat(result.getEntry(), hasSize(5));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	private Set<ResourceType> getEverythingValidResourceTypes() {
+		Set<ResourceType> validTypes = new HashSet<>();
+		
+		validTypes.add(ResourceType.Patient);
+		validTypes.add(ResourceType.Encounter);
+		validTypes.add(ResourceType.Observation);
+		validTypes.add(ResourceType.Location);
+		validTypes.add(ResourceType.Practitioner);
+		validTypes.add(ResourceType.MedicationRequest);
+		validTypes.add(ResourceType.DiagnosticReport);
+		validTypes.add(ResourceType.ServiceRequest);
+		
+		return validTypes;
 	}
 	
 	@Test

@@ -132,6 +132,8 @@ public class FhirConstants {
 	
 	public static final String MEDICATION = "Medication";
 	
+	public static final String MEDICATION_DISPENSE = "MedicationDispense";
+	
 	public static final String MEDICATION_REQUEST = "MedicationRequest";
 	
 	public static final String OBSERVATION = "Observation";
@@ -177,6 +179,8 @@ public class FhirConstants {
 	public static final String ENCOUNTER_REFERENCE_SEARCH_HANDLER = "encounter.reference.search.handler";
 	
 	public static final String PATIENT_REFERENCE_SEARCH_HANDLER = "patient.reference.search.handler";
+	
+	public static final String MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER = "medicationRequest.reference.search.handler";
 	
 	public static final String MEDICATION_REFERENCE_SEARCH_HANDLER = "medication.reference.search.handler";
 	
@@ -288,6 +292,10 @@ public class FhirConstants {
 	
 	public static final String INCLUDE_REQUESTER_PARAM = "requester";
 	
+	public static final String INCLUDE_PERFORMER_PARAM = "performer";
+	
+	public static final String INCLUDE_PRESCRIPTION_PARAM = "prescription";
+	
 	public static final String INCLUDE_MEDICATION_PARAM = "medication";
 	
 	public static final String INCLUDE_HAS_MEMBER_PARAM = "has-member";
@@ -319,4 +327,6 @@ public class FhirConstants {
 	public static final String SNOMED_SYSTEM_URI = "http://snomed.info/sct";
 	
 	public static final String RX_NORM_SYSTEM_URI = "http://www.nlm.nih.gov/research/umls/rxnorm";
+	
+	public static final String UCUM_SYSTEM_URI = "http://unitsofmeasure.org";
 }

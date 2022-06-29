@@ -11,21 +11,13 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
-import lombok.AccessLevel;
-import lombok.Setter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ICoding;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.translators.CodingTranslator;
-import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.util.OpenmrsUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
-@Setter(AccessLevel.PACKAGE)
 /**
  * This is an implementation of Coding Translator that maps a Medication Quantity Concept to/from a
  * Coding in FHIR with a preferred set of systems and codes to prioritize. This will first favor
@@ -33,10 +25,8 @@ import org.springframework.stereotype.Component;
  * favor SNOMED-CT. Finally, if neither are present, it will favor the Concept UUID with a null
  * system.
  */
-public class MedicationQuantityCodingTranslatorImpl implements CodingTranslator {
-	
-	@Autowired
-	private ConceptTranslator conceptTranslator;
+@Component
+public class MedicationQuantityCodingTranslatorImpl extends BaseCodingTranslator {
 	
 	@Override
 	public Coding toFhirResource(@Nonnull Concept concept) {
@@ -59,25 +49,6 @@ public class MedicationQuantityCodingTranslatorImpl implements CodingTranslator 
 	
 	@Override
 	public Concept toOpenmrsType(@Nonnull ICoding coding) {
-		if (coding.getCode() != null) {
-			CodeableConcept codeableConcept = new CodeableConcept();
-			codeableConcept.addCoding(new Coding(coding.getSystem(), coding.getCode(), coding.getDisplay()));
-			return conceptTranslator.toOpenmrsType(codeableConcept);
-		}
-		return null;
-	}
-	
-	/**
-	 * @return the coding on the CodeableConcept with the given system, or null if none found.
-	 */
-	Coding getCodingForSystem(CodeableConcept codeableConcept, String system) {
-		if (codeableConcept != null && codeableConcept.getCoding() != null) {
-			for (Coding coding : codeableConcept.getCoding()) {
-				if (OpenmrsUtil.nullSafeEqualsIgnoreCase(system, coding.getSystem())) {
-					return coding;
-				}
-			}
-		}
-		return null;
+		return fhirCodingToOpenmrsConcept(coding);
 	}
 }

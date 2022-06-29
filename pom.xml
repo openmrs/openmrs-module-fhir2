@@ -4,7 +4,7 @@
 
     <groupId>org.openmrs.module</groupId>
     <artifactId>fhir2</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR2</name>
     <description>Implementation of FHIR R4 for OpenMRS</description>
@@ -40,10 +40,12 @@
         <module>api</module>
         <module>api-2.1</module>
         <module>api-2.2</module>
+        <module>api-2.6</module>
         <module>omod</module>
         <module>integration-tests</module>
         <module>integration-tests-2.1</module>
         <module>integration-tests-2.2</module>
+        <module>integration-tests-2.6</module>
     </modules>
 
     <repositories>
@@ -435,6 +437,18 @@
                 <version>2.0.7</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>co.unruly</groupId>
+                <artifactId>java-8-matchers</artifactId>
+                <version>1.6</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>pl.pragmatists</groupId>
+                <artifactId>JUnitParams</artifactId>
+                <version>1.1.1</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -468,6 +482,10 @@
             <artifactId>hamcrest-date</artifactId>
         </dependency>
         <dependency>
+            <groupId>co.unruly</groupId>
+            <artifactId>java-8-matchers</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
@@ -478,6 +496,10 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>pl.pragmatists</groupId>
+            <artifactId>JUnitParams</artifactId>
         </dependency>
     </dependencies>
 
