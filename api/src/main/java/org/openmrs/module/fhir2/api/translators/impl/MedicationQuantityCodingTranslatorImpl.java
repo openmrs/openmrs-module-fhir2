@@ -13,7 +13,6 @@ import javax.annotation.Nonnull;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ICoding;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.springframework.stereotype.Component;
@@ -45,10 +44,5 @@ public class MedicationQuantityCodingTranslatorImpl extends BaseCodingTranslator
 			coding = codeableConcept.getCodingFirstRep();
 		}
 		return coding;
-	}
-	
-	@Override
-	public Concept toOpenmrsType(@Nonnull ICoding coding) {
-		return fhirCodingToOpenmrsConcept(coding);
 	}
 }
