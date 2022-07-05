@@ -7,9 +7,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>fhir2-integration-tests</artifactId>
-    <name>FHIR2 Integration Tests</name>
-    <description>Integration Tests for the FHIR2 Module</description>
+    <artifactId>fhir2-e2e-tests</artifactId>
+    <name>FHIR2 End-to-End Tests</name>
+    <description>End-to-End Tests for the FHIR2 Module</description>
 
     <dependencies>
         <dependency>
