@@ -43,6 +43,7 @@ import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.api.spi.ModuleLifecycleListener;
 import org.openmrs.module.fhir2.narrative.OpenmrsThymeleafNarrativeGenerator;
 import org.openmrs.module.fhir2.web.authentication.RequireAuthenticationInterceptor;
+import org.openmrs.module.fhir2.web.util.DisableCacheInterceptor;
 import org.openmrs.module.fhir2.web.util.NarrativeUtils;
 import org.openmrs.module.fhir2.web.util.SummaryInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,8 +149,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		registerInterceptor(loggingInterceptor);
-		registerInterceptor(new SummaryInterceptor());
 		registerInterceptor(new RequireAuthenticationInterceptor());
+		registerInterceptor(new DisableCacheInterceptor());
+		registerInterceptor(new SummaryInterceptor());
 
 		String narrativesOverridePropertyFile = NarrativeUtils.getValidatedPropertiesFilePath(
 				globalPropertyService.getGlobalProperty(FhirConstants.NARRATIVES_OVERRIDE_PROPERTY_FILE, (String) null));
@@ -234,8 +236,9 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 			        .collect(Collectors.toList()));
 			
 			registerInterceptor(ctx.getBean("hapiLoggingInterceptor", LoggingInterceptor.class));
-			registerInterceptor(new SummaryInterceptor());
 			registerInterceptor(new RequireAuthenticationInterceptor());
+			registerInterceptor(new DisableCacheInterceptor());
+			registerInterceptor(new SummaryInterceptor());
 			setAdministrationService(ctx.getBean("adminService", AdministrationService.class));
 			setGlobalPropertyService(ctx.getBean(FhirGlobalPropertyService.class));
 			setServerAddressStrategy(ctx.getBean(IServerAddressStrategy.class));
