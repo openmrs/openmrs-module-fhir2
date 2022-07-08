@@ -27,7 +27,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 
-@RunWith(MockitoJUnitRunner.class)
+// we intentionally have unnecessary stubbings for this class when testing the X-Forwarded headers
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class OpenmrsFhirAddressStrategyTest {
 	
 	@Mock
