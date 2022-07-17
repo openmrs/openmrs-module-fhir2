@@ -32,7 +32,8 @@ public abstract class BaseCodingTranslator implements CodingTranslator {
 	 * Base implementation of conversion between a FHIR Coding interface and OpenMRS Concept
 	 * representation.
 	 */
-	protected Concept fhirCodingToOpenmrsConcept(@Nonnull ICoding coding) {
+	@Override
+	public Concept toOpenmrsType(@Nonnull ICoding coding) {
 		if (coding.getCode() != null) {
 			CodeableConcept codeableConcept = new CodeableConcept();
 			codeableConcept.addCoding(new Coding(coding.getSystem(), coding.getCode(), coding.getDisplay()));

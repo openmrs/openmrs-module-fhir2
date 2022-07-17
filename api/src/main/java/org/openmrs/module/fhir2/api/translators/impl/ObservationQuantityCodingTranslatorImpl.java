@@ -20,7 +20,6 @@ import lombok.Setter;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ICoding;
 import org.openmrs.Concept;
 import org.openmrs.ConceptNumeric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,8 @@ public class ObservationQuantityCodingTranslatorImpl extends BaseCodingTranslato
 	
 	/**
 	 * @param concept the openMRS {@link Concept} to translate
-	 * @return UCUM Coding object if Concept provides valid UCUM unit, null otherwise
+	 * @return UCUM Coding object if Concept provides valid UCUM unit, null if no ucum or uuid system
+	 *         found
 	 */
 	@Override
 	public Coding toFhirResource(@Nonnull Concept concept) {
@@ -67,10 +67,5 @@ public class ObservationQuantityCodingTranslatorImpl extends BaseCodingTranslato
 		
 		return coding;
 		
-	}
-	
-	@Override
-	public Concept toOpenmrsType(@Nonnull ICoding coding) {
-		return fhirCodingToOpenmrsConcept(coding);
 	}
 }
