@@ -47,7 +47,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		if (concept == null) {
 			return null;
 		}
-		System.out.println("yeah yeah");
+
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText(concept.getDisplayString());
 		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
