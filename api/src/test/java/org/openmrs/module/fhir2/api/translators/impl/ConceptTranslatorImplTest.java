@@ -62,6 +62,8 @@ public class ConceptTranslatorImplTest {
 	
 	private ConceptMapType narrowerThan;
 	
+	private ConceptMapType broaderThan;
+	
 	private Concept concept;
 	
 	private CodeableConcept fhirConcept;
@@ -85,6 +87,8 @@ public class ConceptTranslatorImplTest {
 		sameAs.setName("SAME-AS");
 		narrowerThan = new ConceptMapType();
 		narrowerThan.setName("NARROWER-THAN");
+		broaderThan = new ConceptMapType();
+		broaderThan.setName("BROADER-THAN");
 		loinc = new ConceptSource();
 		loinc.setName("LOINC");
 		ciel = new ConceptSource();
@@ -224,9 +228,9 @@ public class ConceptTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldOnlyAddCodesThatAreMappedSAME_AS() {
+	public void shouldAddCodesThatAreMappedSAME_ASIfTheyExist() {
 		addMapping(sameAs, ciel, "1650");
-		addMapping(narrowerThan, loinc, "1000-1");
+		addMapping(narrowerThan, ciel, "1690");
 		
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		
@@ -236,6 +240,100 @@ public class ConceptTranslatorImplTest {
 		assertThat(result.getCoding(), hasSize(2));
 		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
 		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+	}
+	
+	@Test
+	public void shouldAddCodesThatAreMappedSAME_ASIfOneMappingExists() {
+		addMapping(sameAs, ciel, "1650");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		// one SAME-AS, one UUID
+		assertThat(result.getCoding(), hasSize(2));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+	}
+	
+	@Test
+	public void shouldAddCodesThatAreNotMappedSAME_ASIfOnlyOneMappingExistsPerSource() {
+		addMapping(narrowerThan, ciel, "1650");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		// one NARROWER-THAN, one UUID
+		assertThat(result.getCoding(), hasSize(2));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+	}
+	
+	@Test
+	public void shouldNotAddCodesThatAreNotMappedSAME_ASIfManyMappingExistsForTheSameSource() {
+		addMapping(narrowerThan, ciel, "1650");
+		addMapping(broaderThan, ciel, "1690");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		assertThat(result.getCoding(), hasSize(1));
+	}
+	
+	@Test
+	public void shouldAddCodesThatAreNotMappedSAME_ASIfOneMappingPerSourceExistsForMultipleSources() {
+		addMapping(narrowerThan, ciel, "1650");
+		addMapping(broaderThan, loinc, "1000-1");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		assertThat(result.getCoding(), hasSize(3));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1000-1"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+	}
+	
+	@Test
+	public void shouldNotAddCodesThatAreNotMappedSAME_ASIfManyMappingExistsPerSourceForMultipleSources() {
+		addMapping(narrowerThan, ciel, "1650");
+		addMapping(broaderThan, ciel, "1659");
+		addMapping(broaderThan, loinc, "1000-1");
+		addMapping(narrowerThan, loinc, "1000-2");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		assertThat(result.getCoding(), hasSize(1));
+	}
+	
+	@Test
+	public void shouldAddCodesThatAreMappedSAME_ASIfTheyExistForMultipleSources() {
+		addMapping(sameAs, ciel, "1650");
+		addMapping(narrowerThan, ciel, "1680");
+		addMapping(sameAs, loinc, "1000-1");
+		addMapping(broaderThan, loinc, "1000-2");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		assertThat(result.getCoding(), hasSize(3));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1000-1"))));
 		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
 	}
 	
