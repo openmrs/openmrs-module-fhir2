@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
@@ -26,11 +27,11 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -44,7 +45,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Location;
 import org.junit.Before;
@@ -430,7 +430,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_LOCATION_PATH)) {
 			Objects.requireNonNull(is);
-			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonLocation = inputStreamToString(is, UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
@@ -448,7 +448,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_PATH)) {
 			Objects.requireNonNull(is);
-			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonLocation = inputStreamToString(is, UTF_8);
 		}
 		org.hl7.fhir.r4.model.Location location = new org.hl7.fhir.r4.model.Location();
 		location.setId(LOCATION_UUID);
@@ -466,7 +466,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonLocation = inputStreamToString(is, UTF_8);
 		}
 		MockHttpServletResponse response = put("/Location/" + LOCATION_UUID).jsonContent(jsonLocation)
 		        .accept(FhirMediaTypes.JSON).go();
@@ -480,7 +480,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_LOCATION_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonLocation = inputStreamToString(is, UTF_8);
 		}
 		MockHttpServletResponse response = put("/Location/" + WRONG_LOCATION_UUID).jsonContent(jsonLocation)
 		        .accept(FhirMediaTypes.JSON).go();

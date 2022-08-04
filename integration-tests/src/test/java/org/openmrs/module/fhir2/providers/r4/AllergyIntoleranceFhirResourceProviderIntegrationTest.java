@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,15 +19,14 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -126,7 +126,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		String jsonAllergy;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_ALLERGY_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonAllergy = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonAllergy = inputStreamToString(is, UTF_8);
 		}
 		
 		// create allergy
@@ -176,7 +176,7 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		String jsonAllergy;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_ALLERGY_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonAllergy = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonAllergy = inputStreamToString(is, UTF_8);
 		}
 		
 		// create allergy

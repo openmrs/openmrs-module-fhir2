@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
@@ -21,11 +22,11 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,7 +40,6 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Medication;
@@ -234,7 +234,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
-			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
 		when(fhirMedicationService.create(any(Medication.class))).thenReturn(medication);
@@ -255,7 +255,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
 			assert is != null;
 			Objects.requireNonNull(is);
-			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
 		when(fhirMedicationService.update(any(String.class), any(Medication.class))).thenReturn(medication);
@@ -271,7 +271,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
-			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(medicationJson)
@@ -287,7 +287,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITHOUT_ID_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
-			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Medication/" + MEDICATION_UUID).jsonContent(medicationJson)
@@ -303,7 +303,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR4ResourcePro
 		try (InputStream is = this.getClass().getClassLoader()
 		        .getResourceAsStream(JSON_UPDATE_WITH_WRONG_ID_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
-			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(medicationJson)

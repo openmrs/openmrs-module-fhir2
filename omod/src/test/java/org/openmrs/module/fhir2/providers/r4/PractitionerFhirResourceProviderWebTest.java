@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
@@ -24,11 +25,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,7 +42,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Bundle;
@@ -384,7 +384,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		String jsonPractitioner;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PRACTITIONER_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPractitioner = inputStreamToString(is, UTF_8);
 		}
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
@@ -402,7 +402,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		String jsonPractitioner;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPractitioner = inputStreamToString(is, UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
@@ -422,7 +422,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		String jsonPractitioner;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPractitioner = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Practitioner/" + PRACTITIONER_UUID).jsonContent(jsonPractitioner)
@@ -437,7 +437,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		String jsonPractitioner;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPractitioner = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Practitioner/" + WRONG_PRACTITIONER_UUID).jsonContent(jsonPractitioner)

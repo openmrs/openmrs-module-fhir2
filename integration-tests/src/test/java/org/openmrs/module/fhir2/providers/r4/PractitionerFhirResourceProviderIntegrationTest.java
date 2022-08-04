@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -19,9 +20,9 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
@@ -31,7 +32,6 @@ import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -131,7 +131,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		String jsonPractitioner;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PRACTITIONER_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPractitioner = inputStreamToString(is, UTF_8);
 		}
 		
 		// create practitioner
@@ -176,7 +176,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		String xmlPractitioner;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_PRACTITIONER_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			xmlPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlPractitioner = inputStreamToString(is, UTF_8);
 		}
 		
 		// create practitioner

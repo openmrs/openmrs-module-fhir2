@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.exparity.hamcrest.date.DateMatchers.within;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
@@ -21,9 +22,9 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -32,7 +33,6 @@ import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Task;
@@ -135,7 +135,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_TASK_DOCUMENT)) {
 			assertThat(is, notNullValue());
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = post("/Task").accept(FhirMediaTypes.JSON).jsonContent(jsonTask).go();
@@ -176,7 +176,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		String xmlTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_TASK_DOCUMENT)) {
 			assertThat(is, notNullValue());
-			xmlTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlTask = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = post("/Task").accept(FhirMediaTypes.XML).xmlContent(xmlTask).go();

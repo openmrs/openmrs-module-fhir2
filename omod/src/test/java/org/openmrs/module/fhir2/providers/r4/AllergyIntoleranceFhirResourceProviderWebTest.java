@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
@@ -22,11 +23,11 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -45,7 +46,6 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Bundle;
@@ -425,7 +425,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 		String createAllergyJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_ALLERGY_PATH)) {
 			Objects.requireNonNull(is);
-			createAllergyJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			createAllergyJson = inputStreamToString(is, UTF_8);
 		}
 		
 		when(allergyService.create(any(AllergyIntolerance.class))).thenReturn(allergy);
@@ -444,7 +444,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 		String createAllergyJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ALLERGY_PATH)) {
 			Objects.requireNonNull(is);
-			createAllergyJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			createAllergyJson = inputStreamToString(is, UTF_8);
 		}
 		
 		when(allergyService.update(any(String.class), any(AllergyIntolerance.class))).thenReturn(allergy);
@@ -460,7 +460,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 		String createAllergyJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ALLERGY_PATH)) {
 			Objects.requireNonNull(is);
-			createAllergyJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			createAllergyJson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/AllergyIntolerance/" + WRONG_ALLERGY_UUID).jsonContent(createAllergyJson)
@@ -476,7 +476,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 		String createAllergyJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITHOUTID_ALLERGY_PATH)) {
 			Objects.requireNonNull(is);
-			createAllergyJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			createAllergyJson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/AllergyIntolerance/" + ALLERGY_UUID).jsonContent(createAllergyJson)
@@ -491,7 +491,7 @@ public class AllergyIntoleranceFhirResourceProviderWebTest extends BaseFhirR4Res
 		String createAllergyJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITH_WRONGID_ALLERGY_PATH)) {
 			Objects.requireNonNull(is);
-			createAllergyJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			createAllergyJson = inputStreamToString(is, UTF_8);
 		}
 		
 		when(allergyService.update(eq(WRONG_ALLERGY_UUID), any(AllergyIntolerance.class)))

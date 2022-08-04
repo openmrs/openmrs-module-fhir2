@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
@@ -44,7 +45,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -621,7 +621,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PATIENT_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPatient = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
@@ -639,7 +639,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PATIENT_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPatient = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
@@ -658,7 +658,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PATIENT_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPatient = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Patient/" + PATIENT_UUID).jsonContent(jsonPatient)
@@ -673,7 +673,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PATIENT_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPatient = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Patient/" + BAD_PATIENT_UUID).jsonContent(jsonPatient)

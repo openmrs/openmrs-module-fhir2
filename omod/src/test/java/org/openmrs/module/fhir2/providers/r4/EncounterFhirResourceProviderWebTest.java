@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
@@ -24,11 +25,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -47,7 +48,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -748,7 +748,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		String encounterJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
-			encounterJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			encounterJson = inputStreamToString(is, UTF_8);
 		}
 		
 		when(encounterService.create(any(Encounter.class))).thenReturn(encounter);
@@ -764,7 +764,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		String encounterJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
-			encounterJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			encounterJson = inputStreamToString(is, UTF_8);
 		}
 		
 		when(encounterService.update(any(String.class), any(Encounter.class))).thenReturn(encounter);
@@ -780,7 +780,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		String encounterJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ENCOUNTER_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			encounterJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			encounterJson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Encounter/" + ENCOUNTER_UUID).jsonContent(encounterJson)
@@ -795,7 +795,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 		String encounterJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_ENCOUNTER_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			encounterJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			encounterJson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Encounter/" + WRONG_ENCOUNTER_UUID).jsonContent(encounterJson)

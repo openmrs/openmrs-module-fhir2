@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
@@ -24,11 +25,11 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Objects;
@@ -40,7 +41,6 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Task;
@@ -126,7 +126,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_PATH)) {
 			Objects.requireNonNull(is);
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		when(service.create(any(Task.class))).thenReturn(task);
@@ -141,7 +141,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_PATH)) {
 			Objects.requireNonNull(is);
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		when(service.update(anyString(), any(Task.class))).thenReturn(task);
@@ -156,7 +156,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Task/" + TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON).go();
@@ -171,7 +171,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Task/" + TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON).go();
@@ -185,7 +185,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		when(service.update(eq(WRONG_TASK_UUID), any(Task.class)))

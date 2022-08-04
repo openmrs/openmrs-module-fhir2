@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.equalTo;
@@ -16,17 +17,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Group;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,7 +88,7 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR3ResourceProvider
 		String jsonGroup;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_GROUP_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonGroup = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonGroup = inputStreamToString(is, UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Group group = new org.hl7.fhir.r4.model.Group();
@@ -106,7 +106,7 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR3ResourceProvider
 		String jsonGroup;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_GROUP_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonGroup = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonGroup = inputStreamToString(is, UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Group group = new org.hl7.fhir.r4.model.Group();
@@ -125,7 +125,7 @@ public class GroupFhirResourceProviderWebTest extends BaseFhirR3ResourceProvider
 		String jsonGroup;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_GROUP_DOCUMENT_NO_ID)) {
 			Objects.requireNonNull(is);
-			jsonGroup = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonGroup = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Group/" + COHORT_UUID).accept(FhirMediaTypes.JSON).jsonContent(jsonGroup)

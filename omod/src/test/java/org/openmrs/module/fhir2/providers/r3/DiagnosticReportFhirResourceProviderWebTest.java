@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
@@ -45,7 +46,6 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
@@ -145,7 +145,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_PATH)) {
 			Objects.requireNonNull(is);
-			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonDiagnosticReport = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.DiagnosticReport diagnosticReport = new org.hl7.fhir.r4.model.DiagnosticReport();
@@ -164,7 +164,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_PATH)) {
 			Objects.requireNonNull(is);
-			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonDiagnosticReport = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.DiagnosticReport diagnosticReport = new org.hl7.fhir.r4.model.DiagnosticReport();
@@ -183,7 +183,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_PATH)) {
 			Objects.requireNonNull(is);
-			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonDiagnosticReport = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/DiagnosticReport/" + WRONG_UUID).jsonContent(jsonDiagnosticReport)
@@ -199,7 +199,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonDiagnosticReport = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
@@ -214,7 +214,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR3Resou
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_WRONG_UUID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonDiagnosticReport = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(service.update(eq(WRONG_UUID), any(org.hl7.fhir.r4.model.DiagnosticReport.class)))

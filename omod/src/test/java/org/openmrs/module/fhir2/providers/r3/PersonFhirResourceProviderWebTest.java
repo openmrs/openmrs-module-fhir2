@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
@@ -23,11 +24,11 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -40,7 +41,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Person;
@@ -419,7 +419,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		String jsonPerson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PERSON_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPerson = inputStreamToString(is, UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
@@ -437,7 +437,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		String jsonPerson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PERSON_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPerson = inputStreamToString(is, UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Person person = new org.hl7.fhir.r4.model.Person();
@@ -456,7 +456,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		String jsonPerson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PERSON_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPerson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Person/" + PERSON_UUID).jsonContent(jsonPerson).accept(FhirMediaTypes.JSON)
@@ -471,7 +471,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		String jsonPerson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PERSON_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPerson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPerson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Person/" + WRONG_PERSON_UUID).jsonContent(jsonPerson)
