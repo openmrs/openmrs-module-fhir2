@@ -46,7 +46,7 @@
 			<path>/lib/jackson-.*.jar</path>
 			<openmrsVersion>2.0.5 - 2.1.2</openmrsVersion>
 		</conditionalResource>
-		<!-- required for HAPI -->
+
 		<conditionalResource>
 			<path>/lib/commons-io.*.jar</path>
 			<openmrsVersion>2.0.5 - 2.1.*</openmrsVersion>
