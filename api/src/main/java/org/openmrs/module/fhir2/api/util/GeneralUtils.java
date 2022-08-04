@@ -34,7 +34,7 @@ public final class GeneralUtils {
 	}
 	
 	public static String resourceToString(final String resource, final Charset charset, final ClassLoader cl)
-			throws IOException {
+	        throws IOException {
 		return inputStreamToString(Objects.requireNonNull(cl.getResourceAsStream(resource)), charset);
 	}
 }
