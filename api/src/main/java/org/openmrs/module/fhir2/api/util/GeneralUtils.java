@@ -12,9 +12,8 @@ package org.openmrs.module.fhir2.api.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +34,7 @@ public final class GeneralUtils {
 	}
 	
 	public static String resourceToString(final String resource, final Charset charset, final ClassLoader cl)
-	        throws IOException {
-		return inputStreamToString(cl.getResourceAsStream(resource), charset);
+			throws IOException {
+		return inputStreamToString(Objects.requireNonNull(cl.getResourceAsStream(resource)), charset);
 	}
 }
