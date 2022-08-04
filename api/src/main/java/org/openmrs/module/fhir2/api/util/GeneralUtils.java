@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +31,7 @@ public final class GeneralUtils {
 		while ((length = is.read(buffer)) != -1) {
 			outputStream.write(buffer, 0, length);
 		}
-		return new String(charset.decode(ByteBuffer.wrap(outputStream.toByteArray())).array());
+		return outputStream.toString(charset.name());
 	}
 	
 	public static String resourceToString(final String resource, final Charset charset, final ClassLoader cl)
