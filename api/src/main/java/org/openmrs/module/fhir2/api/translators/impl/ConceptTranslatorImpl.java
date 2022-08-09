@@ -103,6 +103,11 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 							    coding.getCode());
 							if (c.isPresent()) {
 								return c.get();
+							} else {
+								c = conceptService.getConceptWithAnyMappingInSource(conceptSource.get(), coding.getCode());
+								if (c.isPresent()) {
+									return c.get();
+								}
 							}
 						}
 					}

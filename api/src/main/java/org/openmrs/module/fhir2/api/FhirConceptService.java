@@ -21,4 +21,6 @@ public interface FhirConceptService {
 	Optional<Concept> getConceptWithSameAsMappingInSource(ConceptSource conceptSource, String mappingCode);
 	
 	Optional<String> getSameAsMappingForConceptInSource(ConceptSource source, Concept concept);
+	
+	Optional<Concept> getConceptWithAnyMappingInSource(ConceptSource conceptSource, String mappingCode);
 }

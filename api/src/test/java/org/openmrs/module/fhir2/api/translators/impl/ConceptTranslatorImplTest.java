@@ -177,7 +177,7 @@ public class ConceptTranslatorImplTest {
 		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
 		loincCoding.setCode("1000-1");
 		
-		when(conceptService.getConceptWithSameAsMappingInSource(loinc, "1000-1")).thenReturn(Optional.of(concept));
+		when(conceptService.getConceptWithAnyMappingInSource(loinc, "1000-1")).thenReturn(Optional.of(concept));
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());
@@ -207,7 +207,7 @@ public class ConceptTranslatorImplTest {
 		Coding cielCoding = codeableConcept.addCoding();
 		cielCoding.setSystem(FhirTestConstants.CIEL_SYSTEM_URN);
 		cielCoding.setCode("1650");
-		when(conceptService.getConceptWithSameAsMappingInSource(ciel, "1650")).thenReturn(Optional.of(concept));
+		when(conceptService.getConceptWithAnyMappingInSource(ciel, "1650")).thenReturn(Optional.of(concept));
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());

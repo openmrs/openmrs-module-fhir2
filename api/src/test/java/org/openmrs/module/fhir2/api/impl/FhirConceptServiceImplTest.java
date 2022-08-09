@@ -87,4 +87,24 @@ public class FhirConceptServiceImplTest {
 		
 		assertThat(result, empty());
 	}
+	
+	@Test
+	public void getConceptWithAnyMappingInSource_shouldGetConceptBySourceNameAndCode() {
+		ConceptSource loinc = new ConceptSource();
+		Concept concept = new Concept();
+		concept.setUuid(CONCEPT_UUID);
+		when(conceptDao.getConceptWithAnyMappingInSource(loinc, "1000-1")).thenReturn(Optional.of(concept));
+		
+		Optional<Concept> result = fhirConceptService.getConceptWithAnyMappingInSource(loinc, "1000-1");
+		
+		assertThat(result, not(empty()));
+		assertThat(result, contains(equalTo(concept)));
+	}
+	
+	@Test
+	public void getConceptWithAnyMappingInSource_shouldReturnNullIfSourceIsNull() {
+		Optional<Concept> result = fhirConceptService.getConceptWithAnyMappingInSource(null, "1000-1");
+		
+		assertThat(result, empty());
+	}
 }

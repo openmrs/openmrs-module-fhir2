@@ -70,4 +70,30 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		
 		return Optional.ofNullable((Concept) criteria.uniqueResult());
 	}
+	
+	@Override
+	public Optional<Concept> getConceptWithAnyMappingInSource(@Nonnull ConceptSource conceptSource,
+	        @Nonnull String mappingCode) {
+		if (conceptSource == null || mappingCode == null) {
+			return Optional.empty();
+		}
+		
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(ConceptMap.class);
+		criteria.setProjection(property("concept"));
+		criteria.createAlias("conceptReferenceTerm", "term");
+		criteria.createAlias("conceptMapType", "mapType");
+		criteria.createAlias("concept", "concept");
+		
+		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
+			criteria.add(eq("term.code", mappingCode).ignoreCase());
+		} else {
+			criteria.add(eq("term.code", mappingCode));
+		}
+		
+		criteria.add(eq("term.conceptSource", conceptSource));
+		criteria.addOrder(asc("concept.retired"));
+		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
+		
+		return Optional.ofNullable((Concept) criteria.uniqueResult());
+	}
 }

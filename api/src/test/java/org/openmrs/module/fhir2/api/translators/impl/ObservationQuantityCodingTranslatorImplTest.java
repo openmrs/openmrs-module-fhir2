@@ -166,7 +166,7 @@ public class ObservationQuantityCodingTranslatorImplTest {
 		mgSource.setName("UCUM");
 		
 		when(conceptSourceService.getConceptSourceByUrl(UCUM_SYSTEM_URI)).thenReturn(Optional.of(mgSource));
-		when(conceptService.getConceptWithSameAsMappingInSource(mgSource, "mg")).thenReturn(Optional.of(mg));
+		when(conceptService.getConceptWithAnyMappingInSource(mgSource, "mg")).thenReturn(Optional.of(mg));
 		
 		SimpleQuantity observationQuantity = new SimpleQuantity();
 		observationQuantity.setValue(1000d);

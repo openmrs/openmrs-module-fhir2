@@ -62,4 +62,10 @@ public class FhirConceptServiceImpl implements FhirConceptService {
 		
 		return Optional.empty();
 	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<Concept> getConceptWithAnyMappingInSource(ConceptSource conceptSource, String mappingCode) {
+		return dao.getConceptWithAnyMappingInSource(conceptSource, mappingCode);
+	}
 }
