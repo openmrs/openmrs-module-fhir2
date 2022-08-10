@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -65,7 +66,7 @@ public class FhirConceptServiceImpl implements FhirConceptService {
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<Concept> getConceptWithAnyMappingInSource(ConceptSource conceptSource, String mappingCode) {
-		return dao.getConceptWithAnyMappingInSource(conceptSource, mappingCode);
+	public List<Concept> getConceptsWithAnyMappingInSource(ConceptSource conceptSource, String mappingCode) {
+		return dao.getConceptsWithAnyMappingInSource(conceptSource, mappingCode);
 	}
 }

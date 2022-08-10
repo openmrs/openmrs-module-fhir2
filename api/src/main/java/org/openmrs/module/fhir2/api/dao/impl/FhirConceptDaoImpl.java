@@ -16,6 +16,8 @@ import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -72,10 +74,10 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	@Override
-	public Optional<Concept> getConceptWithAnyMappingInSource(@Nonnull ConceptSource conceptSource,
+	public List<Concept> getConceptsWithAnyMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
-		if (conceptSource == null || mappingCode == null) {
-			return Optional.empty();
+		if (conceptSource == null && mappingCode == null) {
+			return Collections.<Concept> emptyList();
 		}
 		
 		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(ConceptMap.class);
@@ -94,6 +96,6 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		criteria.addOrder(asc("concept.retired"));
 		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
 		
-		return Optional.ofNullable((Concept) criteria.uniqueResult());
+		return criteria.list();
 	}
 }

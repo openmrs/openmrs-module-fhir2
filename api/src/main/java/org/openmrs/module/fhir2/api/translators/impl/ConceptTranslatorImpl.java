@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import javax.annotation.Nonnull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -99,14 +100,18 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 						Optional<ConceptSource> conceptSource = conceptSourceService
 						        .getConceptSourceByUrl(coding.getSystem());
 						if (conceptSource.isPresent()) {
-							Optional<Concept> c = conceptService.getConceptWithSameAsMappingInSource(conceptSource.get(),
-							    coding.getCode());
-							if (c.isPresent()) {
-								return c.get();
-							} else {
-								c = conceptService.getConceptWithAnyMappingInSource(conceptSource.get(), coding.getCode());
-								if (c.isPresent()) {
-									return c.get();
+							List<Concept> allMatchingConcepts = conceptService
+							        .getConceptsWithAnyMappingInSource(conceptSource.get(), coding.getCode());
+							if (!allMatchingConcepts.isEmpty()) {
+								Map<String, Concept> mapTypeToConceptMap = new HashMap<>();
+								addConceptsToMap(mapTypeToConceptMap, allMatchingConcepts, conceptSource.get(),
+								    coding.getCode());
+								if (mapTypeToConceptMap.size() == 1) {
+									for (String mapType : mapTypeToConceptMap.keySet()) {
+										return mapTypeToConceptMap.get(mapType);
+									}
+								} else if (mapTypeToConceptMap.size() > 1 && mapTypeToConceptMap.containsKey("SAME-AS")) {
+									return mapTypeToConceptMap.get("SAME-AS");
 								}
 							}
 						}
@@ -133,5 +138,25 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 			mapTypeToCodeMap.put(mapType, code);
 			systemUrlToCodeMap.put(systemUrl, mapTypeToCodeMap);
 		}
+	}
+	
+	private void addConceptsToMap(Map<String, Concept> mapTypeToConceptMap, List<Concept> allMatchingConcepts,
+	        ConceptSource conceptSource, String code) {
+		allMatchingConcepts.forEach(concept -> {
+			for (ConceptMap mapping : concept.getConceptMappings()) {
+				ConceptMapType mapType = mapping.getConceptMapType();
+				ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
+				if (crt.getCode().equals(code) && crt.getConceptSource().equals(conceptSource)) {
+					boolean sameAs = mapType.getUuid() != null
+					        && mapType.getUuid().equals(ConceptMapType.SAME_AS_MAP_TYPE_UUID);
+					sameAs = sameAs || (mapType.getName() != null && mapType.getName().equalsIgnoreCase("SAME-AS"));
+					if (sameAs) {
+						mapTypeToConceptMap.put("SAME-AS", concept);
+					} else {
+						mapTypeToConceptMap.put(mapType.getName(), concept);
+					}
+				}
+			}
+		});
 	}
 }

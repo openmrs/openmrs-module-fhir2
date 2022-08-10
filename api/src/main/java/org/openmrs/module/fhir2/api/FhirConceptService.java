@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.openmrs.Concept;
@@ -22,5 +23,5 @@ public interface FhirConceptService {
 	
 	Optional<String> getSameAsMappingForConceptInSource(ConceptSource source, Concept concept);
 	
-	Optional<Concept> getConceptWithAnyMappingInSource(ConceptSource conceptSource, String mappingCode);
+	List<Concept> getConceptsWithAnyMappingInSource(ConceptSource conceptSource, String mappingCode);
 }
