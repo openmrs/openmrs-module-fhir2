@@ -76,7 +76,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	@Override
 	public List<Concept> getConceptsWithAnyMappingInSource(@Nonnull ConceptSource conceptSource,
 	        @Nonnull String mappingCode) {
-		if (conceptSource == null && mappingCode == null) {
+		if (conceptSource == null || mappingCode == null) {
 			return Collections.<Concept> emptyList();
 		}
 		
