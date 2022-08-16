@@ -21,6 +21,7 @@ import static org.openmrs.module.fhir2.FhirConstants.UCUM_SYSTEM_URI;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import junitparams.FileParameters;
@@ -38,7 +39,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.openmrs.Concept;
+import org.openmrs.ConceptMap;
+import org.openmrs.ConceptMapType;
 import org.openmrs.ConceptNumeric;
+import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
@@ -162,11 +166,24 @@ public class ObservationQuantityCodingTranslatorImplTest {
 	@Test
 	public void toOpenmrsType_shouldTranslateUCUMSystemQuantityIfOpenMRSUcumSystemDefined() {
 		Concept mg = new Concept();
+		
 		ConceptSource mgSource = new ConceptSource();
 		mgSource.setName("UCUM");
 		
+		ConceptMapType broaderThan = new ConceptMapType();
+		broaderThan.setName("BROADER-THAN");
+		
+		ConceptMap m = new ConceptMap();
+		m.setConceptMapType(broaderThan);
+		m.setConcept(mg);
+		m.setConceptReferenceTerm(new ConceptReferenceTerm(mgSource, "mg", "mg"));
+		mg.addConceptMapping(m);
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		matchingConcepts.add(mg);
+		
 		when(conceptSourceService.getConceptSourceByUrl(UCUM_SYSTEM_URI)).thenReturn(Optional.of(mgSource));
-		when(conceptService.getConceptWithSameAsMappingInSource(mgSource, "mg")).thenReturn(Optional.of(mg));
+		when(conceptService.getConceptsWithAnyMappingInSource(mgSource, "mg")).thenReturn(matchingConcepts);
 		
 		SimpleQuantity observationQuantity = new SimpleQuantity();
 		observationQuantity.setValue(1000d);

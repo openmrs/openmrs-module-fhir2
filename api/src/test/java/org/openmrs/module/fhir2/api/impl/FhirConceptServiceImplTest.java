@@ -13,11 +13,14 @@ import static co.unruly.matchers.OptionalMatchers.contains;
 import static co.unruly.matchers.OptionalMatchers.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -86,5 +89,32 @@ public class FhirConceptServiceImplTest {
 		Optional<Concept> result = fhirConceptService.getConceptWithSameAsMappingInSource(null, "1000-1");
 		
 		assertThat(result, empty());
+	}
+	
+	@Test
+	public void getConceptsWithAnyMappingInSource_shouldGetListOfConceptsBySourceNameAndCode() {
+		ConceptSource loinc = new ConceptSource();
+		Concept concept = new Concept();
+		concept.setUuid(CONCEPT_UUID);
+		
+		Concept concept2 = new Concept();
+		concept2.setUuid("12388-abcdef-12345");
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		matchingConcepts.add(concept);
+		matchingConcepts.add(concept2);
+		when(conceptDao.getConceptsWithAnyMappingInSource(loinc, "1000-1")).thenReturn(matchingConcepts);
+		
+		List<Concept> results = fhirConceptService.getConceptsWithAnyMappingInSource(loinc, "1000-1");
+		
+		assertThat(results, hasSize(2));
+		assertThat(results.get(0), equalTo(concept));
+	}
+	
+	@Test
+	public void getConceptWithAnyMappingInSource_shouldReturnNullIfSourceIsNull() {
+		List<Concept> results = fhirConceptService.getConceptsWithAnyMappingInSource(null, "1000-1");
+		
+		assertThat(results, hasSize(0));
 	}
 }

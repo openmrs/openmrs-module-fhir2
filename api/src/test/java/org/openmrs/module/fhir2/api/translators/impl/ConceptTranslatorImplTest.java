@@ -20,7 +20,9 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -170,14 +172,28 @@ public class ConceptTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldTranslateLOINCCodeableConceptToConcept() {
+	public void shouldTranslateLOINCCodeableConceptToConceptWithSAMEASMapType() {
 		addMapping(sameAs, loinc, "1000-1");
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding loincCoding = codeableConcept.addCoding();
 		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
 		loincCoding.setCode("1000-1");
 		
-		when(conceptService.getConceptWithSameAsMappingInSource(loinc, "1000-1")).thenReturn(Optional.of(concept));
+		Concept concept2 = new Concept();
+		concept2.setUuid("1234-666-999");
+		concept2.addName(new ConceptName("Sample Concept", Locale.ENGLISH));
+		
+		ConceptMap m = new ConceptMap();
+		m.setConceptMapType(broaderThan);
+		m.setConcept(concept2);
+		m.setConceptReferenceTerm(new ConceptReferenceTerm(loinc, "1000-1", "1000-1"));
+		concept.addConceptMapping(m);
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		matchingConcepts.add(concept);
+		matchingConcepts.add(concept2);
+		
+		when(conceptService.getConceptsWithAnyMappingInSource(loinc, "1000-1")).thenReturn(matchingConcepts);
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());
@@ -185,6 +201,47 @@ public class ConceptTranslatorImplTest {
 		assertThat(result.getConceptMappings(), not(empty()));
 		assertThat(result.getConceptMappings(),
 		    hasItem(hasProperty("conceptReferenceTerm", hasProperty("code", equalTo("1000-1")))));
+	}
+	
+	@Test
+	public void shouldNotTranslateCodeableConceptToAnyConceptIfMultipleConceptsExistWithNoSAMEASMapType() {
+		addMapping(narrowerThan, loinc, "1000-1");
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding loincCoding = codeableConcept.addCoding();
+		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
+		loincCoding.setCode("1000-1");
+		
+		Concept concept2 = new Concept();
+		concept2.setUuid("1234-666-999");
+		concept2.addName(new ConceptName("Sample Concept", Locale.ENGLISH));
+		
+		ConceptMap m = new ConceptMap();
+		m.setConceptMapType(broaderThan);
+		m.setConcept(concept2);
+		m.setConceptReferenceTerm(new ConceptReferenceTerm(loinc, "1000-1", "1000-1"));
+		concept.addConceptMapping(m);
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		matchingConcepts.add(concept);
+		matchingConcepts.add(concept2);
+		
+		when(conceptService.getConceptsWithAnyMappingInSource(loinc, "1000-1")).thenReturn(matchingConcepts);
+		
+		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
+		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void shouldNotTranslateCodeableConceptToAnyConceptIfNoConceptMatches() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding loincCoding = codeableConcept.addCoding();
+		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
+		loincCoding.setCode("1000-1");
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		when(conceptService.getConceptsWithAnyMappingInSource(loinc, "1000-1")).thenReturn(matchingConcepts);
+		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
+		assertThat(result, nullValue());
 	}
 	
 	@Test
@@ -207,7 +264,30 @@ public class ConceptTranslatorImplTest {
 		Coding cielCoding = codeableConcept.addCoding();
 		cielCoding.setSystem(FhirTestConstants.CIEL_SYSTEM_URN);
 		cielCoding.setCode("1650");
-		when(conceptService.getConceptWithSameAsMappingInSource(ciel, "1650")).thenReturn(Optional.of(concept));
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		matchingConcepts.add(concept);
+		when(conceptService.getConceptsWithAnyMappingInSource(ciel, "1650")).thenReturn(matchingConcepts);
+		
+		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
+		assertThat(result, notNullValue());
+		assertThat(result.getConceptMappings(), notNullValue());
+		assertThat(result.getConceptMappings(), not(empty()));
+		assertThat(result.getConceptMappings(),
+		    hasItem(hasProperty("conceptReferenceTerm", hasProperty("code", equalTo("1650")))));
+	}
+	
+	@Test
+	public void shouldTranslateCodeableConceptToConceptWithNoSAMEASMappingIfOnlyOneConceptExists() {
+		addMapping(narrowerThan, ciel, "1650");
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding cielCoding = codeableConcept.addCoding();
+		cielCoding.setSystem(FhirTestConstants.CIEL_SYSTEM_URN);
+		cielCoding.setCode("1650");
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		matchingConcepts.add(concept);
+		when(conceptService.getConceptsWithAnyMappingInSource(ciel, "1650")).thenReturn(matchingConcepts);
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());

@@ -16,6 +16,8 @@ import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -69,5 +71,31 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
 		
 		return Optional.ofNullable((Concept) criteria.uniqueResult());
+	}
+	
+	@Override
+	public List<Concept> getConceptsWithAnyMappingInSource(@Nonnull ConceptSource conceptSource,
+	        @Nonnull String mappingCode) {
+		if (conceptSource == null || mappingCode == null) {
+			return Collections.<Concept> emptyList();
+		}
+		
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(ConceptMap.class);
+		criteria.setProjection(property("concept"));
+		criteria.createAlias("conceptReferenceTerm", "term");
+		criteria.createAlias("conceptMapType", "mapType");
+		criteria.createAlias("concept", "concept");
+		
+		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
+			criteria.add(eq("term.code", mappingCode).ignoreCase());
+		} else {
+			criteria.add(eq("term.code", mappingCode));
+		}
+		
+		criteria.add(eq("term.conceptSource", conceptSource));
+		criteria.addOrder(asc("concept.retired"));
+		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
+		
+		return criteria.list();
 	}
 }
