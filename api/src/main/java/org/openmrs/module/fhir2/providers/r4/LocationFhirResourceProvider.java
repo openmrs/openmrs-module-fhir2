@@ -11,9 +11,22 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import static lombok.AccessLevel.PACKAGE;
 
+import java.util.HashSet;
+
 import javax.annotation.Nonnull;
 
-import java.util.HashSet;
+import org.apache.commons.collections.CollectionUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.openmrs.module.fhir2.api.FhirLocationService;
+import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -37,17 +50,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
-import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.openmrs.module.fhir2.api.FhirLocationService;
-import org.openmrs.module.fhir2.api.annotations.R4Provider;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component("locationFhirR4ResourceProvider")
 @R4Provider
@@ -119,7 +121,7 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return fhirLocationService.searchForLocations(name, city, country, postalCode, state, tag, parent, id, lastUpdated,
-		    includes, revIncludes, sort);
+		return (fhirLocationService.searchForLocations(new LocationSearchParams(name, city, country, postalCode, state, tag,
+		        parent, id, lastUpdated, sort, includes, revIncludes)));
 	}
 }

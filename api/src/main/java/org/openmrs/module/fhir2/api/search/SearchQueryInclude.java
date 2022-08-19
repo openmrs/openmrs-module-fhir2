@@ -16,12 +16,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.ReferenceOrListParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
@@ -49,11 +43,19 @@ import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
+import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import lombok.NoArgsConstructor;
 
 @Component
 @NoArgsConstructor
@@ -211,8 +213,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	private IBundleProvider handleLocationReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.LOCATION:
-				return locationService.searchForLocations(null, null, null, null, null, null, params, null, null, null, null,
-				    null);
+				LocationSearchParams locationSearchParams = new LocationSearchParams();
+				locationSearchParams.setParent(params);
+				return locationService.searchForLocations(locationSearchParams);
 			case FhirConstants.ENCOUNTER:
 				EncounterSearchParams encounterSearchParams = new EncounterSearchParams();
 				encounterSearchParams.setLocation(params);

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Location;
 import org.junit.Before;
@@ -41,8 +40,11 @@ import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
+
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FhirLocationServiceImplTest {
@@ -155,8 +157,9 @@ public class FhirLocationServiceImplTest {
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 		when(locationDao.getSearchResults(any(), any())).thenReturn(locations);
 		
-		IBundleProvider results = fhirLocationService.searchForLocations(null, null, null, null, null, null, null, null,
-		    null, null, null, null);
+		LocationSearchParams locationSearchParams = new LocationSearchParams();
+		locationSearchParams.setParent(null);
+		IBundleProvider results = fhirLocationService.searchForLocations(locationSearchParams);
 		
 		assertThat(results, notNullValue());
 		
