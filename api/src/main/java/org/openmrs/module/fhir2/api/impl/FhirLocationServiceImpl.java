@@ -9,6 +9,10 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import org.hl7.fhir.r4.model.Location;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
@@ -19,11 +23,6 @@ import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
 
 @Component
 @Transactional

@@ -11,24 +11,9 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import static lombok.AccessLevel.PACKAGE;
 
-import java.util.HashSet;
-
 import javax.annotation.Nonnull;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.hl7.fhir.convertors.conv30_40.Location30_40;
-import org.hl7.fhir.dstu3.model.Encounter;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Location;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.openmrs.module.fhir2.api.FhirLocationService;
-import org.openmrs.module.fhir2.api.annotations.R3Provider;
-import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
-import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
-import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import java.util.HashSet;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -52,6 +37,20 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
+import org.hl7.fhir.convertors.conv30_40.Location30_40;
+import org.hl7.fhir.dstu3.model.Encounter;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.openmrs.module.fhir2.api.FhirLocationService;
+import org.openmrs.module.fhir2.api.annotations.R3Provider;
+import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
+import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component("locationFhirR3ResourceProvider")
 @R3Provider

@@ -11,8 +11,6 @@ package org.openmrs.module.fhir2.api.search.param;
 
 import java.util.HashSet;
 
-import org.openmrs.module.fhir2.FhirConstants;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -23,6 +21,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.openmrs.module.fhir2.FhirConstants;
 
 @Data
 @NoArgsConstructor
@@ -44,7 +43,7 @@ public class LocationSearchParams extends BaseResourceSearchParams {
 	private TokenAndListParam tag;
 	
 	private ReferenceAndListParam parent;
-
+	
 	@Builder
 	public LocationSearchParams(StringAndListParam name, StringAndListParam city, StringAndListParam country,
 	    StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,

@@ -9,10 +9,9 @@
  */
 package org.openmrs.module.fhir2.api;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.r4.model.Location;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
-
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 
 public interface FhirLocationService extends FhirService<Location> {
 	
