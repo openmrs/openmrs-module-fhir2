@@ -22,11 +22,12 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
+
+import javax.servlet.ServletException;
 
 import java.io.InputStream;
 import java.util.Calendar;
@@ -34,8 +35,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 
-import javax.servlet.ServletException;
-
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Location;
 import org.junit.Before;
@@ -50,15 +57,6 @@ import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
-
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import lombok.AccessLevel;
-import lombok.Getter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<LocationFhirResourceProvider, Location> {
@@ -108,19 +106,7 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	private LocationFhirResourceProvider locationProvider;
 	
 	@Captor
-	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<StringAndListParam> stringAndListParamCaptor;
-	
-	@Captor
-	private ArgumentCaptor<ReferenceAndListParam> referenceAndListParamCaptor;
-	
-	@Captor
-	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	private ArgumentCaptor<LocationSearchParams> locationSearchParamsCaptor;
 	
 	@Before
 	@Override
@@ -154,49 +140,44 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	public void findLocationByName_shouldReturnBundleOfLocationsWithMatchingName() throws Exception {
 		verifyURI(String.format("/Location?name=%s", LOCATION_NAME));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(stringAndListParamCaptor.capture(), isNull(),
-		        isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()));
-		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
-		assertThat(
-		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(LOCATION_NAME));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		StringAndListParam name = locationSearchParamsCaptor.getValue().getName();
+		
+		assertThat(name, notNullValue());
+		assertThat(name.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(LOCATION_NAME));
 	}
 	
 	@Test
 	public void findLocationsByCity_shouldReturnBundleOfLocationsWithMatchingCity() throws Exception {
 		verifyURI(String.format("/Location?address-city=%s", CITY));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(null, stringAndListParamCaptor.capture(), null,
-		        null, null, null, null, null, null, null, null, null));
-		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
-		assertThat(
-		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(CITY));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		StringAndListParam city = locationSearchParamsCaptor.getValue().getCity();
+		
+		assertThat(city, notNullValue());
+		assertThat(city.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(CITY));
 	}
 	
 	@Test
 	public void findLocationsByCountry_shouldReturnBundleOfLocationsWithMatchingCountry() throws Exception {
 		verifyURI(String.format("/Location?address-country=%s", COUNTRY));
 		
-		verify(locationService)
-		        .searchForLocations(new LocationSearchParams(isNull(), isNull(), stringAndListParamCaptor.capture(),
-		                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()));
-		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
-		assertThat(
-		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(COUNTRY));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		StringAndListParam country = locationSearchParamsCaptor.getValue().getCountry();
+		
+		assertThat(country, notNullValue());
+		assertThat(country.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(COUNTRY));
 	}
 	
 	@Test
 	public void findLocationsByPostalCode_shouldReturnBundleOfLocationsWithMatchingAddressCode() throws Exception {
 		verifyURI(String.format("/Location?address-postalcode=%s", POSTAL_CODE));
 		
-		verify(locationService).searchForLocations(
-		    new LocationSearchParams(isNull(), isNull(), isNull(), stringAndListParamCaptor.capture(), isNull(), isNull(),
-		            isNull(), isNull(), isNull(), isNull(), isNull(), isNull()));
-		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
-		assertThat(
-		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		StringAndListParam postalCode = locationSearchParamsCaptor.getValue().getPostalCode();
+		
+		assertThat(postalCode, notNullValue());
+		assertThat(postalCode.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(POSTAL_CODE));
 	}
 	
@@ -204,22 +185,22 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	public void findLocationsByState_shouldReturnBundleOfLocationsWithMatchingAddressState() throws Exception {
 		verifyURI(String.format("/Location?address-state=%s", STATE));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams());
-		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
-		assertThat(
-		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(STATE));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		StringAndListParam state = locationSearchParamsCaptor.getValue().getState();
+		
+		assertThat(state, notNullValue());
+		assertThat(state.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(STATE));
 	}
 	
 	@Test
 	public void findLocationsByTag_shouldReturnBundleOfLocationsWithMatchingTag() throws Exception {
 		verifyURI(String.format("/Location?_tag=%s", LOGIN_LOCATION_TAG_NAME));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		TokenAndListParam tag = locationSearchParamsCaptor.getValue().getTag();
+		
+		assertThat(tag, notNullValue());
+		assertThat(tag.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(LOGIN_LOCATION_TAG_NAME));
 	}
 	
@@ -227,183 +208,190 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	public void findLocationsByParent_shouldReturnBundleOfLocationsWithMatchingParentId() throws Exception {
 		verifyURI(String.format("/Location?partof=%s", PARENT_LOCATION_ID));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull()));
-		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		ReferenceAndListParam parent = locationSearchParamsCaptor.getValue().getParent();
+		
+		assertThat(parent, notNullValue());
+		assertThat(parent.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARENT_LOCATION_ID));
+		assertThat(parent.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(), equalTo(null));
 	}
 	
 	@Test
 	public void findLocationsByParent_shouldReturnBundleOfLocationsWithMatchingParentName() throws Exception {
 		verifyURI(String.format("/Location?partof.name=%s", PARENT_LOCATION_NAME));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull()));
-		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		ReferenceAndListParam parent = locationSearchParamsCaptor.getValue().getParent();
+		
+		assertThat(parent, notNullValue());
+		assertThat(parent.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARENT_LOCATION_NAME));
+		assertThat(parent.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(), equalTo("name"));
 	}
 	
 	@Test
 	public void findLocationsByParent_shouldReturnBundleOfLocationsWithMatchingParentCity() throws Exception {
 		verifyURI(String.format("/Location?partof.address-city=%s", PARENT_LOCATION_CITY));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull()));
-		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		ReferenceAndListParam parent = locationSearchParamsCaptor.getValue().getParent();
+		
+		assertThat(parent, notNullValue());
+		assertThat(parent.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARENT_LOCATION_CITY));
+		assertThat(parent.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
+		    equalTo("address-city"));
 	}
 	
 	@Test
 	public void findLocationsByParent_shouldReturnBundleOfLocationsWithMatchingParentCountry() throws Exception {
 		verifyURI(String.format("/Location?partof.address-country=%s", PARENT_LOCATION_COUNTRY));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull()));
-		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		ReferenceAndListParam parent = locationSearchParamsCaptor.getValue().getParent();
+		
+		assertThat(parent, notNullValue());
+		assertThat(parent.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARENT_LOCATION_COUNTRY));
+		assertThat(parent.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
+		    equalTo("address-country"));
 	}
 	
 	@Test
 	public void findLocationsByParent_shouldReturnBundleOfLocationsWithMatchingParentPostalCode() throws Exception {
 		verifyURI(String.format("/Location?partof.address-postalcode=%s", PARENT_LOCATION_POSTAL_CODE));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull()));
-		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		ReferenceAndListParam parentPostalCode = locationSearchParamsCaptor.getValue().getParent();
+		
+		assertThat(parentPostalCode, notNullValue());
+		assertThat(parentPostalCode.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARENT_LOCATION_POSTAL_CODE));
+		assertThat(parentPostalCode.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
+		    equalTo("address-postalcode"));
 	}
 	
 	@Test
 	public void findLocationsByParent_shouldReturnBundleOfLocationsWithMatchingParentState() throws Exception {
 		verifyURI(String.format("/Location?partof.address-state=%s", PARENT_LOCATION_STATE));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull()));
-		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
+		ReferenceAndListParam parentState = locationSearchParamsCaptor.getValue().getParent();
+		
+		assertThat(parentState, notNullValue());
+		assertThat(parentState.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARENT_LOCATION_STATE));
+		assertThat(parentState.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
+		    equalTo("address-state"));
 	}
 	
 	@Test
 	public void findLocationsByUUID_shouldReturnBundleOfLocationsWithMatchingUUID() throws Exception {
 		verifyURI(String.format("/Location?_id=%s", LOCATION_UUID));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull()));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
-		    equalTo(LOCATION_UUID));
+		TokenAndListParam uuid = locationSearchParamsCaptor.getValue().getId();
+		
+		assertThat(uuid, notNullValue());
+		assertThat(uuid.getValuesAsQueryTokens(), not(empty()));
+		assertThat(uuid.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(LOCATION_UUID));
 	}
 	
 	@Test
 	public void findLocationsByLastUpdatedDate_shouldReturnBundleOfLocationsWithMatchingLastUpdatedDate() throws Exception {
 		verifyURI(String.format("/Location?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), isNull(), isNull(), dateRangeParamArgumentCaptor.capture(), isNull(), isNull(), isNull()));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
+		DateRangeParam lastUpdated = locationSearchParamsCaptor.getValue().getLastUpdated();
+		
+		assertThat(locationSearchParamsCaptor.getValue(), notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2020, Calendar.SEPTEMBER, 3);
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(lastUpdated.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(lastUpdated.getUpperBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
 	public void findLocationsByInclude_shouldReturnBundleOfLocationsWithIncludedResources() throws Exception {
 		verifyURI("/Location?_include=Location:partof");
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull()));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_PART_OF_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.LOCATION));
+		HashSet<Include> include = locationSearchParamsCaptor.getValue().getIncludes();
+		
+		assertThat(include, notNullValue());
+		assertThat(include.size(), equalTo(1));
+		assertThat(include.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_PART_OF_PARAM));
+		assertThat(include.iterator().next().getParamType(), equalTo(FhirConstants.LOCATION));
 	}
 	
 	@Test
 	public void findLocationsByReverseInclude_shouldReturnBundleOfLocationsWithReverseIncludedLocations() throws Exception {
 		verifyURI("/Location?_revinclude=Location:partof");
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull()));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_PART_OF_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.LOCATION));
+		HashSet<Include> revInclude = locationSearchParamsCaptor.getValue().getRevIncludes();
+		
+		assertThat(revInclude, notNullValue());
+		assertThat(revInclude.size(), equalTo(1));
+		assertThat(revInclude.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_PART_OF_PARAM));
+		assertThat(revInclude.iterator().next().getParamType(), equalTo(FhirConstants.LOCATION));
 	}
 	
 	@Test
 	public void findLocationsByReverseInclude_shouldReturnBundleOfLocationsWithReverseIncludedEncounters() throws Exception {
 		verifyURI("/Location?_revinclude=Encounter:location");
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture()));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_LOCATION_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.ENCOUNTER));
+		HashSet<Include> revInclude = locationSearchParamsCaptor.getValue().getRevIncludes();
+		
+		assertThat(revInclude, notNullValue());
+		assertThat(revInclude.size(), equalTo(1));
+		assertThat(revInclude.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_LOCATION_PARAM));
+		assertThat(revInclude.iterator().next().getParamType(), equalTo(FhirConstants.ENCOUNTER));
 	}
 	
 	@Test
 	public void findLocationsByReverseInclude_shouldHandleMultipleReverseIncludes() throws Exception {
 		verifyURI("/Location?_revinclude=Encounter:location&_revinclude=Location:partof");
 		
-		verify(locationService).searchForLocations(new LocationSearchParams(isNull(), isNull(), isNull(), isNull(), isNull(),
-		        isNull(), isNull(), isNull(), isNull(), isNull(), includeArgumentCaptor.capture(), isNull()));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
+		HashSet<Include> revInclude = locationSearchParamsCaptor.getValue().getRevIncludes();
 		
-		assertThat(includeArgumentCaptor.getValue(),
-		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_LOCATION_PARAM)),
-		        hasProperty("paramType", equalTo(FhirConstants.ENCOUNTER)))));
-		assertThat(includeArgumentCaptor.getValue(),
-		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PART_OF_PARAM)),
-		        hasProperty("paramType", equalTo(FhirConstants.LOCATION)))));
+		assertThat(revInclude, notNullValue());
+		assertThat(revInclude.size(), equalTo(2));
+		
+		assertThat(revInclude, hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_LOCATION_PARAM)),
+		    hasProperty("paramType", equalTo(FhirConstants.ENCOUNTER)))));
+		assertThat(revInclude, hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PART_OF_PARAM)),
+		    hasProperty("paramType", equalTo(FhirConstants.LOCATION)))));
 	}
 	
 	@Test
 	public void shouldGetLocationByComplexQuery() throws Exception {
 		verifyURI(String.format("/Location?name=%s&partof.address-city=%s", LOCATION_NAME, PARENT_LOCATION_CITY));
 		
-		verify(locationService).searchForLocations(
-		    new LocationSearchParams(stringAndListParamCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		            referenceAndListParamCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull()));
+		verify(locationService).searchForLocations(locationSearchParamsCaptor.capture());
 		
-		assertThat(stringAndListParamCaptor.getValue(), notNullValue());
-		assertThat(
-		    stringAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(LOCATION_NAME));
+		StringAndListParam name = locationSearchParamsCaptor.getValue().getName();
+		ReferenceAndListParam parentLocationCity = locationSearchParamsCaptor.getValue().getParent();
 		
-		assertThat(referenceAndListParamCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		assertThat(name, notNullValue());
+		assertThat(name.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(LOCATION_NAME));
+		
+		assertThat(parentLocationCity, notNullValue());
+		assertThat(parentLocationCity.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PARENT_LOCATION_CITY));
+		assertThat(parentLocationCity.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(),
+		    equalTo("address-city"));
 	}
 	
 	@Test
@@ -418,9 +406,8 @@ public class LocationFhirResourceProviderWebTest extends BaseFhirR3ResourceProvi
 	private void verifyURI(String uri) throws Exception {
 		Location location = new Location();
 		location.setId(LOCATION_UUID);
-		when(locationService.searchForLocations(
-		    new LocationSearchParams(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), 10, 1));
+		when(locationService.searchForLocations(any()))
+		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(location), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
 		
