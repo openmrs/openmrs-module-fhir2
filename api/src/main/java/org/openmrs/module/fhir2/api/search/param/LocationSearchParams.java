@@ -28,8 +28,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 @EqualsAndHashCode(callSuper = true)
 public class LocationSearchParams extends BaseResourceSearchParams {
 	
-	private static final long serialVersionUID = 1L;
-	
 	private StringAndListParam name;
 	
 	private StringAndListParam city;
