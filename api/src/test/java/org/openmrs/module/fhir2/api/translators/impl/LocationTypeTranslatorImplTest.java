@@ -157,8 +157,9 @@ public class LocationTypeTranslatorImplTest {
 		when(globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_TYPE_ATTRIBUTE_TYPE))
 		        .thenReturn(LOCATION_ATTRIBUTE_TYPE_UUID);
 		when(conceptTranslator.toOpenmrsType(eq(fhirTypeConcept))).thenReturn(typeConcept);
-		when(locationDao.getActiveAttributesByLocationAndAttributeTypeUuid(any(), any())).thenReturn(Collections.singletonList(typeAttribute));
-
+		when(locationDao.getActiveAttributesByLocationAndAttributeTypeUuid(any(), any()))
+		        .thenReturn(Collections.singletonList(typeAttribute));
+		
 		Location result = locationTypeTranslator.toOpenmrsType(omrsLocation, Collections.singletonList(fhirTypeConcept));
 		
 		assertThat(result, notNullValue());

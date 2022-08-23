@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;

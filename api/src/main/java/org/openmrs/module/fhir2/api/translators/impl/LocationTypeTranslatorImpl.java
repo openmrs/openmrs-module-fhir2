@@ -23,6 +23,7 @@ import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
+import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@OpenmrsProfile(openmrsPlatformVersion = "2.* - 2.4.*")
 @Setter(AccessLevel.PACKAGE)
 public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 	
@@ -58,7 +60,7 @@ public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 			
 			if (typeAttributeType != null) {
 				existingAttributeQuery = location.getAttributes().stream()
-				        .filter(a -> a.getAttributeType() == typeAttributeType).findAny();
+				        .filter(a -> a.getAttributeType() == typeAttributeType).findFirst();
 				
 				if (existingAttributeQuery.isPresent()) {
 					LocationAttribute typeAttribute = existingAttributeQuery.get();
@@ -70,6 +72,7 @@ public class LocationTypeTranslatorImpl implements LocationTypeTranslator {
 				}
 			}
 		}
+		
 		return Collections.emptyList();
 	}
 	
