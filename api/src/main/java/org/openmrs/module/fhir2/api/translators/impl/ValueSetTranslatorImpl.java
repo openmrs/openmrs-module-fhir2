@@ -45,6 +45,11 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 	private ValueSetReferenceTranslator valueSetReferenceTranslator;
 	
 	@Override
+	public Concept toOpenmrsType(@Nonnull ValueSet resource) {
+		return null;
+	}
+	
+	@Override
 	public ValueSet toFhirResource(@Nonnull Concept concept) {
 		if (concept == null) {
 			return null;

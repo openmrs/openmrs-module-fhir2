@@ -14,7 +14,16 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.openmrs.Concept;
 
-public interface ValueSetTranslator extends ToFhirTranslator<Concept, ValueSet> {
+public interface ValueSetTranslator extends OpenmrsFhirTranslator<Concept, ValueSet> {
+	
+	/**
+	 * Not implemented for now
+	 *
+	 * @param resource the FHIR resource to translate
+	 * @return null
+	 */
+	@Override
+	Concept toOpenmrsType(@Nonnull ValueSet resource);
 	
 	/**
 	 * Maps a set of concepts to a {@link ValueSet}
