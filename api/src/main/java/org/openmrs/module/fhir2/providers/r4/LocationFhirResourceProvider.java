@@ -45,6 +45,7 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -119,7 +120,7 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return fhirLocationService.searchForLocations(name, city, country, postalCode, state, tag, parent, id, lastUpdated,
-		    includes, revIncludes, sort);
+		return (fhirLocationService.searchForLocations(new LocationSearchParams(name, city, country, postalCode, state, tag,
+		        parent, id, lastUpdated, sort, includes, revIncludes)));
 	}
 }
