@@ -43,6 +43,7 @@ import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.Observation30_40;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -94,7 +95,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	public IBundleProvider searchObservations(
-	        @OptionalParam(name = Observation.SP_ENCOUNTER) ReferenceAndListParam encounterReference,
+	        @OptionalParam(name = Observation.SP_ENCOUNTER, chainWhitelist = { "",
+	                Encounter.SP_TYPE }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
 	        @OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY,
 	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,

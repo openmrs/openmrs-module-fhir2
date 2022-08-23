@@ -60,7 +60,6 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
-			
 			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
 			
 			setupSearchParams(criteria, theParams);
@@ -99,8 +98,8 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(p -> handleEncounterReference("e", (ReferenceAndListParam) p.getParam())
-					        .ifPresent(c -> criteria.createAlias("encounter", "e").add(c)));
+					entry.getValue()
+					        .forEach(p -> handleEncounterReference(criteria, (ReferenceAndListParam) p.getParam(), "e"));
 					break;
 				case FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER:
 					entry.getValue().forEach(patientReference -> handlePatientReference(criteria,

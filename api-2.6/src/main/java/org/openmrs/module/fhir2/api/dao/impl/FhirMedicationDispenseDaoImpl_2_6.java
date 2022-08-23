@@ -74,8 +74,8 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 					        .forEach(param -> handlePatientReference(criteria, (ReferenceAndListParam) param.getParam()));
 					break;
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
-					entry.getValue().forEach(e -> handleEncounterReference("e", (ReferenceAndListParam) e.getParam())
-					        .ifPresent(c -> createAlias(criteria, "encounter", "e").add(c)));
+					entry.getValue()
+					        .forEach(e -> handleEncounterReference(criteria, (ReferenceAndListParam) e.getParam(), "e"));
 					break;
 				case FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER:
 					entry.getValue()

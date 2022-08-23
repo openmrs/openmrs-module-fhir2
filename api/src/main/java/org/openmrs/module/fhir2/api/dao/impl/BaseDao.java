@@ -80,6 +80,7 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.internal.CriteriaImpl;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Patient;
@@ -493,14 +494,36 @@ public abstract class BaseDao {
 		return handleAndListParam(quantityAndListParam, quantityParam -> handleQuantity(propertyName, quantityParam));
 	}
 	
-	protected Optional<Criterion> handleEncounterReference(@Nonnull String encounterAlias,
-	        ReferenceAndListParam encounterReference) {
+	protected void handleEncounterReference(Criteria criteria, ReferenceAndListParam encounterReference,
+	        @Nonnull String encounterAlias) {
+		handleEncounterReference(criteria, encounterReference, encounterAlias, "encounter");
+	}
+	
+	protected void handleEncounterReference(Criteria criteria, ReferenceAndListParam encounterReference,
+	        @Nonnull String encounterAlias, @Nonnull String associationPath) {
 		if (encounterReference == null) {
-			return Optional.empty();
+			return;
 		}
 		
-		return handleAndListParam(encounterReference,
-		    token -> Optional.of(eq(String.format("%s.uuid", encounterAlias), token.getIdPart())));
+		if (lacksAlias(criteria, encounterAlias)) {
+			criteria.createAlias(associationPath, encounterAlias);
+		}
+		
+		handleAndListParam(encounterReference, token -> {
+			if (token.getChain() != null) {
+				switch (token.getChain()) {
+					case Encounter.SP_TYPE:
+						if (lacksAlias(criteria, "et")) {
+							criteria.createAlias(String.format("%s.encounterType", encounterAlias), "et");
+						}
+						return propertyLike("et.uuid", new StringParam(token.getValue(), true));
+				}
+			} else {
+				return Optional.of(eq(String.format("%s.uuid", encounterAlias), token.getIdPart()));
+			}
+			
+			return Optional.empty();
+		}).ifPresent(criteria::add);
 	}
 	
 	protected Optional<Criterion> handleGender(@Nonnull String propertyName, TokenAndListParam gender) {

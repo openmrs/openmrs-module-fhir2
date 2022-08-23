@@ -91,8 +91,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Search
 	public IBundleProvider searchObservations(
-	        @OptionalParam(name = Observation.SP_ENCOUNTER, chainWhitelist = {
-	                "" }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
+	        @OptionalParam(name = Observation.SP_ENCOUNTER, chainWhitelist = { "",
+	                Encounter.SP_TYPE }, targetTypes = Encounter.class) ReferenceAndListParam encounterReference,
 	        @OptionalParam(name = Observation.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY,
 	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientReference,
