@@ -38,11 +38,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Encounter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -179,8 +179,8 @@ public class ObservationFhirResourceProviderTest extends BaseFhirProvenanceResou
 		ReferenceAndListParam encounterParam = new ReferenceAndListParam();
 		encounterParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Encounter.SP_TYPE)));
 		
-		IBundleProvider results = resourceProvider.searchObservations(encounterParam, null, null, null, null, null, null, null, null,
-		    null, null, null, null, null, null, null);
+		IBundleProvider results = resourceProvider.searchObservations(encounterParam, null, null, null, null, null, null,
+		    null, null, null, null, null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		

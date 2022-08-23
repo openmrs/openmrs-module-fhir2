@@ -131,6 +131,8 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String ENCOUNTER_UUID_TWO = "6519d653-393b-4118-9c83-a3715b82d4ac";
 	
+	private static final String ENCOUNTER_TYPE_UUID = "07000be2-26b6-4cce-8b40-866d8435b613";
+	
 	private static final String MEMBER_UUID = "744b91f8-bdbc-4950-833b-002244e9fa2b";
 	
 	private static final String OBS_SNOMED_CODE = "2332523";
@@ -652,6 +654,25 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 	public void searchForObs_shouldReturnObsByEncounter() {
 		ReferenceAndListParam encounterReference = new ReferenceAndListParam()
 		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_UUID)));
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(14));
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(resultList, notNullValue());
+		assertThat(resultList.size(), equalTo(10));
+	}
+	
+	@Test
+	public void searchForObs_shouldReturnObsByEncounterType() {
+		ReferenceAndListParam encounterReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(ENCOUNTER_TYPE_UUID).setChain("type")));
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference);
