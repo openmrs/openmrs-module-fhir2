@@ -55,7 +55,7 @@ public class ValueSetFhirResourceProviderTest {
 	private ValueSetFhirResourceProvider valueSetFhirResourceProvider;
 	
 	private ValueSet valueSet;
-
+	
 	private org.hl7.fhir.r4.model.ValueSet valueSet4;
 	
 	private List<IBaseResource> get(IBundleProvider results) {
@@ -69,11 +69,11 @@ public class ValueSetFhirResourceProviderTest {
 		
 		valueSet = new ValueSet();
 		valueSet.setId(ROOT_CONCEPT_UUID);
-
+		
 		valueSet4 = new org.hl7.fhir.r4.model.ValueSet();
 		valueSet4.setId(ROOT_CONCEPT_UUID);
 	}
-
+	
 	@Test
 	public void getValueSetByUuid_shouldReturnMatchingValueSet() {
 		IdType id = new IdType();

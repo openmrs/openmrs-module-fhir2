@@ -11,6 +11,8 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import lombok.AccessLevel;
@@ -20,8 +22,10 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.openmrs.Concept;
 import org.openmrs.ConceptMap;
+import org.openmrs.ConceptName;
 import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSet;
+import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
 import org.openmrs.module.fhir2.api.translators.ValueSetReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ValueSetTranslator;
@@ -52,7 +56,7 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 		
 		ValueSet valueSet = new ValueSet();
 		valueSet.setId(concept.getUuid());
-		valueSet.setTitle(Optional.ofNullable(concept.getName()).map(n -> n.getName()).orElse(""));
+		valueSet.setTitle(Optional.ofNullable(concept.getName()).map(ConceptName::getName).orElse(""));
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		
 		valueSet.setDate((concept.getDateChanged() != null) ? concept.getDateChanged() : concept.getDateCreated());
@@ -66,34 +70,39 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 		for (ConceptSet conceptSet : concept.getConceptSets()) {
 			Concept conceptSetMember = conceptSet.getConcept();
 			
-			if (conceptSetMember != null && conceptSetMember.getSet()) {
-				ValueSet.ConceptSetComponent conceptSetComponent = new ValueSet.ConceptSetComponent();
-				conceptSetComponent.addValueSet(valueSetReferenceTranslator.toFhirResource(conceptSetMember).getReference());
-				compose.addInclude(conceptSetComponent);
-				continue;
-			}
-			
-			for (ConceptMap mapping : conceptSetMember.getConceptMappings()) {
-				ValueSet.ConceptSetComponent conceptSetComponent = new ValueSet.ConceptSetComponent();
-				ValueSet.ConceptReferenceComponent conceptReferenceComponent = new ValueSet.ConceptReferenceComponent();
-				
-				ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
-				if (crt == null || crt.getConceptSource() == null) {
-					continue;
-				}
-				
-				String sourceUrl = conceptSourceToURL(crt.getConceptSource().getName());
-				if (sourceUrl == null) {
-					conceptReferenceComponent.setCode(conceptSetMember.getUuid());
-					conceptSetComponent.addConcept(conceptReferenceComponent);
+			if (conceptSetMember != null) {
+				if (conceptSetMember.getSet()) {
+					ValueSet.ConceptSetComponent conceptSetComponent = new ValueSet.ConceptSetComponent();
+					conceptSetComponent
+					        .addValueSet(valueSetReferenceTranslator.toFhirResource(conceptSetMember).getReference());
 					compose.addInclude(conceptSetComponent);
 					continue;
 				}
 				
-				conceptSetComponent.setSystem(sourceUrl);
-				conceptReferenceComponent.setCode(crt.getCode());
-				conceptSetComponent.addConcept(conceptReferenceComponent);
-				compose.addInclude(conceptSetComponent);
+				if (conceptSetMember.getConceptMappings() != null) {
+					Map<ConceptSource, String> conceptSourceCache = new HashMap<>();
+					for (ConceptMap mapping : conceptSetMember.getConceptMappings()) {
+						ValueSet.ConceptSetComponent conceptSetComponent = new ValueSet.ConceptSetComponent();
+						ValueSet.ConceptReferenceComponent conceptReferenceComponent = new ValueSet.ConceptReferenceComponent();
+						
+						ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
+						if (crt == null || crt.getConceptSource() == null) {
+							continue;
+						}
+						
+						String sourceUrl = conceptSourceCache.computeIfAbsent(crt.getConceptSource(),
+						    this::conceptSourceToURL);
+						if (sourceUrl == null) {
+							conceptReferenceComponent.setCode(conceptSetMember.getUuid());
+						} else {
+							conceptSetComponent.setSystem(sourceUrl);
+							conceptReferenceComponent.setCode(crt.getCode());
+						}
+						
+						conceptSetComponent.addConcept(conceptReferenceComponent);
+						compose.addInclude(conceptSetComponent);
+					}
+				}
 			}
 		}
 		
@@ -101,8 +110,7 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 		return valueSet;
 	}
 	
-	private String conceptSourceToURL(String conceptSourceName) {
-		return conceptSourceService.getFhirConceptSourceByConceptSourceName(conceptSourceName).map(FhirConceptSource::getUrl)
-		        .orElse(null);
+	private String conceptSourceToURL(ConceptSource conceptSource) {
+		return conceptSourceService.getFhirConceptSource(conceptSource).map(FhirConceptSource::getUrl).orElse(null);
 	}
 }

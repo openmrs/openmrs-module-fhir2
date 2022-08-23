@@ -94,14 +94,14 @@ public class FhirValueSetServiceImplTest {
 		valueSet = new ValueSet();
 		valueSet.setId(ROOT_CONCEPT_UUID);
 	}
-
+	
 	@Test
 	public void get_shouldGetEncounterByUuid() {
 		when(dao.get(ROOT_CONCEPT_UUID)).thenReturn(concept);
 		when(translator.toFhirResource(concept)).thenReturn(valueSet);
-
+		
 		ValueSet valueSet = fhirValueSetService.get(ROOT_CONCEPT_UUID);
-
+		
 		assertThat(valueSet, notNullValue());
 		assertThat(valueSet.getId(), notNullValue());
 		assertThat(valueSet.getId(), equalTo(ROOT_CONCEPT_UUID));

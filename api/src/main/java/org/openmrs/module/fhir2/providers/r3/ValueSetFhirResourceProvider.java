@@ -44,7 +44,7 @@ public class ValueSetFhirResourceProvider implements IResourceProvider {
 	public Class<? extends IBaseResource> getResourceType() {
 		return ValueSet.class;
 	}
-
+	
 	@Read
 	public ValueSet getValueSetByUuid(@IdParam @Nonnull IdType id) {
 		org.hl7.fhir.r4.model.ValueSet valueSet = fhirValueSetService.get(id.getIdPart());

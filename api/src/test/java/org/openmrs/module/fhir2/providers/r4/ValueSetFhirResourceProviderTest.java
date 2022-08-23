@@ -68,7 +68,7 @@ public class ValueSetFhirResourceProviderTest {
 		valueSet = new ValueSet();
 		valueSet.setId(ROOT_CONCEPT_UUID);
 	}
-
+	
 	@Test
 	public void getValueSetByUuid_shouldReturnMatchingValueSet() {
 		IdType id = new IdType();

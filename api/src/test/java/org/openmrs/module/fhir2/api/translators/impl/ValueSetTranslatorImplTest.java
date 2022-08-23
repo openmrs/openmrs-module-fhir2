@@ -94,7 +94,7 @@ public class ValueSetTranslatorImplTest extends BaseModuleContextSensitiveTest {
 		loincConceptSource.setName("LOINC");
 		loinc.setConceptSource(loincConceptSource);
 		loinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.of(loinc));
+		when(conceptSourceService.getFhirConceptSource(loincConceptSource)).thenReturn(Optional.of(loinc));
 		
 		ConceptSet conceptSet = new ConceptSet();
 		conceptSet.setConceptSet(concept);
