@@ -114,7 +114,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	private void handleTitle(Criteria criteria, StringAndListParam titlePattern) {
-		criteria.add(Restrictions.eq("set", true));
+		criteria.add(eq("set", true));
 		criteria.createAlias("names", "csn");
 		handleAndListParam(titlePattern, (title) -> propertyLike("csn.name", title)).ifPresent(criteria::add);
 	}
