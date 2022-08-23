@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import javax.annotation.Nonnull;
-
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import lombok.AccessLevel;
@@ -33,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PROTECTED)
-public class FhirValueSetServiceImpl implements FhirValueSetService {
+public class FhirValueSetServiceImpl extends BaseFhirService<ValueSet, Concept> implements FhirValueSetService {
 	
 	@Autowired
 	private ValueSetTranslator translator;
@@ -46,12 +44,6 @@ public class FhirValueSetServiceImpl implements FhirValueSetService {
 	
 	@Autowired
 	private SearchQuery<Concept, ValueSet, FhirConceptDao, ValueSetTranslator, SearchQueryInclude<ValueSet>> searchQuery;
-	
-	@Override
-	public ValueSet get(@Nonnull String uuid) {
-		Concept concept = dao.get(uuid);
-		return translator.toFhirResource(concept);
-	}
 	
 	@Override
 	public IBundleProvider searchForValueSets(StringAndListParam title) {

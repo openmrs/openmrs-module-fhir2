@@ -15,7 +15,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import org.hl7.fhir.r4.model.ValueSet;
 
-public interface FhirValueSetService {
+public interface FhirValueSetService extends FhirService<ValueSet> {
 	
 	ValueSet get(@Nonnull String uuid);
 	
