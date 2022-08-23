@@ -13,6 +13,7 @@ import static org.hibernate.criterion.Order.asc;
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.or;
+import static org.openmrs.module.fhir2.FhirConstants.TITLE_SEARCH_HANDLER;
 
 import javax.annotation.Nonnull;
 
@@ -105,7 +106,7 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
-				case FhirConstants.TITLE_SEARCH_HANDLER:
+				case TITLE_SEARCH_HANDLER:
 					entry.getValue().forEach(param -> handleTitle(criteria, (StringAndListParam) param.getParam()));
 					break;
 			}
