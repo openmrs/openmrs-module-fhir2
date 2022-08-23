@@ -87,11 +87,8 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteServiceRequest(@IdParam @Nonnull IdType id) {
-		ServiceRequest serviceRequest = serviceRequestService.delete(id.getIdPart());
-		if (serviceRequest == null) {
-			throw new ResourceNotFoundException("Could not find serviceRequest to delete with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(serviceRequest);
+		serviceRequestService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search

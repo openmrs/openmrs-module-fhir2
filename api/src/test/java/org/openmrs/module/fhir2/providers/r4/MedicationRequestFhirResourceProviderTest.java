@@ -356,18 +356,11 @@ public class MedicationRequestFhirResourceProviderTest {
 	
 	@Test
 	public void deleteTask_shouldDeleteMedicationRequest() {
-		when(fhirMedicationRequestService.delete(MEDICATION_REQUEST_UUID)).thenReturn(medicationRequest);
 		OperationOutcome result = resourceProvider.deleteMedicationRequest(new IdType().setValue(MEDICATION_REQUEST_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteMedicationRequest_shouldThrowResourceNotFoundException() {
-		when(fhirMedicationRequestService.delete(WRONG_MEDICATION_REQUEST_UUID)).thenReturn(null);
-		resourceProvider.deleteMedicationRequest(new IdType().setValue(WRONG_MEDICATION_REQUEST_UUID));
-	}
-	
 }

@@ -64,6 +64,7 @@
 
     <changeSet id="add_loinc_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
 	<validCheckSum>3:f4dec7d10e608fcbd604d17a5e147c64</validCheckSum>
+	<validCheckSum>8:3a65e41b9238d0feab36ef2e7c0022d3</validCheckSum>
         <preConditions onFail="MARK_RAN" onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source"/>
@@ -85,6 +86,7 @@
 
     <changeSet id="add_ciel_fhir_concept_source_20200221" author="ibacher" dbms="mysql,mariadb,postgresql">
 	<validCheckSum>3:f540ac5b0cbb385c97531c5fa558a97c</validCheckSum>
+	<validCheckSum>8:719ab651e116abf26ad2d0aa3e0ff14e</validCheckSum>
         <preConditions onFail="MARK_RAN" onError="WARN">
             <and>
                 <tableExists tableName="fhir_concept_source"/>
@@ -976,5 +978,26 @@
         </preConditions>
         <modifyDataType columnName="target_uuid" newDataType="char(38)" tableName="fhir_reference"/>
         <dropUniqueConstraint constraintName="target_uuid"  tableName="fhir_reference" uniqueColumns="target_uuid"/>  
+    </changeSet>
+
+    <changeSet id="drop_fhir_duration_unit_map_20220412" author="mseaton">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_duration_unit_map"/>
+        </preConditions>
+        <dropTable tableName="fhir_duration_unit_map" />
+    </changeSet>
+
+    <changeSet id="update_fhir_diagnostic_report_table_20220511" author="moses_mutesa" dbms="mysql,mariadb,postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_diagnostic_report"/>
+            <columnExists tableName="fhir_diagnostic_report" columnName="name"/>
+            <not>
+                <columnExists tableName="fhir_diagnostic_report" columnName="issued"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="fhir_diagnostic_report">
+            <column name="issued" type="datetime"/>
+        </addColumn>
+        <dropColumn tableName="fhir_diagnostic_report" columnName="name"/>
     </changeSet>
 </databaseChangeLog>

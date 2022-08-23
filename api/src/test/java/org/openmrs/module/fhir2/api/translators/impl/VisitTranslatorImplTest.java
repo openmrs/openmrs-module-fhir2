@@ -22,18 +22,14 @@ import static org.mockito.Mockito.when;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import lombok.SneakyThrows;
 import org.exparity.hamcrest.date.DateMatchers;
 import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,8 +47,6 @@ import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.mappings.EncounterClassMap;
 import org.openmrs.module.fhir2.api.translators.EncounterLocationTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VisitTranslatorImplTest {
@@ -84,9 +78,6 @@ public class VisitTranslatorImplTest {
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Mock
-	private ProvenanceTranslator<org.openmrs.Visit> provenanceTranslator;
-	
-	@Mock
 	private VisitTypeTranslatorImpl visitTypeTranslator;
 	
 	@Mock
@@ -105,7 +96,6 @@ public class VisitTranslatorImplTest {
 		visitTranslator = new VisitTranslatorImpl();
 		visitTranslator.setEncounterLocationTranslator(encounterLocationTranslator);
 		visitTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
-		visitTranslator.setProvenanceTranslator(provenanceTranslator);
 		visitTranslator.setEncounterClassMap(encounterClassMap);
 		visitTranslator.setVisitTypeTranslator(visitTypeTranslator);
 		visitTranslator.setVisitPeriodTranslator(visitPeriodTranslator);
@@ -283,27 +273,6 @@ public class VisitTranslatorImplTest {
 		Encounter result = visitTranslator.toFhirResource(visit);
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
-	public void toFhirResource_shouldAddProvenances() {
-		Visit visit = new Visit();
-		visit.setUuid(VISIT_UUID);
-		
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		provenance.setRecorded(new Date());
-		
-		when(provenanceTranslator.getCreateProvenance(visit)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(visit)).thenReturn(provenance);
-		
-		Encounter result = visitTranslator.toFhirResource(visit);
-		List<Resource> resources = result.getContained();
-		assertThat(resources, notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), CoreMatchers.is(true));
-		assertThat(resources.stream().findAny().get().isResource(), CoreMatchers.is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
 	}
 	
 	@Test

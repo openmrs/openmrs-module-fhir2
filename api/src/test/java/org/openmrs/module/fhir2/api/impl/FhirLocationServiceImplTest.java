@@ -41,6 +41,7 @@ import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 
@@ -155,8 +156,8 @@ public class FhirLocationServiceImplTest {
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
 		when(locationDao.getSearchResults(any(), any())).thenReturn(locations);
 		
-		IBundleProvider results = fhirLocationService.searchForLocations(null, null, null, null, null, null, null, null,
-		    null, null, null, null);
+		IBundleProvider results = fhirLocationService.searchForLocations(
+		    new LocationSearchParams(null, null, null, null, null, null, null, null, null, null, null, null));
 		
 		assertThat(results, notNullValue());
 		

@@ -14,14 +14,16 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -40,8 +42,8 @@ import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.api.FhirConceptService;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
+import org.openmrs.util.LocaleUtility;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConceptTranslatorImplTest {
@@ -56,32 +58,69 @@ public class ConceptTranslatorImplTest {
 	@Mock
 	private FhirConceptSourceService conceptSourceService;
 	
-	@Mock
+	private ConceptTranslatorImpl conceptTranslator;
+	
+	private ConceptMapType sameAs;
+	
+	private ConceptMapType narrowerThan;
+	
+	private ConceptMapType broaderThan;
+	
 	private Concept concept;
 	
-	private ConceptTranslatorImpl conceptTranslator;
+	private CodeableConcept fhirConcept;
+	
+	private ConceptSource loinc;
+	
+	private FhirConceptSource fhirLoinc;
+	
+	private ConceptSource ciel;
+	
+	private FhirConceptSource fhirCiel;
 	
 	@Before
 	public void setup() {
+		LocaleUtility.setLocalesAllowedListCache(Arrays.asList(Locale.ENGLISH));
 		conceptTranslator = new ConceptTranslatorImpl();
 		conceptTranslator.setConceptService(conceptService);
 		conceptTranslator.setConceptSourceService(conceptSourceService);
-	}
-	
-	@Before
-	public void setupMocks() {
-		ConceptName conceptName = mock(ConceptName.class);
-		concept.addName(conceptName);
-		when(conceptName.getName()).thenReturn(CONCEPT_NAME);
-		when(concept.getName()).thenReturn(conceptName);
+		
+		sameAs = new ConceptMapType();
+		sameAs.setName("SAME-AS");
+		narrowerThan = new ConceptMapType();
+		narrowerThan.setName("NARROWER-THAN");
+		broaderThan = new ConceptMapType();
+		broaderThan.setName("BROADER-THAN");
+		loinc = new ConceptSource();
+		loinc.setName("LOINC");
+		ciel = new ConceptSource();
+		ciel.setName("CIEL");
+		
+		concept = new Concept();
+		concept.setUuid(CONCEPT_UUID);
+		concept.addName(new ConceptName(CONCEPT_NAME, Locale.ENGLISH));
+		when(conceptService.get(CONCEPT_UUID)).thenReturn(concept);
+		
+		fhirConcept = new CodeableConcept();
+		Coding baseCoding = fhirConcept.addCoding();
+		baseCoding.setCode(CONCEPT_UUID);
+		
+		fhirLoinc = new FhirConceptSource();
+		fhirLoinc.setConceptSource(loinc);
+		fhirLoinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
+		when(conceptSourceService.getConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL)).thenReturn(Optional.of(loinc));
+		when(conceptSourceService.getUrlForConceptSource(loinc)).thenReturn(FhirTestConstants.LOINC_SYSTEM_URL);
+		
+		FhirConceptSource fhirCiel = new FhirConceptSource();
+		fhirCiel.setConceptSource(ciel);
+		fhirCiel.setUrl(FhirTestConstants.CIEL_SYSTEM_URN);
+		when(conceptSourceService.getConceptSourceByUrl(FhirTestConstants.CIEL_SYSTEM_URN)).thenReturn(Optional.of(ciel));
+		when(conceptSourceService.getUrlForConceptSource(ciel)).thenReturn(FhirTestConstants.CIEL_SYSTEM_URN);
 	}
 	
 	@Test
 	public void shouldTranslateConceptToCodeableConcept() {
-		when(concept.getUuid()).thenReturn(CONCEPT_UUID);
-		
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
-		
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), not(empty()));
 		assertThat(result.getCoding().get(0).getSystem(), nullValue());
@@ -91,27 +130,8 @@ public class ConceptTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateLOINCMappingForLOINCMappedConcept() {
-		Collection<ConceptMap> conceptMaps = new ArrayList<>();
-		ConceptMap conceptMap = mock(ConceptMap.class);
-		conceptMaps.add(conceptMap);
-		ConceptReferenceTerm conceptReferenceTerm = mock(ConceptReferenceTerm.class);
-		ConceptSource conceptSource = mock(ConceptSource.class);
-		
-		when(conceptMap.getConceptReferenceTerm()).thenReturn(conceptReferenceTerm);
-		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
-		when(conceptReferenceTerm.getCode()).thenReturn("1000-1");
-		when(conceptSource.getName()).thenReturn("LOINC");
-		when(concept.getConceptMappings()).thenReturn(conceptMaps);
-		
-		FhirConceptSource loinc = new FhirConceptSource();
-		ConceptSource loincConceptSource = new ConceptSource();
-		loincConceptSource.setName("LOINC");
-		loinc.setConceptSource(loincConceptSource);
-		loinc.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.of(loinc));
-		
+		addMapping(sameAs, loinc, "1000-1");
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
-		
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), not(empty()));
 		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
@@ -121,25 +141,7 @@ public class ConceptTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateCIELMappingForCIELMappedConcept() {
-		Collection<ConceptMap> conceptMaps = new ArrayList<>();
-		ConceptMap conceptMap = mock(ConceptMap.class);
-		conceptMaps.add(conceptMap);
-		ConceptReferenceTerm conceptReferenceTerm = mock(ConceptReferenceTerm.class);
-		ConceptSource conceptSource = mock(ConceptSource.class);
-		
-		when(conceptMap.getConceptReferenceTerm()).thenReturn(conceptReferenceTerm);
-		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
-		when(conceptReferenceTerm.getCode()).thenReturn("1650");
-		when(conceptSource.getName()).thenReturn("CIEL");
-		when(concept.getConceptMappings()).thenReturn(conceptMaps);
-		
-		FhirConceptSource ciel = new FhirConceptSource();
-		ConceptSource cielConceptSource = new ConceptSource();
-		cielConceptSource.setName("CIEL");
-		ciel.setConceptSource(cielConceptSource);
-		ciel.setUrl(FhirTestConstants.CIEL_SYSTEM_URN);
-		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("CIEL")).thenReturn(Optional.of(ciel));
-		
+		addMapping(sameAs, ciel, "1650");
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), not(empty()));
@@ -149,21 +151,12 @@ public class ConceptTranslatorImplTest {
 	}
 	
 	@Test
-	public void shouldNotTranslateUnknownMappingCode() {
-		Collection<ConceptMap> conceptMaps = new ArrayList<>();
-		ConceptMap conceptMap = mock(ConceptMap.class);
-		conceptMaps.add(conceptMap);
-		ConceptReferenceTerm conceptReferenceTerm = mock(ConceptReferenceTerm.class);
-		ConceptSource conceptSource = mock(ConceptSource.class);
-		when(conceptMap.getConceptReferenceTerm()).thenReturn(conceptReferenceTerm);
-		when(conceptReferenceTerm.getConceptSource()).thenReturn(conceptSource);
-		when(conceptSource.getName()).thenReturn("Unknown");
-		when(concept.getConceptMappings()).thenReturn(conceptMaps);
-		when(conceptSourceService.getFhirConceptSourceByConceptSourceName("Unknown")).thenReturn(Optional.empty());
-		
+	public void shouldNotTranslateNullSource() {
+		addMapping(sameAs, null, "1650");
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		assertThat(result, notNullValue());
-		assertThat(result.getCoding(), not(hasItem(hasProperty("code", equalTo("1650")))));
+		assertThat(result.getCoding(), hasSize(1));
+		assertThat(result.getCoding(), not(hasItem(hasProperty("system", notNullValue()))));
 	}
 	
 	@Test
@@ -173,44 +166,34 @@ public class ConceptTranslatorImplTest {
 	
 	@Test
 	public void shouldTranslateCodeableConceptToConcept() {
-		CodeableConcept codeableConcept = new CodeableConcept();
-		Coding baseCoding = codeableConcept.addCoding();
-		baseCoding.setCode(CONCEPT_UUID);
-		
-		Concept concept = new Concept();
-		concept.setUuid(CONCEPT_UUID);
-		when(conceptService.get(CONCEPT_UUID)).thenReturn(concept);
-		
-		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
+		Concept result = conceptTranslator.toOpenmrsType(fhirConcept);
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(CONCEPT_UUID));
 	}
 	
 	@Test
-	public void shouldTranslateLOINCCodeableConceptToConcept() {
+	public void shouldTranslateLOINCCodeableConceptToConceptWithSAMEASMapType() {
+		addMapping(sameAs, loinc, "1000-1");
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding loincCoding = codeableConcept.addCoding();
 		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
 		loincCoding.setCode("1000-1");
 		
-		Concept concept = new Concept();
-		ConceptMap conceptMap = new ConceptMap();
-		ConceptReferenceTerm conceptReferenceTerm = new ConceptReferenceTerm();
-		ConceptSource loinc = new ConceptSource();
-		loinc.setName("LOINC");
-		conceptReferenceTerm.setConceptSource(loinc);
-		conceptReferenceTerm.setCode("1000-1");
-		conceptMap.setConceptReferenceTerm(conceptReferenceTerm);
-		ConceptMapType conceptMapType = new ConceptMapType();
-		conceptMap.setConceptMapType(conceptMapType);
-		concept.addConceptMapping(conceptMap);
-		when(conceptService.getConceptBySourceNameAndCode("LOINC", "1000-1")).thenReturn(Optional.of(concept));
+		Concept concept2 = new Concept();
+		concept2.setUuid("1234-666-999");
+		concept2.addName(new ConceptName("Sample Concept", Locale.ENGLISH));
 		
-		FhirConceptSource fhirLoincSource = new FhirConceptSource();
-		fhirLoincSource.setConceptSource(loinc);
-		fhirLoincSource.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		when(conceptSourceService.getFhirConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL))
-		        .thenReturn(Optional.of(fhirLoincSource));
+		ConceptMap m = new ConceptMap();
+		m.setConceptMapType(broaderThan);
+		m.setConcept(concept2);
+		m.setConceptReferenceTerm(new ConceptReferenceTerm(loinc, "1000-1", "1000-1"));
+		concept.addConceptMapping(m);
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		matchingConcepts.add(concept);
+		matchingConcepts.add(concept2);
+		
+		when(conceptService.getConceptsWithAnyMappingInSource(loinc, "1000-1")).thenReturn(matchingConcepts);
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());
@@ -218,6 +201,47 @@ public class ConceptTranslatorImplTest {
 		assertThat(result.getConceptMappings(), not(empty()));
 		assertThat(result.getConceptMappings(),
 		    hasItem(hasProperty("conceptReferenceTerm", hasProperty("code", equalTo("1000-1")))));
+	}
+	
+	@Test
+	public void shouldNotTranslateCodeableConceptToAnyConceptIfMultipleConceptsExistWithNoSAMEASMapType() {
+		addMapping(narrowerThan, loinc, "1000-1");
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding loincCoding = codeableConcept.addCoding();
+		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
+		loincCoding.setCode("1000-1");
+		
+		Concept concept2 = new Concept();
+		concept2.setUuid("1234-666-999");
+		concept2.addName(new ConceptName("Sample Concept", Locale.ENGLISH));
+		
+		ConceptMap m = new ConceptMap();
+		m.setConceptMapType(broaderThan);
+		m.setConcept(concept2);
+		m.setConceptReferenceTerm(new ConceptReferenceTerm(loinc, "1000-1", "1000-1"));
+		concept.addConceptMapping(m);
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		matchingConcepts.add(concept);
+		matchingConcepts.add(concept2);
+		
+		when(conceptService.getConceptsWithAnyMappingInSource(loinc, "1000-1")).thenReturn(matchingConcepts);
+		
+		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
+		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void shouldNotTranslateCodeableConceptToAnyConceptIfNoConceptMatches() {
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding loincCoding = codeableConcept.addCoding();
+		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
+		loincCoding.setCode("1000-1");
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		when(conceptService.getConceptsWithAnyMappingInSource(loinc, "1000-1")).thenReturn(matchingConcepts);
+		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
+		assertThat(result, nullValue());
 	}
 	
 	@Test
@@ -229,59 +253,41 @@ public class ConceptTranslatorImplTest {
 		loincCoding.setSystem(FhirTestConstants.LOINC_SYSTEM_URL);
 		loincCoding.setCode("1000-1");
 		
-		Concept defaultConcept = new Concept();
-		defaultConcept.setUuid(CONCEPT_UUID);
-		when(conceptService.get(CONCEPT_UUID)).thenReturn(defaultConcept);
-		
-		Concept loincConcept = new Concept();
-		loincConcept.setUuid(FhirUtils.newUuid());
-		ConceptMap conceptMap = new ConceptMap();
-		ConceptReferenceTerm conceptReferenceTerm = new ConceptReferenceTerm();
-		ConceptSource loinc = new ConceptSource();
-		loinc.setName("LOINC");
-		conceptReferenceTerm.setConceptSource(loinc);
-		conceptReferenceTerm.setCode("1000-1");
-		conceptMap.setConceptReferenceTerm(conceptReferenceTerm);
-		ConceptMapType conceptMapType = new ConceptMapType();
-		conceptMap.setConceptMapType(conceptMapType);
-		loincConcept.addConceptMapping(conceptMap);
-		when(conceptService.getConceptBySourceNameAndCode("LOINC", "1000-1")).thenReturn(Optional.of(loincConcept));
-		
-		FhirConceptSource fhirLoincSource = new FhirConceptSource();
-		fhirLoincSource.setConceptSource(loinc);
-		fhirLoincSource.setUrl(FhirTestConstants.LOINC_SYSTEM_URL);
-		when(conceptSourceService.getFhirConceptSourceByUrl(FhirTestConstants.LOINC_SYSTEM_URL))
-		        .thenReturn(Optional.of(fhirLoincSource));
-		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
-		assertThat(result.getUuid(), equalTo(loincConcept.getUuid()));
+		assertThat(result.getUuid(), equalTo(concept.getUuid()));
 	}
 	
 	@Test
 	public void shouldTranslateCIELCodeableConceptToConcept() {
+		addMapping(sameAs, ciel, "1650");
 		CodeableConcept codeableConcept = new CodeableConcept();
 		Coding cielCoding = codeableConcept.addCoding();
 		cielCoding.setSystem(FhirTestConstants.CIEL_SYSTEM_URN);
 		cielCoding.setCode("1650");
 		
-		Concept concept = new Concept();
-		ConceptMap conceptMap = new ConceptMap();
-		ConceptReferenceTerm conceptReferenceTerm = new ConceptReferenceTerm();
-		ConceptSource ciel = new ConceptSource();
-		ciel.setName("CIEL");
-		conceptReferenceTerm.setConceptSource(ciel);
-		conceptReferenceTerm.setCode("1650");
-		conceptMap.setConceptReferenceTerm(conceptReferenceTerm);
-		ConceptMapType conceptMapType = new ConceptMapType();
-		conceptMap.setConceptMapType(conceptMapType);
-		concept.addConceptMapping(conceptMap);
-		when(conceptService.getConceptBySourceNameAndCode("CIEL", "1650")).thenReturn(Optional.of(concept));
+		List<Concept> matchingConcepts = new ArrayList<>();
+		matchingConcepts.add(concept);
+		when(conceptService.getConceptsWithAnyMappingInSource(ciel, "1650")).thenReturn(matchingConcepts);
 		
-		FhirConceptSource fhirCielSource = new FhirConceptSource();
-		fhirCielSource.setConceptSource(ciel);
-		fhirCielSource.setUrl(FhirTestConstants.CIEL_SYSTEM_URN);
-		when(conceptSourceService.getFhirConceptSourceByUrl(FhirTestConstants.CIEL_SYSTEM_URN))
-		        .thenReturn(Optional.of(fhirCielSource));
+		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
+		assertThat(result, notNullValue());
+		assertThat(result.getConceptMappings(), notNullValue());
+		assertThat(result.getConceptMappings(), not(empty()));
+		assertThat(result.getConceptMappings(),
+		    hasItem(hasProperty("conceptReferenceTerm", hasProperty("code", equalTo("1650")))));
+	}
+	
+	@Test
+	public void shouldTranslateCodeableConceptToConceptWithNoSAMEASMappingIfOnlyOneConceptExists() {
+		addMapping(narrowerThan, ciel, "1650");
+		CodeableConcept codeableConcept = new CodeableConcept();
+		Coding cielCoding = codeableConcept.addCoding();
+		cielCoding.setSystem(FhirTestConstants.CIEL_SYSTEM_URN);
+		cielCoding.setCode("1650");
+		
+		List<Concept> matchingConcepts = new ArrayList<>();
+		matchingConcepts.add(concept);
+		when(conceptService.getConceptsWithAnyMappingInSource(ciel, "1650")).thenReturn(matchingConcepts);
 		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, notNullValue());
@@ -297,14 +303,130 @@ public class ConceptTranslatorImplTest {
 		Coding cielCoding = codeableConcept.addCoding();
 		cielCoding.setSystem("Unknown");
 		cielCoding.setCode("1650");
-		when(conceptSourceService.getFhirConceptSourceByUrl("Unknown")).thenReturn(Optional.empty());
-		
 		Concept result = conceptTranslator.toOpenmrsType(codeableConcept);
 		assertThat(result, nullValue());
 	}
 	
 	@Test
+	public void shouldAddCodesThatAreMappedSAME_ASIfTheyExist() {
+		addMapping(sameAs, ciel, "1650");
+		addMapping(narrowerThan, ciel, "1690");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		// one SAME-AS, one UUID
+		assertThat(result.getCoding(), hasSize(2));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+	}
+	
+	@Test
+	public void shouldAddCodesThatAreMappedSAME_ASIfOneMappingExists() {
+		addMapping(sameAs, ciel, "1650");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		// one SAME-AS, one UUID
+		assertThat(result.getCoding(), hasSize(2));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+	}
+	
+	@Test
+	public void shouldAddCodesThatAreNotMappedSAME_ASIfOnlyOneMappingExistsPerSource() {
+		addMapping(narrowerThan, ciel, "1650");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		// one NARROWER-THAN, one UUID
+		assertThat(result.getCoding(), hasSize(2));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+	}
+	
+	@Test
+	public void shouldNotAddCodesThatAreNotMappedSAME_ASIfManyMappingExistsForTheSameSource() {
+		addMapping(narrowerThan, ciel, "1650");
+		addMapping(broaderThan, ciel, "1690");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		assertThat(result.getCoding(), hasSize(1));
+	}
+	
+	@Test
+	public void shouldAddCodesThatAreNotMappedSAME_ASIfOneMappingPerSourceExistsForMultipleSources() {
+		addMapping(narrowerThan, ciel, "1650");
+		addMapping(broaderThan, loinc, "1000-1");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		assertThat(result.getCoding(), hasSize(3));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1000-1"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+	}
+	
+	@Test
+	public void shouldNotAddCodesThatAreNotMappedSAME_ASIfManyMappingExistsPerSourceForMultipleSources() {
+		addMapping(narrowerThan, ciel, "1650");
+		addMapping(broaderThan, ciel, "1659");
+		addMapping(broaderThan, loinc, "1000-1");
+		addMapping(narrowerThan, loinc, "1000-2");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		assertThat(result.getCoding(), hasSize(1));
+	}
+	
+	@Test
+	public void shouldAddCodesThatAreMappedSAME_ASIfTheyExistForMultipleSources() {
+		addMapping(sameAs, ciel, "1650");
+		addMapping(narrowerThan, ciel, "1680");
+		addMapping(sameAs, loinc, "1000-1");
+		addMapping(broaderThan, loinc, "1000-2");
+		
+		CodeableConcept result = conceptTranslator.toFhirResource(concept);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getCoding(), not(empty()));
+		assertThat(result.getCoding(), hasSize(3));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
+		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1000-1"))));
+		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+	}
+	
+	@Test
 	public void shouldReturnNullWhenCodeableConceptNull() {
 		assertThat(conceptTranslator.toOpenmrsType(null), nullValue());
+	}
+	
+	private void addMapping(ConceptMapType mapType, ConceptSource conceptSource, String code) {
+		ConceptMap m = new ConceptMap();
+		m.setConceptMapType(mapType);
+		m.setConcept(concept);
+		m.setConceptReferenceTerm(new ConceptReferenceTerm(conceptSource, code, code));
+		concept.addConceptMapping(m);
 	}
 }

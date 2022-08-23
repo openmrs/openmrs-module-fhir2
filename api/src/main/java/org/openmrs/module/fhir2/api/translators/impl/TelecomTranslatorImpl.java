@@ -51,19 +51,25 @@ public class TelecomTranslatorImpl implements TelecomTranslator<BaseOpenmrsData>
 		
 		if (attribute instanceof PersonAttribute) {
 			PersonAttribute personAttribute = (PersonAttribute) attribute;
-			personAttribute.setUuid(contactPoint.getId());
+			if (contactPoint.hasId()) {
+				personAttribute.setUuid(contactPoint.getId());
+			}
 			personAttribute.setValue(contactPoint.getValue());
 			personAttribute.setAttributeType(personService.getPersonAttributeTypeByUuid(
 			    globalPropertyService.getGlobalProperty(FhirConstants.PERSON_CONTACT_POINT_ATTRIBUTE_TYPE)));
 		} else if (attribute instanceof LocationAttribute) {
 			LocationAttribute locationAttribute = (LocationAttribute) attribute;
-			locationAttribute.setUuid(contactPoint.getId());
+			if (contactPoint.hasId()) {
+				locationAttribute.setUuid(contactPoint.getId());
+			}
 			locationAttribute.setValue(contactPoint.getValue());
 			locationAttribute.setAttributeType(locationService.getLocationAttributeTypeByUuid(
 			    globalPropertyService.getGlobalProperty(FhirConstants.LOCATION_CONTACT_POINT_ATTRIBUTE_TYPE)));
 		} else if (attribute instanceof ProviderAttribute) {
 			ProviderAttribute providerAttribute = (ProviderAttribute) attribute;
-			providerAttribute.setUuid(contactPoint.getId());
+			if (contactPoint.hasId()) {
+				providerAttribute.setUuid(contactPoint.getId());
+			}
 			providerAttribute.setValue(contactPoint.getValue());
 			providerAttribute.setAttributeType(providerService.getProviderAttributeTypeByUuid(
 			    globalPropertyService.getGlobalProperty(FhirConstants.PROVIDER_CONTACT_POINT_ATTRIBUTE_TYPE)));

@@ -14,13 +14,11 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -49,11 +47,11 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -82,15 +80,6 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 		return Observation30_40.convertObservation(observation);
 	}
 	
-	@History
-	public List<Resource> getObservationHistoryById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Observation observation = observationService.get(id.getIdPart());
-		if (observation == null) {
-			throw new ResourceNotFoundException("Could not find Observation with Id " + id.getIdPart());
-		}
-		return Observation30_40.convertObservation(observation).getContained();
-	}
-	
 	@Create
 	public MethodOutcome createObservationResource(@ResourceParam Observation observation) {
 		return FhirProviderUtils.buildCreate(Observation30_40
@@ -99,12 +88,8 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	public OperationOutcome deleteObservationResource(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Observation observation = observationService.delete(id.getIdPart());
-		if (observation == null) {
-			throw new ResourceNotFoundException("Could not find observation to delete with id" + id.getIdPart());
-		}
-		
-		return FhirProviderUtils.buildDelete(Observation30_40.convertObservation(observation));
+		observationService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR3();
 	}
 	
 	@Search
@@ -142,9 +127,9 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(observationService.searchForObservations(encounterReference,
-		    patientReference, hasMemberReference, valueConcept, valueDateParam, valueQuantityParam, valueStringParam, date,
-		    code, category, id, lastUpdated, sort, includes, revIncludes));
+		return new SearchQueryBundleProviderR3Wrapper(observationService.searchForObservations(new ObservationSearchParams(
+		        encounterReference, patientReference, hasMemberReference, valueConcept, valueDateParam, valueQuantityParam,
+		        valueStringParam, date, code, category, id, lastUpdated, sort, includes, revIncludes)));
 	}
 	
 	@Operation(name = "lastn", idempotent = true, type = Observation.class, bundleType = BundleTypeEnum.SEARCHSET)
@@ -157,8 +142,12 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			subjectParam = patientParam;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(
-		        observationService.getLastnObservations(max, subjectParam, category, code));
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(subjectParam);
+		searchParams.setCategory(category);
+		searchParams.setCode(code);
+		
+		return new SearchQueryBundleProviderR3Wrapper(observationService.getLastnObservations(max, searchParams));
 	}
 	
 	/**
@@ -184,7 +173,11 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			subjectParam = patientParam;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(
-		        observationService.getLastnEncountersObservations(max, subjectParam, category, code));
+		ObservationSearchParams searchParams = new ObservationSearchParams();
+		searchParams.setPatient(subjectParam);
+		searchParams.setCategory(category);
+		searchParams.setCode(code);
+		
+		return new SearchQueryBundleProviderR3Wrapper(observationService.getLastnEncountersObservations(max, searchParams));
 	}
 }

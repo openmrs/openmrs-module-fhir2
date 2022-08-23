@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
 
 import javax.annotation.Nonnull;
@@ -34,7 +35,6 @@ import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,9 +57,6 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	
 	@Autowired
 	private FhirLocationDao fhirLocationDao;
-	
-	@Autowired
-	private ProvenanceTranslator<org.openmrs.Location> provenanceTranslator;
 	
 	/**
 	 * @see org.openmrs.module.fhir2.api.translators.LocationTranslator#toFhirResource(org.openmrs.Location)
@@ -109,9 +106,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 			fhirLocation.setPartOf(createLocationReference(openmrsLocation.getParentLocation()));
 		}
 		
-		fhirLocation.getMeta().setLastUpdated(openmrsLocation.getDateChanged());
-		fhirLocation.addContained(provenanceTranslator.getCreateProvenance(openmrsLocation));
-		fhirLocation.addContained(provenanceTranslator.getUpdateProvenance(openmrsLocation));
+		fhirLocation.getMeta().setLastUpdated(getLastUpdated(openmrsLocation));
 		
 		return fhirLocation;
 	}

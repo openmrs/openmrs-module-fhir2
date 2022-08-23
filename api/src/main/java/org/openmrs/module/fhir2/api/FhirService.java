@@ -26,5 +26,5 @@ public interface FhirService<T extends IAnyResource> {
 	
 	T update(@Nonnull String uuid, @Nonnull T updatedResource);
 	
-	T delete(@Nonnull String uuid);
+	void delete(@Nonnull String uuid);
 }

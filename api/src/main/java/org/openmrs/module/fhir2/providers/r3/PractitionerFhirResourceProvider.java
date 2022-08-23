@@ -14,12 +14,10 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -44,7 +42,6 @@ import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
@@ -99,22 +96,8 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deletePractitioner(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Practitioner practitioner = practitionerService.delete(id.getIdPart());
-		if (practitioner == null) {
-			throw new ResourceNotFoundException("Could not find practitioner to delete with id " + id.getIdPart());
-		}
-		
-		return FhirProviderUtils.buildDelete(Practitioner30_40.convertPractitioner(practitioner));
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getPractitionerHistoryById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Practitioner practitioner = practitionerService.get(id.getIdPart());
-		if (practitioner == null) {
-			throw new ResourceNotFoundException("Could not find practitioner with Id " + id.getIdPart());
-		}
-		return Practitioner30_40.convertPractitioner(practitioner).getContained();
+		practitionerService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR3();
 	}
 	
 	@Search

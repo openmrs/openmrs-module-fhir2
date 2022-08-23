@@ -12,15 +12,15 @@ package org.openmrs.module.fhir2.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
-import org.hibernate.SessionFactory;
 import org.hl7.fhir.r4.model.Timing;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.openmrs.Concept;
+import org.openmrs.api.ConceptService;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
-import org.openmrs.module.fhir2.api.mappings.DurationUnitMap;
+import org.openmrs.module.fhir2.api.translators.DurationUnitTranslator;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -46,26 +46,19 @@ public class DurationUnitTranslatorImplTest extends BaseModuleContextSensitiveTe
 	
 	private static final String WRONG_UUID = "2909AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 	
-	@Mock
-	private DurationUnitMap durationUnitMap;
-	
-	@Autowired
-	private SessionFactory sessionFactory;
-	
 	private Concept concept;
 	
 	private Timing.UnitsOfTime result;
 	
-	private DurationUnitTranslatorImpl durationUnitTranslator;
+	@Autowired
+	private DurationUnitTranslator durationUnitTranslator;
+	
+	@Autowired
+	ConceptService conceptService;
 	
 	@Before
 	public void setup() throws Exception {
-		durationUnitTranslator = new DurationUnitTranslatorImpl();
-		durationUnitMap = new DurationUnitMap();
 		concept = new Concept();
-		durationUnitTranslator.setDurationUnitMap(durationUnitMap);
-		durationUnitMap.setSessionFactory(sessionFactory);
-		
 		executeDataSet(DURATION_UNIT_CONCEPT_DATA);
 	}
 	
@@ -82,7 +75,7 @@ public class DurationUnitTranslatorImplTest extends BaseModuleContextSensitiveTe
 	
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsSeconds() {
-		concept.setUuid(SECONDS_UUID);
+		concept = conceptService.getConceptByUuid(SECONDS_UUID);
 		
 		result = durationUnitTranslator.toFhirResource(concept);
 		
@@ -92,7 +85,7 @@ public class DurationUnitTranslatorImplTest extends BaseModuleContextSensitiveTe
 	
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsMinutes() {
-		concept.setUuid(MINUTES_UUID);
+		concept = conceptService.getConceptByUuid(MINUTES_UUID);
 		
 		result = durationUnitTranslator.toFhirResource(concept);
 		
@@ -103,7 +96,7 @@ public class DurationUnitTranslatorImplTest extends BaseModuleContextSensitiveTe
 	
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsHours() {
-		concept.setUuid(HOUR_UUID);
+		concept = conceptService.getConceptByUuid(HOUR_UUID);
 		
 		result = durationUnitTranslator.toFhirResource(concept);
 		
@@ -113,7 +106,7 @@ public class DurationUnitTranslatorImplTest extends BaseModuleContextSensitiveTe
 	
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsDays() {
-		concept.setUuid(DAYS_UUID);
+		concept = conceptService.getConceptByUuid(DAYS_UUID);
 		
 		result = durationUnitTranslator.toFhirResource(concept);
 		
@@ -123,7 +116,7 @@ public class DurationUnitTranslatorImplTest extends BaseModuleContextSensitiveTe
 	
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsWeeks() {
-		concept.setUuid(WEEKS_UUID);
+		concept = conceptService.getConceptByUuid(WEEKS_UUID);
 		
 		result = durationUnitTranslator.toFhirResource(concept);
 		
@@ -133,7 +126,7 @@ public class DurationUnitTranslatorImplTest extends BaseModuleContextSensitiveTe
 	
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsMonths() {
-		concept.setUuid(MONTHS_UUID);
+		concept = conceptService.getConceptByUuid(MONTHS_UUID);
 		
 		result = durationUnitTranslator.toFhirResource(concept);
 		
@@ -143,11 +136,66 @@ public class DurationUnitTranslatorImplTest extends BaseModuleContextSensitiveTe
 	
 	@Test
 	public void toFhirResource_shouldTranslateDrugOrderToUnitsOfTimeIsYears() {
-		concept.setUuid(YEARS_UUID);
+		concept = conceptService.getConceptByUuid(YEARS_UUID);
 		
 		result = durationUnitTranslator.toFhirResource(concept);
 		
 		assertThat(result, notNullValue());
 		assertThat(result, equalTo(Timing.UnitsOfTime.A));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateNullDuration() {
+		Concept result = durationUnitTranslator.toOpenmrsType(Timing.UnitsOfTime.NULL);
+		assertThat(result, nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateSeconds() {
+		Concept result = durationUnitTranslator.toOpenmrsType(Timing.UnitsOfTime.S);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(SECONDS_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateMinutes() {
+		Concept result = durationUnitTranslator.toOpenmrsType(Timing.UnitsOfTime.MIN);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(MINUTES_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateHours() {
+		Concept result = durationUnitTranslator.toOpenmrsType(Timing.UnitsOfTime.H);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(HOUR_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateDays() {
+		Concept result = durationUnitTranslator.toOpenmrsType(Timing.UnitsOfTime.D);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(DAYS_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateWeeks() {
+		Concept result = durationUnitTranslator.toOpenmrsType(Timing.UnitsOfTime.WK);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(WEEKS_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateMonths() {
+		Concept result = durationUnitTranslator.toOpenmrsType(Timing.UnitsOfTime.MO);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(MONTHS_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateYears() {
+		Concept result = durationUnitTranslator.toOpenmrsType(Timing.UnitsOfTime.A);
+		assertThat(result, notNullValue());
+		assertThat(result.getUuid(), equalTo(YEARS_UUID));
 	}
 }

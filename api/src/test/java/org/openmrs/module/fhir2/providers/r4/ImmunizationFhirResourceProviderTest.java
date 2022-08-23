@@ -10,11 +10,9 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,8 +33,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -106,39 +102,6 @@ public class ImmunizationFhirResourceProviderTest extends BaseFhirProvenanceReso
 		idType.setValue(WRONG_IMMUNIZATION_UUID);
 		assertThat(resourceProvider.getImmunizationByUuid(idType).isResource(), is(true));
 		assertThat(resourceProvider.getImmunizationByUuid(idType), nullValue());
-	}
-	
-	@Test
-	public void getImmunizationHistory_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(IMMUNIZATION_UUID);
-		when(immunizationService.get(IMMUNIZATION_UUID)).thenReturn(immunization);
-		
-		List<Resource> resources = resourceProvider.getImmunizationHistoryById(id);
-		assertThat(resources, notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(2));
-	}
-	
-	@Test
-	public void getImmunizationHistory_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(IMMUNIZATION_UUID);
-		when(immunizationService.get(IMMUNIZATION_UUID)).thenReturn(immunization);
-		
-		List<Resource> resources = resourceProvider.getImmunizationHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getImmunizationHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_IMMUNIZATION_UUID);
-		
-		assertThat(resourceProvider.getImmunizationHistoryById(idType).isEmpty(), is(true));
-		assertThat(resourceProvider.getImmunizationHistoryById(idType).size(), equalTo(0));
 	}
 	
 	@Test

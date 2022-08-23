@@ -9,15 +9,25 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import lombok.AccessLevel;
-import lombok.Setter;
+import java.util.Date;
+
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
-import org.springframework.stereotype.Component;
 
-@Component
-@Setter(AccessLevel.PACKAGE)
-public class ProvenanceTranslatorImpl<T extends OpenmrsObject & Auditable> extends BaseProvenanceHandlingTranslator<T> implements ProvenanceTranslator<T> {
+public class FhirTranslatorUtils {
+	
+	public static Date getLastUpdated(OpenmrsObject object) {
+		if (object instanceof Auditable) {
+			Auditable auditable = (Auditable) object;
+			
+			if (auditable.getDateChanged() != null) {
+				return auditable.getDateChanged();
+			} else {
+				return auditable.getDateCreated();
+			}
+		}
+		
+		return null;
+	}
 	
 }

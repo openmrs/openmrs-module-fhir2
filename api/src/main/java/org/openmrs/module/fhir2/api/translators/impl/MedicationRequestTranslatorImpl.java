@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 
 import javax.annotation.Nonnull;
 
@@ -17,8 +18,12 @@ import java.util.Collections;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Annotation;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.openmrs.Concept;
+import org.openmrs.Drug;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
@@ -27,6 +32,7 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationReferenceTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestDispenseRequestComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
@@ -67,6 +73,9 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 	@Autowired
 	private OrderIdentifierTranslator orderIdentifierTranslator;
 	
+	@Autowired
+	private MedicationRequestDispenseRequestComponentTranslator medicationRequestDispenseRequestComponentTranslator;
+	
 	@Override
 	public MedicationRequest toFhirResource(@Nonnull DrugOrder drugOrder) {
 		notNull(drugOrder, "The DrugOrder object should not be null");
@@ -75,7 +84,16 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		medicationRequest.setId(drugOrder.getUuid());
 		medicationRequest.setStatus(statusTranslator.toFhirResource(drugOrder));
 		
-		medicationRequest.setMedication(medicationReferenceTranslator.toFhirResource(drugOrder.getDrug()));
+		if (drugOrder.getDrug() != null) {
+			medicationRequest.setMedication(medicationReferenceTranslator.toFhirResource(drugOrder.getDrug()));
+		} else {
+			CodeableConcept medicationConcept = conceptTranslator.toFhirResource(drugOrder.getConcept());
+			if (StringUtils.isNotBlank(drugOrder.getDrugNonCoded())) {
+				medicationConcept.setText(drugOrder.getDrugNonCoded());
+			}
+			medicationRequest.setMedication(medicationConcept);
+		}
+		
 		medicationRequest.setPriority(medicationRequestPriorityTranslator.toFhirResource(drugOrder.getUrgency()));
 		medicationRequest.setRequester(practitionerReferenceTranslator.toFhirResource(drugOrder.getOrderer()));
 		medicationRequest.setEncounter(encounterReferenceTranslator.toFhirResource(drugOrder.getEncounter()));
@@ -86,6 +104,8 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		medicationRequest.addReasonCode(conceptTranslator.toFhirResource(drugOrder.getOrderReason()));
 		medicationRequest.addDosageInstruction(dosageTranslator.toFhirResource(drugOrder));
 		
+		medicationRequest.setDispenseRequest(medicationRequestDispenseRequestComponentTranslator.toFhirResource(drugOrder));
+		
 		if (drugOrder.getPreviousOrder() != null
 		        && (drugOrder.getAction() == Order.Action.DISCONTINUE || drugOrder.getAction() == Order.Action.REVISE)) {
 			medicationRequest.setPriorPrescription(createOrderReference(drugOrder.getPreviousOrder())
@@ -94,6 +114,8 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 			medicationRequest.setBasedOn(Collections.singletonList(createOrderReference(drugOrder.getPreviousOrder())
 			        .setIdentifier(orderIdentifierTranslator.toFhirResource(drugOrder.getPreviousOrder()))));
 		}
+		
+		medicationRequest.getMeta().setLastUpdated(getLastUpdated(drugOrder));
 		
 		return medicationRequest;
 	}
@@ -111,7 +133,21 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		existingDrugOrder.setUuid(medicationRequest.getId());
 		
-		existingDrugOrder.setDrug(medicationReferenceTranslator.toOpenmrsType(medicationRequest.getMedicationReference()));
+		if (medicationRequest.hasMedicationReference()) {
+			Drug drug = medicationReferenceTranslator.toOpenmrsType(medicationRequest.getMedicationReference());
+			existingDrugOrder.setDrug(drug);
+		} else {
+			CodeableConcept codeableConcept = medicationRequest.getMedicationCodeableConcept();
+			Concept concept = conceptTranslator.toOpenmrsType(codeableConcept);
+			existingDrugOrder.setConcept(concept);
+			if (codeableConcept.getText() != null) {
+				CodeableConcept referenceConcept = conceptTranslator.toFhirResource(concept);
+				if (!codeableConcept.getText().equals(referenceConcept.getText())) {
+					existingDrugOrder.setDrugNonCoded(codeableConcept.getText());
+				}
+			}
+		}
+		
 		existingDrugOrder.setUrgency(medicationRequestPriorityTranslator.toOpenmrsType(medicationRequest.getPriority()));
 		existingDrugOrder.setOrderer(practitionerReferenceTranslator.toOpenmrsType(medicationRequest.getRequester()));
 		existingDrugOrder.setEncounter(encounterReferenceTranslator.toOpenmrsType(medicationRequest.getEncounter()));
@@ -119,6 +155,10 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		existingDrugOrder.setCommentToFulfiller(medicationRequest.getNoteFirstRep().getText());
 		existingDrugOrder.setOrderReason(conceptTranslator.toOpenmrsType(medicationRequest.getReasonCodeFirstRep()));
+		dosageTranslator.toOpenmrsType(existingDrugOrder, medicationRequest.getDosageInstructionFirstRep());
+		
+		medicationRequestDispenseRequestComponentTranslator.toOpenmrsType(existingDrugOrder,
+		    medicationRequest.getDispenseRequest());
 		
 		return existingDrugOrder;
 		

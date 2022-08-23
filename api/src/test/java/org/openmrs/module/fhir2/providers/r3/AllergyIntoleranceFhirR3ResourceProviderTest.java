@@ -11,12 +11,10 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,8 +46,6 @@ import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Provenance;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.Test;
@@ -133,27 +129,6 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 		id.setValue(WRONG_ALLERGY_UUID);
 		AllergyIntolerance result = resourceProvider.getAllergyIntoleranceById(id);
 		assertThat(result, nullValue());
-	}
-	
-	@Test
-	public void getAllergyIntoleranceHistory_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(ALLERGY_UUID);
-		when(service.get(ALLERGY_UUID)).thenReturn(allergyIntolerance);
-		
-		List<Resource> resources = resourceProvider.getAllergyIntoleranceHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getAllergyIntoleranceHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_ALLERGY_UUID);
-		assertThat(resourceProvider.getAllergyIntoleranceHistoryById(idType).isEmpty(), is(true));
-		assertThat(resourceProvider.getAllergyIntoleranceHistoryById(idType).size(), equalTo(0));
-		
 	}
 	
 	@Test
@@ -497,18 +472,11 @@ public class AllergyIntoleranceFhirR3ResourceProviderTest extends BaseFhirR3Prov
 	
 	@Test
 	public void deleteAllergyIntolerance_shouldDeleteRequestedAllergyIntolerance() {
-		when(service.delete(ALLERGY_UUID)).thenReturn(allergyIntolerance);
-		
 		OperationOutcome result = resourceProvider.deleteAllergyIntolerance(new IdType().setValue(ALLERGY_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteAllergyIntolerance_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentAllergyIntolerance() {
-		when(service.delete(WRONG_ALLERGY_UUID)).thenReturn(null);
-		resourceProvider.deleteAllergyIntolerance(new IdType().setValue(WRONG_ALLERGY_UUID));
 	}
 }

@@ -14,11 +14,16 @@ import static org.hibernate.criterion.Restrictions.eq;
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.openmrs.ConceptSource;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,15 +48,33 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	
 	@Override
 	public Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url) {
-		return Optional.ofNullable((FhirConceptSource) sessionFactory.getCurrentSession()
-		        .createCriteria(FhirConceptSource.class).add(eq("url", url)).add(eq("retired", false)).uniqueResult());
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class);
+		criteria.add(eq("url", url)).add(eq("retired", false));
+		return Optional.ofNullable((FhirConceptSource) criteria.uniqueResult());
 	}
 	
 	@Override
-	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
-		return Optional
-		        .ofNullable((FhirConceptSource) sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class)
-		                .createAlias("conceptSource", "conceptSource").add(eq("conceptSource.name", sourceName))
-		                .add(eq("conceptSource.retired", false)).add(eq("retired", false)).uniqueResult());
+	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSource(@Nonnull ConceptSource conceptSource) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class);
+		criteria.add(eq("conceptSource", conceptSource));
+		return Optional.ofNullable((FhirConceptSource) criteria.uniqueResult());
+	}
+	
+	@Override
+	public Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(ConceptSource.class);
+		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
+			criteria.add(eq("hl7Code", hl7Code).ignoreCase());
+		} else {
+			criteria.add(eq("hl7Code", hl7Code));
+		}
+		criteria.addOrder(Order.asc("retired"));
+		
+		List<ConceptSource> matchingSources = criteria.list();
+		if (matchingSources.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		return Optional.ofNullable(matchingSources.get(0));
 	}
 }

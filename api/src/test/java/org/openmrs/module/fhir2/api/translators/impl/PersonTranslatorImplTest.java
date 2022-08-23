@@ -34,8 +34,6 @@ import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,9 +55,7 @@ import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PersonTranslatorImplTest {
@@ -103,9 +99,6 @@ public class PersonTranslatorImplTest {
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Mock
-	private ProvenanceTranslator<Person> provenanceTranslator;
-	
-	@Mock
 	private FhirPatientDao patientDao;
 	
 	@Mock
@@ -124,7 +117,6 @@ public class PersonTranslatorImplTest {
 		personTranslator.setNameTranslator(nameTranslator);
 		personTranslator.setAddressTranslator(addressTranslator);
 		personTranslator.setTelecomTranslator(telecomTranslator);
-		personTranslator.setProvenanceTranslator(provenanceTranslator);
 		personTranslator.setPatientDao(patientDao);
 		personTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		personTranslator.setBirthDateTranslator(birthDateTranslator);
@@ -474,38 +466,5 @@ public class PersonTranslatorImplTest {
 		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(person);
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
-	public void shouldAddProvenanceResources() {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		when(provenanceTranslator.getCreateProvenance(personMock)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(personMock)).thenReturn(provenance);
-		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(personMock);
-		assertThat(result, notNullValue());
-		assertThat(result.getContained(), not(empty()));
-		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
-		assertThat(result.getContained().stream()
-		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
-		    is(true));
-	}
-	
-	@Test
-	public void shouldNotAddUpdateProvenanceIfDateChangedAndChangedByAreBothNull() {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		personMock.setDateChanged(null);
-		personMock.setChangedBy(null);
-		when(provenanceTranslator.getCreateProvenance(personMock)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(personMock)).thenReturn(null);
-		
-		org.hl7.fhir.r4.model.Person result = personTranslator.toFhirResource(personMock);
-		assertThat(result, notNullValue());
-		assertThat(result.getContained(), not(empty()));
-		assertThat(result.getContained().size(), equalTo(1));
-		assertThat(result.getContained().stream()
-		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
-		    is(true));
 	}
 }

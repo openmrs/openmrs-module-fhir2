@@ -23,18 +23,17 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -43,17 +42,12 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,7 +57,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -73,10 +66,6 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 	private static final String PATIENT_UUID = "0b42f99b-776e-4388-8f6f-84357ae2a8fb";
 	
 	private static final String BAD_PATIENT_UUID = "bb2354c1-e9e4-4020-bda0-d4a9f3232c9c";
-	
-	private static final String AUTHOR = "author";
-	
-	private static final String AUT = "AUT";
 	
 	private static final String LAST_UPDATED_DATE = "eq2020-09-03";
 	
@@ -609,71 +598,6 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		        hasProperty("paramType", equalTo(FhirConstants.ALLERGY_INTOLERANCE)))));
 	}
 	
-	@Test
-	public void shouldVerifyGetPatientResourceHistoryUri() throws Exception {
-		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-		patient.setId(PATIENT_UUID);
-		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
-		
-		MockHttpServletResponse response = getPatientHistoryRequest();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-	}
-	
-	@Test
-	public void shouldGetPatientResourceHistory() throws IOException, ServletException {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		provenance.setRecorded(new Date());
-		provenance.setActivity(new CodeableConcept().addCoding(
-		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
-		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
-		        .setType(new CodeableConcept().addCoding(new Coding().setCode(AUT).setDisplay(AUTHOR)
-		                .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
-		        .addRole(new CodeableConcept().addCoding(
-		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
-		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-		patient.setId(PATIENT_UUID);
-		patient.addContained(provenance);
-		
-		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
-		
-		MockHttpServletResponse response = getPatientHistoryRequest();
-		
-		Bundle results = readBundleResponse(response);
-		assertThat(results, notNullValue());
-		assertThat(results.hasEntry(), is(true));
-		assertThat(results.getEntry().get(0).getResource(), notNullValue());
-		assertThat(results.getEntry().get(0).getResource().getResourceType().name(),
-		    equalTo(Provenance.class.getSimpleName()));
-		
-	}
-	
-	@Test
-	public void shouldReturnBundleWithEmptyEntriesIfContainedIsEmpty() throws Exception {
-		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-		patient.setId(PATIENT_UUID);
-		patient.setContained(new ArrayList<>());
-		when(patientService.get(PATIENT_UUID)).thenReturn(patient);
-		
-		MockHttpServletResponse response = getPatientHistoryRequest();
-		Bundle results = readBundleResponse(response);
-		assertThat(results.hasEntry(), is(false));
-	}
-	
-	@Test
-	public void getPatientHistory_shouldReturn404IfPatientIdIsWrong() throws Exception {
-		MockHttpServletResponse response = get("/Patient/" + BAD_PATIENT_UUID + "/_history").accept(FhirMediaTypes.JSON)
-		        .go();
-		
-		assertThat(response, isNotFound());
-	}
-	
-	private MockHttpServletResponse getPatientHistoryRequest() throws IOException, ServletException {
-		return get("/Patient/" + PATIENT_UUID + "/_history").accept(FhirMediaTypes.JSON).go();
-	}
-	
 	private void verifyUri(String uri) throws Exception {
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
@@ -697,7 +621,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PATIENT_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPatient = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
@@ -715,7 +639,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PATIENT_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPatient = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
@@ -734,7 +658,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PATIENT_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPatient = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Patient/" + PATIENT_UUID).jsonContent(jsonPatient)
@@ -749,7 +673,7 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PATIENT_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPatient = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Patient/" + BAD_PATIENT_UUID).jsonContent(jsonPatient)
@@ -762,18 +686,19 @@ public class PatientFhirR3ResourceProviderWebTest extends BaseFhirR3ResourceProv
 	
 	@Test
 	public void deletePatient_shouldDeletePatient() throws Exception {
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(PATIENT_UUID);
-		retVal.getText().setDivAsString("Deleted successfully");
-		
-		org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-		patient.setId(PATIENT_UUID);
-		
-		when(patientService.delete(PATIENT_UUID)).thenReturn(patient);
-		
 		MockHttpServletResponse response = delete("/Patient/" + PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
+	
+	@Test
+	public void deletePatient_shouldReturn404WhenPatientNotFound() throws Exception {
+		doThrow(new ResourceNotFoundException("")).when(patientService).delete(BAD_PATIENT_UUID);
+		
+		MockHttpServletResponse response = delete("/Patient/" + BAD_PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
 	

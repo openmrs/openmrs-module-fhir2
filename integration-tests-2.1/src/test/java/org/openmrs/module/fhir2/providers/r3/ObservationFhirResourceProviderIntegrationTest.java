@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -27,18 +28,17 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -217,7 +217,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		String jsonObs;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_OBS_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonObs = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonObs = inputStreamToString(is, UTF_8);
 		}
 		
 		// create obs
@@ -261,7 +261,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		String xmlObs;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_OBS_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			xmlObs = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlObs = inputStreamToString(is, UTF_8);
 		}
 		
 		// create obs

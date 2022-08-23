@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 
 import javax.annotation.Nonnull;
 
@@ -32,7 +33,6 @@ import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceTranslator;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,9 +45,6 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 	
 	@Autowired
 	private PatientReferenceTranslator patientReferenceTranslator;
-	
-	@Autowired
-	private ProvenanceTranslator<Allergy> provenanceTranslator;
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
@@ -79,15 +76,14 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		allergy.setPatient(patientReferenceTranslator.toFhirResource(omrsAllergy.getPatient()));
 		allergy.setRecorder(practitionerReferenceTranslator.toFhirResource(omrsAllergy.getCreator()));
 		allergy.setRecordedDate(omrsAllergy.getDateCreated());
-		allergy.getMeta().setLastUpdated(omrsAllergy.getDateChanged());
 		allergy.setType(AllergyIntolerance.AllergyIntoleranceType.ALLERGY);
 		allergy.addNote(new Annotation().setText(omrsAllergy.getComment()));
 		allergy.setCriticality(
 		    criticalityTranslator.toFhirResource(severityTranslator.toFhirResource(omrsAllergy.getSeverity())));
 		allergy.addReaction(reactionComponentTranslator.toFhirResource(omrsAllergy));
 		allergy.setCode(allergy.getReactionFirstRep().getSubstance());
-		allergy.addContained(provenanceTranslator.getCreateProvenance(omrsAllergy));
-		allergy.addContained(provenanceTranslator.getUpdateProvenance(omrsAllergy));
+		
+		allergy.getMeta().setLastUpdated(getLastUpdated(omrsAllergy));
 		
 		return allergy;
 	}

@@ -31,6 +31,7 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslator implement
 		fhirAddress.setCity(address.getCityVillage());
 		fhirAddress.setState(address.getStateProvince());
 		fhirAddress.setCountry(address.getCountry());
+		fhirAddress.setDistrict(address.getCountyDistrict());
 		fhirAddress.setPostalCode(address.getPostalCode());
 		
 		// TODO is this the right mapping?
@@ -62,8 +63,12 @@ public class PersonAddressTranslatorImpl extends BaseAddressTranslator implement
 			return personAddress;
 		}
 		
-		personAddress.setUuid(address.getId());
+		if (address.hasId()) {
+			personAddress.setUuid(address.getId());
+		}
+		
 		personAddress.setCityVillage(address.getCity());
+		personAddress.setCountyDistrict(address.getDistrict());
 		personAddress.setStateProvince(address.getState());
 		personAddress.setCountry(address.getCountry());
 		personAddress.setPostalCode(address.getPostalCode());

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
@@ -21,34 +22,27 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Objects;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Task;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,9 +52,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
-import org.openmrs.module.fhir2.providers.util.TaskVersionConverter;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -130,66 +122,11 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	}
 	
 	@Test
-	public void getTaskHistoryByIdRequest_shouldVerifyGetTaskHistoryByIdUri() throws Exception {
-		MockHttpServletResponse response = getTaskHistoryByIdRequest();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-	}
-	
-	@Test
-	public void getTaskHistoryByIdRequest_shouldGetTaskHistoryById() throws IOException, ServletException {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		provenance.setRecorded(new Date());
-		provenance.setActivity(new CodeableConcept().addCoding(
-		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
-		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
-		        .setType(
-		            new CodeableConcept().addCoding(new Coding().setCode(FhirConstants.AUT).setDisplay(FhirConstants.AUTHOR)
-		                    .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
-		        .addRole(new CodeableConcept().addCoding(
-		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
-		
-		task.addContained(provenance);
-		
-		MockHttpServletResponse response = getTaskHistoryByIdRequest();
-		Bundle results = readBundleResponse(response);
-		
-		assertThat(results, notNullValue());
-		assertThat(results.hasEntry(), is(true));
-		assertThat(results.getEntry().get(0).getResource(), notNullValue());
-		assertThat(results.getEntry().get(0).getResource().getResourceType().name(),
-		    equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test
-	public void getTaskHistoryById_shouldReturnBundleWithEmptyEntriesIfPractitionerContainedIsEmpty() throws Exception {
-		task.setContained(new ArrayList<>());
-		
-		MockHttpServletResponse response = getTaskHistoryByIdRequest();
-		Bundle results = readBundleResponse(response);
-		
-		assertThat(results.hasEntry(), is(false));
-	}
-	
-	@Test
-	public void getTaskHistoryById_shouldReturn404IfPractitionerIdIsWrong() throws Exception {
-		MockHttpServletResponse response = get("/Task/" + WRONG_TASK_UUID + "/_history").accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isNotFound());
-	}
-	
-	private MockHttpServletResponse getTaskHistoryByIdRequest() throws IOException, ServletException {
-		return get("/Task/" + TASK_UUID + "/_history").accept(FhirMediaTypes.JSON).go();
-	}
-	
-	@Test
 	public void createTask_shouldCreateNewTask() throws Exception {
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_PATH)) {
 			Objects.requireNonNull(is);
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		when(service.create(any(org.hl7.fhir.r4.model.Task.class))).thenReturn(task);
@@ -204,7 +141,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_PATH)) {
 			Objects.requireNonNull(is);
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		when(service.update(anyString(), any(org.hl7.fhir.r4.model.Task.class))).thenReturn(task);
@@ -219,7 +156,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Task/" + TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON).go();
@@ -234,7 +171,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Task/" + TASK_UUID).jsonContent(jsonTask).accept(FhirMediaTypes.JSON).go();
@@ -248,7 +185,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 		String jsonTask;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonTask = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonTask = inputStreamToString(is, UTF_8);
 		}
 		
 		when(service.update(eq(WRONG_TASK_UUID), any(org.hl7.fhir.r4.model.Task.class)))
@@ -388,12 +325,6 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	
 	@Test
 	public void deleteTask_shouldDeleteTask() throws Exception {
-		Task task = new Task();
-		task.setId(TASK_UUID);
-		task.setStatus(Task.TaskStatus.ACCEPTED);
-		
-		when(service.delete(any(String.class))).thenReturn(TaskVersionConverter.convertTask(task));
-		
 		MockHttpServletResponse response = delete("/Task/" + TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -402,7 +333,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	
 	@Test
 	public void deleteTask_shouldReturn404ForNonExistingTask() throws Exception {
-		when(service.delete(WRONG_TASK_UUID)).thenReturn(null);
+		doThrow(new ResourceNotFoundException("")).when(service).delete(WRONG_TASK_UUID);
 		
 		MockHttpServletResponse response = delete("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
@@ -21,18 +22,16 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -40,18 +39,13 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +55,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -369,73 +362,6 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		    equalTo(PRACTITIONER_IDENTIFIER));
 	}
 	
-	@Test
-	public void shouldVerifyGetPractitionerHistoryByIdUri() throws Exception {
-		Practitioner practitioner = new Practitioner();
-		practitioner.setId(PRACTITIONER_UUID);
-		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
-		
-		MockHttpServletResponse response = getPractitionerHistoryByIdRequest();
-		
-		MatcherAssert.assertThat(response, isOk());
-		MatcherAssert.assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-	}
-	
-	@Test
-	public void shouldGetPractitionerHistoryById() throws IOException, ServletException {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		provenance.setRecorded(new Date());
-		provenance.setActivity(new CodeableConcept().addCoding(
-		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
-		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
-		        .setType(
-		            new CodeableConcept().addCoding(new Coding().setCode(FhirConstants.AUT).setDisplay(FhirConstants.AUTHOR)
-		                    .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
-		        .addRole(new CodeableConcept().addCoding(
-		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
-		Practitioner practitioner = new Practitioner();
-		practitioner.setId(PRACTITIONER_UUID);
-		practitioner.addContained(provenance);
-		
-		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
-		
-		MockHttpServletResponse response = getPractitionerHistoryByIdRequest();
-		
-		Bundle results = readBundleResponse(response);
-		assertThat(results, notNullValue());
-		assertThat(results.hasEntry(), is(true));
-		assertThat(results.getEntry().get(0).getResource(), notNullValue());
-		assertThat(results.getEntry().get(0).getResource().getResourceType().name(),
-		    equalTo(Provenance.class.getSimpleName()));
-		
-	}
-	
-	@Test
-	public void getPractitionerHistoryById_shouldReturnBundleWithEmptyEntriesIfPractitionerContainedIsEmpty()
-	        throws Exception {
-		Practitioner practitioner = new Practitioner();
-		practitioner.setId(PRACTITIONER_UUID);
-		practitioner.setContained(new ArrayList<>());
-		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
-		
-		MockHttpServletResponse response = getPractitionerHistoryByIdRequest();
-		Bundle results = readBundleResponse(response);
-		assertThat(results.hasEntry(), is(false));
-	}
-	
-	@Test
-	public void getPractitionerHistoryById_shouldReturn404IfPractitionerIdIsWrong() throws Exception {
-		MockHttpServletResponse response = get("/Practitioner/" + WRONG_PRACTITIONER_UUID + "/_history")
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		MatcherAssert.assertThat(response, isNotFound());
-	}
-	
-	private MockHttpServletResponse getPractitionerHistoryByIdRequest() throws IOException, ServletException {
-		return get("/Practitioner/" + PRACTITIONER_UUID + "/_history").accept(FhirMediaTypes.JSON).go();
-	}
-	
 	private void verifyUri(String uri) throws Exception {
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
@@ -458,7 +384,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		String jsonPractitioner;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PRACTITIONER_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPractitioner = inputStreamToString(is, UTF_8);
 		}
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
 		practitioner.setId(PRACTITIONER_UUID);
@@ -476,7 +402,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		String jsonPractitioner;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPractitioner = inputStreamToString(is, UTF_8);
 		}
 		
 		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
@@ -496,7 +422,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		String jsonPractitioner;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPractitioner = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Practitioner/" + PRACTITIONER_UUID).jsonContent(jsonPractitioner)
@@ -511,7 +437,7 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 		String jsonPractitioner;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_PRACTITIONER_WRONG_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPractitioner = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPractitioner = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Practitioner/" + WRONG_PRACTITIONER_UUID).jsonContent(jsonPractitioner)
@@ -524,19 +450,20 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR4ResourceP
 	
 	@Test
 	public void deletePractitioner_shouldDeletePractitioner() throws Exception {
-		OperationOutcome retVal = new OperationOutcome();
-		retVal.setId(PRACTITIONER_UUID);
-		retVal.getText().setDivAsString("Deleted successfully");
-		
-		org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
-		practitioner.setId(PRACTITIONER_UUID);
-		
-		when(practitionerService.delete(PRACTITIONER_UUID)).thenReturn(practitioner);
-		
 		MockHttpServletResponse response = delete("/Practitioner/" + PRACTITIONER_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
 	}
 	
+	@Test
+	public void deletePractitioner_shouldReturn404IfPractitionerNotFound() throws Exception {
+		doThrow(new ResourceNotFoundException("")).when(practitionerService).delete(WRONG_PRACTITIONER_UUID);
+		
+		MockHttpServletResponse response = delete("/Practitioner/" + WRONG_PRACTITIONER_UUID).accept(FhirMediaTypes.JSON)
+		        .go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
+	}
 }

@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -24,9 +25,9 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -36,7 +37,6 @@ import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -191,7 +191,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		String jsonReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_DIAGNOSTIC_REPORT_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonReport = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = post("/DiagnosticReport").accept(FhirMediaTypes.JSON).jsonContent(jsonReport)
@@ -235,7 +235,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		String xmlReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_DIAGNOSTIC_REPORT_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			xmlReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlReport = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = post("/DiagnosticReport").accept(FhirMediaTypes.XML).xmlContent(xmlReport).go();

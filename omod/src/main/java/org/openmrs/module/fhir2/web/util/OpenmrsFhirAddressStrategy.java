@@ -93,9 +93,30 @@ public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 			return gpUrl.append('/').append(fhirVersion == UNKNOWN ? "" : fhirVersion.toString()).toString();
 		}
 		
+		String scheme;
+		if (StringUtils.isNotBlank(request.getHeader("X-Forwarded-Proto"))) {
+			scheme = request.getHeader("X-Forwarded-Proto");
+		} else {
+			scheme = request.getScheme();
+		}
+		
+		String host;
+		if (StringUtils.isNotBlank(request.getHeader("X-Forwarded-Host"))) {
+			host = request.getHeader("X-Forwarded-Host");
+		} else {
+			host = request.getServerName();
+		}
+		
 		int serverPort = request.getServerPort();
 		String port;
-		if ("http".equalsIgnoreCase(request.getScheme())) {
+		if (StringUtils.isNotBlank(request.getHeader("X-Forwarded-Port"))) {
+			port = ":" + request.getHeader("X-Forwarded-Port");
+			if (scheme.equalsIgnoreCase("http") && port.equals(":80")) {
+				port = "";
+			} else if (scheme.equalsIgnoreCase("https") && port.equals(":443")) {
+				port = "";
+			}
+		} else if ("http".equalsIgnoreCase(request.getScheme())) {
 			port = serverPort == 80 ? "" : ":" + serverPort;
 		} else if ("https".equalsIgnoreCase(request.getScheme())) {
 			port = serverPort == 443 ? "" : ":" + serverPort;
@@ -105,8 +126,7 @@ public class OpenmrsFhirAddressStrategy implements IServerAddressStrategy {
 		
 		FhirVersionUtils.FhirVersion fhirVersion = FhirVersionUtils.getFhirVersion(request);
 		
-		return request.getScheme() + "://" + request.getServerName() + port
-		        + StringUtils.defaultString(request.getContextPath()) + "/ws/fhir2/"
+		return scheme + "://" + host + port + StringUtils.defaultString(request.getContextPath()) + "/ws/fhir2/"
 		        + (fhirVersion == UNKNOWN ? "" : fhirVersion.toString());
 	}
 	

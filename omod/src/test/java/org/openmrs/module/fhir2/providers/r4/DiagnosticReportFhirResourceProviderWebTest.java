@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
@@ -24,13 +25,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,9 +43,9 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -143,7 +145,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_PATH)) {
 			Objects.requireNonNull(is);
-			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonDiagnosticReport = inputStreamToString(is, UTF_8);
 		}
 		
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
@@ -162,7 +164,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_PATH)) {
 			Objects.requireNonNull(is);
-			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonDiagnosticReport = inputStreamToString(is, UTF_8);
 		}
 		
 		DiagnosticReport diagnosticReport = new DiagnosticReport();
@@ -181,7 +183,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_PATH)) {
 			Objects.requireNonNull(is);
-			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonDiagnosticReport = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/DiagnosticReport/" + WRONG_UUID).jsonContent(jsonDiagnosticReport)
@@ -197,7 +199,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_NO_ID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonDiagnosticReport = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
@@ -212,7 +214,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 		String jsonDiagnosticReport;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_DIAGNOSTIC_REPORT_WRONG_UUID_PATH)) {
 			Objects.requireNonNull(is);
-			jsonDiagnosticReport = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonDiagnosticReport = inputStreamToString(is, UTF_8);
 		}
 		
 		when(service.update(eq(WRONG_UUID), any(DiagnosticReport.class)))
@@ -558,12 +560,6 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	
 	@Test
 	public void shouldDeleteDiagnosticReport() throws Exception {
-		DiagnosticReport diagnosticReport = new DiagnosticReport();
-		diagnosticReport.setId(DIAGNOSTIC_REPORT_UUID);
-		diagnosticReport.setStatus(DiagnosticReport.DiagnosticReportStatus.CANCELLED);
-		
-		when(service.delete(any(String.class))).thenReturn(diagnosticReport);
-		
 		MockHttpServletResponse response = delete("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
 		
@@ -573,7 +569,7 @@ public class DiagnosticReportFhirResourceProviderWebTest extends BaseFhirR4Resou
 	
 	@Test
 	public void deleteDiagnosticReport_shouldReturn404ForNonExistingDiagnosticReport() throws Exception {
-		when(service.delete(WRONG_UUID)).thenReturn(null);
+		doThrow(new ResourceNotFoundException("")).when(service).delete(WRONG_UUID);
 		
 		MockHttpServletResponse response = delete("/DiagnosticReport/" + WRONG_UUID).accept(FhirMediaTypes.JSON).go();
 		

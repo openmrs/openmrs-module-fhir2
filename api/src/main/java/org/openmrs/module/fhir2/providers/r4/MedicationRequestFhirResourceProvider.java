@@ -89,13 +89,8 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	}
 	
 	public OperationOutcome deleteMedicationRequest(@IdParam IdType id) {
-		MedicationRequest medicationRequest = fhirMedicationRequestService.delete(id.getIdPart());
-		if (medicationRequest == null) {
-			throw new ResourceNotFoundException(
-			        "Could not find medication request resource with id " + id.getIdPart() + " to delete");
-		}
-		
-		return FhirProviderUtils.buildDelete(medicationRequest);
+		fhirMedicationRequestService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search

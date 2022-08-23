@@ -27,7 +27,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 
-@RunWith(MockitoJUnitRunner.class)
+// we intentionally have unnecessary stubbings for this class when testing the X-Forwarded headers
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class OpenmrsFhirAddressStrategyTest {
 	
 	@Mock
@@ -157,5 +158,21 @@ public class OpenmrsFhirAddressStrategyTest {
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
 		
 		assertThat(serverBase, containsString(":8443/"));
+	}
+	
+	@Test
+	public void shouldProperlyHandleStandardProxyHeaders() {
+		when(httpServletRequest.getHeader("X-Forwarded-Proto")).thenReturn("https");
+		when(httpServletRequest.getHeader("X-Forwarded-Host")).thenReturn("my.openmrs.org");
+		when(httpServletRequest.getHeader("X-Forwarded-Port")).thenReturn("4443");
+		when(httpServletRequest.getScheme()).thenReturn("http");
+		when(httpServletRequest.getServerName()).thenReturn("localhost");
+		when(httpServletRequest.getServerPort()).thenReturn(8080);
+		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
+		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
+		
+		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
+		
+		assertThat(serverBase, equalTo("https://my.openmrs.org:4443/openmrs/ws/fhir2/R4"));
 	}
 }

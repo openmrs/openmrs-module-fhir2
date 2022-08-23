@@ -17,12 +17,15 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.FhirConstants.RX_NORM_SYSTEM_URI;
+import static org.openmrs.module.fhir2.FhirConstants.UCUM_SYSTEM_URI;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.util.Date;
 
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Quantity;
@@ -53,6 +56,9 @@ public class ObservationValueTranslatorImplTest {
 	@Mock
 	private ConceptTranslator conceptTranslator;
 	
+	@Mock
+	private ObservationQuantityCodingTranslatorImpl quantityCodingTranslator;
+	
 	private Obs obs;
 	
 	private ObservationValueTranslatorImpl obsValueTranslator;
@@ -61,6 +67,7 @@ public class ObservationValueTranslatorImplTest {
 	public void setup() {
 		obsValueTranslator = new ObservationValueTranslatorImpl();
 		obsValueTranslator.setConceptTranslator(conceptTranslator);
+		obsValueTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
 		
 		obs = new Obs();
 	}
@@ -112,12 +119,54 @@ public class ObservationValueTranslatorImplTest {
 		obs.setValueNumeric(130d);
 		obs.setConcept(cn);
 		
-		Type result = obsValueTranslator.toFhirResource(obs);
+		Coding coding = new Coding(null, "cm", "cm");
+		when(quantityCodingTranslator.toFhirResource(cn)).thenReturn(coding);
+		
+		Quantity result = (Quantity) obsValueTranslator.toFhirResource(obs);
 		
 		assertThat(result, notNullValue());
-		assertThat(result, instanceOf(Quantity.class));
-		assertThat(((Quantity) result).getValue().doubleValue(), equalTo(130d));
-		assertThat(((Quantity) result).getUnit(), equalTo("cm"));
+		assertThat(result.getValue().doubleValue(), equalTo(130d));
+		assertThat(result.getUnit(), equalTo("cm"));
+		assertThat(result.getSystem(), equalTo(null));
+		assertThat(result.getCode(), equalTo(null));
+	}
+	
+	@Test
+	public void toFhirResource_shouldIgnoreNumericValueUnitSystemIfNotUCUM() {
+		ConceptNumeric cn = new ConceptNumeric();
+		cn.setUnits("mm[Hg]");
+		obs.setValueNumeric(130d);
+		obs.setConcept(cn);
+		
+		Coding coding = new Coding(RX_NORM_SYSTEM_URI, "mm[Hg]", "mmHg");
+		when(quantityCodingTranslator.toFhirResource(cn)).thenReturn(coding);
+		
+		Quantity result = (Quantity) obsValueTranslator.toFhirResource(obs);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getValue().doubleValue(), equalTo(130d));
+		assertThat(result.getUnit(), equalTo("mm[Hg]"));
+		assertThat(result.getSystem(), equalTo(null));
+		assertThat(result.getCode(), equalTo(null));
+	}
+	
+	@Test
+	public void toFhirResource_shouldConvertObsWithCommonUCUMUnitsToQuantityWithUCUMSystem() {
+		ConceptNumeric cn = new ConceptNumeric();
+		cn.setUnits("mm[Hg]");
+		obs.setValueNumeric(130d);
+		obs.setConcept(cn);
+		
+		Coding coding = new Coding(UCUM_SYSTEM_URI, "mm[Hg]", "mmHg");
+		when(quantityCodingTranslator.toFhirResource(cn)).thenReturn(coding);
+		
+		Quantity result = (Quantity) obsValueTranslator.toFhirResource(obs);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getValue().doubleValue(), equalTo(130d));
+		assertThat(result.getUnit(), equalTo("mm[Hg]"));
+		assertThat(result.getSystem(), equalTo(UCUM_SYSTEM_URI));
+		assertThat(result.getCode(), equalTo("mm[Hg]"));
 	}
 	
 	@Test

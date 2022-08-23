@@ -9,29 +9,34 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -459,7 +464,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		String jsonEncounter;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(ENCOUNTER_JSON_CREATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
-			jsonEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonEncounter = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = post("/Encounter").accept(FhirMediaTypes.JSON).jsonContent(jsonEncounter).go();
@@ -495,7 +500,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		String xmlEncounter;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(ENCOUNTER_XML_CREATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
-			xmlEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlEncounter = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = post("/Encounter").accept(FhirMediaTypes.XML).xmlContent(xmlEncounter).go();
@@ -531,7 +536,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		String jsonEncounter;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(VISIT_JSON_CREATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
-			jsonEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonEncounter = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = post("/Encounter").accept(FhirMediaTypes.JSON).jsonContent(jsonEncounter).go();
@@ -564,7 +569,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		String xmlEncounter;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(VISIT_XML_CREATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
-			xmlEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlEncounter = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = post("/Encounter").accept(FhirMediaTypes.XML).xmlContent(xmlEncounter).go();
@@ -611,7 +616,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		String jsonEncounter;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(ENCOUNTER_JSON_UPDATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
-			jsonEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonEncounter = inputStreamToString(is, UTF_8);
 		}
 		
 		response = put("/Encounter/" + ENCOUNTER_UUID).jsonContent(jsonEncounter).accept(FhirMediaTypes.JSON).go();
@@ -630,7 +635,6 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		response = get("/Encounter/" + ENCOUNTER_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		encounter = readResponse(response);
-		
 		assertThat(encounter, notNullValue());
 		assertThat(encounter, validResource());
 		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
@@ -654,7 +658,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		String jsonEncounter;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(VISIT_JSON_UPDATE_ENCOUNTER_PATH)) {
 			Objects.requireNonNull(is);
-			jsonEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonEncounter = inputStreamToString(is, UTF_8);
 		}
 		
 		response = put("/Encounter/" + VISIT_UUID).jsonContent(jsonEncounter).accept(FhirMediaTypes.JSON).go();
@@ -680,12 +684,115 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
+	public void shouldReturnEncounterEverythingAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything").accept(FhirMediaTypes.JSON)
+		        .go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(7)));
+		assertThat(result.getEntry(), hasSize(7));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnForEncounterEverythingWhenCountIsSpecifiedAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything?_count=5")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(7)));
+		assertThat(result.getEntry(), hasSize(5));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnEncounterEverythingAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything").accept(FhirMediaTypes.XML)
+		        .go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(7)));
+		assertThat(result.getEntry(), hasSize(7));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnForEncounterEverythingWhenCountIsSpecifiedAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Encounter/" + ENCOUNTER_UUID + "/$everything?_count=5")
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(7)));
+		assertThat(result.getEntry(), hasSize(5));
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries, everyItem(hasResource(hasProperty("resourceType", in(getEverythingValidResourceTypes())))));
+	}
+	
+	private Set<ResourceType> getEverythingValidResourceTypes() {
+		Set<ResourceType> validTypes = new HashSet<>();
+		
+		validTypes.add(ResourceType.Patient);
+		validTypes.add(ResourceType.Encounter);
+		validTypes.add(ResourceType.Observation);
+		validTypes.add(ResourceType.Location);
+		validTypes.add(ResourceType.Practitioner);
+		validTypes.add(ResourceType.MedicationRequest);
+		validTypes.add(ResourceType.DiagnosticReport);
+		validTypes.add(ResourceType.ServiceRequest);
+		
+		return validTypes;
+	}
+	
+	@Test
 	public void shouldThrow404WhenUpdatingNonExistingEncounterAsJson() throws Exception {
 		String jsonEncounter;
 		try (InputStream is = this.getClass().getClassLoader()
 		        .getResourceAsStream(ENCOUNTER_JSON_UPDATE_ENCOUNTER_PATH_WITH_WRONG_ID)) {
 			Objects.requireNonNull(is);
-			jsonEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonEncounter = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Encounter/" + BAD_ENCOUNTER_UUID).jsonContent(jsonEncounter)
@@ -702,7 +809,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		try (InputStream is = this.getClass().getClassLoader()
 		        .getResourceAsStream(VISIT_JSON_UPDATE_ENCOUNTER_PATH_WITH_WRONG_ID)) {
 			Objects.requireNonNull(is);
-			jsonEncounter = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonEncounter = inputStreamToString(is, UTF_8);
 		}
 		MockHttpServletResponse response = put("/Encounter/" + BAD_VISIT_UUID).jsonContent(jsonEncounter)
 		        .accept(FhirMediaTypes.JSON).go();

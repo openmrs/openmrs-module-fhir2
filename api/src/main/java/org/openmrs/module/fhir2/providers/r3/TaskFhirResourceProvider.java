@@ -14,12 +14,10 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -40,7 +38,6 @@ import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirTaskService;
@@ -74,16 +71,6 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 		return TaskVersionConverter.convertTask(task);
 	}
 	
-	@History
-	public List<Resource> getTaskHistoryById(@IdParam IdType id) {
-		org.hl7.fhir.r4.model.Task task = fhirTaskService.get(id.getIdPart());
-		if (task == null) {
-			throw new ResourceNotFoundException("Could not find Task with Id " + id.getIdPart());
-		}
-		
-		return TaskVersionConverter.convertTask(task).getContained();
-	}
-	
 	@Create
 	@SuppressWarnings("unused")
 	public MethodOutcome createTask(@ResourceParam Task newTask) {
@@ -100,11 +87,8 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	public OperationOutcome deleteTask(@IdParam IdType id) {
-		org.hl7.fhir.r4.model.Task task = fhirTaskService.delete(id.getIdPart());
-		if (task == null) {
-			throw new ResourceNotFoundException("Could not find task resource with id " + id.getIdPart() + "to delete");
-		}
-		return FhirProviderUtils.buildDelete(TaskVersionConverter.convertTask(task));
+		fhirTaskService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR3();
 	}
 	
 	@Search

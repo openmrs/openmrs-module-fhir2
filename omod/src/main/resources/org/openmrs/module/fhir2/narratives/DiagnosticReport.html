@@ -200,10 +200,10 @@ a browser.
                 <th:block th:each="presentedForm, presentedFormItr: ${resource.presentedForm}">
                     <th:block th:if="${presentedForm.url}">
                         <th:block th:if="${presentedFormItr.index}">,</th:block>
-                        <th:block th:if="{presentedForm.title}">
+                        <th:block th:if="${presentedForm.title}">
                             <a th:text="${presentedForm.title}" th:href="${presentedForm.url}"></a>
                         </th:block>
-                        <th:block th:unless="{presentedForm.title}">
+                        <th:block th:unless="${presentedForm.title}">
                             <a th:text="${presentedForm.url}" th:href="${presentedForm.url}"></a>
                         </th:block>
                     </th:block>

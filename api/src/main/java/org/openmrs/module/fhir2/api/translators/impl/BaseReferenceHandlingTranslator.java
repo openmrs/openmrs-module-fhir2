@@ -66,7 +66,7 @@ public abstract class BaseReferenceHandlingTranslator {
 	
 	protected Reference createMedicationReference(@Nonnull Drug drug) {
 		return new Reference().setReference(FhirConstants.MEDICATION + "/" + drug.getUuid())
-		        .setType(FhirConstants.MEDICATION);
+		        .setType(FhirConstants.MEDICATION).setDisplay(drug.getDisplayName());
 	}
 	
 	protected Reference createObservationReference(@Nonnull Obs obs) {
@@ -153,12 +153,19 @@ public abstract class BaseReferenceHandlingTranslator {
 			return new Reference().setReference(FhirConstants.SERVICE_REQUEST + "/" + order.getUuid())
 			        .setType(FhirConstants.SERVICE_REQUEST);
 		} else if (order instanceof DrugOrder) {
-			return new Reference().setReference(FhirConstants.MEDICATION_REQUEST + "/" + order.getUuid())
-			        .setType(FhirConstants.MEDICATION_REQUEST);
+			return createDrugOrderReference((DrugOrder) order);
 		} else {
 			log.warn("Could not determine order type for order {}", order);
 			return null;
 		}
+	}
+	
+	protected Reference createDrugOrderReference(@Nonnull DrugOrder drugOrder) {
+		if (drugOrder == null) {
+			return null;
+		}
+		return new Reference().setReference(FhirConstants.MEDICATION_REQUEST + "/" + drugOrder.getUuid())
+		        .setType(FhirConstants.MEDICATION_REQUEST);
 	}
 	
 	protected Optional<String> getReferenceType(Reference reference) {

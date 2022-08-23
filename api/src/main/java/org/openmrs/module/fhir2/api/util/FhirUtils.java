@@ -16,6 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -24,6 +25,7 @@ import org.openmrs.OpenmrsMetadata;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 
+@Slf4j
 public class FhirUtils {
 	
 	public enum OpenmrsEncounterType {
@@ -153,7 +155,15 @@ public class FhirUtils {
 		}
 		
 		String code = "ui.i18n." + className + ".name." + metadata.getUuid();
-		String localization = Context.getMessageSourceService().getMessage(code);
+		String localization = null;
+		
+		try {
+			localization = Context.getMessageSourceService().getMessage(code);
+		}
+		catch (Exception e) {
+			log.info("Caught exception while attempting to localize code [{}]", code, e);
+		}
+		
 		if (localization == null || localization.equals(code)) {
 			return metadata.getName();
 		} else {

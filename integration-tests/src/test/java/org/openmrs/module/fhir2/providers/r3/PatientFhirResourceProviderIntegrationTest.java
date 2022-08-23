@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -22,9 +23,9 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
@@ -36,7 +37,6 @@ import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Enumerations;
@@ -171,7 +171,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		String jsonPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_PATIENT_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonPatient = inputStreamToString(is, UTF_8);
 		}
 		
 		// create patient
@@ -215,7 +215,7 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR3Integr
 		String xmlPatient;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_PATIENT_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			xmlPatient = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlPatient = inputStreamToString(is, UTF_8);
 		}
 		
 		// create patient

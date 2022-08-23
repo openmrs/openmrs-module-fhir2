@@ -11,17 +11,14 @@ package org.openmrs.module.fhir2.api.translators;
 
 import javax.annotation.Nonnull;
 
-import org.hl7.fhir.r4.model.Timing;
-import org.openmrs.DrugOrder;
+import org.hl7.fhir.r4.model.MedicationDispense;
+import org.openmrs.Concept;
 
-public interface MedicationRequestTimingComponentTranslator extends ToFhirTranslator<DrugOrder, Timing.TimingRepeatComponent> {
+public interface MedicationDispenseStatusTranslator extends ToFhirTranslator<Concept, MedicationDispense.MedicationDispenseStatus>, ToOpenmrsTranslator<Concept, MedicationDispense.MedicationDispenseStatus> {
 	
-	/**
-	 * Maps a {@link org.openmrs.DrugOrder} to a {@link Timing.TimingRepeatComponent} Fhir Type
-	 *
-	 * @param drugOrder the OpenMRS drugOrder to translate
-	 * @return the corresponding TimingRepeatComponent FHIR resource
-	 */
 	@Override
-	Timing.TimingRepeatComponent toFhirResource(@Nonnull DrugOrder drugOrder);
+	MedicationDispense.MedicationDispenseStatus toFhirResource(@Nonnull Concept concept);
+	
+	@Override
+	Concept toOpenmrsType(@Nonnull MedicationDispense.MedicationDispenseStatus resource);
 }

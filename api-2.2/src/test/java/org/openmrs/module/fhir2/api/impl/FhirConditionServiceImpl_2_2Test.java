@@ -208,11 +208,8 @@ public class FhirConditionServiceImpl_2_2Test {
 		condition.setId(CONDITION_UUID);
 		
 		when(dao.delete(CONDITION_UUID)).thenReturn(openmrsCondition);
-		when(conditionTranslator.toFhirResource(openmrsCondition)).thenReturn(condition);
 		
-		org.hl7.fhir.r4.model.Condition result = conditionService.delete(CONDITION_UUID);
-		
-		assertThat(result, notNullValue());
+		conditionService.delete(CONDITION_UUID);
 	}
 	
 	@Test

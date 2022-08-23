@@ -14,13 +14,11 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -52,7 +50,6 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
@@ -107,22 +104,8 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deletePatient(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Patient patient = patientService.delete(id.getIdPart());
-		if (patient == null) {
-			throw new ResourceNotFoundException("Could not find patient to delete with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(Patient30_40.convertPatient(patient));
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getPatientHistoryById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Patient patient = patientService.get(id.getIdPart());
-		if (patient == null) {
-			throw new ResourceNotFoundException("Could not find patient with Id " + id.getIdPart());
-		}
-		
-		return Patient30_40.convertPatient(patient).getContained();
+		patientService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR3();
 	}
 	
 	@Search

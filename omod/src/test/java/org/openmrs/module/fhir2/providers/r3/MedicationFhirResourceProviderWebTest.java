@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
@@ -18,13 +19,14 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,8 +38,8 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Medication;
@@ -232,7 +234,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
-			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
 		when(fhirMedicationService.create(any(org.hl7.fhir.r4.model.Medication.class))).thenReturn(medication);
@@ -252,7 +254,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
-			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
 		when(fhirMedicationService.update(any(String.class), any(org.hl7.fhir.r4.model.Medication.class)))
@@ -269,7 +271,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
-			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(medicationJson)
@@ -285,7 +287,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		String medicationJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_WITHOUT_ID_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
-			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Medication/" + MEDICATION_UUID).jsonContent(medicationJson)
@@ -301,7 +303,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		try (InputStream is = this.getClass().getClassLoader()
 		        .getResourceAsStream(JSON_UPDATE_WITH_WRONG_ID_MEDICATION_PATH)) {
 			Objects.requireNonNull(is);
-			medicationJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			medicationJson = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = put("/Medication/" + WRONG_MEDICATION_UUID).jsonContent(medicationJson)
@@ -312,12 +314,6 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	@Test
 	public void deleteMedication_shouldDeleteRequestedMedication() throws Exception {
-		org.hl7.fhir.r4.model.Medication medication = new org.hl7.fhir.r4.model.Medication();
-		medication.setId(MEDICATION_UUID);
-		medication.setStatus(org.hl7.fhir.r4.model.Medication.MedicationStatus.INACTIVE);
-		
-		when(fhirMedicationService.delete(any(String.class))).thenReturn(medication);
-		
 		MockHttpServletResponse response = delete("/Medication/" + MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
@@ -326,7 +322,7 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 	
 	@Test
 	public void deleteMedication_shouldReturn404ForNonExistingMedication() throws Exception {
-		when(fhirMedicationService.delete(WRONG_MEDICATION_UUID)).thenReturn(null);
+		doThrow(new ResourceNotFoundException("")).when(fhirMedicationService).delete(WRONG_MEDICATION_UUID);
 		
 		MockHttpServletResponse response = delete("/Medication/" + WRONG_MEDICATION_UUID).accept(FhirMediaTypes.JSON).go();
 		

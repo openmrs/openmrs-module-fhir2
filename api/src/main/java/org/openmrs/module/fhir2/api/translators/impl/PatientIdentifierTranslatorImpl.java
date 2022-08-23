@@ -32,7 +32,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
-// TODO Create proper "System" value
 public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTranslator implements PatientIdentifierTranslator {
 	
 	@Autowired
@@ -64,6 +63,7 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		if (identifier.getIdentifierType() != null) {
 			PatientIdentifierType identifierType = identifier.getIdentifierType();
+			patientIdentifier.setSystem(patientIdentifierSystemService.getUrlByPatientIdentifierType(identifierType));
 			patientIdentifier.setType(new CodeableConcept(new Coding().setCode(identifierType.getUuid()))
 			        .setText(getMetadataTranslation(identifierType)));
 		}
@@ -71,11 +71,6 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 		if (identifier.getLocation() != null) {
 			patientIdentifier.addExtension().setUrl(FhirConstants.OPENMRS_FHIR_EXT_PATIENT_IDENTIFIER_LOCATION)
 			        .setValue(createLocationReference(identifier.getLocation()));
-		}
-		
-		if (identifier.getIdentifierType() != null) {
-			patientIdentifier
-			        .setSystem(patientIdentifierSystemService.getUrlByPatientIdentifierType(identifier.getIdentifierType()));
 		}
 		
 		return patientIdentifier;
@@ -93,19 +88,21 @@ public class PatientIdentifierTranslatorImpl extends BaseReferenceHandlingTransl
 	@Override
 	public PatientIdentifier toOpenmrsType(@Nonnull PatientIdentifier patientIdentifier, @Nonnull Identifier identifier) {
 		if (patientIdentifier == null || identifier == null) {
-			return patientIdentifier;
+			return null;
 		}
-		
-		patientIdentifier.setUuid(identifier.getId());
-		
-		patientIdentifier.setIdentifier(identifier.getValue());
-		
-		patientIdentifier.setPreferred(Identifier.IdentifierUse.OFFICIAL.equals(identifier.getUse()));
 		
 		PatientIdentifierType type = patientService.getPatientIdentifierTypeByIdentifier(identifier);
 		if (type == null && patientIdentifier.getIdentifierType() == null) {
 			return null;
 		}
+		
+		if (identifier.hasId()) {
+			patientIdentifier.setUuid(identifier.getId());
+		}
+		
+		patientIdentifier.setIdentifier(identifier.getValue());
+		
+		patientIdentifier.setPreferred(Identifier.IdentifierUse.OFFICIAL.equals(identifier.getUse()));
 		
 		patientIdentifier.setIdentifierType(type);
 		

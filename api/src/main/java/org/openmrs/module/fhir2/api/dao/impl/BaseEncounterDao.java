@@ -11,15 +11,26 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.openmrs.module.fhir2.FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.Auditable;
+import org.openmrs.DrugOrder;
+import org.openmrs.Encounter;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
+@Slf4j
 public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> extends BaseFhirDao<T> {
 	
 	@Override
@@ -46,8 +57,68 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
+				case FhirConstants.HAS_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleHasAndListParam(criteria, (HasAndListParam) param.getParam()));
+					break;
 			}
 		});
+	}
+	
+	/**
+	 * Handle _has parameters that are passed in to constrain the Encounter resource on properties of
+	 * dependent resources
+	 */
+	protected void handleHasAndListParam(Criteria criteria, HasAndListParam hasAndListParam) {
+		if (hasAndListParam != null) {
+			log.debug("Handling hasAndListParam");
+			hasAndListParam.getValuesAsQueryTokens().forEach(hasOrListParam -> {
+				if (!hasOrListParam.getValuesAsQueryTokens().isEmpty()) {
+					
+					log.debug("Handling hasOrListParam");
+					// Making the assumption that any "orListParams" match everything except for the value
+					HasParam hasParam = hasOrListParam.getValuesAsQueryTokens().get(0);
+					Set<String> values = new HashSet<>();
+					hasOrListParam.getValuesAsQueryTokens().forEach(orParam -> values.add(orParam.getParameterValue()));
+					
+					log.debug("Handling hasParam = " + hasParam.getQueryParameterQualifier());
+					log.debug("With value in " + values);
+					
+					boolean handled = false;
+					
+					// Support constraining encounter resources to those that contain only certain Medication Requests
+					if (FhirConstants.MEDICATION_REQUEST.equals(hasParam.getTargetResourceType())) {
+						if (MedicationRequest.SP_ENCOUNTER.equals(hasParam.getReferenceFieldName())) {
+							if (lacksAlias(criteria, "orders")) {
+								if (Encounter.class.isAssignableFrom(typeToken.getRawType())) {
+									criteria.createAlias("orders", "orders");
+								} else {
+									if (lacksAlias(criteria, "en")) {
+										criteria.createAlias("encounters", "en");
+									}
+									criteria.createAlias("en.orders", "orders");
+								}
+							}
+							// Constrain only on non-voided Drug Orders
+							criteria.add(Restrictions.eq("orders.class", DrugOrder.class));
+							criteria.add(Restrictions.eq("orders.voided", false));
+							
+							String paramName = hasParam.getParameterName();
+							String paramValue = hasParam.getParameterValue();
+							if (MedicationRequest.SP_INTENT.equals(paramName)) {
+								if (values.contains(MedicationRequest.MedicationRequestIntent.ORDER.toCode())) {
+									// No additional constraints needed, all Orders are given/assumed intent=order
+									handled = true;
+								}
+							}
+						}
+					}
+					if (!handled) {
+						log.warn("_has parameter not supported: " + hasParam.getQueryParameterQualifier());
+					}
+					
+				}
+			});
+		}
 	}
 	
 	protected abstract void handleDate(Criteria criteria, DateRangeParam dateRangeParam);

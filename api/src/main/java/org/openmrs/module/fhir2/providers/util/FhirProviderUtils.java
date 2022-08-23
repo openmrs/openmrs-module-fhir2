@@ -43,14 +43,14 @@ public class FhirProviderUtils {
 		return buildWithResource(methodOutcome, resource);
 	}
 	
-	public static org.hl7.fhir.r4.model.OperationOutcome buildDelete(org.hl7.fhir.r4.model.Resource resource) {
+	public static org.hl7.fhir.r4.model.OperationOutcome buildDeleteR4() {
 		org.hl7.fhir.r4.model.OperationOutcome outcome = new org.hl7.fhir.r4.model.OperationOutcome();
 		outcome.addIssue().setSeverity(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.INFORMATION)
 		        .setCode(org.hl7.fhir.r4.model.OperationOutcome.IssueType.INFORMATIONAL).setDetails(MSG_DELETED_R4);
 		return outcome;
 	}
 	
-	public static org.hl7.fhir.dstu3.model.OperationOutcome buildDelete(org.hl7.fhir.dstu3.model.Resource resource) {
+	public static org.hl7.fhir.dstu3.model.OperationOutcome buildDeleteR3() {
 		org.hl7.fhir.dstu3.model.OperationOutcome outcome = new org.hl7.fhir.dstu3.model.OperationOutcome();
 		outcome.addIssue().setSeverity(org.hl7.fhir.dstu3.model.OperationOutcome.IssueSeverity.INFORMATION)
 		        .setCode(org.hl7.fhir.dstu3.model.OperationOutcome.IssueType.INFORMATIONAL).setDetails(MSG_DELETED_R3);

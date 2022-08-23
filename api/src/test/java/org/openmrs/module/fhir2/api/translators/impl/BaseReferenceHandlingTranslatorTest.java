@@ -360,6 +360,24 @@ public class BaseReferenceHandlingTranslatorTest {
 	}
 	
 	@Test
+	public void shouldReturnReferenceForDrugOrder() {
+		DrugOrder order = new DrugOrder();
+		order.setUuid(ORDER_UUID);
+		
+		Reference reference = referenceHandlingTranslator.createDrugOrderReference(order);
+		
+		assertThat(reference, notNullValue());
+		assertThat(reference.getReference(), equalTo(DRUG_ORDER_REFERENCE));
+		assertThat(reference.getDisplay(), nullValue());
+	}
+	
+	@Test
+	public void shouldReturnNullForNullDrugOrder() {
+		Reference reference = referenceHandlingTranslator.createDrugOrderReference(null);
+		assertThat(reference, nullValue());
+	}
+	
+	@Test
 	public void shouldReturnLocationReferenceForUuid() {
 		Reference reference = referenceHandlingTranslator.createLocationReferenceByUuid(LOCATION_UUID);
 		assertThat(reference, notNullValue());

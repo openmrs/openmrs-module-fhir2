@@ -87,11 +87,8 @@ public class GroupFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteGroup(@IdParam @Nonnull IdType id) {
-		Group group = groupService.delete(id.getIdPart());
-		if (group == null) {
-			throw new ResourceNotFoundException("Could not find group to update with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(group);
+		groupService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Operation(name = "$members", idempotent = true)

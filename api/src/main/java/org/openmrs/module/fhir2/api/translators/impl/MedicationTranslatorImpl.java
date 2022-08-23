@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
@@ -31,6 +33,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class MedicationTranslatorImpl implements MedicationTranslator {
+	
+	public static final String DRUG_NAME_EXTENSION = "drugName";
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
@@ -56,6 +60,8 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		medication.getMeta().setLastUpdated(drug.getDateChanged());
 		medication.setStatus(Medication.MedicationStatus.ACTIVE);
 		
+		addMedicineExtension(medication, DRUG_NAME_EXTENSION, drug.getName());
+		
 		if (drug.getMaximumDailyDose() != null) {
 			addMedicineExtension(medication, "maximumDailyDose", drug.getMaximumDailyDose().toString());
 		}
@@ -67,6 +73,8 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		if (drug.getStrength() != null) {
 			addMedicineExtension(medication, "strength", drug.getStrength());
 		}
+		
+		medication.getMeta().setLastUpdated(getLastUpdated(drug));
 		
 		return medication;
 	}
@@ -132,6 +140,9 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 				break;
 			case "strength":
 				drug.setStrength(value);
+				break;
+			case DRUG_NAME_EXTENSION:
+				drug.setName(value);
 				break;
 		}
 	}

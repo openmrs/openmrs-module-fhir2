@@ -14,12 +14,10 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -32,6 +30,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -50,11 +49,12 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -106,21 +106,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteEncounter(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Encounter encounter = encounterService.delete(id.getIdPart());
-		if (encounter == null) {
-			throw new ResourceNotFoundException("Could not find encounter to delete with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(Encounter30_40.convertEncounter(encounter));
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getEncounterHistoryById(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.Encounter encounter = encounterService.get(id.getIdPart());
-		if (encounter == null) {
-			throw new ResourceNotFoundException("Could not find encounter with Id " + id.getIdPart());
-		}
-		return Encounter30_40.convertEncounter(encounter).getContained();
+		encounterService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR3();
 	}
 	
 	@Search
@@ -138,7 +125,9 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientParam,
 	        @OptionalParam(name = Encounter.SP_TYPE) TokenAndListParam encounterType,
 	        @OptionalParam(name = Encounter.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = "_tag") TokenAndListParam tag,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
+	        @OptionalParam(name = FhirConstants.HAS_SEARCH_HANDLER) HasAndListParam hasAndListParam,
 	        @IncludeParam(allow = { "Encounter:" + Encounter.SP_LOCATION, "Encounter:" + Encounter.SP_PATIENT,
 	                "Encounter:" + Encounter.SP_PARTICIPANT }) HashSet<Include> includes,
 	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_ENCOUNTER,
@@ -156,8 +145,9 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(encounterService.searchForEncounters(date, location,
-		    participantReference, subjectReference, encounterType, id, lastUpdated, sort, includes, revIncludes));
+		return new SearchQueryBundleProviderR3Wrapper(encounterService
+		        .searchForEncounters(new EncounterSearchParams(date, location, participantReference, subjectReference,
+		                encounterType, id, lastUpdated, tag, hasAndListParam, sort, includes, revIncludes)));
 	}
 	
 }

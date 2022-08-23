@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -21,9 +22,9 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -31,7 +32,6 @@ import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -144,7 +144,7 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		String jsonCondition;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_CONDITION_DOCUMENT)) {
 			assertThat(is, notNullValue());
-			jsonCondition = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonCondition = inputStreamToString(is, UTF_8);
 			assertThat(jsonCondition, notNullValue());
 		}
 		
@@ -178,7 +178,7 @@ public class ConditionFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		String xmlCondition;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_CONDITION_DOCUMENT)) {
 			assertThat(is, notNullValue());
-			xmlCondition = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlCondition = inputStreamToString(is, UTF_8);
 			assertThat(xmlCondition, notNullValue());
 		}
 		
