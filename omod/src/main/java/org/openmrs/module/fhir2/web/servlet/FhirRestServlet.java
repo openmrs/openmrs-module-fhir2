@@ -73,8 +73,6 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	@Qualifier("hapiLoggingInterceptor")
 	private LoggingInterceptor loggingInterceptor;
 	
-	private ConfigurableApplicationContext ctx;
-	
 	private boolean started = false;
 	
 	@Autowired
@@ -131,9 +129,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 		Module fhirModule = ModuleFactory.getModuleById(FHIR2_MODULE_ID);
 		if (fhirModule != null) {
 			FhirActivator activator = (FhirActivator) fhirModule.getModuleActivator();
-
-			// get the activator which contains our ApplicationContext
-			ctx = FhirActivator.getApplicationContext();
+			// listen to the module lifecycle calls
 			activator.addModuleLifecycleListener(this);
 		}
 
@@ -214,6 +210,7 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	}
 	
 	protected void autoInject() {
+		final ConfigurableApplicationContext ctx = FhirActivator.getApplicationContext();
 		if (ctx != null) {
 			AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 			bpp.setBeanFactory(ctx.getAutowireCapableBeanFactory());
@@ -224,27 +221,30 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	@Override
 	public void refreshed() {
 		if (started) {
-			getInterceptorService().unregisterAllInterceptors();
-			
-			unregisterAllProviders();
-			
-			// load the resource providers from the Spring context
-			Set<String> validBeanNames = Arrays.stream(ctx.getBeanNamesForAnnotation(getResourceProviderAnnotation()))
-			        .collect(Collectors.toSet());
-			setResourceProviders(ctx.getBeansOfType(IResourceProvider.class).entrySet().stream()
-			        .filter(entry -> validBeanNames.contains(entry.getKey())).map(Map.Entry::getValue)
-			        .collect(Collectors.toList()));
-			
-			registerInterceptor(ctx.getBean("hapiLoggingInterceptor", LoggingInterceptor.class));
-			registerInterceptor(new RequireAuthenticationInterceptor());
-			registerInterceptor(new DisableCacheInterceptor());
-			registerInterceptor(new SummaryInterceptor());
-			setAdministrationService(ctx.getBean("adminService", AdministrationService.class));
-			setGlobalPropertyService(ctx.getBean(FhirGlobalPropertyService.class));
-			setServerAddressStrategy(ctx.getBean(IServerAddressStrategy.class));
-			setPagingProvider(createPagingProvider());
-			
-			administrationService.addGlobalPropertyListener(fhirRestServletListener);
+			final ConfigurableApplicationContext ctx = FhirActivator.getApplicationContext();
+			if (ctx != null) {
+				getInterceptorService().unregisterAllInterceptors();
+				
+				unregisterAllProviders();
+				
+				// load the resource providers from the Spring context
+				Set<String> validBeanNames = Arrays.stream(ctx.getBeanNamesForAnnotation(getResourceProviderAnnotation()))
+				        .collect(Collectors.toSet());
+				setResourceProviders(ctx.getBeansOfType(IResourceProvider.class).entrySet().stream()
+				        .filter(entry -> validBeanNames.contains(entry.getKey())).map(Map.Entry::getValue)
+				        .collect(Collectors.toList()));
+				
+				registerInterceptor(ctx.getBean("hapiLoggingInterceptor", LoggingInterceptor.class));
+				registerInterceptor(new RequireAuthenticationInterceptor());
+				registerInterceptor(new DisableCacheInterceptor());
+				registerInterceptor(new SummaryInterceptor());
+				setAdministrationService(ctx.getBean("adminService", AdministrationService.class));
+				setGlobalPropertyService(ctx.getBean(FhirGlobalPropertyService.class));
+				setServerAddressStrategy(ctx.getBean(IServerAddressStrategy.class));
+				setPagingProvider(createPagingProvider());
+				
+				administrationService.addGlobalPropertyListener(fhirRestServletListener);
+			}
 		}
 	}
 	
@@ -257,7 +257,15 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 			
 		}
 		
-		ctx = null;
+		try {
+			FhirActivator activator = (FhirActivator) ModuleFactory.getModuleById("fhir2").getModuleActivator();
+			if (activator != null) {
+				activator.removeModuleLifecycleLister(this);
+			}
+		}
+		catch (Exception ignored) {
+			
+		}
 		
 		super.destroy();
 	}
