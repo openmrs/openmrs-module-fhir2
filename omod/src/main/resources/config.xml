@@ -32,15 +32,19 @@
     <conditionalResources>
 		<conditionalResource>
 			<path>/lib/fhir2-api-2.1-${project.parent.version}.jar</path>
-			<openmrsVersion>2.1.* - 2.*</openmrsVersion>
+			<openmrsVersion>2.1.* - 9.*</openmrsVersion>
 		</conditionalResource>
         <conditionalResource>
             <path>/lib/fhir2-api-2.2-${project.parent.version}.jar</path>
-            <openmrsVersion>2.2.* - 2.*</openmrsVersion>
+            <openmrsVersion>2.2.* - 9.*</openmrsVersion>
         </conditionalResource>
 		<conditionalResource>
+			<path>/lib/fhir2-api-2.5-${project.parent.version}.jar</path>
+			<openmrsVersion>2.5.* - 9.*</openmrsVersion>
+		</conditionalResource>
+		<conditionalResource>
 			<path>/lib/fhir2-api-2.6-${project.parent.version}.jar</path>
-			<openmrsVersion>2.6.* - 2.*</openmrsVersion>
+			<openmrsVersion>2.6.* - 9.*</openmrsVersion>
 		</conditionalResource>
 		<conditionalResource>
 			<path>/lib/jackson-.*.jar</path>
@@ -162,6 +166,11 @@
 	<globalProperty>
 		<property>${project.parent.artifactId}.narrativesOverridePropertyFile</property>
 		<description>Path of narrative override properties file</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.locationTypeAttributeTypeUuid</property>
+		<description>The UUID for the Location Attribute Type representing the Location Type</description>
 	</globalProperty>
 
 </module>

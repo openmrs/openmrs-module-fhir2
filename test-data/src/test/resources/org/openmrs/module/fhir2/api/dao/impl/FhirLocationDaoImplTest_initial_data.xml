@@ -23,6 +23,18 @@
     <location_tag_map location_id="2" location_tag_id="7"/>
     <location_tag_map location_id="3" location_tag_id="7"/>
 
+    <concept_map_type concept_map_type_id="2" name="same-as" description="Indicates similarity" is_hidden="0" retired="0" creator="1" date_created="2004-08-12 00:00:00.0" uuid="35543629-7d8c-11e1-909d-c80aa9edcf4e"/>
+    <concept_class concept_class_id="8" name="LabSet" description="Term to describe laboratory sets" creator="1" date_created="2004-03-02 00:00:00.0" retired="false" uuid="4719138c-8553-4c81-bb92-753f41f8be16"/>
+    <concept_datatype concept_datatype_id="3" name="Text" hl7_abbreviation="ST" description="Free text" creator="1" date_created="2004-02-02 00:00:00.0" retired="false" uuid="8d4a4ab4-c2cc-11de-8d13-0010c6dffd0f"/>
+    <concept_reference_source concept_source_id="6" name="LocationType" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="2b3c1ff8-748a-102f-83f4-12313b04a615" />
+    <concept_reference_term concept_reference_term_id="1" retired="false" concept_source_id="6" code="1000-1" creator="1" date_created="2005-01-01 00:00:00.0" uuid="d421950d-0ef5-424c-b72a-3fff29af6b0b" />
+    <concept concept_id="3" retired="0" datatype_id="3" class_id="8" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="378e63b1-6c73-46ed-95e3-797b48ddc9f8" />
+    <concept_reference_map concept_map_id="1" concept_reference_term_id="1" concept_map_type_id="2" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="3" uuid="2f7e0cd7-5836-4345-a24a-9c75cd3a876f" />
+
+    <location location_id="10" name="Test mCSD Location 1" description="Test description" uuid="c0938432-1691-11df-97a5-7038c422" retired="false" date_created="2004-01-01 00:00:00.0" />
+    <location_attribute_type location_attribute_type_id="1" name="Location Type" uuid="9516cc60-6f9f-11e0-8414-001e378eb67e" creator="1" date_created="2005-01-01 00:00:00.0" min_occurs="0" retired="false" />
+    <location_attribute location_attribute_id="1" location_id="10" attribute_type_id="1" value_reference="378e63b1-6c73-46ed-95e3-797b48ddc9f8" uuid="3a2bdb18-6faa-11e0-8414-001e379eb67e" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" />
+
     <patient_identifier_type patient_identifier_type_id="1" name="Test Identifier Type" description="Test description" creator="1" date_created="2005-01-01 00:00:00.0" required="false" retired="false"  uuid="1d64befb-3b2e-48e5-85f5-353d43e23e45"/>
     <person person_id="2" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" gender="M"  uuid="a194be38-271a-44cb-ba3f-f2dbf4831fe9"/>
     <person_name person_id="2" person_name_id="2" preferred="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" given_name="John" middle_name=" " family_name="Doe"  uuid="765b882e-db79-498b-aff7-b5b53f12caf1"/>
@@ -30,5 +42,10 @@
     <patient_identifier patient_identifier_id="1" patient_id="2" creator="1" date_created="2005-01-01 00:00:00.0" identifier="1000WF" identifier_type="1" preferred="1" voided="false" location_id="1"  uuid="b2c299e7-2679-44b8-a7a3-c69159a20ac0"/>
     <encounter_type encounter_type_id="2" name="Emergency" description="Emergency visit" creator="1" date_created="2005-02-24 00:00:00.0" retired="false" uuid="07000be2-26b6-4cce-8b40-866d8435b613"/>
     <encounter encounter_id="3" encounter_type="2" patient_id="2" location_id="5" encounter_datetime="2008-08-01 00:00:00.0" creator="1" date_created="2008-08-18 14:09:05.0" voided="false" uuid="6519d653-393b-4118-9c83-a3715b82d4ac"/>
+
+    <location_attribute_type location_attribute_type_id="1" name="Audit Date" datatype="org.openmrs.customdatatype.datatype.DateDatatype" uuid="9516cc50-6f9f-11e0-8414-001e378eb67e" creator="1" date_created="2005-01-01 00:00:00.0" min_occurs="0" retired="false" />
+    <location_attribute_type location_attribute_type_id="2" name="A Date We Don't Care About" datatype="org.openmrs.customdatatype.datatype.DateDatatype" uuid="9516cc50-6f9f-11e0-8414-001e378eb67f" creator="1" date_created="2005-01-01 00:00:00.0" min_occurs="0" retired="true" retired_by="1" date_retired="2005-01-01 02:00:00.0" retire_reason="for fun and profit" />
+    <location_attribute location_attribute_id="1" location_id="10" attribute_type_id="1" value_reference="2011-04-25" uuid="3a2bdb18-6faa-11e0-8414-001e378eb67e" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" />
+
 </dataset>
 

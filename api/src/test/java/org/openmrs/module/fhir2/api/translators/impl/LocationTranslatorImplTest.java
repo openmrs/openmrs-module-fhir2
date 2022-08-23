@@ -22,10 +22,12 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
@@ -45,6 +47,7 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
+import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -94,6 +97,9 @@ public class LocationTranslatorImplTest {
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
 	
 	@Mock
+	private LocationTypeTranslator locationTypeTranslator;
+	
+	@Mock
 	private FhirLocationDao fhirLocationDao;
 	
 	@Mock
@@ -112,7 +118,7 @@ public class LocationTranslatorImplTest {
 		locationTranslator.setFhirLocationDao(fhirLocationDao);
 		locationTranslator.setPropertyService(propertyService);
 		locationTranslator.setLocationTagTranslator(locationTagTranslator);
-		
+		locationTranslator.setLocationTypeTranslator(locationTypeTranslator);
 	}
 	
 	@Test
@@ -282,7 +288,7 @@ public class LocationTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shoudTranslateOpenmrsTagsToFhirLocationTags() {
+	public void toFhirResource_shouldTranslateOpenmrsTagsToFhirLocationTags() {
 		LocationTag tag = new LocationTag(LOGIN_TAG_NAME, LOGIN_TAG_DESCRIPTION);
 		omrsLocation.addTag(tag);
 		org.hl7.fhir.r4.model.Location fhirLocation = locationTranslator.toFhirResource(omrsLocation);
@@ -306,6 +312,27 @@ public class LocationTranslatorImplTest {
 		assertThat(omrsLocation.getTags(), notNullValue());
 		assertThat(omrsLocation.getTags(), hasSize(greaterThanOrEqualTo(1)));
 		assertThat(omrsLocation.getTags().iterator().next().getName(), is(LAB_TAG_NAME));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateFhirTypeToOpenmrsLocationAttributes() {
+		LocationAttribute omrsAttr = new LocationAttribute();
+		CodeableConcept typeConcept = new CodeableConcept();
+		typeConcept.setId(LOCATION_ATTRIBUTE_TYPE_UUID);
+		
+		org.hl7.fhir.r4.model.Location fhirLocation = new org.hl7.fhir.r4.model.Location();
+		
+		fhirLocation.setType(Collections.singletonList(typeConcept));
+		
+		omrsLocation.addAttribute(omrsAttr);
+		
+		when(locationTypeTranslator.toOpenmrsType(any(), any())).thenReturn(omrsLocation);
+		
+		Location result = locationTranslator.toOpenmrsType(fhirLocation);
+		
+		assertThat(result.getActiveAttributes(), notNullValue());
+		assertThat(omrsLocation.getActiveAttributes(), hasSize(greaterThanOrEqualTo(1)));
+		assertThat(omrsLocation.getActiveAttributes().stream().findFirst().get(), is(omrsAttr));
 	}
 	
 	@Test

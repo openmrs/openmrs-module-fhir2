@@ -7,10 +7,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>fhir2-api-2.6</artifactId>
+    <artifactId>fhir2-api-2.5</artifactId>
     <packaging>jar</packaging>
-    <name>FHIR2 API 2.6</name>
-    <description>API 2.6 for FHIR2</description>
+    <name>FHIR2 API 2.5</name>
+    <description>API 2.5 for FHIR2</description>
 
     <dependencies>
         <dependency>
@@ -28,12 +28,6 @@
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>${project.parent.artifactId}-api-2.2</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.parent.groupId}</groupId>
-            <artifactId>${project.parent.artifactId}-api-2.5</artifactId>
             <version>${project.parent.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -85,7 +79,7 @@
     </build>
 
     <properties>
-        <openmrsPlatformVersion>2.6.0-SNAPSHOT</openmrsPlatformVersion>
+        <openmrsPlatformVersion>2.5.0</openmrsPlatformVersion>
     </properties>
 
 </project>

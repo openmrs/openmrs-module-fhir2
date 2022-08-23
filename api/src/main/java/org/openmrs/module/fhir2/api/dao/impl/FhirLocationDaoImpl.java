@@ -25,6 +25,7 @@ import org.hibernate.Criteria;
 import org.hibernate.sql.JoinType;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
+import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -141,5 +142,10 @@ public class FhirLocationDaoImpl extends BaseFhirDao<Location> implements FhirLo
 	@Override
 	public LocationTag saveLocationTag(LocationTag tag) {
 		return locationService.saveLocationTag(tag);
+	}
+	
+	@Override
+	public LocationAttributeType getLocationAttributeTypeByUuid(String uuid) {
+		return locationService.getLocationAttributeTypeByUuid(uuid);
 	}
 }

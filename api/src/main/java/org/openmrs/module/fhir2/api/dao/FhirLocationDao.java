@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
+import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -51,4 +52,7 @@ public interface FhirLocationDao extends FhirDao<Location> {
 	
 	@Authorized({ PrivilegeConstants.MANAGE_LOCATION_TAGS })
 	LocationTag saveLocationTag(@Nonnull LocationTag tag);
+	
+	@Authorized({ PrivilegeConstants.GET_LOCATIONS })
+	LocationAttributeType getLocationAttributeTypeByUuid(@Nonnull String uuid);
 }
