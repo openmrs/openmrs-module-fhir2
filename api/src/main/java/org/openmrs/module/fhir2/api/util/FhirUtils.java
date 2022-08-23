@@ -16,12 +16,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.OpenmrsMetadata;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 
+@Slf4j
 public class FhirUtils {
 	
 	public enum OpenmrsEncounterType {
@@ -129,6 +133,41 @@ public class FhirUtils {
 			return Optional.of(openmrsEncounterTypes.get(0));
 		} else {
 			return Optional.of(OpenmrsEncounterType.AMBIGUOUS);
+		}
+	}
+	
+	/**
+	 * Provides implementation-defined localizations for OpenMRS Metadata. This should be used in any
+	 * display fields to override the default value.
+	 *
+	 * @param metadata the piece of OpenMRS Metadata to localize
+	 * @return localization for the given metadata, from message source, in the authenticated locale
+	 */
+	public static String getMetadataTranslation(OpenmrsMetadata metadata) {
+		// This code is from the REST module which derived it from the UI framework
+		String className = metadata.getClass().getSimpleName();
+		
+		// in case this is a proxy, strip off anything after an underscore
+		// ie: EncounterType_$$_javassist_26 needs to be converted to EncounterType
+		int underscoreIndex = className.indexOf("_$");
+		if (underscoreIndex > 0) {
+			className = className.substring(0, underscoreIndex);
+		}
+		
+		String code = "ui.i18n." + className + ".name." + metadata.getUuid();
+		String localization = null;
+		
+		try {
+			localization = Context.getMessageSourceService().getMessage(code);
+		}
+		catch (Exception e) {
+			log.info("Caught exception while attempting to localize code [{}]", code, e);
+		}
+		
+		if (localization == null || localization.equals(code)) {
+			return metadata.getName();
+		} else {
+			return localization;
 		}
 	}
 }

@@ -132,6 +132,8 @@ public class FhirConstants {
 	
 	public static final String MEDICATION = "Medication";
 	
+	public static final String MEDICATION_DISPENSE = "MedicationDispense";
+	
 	public static final String MEDICATION_REQUEST = "MedicationRequest";
 	
 	public static final String OBSERVATION = "Observation";
@@ -153,6 +155,8 @@ public class FhirConstants {
 	public static final String TASK = "Task";
 	
 	public static final String DIAGNOSTIC_REPORT_CATEGORY_LAB = "LAB";
+	
+	public static final String VALUESET = "ValueSet";
 	
 	public static final String PERSON_CONTACT_POINT_ATTRIBUTE_TYPE = "fhir2.personContactPointAttributeTypeUuid";
 	
@@ -176,13 +180,11 @@ public class FhirConstants {
 	
 	public static final String GLOBAL_PROPERTY_URI_PREFIX = "fhir2.uriPrefix";
 	
-	public static final String AUTHOR = "author";
-	
-	public static final String AUT = "AUT";
-	
 	public static final String ENCOUNTER_REFERENCE_SEARCH_HANDLER = "encounter.reference.search.handler";
 	
 	public static final String PATIENT_REFERENCE_SEARCH_HANDLER = "patient.reference.search.handler";
+	
+	public static final String MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER = "medicationRequest.reference.search.handler";
 	
 	public static final String MEDICATION_REFERENCE_SEARCH_HANDLER = "medication.reference.search.handler";
 	
@@ -294,6 +296,10 @@ public class FhirConstants {
 	
 	public static final String INCLUDE_REQUESTER_PARAM = "requester";
 	
+	public static final String INCLUDE_PERFORMER_PARAM = "performer";
+	
+	public static final String INCLUDE_PRESCRIPTION_PARAM = "prescription";
+	
 	public static final String INCLUDE_MEDICATION_PARAM = "medication";
 	
 	public static final String INCLUDE_HAS_MEMBER_PARAM = "has-member";
@@ -304,9 +310,11 @@ public class FhirConstants {
 	
 	public static final String INCLUDE_RESULT_PARAM = "result";
 	
-	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
+	public static final String INCLUDE_BASED_0N_PARAM = "based-on";
 	
-	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	public static final String INCLUDE_OWNER_PARAM = "owner";
+	
+	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
 	
 	public static final String MAX_SEARCH_HANDLER = "max.search.handler";
 	
@@ -315,4 +323,16 @@ public class FhirConstants {
 	public static final String LASTN_ENCOUNTERS_SEARCH_HANDLER = "lastn.encounters.search.handler";
 	
 	public static final String EVERYTHING_SEARCH_HANDLER = "everything.search.handler";
+	
+	public static final String TITLE_SEARCH_HANDLER = "title.search.handler";
+	
+	public static final String HAS_SEARCH_HANDLER = "_has";
+	
+	public static final String CONDITION_OBSERVATION_CONCEPT_UUID = "1284AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+	
+	public static final String SNOMED_SYSTEM_URI = "http://snomed.info/sct";
+	
+	public static final String RX_NORM_SYSTEM_URI = "http://www.nlm.nih.gov/research/umls/rxnorm";
+	
+	public static final String UCUM_SYSTEM_URI = "http://unitsofmeasure.org";
 }

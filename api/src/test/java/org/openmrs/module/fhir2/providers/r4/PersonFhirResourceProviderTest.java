@@ -10,12 +10,10 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -47,8 +45,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -345,38 +341,6 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	}
 	
 	@Test
-	public void getPatientResourceHistory_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(PERSON_UUID);
-		when(fhirPersonService.get(PERSON_UUID)).thenReturn(person);
-		
-		List<Resource> resources = resourceProvider.getPersonHistoryById(id);
-		assertThat(resources, notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), equalTo(2));
-	}
-	
-	@Test
-	public void getPatientResourceHistory_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(PERSON_UUID);
-		when(fhirPersonService.get(PERSON_UUID)).thenReturn(person);
-		
-		List<Resource> resources = resourceProvider.getPersonHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getPatientHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_PERSON_UUID);
-		assertThat(resourceProvider.getPersonHistoryById(idType).isEmpty(), is(true));
-		assertThat(resourceProvider.getPersonHistoryById(idType).size(), equalTo(0));
-	}
-	
-	@Test
 	public void updatePerson_shouldUpdatePerson() {
 		
 		when(fhirPersonService.update(PERSON_UUID, person)).thenReturn(person);
@@ -414,23 +378,13 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 	
 	@Test
 	public void deletePerson_shouldDeletePerson() {
-		
-		when(fhirPersonService.delete(PERSON_UUID)).thenReturn(person);
-		
 		OperationOutcome result = resourceProvider.deletePerson(new IdType().setValue(PERSON_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
 		    equalTo("This resource has been deleted"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deletePerson_shouldThrowResourceNotFoundException() {
-		
-		when(fhirPersonService.delete(WRONG_PERSON_UUID)).thenReturn(null);
-		
-		resourceProvider.deletePerson(new IdType().setValue(WRONG_PERSON_UUID));
 	}
 	
 	@Test
@@ -442,5 +396,4 @@ public class PersonFhirResourceProviderTest extends BaseFhirProvenanceResourceTe
 		assertThat(result, notNullValue());
 		assertThat(result.getResource(), equalTo(person));
 	}
-	
 }

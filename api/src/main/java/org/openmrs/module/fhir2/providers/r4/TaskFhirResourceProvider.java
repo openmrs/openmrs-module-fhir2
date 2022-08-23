@@ -11,12 +11,13 @@ package org.openmrs.module.fhir2.providers.r4;
 
 import static lombok.AccessLevel.PACKAGE;
 
-import java.util.List;
+import java.util.HashSet;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -32,10 +33,10 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
@@ -65,15 +66,6 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 		return task;
 	}
 	
-	@History
-	public List<Resource> getTaskHistoryById(@IdParam IdType id) {
-		Task task = service.get(id.getIdPart());
-		if (task == null) {
-			throw new ResourceNotFoundException("Could not find Task with Id " + id.getIdPart());
-		}
-		return task.getContained();
-	}
-	
 	@Create
 	public MethodOutcome createTask(@ResourceParam Task newTask) {
 		return FhirProviderUtils.buildCreate(service.create(newTask));
@@ -86,11 +78,8 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	public OperationOutcome deleteTask(@IdParam IdType id) {
-		Task task = service.delete(id.getIdPart());
-		if (task == null) {
-			throw new ResourceNotFoundException("Could not find task resource with id " + id.getIdPart() + "to delete");
-		}
-		return FhirProviderUtils.buildDelete(task);
+		service.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search
@@ -99,7 +88,12 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Task.SP_OWNER, chainWhitelist = { "" }) ReferenceAndListParam ownerReference,
 	        @OptionalParam(name = Task.SP_STATUS) TokenAndListParam status,
 	        @OptionalParam(name = Task.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort) {
-		return service.searchForTasks(basedOnReference, ownerReference, status, id, lastUpdated, sort);
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @Sort SortSpec sort,
+	        @IncludeParam(allow = { "Task:" + Task.SP_PATIENT, "Task:" + Task.SP_OWNER, "Task:" + Task.SP_BASED_ON,
+	                "Task:" + Task.SP_ENCOUNTER }) HashSet<Include> includes) {
+		if (CollectionUtils.isEmpty(includes)) {
+			includes = null;
+		}
+		return service.searchForTasks(basedOnReference, ownerReference, status, id, lastUpdated, sort, includes);
 	}
 }

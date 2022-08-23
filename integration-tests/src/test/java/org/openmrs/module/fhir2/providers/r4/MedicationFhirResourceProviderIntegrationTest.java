@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
@@ -17,16 +18,15 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
@@ -127,7 +127,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		String jsonMedication;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_MEDICATION_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonMedication = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonMedication = inputStreamToString(is, UTF_8);
 		}
 		
 		// create medication
@@ -160,7 +160,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		String xmlMedication;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_MEDICATION_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			xmlMedication = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlMedication = inputStreamToString(is, UTF_8);
 		}
 		
 		// create medication
@@ -210,7 +210,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		String jsonMedication;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_UPDATE_MEDICATION_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonMedication = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonMedication = inputStreamToString(is, UTF_8);
 		}
 		
 		//Update
@@ -313,7 +313,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		String xmlMedication;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_UPDATE_MEDICATION_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			xmlMedication = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlMedication = inputStreamToString(is, UTF_8);
 		}
 		
 		//Update

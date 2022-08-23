@@ -90,12 +90,8 @@ public class ProcedureRequestFhirResourceProvider implements IResourceProvider {
 	}
 	
 	public OperationOutcome deleteProcedureRequest(@IdParam @Nonnull IdType id) {
-		ServiceRequest serviceRequest = serviceRequestService.delete(id.getIdPart());
-		if (serviceRequest == null) {
-			throw new ResourceNotFoundException("Could not find procedure request to delete with id " + id.getIdPart());
-		}
-		
-		return FhirProviderUtils.buildDelete(VersionConvertor_30_40.convertResource(serviceRequest, false));
+		serviceRequestService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR3();
 	}
 	
 	@Search

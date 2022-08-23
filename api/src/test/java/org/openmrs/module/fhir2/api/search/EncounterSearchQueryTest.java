@@ -16,20 +16,26 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -1485,5 +1491,52 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		includes.add(new Include(FhirConstants.ENCOUNTER + ":" + FhirConstants.INCLUDE_PARTICIPANT_PARAM));
 		
 		theParams.addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
+	}
+	
+	@Test
+	public void shouldReturnCollectionOfEncountersSortedByEncounterDate() {
+		SortSpec sort = new SortSpec();
+		sort.setParamName("date");
+		sort.setOrder(SortOrderEnum.ASC);
+		
+		SearchParameterMap theParams = new SearchParameterMap().setSortSpec(sort);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		List<Encounter> resultList = get(results).stream().filter(it -> it instanceof Encounter).map(it -> (Encounter) it)
+		        .collect(Collectors.toList());
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		
+		for (int i = 1; i < resultList.size(); i++) {
+			assertNotNull(resultList.get(i - 1).getPeriod().getStart());
+			assertNotNull(resultList.get(i).getPeriod().getStart());
+			assertThat(resultList.get(i - 1).getPeriod().getStart(),
+			    lessThanOrEqualTo(resultList.get(i).getPeriod().getStart()));
+		}
+		
+		sort.setOrder(SortOrderEnum.DESC);
+		
+		theParams.setSortSpec(sort);
+		
+		results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), greaterThan(1));
+		
+		resultList = get(results).stream().filter(it -> it instanceof Encounter).map(it -> (Encounter) it)
+		        .collect(Collectors.toList());
+		
+		assertThat(resultList, hasSize(greaterThan(1)));
+		
+		for (int i = 1; i < resultList.size(); i++) {
+			assertNotNull(resultList.get(i - 1).getPeriod().getStart());
+			assertNotNull(resultList.get(i).getPeriod().getStart());
+			assertThat(resultList.get(i - 1).getPeriod().getStart(),
+			    greaterThanOrEqualTo(resultList.get(i).getPeriod().getStart()));
+		}
 	}
 }

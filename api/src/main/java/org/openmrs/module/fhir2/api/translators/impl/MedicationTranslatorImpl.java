@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 
 import javax.annotation.Nonnull;
 
@@ -34,12 +34,16 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.PACKAGE)
 public class MedicationTranslatorImpl implements MedicationTranslator {
 	
+	public static final String DRUG_NAME_EXTENSION = "drugName";
+	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
 	
 	@Override
 	public Medication toFhirResource(@Nonnull Drug drug) {
-		notNull(drug, "The Drug object should not be null");
+		if (drug == null) {
+			return null;
+		}
 		
 		Medication medication = new Medication();
 		medication.setId(drug.getUuid());
@@ -56,6 +60,8 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 		medication.getMeta().setLastUpdated(drug.getDateChanged());
 		medication.setStatus(Medication.MedicationStatus.ACTIVE);
 		
+		addMedicineExtension(medication, DRUG_NAME_EXTENSION, drug.getName());
+		
 		if (drug.getMaximumDailyDose() != null) {
 			addMedicineExtension(medication, "maximumDailyDose", drug.getMaximumDailyDose().toString());
 		}
@@ -68,36 +74,42 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 			addMedicineExtension(medication, "strength", drug.getStrength());
 		}
 		
+		medication.getMeta().setLastUpdated(getLastUpdated(drug));
+		
 		return medication;
 	}
 	
 	@Override
 	public Drug toOpenmrsType(@Nonnull Medication medication) {
-		notNull(medication, "The Medication object should not be null");
+		if (medication == null) {
+			return null;
+		}
+		
 		return toOpenmrsType(new Drug(), medication);
 	}
 	
 	@Override
-	public Drug toOpenmrsType(@Nonnull Drug existingDrug, @Nonnull Medication med) {
-		notNull(existingDrug, "The existing Drug object should not be null");
-		notNull(med, "The Medication object should not be null");
-		
-		if (med.getId() != null) {
-			existingDrug.setUuid(med.getId());
+	public Drug toOpenmrsType(@Nonnull Drug existingDrug, @Nonnull Medication medication) {
+		if (existingDrug == null || medication == null) {
+			return null;
 		}
 		
-		if (med.hasCode()) {
-			existingDrug.setConcept(conceptTranslator.toOpenmrsType(med.getCode()));
+		if (medication.getId() != null) {
+			existingDrug.setUuid(medication.getId());
 		}
 		
-		if (med.hasForm()) {
-			existingDrug.setConcept(conceptTranslator.toOpenmrsType(med.getForm()));
+		if (medication.hasCode()) {
+			existingDrug.setConcept(conceptTranslator.toOpenmrsType(medication.getCode()));
+		}
+		
+		if (medication.hasForm()) {
+			existingDrug.setConcept(conceptTranslator.toOpenmrsType(medication.getForm()));
 		}
 		
 		Collection<DrugIngredient> ingredients = new LinkedHashSet<>();
 		
-		if (med.hasIngredient()) {
-			for (Medication.MedicationIngredientComponent ingredient : med.getIngredient()) {
+		if (medication.hasIngredient()) {
+			for (Medication.MedicationIngredientComponent ingredient : medication.getIngredient()) {
 				DrugIngredient omrsIngredient = new DrugIngredient();
 				omrsIngredient.setDrug(existingDrug);
 				omrsIngredient.setIngredient(conceptTranslator.toOpenmrsType(ingredient.getItemCodeableConcept()));
@@ -106,7 +118,7 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 			existingDrug.setIngredients(ingredients);
 		}
 		
-		getOpenmrsMedicineExtension(med).ifPresent(ext -> ext.getExtension()
+		getOpenmrsMedicineExtension(medication).ifPresent(ext -> ext.getExtension()
 		        .forEach(e -> addMedicineComponent(existingDrug, e.getUrl(), ((StringType) e.getValue()).getValue())));
 		
 		return existingDrug;
@@ -128,6 +140,9 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 				break;
 			case "strength":
 				drug.setStrength(value);
+				break;
+			case DRUG_NAME_EXTENSION:
+				drug.setName(value);
 				break;
 		}
 	}

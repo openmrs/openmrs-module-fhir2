@@ -14,11 +14,20 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.util.List;
+
+import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
+import org.openmrs.Order;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +39,10 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String ENCOUNTER_UUID = "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9";
 	
 	private static final String UNKNOWN_ENCOUNTER_UUID = "xx923xx-3423kk-2323-232jk23";
+	
+	private static final String ENCOUNTER_WITH_DRUG_ORDERS = "6519d653-393b-4118-9c83-a3715b82d4ac"; // 3 in standard test dataset
+	
+	private static final String ENCOUNTER_WITH_NO_DRUG_ORDERS = "eec646cb-c847-45a7-98bc-91c8c4f70add"; // 4 in standard test dataset
 	
 	private static final String ENCOUNTER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml";
 	
@@ -58,5 +71,30 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	public void shouldReturnNullWithUnknownEncounterUuid() {
 		Encounter encounter = dao.get(UNKNOWN_ENCOUNTER_UUID);
 		assertThat(encounter, nullValue());
+	}
+	
+	@Test
+	public void shouldOnlyReturnEncountersThatHaveAssociatedMedicationRequests() {
+		Encounter withNoDrugOrders = dao.get(ENCOUNTER_WITH_NO_DRUG_ORDERS);
+		assertThat(withNoDrugOrders, notNullValue());
+		assertThat("Orders is empty", withNoDrugOrders.getOrders().isEmpty());
+		
+		Encounter withDrugOrders = dao.get(ENCOUNTER_WITH_DRUG_ORDERS);
+		assertThat(withDrugOrders, notNullValue());
+		assertThat("Orders is not empty", !withDrugOrders.getOrders().isEmpty());
+		for (Order order : withDrugOrders.getOrders()) {
+			assertThat(order.getClass(), equalTo(DrugOrder.class));
+		}
+		
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "intent", "order"));
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		List<String> matchingUuids = dao.getSearchResultUuids(theParams);
+		assertThat("Encounter with Drug Orders is returned", matchingUuids.contains(ENCOUNTER_WITH_DRUG_ORDERS));
+		assertThat("Encounter without Drug Orders is not returned", !matchingUuids.contains(ENCOUNTER_WITH_NO_DRUG_ORDERS));
 	}
 }

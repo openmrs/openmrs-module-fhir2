@@ -563,8 +563,10 @@ public abstract class BaseDao {
 	}
 	
 	protected void handleParticipantReference(Criteria criteria, ReferenceAndListParam participantReference) {
-		if (participantReference != null && lacksAlias(criteria, "ep")) {
-			criteria.createAlias("encounterProviders", "ep");
+		if (participantReference != null) {
+			if (lacksAlias(criteria, "ep")) {
+				return;
+			}
 			
 			handleAndListParam(participantReference, participantToken -> {
 				if (participantToken.getChain() != null) {
@@ -614,7 +616,6 @@ public abstract class BaseDao {
 				
 				return Optional.empty();
 			}).ifPresent(criteria::add);
-			
 		}
 	}
 	
@@ -841,6 +842,16 @@ public abstract class BaseDao {
 		
 		return handleAndListParam(medicationReference,
 		    token -> Optional.of(eq(String.format("%s.uuid", medicationAlias), token.getIdPart())));
+	}
+	
+	protected Optional<Criterion> handleMedicationRequestReference(@Nonnull String drugOrderAlias,
+	        ReferenceAndListParam drugOrderReference) {
+		if (drugOrderReference == null) {
+			return Optional.empty();
+		}
+		
+		return handleAndListParam(drugOrderReference,
+		    token -> Optional.of(eq(String.format("%s.uuid", drugOrderAlias), token.getIdPart())));
 	}
 	
 	/**

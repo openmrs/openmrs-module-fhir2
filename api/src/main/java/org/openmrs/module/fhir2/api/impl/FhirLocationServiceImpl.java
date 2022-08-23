@@ -9,25 +9,16 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
-import java.util.HashSet;
-
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Location;
-import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirLocationService;
 import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
-import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,23 +44,7 @@ public class FhirLocationServiceImpl extends BaseFhirService<Location, org.openm
 	
 	@Override
 	@Transactional(readOnly = true)
-	public IBundleProvider searchForLocations(StringAndListParam name, StringAndListParam city, StringAndListParam country,
-	        StringAndListParam postalCode, StringAndListParam state, TokenAndListParam tag, ReferenceAndListParam parent,
-	        TokenAndListParam id, DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes,
-	        SortSpec sort) {
-		
-		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, name)
-		        .addParameter(FhirConstants.CITY_SEARCH_HANDLER, city)
-		        .addParameter(FhirConstants.STATE_SEARCH_HANDLER, state)
-		        .addParameter(FhirConstants.COUNTRY_SEARCH_HANDLER, country)
-		        .addParameter(FhirConstants.POSTALCODE_SEARCH_HANDLER, postalCode)
-		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, parent)
-		        .addParameter(FhirConstants.TAG_SEARCH_HANDLER, tag)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
-		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes).setSortSpec(sort);
-		
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	public IBundleProvider searchForLocations(LocationSearchParams locationSearchParams) {
+		return searchQuery.getQueryResults(locationSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
 	}
 }

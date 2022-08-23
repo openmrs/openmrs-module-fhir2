@@ -13,7 +13,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
@@ -38,10 +37,8 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,9 +57,7 @@ import org.openmrs.module.fhir2.api.translators.GenderTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientTranslatorImplTest {
@@ -110,9 +105,6 @@ public class PatientTranslatorImplTest {
 	@Mock
 	private FhirGlobalPropertyService globalPropertyService;
 	
-	@Mock
-	private ProvenanceTranslator<org.openmrs.Patient> provenanceTranslator;
-	
 	private BirthDateTranslator birthDateTranslator = new BirthDateTranslatorImpl();
 	
 	private PatientTranslatorImpl patientTranslator;
@@ -127,7 +119,6 @@ public class PatientTranslatorImplTest {
 		patientTranslator.setTelecomTranslator(telecomTranslator);
 		patientTranslator.setFhirPersonDao(fhirPersonDao);
 		patientTranslator.setGlobalPropertyService(globalPropertyService);
-		patientTranslator.setProvenanceTranslator(provenanceTranslator);
 		patientTranslator.setBirthDateTranslator(birthDateTranslator);
 	}
 	
@@ -381,44 +372,6 @@ public class PatientTranslatorImplTest {
 		Patient result = patientTranslator.toFhirResource(patient);
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
-	}
-	
-	@Test
-	public void shouldAddProvenanceResources() {
-		org.openmrs.Patient patient = new org.openmrs.Patient();
-		patient.setUuid(PATIENT_UUID);
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		when(provenanceTranslator.getCreateProvenance(patient)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(patient)).thenReturn(provenance);
-		org.hl7.fhir.r4.model.Patient result = patientTranslator.toFhirResource(patient);
-		assertThat(result, notNullValue());
-		assertThat(result.getContained(), not(empty()));
-		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
-		assertThat(result.getContained().stream()
-		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
-		    is(true));
-	}
-	
-	@Test
-	public void shouldNotAddUpdateProvenanceIfDateChangedAndChangedByAreBothNull() {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		
-		org.openmrs.Patient patient = new org.openmrs.Patient();
-		patient.setUuid(PATIENT_UUID);
-		patient.setDateChanged(null);
-		patient.setChangedBy(null);
-		when(provenanceTranslator.getCreateProvenance(patient)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(patient)).thenReturn(null);
-		
-		org.hl7.fhir.r4.model.Patient result = patientTranslator.toFhirResource(patient);
-		assertThat(result, notNullValue());
-		assertThat(result.getContained(), not(empty()));
-		assertThat(result.getContained().size(), equalTo(1));
-		assertThat(result.getContained().stream()
-		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
-		    is(true));
 	}
 	
 	@Test

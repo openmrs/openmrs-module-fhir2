@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -42,17 +41,14 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.convertors.conv30_40.Practitioner30_40;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -550,39 +546,6 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 	}
 	
 	@Test
-	public void getPractitionerHistoryById_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(PRACTITIONER_UUID);
-		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
-		
-		List<Resource> resources = resourceProvider.getPractitionerHistoryById(id);
-		assertThat(resources, Matchers.notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), Matchers.equalTo(2));
-	}
-	
-	@Test
-	public void getPractitionerHistoryById_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(PRACTITIONER_UUID);
-		when(practitionerService.get(PRACTITIONER_UUID)).thenReturn(practitioner);
-		
-		List<Resource> resources = resourceProvider.getPractitionerHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), Matchers.is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(),
-		    Matchers.equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getPractitionerHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_PRACTITIONER_UUID);
-		assertThat(resourceProvider.getPractitionerHistoryById(idType).isEmpty(), Matchers.is(true));
-		assertThat(resourceProvider.getPractitionerHistoryById(idType).size(), Matchers.equalTo(0));
-	}
-	
-	@Test
 	public void createPractitioner_shouldCreateNewPractitioner() {
 		when(practitionerService.create(any(org.hl7.fhir.r4.model.Practitioner.class))).thenReturn(practitioner);
 		
@@ -591,26 +554,6 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		assertThat(result.getCreated(), is(true));
 		assertThat(result.getResource(), notNullValue());
 		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
-	}
-	
-	@Test
-	public void deletePractitioner_shouldDeletePractitioner() {
-		
-		when(practitionerService.delete(PRACTITIONER_UUID)).thenReturn(practitioner);
-		
-		OperationOutcome result = resourceProvider.deletePractitioner(new IdType().setValue(PRACTITIONER_UUID));
-		assertThat(result, notNullValue());
-		assertThat(result.getIssue(), notNullValue());
-		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
-		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
-		    equalTo("This resource has been deleted"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deletePractitioner_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentPractitioner() {
-		when(practitionerService.delete(WRONG_PRACTITIONER_UUID)).thenReturn(null);
-		resourceProvider.deletePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID));
 	}
 	
 	@Test
@@ -655,5 +598,17 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirR3ProvenanceRe
 		
 		resourceProvider.updatePractitioner(new IdType().setValue(WRONG_PRACTITIONER_UUID),
 		    Practitioner30_40.convertPractitioner(wrongPractitioner));
+	}
+	
+	@Test
+	public void deletePractitioner_shouldDeletePractitioner() {
+		OperationOutcome result = resourceProvider.deletePractitioner(new IdType().setValue(PRACTITIONER_UUID));
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getIssue(), notNullValue());
+		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
+		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
+		    equalTo("This resource has been deleted"));
 	}
 }

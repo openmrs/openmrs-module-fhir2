@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -26,6 +28,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,11 +46,11 @@ import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
-import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestPriorityTranslator;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
+import org.openmrs.module.fhir2.api.translators.MedicationRequestTimingTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
@@ -103,9 +106,15 @@ public class MedicationRequestTranslatorImplTest {
 	private ConceptTranslator conceptTranslator;
 	
 	@Mock
-	private DosageTranslator dosageTranslator;
+	private MedicationRequestTimingTranslator timingTranslator;
+	
+	private MedicationRequestDispenseRequestComponentTranslatorImpl dispenseRequestComponentTranslator;
+	
+	private DosageTranslatorImpl dosageTranslator;
 	
 	private MedicationRequestTranslatorImpl medicationRequestTranslator;
+	
+	private MedicationQuantityCodingTranslatorImpl quantityCodingTranslator;
 	
 	private MedicationRequest medicationRequest;
 	
@@ -115,6 +124,17 @@ public class MedicationRequestTranslatorImplTest {
 	
 	@Before
 	public void setup() {
+		quantityCodingTranslator = new MedicationQuantityCodingTranslatorImpl();
+		quantityCodingTranslator.setConceptTranslator(conceptTranslator);
+		
+		dosageTranslator = new DosageTranslatorImpl();
+		dosageTranslator.setConceptTranslator(conceptTranslator);
+		dosageTranslator.setTimingTranslator(timingTranslator);
+		dosageTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
+		
+		dispenseRequestComponentTranslator = new MedicationRequestDispenseRequestComponentTranslatorImpl();
+		dispenseRequestComponentTranslator.setQuantityCodingTranslator(quantityCodingTranslator);
+		
 		medicationRequestTranslator = new MedicationRequestTranslatorImpl();
 		medicationRequestTranslator.setStatusTranslator(medicationRequestStatusTranslator);
 		medicationRequestTranslator.setPractitionerReferenceTranslator(providerPractitionerReferenceTranslator);
@@ -125,6 +145,8 @@ public class MedicationRequestTranslatorImplTest {
 		medicationRequestTranslator.setEncounterReferenceTranslator(encounterReferenceTranslator);
 		medicationRequestTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
 		medicationRequestTranslator.setOrderIdentifierTranslator(new OrderIdentifierTranslatorImpl());
+		medicationRequestTranslator
+		        .setMedicationRequestDispenseRequestComponentTranslator(dispenseRequestComponentTranslator);
 		
 		drugOrder = new DrugOrder();
 		drugOrder.setUuid(DRUG_ORDER_UUID);
@@ -141,7 +163,6 @@ public class MedicationRequestTranslatorImplTest {
 		
 		medicationRequest = new MedicationRequest();
 		medicationRequest.setId(DRUG_ORDER_UUID);
-		
 	}
 	
 	@Test
@@ -394,6 +415,97 @@ public class MedicationRequestTranslatorImplTest {
 	}
 	
 	@Test
+	public void toOpenMrsType_shouldTranslateMedicationToOpenMrsConcept() {
+		CodeableConcept fhirConcept = new CodeableConcept();
+		fhirConcept.setId(CONCEPT_UUID);
+		fhirConcept.setText("Test Concept");
+		
+		Concept openmrsConcept = new Concept();
+		openmrsConcept.setUuid(CONCEPT_UUID);
+		
+		when(conceptTranslator.toOpenmrsType(fhirConcept)).thenReturn(openmrsConcept);
+		when(conceptTranslator.toFhirResource(openmrsConcept)).thenReturn(fhirConcept);
+		
+		medicationRequest.setMedication(fhirConcept);
+		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDrug(), nullValue());
+		assertThat(result.getConcept(), notNullValue());
+		assertThat(result.getConcept().getUuid(), equalTo(CONCEPT_UUID));
+		assertThat(result.getDrugNonCoded(), nullValue());
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToMedicationCodeableConcept() {
+		CodeableConcept fhirConcept = new CodeableConcept();
+		fhirConcept.setId(CONCEPT_UUID);
+		fhirConcept.setText("Test Concept");
+		
+		Concept openmrsConcept = new Concept();
+		openmrsConcept.setUuid(CONCEPT_UUID);
+		
+		when(conceptTranslator.toFhirResource(openmrsConcept)).thenReturn(fhirConcept);
+		
+		drugOrder.setConcept(openmrsConcept);
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getMedication(), equalTo(fhirConcept));
+		assertThat(result.hasMedicationReference(), is(false));
+		assertThat(result.getMedicationCodeableConcept(), equalTo(fhirConcept));
+		assertThat(result.getMedicationCodeableConcept().getText(), equalTo(fhirConcept.getText()));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldTranslateMedicationToOpenMrsConceptWithDrugNonCodedText() {
+		CodeableConcept fhirConcept = new CodeableConcept();
+		fhirConcept.setId(CONCEPT_UUID);
+		fhirConcept.setText("Test Concept");
+		
+		CodeableConcept fhirConceptWithNonCoded = new CodeableConcept();
+		fhirConceptWithNonCoded.setId(CONCEPT_UUID);
+		fhirConceptWithNonCoded.setText("Non-Coded Drug Formulation");
+		
+		Concept openmrsConcept = new Concept();
+		openmrsConcept.setUuid(CONCEPT_UUID);
+		
+		when(conceptTranslator.toOpenmrsType(any())).thenReturn(openmrsConcept);
+		when(conceptTranslator.toFhirResource(any())).thenReturn(fhirConcept);
+		
+		medicationRequest.setMedication(fhirConceptWithNonCoded);
+		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDrug(), nullValue());
+		assertThat(result.getConcept(), notNullValue());
+		assertThat(result.getConcept().getUuid(), equalTo(CONCEPT_UUID));
+		assertThat(result.getDrugNonCoded(), equalTo("Non-Coded Drug Formulation"));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateConceptToMedicationCodeableConceptWithDrugNonCoded() {
+		CodeableConcept fhirConcept = new CodeableConcept();
+		fhirConcept.setId(CONCEPT_UUID);
+		fhirConcept.setText("Test Concept");
+		
+		Concept openmrsConcept = new Concept();
+		openmrsConcept.setUuid(CONCEPT_UUID);
+		
+		when(conceptTranslator.toFhirResource(openmrsConcept)).thenReturn(fhirConcept);
+		
+		drugOrder.setConcept(openmrsConcept);
+		drugOrder.setDrugNonCoded("Non-Coded Drug Formulation");
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		assertThat(result, notNullValue());
+		assertThat(result.getMedication(), equalTo(fhirConcept));
+		assertThat(result.hasMedicationReference(), is(false));
+		assertThat(result.getMedicationCodeableConcept().getId(), equalTo(fhirConcept.getId()));
+		assertThat(result.getMedicationCodeableConcept().getText(), equalTo("Non-Coded Drug Formulation"));
+	}
+	
+	@Test
 	public void toFhirResource_shouldTranslateOrderReasonToReasonCode() {
 		Concept concept = new Concept();
 		concept.setUuid(CONCEPT_UUID);
@@ -455,23 +567,13 @@ public class MedicationRequestTranslatorImplTest {
 	
 	@Test
 	public void toFhirResource_shouldAddDosageInstructions() {
-		Concept concept = new Concept();
-		concept.setUuid(CONCEPT_UUID);
-		concept.setConceptId(10023);
-		
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding(new Coding().setCode(concept.getConceptId().toString()));
-		
-		Dosage dosage = new Dosage();
-		dosage.setRoute(codeableConcept);
-		dosage.setAsNeeded(new BooleanType(true));
-		dosage.setText(DOSING_INSTRUCTIONS);
+		CodeableConcept routeFhirConcept = new CodeableConcept();
+		Concept routeConcept = new Concept();
+		when(conceptTranslator.toFhirResource(routeConcept)).thenReturn(routeFhirConcept);
 		
 		drugOrder.setAsNeeded(true);
-		drugOrder.setRoute(concept);
+		drugOrder.setRoute(routeConcept);
 		drugOrder.setDosingInstructions(DOSING_INSTRUCTIONS);
-		
-		when(dosageTranslator.toFhirResource(drugOrder)).thenReturn(dosage);
 		
 		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
 		
@@ -479,7 +581,51 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result.getDosageInstructionFirstRep(), notNullValue());
 		assertThat(result.getDosageInstructionFirstRep().getText(), equalTo(DOSING_INSTRUCTIONS));
 		assertThat(result.getDosageInstructionFirstRep().getAsNeededBooleanType().booleanValue(), is(true));
-		assertThat(result.getDosageInstructionFirstRep().getRoute(), equalTo(codeableConcept));
+		assertThat(result.getDosageInstructionFirstRep().getRoute(), equalTo(routeFhirConcept));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldAddDosageInstructions() {
+		CodeableConcept routeFhirConcept = new CodeableConcept();
+		Concept routeConcept = new Concept();
+		when(conceptTranslator.toOpenmrsType(routeFhirConcept)).thenReturn(routeConcept);
+		
+		Dosage dosage = new Dosage();
+		dosage.setRoute(routeFhirConcept);
+		dosage.setAsNeeded(new BooleanType(true));
+		dosage.setText(DOSING_INSTRUCTIONS);
+		medicationRequest.addDosageInstruction(dosage);
+		
+		DrugOrder result = medicationRequestTranslator.toOpenmrsType(new DrugOrder(), medicationRequest);
+		assertThat(result, notNullValue());
+		assertThat(result.getRoute(), equalTo(routeConcept));
+		assertThat(result.getAsNeeded(), is(true));
+		assertThat(result.getDosingInstructions(), equalTo(DOSING_INSTRUCTIONS));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateDispenseRequest() {
+		drugOrder.setQuantity(100.0);
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getDispenseRequest(), notNullValue());
+		assertThat(result.getDispenseRequest().getQuantity().getValue().doubleValue(), equalTo(100.0));
+	}
+	
+	@Test
+	public void toOpenMrsType_shouldTranslateDispenseRequest() {
+		MedicationRequest.MedicationRequestDispenseRequestComponent dispenseRequestComponent = new MedicationRequest.MedicationRequestDispenseRequestComponent();
+		Quantity quantity = new Quantity();
+		quantity.setValue(200.0);
+		dispenseRequestComponent.setQuantity(quantity);
+		medicationRequest.setDispenseRequest(dispenseRequestComponent);
+		
+		DrugOrder result = medicationRequestTranslator.toOpenmrsType(drugOrder, medicationRequest);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getQuantity(), equalTo(200.0));
 	}
 	
 	@SneakyThrows

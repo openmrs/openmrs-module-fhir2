@@ -147,20 +147,11 @@ public class GroupFhirResourceProviderTest {
 	
 	@Test
 	public void shouldDeleteRequestedGroup() {
-		when(fhirGroupService.delete(COHORT_UUID)).thenReturn(group);
-		
 		OperationOutcome result = resourceProvider.deleteGroup(new IdType().setValue(COHORT_UUID));
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistentGroup() {
-		when(fhirGroupService.delete(BAD_COHORT_UUID)).thenReturn(null);
-		
-		resourceProvider.deleteGroup(new IdType().setValue(BAD_COHORT_UUID));
 	}
 }

@@ -14,16 +14,18 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -36,10 +38,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +64,10 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	private static final int START_INDEX = 0;
 	
 	private static final int END_INDEX = 10;
+	
+	private static final int PREFERRED_PAGE_SIZE = 10;
+	
+	private static final int COUNT = 1;
 	
 	@Mock
 	private FhirTaskService taskService;
@@ -116,39 +124,6 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	}
 	
 	@Test
-	public void getTaskHistoryById_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(TASK_UUID);
-		when(taskService.get(TASK_UUID)).thenReturn(task);
-		
-		List<Resource> resources = resourceProvider.getTaskHistoryById(id);
-		assertThat(resources, Matchers.notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), Matchers.equalTo(2));
-	}
-	
-	@Test
-	public void getTaskHistoryById_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(TASK_UUID);
-		when(taskService.get(TASK_UUID)).thenReturn(task);
-		
-		List<Resource> resources = resourceProvider.getTaskHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), Matchers.is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(),
-		    Matchers.equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getTaskHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_TASK_UUID);
-		assertThat(resourceProvider.getTaskHistoryById(idType).isEmpty(), Matchers.is(true));
-		assertThat(resourceProvider.getTaskHistoryById(idType).size(), Matchers.equalTo(0));
-	}
-	
-	@Test
 	public void createTask_shouldCreateNewTask() {
 		when(taskService.create(task)).thenReturn(task);
 		
@@ -198,7 +173,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(task);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(tasks, 10, 1));
 		
 		TokenAndListParam status = new TokenAndListParam();
@@ -206,7 +181,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		statusToken.setValue("ACCEPTED");
 		status.addAnd(new TokenOrListParam().add(statusToken));
 		
-		IBundleProvider results = resourceProvider.searchTasks(null, null, status, null, null, null);
+		IBundleProvider results = resourceProvider.searchTasks(null, null, status, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -217,17 +192,95 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 	
 	@Test
 	public void deleteTask_shouldDeleteRequestedTask() {
-		when(taskService.delete(TASK_UUID)).thenReturn(task);
 		OperationOutcome result = resourceProvider.deleteTask(new IdType().setValue(TASK_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteTask_shouldThrowResourceNotFoundException() {
-		when(taskService.delete(WRONG_TASK_UUID)).thenReturn(null);
-		resourceProvider.deleteTask(new IdType().setValue(WRONG_TASK_UUID));
+	@Test
+	public void searchTasks_shouldAddRelatedPatientResourceToResultListWhenIncluded() {
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Task:patient"));
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), argThat(is(includes))))
+		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(task, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
+		
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resources, hasSize(Matchers.equalTo(2)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), Matchers.equalTo(FhirConstants.TASK));
+		assertThat(resources.get(1).fhirType(), Matchers.equalTo(FhirConstants.PATIENT));
+		assertThat(resources.get(0).getIdElement().getIdPart(), Matchers.equalTo(TASK_UUID));
+	}
+	
+	@Test
+	public void searchTasks_shouldAddRelatedPractionerResourceToResultListWhenIncluded() {
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Task:owner"));
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), argThat(is(includes))))
+		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(task, new Practitioner()), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
+		
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resources, hasSize(Matchers.equalTo(2)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), Matchers.equalTo(FhirConstants.TASK));
+		assertThat(resources.get(1).fhirType(), Matchers.equalTo(FhirConstants.PRACTITIONER));
+		assertThat(resources.get(0).getIdElement().getIdPart(), Matchers.equalTo(TASK_UUID));
+	}
+	
+	@Test
+	public void searchTasks_shouldAddRelatedEncounterResourceToResultListWhenIncluded() {
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Task:encounter"));
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), argThat(is(includes))))
+		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(task, new Encounter()), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
+		
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resources, hasSize(Matchers.equalTo(2)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), Matchers.equalTo(FhirConstants.TASK));
+		assertThat(resources.get(1).fhirType(), Matchers.equalTo(FhirConstants.ENCOUNTER));
+		assertThat(resources.get(0).getIdElement().getIdPart(), Matchers.equalTo(TASK_UUID));
+	}
+	
+	@Test
+	public void searchTasks_shouldAddRelatedServiceRequestResourceToResultListWhenIncluded() {
+		HashSet<Include> includes = new HashSet<>();
+		includes.add(new Include("Task:based-on"));
+		
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), argThat(is(includes)))).thenReturn(
+		    new MockIBundleProvider<>(Arrays.asList(task, new ServiceRequest()), PREFERRED_PAGE_SIZE, COUNT));
+		
+		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
+		
+		List<IBaseResource> resources = getResources(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resources, hasSize(Matchers.equalTo(2)));
+		assertThat(resources.get(0), notNullValue());
+		assertThat(resources.get(0).fhirType(), Matchers.equalTo(FhirConstants.TASK));
+		assertThat(resources.get(1).fhirType(), Matchers.equalTo(FhirConstants.SERVICE_REQUEST));
+		assertThat(resources.get(0).getIdElement().getIdPart(), Matchers.equalTo(TASK_UUID));
+	}
+	
+	private List<IBaseResource> getResources(IBundleProvider results) {
+		return results.getResources(START_INDEX, END_INDEX);
 	}
 }

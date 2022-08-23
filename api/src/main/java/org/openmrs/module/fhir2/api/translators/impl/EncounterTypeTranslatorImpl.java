@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
+
 import javax.annotation.Nonnull;
 
 import java.util.Collections;
@@ -41,7 +43,7 @@ public class EncounterTypeTranslatorImpl implements EncounterTypeTranslator<Enco
 		
 		CodeableConcept code = new CodeableConcept();
 		code.addCoding().setSystem(FhirConstants.ENCOUNTER_TYPE_SYSTEM_URI).setCode(encounterType.getUuid())
-		        .setDisplay(encounterType.getName());
+		        .setDisplay(getMetadataTranslation(encounterType));
 		return Collections.singletonList(code);
 	}
 	

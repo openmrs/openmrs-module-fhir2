@@ -97,12 +97,8 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deleteDiagnosticReport(@IdParam @Nonnull IdType id) {
-		org.hl7.fhir.r4.model.DiagnosticReport diagnosticReport = diagnosticReportService.delete(id.getIdPart());
-		if (diagnosticReport == null) {
-			throw new ResourceNotFoundException("Could not find medication to delete with id " + id.getIdPart());
-		}
-		
-		return FhirProviderUtils.buildDelete(DiagnosticReport30_40.convertDiagnosticReport(diagnosticReport));
+		diagnosticReportService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR3();
 	}
 	
 	@Search

@@ -34,7 +34,8 @@ public abstract class FhirTaskParam extends BaseOpenmrsMetadata {
 	@JoinColumn(name = "task_id")
 	protected FhirTask task;
 	
-	@Column(name = "type_id", nullable = false)
+	@ManyToOne
+	@JoinColumn(name = "type_id", referencedColumnName = "concept_id", nullable = false)
 	protected Concept type;
 	
 	@Column(name = "value_datetime")

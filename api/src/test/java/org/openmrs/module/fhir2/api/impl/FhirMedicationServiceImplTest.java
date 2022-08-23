@@ -370,11 +370,7 @@ public class FhirMedicationServiceImplTest {
 	public void deleteMedication_shouldDeleteMedication() {
 		medication.setStatus(Medication.MedicationStatus.INACTIVE);
 		when(medicationDao.delete(MEDICATION_UUID)).thenReturn(drug);
-		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		Medication medication = fhirMedicationService.delete(MEDICATION_UUID);
-		assertThat(medication, notNullValue());
-		assertThat(medication.getId(), equalTo(MEDICATION_UUID));
-		assertThat(medication.getStatus(), equalTo(Medication.MedicationStatus.INACTIVE));
+		fhirMedicationService.delete(MEDICATION_UUID);
 	}
 }

@@ -21,17 +21,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import javax.servlet.ServletException;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -43,15 +41,9 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Condition;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +53,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirConditionService;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -150,79 +141,13 @@ public class ConditionFhirR3ResourceProviderWebTest extends BaseFhirR3ResourcePr
 	}
 	
 	@Test
-	public void shouldVerifyConditionHistoryByIdUri() throws Exception {
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		condition.setId(CONDITION_UUID);
-		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
-		
-		MockHttpServletResponse response = getConditionHistoryRequest();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), equalTo(FhirMediaTypes.JSON.toString()));
-	}
-	
-	@Test
-	public void shouldGetConditionHistoryById() throws IOException, ServletException {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		provenance.setRecorded(new Date());
-		provenance.setActivity(new CodeableConcept().addCoding(
-		    new Coding().setCode("CREATE").setSystem(FhirConstants.FHIR_TERMINOLOGY_DATA_OPERATION).setDisplay("create")));
-		provenance.addAgent(new Provenance.ProvenanceAgentComponent()
-		        .setType(
-		            new CodeableConcept().addCoding(new Coding().setCode(FhirConstants.AUT).setDisplay(FhirConstants.AUTHOR)
-		                    .setSystem(FhirConstants.FHIR_TERMINOLOGY_PROVENANCE_PARTICIPANT_TYPE)))
-		        .addRole(new CodeableConcept().addCoding(
-		            new Coding().setCode("").setDisplay("").setSystem(FhirConstants.FHIR_TERMINOLOGY_PARTICIPATION_TYPE))));
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		condition.setId(CONDITION_UUID);
-		condition.addContained(provenance);
-		
-		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
-		
-		MockHttpServletResponse response = getConditionHistoryRequest();
-		
-		Bundle results = readBundleResponse(response);
-		assertThat(results, notNullValue());
-		assertThat(results.hasEntry(), is(true));
-		assertThat(results.getEntry().get(0).getResource(), notNullValue());
-		assertThat(results.getEntry().get(0).getResource().getResourceType().name(),
-		    equalTo(Provenance.class.getSimpleName()));
-		
-	}
-	
-	@Test
-	public void getConditionHistoryById_shouldReturnBundleWithEmptyEntriesIfConditionContainedIsEmpty() throws Exception {
-		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
-		condition.setId(CONDITION_UUID);
-		condition.setContained(new ArrayList<>());
-		when(conditionService.get(CONDITION_UUID)).thenReturn(condition);
-		
-		MockHttpServletResponse response = getConditionHistoryRequest();
-		Bundle results = readBundleResponse(response);
-		assertThat(results.hasEntry(), is(false));
-	}
-	
-	@Test
-	public void getConditionHistoryById_shouldReturn404IfConditionIdIsWrong() throws Exception {
-		MockHttpServletResponse response = get("/Condition/" + WRONG_CONDITION_UUID + "/_history")
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isNotFound());
-	}
-	
-	private MockHttpServletResponse getConditionHistoryRequest() throws IOException, ServletException {
-		return get("/Condition/" + CONDITION_UUID + "/_history").accept(FhirMediaTypes.JSON).go();
-	}
-	
-	@Test
 	public void shouldCreateNewConditionGivenValidConditionResource() throws Exception {
 		org.hl7.fhir.r4.model.Condition condition = new org.hl7.fhir.r4.model.Condition();
 		condition.setId(CONDITION_UUID);
 		String conditionJson;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_CONDITION_PATH)) {
 			Objects.requireNonNull(is);
-			conditionJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+			conditionJson = inputStreamToString(is, StandardCharsets.UTF_8);
 		}
 		
 		when(conditionService.create(any(org.hl7.fhir.r4.model.Condition.class))).thenReturn(condition);

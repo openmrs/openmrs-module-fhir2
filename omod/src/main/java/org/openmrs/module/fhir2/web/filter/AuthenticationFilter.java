@@ -58,10 +58,8 @@ public class AuthenticationFilter implements Filter {
 							return;
 						}
 					} else {
-						// This sends 401 error if not authenticated
-						HttpServletResponse httpResponse = (HttpServletResponse) response;
-						httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not authenticated");
-						return;
+						// This filter never stops execution since the authentication scheme might be different. 
+						// If the user failed to authenticate with basic auth, that will be caught later.
 					}
 				}
 			}

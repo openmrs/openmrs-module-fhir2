@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -61,10 +62,14 @@ public class ImmunizationObsGroupHelper {
 		return new UnprocessableEntityException(errMsg, createExceptionErrorOperationOutcome(errMsg));
 	}
 	
+	public static NotImplementedOperationException createImmunizationRequestSetupError(@Nonnull String errMsg) {
+		return new NotImplementedOperationException(errMsg, createExceptionErrorOperationOutcome(errMsg));
+	}
+	
 	public EncounterType getImmunizationsEncounterType() {
 		String uuid = globalPropertyService.getGlobalProperty(IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY);
 		return Optional.ofNullable(encounterService.getEncounterTypeByUuid(uuid)).orElseThrow(
-		    () -> createImmunizationRequestValidationError(
+		    () -> createImmunizationRequestSetupError(
 		        "The Immunization resource requires an immunizations encounter type to be defined in the global property '"
 		                + IMMUNIZATIONS_ENCOUNTER_TYPE_PROPERTY
 		                + "', but no immunizations encounter type is defined for this instance."));
@@ -73,15 +78,15 @@ public class ImmunizationObsGroupHelper {
 	public EncounterRole getAdministeringEncounterRole() {
 		String uuid = globalPropertyService.getGlobalProperty(ADMINISTERING_ENCOUNTER_ROLE_PROPERTY);
 		return Optional.ofNullable(encounterService.getEncounterRoleByUuid(uuid)).orElseThrow(
-		    () -> createImmunizationRequestValidationError(
+		    () -> createImmunizationRequestSetupError(
 		        "The Immunization resource requires an administering encounter role to be defined in the global property '"
 		                + ADMINISTERING_ENCOUNTER_ROLE_PROPERTY
 		                + "', but no administering encounter role is defined for this instance."));
 	}
 	
 	public Concept concept(String refTerm) {
-		return getConceptFromMapping(refTerm).orElseThrow(() -> createImmunizationRequestValidationError(
-		    "The Immunization resource requires a concept mapped to '" + refTerm
+		return getConceptFromMapping(refTerm).orElseThrow(
+		    () -> createImmunizationRequestSetupError("The Immunization resource requires a concept mapped to '" + refTerm
 		            + "', however either multiple concepts are mapped to that term or not concepts are mapped to that term."));
 	}
 	
@@ -128,7 +133,7 @@ public class ImmunizationObsGroupHelper {
 	
 	public void validateImmunizationObsGroup(Obs obs) {
 		if (!concept(IMMUNIZATION_GROUPING_CONCEPT).equals(obs.getConcept())) {
-			throw createImmunizationRequestValidationError(
+			throw createImmunizationRequestSetupError(
 			    "The Immunization resource requires the underlying OpenMRS immunization obs group to be defined by a concept mapped as same as "
 			            + IMMUNIZATION_GROUPING_CONCEPT + ". That is not the case for obs '" + obs.getUuid()
 			            + "' that is defined by the concept named '" + obs.getConcept().getName().toString() + "'.");

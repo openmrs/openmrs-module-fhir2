@@ -14,8 +14,11 @@ import javax.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.Concept;
 
-public interface DurationUnitTranslator extends ToFhirTranslator<Concept, Timing.UnitsOfTime> {
+public interface DurationUnitTranslator extends ToFhirTranslator<Concept, Timing.UnitsOfTime>, ToOpenmrsTranslator<Concept, Timing.UnitsOfTime> {
 	
 	@Override
 	Timing.UnitsOfTime toFhirResource(@Nonnull Concept concept);
+	
+	@Override
+	Concept toOpenmrsType(@Nonnull Timing.UnitsOfTime resource);
 }

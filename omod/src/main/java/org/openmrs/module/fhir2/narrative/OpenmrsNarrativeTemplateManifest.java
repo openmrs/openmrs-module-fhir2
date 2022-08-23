@@ -22,12 +22,14 @@
 package org.openmrs.module.fhir2.narrative;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,9 +48,7 @@ import ca.uhn.fhir.narrative2.INarrativeTemplate;
 import ca.uhn.fhir.narrative2.INarrativeTemplateManifest;
 import ca.uhn.fhir.narrative2.TemplateTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.google.common.base.Charsets;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -255,10 +255,10 @@ public class OpenmrsNarrativeTemplateManifest implements INarrativeTemplateManif
 						if (resource2 == null) {
 							throw new IOException("Can not find '" + cpName + "' on classpath");
 						}
-						return IOUtils.toString(resource2, Charsets.UTF_8);
+						return inputStreamToString(resource2, StandardCharsets.UTF_8);
 					}
 				}
-				return IOUtils.toString(resource, Charsets.UTF_8);
+				return inputStreamToString(resource, StandardCharsets.UTF_8);
 			}
 		} else if (name.startsWith("file:")) {
 			File file = new File(name.substring("file:".length()));
@@ -266,7 +266,7 @@ public class OpenmrsNarrativeTemplateManifest implements INarrativeTemplateManif
 				throw new IOException("File not found: " + file.getAbsolutePath());
 			}
 			try (FileInputStream inputStream = new FileInputStream(file)) {
-				return IOUtils.toString(inputStream, Charsets.UTF_8);
+				return inputStreamToString(inputStream, StandardCharsets.UTF_8);
 			}
 		} else if (name.startsWith("openmrs:")) {
 			File file = new File(OpenmrsUtil.getApplicationDataDirectory(), name.substring("openmrs:".length()));
@@ -274,7 +274,7 @@ public class OpenmrsNarrativeTemplateManifest implements INarrativeTemplateManif
 				throw new IOException("File not found: " + file.getAbsolutePath());
 			}
 			try (FileInputStream inputStream = new FileInputStream(file)) {
-				return IOUtils.toString(inputStream, Charsets.UTF_8);
+				return inputStreamToString(inputStream, StandardCharsets.UTF_8);
 			}
 		} else {
 			throw new IOException("Invalid resource name: '" + name + "' (must start with classpath: or file: or openmrs:)");

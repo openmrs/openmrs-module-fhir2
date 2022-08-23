@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 
 import javax.annotation.Nonnull;
 
@@ -41,7 +42,6 @@ import org.openmrs.module.fhir2.api.translators.PatientIdentifierTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.PersonNameTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -73,9 +73,6 @@ public class PatientTranslatorImpl implements PatientTranslator {
 	
 	@Autowired
 	private TelecomTranslator<BaseOpenmrsData> telecomTranslator;
-	
-	@Autowired
-	private ProvenanceTranslator<org.openmrs.Patient> provenanceTranslator;
 	
 	@Override
 	public Patient toFhirResource(@Nonnull org.openmrs.Patient openmrsPatient) {
@@ -114,9 +111,7 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		}
 		
 		patient.setTelecom(getPatientContactDetails(openmrsPatient));
-		patient.getMeta().setLastUpdated(openmrsPatient.getDateChanged());
-		patient.addContained(provenanceTranslator.getCreateProvenance(openmrsPatient));
-		patient.addContained(provenanceTranslator.getUpdateProvenance(openmrsPatient));
+		patient.getMeta().setLastUpdated(getLastUpdated(openmrsPatient));
 		
 		return patient;
 	}

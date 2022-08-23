@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
 
 import javax.annotation.Nonnull;
 
@@ -34,7 +35,6 @@ import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,9 +51,6 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
-	
-	@Autowired
-	private ProvenanceTranslator<Obs> provenanceTranslator;
 	
 	@Autowired
 	private ConceptService conceptService;
@@ -83,9 +80,8 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 		fhirCondition.setOnset(new DateTimeType().setValue(obsCondition.getObsDatetime()));
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(obsCondition.getCreator()));
 		fhirCondition.setRecordedDate(obsCondition.getDateCreated());
-		fhirCondition.getMeta().setLastUpdated(obsCondition.getDateChanged());
-		fhirCondition.addContained(provenanceTranslator.getCreateProvenance(obsCondition));
-		fhirCondition.addContained(provenanceTranslator.getUpdateProvenance(obsCondition));
+		
+		fhirCondition.getMeta().setLastUpdated(getLastUpdated(obsCondition));
 		
 		return fhirCondition;
 	}

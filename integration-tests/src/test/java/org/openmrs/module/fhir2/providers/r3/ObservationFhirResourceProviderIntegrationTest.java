@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.exparity.hamcrest.date.DateMatchers.sameOrAfter;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -28,11 +29,11 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -41,12 +42,12 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -120,6 +121,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		// verify expected value
 		assertThat(observation.getValueQuantity(), notNullValue());
 		assertThat(observation.getValueQuantity().getValue(), equalTo(OBS_CONCEPT_VALUE));
+		assertThat(observation.getValueQuantity().getSystem(), equalTo(FhirConstants.UCUM_SYSTEM_URI));
 		
 		// verify reference ranges
 		assertThat(observation.getReferenceRange(), notNullValue());
@@ -180,6 +182,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		// verify expected value
 		assertThat(observation.getValueQuantity(), notNullValue());
 		assertThat(observation.getValueQuantity().getValue(), equalTo(OBS_CONCEPT_VALUE));
+		assertThat(observation.getValueQuantity().getSystem(), equalTo(FhirConstants.UCUM_SYSTEM_URI));
 		
 		// verify reference ranges
 		assertThat(observation.getReferenceRange(), notNullValue());
@@ -223,7 +226,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		String jsonObs;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_OBS_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonObs = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonObs = inputStreamToString(is, UTF_8);
 		}
 		
 		// create obs
@@ -249,6 +252,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getValueQuantity(), notNullValue());
 		assertThat(observation.getValueQuantity().getValue(), equalTo(BigDecimal.valueOf(156.0)));
 		assertThat(observation.getValueQuantity().getUnit(), equalTo("cm"));
+		assertThat(observation.getValueQuantity().getSystem(), equalTo(FhirConstants.UCUM_SYSTEM_URI));
 		assertThat(observation, validResource());
 		
 		// try to fetch the new observation
@@ -267,7 +271,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		String xmlObs;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_OBS_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			xmlObs = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlObs = inputStreamToString(is, UTF_8);
 		}
 		
 		// create obs
@@ -293,6 +297,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(observation.getValueQuantity(), notNullValue());
 		assertThat(observation.getValueQuantity().getValue(), equalTo(BigDecimal.valueOf(156.0)));
 		assertThat(observation.getValueQuantity().getUnit(), equalTo("cm"));
+		assertThat(observation.getValueQuantity().getSystem(), equalTo(FhirConstants.UCUM_SYSTEM_URI));
 		assertThat(observation, validResource());
 		
 		// try to fetch the new observation

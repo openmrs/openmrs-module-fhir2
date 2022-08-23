@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import static co.unruly.matchers.OptionalMatchers.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
@@ -21,12 +22,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
+import co.unruly.matchers.OptionalMatchers;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.dao.FhirConceptSourceDao;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 
@@ -86,22 +89,38 @@ public class FhirConceptSourceServiceImplTest {
 	}
 	
 	@Test
-	public void getFhirConceptSourceByConceptSourceName_shouldReturnConceptSourceForName() {
-		FhirConceptSource source = new FhirConceptSource();
-		when(dao.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.of(source));
+	public void getFhirConceptSourceByConceptSource_shouldReturnSourceWherePresent() {
+		FhirConceptSource fhirSource = new FhirConceptSource();
+		ConceptSource source = new ConceptSource();
+		when(dao.getFhirConceptSourceByConceptSource(source)).thenReturn(Optional.of(fhirSource));
 		
-		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC");
-		
+		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSource(source);
 		assertThat(result.isPresent(), is(true));
-		assertThat(result.get(), equalTo(source));
+		assertThat(result.get(), equalTo(fhirSource));
 	}
 	
 	@Test
-	public void getFhirConceptSourceByConceptSourceName_shouldReturnEmptyWhenNoConceptSourceFound() {
-		when(dao.getFhirConceptSourceByConceptSourceName("LOINC")).thenReturn(Optional.empty());
-		
-		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSourceByConceptSourceName("LOINC");
-		
+	public void getFhirConceptSourceByConceptSource_shouldReturnEmptyOptionalWhereNoFhirConceptSourceExists() {
+		ConceptSource conceptSource = new ConceptSource();
+		Optional<FhirConceptSource> result = fhirConceptSourceService.getFhirConceptSource(conceptSource);
 		assertThat(result.isPresent(), is(false));
+	}
+	
+	@Test
+	public void getConceptSourceByHl7Code_shouldReturnSourceForHl7Code() {
+		ConceptSource source = new ConceptSource();
+		when(dao.getConceptSourceByHl7Code("SCT")).thenReturn(Optional.of(source));
+		
+		Optional<ConceptSource> result = fhirConceptSourceService.getConceptSourceByHl7Code("SCT");
+		
+		assertThat(result, not(OptionalMatchers.empty()));
+		assertThat(result, contains(equalTo(source)));
+	}
+	
+	@Test
+	public void getFhirConceptSourceByHl7Code_shouldReturnNullForMissingSourceName() {
+		Optional<ConceptSource> result = fhirConceptSourceService.getConceptSourceByHl7Code("SNOMED CT");
+		
+		assertThat(result, OptionalMatchers.empty());
 	}
 }

@@ -44,11 +44,11 @@ public class ForwardingFilter implements Filter {
 			FhirVersionUtils.FhirVersion fhirVersion = FhirVersionUtils.getFhirVersion(request);
 			switch (fhirVersion) {
 				case R3:
-					prefix.append(fhirVersion.toString());
+					prefix.append(fhirVersion);
 					replacement = FhirConstants.SERVLET_PATH_R3;
 					break;
 				case R4:
-					prefix.append(fhirVersion.toString());
+					prefix.append(fhirVersion);
 					replacement = FhirConstants.SERVLET_PATH_R4;
 					break;
 				default:

@@ -10,29 +10,22 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
-import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,8 +45,6 @@ import org.openmrs.module.fhir2.api.translators.AllergyIntoleranceSeverityTransl
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AllergyIntoleranceTranslatorImplTest {
@@ -83,9 +74,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 	private PatientReferenceTranslator patientReferenceTranslator;
 	
 	@Mock
-	private ProvenanceTranslator<Allergy> provenanceTranslator;
-	
-	@Mock
 	private ConceptTranslator conceptTranslator;
 	
 	@Mock
@@ -109,7 +97,6 @@ public class AllergyIntoleranceTranslatorImplTest {
 		allergyIntoleranceTranslator = new AllergyIntoleranceTranslatorImpl();
 		allergyIntoleranceTranslator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 		allergyIntoleranceTranslator.setPatientReferenceTranslator(patientReferenceTranslator);
-		allergyIntoleranceTranslator.setProvenanceTranslator(provenanceTranslator);
 		allergyIntoleranceTranslator.setConceptTranslator(conceptTranslator);
 		allergyIntoleranceTranslator.setSeverityTranslator(severityTranslator);
 		allergyIntoleranceTranslator.setCriticalityTranslator(criticalityTranslator);
@@ -538,32 +525,5 @@ public class AllergyIntoleranceTranslatorImplTest {
 		
 		assertThat(omrsAllergy.getReactions().size(), equalTo(0));
 		assertThat(omrsAllergy.getSeverity().getUuid(), equalTo(GLOBAL_PROPERTY_MILD_VALUE));
-	}
-	
-	@Test
-	public void shouldAddProvenances() {
-		org.openmrs.Allergy allergy = new org.openmrs.Allergy();
-		allergy.setUuid(ALLERGY_UUID);
-		Concept concept = new Concept();
-		concept.setUuid(CONCEPT_UUID);
-		Allergen allergen = new Allergen();
-		allergen.setCodedAllergen(concept);
-		allergen.setNonCodedAllergen("Test Allergen");
-		allergen.setAllergenType(AllergenType.FOOD);
-		
-		allergy.setAllergen(allergen);
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		provenance.setRecorded(new Date());
-		when(provenanceTranslator.getCreateProvenance(allergy)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(allergy)).thenReturn(provenance);
-		
-		AllergyIntolerance result = allergyIntoleranceTranslator.toFhirResource(allergy);
-		List<Resource> resources = result.getContained();
-		assertThat(resources, notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), CoreMatchers.is(true));
-		assertThat(resources.stream().findAny().get().isResource(), CoreMatchers.is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(), equalTo(Provenance.class.getSimpleName()));
 	}
 }

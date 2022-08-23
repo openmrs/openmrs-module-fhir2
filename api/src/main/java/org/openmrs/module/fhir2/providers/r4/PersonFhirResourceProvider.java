@@ -14,12 +14,10 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -43,7 +41,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirPersonService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -93,21 +90,8 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	@Delete
 	@SuppressWarnings("unused")
 	public OperationOutcome deletePerson(@IdParam @Nonnull IdType id) {
-		Person person = fhirPersonService.delete(id.getIdPart());
-		if (person == null) {
-			throw new ResourceNotFoundException("Could not find person to delete with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(person);
-	}
-	
-	@History
-	@SuppressWarnings("unused")
-	public List<Resource> getPersonHistoryById(@IdParam @Nonnull IdType id) {
-		Person person = fhirPersonService.get(id.getIdPart());
-		if (person == null) {
-			throw new ResourceNotFoundException("Could not find person with Id " + id.getIdPart());
-		}
-		return person.getContained();
+		fhirPersonService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search

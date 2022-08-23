@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
+import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
+
 import javax.annotation.Nonnull;
 
 import java.util.Optional;
@@ -18,6 +20,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
@@ -53,9 +56,17 @@ public abstract class BaseReferenceHandlingTranslator {
 		        .setType(FhirConstants.ENCOUNTER);
 	}
 	
+	protected Reference createValueSetReference(@Nonnull Concept concept) {
+		if (concept == null || !concept.getSet()) {
+			return null;
+		}
+		return new Reference().setReference(FhirConstants.VALUESET + "/" + concept.getUuid())
+		        .setType(FhirConstants.VALUESET);
+	}
+	
 	protected Reference createMedicationReference(@Nonnull Drug drug) {
 		return new Reference().setReference(FhirConstants.MEDICATION + "/" + drug.getUuid())
-		        .setType(FhirConstants.MEDICATION);
+		        .setType(FhirConstants.MEDICATION).setDisplay(drug.getDisplayName());
 	}
 	
 	protected Reference createObservationReference(@Nonnull Obs obs) {
@@ -69,7 +80,7 @@ public abstract class BaseReferenceHandlingTranslator {
 	
 	protected Reference createLocationReference(@Nonnull Location location) {
 		return new Reference().setReference(FhirConstants.LOCATION + "/" + location.getUuid())
-		        .setType(FhirConstants.LOCATION).setDisplay(location.getName());
+		        .setType(FhirConstants.LOCATION).setDisplay(getMetadataTranslation(location));
 	}
 	
 	protected Reference createPatientReference(@Nonnull Patient patient) {
@@ -87,7 +98,7 @@ public abstract class BaseReferenceHandlingTranslator {
 			
 			PatientIdentifierType identifierType = identifier.getIdentifierType();
 			if (identifierType != null && identifierType.getName() != null) {
-				sb.append(identifierType.getName()).append(": ");
+				sb.append(getMetadataTranslation(identifierType)).append(": ");
 			}
 			
 			sb.append(identifier.getIdentifier()).append(")");
@@ -142,12 +153,19 @@ public abstract class BaseReferenceHandlingTranslator {
 			return new Reference().setReference(FhirConstants.SERVICE_REQUEST + "/" + order.getUuid())
 			        .setType(FhirConstants.SERVICE_REQUEST);
 		} else if (order instanceof DrugOrder) {
-			return new Reference().setReference(FhirConstants.MEDICATION_REQUEST + "/" + order.getUuid())
-			        .setType(FhirConstants.MEDICATION_REQUEST);
+			return createDrugOrderReference((DrugOrder) order);
 		} else {
 			log.warn("Could not determine order type for order {}", order);
 			return null;
 		}
+	}
+	
+	protected Reference createDrugOrderReference(@Nonnull DrugOrder drugOrder) {
+		if (drugOrder == null) {
+			return null;
+		}
+		return new Reference().setReference(FhirConstants.MEDICATION_REQUEST + "/" + drugOrder.getUuid())
+		        .setType(FhirConstants.MEDICATION_REQUEST);
 	}
 	
 	protected Optional<String> getReferenceType(Reference reference) {

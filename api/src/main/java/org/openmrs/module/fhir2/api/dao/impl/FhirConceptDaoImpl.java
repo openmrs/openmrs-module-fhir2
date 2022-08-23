@@ -9,15 +9,31 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hibernate.criterion.Order.asc;
+import static org.hibernate.criterion.Projections.property;
+import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.or;
+import static org.openmrs.module.fhir2.FhirConstants.TITLE_SEARCH_HANDLER;
+
 import javax.annotation.Nonnull;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hibernate.Criteria;
+import org.hibernate.transform.DistinctRootEntityResultTransformer;
 import org.openmrs.Concept;
+import org.openmrs.ConceptMap;
+import org.openmrs.ConceptMapType;
+import org.openmrs.ConceptSource;
 import org.openmrs.api.ConceptService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +50,72 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 	}
 	
 	@Override
-	public Optional<Concept> getConceptBySourceNameAndCode(String sourceName, String code) {
-		return Optional.ofNullable(conceptService.getConceptByMapping(code, sourceName, false));
+	public Optional<Concept> getConceptWithSameAsMappingInSource(@Nonnull ConceptSource conceptSource,
+	        @Nonnull String mappingCode) {
+		if (conceptSource == null || mappingCode == null) {
+			return Optional.empty();
+		}
+		
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(ConceptMap.class);
+		criteria.setProjection(property("concept"));
+		criteria.createAlias("conceptReferenceTerm", "term");
+		criteria.createAlias("conceptMapType", "mapType");
+		criteria.createAlias("concept", "concept");
+		
+		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
+			criteria.add(eq("term.code", mappingCode).ignoreCase());
+		} else {
+			criteria.add(eq("term.code", mappingCode));
+		}
+		
+		criteria.add(eq("term.conceptSource", conceptSource));
+		criteria.add(or(eq("mapType.uuid", ConceptMapType.SAME_AS_MAP_TYPE_UUID), eq("mapType.name", "SAME-AS")));
+		criteria.addOrder(asc("concept.retired"));
+		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
+		
+		return Optional.ofNullable((Concept) criteria.uniqueResult());
+	}
+	
+	@Override
+	public List<Concept> getConceptsWithAnyMappingInSource(@Nonnull ConceptSource conceptSource,
+	        @Nonnull String mappingCode) {
+		if (conceptSource == null || mappingCode == null) {
+			return Collections.<Concept> emptyList();
+		}
+		
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(ConceptMap.class);
+		criteria.setProjection(property("concept"));
+		criteria.createAlias("conceptReferenceTerm", "term");
+		criteria.createAlias("conceptMapType", "mapType");
+		criteria.createAlias("concept", "concept");
+		
+		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
+			criteria.add(eq("term.code", mappingCode).ignoreCase());
+		} else {
+			criteria.add(eq("term.code", mappingCode));
+		}
+		
+		criteria.add(eq("term.conceptSource", conceptSource));
+		criteria.addOrder(asc("concept.retired"));
+		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
+		
+		return criteria.list();
+	}
+	
+	@Override
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case TITLE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleTitle(criteria, (StringAndListParam) param.getParam()));
+					break;
+			}
+		});
+	}
+	
+	private void handleTitle(Criteria criteria, StringAndListParam titlePattern) {
+		criteria.add(eq("set", true));
+		criteria.createAlias("names", "csn");
+		handleAndListParam(titlePattern, (title) -> propertyLike("csn.name", title)).ifPresent(criteria::add);
 	}
 }

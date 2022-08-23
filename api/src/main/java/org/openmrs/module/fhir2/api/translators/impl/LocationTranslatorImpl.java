@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.api.translators.impl.FhirTranslatorUtils.getLastUpdated;
+import static org.openmrs.module.fhir2.api.util.FhirUtils.getMetadataTranslation;
 
 import javax.annotation.Nonnull;
 
@@ -34,7 +36,6 @@ import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -61,20 +62,19 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	@Autowired
 	private FhirLocationDao fhirLocationDao;
 	
-	@Autowired
-	private ProvenanceTranslator<org.openmrs.Location> provenanceTranslator;
-	
 	/**
 	 * @see org.openmrs.module.fhir2.api.translators.LocationTranslator#toFhirResource(org.openmrs.Location)
 	 */
 	@Override
 	public Location toFhirResource(@Nonnull org.openmrs.Location openmrsLocation) {
-		notNull(openmrsLocation, "The Openmrs Location object should not be null");
+		if (openmrsLocation == null) {
+			return null;
+		}
 		
 		Location fhirLocation = new Location();
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent();
 		fhirLocation.setId(openmrsLocation.getUuid());
-		fhirLocation.setName(openmrsLocation.getName());
+		fhirLocation.setName(getMetadataTranslation(openmrsLocation));
 		fhirLocation.setDescription(openmrsLocation.getDescription());
 		fhirLocation.setAddress(locationAddressTranslator.toFhirResource(openmrsLocation));
 		
@@ -114,9 +114,7 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 			fhirLocation.setPartOf(createLocationReference(openmrsLocation.getParentLocation()));
 		}
 		
-		fhirLocation.getMeta().setLastUpdated(openmrsLocation.getDateChanged());
-		fhirLocation.addContained(provenanceTranslator.getCreateProvenance(openmrsLocation));
-		fhirLocation.addContained(provenanceTranslator.getUpdateProvenance(openmrsLocation));
+		fhirLocation.getMeta().setLastUpdated(getLastUpdated(openmrsLocation));
 		
 		return fhirLocation;
 	}
@@ -133,7 +131,10 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 	 */
 	@Override
 	public org.openmrs.Location toOpenmrsType(@Nonnull Location fhirLocation) {
-		notNull(fhirLocation, "The Location object should not be null");
+		if (fhirLocation == null) {
+			return null;
+		}
+		
 		return toOpenmrsType(new org.openmrs.Location(), fhirLocation);
 	}
 	

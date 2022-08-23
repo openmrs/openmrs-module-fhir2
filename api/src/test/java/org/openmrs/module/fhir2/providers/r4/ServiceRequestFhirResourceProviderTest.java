@@ -294,7 +294,6 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void updateServiceRequest_shouldUpdateServiceRequest() {
-		
 		when(serviceRequestService.update(SERVICE_REQUEST_UUID, serviceRequest)).thenReturn(serviceRequest);
 		
 		MethodOutcome result = resourceProvider.updateServiceRequest(new IdType().setValue(SERVICE_REQUEST_UUID),
@@ -333,21 +332,14 @@ public class ServiceRequestFhirResourceProviderTest {
 	
 	@Test
 	public void deleteServiceRequest_shouldDeleteServiceRequest() {
-		when(serviceRequestService.delete(SERVICE_REQUEST_UUID)).thenReturn(serviceRequest);
-		
 		OperationOutcome result = resourceProvider.deleteServiceRequest(new IdType().setValue(SERVICE_REQUEST_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getDisplay(),
 		    equalTo("This resource has been deleted"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteServiceRequest_shouldThrowResourceNotFoundException() {
-		when(serviceRequestService.delete(WRONG_SERVICE_REQUEST_UUID)).thenReturn(null);
-		resourceProvider.deleteServiceRequest(new IdType().setValue(WRONG_SERVICE_REQUEST_UUID));
 	}
 	
 	@Test
@@ -360,6 +352,7 @@ public class ServiceRequestFhirResourceProviderTest {
 		assertThat(result.getResource(), equalTo(serviceRequest));
 	}
 	
+	@Test
 	public void searchServiceRequest_shouldAddRelatedResourcesToResultListWhenIncluded() {
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("ServiceRequest:patient"));

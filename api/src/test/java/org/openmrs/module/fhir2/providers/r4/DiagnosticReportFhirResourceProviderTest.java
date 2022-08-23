@@ -244,18 +244,10 @@ public class DiagnosticReportFhirResourceProviderTest {
 	
 	@Test
 	public void deleteDiagnosticReport_shouldDeleteRequestedDiagnosticReport() {
-		when(service.delete(UUID)).thenReturn(diagnosticReport);
-		
 		OperationOutcome result = resourceProvider.deleteDiagnosticReport(new IdType().setValue(UUID));
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteDiagnosticReport_shouldThrowResourceNotFoundExceptionWhenIdRefersToNonExistantDiagnosticReport() {
-		when(service.delete(WRONG_UUID)).thenReturn(null);
-		resourceProvider.deleteDiagnosticReport(new IdType().setValue(WRONG_UUID));
 	}
 }

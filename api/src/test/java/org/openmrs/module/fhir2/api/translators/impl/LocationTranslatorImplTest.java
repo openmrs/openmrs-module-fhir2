@@ -10,12 +10,10 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,7 +27,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.exparity.hamcrest.date.DateMatchers;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,9 +47,7 @@ import org.openmrs.module.fhir2.api.dao.FhirLocationDao;
 import org.openmrs.module.fhir2.api.translators.LocationAddressTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTagTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationTypeTranslator;
-import org.openmrs.module.fhir2.api.translators.ProvenanceTranslator;
 import org.openmrs.module.fhir2.api.translators.TelecomTranslator;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocationTranslatorImplTest {
@@ -105,9 +104,6 @@ public class LocationTranslatorImplTest {
 	@Mock
 	private FhirGlobalPropertyService propertyService;
 	
-	@Mock
-	private ProvenanceTranslator<Location> provenanceTranslator;
-	
 	private LocationTranslatorImpl locationTranslator;
 	
 	private Location omrsLocation;
@@ -120,7 +116,6 @@ public class LocationTranslatorImplTest {
 		locationTranslator.setTelecomTranslator(telecomTranslator);
 		locationTranslator.setFhirLocationDao(fhirLocationDao);
 		locationTranslator.setPropertyService(propertyService);
-		locationTranslator.setProvenanceTranslator(provenanceTranslator);
 		locationTranslator.setLocationTagTranslator(locationTagTranslator);
 		locationTranslator.setLocationTypeTranslator(locationTypeTranslator);
 	}
@@ -158,16 +153,6 @@ public class LocationTranslatorImplTest {
 		assertThat(fhirLocation, notNullValue());
 		assertThat(fhirLocation.getDescription(), notNullValue());
 		assertThat(fhirLocation.getDescription(), equalTo(LOCATION_DESCRIPTION));
-	}
-	
-	@Test(expected = NullPointerException.class)
-	public void toFhirResource_shouldThrowExceptionWhenCalledWithEmptyOmrsLocation() {
-		locationTranslator.toFhirResource(null);
-	}
-	
-	@Test(expected = NullPointerException.class)
-	public void toOpenmrsType_shouldThrowExceptionWhenCalledWithEmptyFhirLocation() {
-		locationTranslator.toOpenmrsType(null);
 	}
 	
 	@Test
@@ -426,43 +411,5 @@ public class LocationTranslatorImplTest {
 		assertThat(omrsLocation, notNullValue());
 		assertThat(omrsLocation.getLatitude(), is(LOCATION_LATITUDE));
 		assertThat(omrsLocation.getLongitude(), is(LOCATION_LONGITUDE));
-	}
-	
-	@Test
-	public void toFhirResource_shouldAddProvenanceResources() {
-		Location location = new Location();
-		location.setUuid(LOCATION_UUID);
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		when(provenanceTranslator.getCreateProvenance(location)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(location)).thenReturn(provenance);
-		org.hl7.fhir.r4.model.Location result = locationTranslator.toFhirResource(location);
-		assertThat(result, notNullValue());
-		assertThat(result.getContained(), not(empty()));
-		assertThat(result.getContained().size(), greaterThanOrEqualTo(2));
-		assertThat(result.getContained().stream()
-		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
-		    is(true));
-	}
-	
-	@Test
-	public void shouldNotAddUpdateProvenanceIfDateChangedAndChangedByAreBothNull() {
-		Provenance provenance = new Provenance();
-		provenance.setId(new IdType(FhirUtils.newUuid()));
-		
-		org.openmrs.Location location = new org.openmrs.Location();
-		location.setUuid(LOCATION_UUID);
-		location.setDateChanged(null);
-		location.setChangedBy(null);
-		when(provenanceTranslator.getCreateProvenance(location)).thenReturn(provenance);
-		when(provenanceTranslator.getUpdateProvenance(location)).thenReturn(null);
-		
-		org.hl7.fhir.r4.model.Location result = locationTranslator.toFhirResource(location);
-		assertThat(result, notNullValue());
-		assertThat(result.getContained(), not(empty()));
-		assertThat(result.getContained().size(), equalTo(1));
-		assertThat(result.getContained().stream()
-		        .anyMatch(resource -> resource.getResourceType().name().equals(Provenance.class.getSimpleName())),
-		    is(true));
 	}
 }

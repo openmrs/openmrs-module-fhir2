@@ -4,7 +4,7 @@
 
     <groupId>org.openmrs.module</groupId>
     <artifactId>fhir2</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>FHIR2</name>
     <description>Implementation of FHIR R4 for OpenMRS</description>
@@ -41,11 +41,14 @@
         <module>api-2.1</module>
         <module>api-2.2</module>
         <module>api-2.5</module>
+        <module>api-2.6</module>
         <module>omod</module>
         <module>integration-tests</module>
         <module>integration-tests-2.1</module>
         <module>integration-tests-2.2</module>
         <module>integration-tests-2.5</module>
+        <module>integration-tests-2.6</module>
+        <module>e2e-tests</module>
     </modules>
 
     <repositories>
@@ -356,7 +359,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>29.0-jre</version>
+                <version>31.0.1-jre</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -367,7 +370,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.10.5.1</version>
+                <version>2.13.3</version>
             </dependency>
             <dependency>
                 <groupId>org.thymeleaf</groupId>
@@ -437,6 +440,18 @@
                 <version>2.0.7</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>co.unruly</groupId>
+                <artifactId>java-8-matchers</artifactId>
+                <version>1.6</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>pl.pragmatists</groupId>
+                <artifactId>JUnitParams</artifactId>
+                <version>1.1.1</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -470,6 +485,10 @@
             <artifactId>hamcrest-date</artifactId>
         </dependency>
         <dependency>
+            <groupId>co.unruly</groupId>
+            <artifactId>java-8-matchers</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
@@ -480,6 +499,10 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>pl.pragmatists</groupId>
+            <artifactId>JUnitParams</artifactId>
         </dependency>
     </dependencies>
 
@@ -560,6 +583,7 @@
                     <configuration>
                         <excludes>
                             <exclude>**/*IntegrationTest</exclude>
+                            <exclude>**/*DomainTest</exclude>
                         </excludes>
                     </configuration>
                 </plugin>
@@ -820,6 +844,38 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>e2e-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>3.0.0-M4</version>
+                        <configuration>
+                            <includes>
+                                <include>**/*DomainTest</include>
+                            </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>true</skipTests>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

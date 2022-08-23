@@ -116,7 +116,7 @@ public class FhirImmunizationServiceImpl extends BaseFhirService<Immunization, O
 	}
 	
 	@Override
-	public Immunization delete(@Nonnull String uuid) {
+	public void delete(@Nonnull String uuid) {
 		if (uuid == null) {
 			throw new InvalidRequestException("Uuid cannot be null.");
 		}
@@ -128,8 +128,6 @@ public class FhirImmunizationServiceImpl extends BaseFhirService<Immunization, O
 		}
 		
 		obsService.voidObs(obs, "Voided via FHIR API");
-		
-		return translator.toFhirResource(obs);
 	}
 	
 	@Override

@@ -14,10 +14,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -35,13 +33,10 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Provenance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,39 +113,6 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 	}
 	
 	@Test
-	public void getTaskHistoryById_shouldReturnListOfResource() {
-		IdType id = new IdType();
-		id.setValue(TASK_UUID);
-		when(taskService.get(TASK_UUID)).thenReturn(task);
-		
-		List<Resource> resources = resourceProvider.getTaskHistoryById(id);
-		assertThat(resources, Matchers.notNullValue());
-		assertThat(resources, not(empty()));
-		assertThat(resources.size(), Matchers.equalTo(2));
-	}
-	
-	@Test
-	public void getTaskHistoryById_shouldReturnProvenanceResources() {
-		IdType id = new IdType();
-		id.setValue(TASK_UUID);
-		when(taskService.get(TASK_UUID)).thenReturn(task);
-		
-		List<Resource> resources = resourceProvider.getTaskHistoryById(id);
-		assertThat(resources, not(empty()));
-		assertThat(resources.stream().findAny().isPresent(), Matchers.is(true));
-		assertThat(resources.stream().findAny().get().getResourceType().name(),
-		    Matchers.equalTo(Provenance.class.getSimpleName()));
-	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void getTaskHistoryByWithWrongId_shouldThrowResourceNotFoundException() {
-		IdType idType = new IdType();
-		idType.setValue(WRONG_TASK_UUID);
-		assertThat(resourceProvider.getTaskHistoryById(idType).isEmpty(), Matchers.is(true));
-		assertThat(resourceProvider.getTaskHistoryById(idType).size(), Matchers.equalTo(0));
-	}
-	
-	@Test
 	public void createTask_shouldCreateNewTask() {
 		when(taskService.create(any(org.hl7.fhir.r4.model.Task.class))).thenReturn(task);
 		
@@ -208,7 +170,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		List<org.hl7.fhir.r4.model.Task> tasks = new ArrayList<>();
 		tasks.add(task);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any()))
+		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), any()))
 		        .thenReturn(new MockIBundleProvider<>(tasks, 10, 1));
 		
 		TokenAndListParam status = new TokenAndListParam();
@@ -216,7 +178,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		statusToken.setValue("ACCEPTED");
 		status.addAnd(new TokenOrListParam().add(statusToken));
 		
-		IBundleProvider results = resourceProvider.searchTasks(null, null, status, null, null, null);
+		IBundleProvider results = resourceProvider.searchTasks(null, null, status, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -227,18 +189,11 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 	
 	@Test
 	public void deleteTask_shouldDeleteRequestedTask() {
-		when(taskService.delete(TASK_UUID)).thenReturn(task);
 		OperationOutcome result = resourceProvider.deleteTask(new IdType().setValue(TASK_UUID));
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getIssue(), notNullValue());
 		assertThat(result.getIssueFirstRep().getSeverity(), equalTo(OperationOutcome.IssueSeverity.INFORMATION));
 		assertThat(result.getIssueFirstRep().getDetails().getCodingFirstRep().getCode(), equalTo("MSG_DELETED"));
 	}
-	
-	@Test(expected = ResourceNotFoundException.class)
-	public void deleteTask_shouldThrowResourceNotFoundException() {
-		when(taskService.delete(WRONG_TASK_UUID)).thenReturn(null);
-		resourceProvider.deleteTask(new IdType().setValue(WRONG_TASK_UUID));
-	}
-	
 }

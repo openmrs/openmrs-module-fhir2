@@ -98,7 +98,7 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	
 	public void setupFhirServlet() throws ServletException {
 		servlet = getRestfulServer();
-		servlet.setCtx(ctx);
+		new FhirActivator().setApplicationContext(ctx);
 		servlet.setFhirContext(getFhirContext());
 		servlet.init(servletConfig);
 	}

@@ -106,10 +106,14 @@ public class FhirActivator extends BaseModuleActivator implements ApplicationCon
 		log.info("Shutdown FHIR");
 	}
 	
-	@SuppressWarnings("unused")
 	public void addModuleLifecycleListener(@Nonnull ModuleLifecycleListener lifecycleListener) {
 		Objects.requireNonNull(lifecycleListener);
 		lifecycleListeners.add(lifecycleListener);
+	}
+	
+	public void removeModuleLifecycleLister(@Nonnull ModuleLifecycleListener lifecycleListener) {
+		Objects.requireNonNull(lifecycleListener);
+		lifecycleListeners.remove(lifecycleListener);
 	}
 	
 	@Override

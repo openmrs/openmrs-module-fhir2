@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.web.util;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.Mockito.when;
@@ -26,7 +27,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 
-@RunWith(MockitoJUnitRunner.class)
+// we intentionally have unnecessary stubbings for this class when testing the X-Forwarded headers
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class OpenmrsFhirAddressStrategyTest {
 	
 	@Mock
@@ -48,7 +50,7 @@ public class OpenmrsFhirAddressStrategyTest {
 	@Test
 	public void shouldDetermineServerBaseFromGlobalProperty() {
 		fhirAddressStrategy.setGpPrefix("http://my.openmrs.org/ws/fhir2/");
-		when(httpServletRequest.getContextPath()).thenReturn("");
+		when(httpServletRequest.getContextPath()).thenReturn("/");
 		when(httpServletRequest.getRequestURI()).thenReturn("/ws/fhir2/R4");
 		
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
@@ -59,12 +61,25 @@ public class OpenmrsFhirAddressStrategyTest {
 	@Test
 	public void shouldDetermineServerBaseFromGlobalPropertyWithoutTrailingSlash() {
 		fhirAddressStrategy.setGpPrefix("http://my.openmrs.org/ws/fhir2");
-		when(httpServletRequest.getContextPath()).thenReturn("");
+		when(httpServletRequest.getContextPath()).thenReturn("/");
 		when(httpServletRequest.getRequestURI()).thenReturn("/ws/fhir2/R4");
 		
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
 		
 		assertThat(serverBase, startsWith("http://my.openmrs.org/ws/fhir2/"));
+	}
+	
+	@Test
+	public void shouldReturnAppropriateBaseUrlWithContextPath() {
+		when(httpServletRequest.getScheme()).thenReturn("http");
+		when(httpServletRequest.getServerName()).thenReturn("localhost");
+		when(httpServletRequest.getServerPort()).thenReturn(80);
+		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
+		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
+		
+		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
+		
+		assertThat(serverBase, equalTo("http://localhost/openmrs/ws/fhir2/R4"));
 	}
 	
 	@Test
@@ -143,5 +158,21 @@ public class OpenmrsFhirAddressStrategyTest {
 		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
 		
 		assertThat(serverBase, containsString(":8443/"));
+	}
+	
+	@Test
+	public void shouldProperlyHandleStandardProxyHeaders() {
+		when(httpServletRequest.getHeader("X-Forwarded-Proto")).thenReturn("https");
+		when(httpServletRequest.getHeader("X-Forwarded-Host")).thenReturn("my.openmrs.org");
+		when(httpServletRequest.getHeader("X-Forwarded-Port")).thenReturn("4443");
+		when(httpServletRequest.getScheme()).thenReturn("http");
+		when(httpServletRequest.getServerName()).thenReturn("localhost");
+		when(httpServletRequest.getServerPort()).thenReturn(8080);
+		when(httpServletRequest.getContextPath()).thenReturn("/openmrs");
+		when(httpServletRequest.getRequestURI()).thenReturn("/openmrs/ws/fhir2/R4/Person");
+		
+		String serverBase = fhirAddressStrategy.determineServerBase(servletContext, httpServletRequest);
+		
+		assertThat(serverBase, equalTo("https://my.openmrs.org:4443/openmrs/ws/fhir2/R4"));
 	}
 }

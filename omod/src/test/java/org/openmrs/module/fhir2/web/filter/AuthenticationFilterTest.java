@@ -95,20 +95,6 @@ public class AuthenticationFilterTest {
 	}
 	
 	@Test
-	public void shouldReturn401WhenNotUsingBasicAuth() throws Exception {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-		
-		servletRequest.setRequestURI("/openmrs/ws/fhir2/Patient?_id=aa1c7cf0-6a54-4a06-9d77-b26107ad9144");
-		servletRequest.addHeader(HttpHeaders.AUTHORIZATION,
-		    "Bearer " + Base64.getEncoder().encodeToString((USERNAME + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8)));
-		
-		authenticationFilter.doFilter(servletRequest, servletResponse, filterChain);
-		
-		assertThat(servletResponse.getStatus(), equalTo(401));
-	}
-	
-	@Test
 	public void shouldBypassAuthenticationForConformanceStatement() throws Exception {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();

@@ -14,12 +14,10 @@ import static lombok.AccessLevel.PACKAGE;
 import javax.annotation.Nonnull;
 
 import java.util.HashSet;
-import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -45,7 +43,6 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Resource;
 import org.openmrs.module.fhir2.api.FhirConditionService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -74,15 +71,6 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 		return condition;
 	}
 	
-	@History
-	public List<Resource> getConditionHistoryById(@IdParam @Nonnull IdType id) {
-		Condition condition = conditionService.get(id.getIdPart());
-		if (condition == null) {
-			throw new ResourceNotFoundException("Could not find condition with Id " + id.getIdPart());
-		}
-		return condition.getContained();
-	}
-	
 	@Create
 	public MethodOutcome createCondition(@ResourceParam Condition newCondition) {
 		return FhirProviderUtils.buildCreate(conditionService.create(newCondition));
@@ -101,11 +89,8 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	
 	@Delete
 	public OperationOutcome deleteCondition(@IdParam IdType id) {
-		Condition condition = conditionService.delete(id.getIdPart());
-		if (condition == null) {
-			throw new ResourceNotFoundException("Could not find condition to delete with id " + id.getIdPart());
-		}
-		return FhirProviderUtils.buildDelete(condition);
+		conditionService.delete(id.getIdPart());
+		return FhirProviderUtils.buildDeleteR4();
 	}
 	
 	@Search

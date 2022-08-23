@@ -38,7 +38,7 @@ public abstract class BaseServiceRequestTranslator extends BaseReferenceHandling
 		IBundleProvider results = taskService.searchForTasks(
 		    new ReferenceAndListParam()
 		            .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
-		    null, null, null, null, null);
+		    null, null, null, null, null, null);
 		
 		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
 		        .collect(Collectors.toList());
@@ -72,7 +72,7 @@ public abstract class BaseServiceRequestTranslator extends BaseReferenceHandling
 		IBundleProvider results = taskService.searchForTasks(
 		    new ReferenceAndListParam()
 		            .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
-		    null, null, null, null, null);
+		    null, null, null, null, null, null);
 		
 		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
 		        .collect(Collectors.toList());

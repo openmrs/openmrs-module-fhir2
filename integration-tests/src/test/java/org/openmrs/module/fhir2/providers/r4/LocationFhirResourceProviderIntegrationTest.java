@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,15 +19,14 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -130,7 +130,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_LOCATION_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonLocation = inputStreamToString(is, UTF_8);
 		}
 		
 		// create location
@@ -172,7 +172,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		String jsonLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_LOCATION_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			jsonLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+			jsonLocation = inputStreamToString(is, UTF_8);
 		}
 		
 		// create location
@@ -211,7 +211,7 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		String xmlLocation;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_CREATE_LOCATION_DOCUMENT)) {
 			Objects.requireNonNull(is);
-			xmlLocation = IOUtils.toString(is, StandardCharsets.UTF_8);
+			xmlLocation = inputStreamToString(is, UTF_8);
 		}
 		
 		// create location

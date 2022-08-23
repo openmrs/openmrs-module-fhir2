@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.apache.commons.lang3.Validate.notNull;
+import static org.openmrs.module.fhir2.FhirConstants.UCUM_SYSTEM_URI;
 
 import javax.annotation.Nonnull;
 
@@ -17,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Quantity;
@@ -36,6 +38,9 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 	
 	@Autowired
 	private ConceptTranslator conceptTranslator;
+	
+	@Autowired
+	private ObservationQuantityCodingTranslatorImpl quantityCodingTranslator;
 	
 	@Override
 	public Type toFhirResource(@Nonnull Obs obs) {
@@ -60,6 +65,13 @@ public class ObservationValueTranslatorImpl implements ObservationValueTranslato
 			if (obs.getConcept() instanceof ConceptNumeric) {
 				ConceptNumeric cn = (ConceptNumeric) obs.getConcept();
 				result.setUnit(cn.getUnits());
+				
+				// only set the coding system if unit conforms to UCUM standard
+				Coding coding = quantityCodingTranslator.toFhirResource(cn);
+				if (coding.hasSystem() && coding.getSystem().equals(UCUM_SYSTEM_URI)) {
+					result.setCode(coding.getCode());
+					result.setSystem(coding.getSystem());
+				}
 			}
 			
 			return result;

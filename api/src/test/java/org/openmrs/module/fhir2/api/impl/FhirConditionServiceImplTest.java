@@ -180,11 +180,8 @@ public class FhirConditionServiceImplTest {
 	@Test
 	public void delete_shouldDeleteExistingCondition() {
 		when(dao.delete(OBS_UUID)).thenReturn(obsCondition);
-		when(translator.toFhirResource(obsCondition)).thenReturn(condition);
 		
-		org.hl7.fhir.r4.model.Condition result = fhirConditionService.delete(OBS_UUID);
-		
-		assertThat(result, notNullValue());
+		fhirConditionService.delete(OBS_UUID);
 	}
 	
 	@Test
