@@ -20,6 +20,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
@@ -53,6 +54,14 @@ public abstract class BaseReferenceHandlingTranslator {
 	private Reference createEncounterReference(@Nonnull OpenmrsObject encounter) {
 		return new Reference().setReference(FhirConstants.ENCOUNTER + "/" + encounter.getUuid())
 		        .setType(FhirConstants.ENCOUNTER);
+	}
+	
+	protected Reference createValueSetReference(@Nonnull Concept concept) {
+		if (concept == null || !concept.getSet()) {
+			return null;
+		}
+		return new Reference().setReference(FhirConstants.VALUESET + "/" + concept.getUuid())
+		        .setType(FhirConstants.VALUESET);
 	}
 	
 	protected Reference createMedicationReference(@Nonnull Drug drug) {

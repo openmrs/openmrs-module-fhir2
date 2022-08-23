@@ -13,6 +13,7 @@ import static org.hibernate.criterion.Order.asc;
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.or;
+import static org.openmrs.module.fhir2.FhirConstants.TITLE_SEARCH_HANDLER;
 
 import javax.annotation.Nonnull;
 
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
@@ -31,6 +33,7 @@ import org.openmrs.ConceptSource;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
+import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -97,5 +100,22 @@ public class FhirConceptDaoImpl extends BaseFhirDao<Concept> implements FhirConc
 		criteria.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE);
 		
 		return criteria.list();
+	}
+	
+	@Override
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
+		theParams.getParameters().forEach(entry -> {
+			switch (entry.getKey()) {
+				case TITLE_SEARCH_HANDLER:
+					entry.getValue().forEach(param -> handleTitle(criteria, (StringAndListParam) param.getParam()));
+					break;
+			}
+		});
+	}
+	
+	private void handleTitle(Criteria criteria, StringAndListParam titlePattern) {
+		criteria.add(eq("set", true));
+		criteria.createAlias("names", "csn");
+		handleAndListParam(titlePattern, (title) -> propertyLike("csn.name", title)).ifPresent(criteria::add);
 	}
 }
