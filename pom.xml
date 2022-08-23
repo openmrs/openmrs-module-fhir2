@@ -622,6 +622,7 @@
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <arguments>-Prelease</arguments>
                         <tagNameFormat>@{project.version}</tagNameFormat>
+                        <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -672,7 +673,7 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>1.4.1</version>
-                    <executions>
+<!--                    <executions>
                         <execution>
                             <id>enforce-no-snapshots</id>
                             <goals>
@@ -687,7 +688,7 @@
                                 <fail>true</fail>
                             </configuration>
                         </execution>
-                    </executions>
+                    </executions> -->
                 </plugin>
                 <!-- NB must be declare *before* the license-maven-plugin -->
                 <plugin>
