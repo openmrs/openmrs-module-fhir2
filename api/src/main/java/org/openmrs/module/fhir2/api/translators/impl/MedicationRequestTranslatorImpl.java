@@ -94,7 +94,9 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 			medicationRequest.setMedication(medicationConcept);
 		}
 		
-		medicationRequest.setPriority(medicationRequestPriorityTranslator.toFhirResource(drugOrder.getUrgency()));
+		if (drugOrder.getUrgency() != null) {
+			medicationRequest.setPriority(medicationRequestPriorityTranslator.toFhirResource(drugOrder.getUrgency()));
+		}
 		medicationRequest.setRequester(practitionerReferenceTranslator.toFhirResource(drugOrder.getOrderer()));
 		medicationRequest.setEncounter(encounterReferenceTranslator.toFhirResource(drugOrder.getEncounter()));
 		medicationRequest.setSubject(patientReferenceTranslator.toFhirResource(drugOrder.getPatient()));
@@ -148,7 +150,9 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 			}
 		}
 		
-		existingDrugOrder.setUrgency(medicationRequestPriorityTranslator.toOpenmrsType(medicationRequest.getPriority()));
+		if (medicationRequest.getPriority() != null) {
+			existingDrugOrder.setUrgency(medicationRequestPriorityTranslator.toOpenmrsType(medicationRequest.getPriority()));
+		}
 		existingDrugOrder.setOrderer(practitionerReferenceTranslator.toOpenmrsType(medicationRequest.getRequester()));
 		existingDrugOrder.setEncounter(encounterReferenceTranslator.toOpenmrsType(medicationRequest.getEncounter()));
 		existingDrugOrder.setPatient(patientReferenceTranslator.toOpenmrsType(medicationRequest.getSubject()));
