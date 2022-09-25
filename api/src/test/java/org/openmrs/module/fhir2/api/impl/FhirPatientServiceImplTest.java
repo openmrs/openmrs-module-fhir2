@@ -58,6 +58,7 @@ import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 
@@ -207,23 +208,23 @@ public class FhirPatientServiceImplTest {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(PATIENT_GIVEN_NAME));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(stringAndListParam, null, null, null, null, null, null,
-		    null, null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(stringAndListParam, null, null, null, null, null, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
-		
+
 		assertThat(get(results), hasSize(equalTo(1)));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByGivenName() {
 		List<Patient> patients = new ArrayList<>();
@@ -231,24 +232,24 @@ public class FhirPatientServiceImplTest {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(PATIENT_GIVEN_NAME));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, stringAndListParam, null, null, null, null, null,
-		    null, null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, stringAndListParam, null, null, null, null, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
-		
+
 		assertThat(get(results), not(empty()));
 		assertThat(get(results), hasSize(equalTo(1)));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldSearchForPatientsByFamilyName() {
 		List<Patient> patients = new ArrayList<>();
@@ -256,7 +257,7 @@ public class FhirPatientServiceImplTest {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(PATIENT_FAMILY_NAME));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
-		
+
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
@@ -264,16 +265,16 @@ public class FhirPatientServiceImplTest {
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, stringAndListParam, null, null, null, null,
-		    null, null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, stringAndListParam, null, null, null, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results.getUuid(), notNullValue());
 		assertThat(results.size(), equalTo(1));
 		assertThat(results.preferredPageSize(), equalTo(10));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientsForPartialMatchOnGivenName() {
 		List<Patient> patients = new ArrayList<>();
@@ -281,22 +282,22 @@ public class FhirPatientServiceImplTest {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(PATIENT_PARTIAL_GIVEN_NAME));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, stringAndListParam, null, null, null, null, null,
-		    null, null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, stringAndListParam, null, null, null, null, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientsForPartialMatchOnFamilyName() {
 		List<Patient> patients = new ArrayList<>();
@@ -305,77 +306,77 @@ public class FhirPatientServiceImplTest {
 		        .addAnd(new StringParam(PATIENT_PARTIAL_FAMILY_NAME));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, stringAndListParam, null, null, null, null,
-		    null, null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, stringAndListParam, null, null, null, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientNameNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringParam(PATIENT_GIVEN_NAME_NOT_MATCHED));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(stringAndListParam, null, null, null, null, null, null,
-		    null, null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(stringAndListParam, null, null, null, null, null, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), is(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientGivenNameNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringParam(PATIENT_GIVEN_NAME_NOT_MATCHED));
-		
+
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, stringAndListParam, null, null, null, null, null,
-		    null, null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, stringAndListParam, null, null, null, null, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), is(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientFamilyNameNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam()
 		        .addAnd(new StringParam(PATIENT_FAMILY_NAME_NOT_MATCHED));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, stringAndListParam, null, null, null, null,
-		    null, null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, stringAndListParam, null, null, null, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), is(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientWhenPatientGenderMatched() {
 		List<Patient> patients = new ArrayList<>();
@@ -383,127 +384,127 @@ public class FhirPatientServiceImplTest {
 		TokenAndListParam tokenAndListParam = new TokenAndListParam().addAnd(new TokenParam(GENDER));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    tokenAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, tokenAndListParam, null, null,
-		    null, null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, tokenAndListParam, null, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), not(empty()));
 		assertThat(get(results), hasSize(greaterThanOrEqualTo(1)));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientGenderNotMatched() {
 		TokenAndListParam tokenAndListParam = new TokenAndListParam().addAnd(new TokenParam(WRONG_GENDER));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    tokenAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, tokenAndListParam, null, null,
-		    null, null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, tokenAndListParam, null, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), is(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientWhenPatientBirthDateMatched() throws ParseException {
 		Date birthDate = dateFormatter.parse(DATE);
 		patient.setBirthdate(birthDate);
-		
+
 		List<Patient> patients = new ArrayList<>();
 		patients.add(patient);
-		
+
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(DATE).setUpperBound(DATE);
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
 		    dateRangeParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, dateRangeParam, null, null,
-		    null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, dateRangeParam, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientBirthDateNotMatched() {
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(UNKNOWN_DATE).setUpperBound(UNKNOWN_DATE);
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    dateRangeParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, dateRangeParam, null, null,
-		    null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, dateRangeParam, null, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientWhenPatientDeathDateMatched() throws ParseException {
 		Date deathDate = dateFormatter.parse(DATE);
 		patient.setDeathDate(deathDate);
-		
+
 		List<Patient> patients = new ArrayList<>();
 		patients.add(patient);
-		
+
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(DATE).setUpperBound(DATE);
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
 		    dateRangeParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, dateRangeParam, null,
-		    null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, dateRangeParam, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientDeathDateNotMatched() {
 		DateRangeParam dateRangeParam = new DateRangeParam().setLowerBound(UNKNOWN_DATE).setUpperBound(UNKNOWN_DATE);
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    dateRangeParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, dateRangeParam, null,
-		    null, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, dateRangeParam, null,
+				null, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientWhenPatientCityMatched() {
 		List<Patient> patients = new ArrayList<>();
@@ -511,39 +512,39 @@ public class FhirPatientServiceImplTest {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(CITY));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, "city",
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null,
-		    stringAndListParam, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				stringAndListParam, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientCityNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(UNKNOWN_ADDRESS));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, "city",
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null,
-		    stringAndListParam, null, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				stringAndListParam, null, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientWhenPatientStateMatched() {
 		List<Patient> patients = new ArrayList<>();
@@ -551,39 +552,39 @@ public class FhirPatientServiceImplTest {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(STATE));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, "state",
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    stringAndListParam, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, stringAndListParam, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientStateNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(UNKNOWN_ADDRESS));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, "state",
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    stringAndListParam, null, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, stringAndListParam, null, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientWhenPatientPostalCodeMatched() {
 		List<Patient> patients = new ArrayList<>();
@@ -591,38 +592,38 @@ public class FhirPatientServiceImplTest {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(POSTAL_CODE));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, "postalCode",
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    null, stringAndListParam, null, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, null, stringAndListParam, null, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientPostalCodeNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(UNKNOWN_ADDRESS));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, "postalCode",
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    null, stringAndListParam, null, null, null, null, null);
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, null, stringAndListParam, null, null, null, null, null));
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientWhenPatientCountryMatched() {
 		List<Patient> patients = new ArrayList<>();
@@ -630,165 +631,165 @@ public class FhirPatientServiceImplTest {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(COUNTRY));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER, "country",
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(patients);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    null, null, stringAndListParam, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, null, null, stringAndListParam, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenPatientCountryNotMatched() {
 		StringAndListParam stringAndListParam = new StringAndListParam().addAnd(new StringParam(UNKNOWN_ADDRESS));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    null, null, stringAndListParam, null, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, null, null, stringAndListParam, null, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientWhenUUIDMatched() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_UUID));
-		
+
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(patient));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    null, null, null, uuid, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, null, null, null, uuid, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenUUIDNotMatched() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(WRONG_PATIENT_UUID));
-		
+
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    null, null, null, uuid, null, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, null, null, null, uuid, null, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnCollectionOfPatientWhenLastUpdatedMatched() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
-		
+
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(patient));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    null, null, null, null, lastUpdated, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, null, null, null, null, lastUpdated, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(results.size(), greaterThanOrEqualTo(1));
 		assertThat(get(results), not(empty()));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldReturnEmptyCollectionWhenLastUpdatedNotMatched() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(WRONG_LAST_UPDATED_DATE)
 		        .setLowerBound(WRONG_LAST_UPDATED_DATE);
-		
+
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    null, null, null, null, lastUpdated, null, null);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, null, null, null, null, lastUpdated, null, null));
+
 		assertThat(results, notNullValue());
 		assertThat(get(results), empty());
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldAddReverseIncludedResourcesToResultList() {
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("Observation:patient"));
-		
+
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER,
 		    revIncludes);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(patient));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Observation()));
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    null, null, null, null, null, null, revIncludes);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, null, null, null, null, null, null, revIncludes));
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(2));
 		assertThat(resultList, hasItem(is(instanceOf(Observation.class))));
 	}
-	
+
 	@Test
 	public void searchForPatients_shouldNotAddRelatedResourcesToResultListForEmptyRevInclude() {
 		HashSet<Include> revIncludes = new HashSet<>();
-		
+
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER,
 		    revIncludes);
-		
+
 		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(PATIENT_UUID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(patient));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, patientTranslator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(patientTranslator.toFhirResource(patient)).thenReturn(fhirPatient);
-		
-		IBundleProvider results = patientService.searchForPatients(null, null, null, null, null, null, null, null, null,
-		    null, null, null, null, null, null, revIncludes);
-		
+
+		IBundleProvider results = patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+				null, null, null, null, null, null, null, revIncludes));
+
 		List<IBaseResource> resultList = get(results);
-		
+
 		assertThat(results, notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList.size(), greaterThanOrEqualTo(1));

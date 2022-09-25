@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 
 public interface FhirPatientService extends FhirService<Patient> {
 	
@@ -36,12 +37,8 @@ public interface FhirPatientService extends FhirService<Patient> {
 	Patient getById(@Nonnull Integer id);
 	
 	PatientIdentifierType getPatientIdentifierTypeByIdentifier(Identifier identifier);
-	
-	IBundleProvider searchForPatients(StringAndListParam name, StringAndListParam given, StringAndListParam family,
-	        TokenAndListParam identifier, TokenAndListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
-	        TokenAndListParam deceased, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
-	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
-	        HashSet<Include> revIncludes);
+
+	IBundleProvider searchForPatients(PatientSearchParams patientSearchParams);
 	
 	IBundleProvider getPatientEverything(TokenParam identifier);
 	

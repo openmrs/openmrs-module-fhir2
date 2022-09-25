@@ -35,6 +35,7 @@ import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.PatientTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,30 +83,8 @@ public class FhirPatientServiceImpl extends BaseFhirService<Patient, org.openmrs
 	
 	@Override
 	@Transactional(readOnly = true)
-	public IBundleProvider searchForPatients(StringAndListParam name, StringAndListParam given, StringAndListParam family,
-	        TokenAndListParam identifier, TokenAndListParam gender, DateRangeParam birthDate, DateRangeParam deathDate,
-	        TokenAndListParam deceased, StringAndListParam city, StringAndListParam state, StringAndListParam postalCode,
-	        StringAndListParam country, TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort,
-	        HashSet<Include> revIncludes) {
-		
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.NAME_PROPERTY, name)
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.GIVEN_PROPERTY, given)
-		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.FAMILY_PROPERTY, family)
-		        .addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER, identifier)
-		        .addParameter(FhirConstants.GENDER_SEARCH_HANDLER, "gender", gender)
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "birthdate", birthDate)
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, "deathDate", deathDate)
-		        .addParameter(FhirConstants.BOOLEAN_SEARCH_HANDLER, deceased)
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, city)
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, state)
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, postalCode)
-		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, country)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
-		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes).setSortSpec(sort);
-		
-		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	public IBundleProvider searchForPatients(PatientSearchParams patientSearchParams) {
+		return searchQuery.getQueryResults(patientSearchParams.toSearchParameterMap(), dao, translator, searchQueryInclude);
 	}
 	
 	@Override
