@@ -52,7 +52,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.openmrs.module.fhir2.api.FhirPatientService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
-import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;

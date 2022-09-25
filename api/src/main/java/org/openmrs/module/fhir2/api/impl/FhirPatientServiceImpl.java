@@ -17,10 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import lombok.AccessLevel;

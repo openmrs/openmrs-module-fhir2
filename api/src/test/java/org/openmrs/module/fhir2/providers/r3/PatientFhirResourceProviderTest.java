@@ -18,9 +18,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -235,9 +233,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByGivenName() {
 		StringAndListParam givenNameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NAME)));
-		when(patientService.searchForPatients(new PatientSearchParams(null, givenNameParam, null, null, null, null, null, null,
-				null, null, null, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, givenNameParam, null, null, null, null, null,
+		        null, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, givenNameParam, null, null, null, null,
 		    null, null, null, null, null, null, null, null, null, null);
@@ -253,9 +251,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByFamilyName() {
 		StringAndListParam familyNameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(FAMILY_NAME)));
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, familyNameParam, null, null, null, null, null,
-				null, null, null, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, familyNameParam, null, null, null, null,
+		        null, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, familyNameParam, null, null, null,
 		    null, null, null, null, null, null, null, null, null, null);
@@ -270,228 +268,228 @@ public class PatientFhirResourceProviderTest extends BaseFhirR3ProvenanceResourc
 	@Test
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByIdentifier() {
 		TokenAndListParam identifierParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(IDENTIFIER));
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, identifierParam, null, null, null, null,
-				null, null, null, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, identifierParam, null, null, null,
+		        null, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, identifierParam, null, null,
 		    null, null, null, null, null, null, null, null, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByGender() {
 		TokenAndListParam genderParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(GENDER));
 		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, genderParam, null, null, null,
-				null, null, null, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		        null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, genderParam, null, null,
 		    null, null, null, null, null, null, null, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByBirthDate() {
 		DateRangeParam birthDateParam = new DateRangeParam().setLowerBound(BIRTH_DATE).setUpperBound(BIRTH_DATE);
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, birthDateParam, null, null,
-				null, null, null, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, birthDateParam, null,
+		        null, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, birthDateParam,
 		    null, null, null, null, null, null, null, null, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByDeathDate() {
 		DateRangeParam deathDateParam = new DateRangeParam().setLowerBound(DEATH_DATE).setUpperBound(DEATH_DATE);
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, deathDateParam, null,
-				null, null, null, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, deathDateParam,
+		        null, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, null,
 		    deathDateParam, null, null, null, null, null, null, null, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByDeceased() {
 		TokenAndListParam deceasedParam = new TokenAndListParam().addAnd(new TokenOrListParam().add("true"));
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, deceasedParam,
-				null, null, null, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null,
+		        deceasedParam, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, null, null,
 		    deceasedParam, null, null, null, null, null, null, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByCity() {
 		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
 		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
-				cityParam, null, null, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		        cityParam, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, null, null, null,
 		    cityParam, null, null, null, null, null, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByState() {
 		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
-				null, stateParam, null, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        stateParam, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, null, null, null,
 		    null, stateParam, null, null, null, null, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByPostalCode() {
 		StringAndListParam postalCodeParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
-				null, null, postalCodeParam, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, postalCodeParam, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, null, null, null,
 		    null, null, postalCodeParam, null, null, null, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByCountry() {
 		StringAndListParam countryParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
-				null, null, null, countryParam, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, countryParam, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, null, null, null,
 		    null, null, null, countryParam, null, null, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByUUID() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_UUID));
-
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
-				null, null, null, null, uuid, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, uuid, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, null, null, null,
 		    null, null, null, null, uuid, null, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByLastUpdated() {
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
-
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
-				null, null, null, null, null, lastUpdated, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, null, lastUpdated, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, null, null, null,
 		    null, null, null, null, null, lastUpdated, null, null);
 		List<IBaseResource> resources = getResources(results);
-
+		
 		assertThat(resources, notNullValue());
 		assertThat(resources, hasSize(equalTo(1)));
 		assertThat(resources.get(0).fhirType(), is(FhirConstants.PATIENT));
 		assertThat(resources.get(0).getIdElement().getIdPart(), is(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldAddRelatedResourcesForRevInclude() {
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("Observation:patient"));
-
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
-				null, null, null, null, null, null, null, revIncludes)))
-				.thenReturn(new MockIBundleProvider<>(Arrays.asList(patient, new Observation()), 10, 1));
-
+		
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, null, null, null, revIncludes)))
+		                .thenReturn(new MockIBundleProvider<>(Arrays.asList(patient, new Observation()), 10, 1));
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, null, null, null,
 		    null, null, null, null, null, null, null, revIncludes);
-
+		
 		List<IBaseResource> resultList = getResources(results);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), greaterThanOrEqualTo(2));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.PATIENT));
 		assertThat(resultList.get(1).fhirType(), equalTo(FhirConstants.OBSERVATION));
 		assertThat(((Patient) resultList.iterator().next()).getId(), equalTo(PATIENT_UUID));
 	}
-
+	
 	@Test
 	public void searchForPatients_shouldNotAddResourcesForEmptyRevInclude() {
-		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
-				null, null, null, null, null, null, null, null)))
-				.thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
-
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		
 		HashSet<Include> revIncludes = new HashSet<>();
-
+		
 		IBundleProvider results = patientFhirResourceProvider.searchPatients(null, null, null, null, null, null, null, null,
 		    null, null, null, null, null, null, null, revIncludes);
-
+		
 		List<IBaseResource> resultList = getResources(results);
-
+		
 		assertThat(results, notNullValue());
 		assertThat(resultList.size(), equalTo(1));
 		assertThat(resultList.get(0).fhirType(), equalTo(FhirConstants.PATIENT));
