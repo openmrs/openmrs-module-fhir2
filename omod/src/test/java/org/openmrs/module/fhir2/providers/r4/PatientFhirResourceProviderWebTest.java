@@ -557,8 +557,8 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 	}
 	
 	@Test
-	public void shouldAddReverseIncludedProcedureRequestsToReturnedResults() throws Exception {
-		verifyUri("/Patient?_revinclude=ProcedureRequest:patient");
+	public void shouldAddReverseIncludedServiceRequestsToReturnedResults() throws Exception {
+		verifyUri("/Patient?_revinclude=ServiceRequest:patient");
 		
 		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
 		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
@@ -566,7 +566,7 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		assertThat(revIncludesParam, notNullValue());
 		assertThat(revIncludesParam.size(), equalTo(1));
 		assertThat(revIncludesParam.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
-		assertThat(revIncludesParam.iterator().next().getParamType(), equalTo(FhirConstants.PROCEDURE_REQUEST));
+		assertThat(revIncludesParam.iterator().next().getParamType(), equalTo(FhirConstants.SERVICE_REQUEST));
 	}
 	
 	@Test
