@@ -28,6 +28,9 @@ public interface FhirConceptSourceDao {
 	Optional<FhirConceptSource> getFhirConceptSourceByUrl(@Nonnull String url);
 	
 	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
+	Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName);
+	
+	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
 	Optional<FhirConceptSource> getFhirConceptSourceByConceptSource(@Nonnull ConceptSource conceptSource);
 	
 	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)

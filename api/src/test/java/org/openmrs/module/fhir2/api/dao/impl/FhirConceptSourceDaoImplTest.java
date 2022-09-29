@@ -83,6 +83,21 @@ public class FhirConceptSourceDaoImplTest extends BaseModuleContextSensitiveTest
 	}
 	
 	@Test
+	public void getFhirConceptSourceByConceptSourceName_shouldReturnSourceForName() {
+		Optional<FhirConceptSource> result = fhirConceptSourceDao.getFhirConceptSourceByConceptSourceName("LOINC");
+		assertThat(result.isPresent(), is(true));
+		assertThat(result.get().getConceptSource().getName(), equalTo("LOINC"));
+		assertThat(result.get().getUrl(), equalTo(FhirTestConstants.LOINC_SYSTEM_URL));
+	}
+	
+	@Test
+	public void getFhirConceptSourceByConceptSourceName_shouldReturnNullForMissingSourceName() {
+		Optional<FhirConceptSource> result = fhirConceptSourceDao
+		        .getFhirConceptSourceByConceptSourceName("Not a real source");
+		assertThat(result.isPresent(), is(false));
+	}
+	
+	@Test
 	public void getFhirConceptSourceByConceptSource_shouldReturnSourceWherePresent() {
 		ConceptSource conceptSource = conceptService.getConceptSourceByName("LOINC");
 		assertThat(conceptSource, notNullValue());

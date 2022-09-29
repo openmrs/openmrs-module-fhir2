@@ -54,6 +54,24 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 	}
 	
 	@Override
+	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSourceName(@Nonnull String sourceName) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(ConceptSource.class);
+		if (Context.getAdministrationService().isDatabaseStringComparisonCaseSensitive()) {
+			criteria.add(eq("name", sourceName).ignoreCase());
+		} else {
+			criteria.add(eq("name", sourceName));
+		}
+		criteria.addOrder(Order.asc("retired"));
+		
+		List<ConceptSource> matchingSources = criteria.list();
+		if (matchingSources.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		return getFhirConceptSourceByConceptSource(matchingSources.get(0));
+	}
+	
+	@Override
 	public Optional<FhirConceptSource> getFhirConceptSourceByConceptSource(@Nonnull ConceptSource conceptSource) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirConceptSource.class);
 		criteria.add(eq("conceptSource", conceptSource));
