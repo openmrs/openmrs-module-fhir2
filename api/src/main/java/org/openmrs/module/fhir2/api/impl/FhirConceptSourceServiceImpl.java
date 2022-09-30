@@ -85,4 +85,10 @@ public class FhirConceptSourceServiceImpl implements FhirConceptSourceService {
 	public Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code) {
 		return dao.getConceptSourceByHl7Code(hl7Code);
 	}
+	
+	@Override
+	@Transactional
+	public FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource) {
+		return dao.saveFhirConceptSource(fhirConceptSource);
+	}
 }

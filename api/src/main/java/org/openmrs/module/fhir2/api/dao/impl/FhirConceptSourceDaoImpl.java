@@ -85,4 +85,10 @@ public class FhirConceptSourceDaoImpl implements FhirConceptSourceDao {
 		
 		return Optional.ofNullable(matchingSources.get(0));
 	}
+	
+	@Override
+	public FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource) {
+		sessionFactory.getCurrentSession().saveOrUpdate(fhirConceptSource);
+		return fhirConceptSource;
+	}
 }

@@ -35,4 +35,7 @@ public interface FhirConceptSourceDao {
 	
 	@Authorized(PrivilegeConstants.GET_CONCEPT_SOURCES)
 	Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code);
+	
+	@Authorized(PrivilegeConstants.MANAGE_CONCEPT_SOURCES)
+	FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource);
 }
