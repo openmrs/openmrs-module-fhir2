@@ -30,4 +30,6 @@ public interface FhirConceptSourceService {
 	Optional<ConceptSource> getConceptSourceByUrl(@Nonnull String url);
 	
 	Optional<ConceptSource> getConceptSourceByHl7Code(@Nonnull String hl7Code);
+	
+	FhirConceptSource saveFhirConceptSource(@Nonnull FhirConceptSource fhirConceptSource);
 }
