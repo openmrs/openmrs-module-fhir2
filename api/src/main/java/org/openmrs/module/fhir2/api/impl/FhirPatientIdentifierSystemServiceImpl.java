@@ -32,17 +32,20 @@ public class FhirPatientIdentifierSystemServiceImpl implements FhirPatientIdenti
 	private FhirPatientIdentifierSystemDao dao;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public String getUrlByPatientIdentifierType(@Nonnull PatientIdentifierType patientIdentifierType) {
 		return dao.getUrlByPatientIdentifierType(patientIdentifierType);
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
 	        @Nonnull PatientIdentifierType patientIdentifierType) {
 		return dao.getFhirPatientIdentifierSystem(patientIdentifierType);
 	}
 	
 	@Override
+	@Transactional
 	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
 	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
 		return dao.saveFhirPatientIdentifierSystem(fhirPatientIdentifierSystem);
