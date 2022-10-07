@@ -11,9 +11,14 @@ package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hibernate.criterion.Restrictions.eq;
 
+import javax.annotation.Nonnull;
+
+import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
 import org.openmrs.PatientIdentifierType;
@@ -37,5 +42,20 @@ public class FhirPatientIdentifierSystemDaoImpl implements FhirPatientIdentifier
 		return (String) sessionFactory.getCurrentSession().createCriteria(FhirPatientIdentifierSystem.class)
 		        .add(eq("patientIdentifierType.patientIdentifierTypeId", patientIdentifierType.getId()))
 		        .setProjection(Projections.property("url")).uniqueResult();
+	}
+	
+	@Override
+	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
+	        @Nonnull PatientIdentifierType patientIdentifierType) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(FhirPatientIdentifierSystem.class);
+		criteria.add(eq("patientIdentifierType", patientIdentifierType));
+		return Optional.ofNullable((FhirPatientIdentifierSystem) criteria.uniqueResult());
+	}
+	
+	@Override
+	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
+	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
+		sessionFactory.getCurrentSession().saveOrUpdate(fhirPatientIdentifierSystem);
+		return fhirPatientIdentifierSystem;
 	}
 }

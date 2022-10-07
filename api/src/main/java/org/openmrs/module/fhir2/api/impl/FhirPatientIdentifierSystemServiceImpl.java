@@ -11,11 +11,14 @@ package org.openmrs.module.fhir2.api.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.Optional;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.module.fhir2.api.FhirPatientIdentifierSystemService;
 import org.openmrs.module.fhir2.api.dao.FhirPatientIdentifierSystemDao;
+import org.openmrs.module.fhir2.model.FhirPatientIdentifierSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,5 +34,17 @@ public class FhirPatientIdentifierSystemServiceImpl implements FhirPatientIdenti
 	@Override
 	public String getUrlByPatientIdentifierType(@Nonnull PatientIdentifierType patientIdentifierType) {
 		return dao.getUrlByPatientIdentifierType(patientIdentifierType);
+	}
+	
+	@Override
+	public Optional<FhirPatientIdentifierSystem> getFhirPatientIdentifierSystem(
+	        @Nonnull PatientIdentifierType patientIdentifierType) {
+		return dao.getFhirPatientIdentifierSystem(patientIdentifierType);
+	}
+	
+	@Override
+	public FhirPatientIdentifierSystem saveFhirPatientIdentifierSystem(
+	        @Nonnull FhirPatientIdentifierSystem fhirPatientIdentifierSystem) {
+		return dao.saveFhirPatientIdentifierSystem(fhirPatientIdentifierSystem);
 	}
 }
