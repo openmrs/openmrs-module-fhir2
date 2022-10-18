@@ -17,9 +17,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,6 +52,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPatientService;
+import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -201,9 +200,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	@Test
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByName() {
 		StringAndListParam nameParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(NAME)));
-		when(patientService.searchForPatients(argThat(is(nameParam)), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(nameParam, null, null, null, null, null, null, null,
+		        null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(nameParam, null, null, null, null, null, null, null, null,
 		    null, null, null, null, null, null, null);
@@ -219,9 +218,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByGivenName() {
 		StringAndListParam givenNameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(NAME)));
-		when(patientService.searchForPatients(isNull(), argThat(is(givenNameParam)), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, givenNameParam, null, null, null, null, null,
+		        null, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, givenNameParam, null, null, null, null, null, null,
 		    null, null, null, null, null, null, null, null);
@@ -237,9 +236,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByFamilyName() {
 		StringAndListParam familyNameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(FAMILY_NAME)));
-		when(patientService.searchForPatients(isNull(), isNull(), argThat(is(familyNameParam)), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, familyNameParam, null, null, null, null,
+		        null, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, familyNameParam, null, null, null, null, null,
 		    null, null, null, null, null, null, null, null);
@@ -254,9 +253,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	@Test
 	public void searchPatients_shouldReturnMatchingBundleOfPatientsByIdentifier() {
 		TokenAndListParam identifierParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(IDENTIFIER));
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), argThat(is(identifierParam)), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, identifierParam, null, null, null,
+		        null, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, identifierParam, null, null, null, null,
 		    null, null, null, null, null, null, null, null);
@@ -271,9 +270,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByGender() {
 		TokenAndListParam genderParam = new TokenAndListParam().addAnd(new TokenOrListParam().add(GENDER));
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), argThat(is(genderParam)), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, genderParam, null, null, null,
+		        null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, genderParam, null, null, null,
 		    null, null, null, null, null, null, null, null);
@@ -288,9 +287,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByBirthDate() {
 		DateRangeParam birthDateParam = new DateRangeParam().setLowerBound(BIRTH_DATE).setUpperBound(BIRTH_DATE);
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(birthDateParam)),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, birthDateParam, null,
+		        null, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, birthDateParam, null, null,
 		    null, null, null, null, null, null, null, null);
@@ -305,9 +304,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByDeathDate() {
 		DateRangeParam deathDateParam = new DateRangeParam().setLowerBound(DEATH_DATE).setUpperBound(DEATH_DATE);
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(deathDateParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, deathDateParam,
+		        null, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, deathDateParam, null,
 		    null, null, null, null, null, null, null, null);
@@ -322,9 +321,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByDeceased() {
 		TokenAndListParam deceasedParam = new TokenAndListParam().addAnd(new TokenOrListParam().add("true"));
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(deceasedParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null,
+		        deceasedParam, null, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, deceasedParam,
 		    null, null, null, null, null, null, null, null);
@@ -339,9 +338,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByCity() {
 		StringAndListParam cityParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(CITY)));
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(cityParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null,
+		        cityParam, null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, cityParam,
 		    null, null, null, null, null, null, null);
@@ -356,9 +355,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	@Test
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByState() {
 		StringAndListParam stateParam = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(STATE)));
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), argThat(is(stateParam)), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        stateParam, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null,
 		    stateParam, null, null, null, null, null, null);
@@ -374,9 +373,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByPostalCode() {
 		StringAndListParam postalCodeParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(POSTAL_CODE)));
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), argThat(is(postalCodeParam)), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, postalCodeParam, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
 		    postalCodeParam, null, null, null, null, null);
@@ -392,9 +391,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByCountry() {
 		StringAndListParam countryParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(COUNTRY)));
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), argThat(is(countryParam)), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, countryParam, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
 		    null, countryParam, null, null, null, null);
@@ -410,9 +409,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByUUID() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PATIENT_UUID));
 		
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), argThat(is(uuid)), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, uuid, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
 		    null, null, uuid, null, null, null);
@@ -428,9 +427,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	public void searchForPatients_shouldReturnMatchingBundleOfPatientsByLastUpdated() {
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
 		
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(lastUpdated)), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, null, lastUpdated, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
 		    null, null, null, lastUpdated, null, null);
@@ -447,9 +446,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("Observation:patient"));
 		
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(revIncludes))))
-		            .thenReturn(new MockIBundleProvider<>(Arrays.asList(patient, new Observation()), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, null, null, null, revIncludes)))
+		                .thenReturn(new MockIBundleProvider<>(Arrays.asList(patient, new Observation()), 10, 1));
 		
 		IBundleProvider results = resourceProvider.searchPatients(null, null, null, null, null, null, null, null, null, null,
 		    null, null, null, null, null, revIncludes);
@@ -465,9 +464,9 @@ public class PatientFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	@Test
 	public void searchForPatients_shouldNotAddResourcesForEmptyRevInclude() {
-		when(patientService.searchForPatients(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
-		            .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
+		when(patientService.searchForPatients(new PatientSearchParams(null, null, null, null, null, null, null, null, null,
+		        null, null, null, null, null, null, null)))
+		                .thenReturn(new MockIBundleProvider<>(Collections.singletonList(patient), 10, 1));
 		
 		HashSet<Include> revIncludes = new HashSet<>();
 		
