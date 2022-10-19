@@ -144,6 +144,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				case FhirConstants.INCLUDE_PARTICIPANT_PARAM:
 					bundleProvider = handlePractitionerReverseInclude(referenceParams, revIncludeParam.getParamType());
 					break;
+				case FhirConstants.INCLUDE_AUTHORIZING_PRESCRIPTION_PARAMETER:
+					bundleProvider = handleAuthorizingPrescriptionReverseInclude(referenceParams, revIncludeParam.getParamType());
+					break;
 			}
 			
 			if (bundleProvider != null) {
@@ -284,7 +287,11 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		
 		return null;
 	}
-	
+
+	private IBundleProvider handleAuthorizingPrescriptionReverseInclude(ReferenceAndListParam params, String targetType) {
+		return null;
+	}
+
 	private IBundleProvider handlePatientReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:

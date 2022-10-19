@@ -313,6 +313,8 @@ public class FhirConstants {
 	public static final String INCLUDE_BASED_0N_PARAM = "based-on";
 	
 	public static final String INCLUDE_OWNER_PARAM = "owner";
+
+	public static final String INCLUDE_AUTHORIZING_PRESCRIPTION_PARAMETER = "authorizingPrescription";
 	
 	public static final String REVERSE_INCLUDE_SEARCH_HANDLER = "_revinclude.search.handler";
 	
