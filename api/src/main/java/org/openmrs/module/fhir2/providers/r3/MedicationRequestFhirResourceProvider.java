@@ -41,6 +41,7 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.MedicationDispense;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
@@ -119,7 +120,9 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	        @IncludeParam(allow = { "MedicationRequest:" + MedicationRequest.SP_MEDICATION,
 	                "MedicationRequest:" + MedicationRequest.SP_REQUESTER,
 	                "MedicationRequest:" + MedicationRequest.SP_PATIENT,
-	                "MedicationRequest:" + MedicationRequest.SP_CONTEXT }) HashSet<Include> includes) {
+	                "MedicationRequest:" + MedicationRequest.SP_CONTEXT }) HashSet<Include> includes,
+	        @IncludeParam(reverse = true, allow = {
+	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
@@ -128,7 +131,11 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 			includes = null;
 		}
 		
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
+		}
+		
 		return new SearchQueryBundleProviderR3Wrapper(medicationRequestService.searchForMedicationRequests(patientReference,
-		    encounterReference, code, participantReference, medicationReference, id, lastUpdated, includes));
+		    encounterReference, code, participantReference, medicationReference, id, lastUpdated, includes, revIncludes));
 	}
 }
