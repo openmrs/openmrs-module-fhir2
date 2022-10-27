@@ -145,19 +145,7 @@ public class FhirEncounterServiceImpl extends BaseFhirService<Encounter, org.ope
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForEncounters(EncounterSearchParams searchParameters) {
-		SearchParameterMap theParams = new SearchParameterMap()
-		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, searchParameters.getDate())
-		        .addParameter(FhirConstants.LOCATION_REFERENCE_SEARCH_HANDLER, searchParameters.getLocation())
-		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, searchParameters.getParticipant())
-		        .addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, searchParameters.getSubject())
-		        .addParameter(FhirConstants.ENCOUNTER_TYPE_REFERENCE_SEARCH_HANDLER, searchParameters.getEncounterType())
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, searchParameters.getId())
-		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY,
-		            searchParameters.getLastUpdated())
-		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, searchParameters.getIncludes())
-		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, searchParameters.getRevIncludes())
-		        .addParameter(FhirConstants.HAS_SEARCH_HANDLER, searchParameters.getHasAndListParam())
-		        .setSortSpec(searchParameters.getSort());
+		SearchParameterMap theParams = searchParameters.toSearchParameterMap();
 		
 		IBundleProvider visitBundle = null;
 		IBundleProvider encounterBundle = null;
