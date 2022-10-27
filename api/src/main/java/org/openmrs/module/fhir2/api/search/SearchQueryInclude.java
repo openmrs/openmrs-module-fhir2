@@ -154,7 +154,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 					break;
 			}
 			
-			if (bundleProvider != null) {
+			if (bundleProvider != null && !bundleProvider.isEmpty()) {
 				revIncludedResourcesSet.addAll(bundleProvider.getResources(0, -1));
 			}
 		});
