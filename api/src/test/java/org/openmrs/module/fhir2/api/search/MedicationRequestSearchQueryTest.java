@@ -271,7 +271,6 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		
 		IBundleProvider results = search(theParams);
-		
 		assertThat(results, notNullValue());
 		
 		List<MedicationRequest> resultList = get(results);

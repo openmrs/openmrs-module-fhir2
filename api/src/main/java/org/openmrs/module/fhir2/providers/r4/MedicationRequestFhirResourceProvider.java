@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationDispense;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
@@ -115,7 +116,9 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	        @IncludeParam(allow = { "MedicationRequest:" + MedicationRequest.SP_MEDICATION,
 	                "MedicationRequest:" + MedicationRequest.SP_REQUESTER,
 	                "MedicationRequest:" + MedicationRequest.SP_PATIENT,
-	                "MedicationRequest:" + MedicationRequest.SP_ENCOUNTER }) HashSet<Include> includes) {
+	                "MedicationRequest:" + MedicationRequest.SP_ENCOUNTER }) HashSet<Include> includes,
+	        @IncludeParam(reverse = true, allow = {
+	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
 		if (patientReference == null) {
 			patientReference = subjectReference;
 		}
@@ -124,7 +127,11 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 			includes = null;
 		}
 		
+		if (CollectionUtils.isEmpty(revIncludes)) {
+			revIncludes = null;
+		}
+		
 		return fhirMedicationRequestService.searchForMedicationRequests(patientReference, encounterReference, code,
-		    participantReference, medicationReference, id, lastUpdated, includes);
+		    participantReference, medicationReference, id, lastUpdated, includes, revIncludes);
 	}
 }

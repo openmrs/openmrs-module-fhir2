@@ -42,6 +42,7 @@ import org.openmrs.module.fhir2.api.FhirAllergyIntoleranceService;
 import org.openmrs.module.fhir2.api.FhirDiagnosticReportService;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.FhirLocationService;
+import org.openmrs.module.fhir2.api.FhirMedicationDispenseService;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.FhirObservationService;
@@ -50,6 +51,7 @@ import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.FhirServiceRequestService;
 import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.api.search.param.LocationSearchParams;
+import org.openmrs.module.fhir2.api.search.param.MedicationDispenseSearchParams;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -89,6 +91,9 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	
 	@Autowired
 	private FhirAllergyIntoleranceService allergyIntoleranceService;
+	
+	@Autowired
+	private FhirMedicationDispenseService medicationDispenseService;
 	
 	public Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams) {
 		List<PropParam<?>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);
@@ -144,9 +149,12 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				case FhirConstants.INCLUDE_PARTICIPANT_PARAM:
 					bundleProvider = handlePractitionerReverseInclude(referenceParams, revIncludeParam.getParamType());
 					break;
+				case FhirConstants.INCLUDE_PRESCRIPTION_PARAMETER:
+					bundleProvider = handlePrescriptionReverseInclude(referenceParams, revIncludeParam.getParamType());
+					break;
 			}
 			
-			if (bundleProvider != null) {
+			if (bundleProvider != null && !bundleProvider.isEmpty()) {
 				revIncludedResourcesSet.addAll(bundleProvider.getResources(0, -1));
 			}
 		});
@@ -245,7 +253,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				encounterSearchParams.setParticipant(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null,
+				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null, null,
 				    null);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
@@ -265,7 +273,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null,
+				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
@@ -278,10 +286,20 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	private IBundleProvider handleMedicationReverseInclude(ReferenceAndListParam params, String targetType) {
 		switch (targetType) {
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null,
+				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null, null,
 				    null);
 		}
 		
+		return null;
+	}
+	
+	private IBundleProvider handlePrescriptionReverseInclude(ReferenceAndListParam params, String targetType) {
+		switch (targetType) {
+			case FhirConstants.MEDICATION_DISPENSE:
+				MedicationDispenseSearchParams medicationDispenseSearchParams = new MedicationDispenseSearchParams();
+				medicationDispenseSearchParams.setMedicationRequest(params);
+				return medicationDispenseService.searchMedicationDispenses(medicationDispenseSearchParams);
+		}
 		return null;
 	}
 	
@@ -302,7 +320,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				encounterSearchParams.setSubject(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null,
+				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.SERVICE_REQUEST:
 			case FhirConstants.PROCEDURE_REQUEST:
