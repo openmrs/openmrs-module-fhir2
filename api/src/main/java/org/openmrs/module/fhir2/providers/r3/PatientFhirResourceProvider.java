@@ -9,12 +9,6 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import static lombok.AccessLevel.PACKAGE;
-
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -45,6 +39,7 @@ import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.MedicationDispense;
 import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -58,6 +53,11 @@ import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
+import java.util.HashSet;
+
+import static lombok.AccessLevel.PACKAGE;
 
 @Component("patientFhirR3ResourceProvider")
 @R3Provider
@@ -128,7 +128,8 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_PATIENT,
 	                "AllergyIntolerance:" + AllergyIntolerance.SP_PATIENT, "DiagnosticReport:" + DiagnosticReport.SP_PATIENT,
 	                "Encounter:" + Encounter.SP_PATIENT, "MedicationRequest:" + MedicationRequest.SP_PATIENT,
-	                "ProcedureRequest:" + ProcedureRequest.SP_PATIENT }) HashSet<Include> revIncludes) {
+	                "ProcedureRequest:" + ProcedureRequest.SP_PATIENT,
+	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
 		if (CollectionUtils.isEmpty(revIncludes)) {
 			revIncludes = null;
 		}

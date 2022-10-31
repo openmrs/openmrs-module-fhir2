@@ -9,13 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -57,6 +50,13 @@ import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @NoArgsConstructor
@@ -151,7 +151,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 					bundleProvider = handleMedicationReverseInclude(referenceParams, revIncludeParam.getParamType());
 					break;
 				case FhirConstants.INCLUDE_PATIENT_PARAM:
-					bundleProvider = handlePatientReverseInclude(referenceParams, revIncludeParam.getParamType());
+					bundleProvider = handlePatientReverseInclude(referenceParams, revIncludeParam.getParamType(),
+					    getRecursiveIncludes(includeSet), getRecursiveIncludes(revIncludeSet));
 					break;
 				case FhirConstants.INCLUDE_HAS_MEMBER_PARAM:
 				case FhirConstants.INCLUDE_RESULT_PARAM:
@@ -160,7 +161,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 					break;
 				case FhirConstants.INCLUDE_REQUESTER_PARAM:
 				case FhirConstants.INCLUDE_PARTICIPANT_PARAM:
-					bundleProvider = handlePractitionerReverseInclude(referenceParams, revIncludeParam.getParamType());
+					bundleProvider = handlePractitionerReverseInclude(referenceParams, revIncludeParam.getParamType(),
+					    getRecursiveIncludes(includeSet), getRecursiveIncludes(revIncludeSet));
 					break;
 				case FhirConstants.INCLUDE_PRESCRIPTION_PARAMETER:
 					bundleProvider = handlePrescriptionReverseInclude(referenceParams, revIncludeParam.getParamType());
@@ -259,15 +261,16 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
-	private IBundleProvider handlePractitionerReverseInclude(ReferenceAndListParam params, String targetType) {
+	private IBundleProvider handlePractitionerReverseInclude(ReferenceAndListParam params, String targetType,
+	        HashSet<Include> recursiveIncludes, HashSet<Include> recursiveRevIncludes) {
 		switch (targetType) {
 			case FhirConstants.ENCOUNTER:
 				EncounterSearchParams encounterSearchParams = new EncounterSearchParams();
 				encounterSearchParams.setParticipant(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null, null,
-				    null);
+				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null,
+				    recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(null, null, null, params, null, null, null, null);
@@ -317,7 +320,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
-	private IBundleProvider handlePatientReverseInclude(ReferenceAndListParam params, String targetType) {
+	private IBundleProvider handlePatientReverseInclude(ReferenceAndListParam params, String targetType,
+	        HashSet<Include> recursiveIncludes, HashSet<Include> recursiveRevIncludes) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
 				ObservationSearchParams observationSearchParams = new ObservationSearchParams();
@@ -334,8 +338,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				encounterSearchParams.setSubject(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null, null,
-				    null);
+				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null,
+				    recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.SERVICE_REQUEST:
 			case FhirConstants.PROCEDURE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(params, null, null, null, null, null, null, null);

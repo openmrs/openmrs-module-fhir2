@@ -9,12 +9,6 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import static lombok.AccessLevel.PACKAGE;
-
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -38,6 +32,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.Practitioner30_40;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.MedicationDispense;
 import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -49,6 +44,11 @@ import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
+import java.util.HashSet;
+
+import static lombok.AccessLevel.PACKAGE;
 
 @Component("practitionerFhirR3ResourceProvider")
 @R3Provider
@@ -113,7 +113,8 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(reverse = true, allow = { "Encounter:" + Encounter.SP_PARTICIPANT,
 	                "MedicationRequest:" + MedicationRequest.SP_REQUESTER,
-	                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER }) HashSet<Include> revIncludes) {
+	                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER,
+	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
 		if (CollectionUtils.isEmpty(revIncludes)) {
 			revIncludes = null;
 		}

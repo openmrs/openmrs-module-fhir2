@@ -9,12 +9,6 @@
  */
 package org.openmrs.module.fhir2.providers.r3;
 
-import static lombok.AccessLevel.PACKAGE;
-
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -50,6 +44,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.MedicationDispense;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirEncounterService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
@@ -58,6 +53,11 @@ import org.openmrs.module.fhir2.api.search.param.EncounterSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
+import java.util.HashSet;
+
+import static lombok.AccessLevel.PACKAGE;
 
 @Component("encounterFhirR3ResourceProvider")
 @R3Provider
@@ -132,7 +132,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	                "Encounter:" + Encounter.SP_PARTICIPANT }) HashSet<Include> includes,
 	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_ENCOUNTER,
 	                "DiagnosticReport:" + DiagnosticReport.SP_ENCOUNTER, "MedicationRequest:" + MedicationRequest.SP_CONTEXT,
-	                "ProcedureRequest:" + ProcedureRequest.SP_ENCOUNTER }) HashSet<Include> revIncludes) {
+	                "ProcedureRequest:" + ProcedureRequest.SP_ENCOUNTER,
+	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
 		if (patientParam != null) {
 			subjectReference = patientParam;
 		}
