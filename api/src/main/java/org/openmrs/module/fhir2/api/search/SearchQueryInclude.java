@@ -9,6 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -50,13 +57,6 @@ import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @NoArgsConstructor
@@ -148,7 +148,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 					    getRecursiveIncludes(includeSet), getRecursiveIncludes(revIncludeSet));
 					break;
 				case FhirConstants.INCLUDE_MEDICATION_PARAM:
-					bundleProvider = handleMedicationReverseInclude(referenceParams, revIncludeParam.getParamType());
+					bundleProvider = handleMedicationReverseInclude(referenceParams, revIncludeParam.getParamType(),
+					    getRecursiveIncludes(includeSet), getRecursiveIncludes(revIncludeSet));
 					break;
 				case FhirConstants.INCLUDE_PATIENT_PARAM:
 					bundleProvider = handlePatientReverseInclude(referenceParams, revIncludeParam.getParamType(),
@@ -300,11 +301,12 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
-	private IBundleProvider handleMedicationReverseInclude(ReferenceAndListParam params, String targetType) {
+	private IBundleProvider handleMedicationReverseInclude(ReferenceAndListParam params, String targetType,
+	        HashSet<Include> recursiveIncludes, HashSet<Include> recursiveRevIncludes) {
 		switch (targetType) {
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null, null,
-				    null);
+				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null,
+				    recursiveIncludes, recursiveRevIncludes);
 		}
 		
 		return null;

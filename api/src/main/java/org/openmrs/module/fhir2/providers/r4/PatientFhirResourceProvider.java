@@ -9,6 +9,12 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static lombok.AccessLevel.PACKAGE;
+
+import javax.annotation.Nonnull;
+
+import java.util.HashSet;
+
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -51,11 +57,6 @@ import org.openmrs.module.fhir2.api.search.param.PatientSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Nonnull;
-import java.util.HashSet;
-
-import static lombok.AccessLevel.PACKAGE;
 
 @Component("patientFhirR4ResourceProvider")
 @R4Provider

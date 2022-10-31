@@ -9,12 +9,6 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
-import static lombok.AccessLevel.PACKAGE;
-
-import javax.annotation.Nonnull;
-
-import java.util.HashSet;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -34,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
+import org.hl7.fhir.dstu3.model.MedicationDispense;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
@@ -44,6 +39,11 @@ import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
+import java.util.HashSet;
+
+import static lombok.AccessLevel.PACKAGE;
 
 @Component("medicationFhirR4ResourceProvider")
 @R4Provider
@@ -99,8 +99,9 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,
 	        @OptionalParam(name = Medication.SP_INGREDIENT_CODE) TokenAndListParam ingredientCode,
 	        @OptionalParam(name = Medication.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @IncludeParam(reverse = true, allow = {
-	                "MedicationRequest:" + MedicationRequest.SP_MEDICATION }) HashSet<Include> revIncludes) {
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+	        @IncludeParam(reverse = true, allow = { "MedicationRequest:" + MedicationRequest.SP_MEDICATION,
+	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
 		if (CollectionUtils.isEmpty(revIncludes)) {
 			revIncludes = null;
 		}
