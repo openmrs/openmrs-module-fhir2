@@ -135,7 +135,7 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 	private ConditionTranslator<Condition> translator;
 	
 	@Autowired
-	private SearchQueryInclude_2_2 searchQueryInclude;
+	private SearchQueryInclude searchQueryInclude;
 	
 	@Autowired
 	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
