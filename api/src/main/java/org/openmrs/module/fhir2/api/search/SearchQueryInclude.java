@@ -9,13 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -57,6 +50,13 @@ import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @NoArgsConstructor
@@ -111,7 +111,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 			revIncludeSet = (HashSet<Include>) revIncludeParamList.get(0).getParam();
 		}
 		
-		Set<IBaseResource> _includeResources = handleInclude(resourceList, includeSet, revIncludeSet);
+		Set<IBaseResource> _includeResources = handleInclude(resourceList, includeSet);
 		Set<IBaseResource> _revIncludeResources = handleRevInclude(resourceList, includeSet, revIncludeSet);
 		
 		Set<IBaseResource> resourcesToBeReturned = new HashSet<>();
@@ -179,8 +179,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Set<IBaseResource> handleInclude(List<U> resourceList, HashSet<Include> includeSet,
-	        HashSet<Include> revIncludeSet) {
+	public Set<IBaseResource> handleInclude(List<U> resourceList, HashSet<Include> includeSet) {
 		Set<IBaseResource> includedResourcesSet = new HashSet<>();
 		
 		if (CollectionUtils.isEmpty(includeSet)) {
