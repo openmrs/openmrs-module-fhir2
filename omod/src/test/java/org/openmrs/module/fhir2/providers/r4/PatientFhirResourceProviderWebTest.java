@@ -585,6 +585,26 @@ public class PatientFhirResourceProviderWebTest extends BaseFhirR4ResourceProvid
 		    hasProperty("paramType", equalTo(FhirConstants.ALLERGY_INTOLERANCE)))));
 	}
 	
+	@Test
+	public void shouldAddReverseIncludedMedicationRequestsWithIterativeMedicationDispenseToReturnedResults()
+	        throws Exception {
+		verifyUri("/Patient?_revinclude=MedicationRequest:patient&_revinclude:iterative=MedicationDispense:prescription");
+		
+		verify(patientService).searchForPatients(patientSearchParamsCaptor.capture());
+		HashSet<Include> revIncludesParam = patientSearchParamsCaptor.getValue().getRevIncludes();
+		
+		assertThat(revIncludesParam, notNullValue());
+		assertThat(revIncludesParam.size(), equalTo(2));
+		
+		assertThat(revIncludesParam, hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PATIENT_PARAM)),
+		    hasProperty("paramType", equalTo(FhirConstants.MEDICATION_REQUEST)))));
+		
+		assertThat(revIncludesParam,
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PRESCRIPTION_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.MEDICATION_DISPENSE)))));
+		
+	}
+	
 	private void verifyUri(String uri) throws Exception {
 		Patient patient = new Patient();
 		patient.setId(PATIENT_UUID);
