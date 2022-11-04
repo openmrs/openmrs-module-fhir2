@@ -323,7 +323,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR3ResourceProvide
 		verifyUri(String.format("/Person?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
 		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
-		DateRangeParam lastUpdated = personSearchParamsCaptor.getValue().getBirthDate();
+		DateRangeParam lastUpdated = personSearchParamsCaptor.getValue().getLastUpdated();
 		
 		assertThat(lastUpdated, notNullValue());
 		

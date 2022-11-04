@@ -154,16 +154,14 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
 		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
-
+		
 		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(birthdate.getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(birthdate.getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getUpperBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
@@ -172,14 +170,13 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
 		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
-
+		
 		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(birthdate.getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 		assertThat(birthdate.getUpperBound(), nullValue());
 	}
 	
@@ -189,14 +186,13 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
 		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
-
+		
 		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(birthdate.getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 		assertThat(birthdate.getUpperBound(), nullValue());
 	}
 	
@@ -206,15 +202,14 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
 		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
-
+		
 		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(birthdate.getLowerBound(), nullValue());
-		assertThat(birthdate.getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getUpperBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
@@ -223,15 +218,14 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
 		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
-
+		
 		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
 		assertThat(birthdate.getLowerBound(), nullValue());
-		assertThat(birthdate.getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getUpperBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
@@ -247,10 +241,8 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		upperBound.set(1980, Calendar.FEBRUARY, 2);
 		
 		assertThat(birthdate, notNullValue());
-		assertThat(birthdate.getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(lowerBound.getTime(), Calendar.DATE)));
-		assertThat(birthdate.getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(upperBound.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getLowerBound().getValue(), equalTo(DateUtils.truncate(lowerBound.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getUpperBound().getValue(), equalTo(DateUtils.truncate(upperBound.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
@@ -262,8 +254,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		assertThat(city, notNullValue());
 		assertThat(city.getValuesAsQueryTokens(), not(empty()));
-		assertThat(city.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(ADDRESS_FIELD));
+		assertThat(city.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(ADDRESS_FIELD));
 	}
 	
 	@Test
@@ -275,8 +266,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		assertThat(state, notNullValue());
 		assertThat(state.getValuesAsQueryTokens(), not(empty()));
-		assertThat(state.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(ADDRESS_FIELD));
+		assertThat(state.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(ADDRESS_FIELD));
 	}
 	
 	@Test
@@ -314,8 +304,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		assertThat(uuid, notNullValue());
 		assertThat(uuid.getValuesAsQueryTokens(), not(empty()));
-		assertThat(uuid.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(PERSON_UUID));
+		assertThat(uuid.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(PERSON_UUID));
 	}
 	
 	@Test
@@ -347,8 +336,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		assertThat(name, notNullValue());
 		assertThat(name.getValuesAsQueryTokens(), not(empty()));
-		assertThat(name.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(PERSON_NAME));
+		assertThat(name.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(PERSON_NAME));
 		
 		assertThat(gender, notNullValue());
 		assertThat(gender.getValuesAsQueryTokens(), not(empty()));
@@ -360,10 +348,8 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(birthdate.getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(birthdate.getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getUpperBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
@@ -375,8 +361,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		assertThat(include, notNullValue());
 		assertThat(include.size(), equalTo(1));
-		assertThat(include.iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
+		assertThat(include.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
 		assertThat(include.iterator().next().getParamType(), equalTo(FhirConstants.PERSON));
 	}
 	
@@ -389,8 +374,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 		
 		assertThat(include, notNullValue());
 		assertThat(include.size(), equalTo(1));
-		assertThat(include.iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_LINK_PARAM));
+		assertThat(include.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_LINK_PARAM));
 		assertThat(include.iterator().next().getParamType(), equalTo(FhirConstants.PERSON));
 		assertThat(include.iterator().next().getParamTargetType(), equalTo(FhirConstants.PATIENT));
 	}
