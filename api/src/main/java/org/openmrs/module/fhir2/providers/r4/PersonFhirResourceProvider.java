@@ -43,6 +43,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Person;
 import org.openmrs.module.fhir2.api.FhirPersonService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.search.param.PersonSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -110,8 +111,8 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 			includes = null;
 		}
 		
-		return fhirPersonService.searchForPeople(name, gender, birthDate, city, state, postalCode, country, id, lastUpdated,
-		    sort, includes);
+		return fhirPersonService.searchForPeople(new PersonSearchParams(name, gender, birthDate, city, state, postalCode,
+		        country, id, lastUpdated, sort, includes));
 	}
 	
 }
