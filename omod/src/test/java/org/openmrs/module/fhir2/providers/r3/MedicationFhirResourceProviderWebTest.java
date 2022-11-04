@@ -11,9 +11,12 @@ package org.openmrs.module.fhir2.providers.r3;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -200,6 +203,26 @@ public class MedicationFhirResourceProviderWebTest extends BaseFhirR3ResourcePro
 		    equalTo(FhirConstants.INCLUDE_MEDICATION_PARAM));
 		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(),
 		    equalTo(FhirConstants.MEDICATION_REQUEST));
+	}
+	
+	@Test
+	public void searchForMedications_shouldAddMedicationRequestsAndMedicationDispenseWithReturnedMedications()
+	        throws Exception {
+		verifyUri(
+		    "/Medication?_revinclude=MedicationRequest:medication&_revinclude:iterate=MedicationDispense:prescription");
+		
+		verify(fhirMedicationService).searchForMedications(isNull(), isNull(), isNull(), isNull(), isNull(),
+		    includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_MEDICATION_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.MEDICATION_REQUEST)))));
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PRESCRIPTION_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.MEDICATION_DISPENSE)))));
+		
 	}
 	
 	@Test

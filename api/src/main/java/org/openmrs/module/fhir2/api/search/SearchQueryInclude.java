@@ -9,13 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -58,6 +51,13 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Component
 @NoArgsConstructor
 public class SearchQueryInclude<U extends IBaseResource> {
@@ -96,11 +96,23 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	private FhirMedicationDispenseService medicationDispenseService;
 	
 	public Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams) {
-		List<PropParam<?>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);
-		Set<IBaseResource> _includeResources = handleInclude(resourceList, includeParamList);
 		
+		List<PropParam<?>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);
 		List<PropParam<?>> revIncludeParamList = theParams.getParameters(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER);
-		Set<IBaseResource> _revIncludeResources = handleRevInclude(resourceList, revIncludeParamList);
+		
+		HashSet<Include> includeSet = new HashSet<>();
+		HashSet<Include> revIncludeSet = new HashSet<>();
+		
+		if (CollectionUtils.isNotEmpty(includeParamList)) {
+			includeSet = (HashSet<Include>) includeParamList.get(0).getParam();
+		}
+		
+		if (CollectionUtils.isNotEmpty(revIncludeParamList)) {
+			revIncludeSet = (HashSet<Include>) revIncludeParamList.get(0).getParam();
+		}
+		
+		Set<IBaseResource> _includeResources = handleInclude(resourceList, includeSet);
+		Set<IBaseResource> _revIncludeResources = handleRevInclude(resourceList, includeSet, revIncludeSet);
 		
 		Set<IBaseResource> resourcesToBeReturned = new HashSet<>();
 		resourcesToBeReturned.addAll(_includeResources);
@@ -110,10 +122,11 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Set<IBaseResource> handleRevInclude(List<U> resourceList, List<PropParam<?>> revIncludeParamList) {
+	private Set<IBaseResource> handleRevInclude(List<U> resourceList, HashSet<Include> includeSet,
+	        HashSet<Include> revIncludeSet) {
 		Set<IBaseResource> revIncludedResourcesSet = new HashSet<>();
 		
-		if (CollectionUtils.isEmpty(revIncludeParamList)) {
+		if (CollectionUtils.isEmpty(revIncludeSet)) {
 			return revIncludedResourcesSet;
 		}
 		
@@ -122,7 +135,6 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		resourceList.forEach(resource -> params.addOr(new ReferenceParam(resource.getIdElement().getIdPart())));
 		referenceParams.addAnd(params);
 		
-		Set<Include> revIncludeSet = (HashSet<Include>) revIncludeParamList.get(0).getParam();
 		revIncludeSet.forEach(revIncludeParam -> {
 			IBundleProvider bundleProvider = null;
 			switch (revIncludeParam.getParamName()) {
@@ -132,13 +144,16 @@ public class SearchQueryInclude<U extends IBaseResource> {
 					break;
 				case FhirConstants.INCLUDE_CONTEXT_PARAM:
 				case FhirConstants.INCLUDE_ENCOUNTER_PARAM:
-					bundleProvider = handleEncounterReverseInclude(referenceParams, revIncludeParam.getParamType());
+					bundleProvider = handleEncounterReverseInclude(referenceParams, revIncludeParam.getParamType(),
+					    getRecursiveIncludes(includeSet), getRecursiveIncludes(revIncludeSet));
 					break;
 				case FhirConstants.INCLUDE_MEDICATION_PARAM:
-					bundleProvider = handleMedicationReverseInclude(referenceParams, revIncludeParam.getParamType());
+					bundleProvider = handleMedicationReverseInclude(referenceParams, revIncludeParam.getParamType(),
+					    getRecursiveIncludes(includeSet), getRecursiveIncludes(revIncludeSet));
 					break;
 				case FhirConstants.INCLUDE_PATIENT_PARAM:
-					bundleProvider = handlePatientReverseInclude(referenceParams, revIncludeParam.getParamType());
+					bundleProvider = handlePatientReverseInclude(referenceParams, revIncludeParam.getParamType(),
+					    getRecursiveIncludes(includeSet), getRecursiveIncludes(revIncludeSet));
 					break;
 				case FhirConstants.INCLUDE_HAS_MEMBER_PARAM:
 				case FhirConstants.INCLUDE_RESULT_PARAM:
@@ -147,7 +162,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 					break;
 				case FhirConstants.INCLUDE_REQUESTER_PARAM:
 				case FhirConstants.INCLUDE_PARTICIPANT_PARAM:
-					bundleProvider = handlePractitionerReverseInclude(referenceParams, revIncludeParam.getParamType());
+					bundleProvider = handlePractitionerReverseInclude(referenceParams, revIncludeParam.getParamType(),
+					    getRecursiveIncludes(includeSet), getRecursiveIncludes(revIncludeSet));
 					break;
 				case FhirConstants.INCLUDE_PRESCRIPTION_PARAMETER:
 					bundleProvider = handlePrescriptionReverseInclude(referenceParams, revIncludeParam.getParamType());
@@ -163,14 +179,13 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Set<IBaseResource> handleInclude(List<U> resourceList, List<PropParam<?>> includeParamList) {
+	public Set<IBaseResource> handleInclude(List<U> resourceList, HashSet<Include> includeSet) {
 		Set<IBaseResource> includedResourcesSet = new HashSet<>();
 		
-		if (CollectionUtils.isEmpty(includeParamList)) {
+		if (CollectionUtils.isEmpty(includeSet)) {
 			return includedResourcesSet;
 		}
 		
-		Set<Include> includeSet = (HashSet<Include>) includeParamList.get(0).getParam();
 		includeSet.forEach(includeParam -> {
 			switch (includeParam.getParamName()) {
 				case FhirConstants.INCLUDE_PART_OF_PARAM:
@@ -246,15 +261,16 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
-	private IBundleProvider handlePractitionerReverseInclude(ReferenceAndListParam params, String targetType) {
+	private IBundleProvider handlePractitionerReverseInclude(ReferenceAndListParam params, String targetType,
+	        HashSet<Include> recursiveIncludes, HashSet<Include> recursiveRevIncludes) {
 		switch (targetType) {
 			case FhirConstants.ENCOUNTER:
 				EncounterSearchParams encounterSearchParams = new EncounterSearchParams();
 				encounterSearchParams.setParticipant(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null, null,
-				    null);
+				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null,
+				    recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(null, null, null, params, null, null, null, null);
@@ -263,7 +279,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
-	private IBundleProvider handleEncounterReverseInclude(ReferenceAndListParam params, String targetType) {
+	private IBundleProvider handleEncounterReverseInclude(ReferenceAndListParam params, String targetType,
+	        HashSet<Include> recursiveIncludes, HashSet<Include> recursiveRevIncludes) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
 				ObservationSearchParams observationSearchParams = new ObservationSearchParams();
@@ -273,8 +290,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null, null,
-				    null);
+				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null,
+				    recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(null, null, params, null, null, null, null, null);
@@ -283,11 +300,12 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
-	private IBundleProvider handleMedicationReverseInclude(ReferenceAndListParam params, String targetType) {
+	private IBundleProvider handleMedicationReverseInclude(ReferenceAndListParam params, String targetType,
+	        HashSet<Include> recursiveIncludes, HashSet<Include> recursiveRevIncludes) {
 		switch (targetType) {
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null, null,
-				    null);
+				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null,
+				    recursiveIncludes, recursiveRevIncludes);
 		}
 		
 		return null;
@@ -303,7 +321,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		return null;
 	}
 	
-	private IBundleProvider handlePatientReverseInclude(ReferenceAndListParam params, String targetType) {
+	private IBundleProvider handlePatientReverseInclude(ReferenceAndListParam params, String targetType,
+	        HashSet<Include> recursiveIncludes, HashSet<Include> recursiveRevIncludes) {
 		switch (targetType) {
 			case FhirConstants.OBSERVATION:
 				ObservationSearchParams observationSearchParams = new ObservationSearchParams();
@@ -320,8 +339,8 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				encounterSearchParams.setSubject(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null, null,
-				    null);
+				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null,
+				    recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.SERVICE_REQUEST:
 			case FhirConstants.PROCEDURE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(params, null, null, null, null, null, null, null);
@@ -607,6 +626,10 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		includedResources.addAll(medicationRequestService.get(uniqueUuids));
 		
 		return includedResources;
+	}
+	
+	private HashSet<Include> getRecursiveIncludes(HashSet<Include> includeSet) {
+		return (HashSet<Include>) includeSet.stream().filter(res -> res.isRecurse()).collect(Collectors.toSet());
 	}
 	
 	private static List<String> getIdsFromReferenceList(List<Reference> referenceList) {
