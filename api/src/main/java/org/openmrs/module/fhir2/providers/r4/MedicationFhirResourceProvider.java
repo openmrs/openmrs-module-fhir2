@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
+import org.hl7.fhir.dstu3.model.MedicationDispense;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
@@ -99,8 +100,9 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = Medication.SP_FORM) TokenAndListParam dosageForm,
 	        @OptionalParam(name = Medication.SP_INGREDIENT_CODE) TokenAndListParam ingredientCode,
 	        @OptionalParam(name = Medication.SP_RES_ID) TokenAndListParam id,
-	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated, @IncludeParam(reverse = true, allow = {
-	                "MedicationRequest:" + MedicationRequest.SP_MEDICATION }) HashSet<Include> revIncludes) {
+	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
+	        @IncludeParam(reverse = true, allow = { "MedicationRequest:" + MedicationRequest.SP_MEDICATION,
+	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
 		if (CollectionUtils.isEmpty(revIncludes)) {
 			revIncludes = null;
 		}

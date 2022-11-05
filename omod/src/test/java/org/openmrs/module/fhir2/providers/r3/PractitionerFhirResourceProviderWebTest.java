@@ -344,6 +344,24 @@ public class PractitionerFhirResourceProviderWebTest extends BaseFhirR3ResourceP
 	}
 	
 	@Test
+	public void findPractitioners_shouldAddReverseIncludedMedicationRequestsWithIterativeMedicationDispenseToReturnedResults()
+	        throws Exception {
+		verifyUri("/Practitioner?_revinclude=MedicationRequest:requester&_revinclude=MedicationDispense:prescription");
+		
+		verify(practitionerService).searchForPractitioners(any(), any(), any(), any(), any(), any(), any(), any(), any(),
+		    any(), includeArgumentCaptor.capture());
+		
+		assertThat(includeArgumentCaptor.getValue(), notNullValue());
+		assertThat(includeArgumentCaptor.getValue().size(), equalTo(2));
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_REQUESTER_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.MEDICATION_REQUEST)))));
+		assertThat(includeArgumentCaptor.getValue(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PRESCRIPTION_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.MEDICATION_DISPENSE)))));
+	}
+	
+	@Test
 	public void findPractitioners_shouldHandleComplexQuery() throws Exception {
 		verifyUri(String.format("/Practitioner?identifier=%s&name=%s", PRACTITIONER_IDENTIFIER, NAME));
 		

@@ -678,6 +678,23 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR4ResourceProv
 	}
 	
 	@Test
+	public void shouldHandleIterativeMedicationDispenseReverseInclude() throws Exception {
+		verifyUri("/Encounter?_revinclude=MedicationRequest:encounter&_revinclude:iterate=MedicationDispense:prescription");
+		
+		verify(encounterService).searchForEncounters(paramCaptor.capture());
+		
+		assertThat(paramCaptor.getValue().getRevIncludes(), notNullValue());
+		assertThat(paramCaptor.getValue().getRevIncludes().size(), equalTo(2));
+		
+		assertThat(paramCaptor.getValue().getRevIncludes(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_ENCOUNTER_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.MEDICATION_REQUEST)))));
+		assertThat(paramCaptor.getValue().getRevIncludes(),
+		    hasItem(allOf(hasProperty("paramName", equalTo(FhirConstants.INCLUDE_PRESCRIPTION_PARAM)),
+		        hasProperty("paramType", equalTo(FhirConstants.MEDICATION_DISPENSE)))));
+	}
+	
+	@Test
 	public void shouldHandleHasAndListParameter() throws Exception {
 		verifyUri(
 		    "/Encounter?_has:MedicationRequest:encounter:intent=order&_has:MedicationRequest:encounter:status=active,draft");

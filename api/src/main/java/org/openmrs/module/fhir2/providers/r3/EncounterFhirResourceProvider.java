@@ -43,6 +43,7 @@ import org.hl7.fhir.dstu3.model.DiagnosticReport;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.dstu3.model.MedicationDispense;
 import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -132,7 +133,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	                "Encounter:" + Encounter.SP_PARTICIPANT }) HashSet<Include> includes,
 	        @IncludeParam(reverse = true, allow = { "Observation:" + Observation.SP_ENCOUNTER,
 	                "DiagnosticReport:" + DiagnosticReport.SP_ENCOUNTER, "MedicationRequest:" + MedicationRequest.SP_CONTEXT,
-	                "ProcedureRequest:" + ProcedureRequest.SP_ENCOUNTER }) HashSet<Include> revIncludes) {
+	                "ProcedureRequest:" + ProcedureRequest.SP_ENCOUNTER,
+	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
 		if (patientParam != null) {
 			subjectReference = patientParam;
 		}

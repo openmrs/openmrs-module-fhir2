@@ -38,6 +38,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.hl7.fhir.convertors.conv30_40.Practitioner30_40;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.MedicationDispense;
 import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -113,7 +114,8 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(reverse = true, allow = { "Encounter:" + Encounter.SP_PARTICIPANT,
 	                "MedicationRequest:" + MedicationRequest.SP_REQUESTER,
-	                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER }) HashSet<Include> revIncludes) {
+	                "ProcedureRequest:" + ProcedureRequest.SP_REQUESTER,
+	                "MedicationDispense:" + MedicationDispense.SP_PRESCRIPTION }) HashSet<Include> revIncludes) {
 		if (CollectionUtils.isEmpty(revIncludes)) {
 			revIncludes = null;
 		}
