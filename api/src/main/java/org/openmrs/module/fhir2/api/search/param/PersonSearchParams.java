@@ -63,10 +63,10 @@ public class PersonSearchParams extends BaseResourceSearchParams {
 		        .addParameter(FhirConstants.NAME_SEARCH_HANDLER, FhirConstants.NAME_PROPERTY, getName())
 		        .addParameter(FhirConstants.GENDER_SEARCH_HANDLER, getGender())
 		        .addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER, getBirthDate())
-		        .addParameter(FhirConstants.CITY_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, getCity())
-		        .addParameter(FhirConstants.STATE_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, getState())
-		        .addParameter(FhirConstants.POSTALCODE_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, getPostalCode())
-		        .addParameter(FhirConstants.COUNTRY_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, getCountry());
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.CITY_PROPERTY, getCity())
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.STATE_PROPERTY, getState())
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.POSTAL_CODE_PROPERTY, getPostalCode())
+		        .addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER, FhirConstants.COUNTRY_PROPERTY, getCountry());
 	}
 	
 }
