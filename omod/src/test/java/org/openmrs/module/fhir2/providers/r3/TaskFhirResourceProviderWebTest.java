@@ -15,13 +15,11 @@ import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
+import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.providers.r4.MockIBundleProvider;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -81,16 +80,10 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	
 	@Getter(AccessLevel.PUBLIC)
 	private TaskFhirResourceProvider resourceProvider;
-	
+
 	@Captor
-	private ArgumentCaptor<ReferenceAndListParam> referenceAndListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<TokenAndListParam> tokenAndListParamArgumentCaptor;
-	
-	@Captor
-	private ArgumentCaptor<DateRangeParam> dateRangeParamArgumentCaptor;
-	
+	private ArgumentCaptor<TaskSearchParams> taskSearchParamsArgumentCaptor;
+
 	@Before
 	public void setup() throws ServletException {
 		resourceProvider = new TaskFhirResourceProvider();
@@ -201,18 +194,19 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	public void searchForTasks_shouldReturnBundleWithMatchingBasedOnResourceUUID() throws Exception {
 		verifyURI(String.format("/Task?based-on:%s=%s", FhirConstants.SERVICE_REQUEST, BASED_ON_UUID));
 		
-		verify(service).searchForTasks(referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull());
-		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		verify(service).searchForTasks(taskSearchParamsArgumentCaptor.capture());
+
+		ReferenceAndListParam service_request = taskSearchParamsArgumentCaptor.getValue().getBasedOnReference();
+
+		assertThat(service_request, notNullValue());
+		assertThat(service_request.getValuesAsQueryTokens(), not(empty()));
+		assertThat(service_request.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
 		        .get(0).getResourceType(),
 		    equalTo(FhirConstants.SERVICE_REQUEST));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		assertThat(service_request.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
 		        .get(0).getChain(),
 		    equalTo(null));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		assertThat(service_request.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
 		        .get(0).getValue(),
 		    equalTo(BASED_ON_UUID));
 	}
@@ -221,18 +215,19 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	public void searchForTasks_shouldReturnBundleWithMatchingOwnerResourceUUID() throws Exception {
 		verifyURI(String.format("/Task?owner:%s=%s", FhirConstants.PRACTITIONER, OWNER_UUID));
 		
-		verify(service).searchForTasks(isNull(), referenceAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull());
+		verify(service).searchForTasks(taskSearchParamsArgumentCaptor.capture());
+
+		ReferenceAndListParam owner = taskSearchParamsArgumentCaptor.getValue().getOwnerReference();
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		assertThat(owner, notNullValue());
+		assertThat(owner.getValuesAsQueryTokens(), not(empty()));
+		assertThat(owner.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
 		        .get(0).getResourceType(),
 		    equalTo(FhirConstants.PRACTITIONER));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		assertThat(owner.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
 		        .get(0).getChain(),
 		    equalTo(null));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		assertThat(owner.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
 		        .get(0).getValue(),
 		    equalTo(OWNER_UUID));
 	}
@@ -241,12 +236,13 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	public void searchForTasks_shouldReturnBundleWithMatchingStatus() throws Exception {
 		verifyURI(String.format("/Task?status=%s", Task.TaskStatus.ACCEPTED.toString()));
 		
-		verify(service).searchForTasks(isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(),
-		    isNull(), isNull());
+		verify(service).searchForTasks(taskSearchParamsArgumentCaptor.capture());
+
+		TokenAndListParam status = taskSearchParamsArgumentCaptor.getValue().getStatus();
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		assertThat(status, notNullValue());
+		assertThat(status.getValuesAsQueryTokens(), not(empty()));
+		assertThat(status.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
 		    equalTo(Task.TaskStatus.ACCEPTED.toString()));
 	}
@@ -256,24 +252,26 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 		verifyURI(String.format("/Task?based-on:%s=%s&status=%s", FhirConstants.SERVICE_REQUEST, BASED_ON_UUID,
 		    Task.TaskStatus.ACCEPTED.toString()));
 		
-		verify(service).searchForTasks(referenceAndListParamArgumentCaptor.capture(), isNull(),
-		    tokenAndListParamArgumentCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		verify(service).searchForTasks(taskSearchParamsArgumentCaptor.capture());
+
+		TokenAndListParam status = taskSearchParamsArgumentCaptor.getValue().getStatus();
+		ReferenceAndListParam serviceRequest = taskSearchParamsArgumentCaptor.getValue().getBasedOnReference();
 		
-		assertThat(referenceAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		assertThat(serviceRequest, notNullValue());
+		assertThat(serviceRequest.getValuesAsQueryTokens(), not(empty()));
+		assertThat(serviceRequest.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
 		        .get(0).getResourceType(),
 		    equalTo(FhirConstants.SERVICE_REQUEST));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		assertThat(serviceRequest.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
 		        .get(0).getChain(),
 		    equalTo(null));
-		assertThat(referenceAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
+		assertThat(serviceRequest.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
 		        .get(0).getValue(),
 		    equalTo(BASED_ON_UUID));
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		assertThat(status, notNullValue());
+		assertThat(status.getValuesAsQueryTokens(), not(empty()));
+		assertThat(status.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
 		    equalTo(Task.TaskStatus.ACCEPTED.toString()));
 	}
@@ -282,12 +280,12 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	public void searchForTasks_shouldReturnBundleWithMatchingUUID() throws Exception {
 		verifyURI(String.format("/Task?_id=%s", TASK_UUID));
 		
-		verify(service).searchForTasks(isNull(), isNull(), isNull(), tokenAndListParamArgumentCaptor.capture(), isNull(),
-		    isNull(), isNull());
+		verify(service).searchForTasks(taskSearchParamsArgumentCaptor.capture());
+		TokenAndListParam uuid = taskSearchParamsArgumentCaptor.getValue().getId();
 		
-		assertThat(tokenAndListParamArgumentCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListParamArgumentCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
+		assertThat(uuid, notNullValue());
+		assertThat(uuid.getValuesAsQueryTokens(), not(empty()));
+		assertThat(uuid.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
 		        .getValue(),
 		    equalTo(TASK_UUID));
 	}
@@ -296,24 +294,24 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderW
 	public void searchForTasks_shouldReturnBundleWithMatchingLastUpdatedDate() throws Exception {
 		verifyURI(String.format("/Task?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
-		verify(service).searchForTasks(isNull(), isNull(), isNull(), isNull(), dateRangeParamArgumentCaptor.capture(),
-		    isNull(), isNull());
+		verify(service).searchForTasks(taskSearchParamsArgumentCaptor.capture());
+		DateRangeParam lastUpdatedDate = taskSearchParamsArgumentCaptor.getValue().getLastUpdated();
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue(), notNullValue());
+		assertThat(lastUpdatedDate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2020, Calendar.SEPTEMBER, 3);
 		
-		assertThat(dateRangeParamArgumentCaptor.getValue().getLowerBound().getValue(),
+		assertThat(lastUpdatedDate.getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeParamArgumentCaptor.getValue().getUpperBound().getValue(),
+		assertThat(lastUpdatedDate.getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	private void verifyURI(String uri) throws Exception {
 		Task condition = new Task();
 		condition.setId(TASK_UUID);
-		when(service.searchForTasks(any(), any(), any(), any(), any(), any(), any()))
+		when(service.searchForTasks(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(condition), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();

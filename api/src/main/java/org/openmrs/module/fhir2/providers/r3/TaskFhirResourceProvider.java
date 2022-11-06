@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.openmrs.module.fhir2.providers.util.TaskVersionConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,6 +106,6 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 			includes = null;
 		}
 		return new SearchQueryBundleProviderR3Wrapper(
-		        fhirTaskService.searchForTasks(basedOnReference, ownerReference, status, id, lastUpdated, sort, includes));
+		        fhirTaskService.searchForTasks(new TaskSearchParams(basedOnReference, ownerReference, status, id, lastUpdated, sort, includes)));
 	}
 }

@@ -39,6 +39,7 @@ import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.api.translators.TaskTranslator;
 import org.openmrs.module.fhir2.model.FhirTask;
 
@@ -213,7 +214,7 @@ public class FhirTaskServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(openmrsTask)).thenReturn(task);
 		
-		IBundleProvider results = fhirTaskService.searchForTasks(null, null, null, null, null, null, null);
+		IBundleProvider results = fhirTaskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		

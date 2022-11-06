@@ -18,7 +18,6 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +51,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirTaskService;
+import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -173,7 +173,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		List<Task> tasks = new ArrayList<>();
 		tasks.add(task);
 		
-		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), any()))
+		when(taskService.searchForTasks(any()))
 		        .thenReturn(new MockIBundleProvider<>(tasks, 10, 1));
 		
 		TokenAndListParam status = new TokenAndListParam();
@@ -205,7 +205,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Task:patient"));
 		
-		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), argThat(is(includes))))
+		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, includes)))
 		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(task, new Patient()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
@@ -225,7 +225,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Task:owner"));
 		
-		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), argThat(is(includes))))
+		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, includes)))
 		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(task, new Practitioner()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
@@ -245,7 +245,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Task:encounter"));
 		
-		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), argThat(is(includes))))
+		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, includes)))
 		        .thenReturn(new MockIBundleProvider<>(Arrays.asList(task, new Encounter()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);
@@ -265,7 +265,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirProvenanceResourceTest
 		HashSet<Include> includes = new HashSet<>();
 		includes.add(new Include("Task:based-on"));
 		
-		when(taskService.searchForTasks(any(), any(), any(), any(), any(), any(), argThat(is(includes)))).thenReturn(
+		when(taskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, includes))).thenReturn(
 		    new MockIBundleProvider<>(Arrays.asList(task, new ServiceRequest()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchTasks(null, null, null, null, null, null, includes);

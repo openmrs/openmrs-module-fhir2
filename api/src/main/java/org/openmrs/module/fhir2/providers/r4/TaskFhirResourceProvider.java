@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
+import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -94,6 +95,6 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 		if (CollectionUtils.isEmpty(includes)) {
 			includes = null;
 		}
-		return service.searchForTasks(basedOnReference, ownerReference, status, id, lastUpdated, sort, includes);
+		return service.searchForTasks(new TaskSearchParams(basedOnReference, ownerReference, status, id, lastUpdated, sort, includes));
 	}
 }

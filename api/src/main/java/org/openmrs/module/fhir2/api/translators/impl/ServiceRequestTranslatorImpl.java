@@ -33,6 +33,7 @@ import org.openmrs.Order;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
 import org.openmrs.module.fhir2.api.FhirTaskService;
+import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.OrderIdentifierTranslator;
@@ -133,10 +134,10 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 	}
 	
 	private Reference determineServiceRequestPerformer(String orderUuid) {
-		IBundleProvider results = taskService.searchForTasks(
+		IBundleProvider results = taskService.searchForTasks(new TaskSearchParams(
 		    new ReferenceAndListParam()
 		            .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
-		    null, null, null, null, null, null);
+		    null, null, null, null, null, null));
 		
 		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
 		        .collect(Collectors.toList());
