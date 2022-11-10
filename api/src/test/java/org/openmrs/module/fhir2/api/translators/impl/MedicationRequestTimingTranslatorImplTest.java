@@ -82,10 +82,12 @@ public class MedicationRequestTimingTranslatorImplTest {
 		oncePerDayFhirConcept = new CodeableConcept();
 		oncePerDayFhirConcept.addCoding(new Coding("system", "code", "display"));
 		oncePerDayFrequency = new OrderFrequency();
+		oncePerDayFrequency.setUuid("once-per-day-frequency-uuid");
 		oncePerDayFrequency.setConcept(oncePerDayConcept);
 		when(conceptTranslator.toFhirResource(oncePerDayConcept)).thenReturn(oncePerDayFhirConcept);
 		when(conceptTranslator.toOpenmrsType(oncePerDayFhirConcept)).thenReturn(oncePerDayConcept);
 		when(orderService.getOrderFrequencyByConcept(oncePerDayConcept)).thenReturn(oncePerDayFrequency);
+		when(orderService.getOrderFrequencyByUuid("once-per-day-frequency-uuid")).thenReturn(oncePerDayFrequency);
 	}
 	
 	@Test
@@ -141,9 +143,20 @@ public class MedicationRequestTimingTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldSetOrderFrequency() {
+	public void toOpenmrsType_shouldSetOrderFrequencyFromConceptRef() {
 		Timing timing = new Timing();
 		timing.setCode(oncePerDayFhirConcept);
+		assertThat(drugOrder.getFrequency(), nullValue());
+		drugOrder = timingTranslator.toOpenmrsType(drugOrder, timing);
+		assertThat(drugOrder.getFrequency(), equalTo(oncePerDayFrequency));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetOrderFrequencyUsingFrequencyRef() {
+		Timing timing = new Timing();
+		CodeableConcept frequencyRef = new CodeableConcept();
+		frequencyRef.addCoding(new Coding("system", "once-per-day-frequency-uuid", "QD"));
+		timing.setCode(frequencyRef);
 		assertThat(drugOrder.getFrequency(), nullValue());
 		drugOrder = timingTranslator.toOpenmrsType(drugOrder, timing);
 		assertThat(drugOrder.getFrequency(), equalTo(oncePerDayFrequency));
