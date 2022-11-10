@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Timing;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
@@ -58,9 +59,16 @@ public class MedicationRequestTimingTranslatorImpl implements MedicationRequestT
 		}
 		if (timing.hasCode()) {
 			OrderFrequency frequency = null;
-			Concept frequencyConcept = conceptTranslator.toOpenmrsType(timing.getCode());
-			if (frequencyConcept != null) {
-				frequency = orderService.getOrderFrequencyByConcept(frequencyConcept);
+			for (Coding coding : timing.getCode().getCoding()) {
+				if (coding.getCode() != null && frequency == null) {
+					frequency = orderService.getOrderFrequencyByUuid(coding.getCode());
+				}
+			}
+			if (frequency == null) {
+				Concept frequencyConcept = conceptTranslator.toOpenmrsType(timing.getCode());
+				if (frequencyConcept != null) {
+					frequency = orderService.getOrderFrequencyByConcept(frequencyConcept);
+				}
 			}
 			drugOrder.setFrequency(frequency);
 		}
