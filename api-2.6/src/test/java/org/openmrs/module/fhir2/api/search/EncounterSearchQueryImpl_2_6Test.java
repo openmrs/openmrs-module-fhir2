@@ -9,16 +9,6 @@
  */
 package org.openmrs.module.fhir2.api.search;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.iterableWithSize;
-import static org.hamcrest.Matchers.notNullValue;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -37,6 +27,16 @@ import org.openmrs.module.fhir2.api.translators.EncounterTranslator;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.iterableWithSize;
+import static org.hamcrest.Matchers.notNullValue;
 
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class EncounterSearchQueryImpl_2_6Test extends BaseModuleContextSensitiveTest {
@@ -93,11 +93,11 @@ public class EncounterSearchQueryImpl_2_6Test extends BaseModuleContextSensitive
 		
 		assertThat(results, notNullValue());
 		
-		assertThat(resultList.size(), equalTo(10)); // reverse included resources added as part of the result list
+		assertThat(resultList.size(), equalTo(8)); // reverse included resources added as part of the result list
 		assertThat(resultList.stream().filter(result -> result instanceof Encounter).collect(Collectors.toList()),
 		    is(iterableWithSize(1))); // the actual matched encounter
 		assertThat(resultList.stream().filter(result -> result instanceof MedicationRequest).collect(Collectors.toList()),
-		    is(iterableWithSize(8))); // 8 requests that reference that encounter
+		    is(iterableWithSize(6))); // 8 requests that reference that encounter
 		assertThat(resultList.stream().filter(result -> result instanceof MedicationDispense).collect(Collectors.toList()),
 		    is(iterableWithSize(1))); // 1 dispense that references the above requests
 	}

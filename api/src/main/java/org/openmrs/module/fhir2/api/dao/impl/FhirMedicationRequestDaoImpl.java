@@ -14,15 +14,58 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
 import org.openmrs.DrugOrder;
+import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Nonnull;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> implements FhirMedicationRequestDao {
+	
+	@Override
+	@Transactional(readOnly = true)
+	public DrugOrder get(@Nonnull String uuid) {
+		DrugOrder result = super.get(uuid);
+		return result != null && result.getAction() != null && result.getAction() != Order.Action.DISCONTINUE ? result
+		        : null;
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	@SuppressWarnings("unchecked")
+	public List<DrugOrder> get(@Nonnull Collection<String> uuids) {
+		List<DrugOrder> results = super.get(uuids);
+		if (results == null) {
+			return results;
+		} else {
+			return results.stream()
+			        .filter(order -> order.getAction() == null || order.getAction() != Order.Action.DISCONTINUE)
+			        .collect(Collectors.toList());
+		}
+	}
+	
+	@Override
+	public List<DrugOrder> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids) {
+		List<DrugOrder> results = super.getSearchResults(theParams, resourceUuids);
+		if (results == null) {
+			return results;
+		} else {
+			return results.stream()
+			        .filter(order -> order.getAction() == null || order.getAction() != Order.Action.DISCONTINUE)
+			        .collect(Collectors.toList());
+		}
+		
+	}
 	
 	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
@@ -52,6 +95,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					break;
 			}
 		});
+		excludeDiscontinueOrders(criteria);
 	}
 	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
@@ -64,4 +108,8 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 		}
 	}
 	
+	private void excludeDiscontinueOrders(Criteria criteria) {
+		// exclude "discontinue" orders, see: https://issues.openmrs.org/browse/FM2-532
+		criteria.add(Restrictions.ne("action", Order.Action.DISCONTINUE));
+	}
 }

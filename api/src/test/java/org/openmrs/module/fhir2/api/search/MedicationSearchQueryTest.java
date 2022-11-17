@@ -306,8 +306,8 @@ public class MedicationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(6)); // reverse included resources added as part of the result list
-		assertThat(resultList.subList(1, 6),
+		assertThat(resultList.size(), equalTo(5)); // reverse included resources added as part of the result list
+		assertThat(resultList.subList(1, 5),
 		    everyItem(allOf(is(instanceOf(MedicationRequest.class)), hasProperty("medicationReference",
 		        hasProperty("referenceElement", hasProperty("idPart", equalTo(MEDICATION_REVINCLUDE_UUID)))))));
 	}

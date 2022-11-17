@@ -91,11 +91,11 @@ public class PatientSearchQueryImpl_2_6Test extends BaseModuleContextSensitiveTe
 		
 		assertThat(results, notNullValue());
 		
-		assertThat(resultList.size(), equalTo(10)); // reverse included resources added as part of the result list
+		assertThat(resultList.size(), equalTo(8)); // reverse included resources added as part of the result list
 		assertThat(resultList.stream().filter(result -> result instanceof Patient).collect(Collectors.toList()),
 		    is(iterableWithSize(1))); // the actual matched patient
 		assertThat(resultList.stream().filter(result -> result instanceof MedicationRequest).collect(Collectors.toList()),
-		    is(iterableWithSize(8))); // 8 requests that reference that patient
+		    is(iterableWithSize(6))); // 6 requests that reference that patient (excluding discontinue orders)
 		assertThat(resultList.stream().filter(result -> result instanceof MedicationDispense).collect(Collectors.toList()),
 		    is(iterableWithSize(1))); // 1 dispense that references the above requests
 	}

@@ -44,6 +44,8 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String ENCOUNTER_WITH_NO_DRUG_ORDERS = "eec646cb-c847-45a7-98bc-91c8c4f70add"; // 4 in standard test dataset
 	
+	private static final String ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER = "fe98c4f0-0ceb-4c61-bd27-a013a90d4d5e";
+	
 	private static final String ENCOUNTER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml";
 	
 	@Autowired
@@ -96,5 +98,19 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		List<String> matchingUuids = dao.getSearchResultUuids(theParams);
 		assertThat("Encounter with Drug Orders is returned", matchingUuids.contains(ENCOUNTER_WITH_DRUG_ORDERS));
 		assertThat("Encounter without Drug Orders is not returned", !matchingUuids.contains(ENCOUNTER_WITH_NO_DRUG_ORDERS));
+	}
+	
+	@Test
+	public void shouldNotReturnEncounterThatHasOnlyDiscontinueOrder() {
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "intent", "order"));
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		List<String> matchingUuids = dao.getSearchResultUuids(theParams);
+		assertThat("Encounter with only Discontinue Order is not returned",
+		    !matchingUuids.contains(ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER));
 	}
 }

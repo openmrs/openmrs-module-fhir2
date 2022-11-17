@@ -61,6 +61,8 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 	
 	private static final String MEDICATION_REQUEST_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
 	
+	private static final String DISCONTINUE_ORDER_UUID = "b951a436-c775-4dfc-9432-e19446d18c28";
+	
 	private static final String PATIENT_UUID = "86526ed5-3c11-11de-a0ba-001e3766667a";
 	
 	private static final String PATIENT_GIVEN_NAME = "Moody";
@@ -142,6 +144,25 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID))));
+	}
+	
+	// see: https://issues.openmrs.org/browse/FM2-532
+	@Test
+	public void searchForMedicationRequest_shouldNotIncludeDiscontinuedOrder() {
+		ReferenceAndListParam patientReference = new ReferenceAndListParam()
+		        .addAnd(new ReferenceOrListParam().add(new ReferenceParam().setValue(PATIENT_UUID)));
+		
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		
+		List<MedicationRequest> resultList = get(results);
+		
+		assertThat(resultList, not(empty()));
+		assertThat(resultList, not(hasItem(hasProperty("id", equalTo(DISCONTINUE_ORDER_UUID)))));
 	}
 	
 	@Test
@@ -497,12 +518,10 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
-		
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
-		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(resultList, hasSize(equalTo(11)));
 	}
 	
 	@Test
@@ -524,12 +543,10 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
-		
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(resultList, hasSize(equalTo(11)));
 	}
 	
 	@Test
@@ -567,12 +584,10 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
-		
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
-		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(resultList, hasSize(equalTo(11)));
 	}
 	
 	@Test
@@ -596,12 +611,10 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
-		
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(resultList, hasSize(equalTo(11)));
 	}
 	
 	@Test
@@ -641,12 +654,10 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
-		
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, notNullValue());
-		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(resultList, hasSize(equalTo(11)));
 	}
 	
 	@Test
@@ -670,12 +681,10 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
-		
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(resultList, hasSize(equalTo(11)));
 	}
 	
 	@Test
@@ -717,12 +726,10 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
-		
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(resultList, hasSize(equalTo(11)));
 	}
 	
 	@Test
@@ -745,12 +752,10 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
-		
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(resultList, hasSize(equalTo(11)));
 	}
 	
 	@Test
@@ -790,12 +795,10 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
-		
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(resultList, hasSize(equalTo(11)));
 	}
 	
 	@Test
@@ -818,12 +821,10 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(13));
-		
 		List<MedicationRequest> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(equalTo(10)));
+		assertThat(resultList, hasSize(equalTo(11)));
 		
 		assertThat(resultList.get(0).getRequester().getIdentifier().getValue(), equalTo(PARTICIPANT_IDENTIFIER));
 	}
@@ -1238,7 +1239,7 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 	}
 	
 	private List<MedicationRequest> get(IBundleProvider results) {
-		return results.getResources(0, 10).stream().filter(it -> it instanceof MedicationRequest)
+		return results.getAllResources().stream().filter(it -> it instanceof MedicationRequest)
 		        .map(it -> (MedicationRequest) it).collect(Collectors.toList());
 	}
 	

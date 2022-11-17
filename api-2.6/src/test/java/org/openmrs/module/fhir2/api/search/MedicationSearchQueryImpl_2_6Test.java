@@ -98,11 +98,11 @@ public class MedicationSearchQueryImpl_2_6Test extends BaseModuleContextSensitiv
 		
 		assertThat(results, Matchers.notNullValue());
 		assertThat(resultList, not(empty()));
-		assertThat(resultList, hasSize(Matchers.equalTo(7))); // included resources added as part of result list
+		assertThat(resultList, hasSize(Matchers.equalTo(6))); // included resources added as part of result list
 		assertThat(resultList.stream().filter(result -> result instanceof Medication).collect(Collectors.toList()),
 		    is(iterableWithSize(1))); // the actual matched medication
 		assertThat(resultList.stream().filter(result -> result instanceof MedicationRequest).collect(Collectors.toList()),
-		    is(iterableWithSize(5))); // 5 requests that reference that medication
+		    is(iterableWithSize(4))); // 5 requests that reference that medication
 		assertThat(resultList.stream().filter(result -> result instanceof MedicationDispense).collect(Collectors.toList()),
 		    is(iterableWithSize(1))); // 1 dispense that references the above requests
 		
