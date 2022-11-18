@@ -1399,8 +1399,8 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), equalTo(9)); // reverse included resources added as part of the result list
-		assertThat(resultList.subList(1, 9), everyItem(allOf(is(instanceOf(MedicationRequest.class)),
+		assertThat(resultList.size(), equalTo(7)); // reverse included resources added as part of the result list
+		assertThat(resultList.subList(1, 7), everyItem(allOf(is(instanceOf(MedicationRequest.class)),
 		    hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID)))))));
 	}
 	
@@ -1446,8 +1446,8 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), equalTo(12)); // reverse included resources (8 medication request + 3 service request) added as part of the result list
-		assertThat(resultList.subList(1, 12),
+		assertThat(resultList.size(), equalTo(10)); // reverse included resources (6 medication request + 3 service request) added as part of the result list
+		assertThat(resultList.subList(1, 10),
 		    everyItem(allOf(anyOf(is(instanceOf(MedicationRequest.class)), is(instanceOf(ServiceRequest.class))),
 		        hasProperty("encounter", hasProperty("referenceElement", hasProperty("idPart", equalTo(ENCOUNTER_UUID)))))));
 	}
@@ -1465,11 +1465,11 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(15));
+		assertThat(results.size(), equalTo(13));
 		
 		List<IBaseResource> resultList = getAllResources(results);
 		
-		assertThat(resultList.size(), equalTo(15));
+		assertThat(resultList.size(), equalTo(13));
 	}
 	
 	private void populateReverseIncludeForEverythingOperationParams(SearchParameterMap theParams) {
