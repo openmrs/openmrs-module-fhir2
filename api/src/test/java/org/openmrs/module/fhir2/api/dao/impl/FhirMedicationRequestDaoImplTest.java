@@ -13,7 +13,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -37,6 +39,8 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	private static final String DRUG_ORDER_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
 	
 	private static final String BAD_DRUG_ORDER_UUID = "uie3b9a2-4de5-4b12-ac40-jk90sdh";
+	
+	private static final String DISCONTINUE_ORDER_UUID = "b951a436-c775-4dfc-9432-e19446d18c28";
 	
 	private static final String MEDICATION_REQUEST_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationRequestDaoImpl_initial_data.xml";
 	
@@ -68,6 +72,33 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 		DrugOrder drugOrder = medicationRequestDao.get(BAD_DRUG_ORDER_UUID);
 		assertThat(drugOrder, nullValue());
 	}
+	
+	@Test
+	public void getMedicationRequestByUuids_shouldReturnEmptyListWhenCalledWithBadUuid() {
+		List<DrugOrder> drugOrders = medicationRequestDao.get(Arrays.asList(BAD_DRUG_ORDER_UUID));
+		assertThat(drugOrders.size(), is(0));
+	}
+	
+	@Test
+	public void getMedicationRequestByUuid_shouldReturnNullWhenRequestingDiscontinueOrder() {
+		DrugOrder drugOrder = medicationRequestDao.get(DISCONTINUE_ORDER_UUID);
+		assertThat(drugOrder, nullValue());
+	}
+	
+	@Test
+	public void getMedicationRequestsByUuid_shouldNotReturnDiscontinueOrders() {
+		List<DrugOrder> drugOrders = medicationRequestDao.get(Arrays.asList(DRUG_ORDER_UUID, DISCONTINUE_ORDER_UUID));
+		assertThat(drugOrders.size(), is(1));
+		assertThat(drugOrders.get(0).getUuid(), is(DRUG_ORDER_UUID));
+	}
+	
+	@Test
+	public void getMedicationRequestsBySearchResults_shouldNotReturnDiscontinuedOrders() {
+		List<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(null, Arrays.asList(DISCONTINUE_ORDER_UUID));
+		assertThat(drugOrders.size(), is(0));
+	}
+	
+	//TODO what about empty list?
 	
 	@Test
 	public void search_shouldReturnSearchQuery() {

@@ -745,8 +745,8 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 		List<IBaseResource> resultList = results.getResources(START_INDEX, END_INDEX);
 		
 		assertThat(results, notNullValue());
-		assertThat(resultList.size(), equalTo(9)); // reverse included resources added as part of the result list
-		assertThat(resultList.subList(1, 9), everyItem(allOf(is(instanceOf(MedicationRequest.class)),
+		assertThat(resultList.size(), equalTo(7)); // reverse included resources added as part of the result list
+		assertThat(resultList.subList(1, 7), everyItem(allOf(is(instanceOf(MedicationRequest.class)),
 		    hasProperty("subject", hasProperty("referenceElement", hasProperty("idPart", equalTo(PATIENT_OTHER3_UUID)))))));
 	}
 	
@@ -1206,10 +1206,10 @@ public class PatientSearchQueryTest extends BaseModuleContextSensitiveTest {
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(46));
+		assertThat(results.size(), equalTo(44));
 		
 		List<IBaseResource> resultList = getAllResources(results);
 		
-		assertThat(resultList, hasSize(46));
+		assertThat(resultList, hasSize(44));
 	}
 }
