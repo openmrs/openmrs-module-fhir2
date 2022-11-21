@@ -1010,5 +1010,9 @@
         <addColumn tableName="fhir_task">
             <column name="location_reference_id" type="int"/>
         </addColumn>
+        <addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="location_reference_id"
+                                 constraintName="task_location_reference_fk"
+                                 referencedTableName="fhir_reference"
+                                 referencedColumnNames="reference_id"/>
     </changeSet>
 </databaseChangeLog>
