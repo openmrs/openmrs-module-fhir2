@@ -48,4 +48,9 @@
 
     <orders order_id="1" order_type_id="2" order_number="1" urgency="ROUTINE" patient_id="2" encounter_id="1" date_activated="2012-08-19 00:00:00.0" concept_id="1" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="0d86e8b4-2f33-495e-aa22-6954785e4e9e" order_action="NEW" care_setting="1"/>
 
+    <!-- for test  shouldNotReturnEncountersThatHaveOnlyDiscontinueOrders -->
+    <encounter encounter_id="2002" encounter_type="1" form_id="1" encounter_datetime="2005-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="fe98c4f0-0ceb-4c61-bd27-a013a90d4d5e"/>
+    <orders order_id="2002" order_type_id="1" order_number="2002" urgency="ROUTINE" patient_id="2" encounter_id="2002" date_activated="2012-08-19 00:00:00.0" concept_id="1" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="0e4cca23-9a52-4fc3-8207-b6ecbf2f470f" order_action="DISCONTINUE" care_setting="1"/>
+    <drug_order order_id="2002" drug_inventory_id="3" dose="325.0" dose_units="50" as_needed="false" frequency="1" dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51" num_refills="10" dispense_as_written="0" />
+
 </dataset>

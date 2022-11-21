@@ -91,17 +91,15 @@ public class MedicationRequestSearchQueryImpl_2_6Test extends BaseModuleContextS
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(9));
+		assertThat(resultList.size(), equalTo(7));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID)))); // order 2
-		assertThat(resultList, hasItem(hasProperty("id", equalTo("efca4077-493c-496b-8312-856ee5d1cc27")))); // order 22
 		assertThat(resultList, hasItem(hasProperty("id", equalTo("2662e6c2-697b-11e3-bd76-0800271c1b75")))); // order 222
 		assertThat(resultList, hasItem(hasProperty("id", equalTo("e3d621f0-a4d5-47d1-a4e1-5ace3f66d43a")))); // order 3
 		assertThat(resultList, hasItem(hasProperty("id", equalTo("047b7424-6f33-4357-823c-420f316bb039")))); // order 4
-		assertThat(resultList, hasItem(hasProperty("id", equalTo("147b7424-6f33-4357-823c-420f316bb038")))); // order 44
 		assertThat(resultList, hasItem(hasProperty("id", equalTo("9c21e407-697b-11e3-bd76-0800271c1b75")))); // order 444
 		assertThat(resultList, hasItem(hasProperty("id", equalTo("0c96f25c-4949-4f72-9931-d808fbc226db")))); // order 5
 		assertThat(resultList, hasItem(hasProperty("id", equalTo("b75c5c9e-b66c-11ec-8065-0242ac110002")))); // medication dispense 1 from Medication dispense dataset (see above)
-		
+		// note that discontinue orders, #22 and #44 are *not* included, see: https://issues.openmrs.org/browse/FM2-532
 	}
 	
 }
