@@ -53,7 +53,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	private static final String JSON_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create.json";
 	
 	private static final String XML_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create.xml";
-
+	
 	private static final String LOCATION_UUID = "58ab6cf9-ea12-43bc-98a6-40353423331e";
 	
 	@Getter(AccessLevel.PUBLIC)
@@ -82,7 +82,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
 		assertThat(task.getStatus(), is(Task.TaskStatus.ACCEPTED));
 		assertThat(task.getIntent(), is(Task.TaskIntent.ORDER));
-		assertThat(task.getLocation().getReference() , is(LOCATION_UUID));
+		assertThat(task.getLocation().getReference(), is(LOCATION_UUID));
 		assertThat(task, validResource());
 	}
 	
@@ -114,7 +114,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
 		assertThat(task.getStatus(), is(Task.TaskStatus.ACCEPTED));
 		assertThat(task.getIntent(), is(Task.TaskIntent.ORDER));
-		assertThat(task.getLocation().getReference() , is(LOCATION_UUID));
+		assertThat(task.getLocation().getReference(), is(LOCATION_UUID));
 		
 		assertThat(task, validResource());
 	}
