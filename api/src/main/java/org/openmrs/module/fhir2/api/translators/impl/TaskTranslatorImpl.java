@@ -102,6 +102,10 @@ public class TaskTranslatorImpl implements TaskTranslator {
 			fhirTask.setOwner(referenceTranslator.toFhirResource(openmrsTask.getOwnerReference()));
 		}
 		
+		if (openmrsTask.getLocationReference() != null) {
+			fhirTask.setLocation(referenceTranslator.toFhirResource(openmrsTask.getLocationReference()));
+		}
+		
 		if (openmrsTask.getInput() != null && !openmrsTask.getInput().isEmpty()) {
 			fhirTask.setInput(
 			    openmrsTask.getInput().stream().map(this::translateFromInputText).collect(Collectors.toList()));
@@ -162,6 +166,10 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		
 		if (!fhirTask.getOwner().isEmpty()) {
 			openmrsTask.setOwnerReference(referenceTranslator.toOpenmrsType(fhirTask.getOwner()));
+		}
+		
+		if (!fhirTask.getLocation().isEmpty()) {
+			openmrsTask.setLocationReference(referenceTranslator.toOpenmrsType(fhirTask.getLocation()));
 		}
 		
 		if (!fhirTask.getInput().isEmpty()) {

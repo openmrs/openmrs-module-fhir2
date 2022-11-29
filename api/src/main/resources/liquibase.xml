@@ -1000,4 +1000,19 @@
         </addColumn>
         <dropColumn tableName="fhir_diagnostic_report" columnName="name"/>
     </changeSet>
+    <changeSet id="add_task_location_reference_20221121" author="moses_mutesa" dbms="mysql,mariadb,postgresql">
+        <preConditions onFail="MARK_RAN" onError="WARN">
+            <tableExists tableName="fhir_task"/>
+            <not>
+                <columnExists tableName="fhir_task" columnName="location_reference_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="fhir_task">
+            <column name="location_reference_id" type="int"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="fhir_task" baseColumnNames="location_reference_id"
+                                 constraintName="task_location_reference_fk"
+                                 referencedTableName="fhir_reference"
+                                 referencedColumnNames="reference_id"/>
+    </changeSet>
 </databaseChangeLog>

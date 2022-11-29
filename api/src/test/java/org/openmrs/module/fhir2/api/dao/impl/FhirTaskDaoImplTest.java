@@ -55,6 +55,8 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	private static final String PATIENT_ID = "23ec6c43-416e-48fd-9464-18c67a164df6";
 	
 	private static final String ENCOUNTER_UUID = "d9d22ce2-36f9-4c39-865b-48a12cf08ba5";
+
+	private static final String LOCATION_UUID = "58ab6cf9-ea12-43bc-98a6-40353423331e";
 	
 	private static final String CONCEPT_UUID = "957eba27-2b38-43e8-91a9-4dfe3956a32d";
 	
@@ -151,12 +153,12 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 	public void saveTask_shouldUpdateEncounterReference() {
 		FhirTask toUpdate = dao.get(TASK_UUID);
 		
-		FhirReference forReference = new FhirReference();
-		forReference.setType(FhirConstants.ENCOUNTER);
-		forReference.setReference(ENCOUNTER_UUID);
-		forReference.setName("TEMP");
+		FhirReference encounterReference = new FhirReference();
+		encounterReference.setType(FhirConstants.ENCOUNTER);
+		encounterReference.setReference(ENCOUNTER_UUID);
+		encounterReference.setName("TEMP");
 		
-		toUpdate.setEncounterReference(forReference);
+		toUpdate.setEncounterReference(encounterReference);
 		
 		dao.createOrUpdate(toUpdate);
 		
@@ -166,6 +168,27 @@ public class FhirTaskDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(result.getEncounterReference().getId(), notNullValue());
 		assertThat(result.getEncounterReference().getType(), equalTo(FhirConstants.ENCOUNTER));
 		assertThat(result.getEncounterReference().getReference(), equalTo(ENCOUNTER_UUID));
+	}
+
+	@Test
+	public void saveTask_shouldUpdateLocationReference() {
+		FhirTask toUpdate = dao.get(TASK_UUID);
+		
+		FhirReference locationReference = new FhirReference();
+		locationReference.setType(FhirConstants.LOCATION);
+		locationReference.setReference(LOCATION_UUID);
+		locationReference.setName("TEMP");
+		
+		toUpdate.setLocationReference(locationReference);
+		
+		dao.createOrUpdate(toUpdate);
+		
+		FhirTask result = dao.get(TASK_UUID);
+		
+		assertThat(result.getLocationReference(), notNullValue());
+		assertThat(result.getLocationReference().getId(), notNullValue());
+		assertThat(result.getLocationReference().getType(), equalTo(FhirConstants.LOCATION));
+		assertThat(result.getLocationReference().getReference(), equalTo(LOCATION_UUID));
 	}
 	
 	@Test
