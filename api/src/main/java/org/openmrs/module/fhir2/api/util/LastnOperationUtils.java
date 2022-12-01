@@ -24,15 +24,15 @@ public final class LastnOperationUtils {
 	 * @param max The value of `N`, which specifies the maximum count of distinct effective datetime
 	 * @return The list of resource uuids
 	 */
-	public static List<String> getTopNRankedUuids(List<LastnResult> list, int max) {
+	public static <T> List<T> getTopNRankedIds(List<LastnResult<T>> list, int max) {
 		list.sort((a, b) -> b.getDatetime().compareTo(a.getDatetime()));
-		List<String> results = new ArrayList<>(list.size());
+		List<T> results = new ArrayList<>(list.size());
 		
 		int currentRank = 0;
 		
 		for (int var = 0; var < list.size() && currentRank < max; var++) {
 			currentRank++;
-			results.add(list.get(var).getUuid());
+			results.add(list.get(var).getId());
 			Date currentDate = list.get(var).getDatetime();
 			
 			if (var == list.size() - 1) {
@@ -42,7 +42,7 @@ public final class LastnOperationUtils {
 			//Adding all objects which have the same Datetime as the current object Datetime since they will have the same rank
 			Date nextDate = list.get(var + 1).getDatetime();
 			while (nextDate.equals(currentDate)) {
-				results.add(list.get(var + 1).getUuid());
+				results.add(list.get(var + 1).getId());
 				var++;
 				
 				if (var + 1 == list.size()) {

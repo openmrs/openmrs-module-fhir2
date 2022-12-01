@@ -12,7 +12,7 @@ package org.openmrs.module.fhir2.api.dao.impl;
 import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hl7.fhir.r4.model.Encounter.SP_DATE;
-import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedUuids;
+import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedIds;
 
 import javax.annotation.Nonnull;
 
@@ -29,6 +29,8 @@ import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Projections;
 import org.openmrs.Encounter;
+import org.openmrs.Retireable;
+import org.openmrs.Voidable;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -49,13 +51,29 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 			criteria.setProjection(Projections.projectionList().add(property("uuid")).add(property("encounterDatetime")));
 			
 			@SuppressWarnings("unchecked")
-			List<LastnResult> results = ((List<Object[]>) criteria.list()).stream().map(LastnResult::new)
-			        .collect(Collectors.toList());
+			List<LastnResult<String>> results = ((List<Object[]>) criteria.list()).stream()
+			        .map(array -> new LastnResult<String>(array)).collect(Collectors.toList());
 			
-			return getTopNRankedUuids(results, getMaxParameter(theParams));
+			return getTopNRankedIds(results, getMaxParameter(theParams));
 		}
 		
-		return super.getSearchResultUuids(theParams);
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
+		
+		if (Voidable.class.isAssignableFrom(typeToken.getRawType())) {
+			handleVoidable(criteria);
+		} else if (Retireable.class.isAssignableFrom(typeToken.getRawType())) {
+			handleRetireable(criteria);
+		}
+		
+		setupSearchParams(criteria, theParams);
+		handleSort(criteria, theParams.getSortSpec());
+		
+		criteria.setProjection(Projections.property("uuid"));
+		
+		@SuppressWarnings("unchecked")
+		List<String> results = criteria.list();
+		
+		return results.stream().distinct().collect(Collectors.toList());
 	}
 	
 	private int getMaxParameter(SearchParameterMap theParams) {
@@ -70,14 +88,14 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	
 	@Override
 	protected void handleEncounterType(Criteria criteria, TokenAndListParam tokenAndListParam) {
-		handleAndListParam((TokenAndListParam) tokenAndListParam, t -> Optional.of(eq("et.uuid", t.getValue())))
+		handleAndListParam(tokenAndListParam, t -> Optional.of(eq("et.uuid", t.getValue())))
 		        .ifPresent(t -> criteria.createAlias("encounterType", "et").add(t));
 	}
 	
 	@Override
 	protected void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam) {
 		criteria.createAlias("encounterProviders", "ep");
-		handleParticipantReference(criteria, (ReferenceAndListParam) referenceAndListParam);
+		handleParticipantReference(criteria, referenceAndListParam);
 	}
 	
 	@Override

@@ -43,6 +43,8 @@ import org.openmrs.module.fhir2.model.GroupMember;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirGroupMemberService_2_1Test {
 	
+	private static final Integer GROUP_MEMBER_ID = 123;
+	
 	private static final String GROUP_MEMBER_UUID = "1359f03d-55d9-4961-b8f8-9a59eddc1f59";
 	
 	private static final String BAD_GROUP_MEMBER_UUID = "02ed36f0-6167-4372-a641-d27b92f7deae";
@@ -93,7 +95,7 @@ public class FhirGroupMemberService_2_1Test {
 		    GROUP_MEMBER_UUID);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(memberships);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(GROUP_MEMBER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(GROUP_MEMBER_ID));
 		when(translator.toFhirResource(cohortMembership)).thenReturn(groupMember);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));

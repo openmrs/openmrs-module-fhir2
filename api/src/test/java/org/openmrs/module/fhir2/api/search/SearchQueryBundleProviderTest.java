@@ -38,7 +38,6 @@ import org.openmrs.module.fhir2.api.FhirGlobalPropertyService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
-import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SearchQueryBundleProviderTest {
@@ -80,14 +79,14 @@ public class SearchQueryBundleProviderTest {
 	
 	@Test
 	public void shouldReturnEmptyListWhenNoResults() {
-		when(observationDao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		when(observationDao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		List<IBaseResource> resources = searchQueryBundleProvider.getResources(0, 10);
 		assertThat(resources, empty());
 	}
 	
 	@Test
 	public void shouldReturnEmptyListWhenRequestingTooManyResults() {
-		when(observationDao.getSearchResultUuids(any())).thenReturn(Arrays.asList(FhirUtils.newUuid(), FhirUtils.newUuid()));
+		when(observationDao.getSearchResultIds(any())).thenReturn(Arrays.asList(1, 2));
 		List<IBaseResource> resources = searchQueryBundleProvider.getResources(3, 13);
 		assertThat(resources, empty());
 	}

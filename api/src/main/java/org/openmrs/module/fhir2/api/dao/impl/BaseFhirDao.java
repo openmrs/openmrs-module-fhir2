@@ -148,7 +148,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	}
 	
 	@Override
-	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
+	public List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
 		
 		if (isVoidable) {
@@ -160,21 +160,21 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		setupSearchParams(criteria, theParams);
 		handleSort(criteria, theParams.getSortSpec());
 		
-		criteria.setProjection(Projections.property("uuid"));
+		criteria.setProjection(Projections.property("id"));
 		
 		@SuppressWarnings("unchecked")
-		List<String> results = criteria.list();
+		List<Integer> results = criteria.list();
 		
 		return results.stream().distinct().collect(Collectors.toList());
 	}
 	
 	@Override
-	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids) {
+	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds) {
 		@SuppressWarnings("unchecked")
 		List<T> results = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType())
-		        .add(in("uuid", resourceUuids)).list();
+		        .add(in("id", resourceIds)).list();
 		
-		results.sort(Comparator.comparingInt(r -> resourceUuids.indexOf(r.getUuid())));
+		results.sort(Comparator.comparingInt(r -> resourceIds.indexOf(r.getId())));
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
 	}
 	

@@ -74,8 +74,8 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
-		Collection<Obs> obs = dao.getSearchResults(theParams, matchingResourceUuids);
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		Collection<Obs> obs = dao.getSearchResults(theParams, matchingResourceIds);
 		
 		assertThat(obs, notNullValue());
 	}

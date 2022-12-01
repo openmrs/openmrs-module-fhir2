@@ -64,6 +64,8 @@ import org.openmrs.module.fhir2.api.translators.MedicationRequestTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirMedicationRequestServiceImplTest {
 	
+	private static final Integer MEDICATION_REQUEST_ID = 123;
+	
 	private static final String MEDICATION_REQUEST_UUID = "d102c80f-1yz9-4da3-0099-8902ce886891";
 	
 	private static final String BAD_MEDICATION_REQUEST_UUID = "d102c80f-1yz9-4da3-0099-8902ce886891";
@@ -148,7 +150,7 @@ public class FhirMedicationRequestServiceImplTest {
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(drugOrders);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
@@ -180,7 +182,7 @@ public class FhirMedicationRequestServiceImplTest {
 		    subject);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(drugOrders);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
@@ -213,7 +215,7 @@ public class FhirMedicationRequestServiceImplTest {
 		        .addParameter(FhirConstants.MEDICATION_REFERENCE_SEARCH_HANDLER, medication);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(drugOrders);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
@@ -242,7 +244,7 @@ public class FhirMedicationRequestServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(drugOrders);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
@@ -275,7 +277,7 @@ public class FhirMedicationRequestServiceImplTest {
 		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounter);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(drugOrders);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
@@ -299,7 +301,7 @@ public class FhirMedicationRequestServiceImplTest {
 		    FhirConstants.ID_PROPERTY, uuid);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(drugOrder));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
@@ -323,7 +325,7 @@ public class FhirMedicationRequestServiceImplTest {
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(drugOrder));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
@@ -351,7 +353,7 @@ public class FhirMedicationRequestServiceImplTest {
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(drugOrder));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
@@ -380,7 +382,7 @@ public class FhirMedicationRequestServiceImplTest {
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(drugOrder));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
@@ -409,7 +411,7 @@ public class FhirMedicationRequestServiceImplTest {
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(drugOrder));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
 		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));

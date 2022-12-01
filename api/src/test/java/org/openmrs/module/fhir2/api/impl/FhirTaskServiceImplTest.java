@@ -45,6 +45,8 @@ import org.openmrs.module.fhir2.model.FhirTask;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirTaskServiceImplTest {
 	
+	private static final Integer TASK_ID = 123;
+	
 	private static final String TASK_UUID = "dc9ce8be-3155-4adf-b28f-29436ec30a30";
 	
 	private static final String WRONG_TASK_UUID = "df34a1c1-f57b-4c33-bee5-e601b56b9d5b";
@@ -206,7 +208,7 @@ public class FhirTaskServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(TASK_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(TASK_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(openmrsTasks);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, fhirGlobalPropertyService, searchQueryInclude));

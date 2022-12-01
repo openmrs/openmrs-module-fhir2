@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -91,7 +92,7 @@ public class MedicationRequestSearchQueryImpl_2_6Test extends BaseModuleContextS
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(resultList, not(empty()));
-		assertThat(resultList.size(), equalTo(7));
+		assertThat(resultList, hasSize(7));
 		assertThat(resultList, hasItem(hasProperty("id", equalTo(MEDICATION_REQUEST_UUID)))); // order 2
 		assertThat(resultList, hasItem(hasProperty("id", equalTo("2662e6c2-697b-11e3-bd76-0800271c1b75")))); // order 222
 		assertThat(resultList, hasItem(hasProperty("id", equalTo("e3d621f0-a4d5-47d1-a4e1-5ace3f66d43a")))); // order 3

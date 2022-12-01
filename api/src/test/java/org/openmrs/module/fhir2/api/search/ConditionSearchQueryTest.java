@@ -341,8 +341,9 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
-		Set<String> resultSet = new HashSet<>(dao.getSearchResultUuids(theParams));
-		assertThat(resultSet.size(), equalTo(2));
+		
+		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
+		assertThat(resultSet, hasSize(2));
 	}
 	
 	@Test
@@ -448,8 +449,9 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
-		Set<String> resultSet = new HashSet<>(dao.getSearchResultUuids(theParams));
-		assertThat(resultSet.size(), equalTo(2));
+		
+		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
+		assertThat(resultSet, hasSize(2));
 	}
 	
 	@Test
@@ -537,8 +539,9 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 		
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
-		List<String> resultSet = dao.getSearchResultUuids(theParams);
-		assertThat(resultSet.size(), equalTo(2));
+		
+		List<Integer> resultSet = dao.getSearchResultIds(theParams);
+		assertThat(resultSet, hasSize(2));
 	}
 	
 	@Test
