@@ -9,6 +9,12 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import javax.annotation.Nonnull;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
@@ -22,11 +28,6 @@ import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
