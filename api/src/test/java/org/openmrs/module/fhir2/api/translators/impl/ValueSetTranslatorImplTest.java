@@ -55,7 +55,7 @@ public class ValueSetTranslatorImplTest extends BaseModuleContextSensitiveTest {
 	@Mock
 	private Concept concept;
 	
-	private ValueSetTranslatorImpl valueSetTranslator = new ValueSetTranslatorImpl();
+	private final ValueSetTranslatorImpl valueSetTranslator = new ValueSetTranslatorImpl();
 	
 	@Before
 	public void setup() {
@@ -77,9 +77,7 @@ public class ValueSetTranslatorImplTest extends BaseModuleContextSensitiveTest {
 		when(concept.getSet()).thenReturn(true);
 		
 		Concept concept1 = new Concept();
-		Collection<ConceptMap> conceptMaps = mock(ArrayList.class);
 		ConceptMap conceptMap = mock(ConceptMap.class);
-		conceptMaps.add(conceptMap);
 		ConceptReferenceTerm conceptReferenceTerm = mock(ConceptReferenceTerm.class);
 		ConceptSource conceptSource = mock(ConceptSource.class);
 		
