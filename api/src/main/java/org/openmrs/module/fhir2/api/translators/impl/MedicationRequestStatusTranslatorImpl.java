@@ -27,7 +27,7 @@ public class MedicationRequestStatusTranslatorImpl implements MedicationRequestS
 		
 		if (drugOrder.isActive()) {
 			return MedicationRequest.MedicationRequestStatus.ACTIVE;
-		} else if (drugOrder.isDiscontinuedRightNow()) {
+		} else if (drugOrder.isDiscontinuedRightNow() || drugOrder.getVoided()) {
 			return MedicationRequest.MedicationRequestStatus.CANCELLED;
 		} else if (drugOrder.isExpired()) {
 			return MedicationRequest.MedicationRequestStatus.STOPPED;

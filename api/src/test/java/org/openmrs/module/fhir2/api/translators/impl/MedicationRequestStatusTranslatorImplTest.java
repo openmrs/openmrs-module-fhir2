@@ -72,10 +72,10 @@ public class MedicationRequestStatusTranslatorImplTest {
 	}
 
 	@Test
-	public void toFhirResource_shouldTranslateToUnknown() {
+	public void toFhirResource_shouldTranslateVoidedOrderToCancelled() {
 		drugOrder.setVoided(true);
 		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
 		assertThat(status, notNullValue());
-		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.UNKNOWN));
+		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.CANCELLED));
 	}
 }
