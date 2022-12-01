@@ -122,4 +122,11 @@ public class FhirTask extends BaseOpenmrsMetadata {
 	@JoinColumn(name = "task_id")
 	
 	private Set<FhirTaskOutput> output;
+	
+	/**
+	 * The location Where task occurs
+	 */
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "location_reference_id", referencedColumnName = "reference_id")
+	private FhirReference locationReference;
 }

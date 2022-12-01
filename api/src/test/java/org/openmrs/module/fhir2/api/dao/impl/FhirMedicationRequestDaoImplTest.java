@@ -13,10 +13,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -39,6 +42,8 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	private static final String DRUG_ORDER_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
 	
 	private static final String BAD_DRUG_ORDER_UUID = "uie3b9a2-4de5-4b12-ac40-jk90sdh";
+	
+	private static final Integer DISCONTINUE_ORDER_ID = 1008;
 	
 	private static final String DISCONTINUE_ORDER_UUID = "b951a436-c775-4dfc-9432-e19446d18c28";
 	
@@ -75,7 +80,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	
 	@Test
 	public void getMedicationRequestByUuids_shouldReturnEmptyListWhenCalledWithBadUuid() {
-		List<DrugOrder> drugOrders = medicationRequestDao.get(Arrays.asList(BAD_DRUG_ORDER_UUID));
+		List<DrugOrder> drugOrders = medicationRequestDao.get(Collections.singletonList(BAD_DRUG_ORDER_UUID));
 		assertThat(drugOrders.size(), is(0));
 	}
 	
@@ -94,11 +99,10 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	
 	@Test
 	public void getMedicationRequestsBySearchResults_shouldNotReturnDiscontinuedOrders() {
-		List<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(null, Arrays.asList(DISCONTINUE_ORDER_UUID));
-		assertThat(drugOrders.size(), is(0));
+		List<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(null,
+		    Collections.singletonList(DISCONTINUE_ORDER_ID));
+		assertThat(drugOrders, hasSize(0));
 	}
-	
-	//TODO what about empty list?
 	
 	@Test
 	public void search_shouldReturnSearchQuery() {
@@ -110,10 +114,11 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<String> matchingResourceUuids = medicationRequestDao.getSearchResultUuids(theParams);
-		Collection<DrugOrder> drugOrder = medicationRequestDao.getSearchResults(theParams, matchingResourceUuids);
+		List<Integer> matchingResourceIds = medicationRequestDao.getSearchResultIds(theParams);
+		Collection<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(theParams, matchingResourceIds);
 		
-		assertThat(drugOrder, notNullValue());
+		assertThat(drugOrders, notNullValue());
+		assertThat(drugOrders, hasSize(greaterThanOrEqualTo(1)));
 	}
 	
 }

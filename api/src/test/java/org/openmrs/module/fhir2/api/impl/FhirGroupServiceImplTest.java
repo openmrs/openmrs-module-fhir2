@@ -53,6 +53,8 @@ import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirGroupServiceImplTest {
 	
+	private static final Integer COHORT_ID = 123;
+	
 	private static final String COHORT_UUID = "1359f03d-55d9-4961-b8f8-9a59eddc1f59";
 	
 	private static final String BAD_COHORT_UUID = "02ed36f0-6167-4372-a641-d27b92f7deae";
@@ -207,7 +209,7 @@ public class FhirGroupServiceImplTest {
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(cohorts);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(COHORT_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(COHORT_ID));
 		when(translator.toFhirResource(cohort)).thenReturn(group);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));

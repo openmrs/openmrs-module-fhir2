@@ -56,9 +56,11 @@ import org.openmrs.module.fhir2.api.translators.MedicationDispenseTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirMedicationDispenseServiceImpl_2_6Test {
 	
-	public static final String MEDICATION_DISPENSE_UUID = "43578769-f1a4-46af-b08b-d9fe8a07066f";
+	private static final Integer MEDICATION_DISPENSE_ID = 123;
 	
-	public static final String NEW_DISPENSE_UUID = "a15e4988-d07a-11ec-8307-0242ac110002";
+	private static final String MEDICATION_DISPENSE_UUID = "43578769-f1a4-46af-b08b-d9fe8a07066f";
+	
+	private static final String NEW_DISPENSE_UUID = "a15e4988-d07a-11ec-8307-0242ac110002";
 	
 	@Mock
 	private FhirMedicationDispenseDao<MedicationDispense> dao;
@@ -231,7 +233,7 @@ public class FhirMedicationDispenseServiceImpl_2_6Test {
 		        .addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, medicationRequestParam)
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sortParam);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(MEDICATION_DISPENSE_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_DISPENSE_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openmrsDispense));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));

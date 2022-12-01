@@ -95,6 +95,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	@Autowired
 	private FhirMedicationDispenseService medicationDispenseService;
 	
+	@SuppressWarnings("unchecked")
 	public Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams) {
 		
 		List<PropParam<?>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);

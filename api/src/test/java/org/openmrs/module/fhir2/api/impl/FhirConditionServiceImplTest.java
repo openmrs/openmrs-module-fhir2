@@ -59,6 +59,8 @@ import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirConditionServiceImplTest {
 	
+	private static final Integer OBS_ID = 12345;
+	
 	private static final String OBS_UUID = "12345-abcde-12345";
 	
 	private static final String WRONG_OBS_CONDITION_UUID = "90378769-f1a4-46af-034j";
@@ -226,7 +228,7 @@ public class FhirConditionServiceImplTest {
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(OBS_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obsCondition));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));

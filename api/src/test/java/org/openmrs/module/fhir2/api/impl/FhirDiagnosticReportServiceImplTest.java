@@ -53,6 +53,8 @@ import org.openmrs.module.fhir2.model.FhirDiagnosticReport;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirDiagnosticReportServiceImplTest {
 	
+	private static final Integer ID = 123;
+	
 	private static final String UUID = "249b9094-b812-4b0c-a204-0052a05c657f";
 	
 	private static final String CHILD_UUID = "07b76ea1-f1b1-4d2c-9958-bf1f6856cf9c";
@@ -206,7 +208,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(fhirDiagnosticReports);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ID));
 		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -238,7 +240,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(diagnosticReportList);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ID));
 		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -272,7 +274,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(diagnosticReportList);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ID));
 		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
