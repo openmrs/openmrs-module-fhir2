@@ -114,10 +114,12 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								}
 							} else if (MedicationRequest.SP_STATUS.equals(paramName)) {
 								// only supports ACTIVE at this time
-								if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
-								        .equals(paramValue.toUpperCase())) {
-									criteria.add(FhirDaoUtils.createActiveOrderCriterion("orders"));
-									handled = true;
+								if (paramValue != null) {
+									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
+									        .equals(paramValue.toUpperCase())) {
+										criteria.add(FhirDaoUtils.createActiveOrderCriterion("orders"));
+										handled = true;
+									}
 								}
 							}
 						}
