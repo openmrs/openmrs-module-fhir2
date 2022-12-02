@@ -54,6 +54,22 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+/*
+ * Notes on test data:
+ * 		standardTestDataset has 10 drug orders, of which:
+ * 			0 are voided
+ * 			2 are discontinue orders
+ * 			3 of the non-voided, non-discontinue orders are stopped
+ * 			0 of the non-voided, non-discontinue orders are expired
+ * 		FhirMedicationRequestDaoImp has 5 drug orders, of which:
+ * 			1 is voided
+ * 			1 is discontinue order
+ * 			0 of the non-voided, non-discontinue orders are stopped
+ * 			3 of the non-voided, non-discontinue orders are expired
+ *
+ * 		Total numbers of non-voided, non-discontinued orders = (10 - 2) + (5 - 2) = 11
+ * 		Total number of active orders (non-voided, non-discontunue, not stopped and not expired) = (10 - 5) + (5 - 5) = 5
+ */
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
@@ -110,6 +126,8 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 	private static final String DATE_CREATED = "2016-08-19";
 	
 	private static final String DATE_VOIDED = "2008-11-20";
+	
+	private static final String STATUS = "ACTIVE";
 	
 	@Autowired
 	private MedicationRequestTranslator translator;
@@ -1017,6 +1035,25 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		
 		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByStatus() {
+		TokenAndListParam status = new TokenAndListParam().addAnd(new TokenParam(STATUS));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER,
+		    MedicationRequest.SP_STATUS, status);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		assertThat(results.size(), equalTo(5));
+		
+		List<MedicationRequest> resultList = get(results);
+		
+		assertThat(resultList, hasSize(equalTo(5)));
+		//assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+		
 	}
 	
 	@Test

@@ -70,6 +70,8 @@ public class FhirMedicationRequestServiceImplTest {
 	
 	private static final String BAD_MEDICATION_REQUEST_UUID = "d102c80f-1yz9-4da3-0099-8902ce886891";
 	
+	private static final String STATUS = "ACTIVE";
+	
 	private static final String LAST_UPDATED_DATE = "2020-09-03";
 	
 	@Mock
@@ -157,7 +159,7 @@ public class FhirMedicationRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, participant, null,
-		    null, null, null, null);
+		    null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -189,7 +191,7 @@ public class FhirMedicationRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(subject, null, null, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -222,7 +224,7 @@ public class FhirMedicationRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, null, medication,
-		    null, null, null, null);
+		    null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -251,7 +253,7 @@ public class FhirMedicationRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, code, null, null, null,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -284,7 +286,7 @@ public class FhirMedicationRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, encounter, null, null, null,
-		    null, null, null, null);
+		    null, null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -308,13 +310,38 @@ public class FhirMedicationRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, null, null, uuid,
-		    null, null, null);
+		    null, null, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
 		assertThat(results, Matchers.notNullValue());
 		assertThat(resultList, not(empty()));
 		assertThat(resultList, hasSize(greaterThanOrEqualTo(1)));
+	}
+	
+	@Test
+	public void searchForMedicationRequest_shouldReturnCollectionOfMedicationRequestsByStatus() {
+		
+		TokenAndListParam status = new TokenAndListParam().addAnd(new TokenParam(STATUS));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
+		    MedicationRequest.SP_STATUS);
+		
+		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(drugOrder));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_REQUEST_ID));
+		when(medicationRequestTranslator.toFhirResource(drugOrder)).thenReturn(medicationRequest);
+		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
+		        dao, medicationRequestTranslator, globalPropertyService, searchQueryInclude));
+		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
+		
+		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, null, null, null,
+		    status, null, null, null);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, Matchers.notNullValue());
+		assertThat(resultList, not(empty()));
+		assertThat(resultList.size(), greaterThanOrEqualTo(1));
 	}
 	
 	@Test
@@ -332,7 +359,7 @@ public class FhirMedicationRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, null, null, null,
-		    lastUpdated, null, null);
+		    null, lastUpdated, null, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -360,7 +387,7 @@ public class FhirMedicationRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.singleton(new Practitioner()));
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, null, null, uuid,
-		    null, includes, null);
+		    null, null, includes, null);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -390,7 +417,7 @@ public class FhirMedicationRequestServiceImplTest {
 		        .thenReturn(Collections.singleton(new MedicationDispense()));
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, null, null, uuid,
-		    null, null, revIncludes);
+		    null, null, null, revIncludes);
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -418,7 +445,7 @@ public class FhirMedicationRequestServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
 		IBundleProvider results = medicationRequestService.searchForMedicationRequests(null, null, null, null, null, uuid,
-		    null, includes, null);
+		    null, null, includes, null);
 		
 		List<IBaseResource> resultList = get(results);
 		

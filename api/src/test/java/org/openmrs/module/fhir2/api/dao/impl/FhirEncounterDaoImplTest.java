@@ -52,6 +52,8 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final Integer ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER = 2002;
 	
+	private static final Integer ENCOUNTER_WITH_ONLY_INACTIVE_DRUG_ORDER = 2003;
+	
 	private static final String ENCOUNTER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml";
 	
 	@Autowired
@@ -106,6 +108,27 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
 		assertThat("Encounter with Drug Orders is returned", matchingResourceIds,
 		    hasItem(equalTo(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
+		assertThat("Encounter with only inactive Drug Orders is returned", matchingResourceIds,
+		    hasItem(equalTo(ENCOUNTER_WITH_ONLY_INACTIVE_DRUG_ORDER)));
+		assertThat("Encounter without Drug Orders is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
+	}
+	
+	@Test
+	public void shouldOnlyReturnEncountersThatHaveAssociatedActiveMedicationRequests() {
+		
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "status", "active")); // has parameter with status=active
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		assertThat("Encounter with Drug Orders is returned", matchingResourceIds,
+		    hasItem(equalTo(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
+		assertThat("Encounter with only inactive Drug Orders is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_ONLY_INACTIVE_DRUG_ORDER))));
 		assertThat("Encounter without Drug Orders is not returned", matchingResourceIds,
 		    not(hasItem(equalTo(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
 	}
