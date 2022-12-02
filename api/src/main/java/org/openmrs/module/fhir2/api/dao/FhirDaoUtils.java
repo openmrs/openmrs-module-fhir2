@@ -13,8 +13,10 @@ public final class FhirDaoUtils {
 			path = path + ".";
 		}
 		
-		// ACTIVE = date activated less than or equal to today, date stopped null or in the future, auto expire date null or in the future
-		return Restrictions.and(Restrictions.le(path + "dateActivated", new Date()),
+		// ACTIVE = date activated null or less than or equal to current datetime, date stopped null or in the future, auto expire date null or in the future
+		return Restrictions.and(
+		    Restrictions.or(Restrictions.isNull(path + "dateActivated"),
+		        Restrictions.le(path + "dateActivated", new Date())),
 		    Restrictions.or(Restrictions.isNull(path + "dateStopped"), Restrictions.gt(path + "dateStopped", new Date())),
 		    Restrictions.or(Restrictions.isNull(path + "autoExpireDate"),
 		        Restrictions.gt(path + "autoExpireDate", new Date())));

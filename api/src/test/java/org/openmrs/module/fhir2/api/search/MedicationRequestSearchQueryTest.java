@@ -79,6 +79,8 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 	
 	private static final String DISCONTINUE_ORDER_UUID = "b951a436-c775-4dfc-9432-e19446d18c28";
 	
+	private static final String NON_ACTIVE_ORDER_UUID = "dfca4077-493c-496b-8312-856ee5d1cc26";
+	
 	private static final String PATIENT_UUID = "86526ed5-3c11-11de-a0ba-001e3766667a";
 	
 	private static final String PATIENT_GIVEN_NAME = "Moody";
@@ -1047,13 +1049,9 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		IBundleProvider results = search(theParams);
 		
 		assertThat(results, notNullValue());
-		assertThat(results.size(), equalTo(5));
-		
 		List<MedicationRequest> resultList = get(results);
-		
 		assertThat(resultList, hasSize(equalTo(5)));
-		//assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
-		
+		assertThat(resultList, not(hasItem(hasProperty("id", equalTo(NON_ACTIVE_ORDER_UUID)))));
 	}
 	
 	@Test

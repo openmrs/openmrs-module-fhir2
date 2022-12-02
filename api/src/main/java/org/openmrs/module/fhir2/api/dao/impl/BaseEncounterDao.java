@@ -117,8 +117,8 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
 								        .equals(paramValue.toUpperCase())) {
 									criteria.add(FhirDaoUtils.createActiveOrderCriterion("orders"));
+									handled = true;
 								}
-								handled = true;
 							}
 						}
 					}
