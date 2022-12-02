@@ -50,27 +50,28 @@ public class MedicationRequestStatusTranslatorImplTest {
 		assertThat(status, notNullValue());
 		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.ACTIVE));
 	}
-
+	
 	@Test
 	public void toFhirResource_shouldTranslateExpiredOrderToStoppedStatus() throws ParseException {
 		drugOrder.setAutoExpireDate(new SimpleDateFormat("YYYY-MM-DD").parse("2000-10-10"));
-
+		
 		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
 		assertThat(status, notNullValue());
 		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.STOPPED));
 	}
-
+	
 	@Test
-	public void toFhirResource_shouldTranslateDiscontinueOrderToCancelledStatus() throws NoSuchFieldException, ParseException, IllegalAccessException{
+	public void toFhirResource_shouldTranslateDiscontinueOrderToCancelledStatus()
+	        throws NoSuchFieldException, ParseException, IllegalAccessException {
 		Field dateStopped = Order.class.getDeclaredField("dateStopped");
 		dateStopped.setAccessible(true);
-		dateStopped.set(drugOrder,new SimpleDateFormat("YYYY-MM-DD").parse("2000-10-10"));
-
+		dateStopped.set(drugOrder, new SimpleDateFormat("YYYY-MM-DD").parse("2000-10-10"));
+		
 		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
 		assertThat(status, notNullValue());
 		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.CANCELLED));
 	}
-
+	
 	@Test
 	public void toFhirResource_shouldTranslateVoidedOrderToCancelled() {
 		drugOrder.setVoided(true);
