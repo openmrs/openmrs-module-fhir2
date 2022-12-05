@@ -29,7 +29,6 @@ import org.openmrs.Encounter;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.dao.FhirDaoUtils;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 
 @Slf4j
@@ -117,7 +116,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
 									        .equals(paramValue.toUpperCase())) {
-										criteria.add(FhirDaoUtils.createActiveOrderCriterion("orders"));
+										criteria.add(generateActiveOrderQuery("orders"));
 									}
 								}
 								handled = true;

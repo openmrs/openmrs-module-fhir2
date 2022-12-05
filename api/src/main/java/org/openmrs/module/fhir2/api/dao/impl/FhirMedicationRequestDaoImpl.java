@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.Medication;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
-import org.openmrs.module.fhir2.api.dao.FhirDaoUtils;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.stereotype.Component;
@@ -112,7 +111,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 				try {
 					// currently only handles "ACTIVE"
 					if (Medication.MedicationStatus.ACTIVE.toString().equals(token.getValue().toUpperCase())) {
-						return Optional.of(FhirDaoUtils.createActiveOrderCriterion(""));
+						return Optional.of(generateActiveOrderQuery());
 					}
 				}
 				catch (IllegalArgumentException e) {
