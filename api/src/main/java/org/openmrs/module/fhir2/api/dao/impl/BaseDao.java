@@ -79,6 +79,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.internal.CriteriaImpl;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -923,6 +924,30 @@ public abstract class BaseDao {
 			return and(propertyEq(String.format("%s.conceptSource", conceptReferenceTermAlias), conceptSourceCriteria),
 			    eq(String.format("%s.code", conceptReferenceTermAlias), codes.get(0)));
 		}
+	}
+	
+	protected Criterion generateActiveOrderQuery(String path, Date onDate) {
+		if (StringUtils.isNotBlank(path)) {
+			path = path + ".";
+		}
+		
+		// ACTIVE = date activated null or less than or equal to current datetime, date stopped null or in the future, auto expire date null or in the future
+		return Restrictions.and(
+		    Restrictions.or(Restrictions.isNull(path + "dateActivated"), Restrictions.le(path + "dateActivated", onDate)),
+		    Restrictions.or(Restrictions.isNull(path + "dateStopped"), Restrictions.gt(path + "dateStopped", onDate)),
+		    Restrictions.or(Restrictions.isNull(path + "autoExpireDate"), Restrictions.gt(path + "autoExpireDate", onDate)));
+	}
+	
+	protected Criterion generateActiveOrderQuery(String path) {
+		return generateActiveOrderQuery(path, new Date());
+	}
+	
+	protected Criterion generateActiveOrderQuery(Date onDate) {
+		return generateActiveOrderQuery("", onDate);
+	}
+	
+	protected Criterion generateActiveOrderQuery() {
+		return generateActiveOrderQuery("", new Date());
 	}
 	
 	protected TokenOrListParam convertStringStatusToBoolean(TokenOrListParam statusParam) {

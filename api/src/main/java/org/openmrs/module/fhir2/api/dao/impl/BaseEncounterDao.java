@@ -111,6 +111,15 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 									// No additional constraints needed, all Orders are given/assumed intent=order
 									handled = true;
 								}
+							} else if (MedicationRequest.SP_STATUS.equals(paramName)) {
+								// only supports ACTIVE at this time
+								if (paramValue != null) {
+									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
+									        .equals(paramValue.toUpperCase())) {
+										criteria.add(generateActiveOrderQuery("orders"));
+									}
+								}
+								handled = true;
 							}
 						}
 					}

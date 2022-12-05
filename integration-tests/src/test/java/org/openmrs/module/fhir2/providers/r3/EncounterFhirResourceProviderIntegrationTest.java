@@ -411,7 +411,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(11)));
+		assertThat(result, hasProperty("total", equalTo(12)));
 	}
 	
 	@Test
@@ -426,7 +426,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR3Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(11)));
+		assertThat(result, hasProperty("total", equalTo(12)));
 	}
 	
 	@Test

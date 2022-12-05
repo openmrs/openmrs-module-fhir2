@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -20,7 +21,9 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
+import org.hl7.fhir.r4.model.Medication;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -91,12 +94,33 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 					entry.getValue().forEach(d -> handleMedicationReference("d", (ReferenceAndListParam) d.getParam())
 					        .ifPresent(c -> criteria.createAlias("drug", "d").add(c)));
 					break;
+				case FhirConstants.STATUS_SEARCH_HANDLER:
+					entry.getValue()
+					        .forEach(param -> handleStatus((TokenAndListParam) param.getParam()).ifPresent(criteria::add));
 				case FhirConstants.COMMON_SEARCH_HANDLER:
 					handleCommonSearchParameters(entry.getValue()).ifPresent(criteria::add);
 					break;
 			}
 		});
 		excludeDiscontinueOrders(criteria);
+	}
+	
+	private Optional<Criterion> handleStatus(TokenAndListParam tokenAndListParam) {
+		return handleAndListParam(tokenAndListParam, token -> {
+			if (token.getValue() != null) {
+				try {
+					// currently only handles "ACTIVE"
+					if (Medication.MedicationStatus.ACTIVE.toString().equals(token.getValue().toUpperCase())) {
+						return Optional.of(generateActiveOrderQuery());
+					}
+				}
+				catch (IllegalArgumentException e) {
+					return Optional.empty();
+				}
+			}
+			
+			return Optional.empty();
+		});
 	}
 	
 	private void handleCodedConcept(Criteria criteria, TokenAndListParam code) {
