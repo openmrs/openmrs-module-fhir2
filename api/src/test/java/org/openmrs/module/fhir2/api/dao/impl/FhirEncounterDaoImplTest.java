@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -145,5 +146,15 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
 		assertThat("Encounter with only Discontinue Order is not returned", matchingResourceIds,
 		    not(hasItem(equalTo(ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER))));
+	}
+	
+	@Test
+	public void delete_shouldVoidEncounterAndUnderlyingObservations() {
+		Encounter encounter = dao.delete(ENCOUNTER_UUID);
+		assertThat(encounter.getVoided(), equalTo(true));
+		assertThat(encounter.getDateVoided(), not(nullValue()));
+		assertThat(encounter.getVoidedBy(), equalTo(Context.getAuthenticatedUser()));
+		assertThat(encounter.getVoidReason(), equalTo("Voided via FHIR API"));
+		assertThat(encounter.getObs().size(), equalTo(0)); // "getObs" does not return voided obs, so if all obs are voided, this count should be 0
 	}
 }

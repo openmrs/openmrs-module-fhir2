@@ -44,6 +44,9 @@ import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
+import org.openmrs.aop.RequiredDataAdvice;
+import org.openmrs.api.handler.RetireHandler;
+import org.openmrs.api.handler.VoidHandler;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -226,9 +229,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @return the same object voided
 	 */
 	protected T voidObject(T object) {
-		Voidable v = (Voidable) object;
-		v.setVoided(true);
-		v.setVoidReason("Voided via FHIR API");
+		RequiredDataAdvice.recursivelyHandle(VoidHandler.class, object, "Voided via FHIR API");
 		return object;
 	}
 	
@@ -239,9 +240,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @return the same object retired
 	 */
 	protected T retireObject(T object) {
-		Retireable r = (Retireable) object;
-		r.setRetired(true);
-		r.setRetireReason("Retired via FHIR API");
+		RequiredDataAdvice.recursivelyHandle(RetireHandler.class, object, "Retired via FHIR API");
 		return object;
 	}
 	
