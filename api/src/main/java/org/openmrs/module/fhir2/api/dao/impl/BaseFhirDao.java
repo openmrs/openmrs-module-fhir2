@@ -20,7 +20,6 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,7 +44,9 @@ import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
 import org.openmrs.Retireable;
 import org.openmrs.Voidable;
-import org.openmrs.api.context.Context;
+import org.openmrs.aop.RequiredDataAdvice;
+import org.openmrs.api.handler.RetireHandler;
+import org.openmrs.api.handler.VoidHandler;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -228,11 +229,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @return the same object voided
 	 */
 	protected T voidObject(T object) {
-		Voidable v = (Voidable) object;
-		v.setVoided(true);
-		v.setDateVoided(new Date());
-		v.setVoidReason("Voided via FHIR API");
-		v.setVoidedBy(Context.getAuthenticatedUser());
+		RequiredDataAdvice.recursivelyHandle(VoidHandler.class, object, "Voided via FHIR API");
 		return object;
 	}
 	
@@ -243,11 +240,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	 * @return the same object retired
 	 */
 	protected T retireObject(T object) {
-		Retireable r = (Retireable) object;
-		r.setRetired(true);
-		r.setDateRetired(new Date());
-		r.setRetireReason("Retired via FHIR API");
-		r.setRetiredBy(Context.getAuthenticatedUser());
+		RequiredDataAdvice.recursivelyHandle(RetireHandler.class, object, "Retired via FHIR API");
 		return object;
 	}
 	

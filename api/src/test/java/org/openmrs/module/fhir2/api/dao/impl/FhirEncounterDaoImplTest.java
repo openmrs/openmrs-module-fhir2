@@ -149,11 +149,12 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void delete_shouldVoidEncounter() {
+	public void delete_shouldVoidEncounterAndUnderlyingObservations() {
 		Encounter encounter = dao.delete(ENCOUNTER_UUID);
 		assertThat(encounter.getVoided(), equalTo(true));
 		assertThat(encounter.getDateVoided(), not(nullValue()));
 		assertThat(encounter.getVoidedBy(), equalTo(Context.getAuthenticatedUser()));
 		assertThat(encounter.getVoidReason(), equalTo("Voided via FHIR API"));
+		assertThat(encounter.getObs().size(), equalTo(0)); // "getObs" does not return voided obs
 	}
 }

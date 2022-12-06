@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -16,11 +17,13 @@ import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
 
+import org.hamcrest.CoreMatchers;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +80,15 @@ public class FhirPersonDaoImplTest extends BaseModuleContextSensitiveTest {
 		    PERSON_ATTRIBUTE_TYPE_UUID);
 		
 		assertThat(attributeList, notNullValue());
+	}
+	
+	@Test
+	public void delete_shouldVoidPerson() {
+		Person person = fhirPersonDao.delete(PERSON_UUID);
+		assertThat(person.getVoided(), CoreMatchers.equalTo(true));
+		assertThat(person.getDateVoided(), not(CoreMatchers.nullValue()));
+		assertThat(person.getVoidedBy(), CoreMatchers.equalTo(Context.getAuthenticatedUser()));
+		assertThat(person.getVoidReason(), CoreMatchers.equalTo("Voided via FHIR API"));
 	}
 	
 }
