@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 
 import co.unruly.matchers.OptionalMatchers;
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;
@@ -175,9 +174,9 @@ public class FhirConceptDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void retire_shouldRetireConcept() {
 		Concept concept = dao.delete(CONCEPT_UUID);
-		assertThat(concept.getRetired(), CoreMatchers.equalTo(true));
-		assertThat(concept.getDateRetired(), CoreMatchers.not(CoreMatchers.nullValue()));
-		assertThat(concept.getRetiredBy(), CoreMatchers.equalTo(Context.getAuthenticatedUser()));
-		assertThat(concept.getRetireReason(), CoreMatchers.equalTo("Retired via FHIR API"));
+		assertThat(concept.getRetired(), equalTo(true));
+		assertThat(concept.getDateRetired(), not(nullValue()));
+		assertThat(concept.getRetiredBy(), equalTo(Context.getAuthenticatedUser()));
+		assertThat(concept.getRetireReason(), equalTo("Retired via FHIR API"));
 	}
 }
