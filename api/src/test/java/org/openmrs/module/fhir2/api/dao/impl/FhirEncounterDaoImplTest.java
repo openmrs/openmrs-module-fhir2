@@ -155,6 +155,6 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		assertThat(encounter.getDateVoided(), not(nullValue()));
 		assertThat(encounter.getVoidedBy(), equalTo(Context.getAuthenticatedUser()));
 		assertThat(encounter.getVoidReason(), equalTo("Voided via FHIR API"));
-		assertThat(encounter.getObs().size(), equalTo(0)); // "getObs" does not return voided obs
+		assertThat(encounter.getObs().size(), equalTo(0)); // "getObs" does not return voided obs, so if all obs are voided, this count should be 0
 	}
 }
