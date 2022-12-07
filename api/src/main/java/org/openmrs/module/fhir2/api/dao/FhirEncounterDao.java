@@ -34,9 +34,12 @@ public interface FhirEncounterDao extends FhirDao<Encounter> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
+	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
+	
+	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
 	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	List<Encounter> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
+	List<Encounter> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
 }

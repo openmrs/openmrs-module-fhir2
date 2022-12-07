@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.openmrs.Concept;
 import org.openmrs.ConceptSource;
 import org.openmrs.api.ConceptService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.dao.FhirConceptDao;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
@@ -168,5 +169,14 @@ public class FhirConceptDaoImplTest extends BaseModuleContextSensitiveTest {
 		List<Concept> results = dao.getConceptsWithAnyMappingInSource(loinc, null);
 		
 		assertThat(results, empty());
+	}
+	
+	@Test
+	public void retire_shouldRetireConcept() {
+		Concept concept = dao.delete(CONCEPT_UUID);
+		assertThat(concept.getRetired(), equalTo(true));
+		assertThat(concept.getDateRetired(), not(nullValue()));
+		assertThat(concept.getRetiredBy(), equalTo(Context.getAuthenticatedUser()));
+		assertThat(concept.getRetireReason(), equalTo("Retired via FHIR API"));
 	}
 }

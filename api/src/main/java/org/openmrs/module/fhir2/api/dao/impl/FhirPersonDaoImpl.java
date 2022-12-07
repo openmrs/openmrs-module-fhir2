@@ -88,11 +88,5 @@ public class FhirPersonDaoImpl extends BasePersonDao<Person> implements FhirPers
 	protected void handleVoidable(Criteria criteria) {
 		criteria.add(eq("personVoided", false));
 	}
-	
-	@Override
-	protected Person voidObject(Person object) {
-		object.setPersonVoided(true);
-		object.setPersonVoidReason("Voided via FHIR API");
-		return object;
-	}
+
 }

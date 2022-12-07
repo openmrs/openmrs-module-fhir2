@@ -62,6 +62,8 @@ public class FhirTaskTranslatorImplTest {
 	
 	private static final String CONCEPT_UUID = "aed0122d-7eed-47e9-89a6-3964c9886588";
 	
+	private static final String LOCATION_UUID = "58ab6cf9-ea12-43bc-98a6-40353423331e";
+	
 	private static final Task.TaskStatus FHIR_TASK_STATUS = Task.TaskStatus.REQUESTED;
 	
 	private static final Task.TaskStatus FHIR_NEW_TASK_STATUS = Task.TaskStatus.ACCEPTED;
@@ -392,6 +394,31 @@ public class FhirTaskTranslatorImplTest {
 		Task task = new Task();
 		
 		shouldUpdateReferenceInOpenmrs(task, FhirConstants.PATIENT, PATIENT_UUID, task::setFor, FhirTask::getForReference);
+	}
+	
+	// Task.location
+	@Test
+	public void toFhirResource_shouldTranslateLocation() {
+		FhirTask task = new FhirTask();
+		
+		shouldTranslateReferenceToFhir(task, FhirConstants.LOCATION, LOCATION_UUID, task::setLocationReference,
+		    Task::getLocation);
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateLocation() {
+		Task task = new Task();
+		
+		shouldTranslateReferenceToOpenmrs(task, FhirConstants.LOCATION, LOCATION_UUID, task::setLocation,
+		    FhirTask::getLocationReference);
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldUpdateLocation() {
+		Task task = new Task();
+		
+		shouldUpdateReferenceInOpenmrs(task, FhirConstants.LOCATION, LOCATION_UUID, task::setLocation,
+		    FhirTask::getLocationReference);
 	}
 	
 	// Task.output

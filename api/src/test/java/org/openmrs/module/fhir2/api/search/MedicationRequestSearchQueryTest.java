@@ -54,6 +54,22 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+/*
+ * Notes on test data:
+ * 		standardTestDataset has 10 drug orders, of which:
+ * 			0 are voided
+ * 			2 are discontinue orders
+ * 			3 of the non-voided, non-discontinue orders are stopped
+ * 			0 of the non-voided, non-discontinue orders are expired
+ * 		FhirMedicationRequestDaoImp has 5 drug orders, of which:
+ * 			1 is voided
+ * 			1 is discontinue order
+ * 			0 of the non-voided, non-discontinue orders are stopped
+ * 			3 of the non-voided, non-discontinue orders are expired
+ *
+ * 		Total numbers of non-voided, non-discontinued orders = (10 - 2) + (5 - 2) = 11
+ * 		Total number of active orders (non-voided, non-discontunue, not stopped and not expired) = (10 - 5) + (5 - 5) = 5
+ */
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitiveTest {
 	
@@ -62,6 +78,8 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 	private static final String MEDICATION_REQUEST_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
 	
 	private static final String DISCONTINUE_ORDER_UUID = "b951a436-c775-4dfc-9432-e19446d18c28";
+	
+	private static final String NON_ACTIVE_ORDER_UUID = "dfca4077-493c-496b-8312-856ee5d1cc26";
 	
 	private static final String PATIENT_UUID = "86526ed5-3c11-11de-a0ba-001e3766667a";
 	
@@ -110,6 +128,8 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 	private static final String DATE_CREATED = "2016-08-19";
 	
 	private static final String DATE_VOIDED = "2008-11-20";
+	
+	private static final String STATUS = "ACTIVE";
 	
 	@Autowired
 	private MedicationRequestTranslator translator;
@@ -1017,6 +1037,21 @@ public class MedicationRequestSearchQueryTest extends BaseModuleContextSensitive
 		
 		assertThat(resultList, hasSize(equalTo(1)));
 		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+	}
+	
+	@Test
+	public void searchForMedicationRequests_shouldSearchForMedicationRequestsByStatus() {
+		TokenAndListParam status = new TokenAndListParam().addAnd(new TokenParam(STATUS));
+		
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.STATUS_SEARCH_HANDLER,
+		    MedicationRequest.SP_STATUS, status);
+		
+		IBundleProvider results = search(theParams);
+		
+		assertThat(results, notNullValue());
+		List<MedicationRequest> resultList = get(results);
+		assertThat(resultList, hasSize(equalTo(5)));
+		assertThat(resultList, not(hasItem(hasProperty("id", equalTo(NON_ACTIVE_ORDER_UUID)))));
 	}
 	
 	@Test

@@ -13,6 +13,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.hl7.fhir.r4.model.MedicationRequest;
@@ -21,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.DrugOrder;
+import org.openmrs.Order;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestStatusTranslatorImplTest {
@@ -41,17 +45,38 @@ public class MedicationRequestStatusTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFirResource_shouldTranslateToActiveStatus() {
+	public void toFhirResource_shouldTranslateToActiveStatus() {
 		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
 		assertThat(status, notNullValue());
 		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.ACTIVE));
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateToUnknown() {
+	public void toFhirResource_shouldTranslateExpiredOrderToStoppedStatus() throws ParseException {
+		drugOrder.setAutoExpireDate(new SimpleDateFormat("YYYY-MM-DD").parse("2000-10-10"));
+		
+		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
+		assertThat(status, notNullValue());
+		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.STOPPED));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateDiscontinueOrderToCancelledStatus()
+	        throws NoSuchFieldException, ParseException, IllegalAccessException {
+		Field dateStopped = Order.class.getDeclaredField("dateStopped");
+		dateStopped.setAccessible(true);
+		dateStopped.set(drugOrder, new SimpleDateFormat("YYYY-MM-DD").parse("2000-10-10"));
+		
+		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
+		assertThat(status, notNullValue());
+		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.CANCELLED));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateVoidedOrderToCancelled() {
 		drugOrder.setVoided(true);
 		MedicationRequest.MedicationRequestStatus status = statusTranslator.toFhirResource(drugOrder);
 		assertThat(status, notNullValue());
-		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.UNKNOWN));
+		assertThat(status, equalTo(MedicationRequest.MedicationRequestStatus.CANCELLED));
 	}
 }

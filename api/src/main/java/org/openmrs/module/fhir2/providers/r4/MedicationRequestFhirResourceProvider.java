@@ -112,6 +112,7 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	        @OptionalParam(name = MedicationRequest.SP_MEDICATION, chainWhitelist = {
 	                "" }, targetTypes = Medication.class) ReferenceAndListParam medicationReference,
 	        @OptionalParam(name = MedicationRequest.SP_RES_ID) TokenAndListParam id,
+	        @OptionalParam(name = MedicationRequest.SP_STATUS) TokenAndListParam status,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(allow = { "MedicationRequest:" + MedicationRequest.SP_MEDICATION,
 	                "MedicationRequest:" + MedicationRequest.SP_REQUESTER,
@@ -132,6 +133,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		}
 		
 		return fhirMedicationRequestService.searchForMedicationRequests(patientReference, encounterReference, code,
-		    participantReference, medicationReference, id, lastUpdated, includes, revIncludes);
+		    participantReference, medicationReference, id, status, lastUpdated, includes, revIncludes);
 	}
 }

@@ -29,8 +29,8 @@ public interface FhirMedicationDispenseDao<T extends OpenmrsObject & Auditable> 
 	T delete(@Nonnull String uuid);
 	
 	@Override
-	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
+	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
 	
 	@Override
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
+	List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
 }

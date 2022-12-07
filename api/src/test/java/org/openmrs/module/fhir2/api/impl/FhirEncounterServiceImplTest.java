@@ -70,6 +70,8 @@ import org.openmrs.module.fhir2.providers.r3.MockIBundleProvider;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirEncounterServiceImplTest {
 	
+	private static final Integer ENCOUNTER_ID = 123;
+	
 	private static final String ENCOUNTER_UUID = "344kk343-45hj45-34jk34-34ui33";
 	
 	private static final String ENCOUNTER_TYPE_UUID = "07000be2-26b6-4cce-8b40-866d8435b613";
@@ -305,7 +307,7 @@ public class FhirEncounterServiceImplTest {
 		fhirEncounter.setId(ENCOUNTER_UUID);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(encounters);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -337,7 +339,7 @@ public class FhirEncounterServiceImplTest {
 		    location);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(encounters);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -372,7 +374,7 @@ public class FhirEncounterServiceImplTest {
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(encounters);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -407,7 +409,7 @@ public class FhirEncounterServiceImplTest {
 		    subject);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(encounters);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -434,7 +436,7 @@ public class FhirEncounterServiceImplTest {
 		    FhirConstants.ID_PROPERTY, uuid);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -465,7 +467,7 @@ public class FhirEncounterServiceImplTest {
 		fhirEncounter.setId(ENCOUNTER_UUID);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(encounters);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -492,7 +494,7 @@ public class FhirEncounterServiceImplTest {
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -519,7 +521,7 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -546,7 +548,7 @@ public class FhirEncounterServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -574,7 +576,7 @@ public class FhirEncounterServiceImplTest {
 		    revIncludes);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -602,7 +604,7 @@ public class FhirEncounterServiceImplTest {
 		    revIncludes);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -631,7 +633,7 @@ public class FhirEncounterServiceImplTest {
 		    hasAndListParam);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));
@@ -739,7 +741,7 @@ public class FhirEncounterServiceImplTest {
 		populateReverseIncludeForEverythingOperationParams(theParams);
 		
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openMrsEncounter));
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(ENCOUNTER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ENCOUNTER_ID));
 		when(encounterTranslator.toFhirResource(openMrsEncounter)).thenReturn(fhirEncounter);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, encounterTranslator, globalPropertyService, searchQueryInclude));

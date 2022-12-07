@@ -59,14 +59,14 @@ public class FhirConditionDaoImpl_2_2 extends BaseFhirDao<Condition> implements 
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONDITIONS)
-	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
-		return super.getSearchResultUuids(theParams);
+	public List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams) {
+		return super.getSearchResultIds(theParams);
 	}
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_CONDITIONS)
-	public List<Condition> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids) {
-		return super.getSearchResults(theParams, resourceUuids);
+	public List<Condition> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds) {
+		return super.getSearchResults(theParams, resourceIds);
 	}
 	
 	private ConditionClinicalStatus convertStatus(String status) {

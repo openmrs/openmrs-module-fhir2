@@ -10,11 +10,12 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 
 import java.util.List;
 
@@ -125,10 +126,10 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientAndParam);
 		
-		List<String> results = dao.getSearchResultUuids(theParams);
-		assertThat(results.size(), equalTo(2));
-		assertThat(results.contains("7a0282eb-b686-11ec-8065-0242ac110002"), is(true));
-		assertThat(results.contains("1bcb299c-b687-11ec-8065-0242ac110002"), is(true));
+		List<Integer> results = dao.getSearchResultIds(theParams);
+		assertThat(results, hasSize(2));
+		assertThat(results, hasItem(10));
+		assertThat(results, hasItem(11));
 	}
 	
 	@Test
@@ -139,9 +140,9 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, param);
 		
-		List<String> results = dao.getSearchResultUuids(theParams);
-		assertThat(results.size(), equalTo(1));
-		assertThat(results.contains("7a0282eb-b686-11ec-8065-0242ac110002"), is(true));
+		List<Integer> results = dao.getSearchResultIds(theParams);
+		assertThat(results, hasSize(1));
+		assertThat(results, hasItem(10));
 	}
 	
 	@Test
@@ -152,9 +153,9 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, param);
 		
-		List<String> results = dao.getSearchResultUuids(theParams);
-		assertThat(results.size(), equalTo(1));
-		assertThat(results.contains("b75c5c9e-b66c-11ec-8065-0242ac110002"), is(true));
+		List<Integer> results = dao.getSearchResultIds(theParams);
+		assertThat(results, hasSize(1));
+		assertThat(results, hasItem(1));
 	}
 	
 	@Test
