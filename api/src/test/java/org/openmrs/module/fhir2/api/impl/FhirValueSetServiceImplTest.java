@@ -47,6 +47,8 @@ import org.openmrs.module.fhir2.api.translators.ValueSetTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirValueSetServiceImplTest {
 	
+	private static final Integer ROOT_CONCEPT_ID = 123;
+	
 	private static final String ROOT_CONCEPT_UUID = "0f97e14e-cdc2-49ac-9255-b5126f8a5147";
 	
 	private static final String ROOT_CONCEPT_NAME = "FOOD CONSTRUCT";
@@ -113,7 +115,7 @@ public class FhirValueSetServiceImplTest {
 		        .addAnd(new StringOrListParam().add(new StringParam(ROOT_CONCEPT_NAME)));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.TITLE_SEARCH_HANDLER, titleParam);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(singletonList(ROOT_CONCEPT_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(singletonList(ROOT_CONCEPT_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(concept));
 		
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -136,7 +138,7 @@ public class FhirValueSetServiceImplTest {
 		        .addAnd(new StringOrListParam().add(new StringParam("wrong name")));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.TITLE_SEARCH_HANDLER, titleParam);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		

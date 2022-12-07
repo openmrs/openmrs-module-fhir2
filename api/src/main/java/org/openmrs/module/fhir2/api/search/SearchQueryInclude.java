@@ -95,6 +95,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	@Autowired
 	private FhirMedicationDispenseService medicationDispenseService;
 	
+	@SuppressWarnings("unchecked")
 	public Set<IBaseResource> getIncludedResources(List<U> resourceList, SearchParameterMap theParams) {
 		
 		List<PropParam<?>> includeParamList = theParams.getParameters(FhirConstants.INCLUDE_SEARCH_HANDLER);
@@ -269,7 +270,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				encounterSearchParams.setParticipant(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null,
+				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null, null,
 				    recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
@@ -290,7 +291,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return diagnosticReportService.searchForDiagnosticReports(params, null, null, null, null, null, null, null,
 				    null);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null,
+				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null, null,
 				    recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
@@ -304,7 +305,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 	        HashSet<Include> recursiveIncludes, HashSet<Include> recursiveRevIncludes) {
 		switch (targetType) {
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null,
+				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null, null,
 				    recursiveIncludes, recursiveRevIncludes);
 		}
 		
@@ -339,7 +340,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				encounterSearchParams.setSubject(params);
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
-				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null,
+				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null, null,
 				    recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.SERVICE_REQUEST:
 			case FhirConstants.PROCEDURE_REQUEST:

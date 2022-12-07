@@ -65,14 +65,14 @@ public class FhirConditionDaoImpl extends BaseFhirDao<Obs> implements FhirCondit
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
-		return super.getSearchResultUuids(theParams);
+	public List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams) {
+		return super.getSearchResultIds(theParams);
 	}
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids) {
-		return super.getSearchResults(theParams, resourceUuids);
+	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds) {
+		return super.getSearchResults(theParams, resourceIds);
 	}
 	
 	@Override

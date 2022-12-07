@@ -10,6 +10,8 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,6 +27,7 @@ import org.junit.Test;
 import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -40,11 +43,17 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String UNKNOWN_ENCOUNTER_UUID = "xx923xx-3423kk-2323-232jk23";
 	
+	private static final Integer ENCOUNTER_WITH_DRUG_ORDERS_ID = 3;
+	
 	private static final String ENCOUNTER_WITH_DRUG_ORDERS = "6519d653-393b-4118-9c83-a3715b82d4ac"; // 3 in standard test dataset
+	
+	private static final Integer ENCOUNTER_WITH_NO_DRUG_ORDERS_ID = 4;
 	
 	private static final String ENCOUNTER_WITH_NO_DRUG_ORDERS = "eec646cb-c847-45a7-98bc-91c8c4f70add"; // 4 in standard test dataset
 	
-	private static final String ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER = "fe98c4f0-0ceb-4c61-bd27-a013a90d4d5e";
+	private static final Integer ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER = 2002;
+	
+	private static final Integer ENCOUNTER_WITH_ONLY_INACTIVE_DRUG_ORDER = 2003;
 	
 	private static final String ENCOUNTER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml";
 	
@@ -58,12 +67,14 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	public void setUp() throws Exception {
 		dao = new FhirEncounterDaoImpl();
 		dao.setSessionFactory(sessionFactory);
+		
 		executeDataSet(ENCOUNTER_INITIAL_DATA_XML);
 	}
 	
 	@Test
 	public void shouldReturnMatchingEncounter() {
 		Encounter encounter = dao.get(ENCOUNTER_UUID);
+		
 		assertThat(encounter, notNullValue());
 		assertThat(encounter.getUuid(), notNullValue());
 		assertThat(encounter.getUuid(), equalTo(ENCOUNTER_UUID));
@@ -95,9 +106,32 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
 		    hasAndListParam);
 		
-		List<String> matchingUuids = dao.getSearchResultUuids(theParams);
-		assertThat("Encounter with Drug Orders is returned", matchingUuids.contains(ENCOUNTER_WITH_DRUG_ORDERS));
-		assertThat("Encounter without Drug Orders is not returned", !matchingUuids.contains(ENCOUNTER_WITH_NO_DRUG_ORDERS));
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		assertThat("Encounter with Drug Orders is returned", matchingResourceIds,
+		    hasItem(equalTo(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
+		assertThat("Encounter with only inactive Drug Orders is returned", matchingResourceIds,
+		    hasItem(equalTo(ENCOUNTER_WITH_ONLY_INACTIVE_DRUG_ORDER)));
+		assertThat("Encounter without Drug Orders is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
+	}
+	
+	@Test
+	public void shouldOnlyReturnEncountersThatHaveAssociatedActiveMedicationRequests() {
+		
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "status", "active")); // has parameter with status=active
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		assertThat("Encounter with Drug Orders is returned", matchingResourceIds,
+		    hasItem(equalTo(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
+		assertThat("Encounter with only inactive Drug Orders is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_ONLY_INACTIVE_DRUG_ORDER))));
+		assertThat("Encounter without Drug Orders is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
 	}
 	
 	@Test
@@ -109,8 +143,18 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
 		    hasAndListParam);
 		
-		List<String> matchingUuids = dao.getSearchResultUuids(theParams);
-		assertThat("Encounter with only Discontinue Order is not returned",
-		    !matchingUuids.contains(ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER));
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		assertThat("Encounter with only Discontinue Order is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER))));
+	}
+	
+	@Test
+	public void delete_shouldVoidEncounterAndUnderlyingObservations() {
+		Encounter encounter = dao.delete(ENCOUNTER_UUID);
+		assertThat(encounter.getVoided(), equalTo(true));
+		assertThat(encounter.getDateVoided(), not(nullValue()));
+		assertThat(encounter.getVoidedBy(), equalTo(Context.getAuthenticatedUser()));
+		assertThat(encounter.getVoidReason(), equalTo("Voided via FHIR API"));
+		assertThat(encounter.getObs().size(), equalTo(0)); // "getObs" does not return voided obs, so if all obs are voided, this count should be 0
 	}
 }

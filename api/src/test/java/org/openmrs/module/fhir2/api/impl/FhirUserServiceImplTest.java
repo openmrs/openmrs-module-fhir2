@@ -66,6 +66,8 @@ import org.openmrs.module.fhir2.api.translators.PractitionerTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirUserServiceImplTest {
 	
+	private static final Integer USER_ID = 123;
+	
 	private static final String USER_UUID = "5f07c6ff-c483-4e77-815e-44dd650470e7";
 	
 	private static final String WRONG_USER_UUID = "1a1d2623-2f67-47de-8fb0-b02f51e378b7";
@@ -153,7 +155,7 @@ public class FhirUserServiceImplTest {
 		StringAndListParam name = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(USER_NAME)));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(NAME_SEARCH_HANDLER, NAME_PROPERTY, name);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(singletonList(USER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(singletonList(USER_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(user));
 		
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -175,7 +177,7 @@ public class FhirUserServiceImplTest {
 		StringAndListParam name = new StringAndListParam().addAnd(new StringOrListParam().add(new StringParam(WRONG_NAME)));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(NAME_SEARCH_HANDLER, NAME_PROPERTY, name);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -192,7 +194,7 @@ public class FhirUserServiceImplTest {
 		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(USER_SYSTEM_ID));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(IDENTIFIER_SEARCH_HANDLER, identifier);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(singletonList(USER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(singletonList(USER_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(user));
 		
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -215,7 +217,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.IDENTIFIER_SEARCH_HANDLER,
 		    identifier);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -232,7 +234,7 @@ public class FhirUserServiceImplTest {
 		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(CITY));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(ADDRESS_SEARCH_HANDLER, CITY_PROPERTY, city);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(singletonList(USER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(singletonList(USER_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(user));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -254,7 +256,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.CITY_PROPERTY, city);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -271,7 +273,7 @@ public class FhirUserServiceImplTest {
 		StringAndListParam state = new StringAndListParam().addAnd(new StringParam(STATE));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(ADDRESS_SEARCH_HANDLER, STATE_PROPERTY, state);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(singletonList(USER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(singletonList(USER_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(user));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -293,7 +295,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.STATE_PROPERTY, state);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -311,7 +313,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(ADDRESS_SEARCH_HANDLER, POSTAL_CODE_PROPERTY,
 		    postalCode);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(singletonList(USER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(singletonList(USER_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(user));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -333,7 +335,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.POSTAL_CODE_PROPERTY, postalCode);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -351,7 +353,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(ADDRESS_SEARCH_HANDLER, COUNTRY_PROPERTY,
 		    country);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(singletonList(USER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(singletonList(USER_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(user));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -373,7 +375,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.COUNTRY_PROPERTY, country);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -391,7 +393,7 @@ public class FhirUserServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(COMMON_SEARCH_HANDLER, ID_PROPERTY, uuid);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(singletonList(USER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(singletonList(USER_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(user));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -414,7 +416,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -433,7 +435,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(COMMON_SEARCH_HANDLER, LAST_UPDATED_PROPERTY,
 		    lastUpdated);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(singletonList(USER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(singletonList(USER_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(user));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
@@ -457,7 +459,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, lastUpdated);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.emptyList());
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -476,7 +478,7 @@ public class FhirUserServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER,
 		    revIncludes);
 		
-		when(dao.getSearchResultUuids(any())).thenReturn(singletonList(USER_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(singletonList(USER_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(user));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(

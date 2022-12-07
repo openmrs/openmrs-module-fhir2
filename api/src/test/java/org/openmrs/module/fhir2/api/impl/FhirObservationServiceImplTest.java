@@ -54,6 +54,8 @@ import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirObservationServiceImplTest {
 	
+	private static final Integer OBS_ID = 123;
+	
 	private static final String OBS_UUID = "12345-abcde-12345";
 	
 	private static final String PATIENT_GIVEN_NAME = "Clement";
@@ -130,7 +132,7 @@ public class FhirObservationServiceImplTest {
 		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientReference);
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(OBS_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -181,7 +183,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(OBS_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -234,7 +236,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(OBS_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -279,7 +281,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(OBS_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -331,7 +333,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(OBS_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -384,7 +386,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(OBS_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -429,7 +431,7 @@ public class FhirObservationServiceImplTest {
 		        .addParameter(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER, new StringParam());
 		
 		when(globalPropertyService.getGlobalProperty(anyString(), anyInt())).thenReturn(10);
-		when(dao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(OBS_UUID));
+		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(OBS_ID));
 		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obs));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));

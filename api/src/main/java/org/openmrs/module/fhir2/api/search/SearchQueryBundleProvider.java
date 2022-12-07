@@ -58,7 +58,7 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	
 	private transient Integer pageSize;
 	
-	private transient List<String> matchingResourceUuids;
+	private transient List<Integer> matchingResources;
 	
 	private final SearchQueryInclude<U> searchQueryInclude;
 	
@@ -78,11 +78,11 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	@Override
 	@Nonnull
 	public List<IBaseResource> getResources(int fromIndex, int toIndex) {
-		if (matchingResourceUuids == null) {
-			matchingResourceUuids = dao.getSearchResultUuids(searchParameterMap);
+		if (matchingResources == null) {
+			matchingResources = dao.getSearchResultIds(searchParameterMap);
 		}
 		
-		if (matchingResourceUuids.isEmpty()) {
+		if (matchingResources.isEmpty()) {
 			return Collections.emptyList();
 		}
 		
@@ -105,7 +105,7 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 		}
 		
 		List<U> returnedResourceList = dao
-		        .getSearchResults(searchParameterMap, matchingResourceUuids.subList(firstResult, lastResult)).stream()
+		        .getSearchResults(searchParameterMap, matchingResources.subList(firstResult, lastResult)).stream()
 		        .map(translator::toFhirResource).filter(Objects::nonNull).collect(Collectors.toList());
 		
 		Set<IBaseResource> includedResources = searchQueryInclude.getIncludedResources(returnedResourceList,
@@ -129,12 +129,12 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	@Override
 	@Nullable
 	public Integer size() {
-		if (matchingResourceUuids == null) {
-			matchingResourceUuids = dao.getSearchResultUuids(searchParameterMap);
+		if (matchingResources == null) {
+			matchingResources = dao.getSearchResultIds(searchParameterMap);
 		}
 		
 		if (count == null) {
-			count = matchingResourceUuids.size();
+			count = matchingResources.size();
 		}
 		
 		return count;

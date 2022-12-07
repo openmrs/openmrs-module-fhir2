@@ -28,7 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirGroupDaoImplTest extends BaseModuleContextSensitiveTest {
 	
-	private static final String COHORT_UUID = "985ff1a2-c2ef-49fd-836f-8a1d936d9ef9";
+	private static final String COHORT_UUID = "1d64befb-3b2e-48e5-85f5-353d43e23e46";
 	
 	private static final String NEW_COHORT_UUID = "111ff1a2-c2ef-49fd-836f-8a1d936d9ef0";
 	
@@ -36,7 +36,7 @@ public class FhirGroupDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String COHORT_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirCohortDaoImplTest_initial_data.xml";
 	
-	private static final String COHORT_NAME = "John's patientList";
+	private static final String COHORT_NAME = "Covid19 patients";
 	
 	private FhirGroupDaoImpl dao;
 	

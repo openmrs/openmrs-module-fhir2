@@ -18,15 +18,17 @@ import javax.persistence.Table;
 
 import java.util.Optional;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.openmrs.BaseOpenmrsMetadata;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 
 /**
  * FHIR Reference - https://www.hl7.org/fhir/references.html
  */
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "fhir_reference")
 public class FhirReference extends BaseOpenmrsMetadata {

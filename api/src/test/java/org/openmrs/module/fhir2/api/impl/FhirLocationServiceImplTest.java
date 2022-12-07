@@ -48,6 +48,8 @@ import org.openmrs.module.fhir2.api.translators.LocationTranslator;
 @RunWith(MockitoJUnitRunner.class)
 public class FhirLocationServiceImplTest {
 	
+	private static final Integer LOCATION_ID = 123;
+	
 	private static final String LOCATION_UUID = "a1758922-b132-4ead-8ebe-5e2b4eaf43a1";
 	
 	private static final String LOCATION_NAME = "Test location 1";
@@ -148,7 +150,7 @@ public class FhirLocationServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		
-		when(locationDao.getSearchResultUuids(any())).thenReturn(Collections.singletonList(LOCATION_UUID));
+		when(locationDao.getSearchResultIds(any())).thenReturn(Collections.singletonList(LOCATION_ID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        locationDao, locationTranslator, globalPropertyService, searchQueryInclude));
 		

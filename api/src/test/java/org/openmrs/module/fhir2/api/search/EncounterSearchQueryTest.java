@@ -215,8 +215,8 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<String> resultSet = new HashSet<>(dao.getSearchResultUuids(theParams));
-		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
+		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
+		assertThat(resultSet, hasSize(1)); // 3 with repetitions
 	}
 	
 	@Test
@@ -306,7 +306,7 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<String> resultSet = new HashSet<>(dao.getSearchResultUuids(theParams));
+		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
 		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
 	}
 	
@@ -397,8 +397,8 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<String> resultSet = new HashSet<>(dao.getSearchResultUuids(theParams));
-		assertThat(resultSet.size(), equalTo(1)); // 2 with repetitions
+		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
+		assertThat(resultSet, hasSize(1)); // 2 with repetitions
 	}
 	
 	@Test

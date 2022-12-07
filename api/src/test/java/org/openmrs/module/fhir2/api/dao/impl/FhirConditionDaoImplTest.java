@@ -9,12 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 import java.util.Collection;
 import java.util.Date;
@@ -38,7 +39,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = TestFhirSpringConfiguration.class, inheritLocations = false)
 public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 	
-	private static final String VOIDED_OBS_CONDITION_UUID = "94dhs003-a55d-43c4-ac7a-bd6d1ba63388";
+	private static final Integer VOIDED_OBS_CONDITION_ID = 33;
 	
 	private static final String EXISTING_OBS_CONDITION_UUID = "86sgf-1f7d-4394-a316-0a458edf28c4";
 	
@@ -93,8 +94,8 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
-		assertEquals(2, matchingResourceUuids.size());
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		assertThat(matchingResourceIds, hasSize(2));
 	}
 	
 	@Test
@@ -107,12 +108,12 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
-		assertEquals(matchingResourceUuids.size(), 0);
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		assertThat(matchingResourceIds, hasSize(0));
 	}
 	
 	@Test
-	public void search_shouldReturnNoVoidedConditonResourceUuids() {
+	public void search_shouldReturnNoVoidedConditionResourceUuids() {
 		TokenAndListParam code = new TokenAndListParam();
 		TokenParam codingToken = new TokenParam();
 		codingToken.setValue(OBS_CONDITION_CONCEPT_ID);
@@ -121,8 +122,8 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
-		assertFalse(matchingResourceUuids.contains(VOIDED_OBS_CONDITION_UUID));
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		assertThat(matchingResourceIds, not(hasItem(VOIDED_OBS_CONDITION_ID)));
 	}
 	
 	@Test
@@ -135,10 +136,10 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<String> matchingResourceUuids = dao.getSearchResultUuids(theParams);
-		Collection<Obs> obs = dao.getSearchResults(theParams, matchingResourceUuids);
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		Collection<Obs> obs = dao.getSearchResults(theParams, matchingResourceIds);
 		assertThat(obs, notNullValue());
-		assertEquals(obs.size(), 2);
+		assertThat(obs, hasSize(2));
 	}
 	
 	@Test
@@ -162,6 +163,7 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void shouldDeleteObsCondition() {
 		Obs result = dao.delete(EXISTING_OBS_CONDITION_UUID);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getUuid(), equalTo(EXISTING_OBS_CONDITION_UUID));
 		assertThat(result.getVoided(), equalTo(true));

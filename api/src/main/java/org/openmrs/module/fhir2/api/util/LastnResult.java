@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.util;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 import lombok.Data;
 
@@ -18,9 +19,9 @@ import lombok.Data;
  * The class stores the result of $lastn type operations
  */
 @Data
-public class LastnResult {
+public class LastnResult<T> {
 	
-	private final String uuid;
+	private final T id;
 	
 	private final Date datetime;
 	
@@ -30,24 +31,27 @@ public class LastnResult {
 	 * Constructor to initialize the LastnResult object with resource uuid, effective datetime and a map
 	 * of other attributes
 	 * 
-	 * @param uuid the resource uuid
+	 * @param id the resource id
 	 * @param datetime the resource's effective datetime
 	 * @param attributes the other attributes of the resource
 	 */
-	public LastnResult(Object uuid, Object datetime, Map<String, Object> attributes) {
-		this.uuid = (String) uuid;
+	public LastnResult(Object id, Object datetime, Map<String, Object> attributes) {
+		Objects.requireNonNull(id, "id must not be null");
+		this.id = (T) id;
 		this.datetime = (Date) datetime;
 		this.attributes = attributes;
 	}
 	
 	/**
-	 * Constructor to initialize the LastnResult object with resource uuid and effective datetime
+	 * Constructor to initialize the LastnResult object with resource id and effective datetime
 	 * 
-	 * @param objects objects[0] holds the resource uuid objects[1] holds the resources's effective
+	 * @param objects objects[0] holds the resource id objects[1] holds the resources's effective
 	 *            datetime
 	 */
 	public LastnResult(Object[] objects) {
-		uuid = (String) objects[0];
+		Objects.requireNonNull(objects[0], "id must not be null");
+		Objects.requireNonNull(objects[1], "datetime must not be null");
+		id = (T) objects[0];
 		datetime = (Date) objects[1];
 		attributes = null;
 	}

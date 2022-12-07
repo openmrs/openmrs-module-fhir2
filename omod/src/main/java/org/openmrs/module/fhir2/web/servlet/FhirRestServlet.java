@@ -204,9 +204,15 @@ public class FhirRestServlet extends RestfulServer implements ModuleLifecycleLis
 	}
 	
 	private BasePagingProvider createPagingProvider() {
-		int defaultPageSize=NumberUtils.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE),10);int maximumPageSize=NumberUtils.toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE),100);
+		int defaultPageSize = NumberUtils
+		        .toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_DEFAULT_PAGE_SIZE), 10);
+		int maximumPageSize = NumberUtils
+		        .toInt(globalPropertyService.getGlobalProperty(FhirConstants.OPENMRS_FHIR_MAXIMUM_PAGE_SIZE), 100);
 		
-		BasePagingProvider pagingProvider=new FifoMemoryPagingProvider(10_000);pagingProvider.setDefaultPageSize(defaultPageSize);pagingProvider.setMaximumPageSize(maximumPageSize);return pagingProvider;
+		BasePagingProvider pagingProvider = new FifoMemoryPagingProvider(100);
+		pagingProvider.setDefaultPageSize(defaultPageSize);
+		pagingProvider.setMaximumPageSize(maximumPageSize);
+		return pagingProvider;
 	}
 	
 	protected void autoInject() {

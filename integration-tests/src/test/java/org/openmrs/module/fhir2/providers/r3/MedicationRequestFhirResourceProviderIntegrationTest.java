@@ -198,7 +198,7 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(13)));
+		assertThat(result, hasProperty("total", equalTo(11)));
 	}
 	
 	@Test
@@ -213,6 +213,6 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(13)));
+		assertThat(result, hasProperty("total", equalTo(11)));
 	}
 }
