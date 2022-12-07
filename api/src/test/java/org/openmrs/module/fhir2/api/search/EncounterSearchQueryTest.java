@@ -1539,4 +1539,21 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 			    greaterThanOrEqualTo(resultList.get(i).getPeriod().getStart()));
 		}
 	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnAllNonVoidedEncountersSortedById() {
+		SearchParameterMap theParams = new SearchParameterMap();
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(4));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo("6519d653-393b-4118-9c83-a3715b82d4ac")); // encounter with encounter_id=3
+		assertThat(resultList.get(1).getIdElement().getIdPart(), equalTo("eec646cb-c847-45a7-98bc-91c8c4f70add")); // encounter with encounter_id=4
+		assertThat(resultList.get(2).getIdElement().getIdPart(), equalTo("e403fafb-e5e4-42d0-9d11-4f52e89d148c")); // encounter with encounter_id=5
+		assertThat(resultList.get(3).getIdElement().getIdPart(), equalTo("y403fafb-e5e4-42d0-9d11-4f52e89d123r")); // encounter with encounter_id=6
+		
+	}
 }
