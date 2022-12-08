@@ -163,6 +163,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		setupSearchParams(criteria, theParams);
 		handleSort(criteria, theParams.getSortSpec());
 		
+		criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
 		criteria.setProjection(Projections.property("id"));
 		
 		@SuppressWarnings("unchecked")
