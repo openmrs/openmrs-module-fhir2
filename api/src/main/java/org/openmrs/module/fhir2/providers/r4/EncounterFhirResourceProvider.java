@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -110,15 +111,15 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	public IBundleProvider searchEncounter(@OptionalParam(name = Encounter.SP_DATE) DateRangeParam date,
 	        @OptionalParam(name = Encounter.SP_LOCATION, chainWhitelist = { "", Location.SP_ADDRESS_CITY,
 	                Location.SP_ADDRESS_STATE, Location.SP_ADDRESS_COUNTRY,
-	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceAndListParam location,
+	                Location.SP_ADDRESS_POSTALCODE }, targetTypes = Location.class) ReferenceOrListParam location,
 	        @OptionalParam(name = Encounter.SP_PARTICIPANT, chainWhitelist = { "", Practitioner.SP_IDENTIFIER,
 	                Practitioner.SP_GIVEN, Practitioner.SP_FAMILY,
-	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceAndListParam participantReference,
+	                Practitioner.SP_NAME }, targetTypes = Practitioner.class) ReferenceOrListParam participantReference,
 	        @OptionalParam(name = Encounter.SP_SUBJECT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
 	                Patient.SP_FAMILY,
-	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam subjectReference,
+	                Patient.SP_NAME }, targetTypes = Patient.class) ReferenceOrListParam subjectReference,
 	        @OptionalParam(name = Encounter.SP_PATIENT, chainWhitelist = { "", Patient.SP_IDENTIFIER, Patient.SP_GIVEN,
-	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceAndListParam patientParam,
+	                Patient.SP_FAMILY, Patient.SP_NAME }, targetTypes = Patient.class) ReferenceOrListParam patientParam,
 	        @OptionalParam(name = Encounter.SP_TYPE) TokenAndListParam encounterType,
 	        @OptionalParam(name = Encounter.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = "_tag") TokenAndListParam tag,
@@ -142,8 +143,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return encounterService.searchForEncounters(new EncounterSearchParams(date, location, participantReference,
-		        subjectReference, encounterType, tag, hasAndListParam, id, lastUpdated, sort, includes, revIncludes));
+		return encounterService.searchForEncounters(new EncounterSearchParams(date, new ReferenceAndListParam().addAnd(location), new ReferenceAndListParam() .addAnd(participantReference),
+		        new ReferenceAndListParam().addAnd(subjectReference), encounterType, tag, hasAndListParam, id, lastUpdated, sort, includes, revIncludes));
 	}
 	
 	/**

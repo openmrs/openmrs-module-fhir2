@@ -137,8 +137,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		when(encounterService.searchForEncounters(any()))
 		        .thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
 		
-		ReferenceAndListParam subjectReference = new ReferenceAndListParam();
-		subjectReference.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
+		ReferenceOrListParam subjectReference = new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME));
 		
 		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, subjectReference, null, null, null,
 		    null, null, null, null, null, null);
@@ -158,8 +157,7 @@ public class EncounterFhirResourceProviderTest extends BaseFhirR3ProvenanceResou
 		when(encounterService.searchForEncounters(any()))
 		        .thenReturn(new MockIBundleProvider<>(encounters, PREFERRED_SIZE, COUNT));
 		
-		ReferenceAndListParam patientParam = new ReferenceAndListParam();
-		patientParam.addValue(new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME)));
+		ReferenceOrListParam patientParam = new ReferenceOrListParam().add(new ReferenceParam().setChain(Patient.SP_NAME));
 		
 		IBundleProvider results = resourceProvider.searchEncounter(null, null, null, null, patientParam, null, null, null,
 		    null, null, null, null, null);

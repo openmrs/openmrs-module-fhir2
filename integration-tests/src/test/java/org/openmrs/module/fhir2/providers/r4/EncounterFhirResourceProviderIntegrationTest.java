@@ -818,4 +818,21 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 	}
+
+	@Test
+	public void shouldSearchForEncountersByPatientIdentifiersOr() throws Exception {
+		String uri = String.format("/Encounter?subject.identifier=101-6&subject.name=Chebaskwony");
+		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.XML).go();
+
+		Bundle results = readBundleResponse(response);
+
+		assertThat(results, notNullValue());
+		assertThat(results.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(results.hasEntry(), is(true));
+
+		// TODO add testing
+	}
 }
+
+
+//6TS-4
