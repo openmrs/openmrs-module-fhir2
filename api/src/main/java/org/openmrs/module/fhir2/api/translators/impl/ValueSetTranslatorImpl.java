@@ -11,7 +11,9 @@ package org.openmrs.module.fhir2.api.translators.impl;
 
 import javax.annotation.Nonnull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,7 +29,6 @@ import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSet;
 import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
-import org.openmrs.module.fhir2.api.translators.ValueSetReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ValueSetTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +41,6 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 	
 	@Autowired
 	private FhirConceptSourceService conceptSourceService;
-	
-	@Autowired
-	private ValueSetReferenceTranslator valueSetReferenceTranslator;
 	
 	@Override
 	public Concept toOpenmrsType(@Nonnull ValueSet resource) {
@@ -72,45 +70,52 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 		
 		ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
 		
+		List<ValueSet.ConceptSetComponent> sets = new ArrayList<ValueSet.ConceptSetComponent>();
+		ValueSet.ConceptSetComponent conceptUuidSet = new ValueSet.ConceptSetComponent();
+		sets.add(conceptUuidSet);
+		
+		Map<ConceptSource, String> conceptSourceCache = new HashMap<>();
+		
 		for (ConceptSet conceptSet : concept.getConceptSets()) {
 			Concept conceptSetMember = conceptSet.getConcept();
 			
 			if (conceptSetMember != null) {
-				if (conceptSetMember.getSet()) {
-					ValueSet.ConceptSetComponent conceptSetComponent = new ValueSet.ConceptSetComponent();
-					conceptSetComponent
-					        .addValueSet(valueSetReferenceTranslator.toFhirResource(conceptSetMember).getReference());
-					compose.addInclude(conceptSetComponent);
-					continue;
-				}
+				// first, add the uuid and display to the concept uuid set
+				ValueSet.ConceptReferenceComponent uuidConceptReferenceComponent = new ValueSet.ConceptReferenceComponent();
+				uuidConceptReferenceComponent.setCode(conceptSetMember.getUuid());
+				uuidConceptReferenceComponent.setDisplay(conceptSetMember.getDisplayString());
+				conceptUuidSet.addConcept(uuidConceptReferenceComponent);
 				
+				// now iterate through all the mappings
 				if (conceptSetMember.getConceptMappings() != null) {
-					Map<ConceptSource, String> conceptSourceCache = new HashMap<>();
-					for (ConceptMap mapping : conceptSetMember.getConceptMappings()) {
-						ValueSet.ConceptSetComponent conceptSetComponent = new ValueSet.ConceptSetComponent();
-						ValueSet.ConceptReferenceComponent conceptReferenceComponent = new ValueSet.ConceptReferenceComponent();
-						
-						ConceptReferenceTerm crt = mapping.getConceptReferenceTerm();
-						if (crt == null || crt.getConceptSource() == null) {
-							continue;
-						}
-						
+					for (ConceptMap conceptMapping : conceptSetMember.getConceptMappings()) {
+						ConceptReferenceTerm crt = conceptMapping.getConceptReferenceTerm();
 						String sourceUrl = conceptSourceCache.computeIfAbsent(crt.getConceptSource(),
 						    this::conceptSourceToURL);
-						if (sourceUrl == null) {
-							conceptReferenceComponent.setCode(conceptSetMember.getUuid());
-						} else {
-							conceptSetComponent.setSystem(sourceUrl);
+						// only add sources that we have urls for (provided by Fhir Concept Source table)
+						if (sourceUrl != null) {
+							// first see if we already have an icnlude for this source, and initialize one if not
+							ValueSet.ConceptSetComponent conceptSetComponent = sets.stream().filter(set -> {
+								return sourceUrl.equals(set.getSystem());
+							}).findFirst().orElse(null);
+							if (conceptSetComponent == null) {
+								conceptSetComponent = new ValueSet.ConceptSetComponent();
+								conceptSetComponent.setSystem(sourceUrl);
+								sets.add(conceptSetComponent);
+							}
+							// set the code and the display string
+							ValueSet.ConceptReferenceComponent conceptReferenceComponent = new ValueSet.ConceptReferenceComponent();
 							conceptReferenceComponent.setCode(crt.getCode());
+							conceptReferenceComponent.setDisplay(conceptSetMember.getDisplayString());
+							conceptSetComponent.addConcept(conceptReferenceComponent);
+							
 						}
-						
-						conceptSetComponent.addConcept(conceptReferenceComponent);
-						compose.addInclude(conceptSetComponent);
 					}
 				}
 			}
 		}
 		
+		compose.setInclude(sets);
 		valueSet.setCompose(compose);
 		return valueSet;
 	}
