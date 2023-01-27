@@ -82,6 +82,7 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		MedicationRequest medicationRequest = new MedicationRequest();
 		medicationRequest.setId(drugOrder.getUuid());
+		medicationRequest.setAuthoredOn(drugOrder.getDateCreated());
 		medicationRequest.setStatus(statusTranslator.toFhirResource(drugOrder));
 		
 		if (drugOrder.getDrug() != null) {
@@ -134,6 +135,7 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		notNull(medicationRequest, "The MedicationRequest object should not be null");
 		
 		existingDrugOrder.setUuid(medicationRequest.getId());
+		existingDrugOrder.setDateCreated(medicationRequest.getAuthoredOn());
 		
 		if (medicationRequest.hasMedicationReference()) {
 			Drug drug = medicationReferenceTranslator.toOpenmrsType(medicationRequest.getMedicationReference());

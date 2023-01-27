@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
@@ -46,6 +47,11 @@ public class MedicationRequestDispenseRequestComponentTranslatorImpl implements 
 		if (drugOrder.getNumRefills() != null) {
 			dispenseRequestComponent.setNumberOfRepeatsAllowed(drugOrder.getNumRefills());
 		}
+		if (drugOrder.getDateActivated() != null) {
+			Period validityPeriod = new Period();
+			validityPeriod.setStart(drugOrder.getDateActivated());
+			dispenseRequestComponent.setValidityPeriod(validityPeriod);
+		}
 		return dispenseRequestComponent;
 	}
 	
@@ -61,6 +67,9 @@ public class MedicationRequestDispenseRequestComponentTranslatorImpl implements 
 			}
 		}
 		drugOrder.setNumRefills(resource.getNumberOfRepeatsAllowed());
+		if (resource.getValidityPeriod() != null && resource.getValidityPeriod().getStart() != null) {
+			drugOrder.setDateActivated(resource.getValidityPeriod().getStart());
+		}
 		return drugOrder;
 	}
 }
