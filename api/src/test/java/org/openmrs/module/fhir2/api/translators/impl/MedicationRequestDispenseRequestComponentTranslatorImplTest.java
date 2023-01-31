@@ -17,10 +17,12 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
 import org.junit.Before;
 import org.junit.Test;
@@ -122,6 +124,15 @@ public class MedicationRequestDispenseRequestComponentTranslatorImplTest {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateDateActivatedToValidityPeriodStart() {
+		Date now = new Date();
+		drugOrder.setDateActivated(now);
+		dispenseRequest = requestTimingComponentTranslator.toFhirResource(drugOrder);
+		assertThat(dispenseRequest, notNullValue());
+		assertThat(dispenseRequest.getValidityPeriod().getStart(), equalTo(now));
+	}
+	
+	@Test
 	public void toOpenmrsType_shouldTranslateToQuantity() {
 		Quantity quantity = new Quantity();
 		quantity.setValue(456.0);
@@ -157,5 +168,16 @@ public class MedicationRequestDispenseRequestComponentTranslatorImplTest {
 		dispenseRequest.setNumberOfRepeatsAllowed(32);
 		drugOrder = requestTimingComponentTranslator.toOpenmrsType(drugOrder, dispenseRequest);
 		assertThat(drugOrder.getNumRefills(), equalTo(32));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateValidityPeriodStartToDateActivated() {
+		Date now = new Date();
+		Period validityPeriod = new Period();
+		validityPeriod.setStart(now);
+		dispenseRequest.setValidityPeriod(validityPeriod);
+		drugOrder = requestTimingComponentTranslator.toOpenmrsType(drugOrder, dispenseRequest);
+		assertThat(drugOrder.getDateActivated(), equalTo(now));
+		
 	}
 }
