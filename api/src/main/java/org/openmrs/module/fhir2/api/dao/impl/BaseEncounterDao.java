@@ -115,8 +115,20 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								// only supports ACTIVE at this time
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
-									        .equals(paramValue.toUpperCase())) {
+									        .equalsIgnoreCase(paramValue)) {
 										criteria.add(generateActiveOrderQuery("orders"));
+									}
+								}
+								handled = true;
+							} else if ((MedicationRequest.SP_STATUS + ":not").equalsIgnoreCase(paramName)) {
+								if (paramValue != null) {
+									if (MedicationRequest.MedicationRequestStatus.CANCELLED.toString()
+									        .equalsIgnoreCase(paramValue)) {
+										criteria.add(generateNotCancelledOrderQuery("orders"));
+									}
+									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
+									        .equalsIgnoreCase(paramValue)) {
+										criteria.add(generateNotCompletedOrderQuery("orders"));
 									}
 								}
 								handled = true;
