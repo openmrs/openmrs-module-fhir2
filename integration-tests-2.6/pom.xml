@@ -116,7 +116,7 @@
     </build>
 
     <properties>
-        <openmrsPlatformVersion>2.6.0-SNAPSHOT</openmrsPlatformVersion>
+        <openmrsPlatformVersion>2.6.0-beta</openmrsPlatformVersion>
     </properties>
 
 </project>
