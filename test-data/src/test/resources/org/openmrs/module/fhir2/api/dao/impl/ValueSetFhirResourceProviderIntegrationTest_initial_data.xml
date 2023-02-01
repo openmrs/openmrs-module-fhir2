@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+
+
+    <concept concept_id="1000" retired="0" datatype_id="4" class_id="10" is_set="true" creator="1" date_created="2005-01-01 00:00:00.0" uuid="378e63b1-6c75-46ed-95e3-797b48ddc9f8" />
+    <concept concept_id="1001" retired="0" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="bbbf56f8-706e-41ef-95cd-57271567223a" />
+    <concept concept_id="1002" retired="0" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="b150225f-2086-43af-a13a-5ff16464a6f7" />
+    <concept concept_id="1003" retired="0" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="f5608410-6610-4314-84de-6d23a7fdfa99" />
+    <concept concept_id="1004" retired="0" datatype_id="4" class_id="10" is_set="true" creator="1" date_created="2005-01-01 00:00:00.0" uuid="a4e4d0be-8edb-4021-86a9-f7ed7d8d45e3" />
+    <concept_name concept_id="1000" name="Farm Animal Set" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1000" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="e893bb48-5f8a-4d69-b93d-9c0bca715982"/>
+    <concept_name concept_id="1001" name="Cow" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1001" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="ee97a1c5-b7d8-498c-93af-f734e672d1ed"/>
+    <concept_name concept_id="1002" name="Pig" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1002" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="14864498-2a5b-4684-a20a-0b6188b9ea17"/>
+    <concept_name concept_id="1003" name="Sheep" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1003" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="caec6795-38a2-409f-ac81-55810da5272f"/>
+    <concept_name concept_id="1003" name="Sheep" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1003" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="caec6795-38a2-409f-ac81-55810da5272f"/>
+    <concept_name concept_id="1004" name="Breeds of Horses" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1004" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="f398b707-006f-49b2-87a6-c25808d15297"/>
+
+    <concept_set concept_set_id="1001" concept_id="1001" concept_set="1000" sort_weight="1.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="9a61d55c-5bfc-4494-b951-56adf85a31df"/>
+    <concept_set concept_set_id="1002" concept_id="1002" concept_set="1000" sort_weight="2.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="8e72b80d-058f-4ecf-8d5d-12de63315ae6"/>
+    <concept_set concept_set_id="1003" concept_id="1003" concept_set="1000" sort_weight="3.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="83a53766-289e-43a5-84b7-9a4897b460fe"/>
+    <concept_set concept_set_id="1004" concept_id="1004" concept_set="1000" sort_weight="3.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="f62274b1-e5fb-4b40-8854-45f8c5dbe604"/>
+
+    <concept_reference_source concept_source_id="1000" name="FARM_CODE" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="2b3c1ff8-768a-102f-83f4-12313b04a615" />
+    <concept_reference_term concept_reference_term_id="1001" concept_source_id="1000" code="MOO" creator="1" date_created="2005-01-01 00:00:00.0" uuid="d471950d-0ef5-424c-b72a-3fff29af6b0b" retired="0"/>
+    <concept_reference_map concept_map_id="1001" concept_reference_term_id="1001" concept_map_type_id="1" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="1001" uuid="2f7e0cd7-5866-4345-a24a-9c75cd3a876f" />
+    <concept_reference_term concept_reference_term_id="1002" concept_source_id="1000" code="OINK" creator="1" date_created="2005-01-01 00:00:00.0" uuid="db149666-232a-4170-b3af-549bf53e167f" retired="0"/>
+    <concept_reference_map concept_map_id="1002" concept_reference_term_id="1002" concept_map_type_id="1" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="1002" uuid="7c1689d6-c3a1-40bb-b754-6c5e7e47b650" />
+    <concept_reference_term concept_reference_term_id="1003" concept_source_id="1000" code="BAA" creator="1" date_created="2005-01-01 00:00:00.0" uuid="b3e9424b-4301-42cf-89a9-048eabf82f3d" retired="0"/>
+    <concept_reference_map concept_map_id="1003" concept_reference_term_id="1003" concept_map_type_id="1" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="1003" uuid="343097c7-4200-4cee-8205-1b6f41081bdd" />
+
+    <concept_reference_source concept_source_id="2000" name="SPANISH_FARM_CODE" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="7b6ab52d-65ab-4a76-825f-224f03ce07f7" />
+    <concept_reference_term concept_reference_term_id="2001" concept_source_id="2000" code="VACA" creator="1" date_created="2005-01-01 00:00:00.0" uuid="9d6ac971-dd6a-4d4e-a93b-c45091f71536" retired="0"/>
+    <concept_reference_map concept_map_id="2001" concept_reference_term_id="2001" concept_map_type_id="1" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="1001" uuid="81aa650f-0ca8-4469-acf7-794018327953" />
+    <concept_reference_term concept_reference_term_id="2002" concept_source_id="2000" code="CERDO" creator="1" date_created="2005-01-01 00:00:00.0" uuid="e1653258-8e0d-4fca-8916-439907eca495" retired="0"/>
+    <concept_reference_map concept_map_id="2002" concept_reference_term_id="2002" concept_map_type_id="1" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="1002" uuid="27ea74f0-2d08-4754-b1b6-4a3440eefa79" />
+    <concept_reference_term concept_reference_term_id="2003" concept_source_id="2000" code="OVEJA" creator="1" date_created="2005-01-01 00:00:00.0" uuid="2e6f456e-e68b-4f63-9024-91bb26d686f9" retired="0"/>
+    <concept_reference_map concept_map_id="2003" concept_reference_term_id="2003" concept_map_type_id="1" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="1003" uuid="ef48e876-4d20-4996-a061-484b29e1d7b7" />
+
+    <concept_reference_source concept_source_id="3000" name="SOURCE_NOT_MAPPED_TO_FHIR" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="b9a74e89-c7a4-4d2d-9813-501c9fb2eec6" />
+    <concept_reference_term concept_reference_term_id="3001" concept_source_id="3000" code="IGNORE" creator="1" date_created="2005-01-01 00:00:00.0" uuid="147c513b-9943-48c9-83b8-6b0e514b21c2" retired="0"/>
+    <concept_reference_map concept_map_id="3001" concept_reference_term_id="3001" concept_map_type_id="1" creator="1" date_created="2005-01-01 00:00:00.0" concept_id="1001" uuid="a9dfe6c3-919c-466f-9260-8b51d6711b18" />
+
+    <fhir_concept_source fhir_concept_source_id="100" concept_source_id="1000" url="http://www.nfacc.ca/" name="National Association of Farm Animal Codes" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="8bbe7f31-acee-499d-93e5-c423f8839d2b" />
+    <fhir_concept_source fhir_concept_source_id="200" concept_source_id="2000" url="https://www.eaap.org/" name="Asociación Nacional de Códigos de Animales de Granja" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="75fc9891-9a57-43c7-b28f-e25a672a81ba" />
+</dataset>

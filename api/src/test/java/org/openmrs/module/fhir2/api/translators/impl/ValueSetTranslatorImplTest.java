@@ -36,7 +36,6 @@ import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.FhirTestConstants;
 import org.openmrs.module.fhir2.TestFhirSpringConfiguration;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
-import org.openmrs.module.fhir2.api.translators.ValueSetReferenceTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -50,9 +49,6 @@ public class ValueSetTranslatorImplTest extends BaseModuleContextSensitiveTest {
 	private FhirConceptSourceService conceptSourceService;
 	
 	@Mock
-	private ValueSetReferenceTranslator valueSetReferenceTranslator;
-	
-	@Mock
 	private Concept concept;
 	
 	private final ValueSetTranslatorImpl valueSetTranslator = new ValueSetTranslatorImpl();
@@ -60,7 +56,6 @@ public class ValueSetTranslatorImplTest extends BaseModuleContextSensitiveTest {
 	@Before
 	public void setup() {
 		valueSetTranslator.setConceptSourceService(conceptSourceService);
-		valueSetTranslator.setValueSetReferenceTranslator(valueSetReferenceTranslator);
 	}
 	
 	@Test
