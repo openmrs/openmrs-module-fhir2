@@ -182,7 +182,13 @@ public class FhirUtils {
 		}
 		
 		String code = "ui.i18n." + shortClassName + ".name." + uuid;
-		String localization = Context.getMessageSourceService().getMessage(code);
+		String localization = null;
+		try {
+			localization = Context.getMessageSourceService().getMessage(code);
+		}
+		catch (Exception e) {
+			log.info("Caught exception while attempting to localize code [{}]", code, e);
+		}
 		if (localization == null || localization.equals(code)) {
 			return null;
 		} else {
