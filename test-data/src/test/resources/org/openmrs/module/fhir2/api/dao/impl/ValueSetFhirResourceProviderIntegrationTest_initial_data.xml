@@ -11,18 +11,22 @@
 <dataset>
 
 
-    <concept concept_id="1000" retired="0" datatype_id="3" class_id="7" is_set="true" creator="1" date_created="2005-01-01 00:00:00.0" uuid="378e63b1-6c75-46ed-95e3-797b48ddc9f8" />
-    <concept concept_id="1001" retired="0" datatype_id="3" class_id="7" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="bbbf56f8-706e-41ef-95cd-57271567223a" />
-    <concept concept_id="1002" retired="0" datatype_id="3" class_id="7" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="b150225f-2086-43af-a13a-5ff16464a6f7" />
-    <concept concept_id="1003" retired="0" datatype_id="3" class_id="7" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="f5608410-6610-4314-84de-6d23a7fdfa99" />
+    <concept concept_id="1000" retired="0" datatype_id="4" class_id="10" is_set="true" creator="1" date_created="2005-01-01 00:00:00.0" uuid="378e63b1-6c75-46ed-95e3-797b48ddc9f8" />
+    <concept concept_id="1001" retired="0" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="bbbf56f8-706e-41ef-95cd-57271567223a" />
+    <concept concept_id="1002" retired="0" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="b150225f-2086-43af-a13a-5ff16464a6f7" />
+    <concept concept_id="1003" retired="0" datatype_id="4" class_id="11" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" uuid="f5608410-6610-4314-84de-6d23a7fdfa99" />
+    <concept concept_id="1004" retired="0" datatype_id="4" class_id="10" is_set="true" creator="1" date_created="2005-01-01 00:00:00.0" uuid="a4e4d0be-8edb-4021-86a9-f7ed7d8d45e3" />
     <concept_name concept_id="1000" name="Farm Animal Set" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1000" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="e893bb48-5f8a-4d69-b93d-9c0bca715982"/>
     <concept_name concept_id="1001" name="Cow" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1001" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="ee97a1c5-b7d8-498c-93af-f734e672d1ed"/>
     <concept_name concept_id="1002" name="Pig" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1002" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="14864498-2a5b-4684-a20a-0b6188b9ea17"/>
     <concept_name concept_id="1003" name="Sheep" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1003" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="caec6795-38a2-409f-ac81-55810da5272f"/>
+    <concept_name concept_id="1003" name="Sheep" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1003" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="caec6795-38a2-409f-ac81-55810da5272f"/>
+    <concept_name concept_id="1004" name="Breeds of Horses" locale="en_GB" creator="1" date_created="2008-08-18 12:38:58.0" concept_name_id="1004" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="f398b707-006f-49b2-87a6-c25808d15297"/>
 
     <concept_set concept_set_id="1001" concept_id="1001" concept_set="1000" sort_weight="1.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="9a61d55c-5bfc-4494-b951-56adf85a31df"/>
     <concept_set concept_set_id="1002" concept_id="1002" concept_set="1000" sort_weight="2.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="8e72b80d-058f-4ecf-8d5d-12de63315ae6"/>
     <concept_set concept_set_id="1003" concept_id="1003" concept_set="1000" sort_weight="3.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="83a53766-289e-43a5-84b7-9a4897b460fe"/>
+    <concept_set concept_set_id="1004" concept_id="1004" concept_set="1000" sort_weight="3.0" creator="1" date_created="2008-08-18 12:38:58.0" uuid="f62274b1-e5fb-4b40-8854-45f8c5dbe604"/>
 
     <concept_reference_source concept_source_id="1000" name="FARM_CODE" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="2b3c1ff8-768a-102f-83f4-12313b04a615" />
     <concept_reference_term concept_reference_term_id="1001" concept_source_id="1000" code="MOO" creator="1" date_created="2005-01-01 00:00:00.0" uuid="d471950d-0ef5-424c-b72a-3fff29af6b0b" retired="0"/>

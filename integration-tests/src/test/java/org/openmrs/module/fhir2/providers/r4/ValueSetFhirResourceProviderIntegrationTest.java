@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.FhirConstants.VALUESET;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -76,12 +77,12 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		List<ValueSet.ConceptSetComponent> includedComponents = valueSet.getCompose().getInclude();
 		assertThat(includedComponents.size(), is(3));
 		
-		// confirm both the includes have the right system
+		// confirm all the includes have the right system
 		assertThat(includedComponents, hasItem(hasProperty("system", nullValue())));
 		assertThat(includedComponents, hasItem(hasProperty("system", is("http://www.nfacc.ca/"))));
 		assertThat(includedComponents, hasItem(hasProperty("system", is("https://www.eaap.org/"))));
 		
-		ValueSet.ConceptSetComponent uuidSystemSet = includedComponents.stream().filter(element -> {
+		ValueSet.ConceptSetComponent nullSystemSet = includedComponents.stream().filter(element -> {
 			return element.getSystem() == null;
 		}).collect(Collectors.toList()).get(0);
 		ValueSet.ConceptSetComponent farmAnimalCodesSystemSet = includedComponents.stream().filter(element -> {
@@ -91,17 +92,22 @@ public class ValueSetFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 			return element.getSystemElement().equals("https://www.eaap.org/");
 		}).collect(Collectors.toList()).get(0);
 		
-		// confirm both sets have 3 concepts
-		assertThat(uuidSystemSet.getConcept().size(), is(3));
+		// confirm all systems have three concepts
+		assertThat(nullSystemSet.getConcept().size(), is(3));
 		assertThat(farmAnimalCodesSystemSet.getConcept().size(), is(3));
 		assertThat(spanishCodesSystemSet.getConcept().size(), is(3));
 		
-		assertThat(uuidSystemSet.getConcept(), hasItem(
+		assertThat(nullSystemSet.getConcept(), hasItem(
 		    allOf(hasProperty("code", is("bbbf56f8-706e-41ef-95cd-57271567223a")), hasProperty("display", is("Cow")))));
-		assertThat(uuidSystemSet.getConcept(), hasItem(
+		assertThat(nullSystemSet.getConcept(), hasItem(
 		    allOf(hasProperty("code", is("b150225f-2086-43af-a13a-5ff16464a6f7")), hasProperty("display", is("Pig")))));
-		assertThat(uuidSystemSet.getConcept(), hasItem(
+		assertThat(nullSystemSet.getConcept(), hasItem(
 		    allOf(hasProperty("code", is("f5608410-6610-4314-84de-6d23a7fdfa99")), hasProperty("display", is("Sheep")))));
+		
+		// the "null" system set should also have a reference to the nested concept set
+		assertThat(nullSystemSet.getValueSet().size(), is(1));
+		assertThat(nullSystemSet.getValueSet().get(0).getValueAsString(),
+		    is(VALUESET + "/a4e4d0be-8edb-4021-86a9-f7ed7d8d45e3"));
 		
 		assertThat(farmAnimalCodesSystemSet.getConcept(),
 		    hasItem(allOf(hasProperty("code", is("MOO")), hasProperty("display", is("Cow")))));

@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Reference;
+import org.openmrs.Concept;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -144,28 +145,46 @@ public class FhirUtils {
 	 * @return localization for the given metadata, from message source, in the authenticated locale
 	 */
 	public static String getMetadataTranslation(OpenmrsMetadata metadata) {
-		// This code is from the REST module which derived it from the UI framework
+		
 		String className = metadata.getClass().getSimpleName();
+		String uuid = metadata.getUuid();
 		
-		// in case this is a proxy, strip off anything after an underscore
-		// ie: EncounterType_$$_javassist_26 needs to be converted to EncounterType
-		int underscoreIndex = className.indexOf("_$");
-		if (underscoreIndex > 0) {
-			className = className.substring(0, underscoreIndex);
-		}
+		String localization = getLocalization(className, uuid);
 		
-		String code = "ui.i18n." + className + ".name." + metadata.getUuid();
-		String localization = null;
-		
-		try {
-			localization = Context.getMessageSourceService().getMessage(code);
-		}
-		catch (Exception e) {
-			log.info("Caught exception while attempting to localize code [{}]", code, e);
-		}
-		
-		if (localization == null || localization.equals(code)) {
+		if (localization == null) {
 			return metadata.getName();
+		} else {
+			return localization;
+		}
+	}
+	
+	public static String getMetadataTranslation(Concept concept) {
+		
+		String className = concept.getClass().getSimpleName();
+		String uuid = concept.getUuid();
+		
+		String localization = getLocalization(className, uuid);
+		
+		if (localization == null) {
+			return concept.getName().getName();
+		} else {
+			return localization;
+		}
+	}
+	
+	// This code is from the REST module which derived it from the UI framework
+	private static String getLocalization(String shortClassName, String uuid) {
+		// in case this is a hibernate proxy, strip off anything after an underscore
+		// ie: EncounterType_$$_javassist_26 needs to be converted to EncounterType
+		int underscoreIndex = shortClassName.indexOf("_$");
+		if (underscoreIndex > 0) {
+			shortClassName = shortClassName.substring(0, underscoreIndex);
+		}
+		
+		String code = "ui.i18n." + shortClassName + ".name." + uuid;
+		String localization = Context.getMessageSourceService().getMessage(code);
+		if (localization == null || localization.equals(code)) {
+			return null;
 		} else {
 			return localization;
 		}

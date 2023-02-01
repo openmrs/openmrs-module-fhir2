@@ -13,7 +13,6 @@ import javax.annotation.Nonnull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,6 +28,7 @@ import org.openmrs.ConceptReferenceTerm;
 import org.openmrs.ConceptSet;
 import org.openmrs.ConceptSource;
 import org.openmrs.module.fhir2.api.FhirConceptSourceService;
+import org.openmrs.module.fhir2.api.translators.ValueSetReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.ValueSetTranslator;
 import org.openmrs.module.fhir2.model.FhirConceptSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +41,9 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 	
 	@Autowired
 	private FhirConceptSourceService conceptSourceService;
+	
+	@Autowired
+	private ValueSetReferenceTranslator valueSetReferenceTranslator;
 	
 	@Override
 	public Concept toOpenmrsType(@Nonnull ValueSet resource) {
@@ -70,9 +73,9 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 		
 		ValueSet.ValueSetComposeComponent compose = new ValueSet.ValueSetComposeComponent();
 		
-		List<ValueSet.ConceptSetComponent> sets = new ArrayList<ValueSet.ConceptSetComponent>();
+		Map<String, ValueSet.ConceptSetComponent> sets = new HashMap<String, ValueSet.ConceptSetComponent>();
 		ValueSet.ConceptSetComponent conceptUuidSet = new ValueSet.ConceptSetComponent();
-		sets.add(conceptUuidSet);
+		sets.put("conceptUuid", conceptUuidSet);
 		
 		Map<ConceptSource, String> conceptSourceCache = new HashMap<>();
 		
@@ -80,42 +83,47 @@ public class ValueSetTranslatorImpl implements ValueSetTranslator {
 			Concept conceptSetMember = conceptSet.getConcept();
 			
 			if (conceptSetMember != null) {
-				// first, add the uuid and display to the concept uuid set
-				ValueSet.ConceptReferenceComponent uuidConceptReferenceComponent = new ValueSet.ConceptReferenceComponent();
-				uuidConceptReferenceComponent.setCode(conceptSetMember.getUuid());
-				uuidConceptReferenceComponent.setDisplay(conceptSetMember.getDisplayString());
-				conceptUuidSet.addConcept(uuidConceptReferenceComponent);
-				
-				// now iterate through all the mappings
-				if (conceptSetMember.getConceptMappings() != null) {
-					for (ConceptMap conceptMapping : conceptSetMember.getConceptMappings()) {
-						ConceptReferenceTerm crt = conceptMapping.getConceptReferenceTerm();
-						String sourceUrl = conceptSourceCache.computeIfAbsent(crt.getConceptSource(),
-						    this::conceptSourceToURL);
-						// only add sources that we have urls for (provided by Fhir Concept Source table)
-						if (sourceUrl != null) {
-							// first see if we already have an icnlude for this source, and initialize one if not
-							ValueSet.ConceptSetComponent conceptSetComponent = sets.stream().filter(set -> {
-								return sourceUrl.equals(set.getSystem());
-							}).findFirst().orElse(null);
-							if (conceptSetComponent == null) {
-								conceptSetComponent = new ValueSet.ConceptSetComponent();
-								conceptSetComponent.setSystem(sourceUrl);
-								sets.add(conceptSetComponent);
+				// if it's a set, just add a reference to the concept uuid set
+				if (conceptSetMember.getSet()) {
+					;
+					conceptUuidSet.addValueSet(valueSetReferenceTranslator.toFhirResource(conceptSetMember).getReference());
+				} else {
+					// first, add the uuid and display to the concept uuid set
+					ValueSet.ConceptReferenceComponent uuidConceptReferenceComponent = new ValueSet.ConceptReferenceComponent();
+					uuidConceptReferenceComponent.setCode(conceptSetMember.getUuid());
+					uuidConceptReferenceComponent.setDisplay(conceptSetMember.getDisplayString());
+					conceptUuidSet.addConcept(uuidConceptReferenceComponent);
+					
+					// now iterate through all the mappings
+					if (conceptSetMember.getConceptMappings() != null) {
+						for (ConceptMap conceptMapping : conceptSetMember.getConceptMappings()) {
+							ConceptReferenceTerm crt = conceptMapping.getConceptReferenceTerm();
+							String sourceUrl = conceptSourceCache.computeIfAbsent(crt.getConceptSource(),
+							    this::conceptSourceToURL);
+							// only add sources that we have urls for (provided by Fhir Concept Source table)
+							if (sourceUrl != null) {
+								ValueSet.ConceptSetComponent conceptSetComponent;
+								if (sets.containsKey(sourceUrl)) {
+									conceptSetComponent = sets.get(sourceUrl);
+								} else {
+									conceptSetComponent = new ValueSet.ConceptSetComponent();
+									conceptSetComponent.setSystem(sourceUrl);
+									sets.put(sourceUrl, conceptSetComponent);
+								}
+								// set the code and the display string
+								ValueSet.ConceptReferenceComponent conceptReferenceComponent = new ValueSet.ConceptReferenceComponent();
+								conceptReferenceComponent.setCode(crt.getCode());
+								conceptReferenceComponent.setDisplay(conceptSetMember.getDisplayString());
+								conceptSetComponent.addConcept(conceptReferenceComponent);
+								
 							}
-							// set the code and the display string
-							ValueSet.ConceptReferenceComponent conceptReferenceComponent = new ValueSet.ConceptReferenceComponent();
-							conceptReferenceComponent.setCode(crt.getCode());
-							conceptReferenceComponent.setDisplay(conceptSetMember.getDisplayString());
-							conceptSetComponent.addConcept(conceptReferenceComponent);
-							
 						}
 					}
 				}
 			}
 		}
 		
-		compose.setInclude(sets);
+		compose.setInclude(new ArrayList<ValueSet.ConceptSetComponent>(sets.values()));
 		valueSet.setCompose(compose);
 		return valueSet;
 	}
