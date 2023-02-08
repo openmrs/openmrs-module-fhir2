@@ -145,23 +145,37 @@ public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseT
 		openmrsObject.setPatient(patientReferenceTranslator.toOpenmrsType(fhirObject.getSubject()));
 		if (fhirObject.hasContext()) {
 			openmrsObject.setEncounter(encounterReferenceTranslator.toOpenmrsType(fhirObject.getContext()));
+		} else {
+			openmrsObject.setEncounter(null);
 		}
 		if (fhirObject.hasAuthorizingPrescription()) {
 			Reference prescription = fhirObject.getAuthorizingPrescriptionFirstRep();
 			openmrsObject.setDrugOrder(medicationRequestReferenceTranslator.toOpenmrsType(prescription));
+		} else {
+			openmrsObject.setDrugOrder(null);
 		}
 		if (fhirObject.hasStatus()) {
 			openmrsObject.setStatus(medicationDispenseStatusTranslator.toOpenmrsType(fhirObject.getStatus()));
-		}
+		} // status mandatory, so we don't reset it, even if null
+		
 		if (fhirObject.hasStatusReasonCodeableConcept()) {
 			openmrsObject.setStatusReason(conceptTranslator.toOpenmrsType(fhirObject.getStatusReasonCodeableConcept()));
+		} else {
+			openmrsObject.setStatusReason(null);
 		}
+		
 		if (fhirObject.hasLocation()) {
 			openmrsObject.setLocation(locationReferenceTranslator.toOpenmrsType(fhirObject.getLocation()));
+		} else {
+			openmrsObject.setLocation(null);
 		}
+		
 		if (fhirObject.hasType()) {
 			openmrsObject.setType(conceptTranslator.toOpenmrsType(fhirObject.getType()));
+		} else {
+			openmrsObject.setType(null);
 		}
+		
 		openmrsObject.setDatePrepared(fhirObject.getWhenPrepared());
 		openmrsObject.setDateHandedOver(fhirObject.getWhenHandedOver());
 		
@@ -196,7 +210,11 @@ public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseT
 			MedicationDispensePerformerComponent performerComponent = fhirObject.getPerformerFirstRep();
 			if (performerComponent != null && performerComponent.hasActor()) {
 				openmrsObject.setDispenser(practitionerReferenceTranslator.toOpenmrsType(performerComponent.getActor()));
+			} else {
+				openmrsObject.setDispenser(null);
 			}
+		} else {
+			openmrsObject.setDispenser(null);
 		}
 		
 		if (fhirObject.hasSubstitution()) {
@@ -204,14 +222,26 @@ public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseT
 			openmrsObject.setWasSubstituted(substitution.getWasSubstituted());
 			if (substitution.hasType()) {
 				openmrsObject.setSubstitutionType(conceptTranslator.toOpenmrsType(substitution.getType()));
+			} else {
+				openmrsObject.setSubstitutionType(null);
 			}
 			if (substitution.hasReason()) {
 				openmrsObject.setSubstitutionReason(conceptTranslator.toOpenmrsType(substitution.getReasonFirstRep()));
+			} else {
+				openmrsObject.setSubstitutionReason(null);
 			}
+		} else {
+			openmrsObject.setWasSubstituted(null);
+			openmrsObject.setSubstitutionType(null);
+			openmrsObject.setSubstitutionReason(null);
 		}
 		
-		if (fhirObject.getMeta() != null) {
-			openmrsObject.setDateCreated(fhirObject.getMeta().getLastUpdated());
+		if (fhirObject.getMeta() != null && fhirObject.getMeta().getLastUpdated() != null) {
+			if (openmrsObject.getDateCreated() == null) {
+				openmrsObject.setDateCreated(fhirObject.getMeta().getLastUpdated());
+			} else {
+				openmrsObject.setDateChanged(fhirObject.getMeta().getLastUpdated());
+			}
 		}
 		
 		return openmrsObject;
