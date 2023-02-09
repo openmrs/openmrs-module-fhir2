@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [ ubuntu-latest, windows-latest ]
+        platform: [ ubuntu-latest ]
         java-version: [ 8 ]
 
     runs-on: ${{ matrix.platform }}
