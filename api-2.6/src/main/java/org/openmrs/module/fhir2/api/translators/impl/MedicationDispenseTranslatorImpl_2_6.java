@@ -236,14 +236,6 @@ public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseT
 			openmrsObject.setSubstitutionReason(null);
 		}
 		
-		if (fhirObject.getMeta() != null && fhirObject.getMeta().getLastUpdated() != null) {
-			if (openmrsObject.getDateCreated() == null) {
-				openmrsObject.setDateCreated(fhirObject.getMeta().getLastUpdated());
-			} else {
-				openmrsObject.setDateChanged(fhirObject.getMeta().getLastUpdated());
-			}
-		}
-		
 		return openmrsObject;
 	}
 }
