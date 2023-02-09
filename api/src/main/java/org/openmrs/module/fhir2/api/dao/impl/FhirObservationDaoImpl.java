@@ -16,6 +16,7 @@ import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRanke
 import javax.annotation.Nonnull;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +72,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			List<LastnResult<Integer>> results = ((List<Object[]>) criteria.list()).stream().map(objects -> {
 				Map<String, Object> attributes = new HashMap<>();
 				attributes.put("concept", objects[1]);
-				return new LastnResult<Integer>(objects[0], objects[2], attributes);
+				return new LastnResult<>((Integer) objects[0], (Date) objects[2], attributes);
 			}).collect(Collectors.toList());
 			
 			return getLastnIds(handleGrouping(results), getMaxParameter(theParams)).stream().distinct()

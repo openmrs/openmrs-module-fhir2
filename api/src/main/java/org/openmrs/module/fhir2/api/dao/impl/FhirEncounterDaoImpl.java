@@ -29,8 +29,6 @@ import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Projections;
 import org.openmrs.Encounter;
-import org.openmrs.Retireable;
-import org.openmrs.Voidable;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -44,7 +42,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
-			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
+			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
 			
 			setupSearchParams(criteria, theParams);
 			
@@ -57,13 +55,9 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 			return getTopNRankedIds(results, getMaxParameter(theParams));
 		}
 		
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
 		
-		if (Voidable.class.isAssignableFrom(typeToken.getRawType())) {
-			handleVoidable(criteria);
-		} else if (Retireable.class.isAssignableFrom(typeToken.getRawType())) {
-			handleRetireable(criteria);
-		}
+		handleVoidable(criteria);
 		
 		setupSearchParams(criteria, theParams);
 		handleSort(criteria, theParams.getSortSpec());
