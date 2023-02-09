@@ -135,7 +135,6 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		notNull(medicationRequest, "The MedicationRequest object should not be null");
 		
 		existingDrugOrder.setUuid(medicationRequest.getId());
-		existingDrugOrder.setDateCreated(medicationRequest.getAuthoredOn());
 		
 		if (medicationRequest.hasMedicationReference()) {
 			Drug drug = medicationReferenceTranslator.toOpenmrsType(medicationRequest.getMedicationReference());

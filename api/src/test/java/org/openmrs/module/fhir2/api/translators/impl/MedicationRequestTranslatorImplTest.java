@@ -640,15 +640,6 @@ public class MedicationRequestTranslatorImplTest {
 		assertThat(result.getAuthoredOn(), equalTo(now));
 	}
 	
-	@Test
-	public void toOpenMrsType_shouldTranslateAuthoredOnToDateCreated() {
-		Date now = new Date();
-		medicationRequest.setAuthoredOn(now);
-		
-		DrugOrder result = medicationRequestTranslator.toOpenmrsType(medicationRequest);
-		assertThat(result.getDateCreated(), equalTo(now));
-	}
-	
 	@SneakyThrows
 	private void setOrderNumberByReflection(DrugOrder order, String orderNumber) {
 		Class<? extends DrugOrder> clazz = order.getClass();

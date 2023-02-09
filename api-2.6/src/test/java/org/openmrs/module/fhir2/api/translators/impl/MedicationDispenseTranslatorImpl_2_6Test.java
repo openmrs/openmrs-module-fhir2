@@ -22,7 +22,6 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Dosage;
-import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Timing;
@@ -504,28 +503,7 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 		assertThat(dispense.getDateHandedOver(), notNullValue());
 		assertThat(dispense.getDateHandedOver(), equalTo(fhirDispense.getWhenHandedOver()));
 	}
-	
-	@Test
-	public void toOpenmrsType_shouldTranslateDateLastUpdated() {
-		Date dateCreated = new DateTime("2012-01-01").toDate();
-		Date dateChanged = new DateTime("2012-02-01").toDate();
-		
-		// sets date created if date created null
-		fhirDispense.setMeta(new Meta().setLastUpdated(dateCreated));
-		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
-		assertThat(dispense.getDateCreated(), notNullValue());
-		assertThat(dispense.getDateCreated(), equalTo(dateCreated));
-		assertThat(dispense.getDateChanged(), nullValue());
-		
-		// but subsequent updates should update date changed
-		fhirDispense.setMeta(new Meta().setLastUpdated(dateChanged));
-		dispense = translator.toOpenmrsType(dispense, fhirDispense);
-		assertThat(dispense.getDateCreated(), notNullValue());
-		assertThat(dispense.getDateCreated(), equalTo(dateCreated));
-		assertThat(dispense.getDateChanged(), notNullValue());
-		assertThat(dispense.getDateChanged(), equalTo(dateChanged));
-	}
-	
+
 	@Test
 	public void toOpenmrsType_shouldTranslateMedicationConcept() {
 		Concept openmrsObject = new Concept();
