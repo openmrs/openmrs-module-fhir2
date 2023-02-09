@@ -9,16 +9,17 @@
  */
 package org.openmrs.module.fhir2.api.translators.impl;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.exparity.hamcrest.date.DateMatchers.sameDay;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Date;
 
-import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
@@ -224,10 +225,12 @@ public class ConditionTranslatorImpl_2_2Test {
 	@Test
 	public void shouldTranslateOpenMrsConditionOnsetDateToFhirType() {
 		openmrsCondition.setOnsetDate(new Date());
+		
 		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		
 		assertThat(condition, notNullValue());
-		assertThat(condition.getOnsetDateTimeType().getValue(), notNullValue());
-		assertThat(condition.getOnsetDateTimeType().getValue(), DateMatchers.sameDay(new Date()));
+		assertThat(condition.hasOnsetDateTimeType(), is(true));
+		assertThat(condition.getOnsetDateTimeType().getValue(), sameDay(new Date()));
 	}
 	
 	@Test
@@ -235,10 +238,37 @@ public class ConditionTranslatorImpl_2_2Test {
 		DateTimeType theDateTime = new DateTimeType();
 		theDateTime.setValue(new Date());
 		fhirCondition.setOnset(theDateTime);
+		
 		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getOnsetDate(), notNullValue());
-		assertThat(condition.getOnsetDate(), DateMatchers.sameDay(new Date()));
+		assertThat(condition.getOnsetDate(), sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateOpenMrsConditionEndDateToFhirType() {
+		openmrsCondition.setEndDate(new Date());
+		
+		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.hasAbatementDateTimeType(), is(true));
+		assertThat(condition.getAbatementDateTimeType().getValue(), notNullValue());
+		assertThat(condition.getAbatementDateTimeType().getValue(), sameDay(new Date()));
+	}
+	
+	@Test
+	public void shouldTranslateFhirConditionAbatementDateToOpenMrsEndDate() {
+		DateTimeType theDateTime = new DateTimeType();
+		theDateTime.setValue(new Date());
+		fhirCondition.setAbatement(theDateTime);
+		
+		org.openmrs.Condition condition = conditionTranslator.toOpenmrsType(fhirCondition);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getEndDate(), notNullValue());
+			assertThat(condition.getEndDate(), sameDay(new Date()));
 	}
 	
 	@Test
@@ -335,7 +365,7 @@ public class ConditionTranslatorImpl_2_2Test {
 		org.hl7.fhir.r4.model.Condition condition = conditionTranslator.toFhirResource(openmrsCondition);
 		assertThat(condition, notNullValue());
 		assertThat(condition.getRecordedDate(), notNullValue());
-		assertThat(condition.getRecordedDate(), DateMatchers.sameDay(new Date()));
+		assertThat(condition.getRecordedDate(), sameDay(new Date()));
 	}
 	
 	@Test

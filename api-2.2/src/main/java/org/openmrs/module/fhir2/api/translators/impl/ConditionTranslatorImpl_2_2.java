@@ -80,6 +80,10 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		}
 		
 		fhirCondition.setOnset(new DateTimeType().setValue(condition.getOnsetDate()));
+		if (condition.getEndDate() != null) {
+			fhirCondition.setAbatement(new DateTimeType().setValue(condition.getEndDate()));
+		}
+		
 		fhirCondition.setRecorder(practitionerReferenceTranslator.toFhirResource(condition.getCreator()));
 		fhirCondition.setRecordedDate(condition.getDateCreated());
 		
@@ -114,7 +118,18 @@ public class ConditionTranslatorImpl_2_2 implements ConditionTranslator<Conditio
 		conditionCodedOrText.setCoded(conceptTranslator.toOpenmrsType(codeableConcept));
 		existingCondition.setCondition(conditionCodedOrText);
 		
-		existingCondition.setOnsetDate(condition.getOnsetDateTimeType().getValue());
+		if (condition.hasOnsetDateTimeType()) {
+			existingCondition.setOnsetDate(condition.getOnsetDateTimeType().getValue());
+		} else if (condition.hasOnsetPeriod()) {
+			existingCondition.setOnsetDate(condition.getOnsetPeriod().getStart());
+		}
+		
+		if (condition.hasAbatementDateTimeType()) {
+			existingCondition.setEndDate(condition.getAbatementDateTimeType().getValue());
+		} else if (condition.hasAbatementPeriod()) {
+			existingCondition.setEndDate(condition.getAbatementPeriod().getEnd());
+		}
+		
 		existingCondition.setCreator(practitionerReferenceTranslator.toOpenmrsType(condition.getRecorder()));
 		
 		return existingCondition;
