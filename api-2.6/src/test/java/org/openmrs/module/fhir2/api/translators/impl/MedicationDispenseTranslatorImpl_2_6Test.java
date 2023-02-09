@@ -503,7 +503,7 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 		assertThat(dispense.getDateHandedOver(), notNullValue());
 		assertThat(dispense.getDateHandedOver(), equalTo(fhirDispense.getWhenHandedOver()));
 	}
-
+	
 	@Test
 	public void toOpenmrsType_shouldTranslateMedicationConcept() {
 		Concept openmrsObject = new Concept();
