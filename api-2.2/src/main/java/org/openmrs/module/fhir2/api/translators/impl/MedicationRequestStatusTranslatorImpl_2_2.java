@@ -13,13 +13,14 @@ import javax.annotation.Nonnull;
 
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
+import org.openmrs.Order;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.translators.MedicationRequestStatusTranslator;
 import org.springframework.stereotype.Component;
 
 @Component
-@OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
-public class MedicationRequestStatusTranslatorImpl implements MedicationRequestStatusTranslator {
+@OpenmrsProfile(openmrsPlatformVersion = "2.2.* - 2.*")
+public class MedicationRequestStatusTranslatorImpl_2_2 implements MedicationRequestStatusTranslator {
 	
 	@Override
 	public MedicationRequest.MedicationRequestStatus toFhirResource(@Nonnull DrugOrder drugOrder) {
@@ -27,7 +28,10 @@ public class MedicationRequestStatusTranslatorImpl implements MedicationRequestS
 			return null;
 		}
 		
-		if (drugOrder.isActive()) {
+		if (drugOrder.getFulfillerStatus() != null
+		        && drugOrder.getFulfillerStatus().equals(Order.FulfillerStatus.COMPLETED)) {
+			return MedicationRequest.MedicationRequestStatus.COMPLETED;
+		} else if (drugOrder.isActive()) {
 			return MedicationRequest.MedicationRequestStatus.ACTIVE;
 		} else if (drugOrder.isDiscontinuedRightNow() || drugOrder.getVoided()) {
 			return MedicationRequest.MedicationRequestStatus.CANCELLED;
@@ -36,4 +40,5 @@ public class MedicationRequestStatusTranslatorImpl implements MedicationRequestS
 		}
 		return MedicationRequest.MedicationRequestStatus.UNKNOWN;
 	}
+	
 }

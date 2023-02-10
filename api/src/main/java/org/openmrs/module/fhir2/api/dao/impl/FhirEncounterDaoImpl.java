@@ -48,7 +48,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
-			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
+			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
 			
 			setupSearchParams(criteria, theParams);
 			
@@ -61,13 +61,9 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 			return getTopNRankedIds(results, getMaxParameter(theParams));
 		}
 		
-		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
+		Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);
 		
-		if (Voidable.class.isAssignableFrom(typeToken.getRawType())) {
-			handleVoidable(criteria);
-		} else if (Retireable.class.isAssignableFrom(typeToken.getRawType())) {
-			handleRetireable(criteria);
-		}
+		handleVoidable(criteria);
 		
 		setupSearchParams(criteria, theParams);
 		handleSort(criteria, theParams.getSortSpec());
@@ -111,7 +107,7 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 				return null;
 		}
 	}
-	
+
 	@Override
 	protected Criterion generateNotCompletedOrderQuery(String path) {
 		throw new APIException("Not implemented until 2.2");

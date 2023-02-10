@@ -54,7 +54,6 @@
 			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>${project.parent.artifactId}-test-data</artifactId>
 			<version>${project.parent.version}</version>
-			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -88,6 +87,13 @@
 				<configuration>
 					<skipIfEmpty>true</skipIfEmpty>
 				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>

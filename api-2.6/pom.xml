@@ -45,7 +45,6 @@
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>${project.parent.artifactId}-test-data</artifactId>
             <version>${project.parent.version}</version>
-            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -85,7 +84,7 @@
     </build>
 
     <properties>
-        <openmrsPlatformVersion>2.6.0-SNAPSHOT</openmrsPlatformVersion>
+        <openmrsPlatformVersion>2.6.0-beta</openmrsPlatformVersion>
     </properties>
 
 </project>
