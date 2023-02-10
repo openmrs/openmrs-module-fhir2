@@ -1,6 +1,6 @@
 {
   "resourceType": "Encounter",
-  "id": "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9",
+  "id": "6519d653-393b-4118-9c83-a3715b82d4ac",
   "identifier": [
     {
       "use": "temp",
@@ -27,7 +27,7 @@
       "coding": [
         {
           "system": "http://fhir.openmrs.org/code-system/encounter-type",
-          "code": "c0c579b0-8e59-401d-8a4a-976a0b183519",
+          "code": "61ae96f4-6afe-4351-b6f8-cd4fc383cce1",
           "display": "Consultation"
         }
       ]
@@ -43,13 +43,13 @@
     ]
   },
   "subject": {
-    "reference": "Patient/a194be38-271a-44cb-ba3f-f2dbf4831fe9",
-    "display": "Mr. John Doe"
+    "reference": "Patient/5946f880-b197-400b-9caa-a3c661d23041",
+    "display": "Collet Chebaskwony"
   },
   "participant": [
     {
       "individual": {
-        "reference": "Practitioner/c2879800-cca9-11e0-9572-0800200c9a66"
+        "reference": "Practitioner/c2299800-cca9-11e0-9572-0800200c9a66"
       }
     }
   ],
@@ -62,7 +62,7 @@
     "reference": "Organization/f201"
   },
   "partOf": {
-    "reference": "Encounter/430bbb70-6a9c-4e1e-badb-9d1034b1b5e9"
+    "reference": "Encounter/6519d653-393b-4118-9c83-a3715b82d4ac"
   },
   "period": {
     "start": "2005-01-01T00:00:00+05:30"
