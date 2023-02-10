@@ -10,11 +10,11 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.exparity.hamcrest.date.DateMatchers.sameDay;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -268,7 +268,7 @@ public class ConditionTranslatorImpl_2_2Test {
 		
 		assertThat(condition, notNullValue());
 		assertThat(condition.getEndDate(), notNullValue());
-			assertThat(condition.getEndDate(), sameDay(new Date()));
+		assertThat(condition.getEndDate(), sameDay(new Date()));
 	}
 	
 	@Test
