@@ -24,7 +24,6 @@ import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.openmrs.Visit;
-import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.springframework.stereotype.Component;
 
@@ -62,6 +61,7 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 	
 	@Override
 	protected Criterion generateNotCompletedOrderQuery(String path) {
-		throw new APIException("Not relevant in visit context");
+		// not relevant in visit context
+		return null;
 	}
 }

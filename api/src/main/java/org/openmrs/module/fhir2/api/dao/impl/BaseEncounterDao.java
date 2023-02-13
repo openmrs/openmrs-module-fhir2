@@ -129,7 +129,10 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 									}
 									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
 									        .equalsIgnoreCase(paramValue)) {
-										criteria.add(generateNotCompletedOrderQuery("orders"));
+										Criterion notCompletedCriterion = generateNotCompletedOrderQuery("orders");
+										if (notCompletedCriterion != null) {
+											criteria.add(notCompletedCriterion);
+										}
 									}
 								}
 								handled = true;

@@ -178,7 +178,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	 * @param date only return encounters with an encounter date greater than or equal to this date
 	 * @param status if set to active, when determined encounters to include, exclude encounters that
 	 *            *only* have completed or cancelled medication requests
-	 * @param patientSearchTerm restrict to encounters for patietns who name or identifier matches the
+	 * @param patientSearchTerm restrict to encounters for patients who name or identifier matches the
 	 *            search term
 	 * @return
 	 */

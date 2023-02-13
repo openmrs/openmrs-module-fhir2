@@ -30,10 +30,7 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.openmrs.Encounter;
-import org.openmrs.Retireable;
-import org.openmrs.Voidable;
 import org.openmrs.annotation.OpenmrsProfile;
-import org.openmrs.api.APIException;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -107,9 +104,10 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 				return null;
 		}
 	}
-
+	
 	@Override
 	protected Criterion generateNotCompletedOrderQuery(String path) {
-		throw new APIException("Not implemented until 2.2");
+		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
+		return null;
 	}
 }
