@@ -33,7 +33,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
@@ -175,7 +174,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	 * Custom search endpoint that fetches encounters that include medication requests Returns a bundle
 	 * that includes the medication requests and any medication dispenses that reference those requests
 	 *
-	 * @param date only return encounters with an encounter date greater than or equal to this date
+	 * @param date restrict by encounter date
 	 * @param status if set to active, when determined encounters to include, exclude encounters that
 	 *            *only* have completed or cancelled medication requests
 	 * @param patientSearchTerm restrict to encounters for patients who name or identifier matches the
@@ -184,8 +183,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	 */
 	
 	@Search(queryName = "encountersWithMedicationRequests")
-	public IBundleProvider getEncountersWithMedicationRequestsSearch(@OptionalParam(name = Encounter.SP_DATE) DateParam date,
-	        @OptionalParam(name = "status") TokenParam status,
+	public IBundleProvider getEncountersWithMedicationRequestsSearch(
+	        @OptionalParam(name = Encounter.SP_DATE) DateRangeParam date, @OptionalParam(name = "status") TokenParam status,
 	        @OptionalParam(name = "patientSearchTerm") TokenParam patientSearchTerm) {
 		
 		EncounterSearchParams params = new EncounterSearchParams();
@@ -196,7 +195,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		
 		if (date != null && !date.isEmpty()) {
 			// encounter must be equal to or after the configured (expire) date
-			params.setDate(new DateRangeParam().setLowerBound(date));
+			params.setDate(date);
 		}
 		
 		if (status != null && !status.isEmpty() && status.getValue().equalsIgnoreCase("active")) {

@@ -845,7 +845,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		executeDataSet(MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML); // additional test data from the fhe FHIR Enocounter DAO test we use to test the encountersWithMedicationRequests query
 		
-		MockHttpServletResponse response = get("/Encounter/?_query=encountersWithMedicationRequests&date=2010-01-01")
+		MockHttpServletResponse response = get("/Encounter/?_query=encountersWithMedicationRequests&date=ge2009-01-01")
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
