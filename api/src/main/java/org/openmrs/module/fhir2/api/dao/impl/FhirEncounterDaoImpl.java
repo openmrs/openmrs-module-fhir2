@@ -27,8 +27,10 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.openmrs.Encounter;
+import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
+@OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
 public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements FhirEncounterDao {
 	
 	@Override
@@ -100,5 +103,11 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 			default:
 				return null;
 		}
+	}
+	
+	@Override
+	protected Criterion generateNotCompletedOrderQuery(String path) {
+		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
+		return null;
 	}
 }

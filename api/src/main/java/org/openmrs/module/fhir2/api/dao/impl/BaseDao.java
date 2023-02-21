@@ -950,6 +950,20 @@ public abstract class BaseDao {
 		return generateActiveOrderQuery("", new Date());
 	}
 	
+	protected Criterion generateNotCancelledOrderQuery() {
+		return generateNotCancelledOrderQuery("");
+	}
+	
+	protected Criterion generateNotCancelledOrderQuery(String path) {
+		if (StringUtils.isNotBlank(path)) {
+			path = path + ".";
+		}
+		
+		Date now = new Date();
+		
+		return Restrictions.or(Restrictions.isNull(path + "dateStopped"), Restrictions.gt(path + "dateStopped", now));
+	}
+	
 	protected TokenOrListParam convertStringStatusToBoolean(TokenOrListParam statusParam) {
 		if (statusParam != null) {
 			return handleOrListParam(statusParam).map(s -> {

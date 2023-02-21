@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static lombok.AccessLevel.PACKAGE;
+import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_EXT_ENCOUNTER_TAG;
 
 import javax.annotation.Nonnull;
 
@@ -29,11 +30,16 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -162,5 +168,71 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		TokenParam encounterReference = new TokenParam().setValue(encounterId.getIdPart());
 		
 		return encounterService.getEncounterEverything(encounterReference);
+	}
+	
+	/**
+	 * Custom search endpoint that fetches encounters that include medication requests Returns a bundle
+	 * that includes the medication requests and any medication dispenses that reference those requests
+	 *
+	 * @param date restrict by encounter date
+	 * @param status if set to active, when determined encounters to include, exclude encounters that
+	 *            *only* have completed or cancelled medication requests
+	 * @param patientSearchTerm restrict to encounters for patients who name or identifier matches the
+	 *            search term
+	 * @return
+	 */
+	
+	@Search(queryName = "encountersWithMedicationRequests")
+	public IBundleProvider getEncountersWithMedicationRequestsSearch(
+	        @OptionalParam(name = Encounter.SP_DATE) DateRangeParam date, @OptionalParam(name = "status") TokenParam status,
+	        @OptionalParam(name = "patientSearchTerm") TokenParam patientSearchTerm) {
+		
+		EncounterSearchParams params = new EncounterSearchParams();
+		
+		// we always want encounters, not visits
+		params.setTag(new TokenAndListParam()
+		        .addAnd(new TokenParam().setSystem(OPENMRS_FHIR_EXT_ENCOUNTER_TAG).setValue("encounter")));
+		
+		if (date != null && !date.isEmpty()) {
+			// encounter must be equal to or after the configured (expire) date
+			params.setDate(date);
+		}
+		
+		if (status != null && !status.isEmpty() && status.getValue().equalsIgnoreCase("active")) {
+			// encounter must have a medication request that is neither completed nor cancelled (expired is okay, since we are using another definition of expired for dispensing purposes)
+			HasOrListParam notCompletedHasParam = new HasOrListParam()
+			        .add(new HasParam("MedicationRequest", "encounter", "status:not", "completed"));
+			HasOrListParam notCancelledHasParam = new HasOrListParam()
+			        .add(new HasParam("MedicationRequest", "encounter", "status:not", "cancelled"));
+			params.setHasAndListParam(new HasAndListParam().addAnd(notCancelledHasParam).addAnd(notCompletedHasParam));
+		} else {
+			// for "all" query only restriction is that the encounter has at least one medication request
+			params.setHasAndListParam(new HasAndListParam()
+			        .addAnd(new HasOrListParam().add(new HasParam("MedicationRequest", "encounter", "intent", "order"))));
+		}
+		
+		// sort by date descending, so most recent is first
+		SortSpec sortSpec = new SortSpec();
+		sortSpec.setParamName("date");
+		sortSpec.setOrder(SortOrderEnum.DESC);
+		params.setSort(sortSpec);
+		
+		// search on identifier or patient name if that value has been passed in
+		if (patientSearchTerm != null && !patientSearchTerm.isEmpty()) {
+			ReferenceOrListParam subjectReference = new ReferenceOrListParam();
+			subjectReference.add(new ReferenceParam("name", patientSearchTerm.getValue()));
+			subjectReference.add(new ReferenceParam("identifier", patientSearchTerm.getValue()));
+			params.setSubject(new ReferenceAndListParam().addAnd(subjectReference));
+		}
+		
+		// include all medication requests associated with the encounter, and then all dispenses associted with those requests
+		HashSet<Include> revIncludes = new HashSet<Include>();
+		Include medicationRequestInclude = new Include("MedicationRequest:encounter", false);
+		Include medicationDispenseInclude = new Include("MedicationDispense:prescription", true);
+		revIncludes.add(medicationRequestInclude);
+		revIncludes.add(medicationDispenseInclude);
+		params.setRevIncludes(revIncludes);
+		
+		return encounterService.searchForEncounters(params);
 	}
 }

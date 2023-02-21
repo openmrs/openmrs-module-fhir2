@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.Auditable;
@@ -115,8 +116,23 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 								// only supports ACTIVE at this time
 								if (paramValue != null) {
 									if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString()
-									        .equals(paramValue.toUpperCase())) {
+									        .equalsIgnoreCase(paramValue)) {
 										criteria.add(generateActiveOrderQuery("orders"));
+									}
+								}
+								handled = true;
+							} else if ((MedicationRequest.SP_STATUS + ":not").equalsIgnoreCase(paramName)) {
+								if (paramValue != null) {
+									if (MedicationRequest.MedicationRequestStatus.CANCELLED.toString()
+									        .equalsIgnoreCase(paramValue)) {
+										criteria.add(generateNotCancelledOrderQuery("orders"));
+									}
+									if (MedicationRequest.MedicationRequestStatus.COMPLETED.toString()
+									        .equalsIgnoreCase(paramValue)) {
+										Criterion notCompletedCriterion = generateNotCompletedOrderQuery("orders");
+										if (notCompletedCriterion != null) {
+											criteria.add(notCompletedCriterion);
+										}
 									}
 								}
 								handled = true;
@@ -137,5 +153,7 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	protected abstract void handleEncounterType(Criteria criteria, TokenAndListParam tokenAndListParam);
 	
 	protected abstract void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam);
+	
+	protected abstract Criterion generateNotCompletedOrderQuery(String path);
 	
 }

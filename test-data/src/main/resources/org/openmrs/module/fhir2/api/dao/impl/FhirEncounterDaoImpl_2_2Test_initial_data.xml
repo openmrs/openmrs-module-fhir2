@@ -8,8 +8,6 @@
     Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
     graphic logo is a trademark of OpenMRS Inc.
 -->
-
-<!-- concept "792" name="D4T+3TC+NVP" in standard test dataset -->
 <dataset>
     <encounter encounter_id="1001" encounter_type="1" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="430bbb70-6a9c-4e1e-badb-9d1034b1b5e9"/>
     <orders order_id="1001" order_type_id="2" order_number="1" urgency="ROUTINE" patient_id="2" encounter_id="1001" date_activated="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="0d86e8b4-2f33-495e-aa22-6954785e4e9e" order_action="NEW" care_setting="1"/>
@@ -29,5 +27,10 @@
     <encounter encounter_id="2004" encounter_type="1" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="ed19b329-9ac6-4271-b730-906a27dd2d2c"/>
     <orders order_id="2004" order_type_id="1" order_number="2004" urgency="ROUTINE" patient_id="2" encounter_id="2004" date_activated="2012-08-19 00:00:00.0" auto_expire_date="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="cbf3f654-f2d5-4306-89aa-bc02cdd29f34" order_action="NEW" care_setting="1"/>
     <drug_order order_id="2004" drug_inventory_id="3" dose="325.0" dose_units="50" as_needed="false" frequency="1" dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51" num_refills="10" dispense_as_written="0" />
+
+    <!-- encounter with completed order -->
+    <encounter encounter_id="2005" encounter_type="1" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="c07455f2-dbb3-4ffc-8fcc-d930e95fae55"/>
+    <orders order_id="2005" order_type_id="1" order_number="2005" urgency="ROUTINE" patient_id="2" encounter_id="2005" date_activated="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" fulfiller_status="COMPLETED" voided="false" uuid="ac463525-9b1a-44f2-99f1-0d6a10d5b60d" order_action="NEW" care_setting="1"/>
+    <drug_order order_id="2005" drug_inventory_id="3" dose="325.0" dose_units="50" as_needed="false" frequency="1" dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51" num_refills="10" dispense_as_written="0" />
 
 </dataset>
