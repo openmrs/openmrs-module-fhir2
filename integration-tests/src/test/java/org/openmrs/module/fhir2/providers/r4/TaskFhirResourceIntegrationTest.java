@@ -42,6 +42,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+
 public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<TaskFhirResourceProvider, Task> {
 	
 	private static final String TASK_DATA_FILES = "org/openmrs/module/fhir2/api/dao/impl/FhirTaskDaoImplTest_initial_data.xml";
@@ -84,6 +87,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(task.getIntent(), is(Task.TaskIntent.ORDER));
 		assertThat(task.getLocation().getReference(), is(LOCATION_UUID));
 		assertThat(task, validResource());
+
 	}
 	
 	@Test
@@ -158,7 +162,12 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(task.getLastModified(), within(1, ChronoUnit.MINUTES, new Date()));
 		assertThat(task, validResource());
 		assertThat(task.getBasedOn(), hasSize(2));
-		assertThat(task.getOutput(), hasSize(2));
+		assertThat(task.getOutput(), hasSize(5));
+		assertThat(task.getInput(), hasSize(4));
+
+		FhirContext ctx = FhirContext.forR4();
+		String parser = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(task);
+	    System.out.println(parser);
 		
 		response = get("/Task/" + task.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		
