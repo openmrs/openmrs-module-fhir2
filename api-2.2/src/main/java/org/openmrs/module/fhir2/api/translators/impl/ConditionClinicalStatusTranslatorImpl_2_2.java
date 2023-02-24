@@ -32,15 +32,12 @@ public class ConditionClinicalStatusTranslatorImpl_2_2 implements ConditionClini
 		CodeableConcept codeableConcept = new CodeableConcept();
 		switch (clinicalStatus) {
 			case ACTIVE:
-				codeableConcept.addCoding().setCode(clinicalStatus.toString().toLowerCase()).setDisplay("Active")
-				        .setSystem(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI);
-				break;
 			case INACTIVE:
-				codeableConcept.addCoding().setCode(clinicalStatus.toString().toLowerCase()).setDisplay("Inactive")
+				codeableConcept.addCoding().setCode(clinicalStatus.toString().toLowerCase())
 				        .setSystem(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI);
 				break;
 			default:
-				codeableConcept.addCoding().setCode("inactive").setDisplay("Inactive")
+				codeableConcept.addCoding().setCode("inactive")
 				        .setSystem(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI);
 				break;
 		}
