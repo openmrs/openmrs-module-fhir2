@@ -36,21 +36,7 @@
           }
         ]
       },
-      "valueReference": {
-        "reference": "DiagnosticReport/dbbd9f60-b963-4987-9ac6-ed7d9906bd82"
-      }
-    },
-    {
-      "type": {
-        "coding": [
-          {
-            "system": "https://openconceptlab.org/orgs/CIEL/sources/CIEL",
-            "code": "5086",
-            "display": "test Code"
-          }
-        ]
-      },
-      "valueString": "Bllod Pressure"
+      "valueString": "Blood Pressure"
     },
     {
       "type": {
@@ -74,7 +60,7 @@
           }
         ]
       },
-      "valueDateTime": "1905-08-23"
+      "valueDateTime": "1905-08-23T13:28:17-05:00"
     }
   ],
   "input": [
@@ -126,7 +112,7 @@
           }
         ]
       },
-      "valueDateTime": "1905-08-23"
+      "valueDateTime": "1905-08-23T13:28:17-05:00"
     }
   ],
   "status": "accepted",

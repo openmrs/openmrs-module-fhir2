@@ -25,6 +25,8 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -34,7 +36,11 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Task;
 import org.junit.Before;
 import org.junit.Test;
@@ -155,7 +161,8 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		assertThat(task.getLastModified(), within(1, ChronoUnit.MINUTES, new Date()));
 		assertThat(task, validResource());
 		assertThat(task.getBasedOn(), hasSize(2));
-		assertThat(task.getOutput(), hasSize(2));
+		assertThat(task.getOutput(), hasSize(4));
+		assertThat(task.getInput(), hasSize(4));
 		
 		response = get("/Task/" + task.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		
@@ -169,6 +176,45 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		assertThat(newTask.getIntent(), equalTo(task.getIntent()));
 		assertThat(task.getAuthoredOn(), equalTo(task.getAuthoredOn()));
 		assertThat(task.getLastModified(), equalTo(task.getLastModified()));
+		assertThat(newTask.getOutput(), hasSize(4));
+		assertThat(newTask.getInput(), hasSize(4));
+		for (Task.TaskOutputComponent output : newTask.getOutput()) {
+			if (output.getValue() instanceof Reference) {
+				assertThat(((Reference) output.getValue()).getReference(),
+				    equalTo("DiagnosticReport/9b6f11dd-55d2-4ff6-8ec2-73f6ad1b759e"));
+				
+			} else if (output.getValue() instanceof DateTimeType) {
+				DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				String dateResult = sdf.format(((DateTimeType) output.getValue()).getValue());
+				assertThat(dateResult, equalTo("1905-08-23"));
+				
+			} else if (output.getValue() instanceof DecimalType) {
+				assertThat(((DecimalType) output.getValue()).getValueAsNumber().doubleValue(), equalTo(37.38));
+				
+			} else if (output.getValue() instanceof StringType) {
+				assertThat(output.getValue().toString(), equalTo("Blood Pressure"));
+				
+			}
+		}
+		
+		for (Task.ParameterComponent input : newTask.getInput()) {
+			if (input.getValue() instanceof Reference) {
+				assertThat(((Reference) input.getValue()).getReference(),
+				    equalTo("DiagnosticReport/dbbd9f60-b963-4987-9ac6-ed7d9906bd82"));
+				
+			} else if (input.getValue() instanceof DateTimeType) {
+				DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				String dateResult = sdf.format(((DateTimeType) input.getValue()).getValue());
+				assertThat(dateResult, equalTo("1905-08-23"));
+				
+			} else if (input.getValue() instanceof DecimalType) {
+				assertThat(((DecimalType) input.getValue()).getValueAsNumber().doubleValue(), equalTo(37.38));
+				
+			} else if (input.getValue() instanceof StringType) {
+				assertThat(input.getValue().toString(), equalTo("Test code"));
+				
+			}
+		}
 	}
 	
 	@Test
