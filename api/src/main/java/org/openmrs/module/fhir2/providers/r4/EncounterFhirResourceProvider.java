@@ -185,7 +185,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	@Search(queryName = "encountersWithMedicationRequests")
 	public IBundleProvider getEncountersWithMedicationRequestsSearch(
 	        @OptionalParam(name = Encounter.SP_DATE) DateRangeParam date, @OptionalParam(name = "status") TokenParam status,
-	        @OptionalParam(name = "patientSearchTerm") TokenParam patientSearchTerm) {
+	        @OptionalParam(name = "patientSearchTerm") TokenParam patientSearchTerm,
+	        @OptionalParam(name = "location") ReferenceAndListParam location) {
 		
 		EncounterSearchParams params = new EncounterSearchParams();
 		
@@ -225,7 +226,10 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 			params.setSubject(new ReferenceAndListParam().addAnd(subjectReference));
 		}
 		
-		// include all medication requests associated with the encounter, and then all dispenses associted with those requests
+		// search by location
+		params.setLocation(location);
+		
+		// include all medication requests associated with the encounter, and then all dispenses associated with those requests
 		HashSet<Include> revIncludes = new HashSet<Include>();
 		Include medicationRequestInclude = new Include("MedicationRequest:encounter", false);
 		Include medicationDispenseInclude = new Include("MedicationDispense:prescription", true);
