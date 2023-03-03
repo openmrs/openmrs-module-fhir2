@@ -919,6 +919,33 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
 	}
 	
+	@Test
+	public void shouldReturnEncountersWithMedicationRequestShouldRestrictByLocation() throws Exception {
+		
+		executeDataSet(MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML); // additional test data from the fhe FHIR Enocounter DAO test we use to test the encountersWithMedicationRequests query
+		
+		MockHttpServletResponse response = get(
+		    "/Encounter/?_query=encountersWithMedicationRequests&location=9356400c-a5a2-4532-8f2b-2361b3446eb8")
+		            .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(1))); // only 1 of the encounters (6 in the main test data) is at location 2 ("Xanadu",  9356400c-a5a2-4532-8f2b-2361b3446eb8)
+		assertThat(result.getEntry(), hasSize(7)); // there are 6 requests associated, so that plus the tne encounter is 7
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
+	}
+	
 	private Set<ResourceType> getEncounterWithMedicationRequestsValidResourceTypes() {
 		Set<ResourceType> validTypes = new HashSet<>();
 		
