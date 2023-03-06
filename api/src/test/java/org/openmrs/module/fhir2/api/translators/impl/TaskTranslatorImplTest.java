@@ -55,7 +55,7 @@ import org.openmrs.module.fhir2.model.FhirTaskInput;
 import org.openmrs.module.fhir2.model.FhirTaskOutput;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FhirTaskTranslatorImplTest {
+public class TaskTranslatorImplTest {
 	
 	private static final String TASK_UUID = "d899333c-5bd4-45cc-b1e7-2f9542dbcbf6";
 	
@@ -89,7 +89,10 @@ public class FhirTaskTranslatorImplTest {
 	private ReferenceTranslatorImpl referenceTranslator;
 	
 	@Mock
-	private ConceptTranslatorImpl conceptTranslator;
+	private TaskInputTranslatorImpl taskInputTranslator;
+	
+	@Mock
+	private TaskOutputTranslatorImpl taskOutputTranslator;
 	
 	private TaskTranslatorImpl taskTranslator;
 	
@@ -97,7 +100,8 @@ public class FhirTaskTranslatorImplTest {
 	public void setup() {
 		taskTranslator = new TaskTranslatorImpl();
 		taskTranslator.setReferenceTranslator(referenceTranslator);
-		taskTranslator.setConceptTranslator(conceptTranslator);
+		taskTranslator.setTaskInputTranslator(taskInputTranslator);
+		taskTranslator.setTaskOutputTranslator(taskOutputTranslator);
 	}
 	
 	@Test
@@ -444,8 +448,13 @@ public class FhirTaskTranslatorImplTest {
 		output.setValueReference(outputReference);
 		task.setOutput(Collections.singleton(output));
 		
-		when(conceptTranslator.toFhirResource(outputType))
-		        .thenReturn(new CodeableConcept().setCoding(Collections.singletonList(new Coding().setCode(CONCEPT_UUID))));
+		Reference fhirRef = new Reference().setReference(DIAGNOSTIC_REPORT_UUID).setType(FhirConstants.DIAGNOSTIC_REPORT);
+		Task.TaskOutputComponent fhirOutput = new Task.TaskOutputComponent();
+		CodeableConcept fhirOutputType = new CodeableConcept()
+		        .setCoding(Collections.singletonList(new Coding().setCode(CONCEPT_UUID)));
+		fhirOutput.setType(fhirOutputType).setValue(fhirRef);
+		
+		when(taskOutputTranslator.toFhirResource(output)).thenReturn(fhirOutput);
 		
 		Task result = shouldTranslateReferenceToFhir(task, FhirConstants.DIAGNOSTIC_REPORT, DIAGNOSTIC_REPORT_UUID,
 		    output::setValueReference, t -> (Reference) t.getOutput().iterator().next().getValue());
@@ -469,7 +478,14 @@ public class FhirTaskTranslatorImplTest {
 		
 		task.setOutput(Collections.singletonList(output));
 		
-		when(conceptTranslator.toOpenmrsType(outputType)).thenReturn(openmrsOutputType);
+		FhirTaskOutput openmrsOutput = new FhirTaskOutput();
+		openmrsOutput.setType(openmrsOutputType);
+		FhirReference openmrsOutputReference = new FhirReference();
+		openmrsOutputReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
+		openmrsOutputReference.setReference(DIAGNOSTIC_REPORT_UUID);
+		openmrsOutput.setValueReference(openmrsOutputReference);
+		
+		when(taskOutputTranslator.toOpenmrsType(output)).thenReturn(openmrsOutput);
 		
 		FhirTask result = shouldTranslateReferenceToOpenmrs(task, FhirConstants.DIAGNOSTIC_REPORT, DIAGNOSTIC_REPORT_UUID,
 		    output::setValue, t -> t.getOutput().iterator().next().getValueReference());
@@ -495,7 +511,14 @@ public class FhirTaskTranslatorImplTest {
 		openmrsTask.setUuid(TASK_UUID);
 		openmrsTask.setOutput(Collections.singleton(new FhirTaskOutput()));
 		
-		when(conceptTranslator.toOpenmrsType(outputType)).thenReturn(openmrsOutputType);
+		FhirTaskOutput openmrsOutput = new FhirTaskOutput();
+		openmrsOutput.setType(openmrsOutputType);
+		FhirReference openmrsOutputReference = new FhirReference();
+		openmrsOutputReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
+		openmrsOutputReference.setReference(DIAGNOSTIC_REPORT_UUID);
+		openmrsOutput.setValueReference(openmrsOutputReference);
+		
+		when(taskOutputTranslator.toOpenmrsType(output)).thenReturn(openmrsOutput);
 		
 		FhirTask result = shouldUpdateReferenceInOpenmrs(task, FhirConstants.DIAGNOSTIC_REPORT, DIAGNOSTIC_REPORT_UUID,
 		    output::setValue, t -> t.getOutput().iterator().next().getValueReference());
@@ -541,12 +564,32 @@ public class FhirTaskTranslatorImplTest {
 		output.add(textOutput);
 		task.setOutput(output);
 		
-		when(conceptTranslator.toFhirResource(outputType))
-		        .thenReturn(new CodeableConcept().setCoding(Collections.singletonList(new Coding().setCode(CONCEPT_UUID))));
+		Reference fhirRef = new Reference().setReference(DIAGNOSTIC_REPORT_UUID).setType(FhirConstants.DIAGNOSTIC_REPORT);
+		Task.TaskOutputComponent refFhirOutput = new Task.TaskOutputComponent();
+		CodeableConcept fhirOutputType = new CodeableConcept()
+		        .setCoding(Collections.singletonList(new Coding().setCode(CONCEPT_UUID)));
+		refFhirOutput.setType(fhirOutputType).setValue(fhirRef);
 		
-		Reference fhirReference = new Reference().setReference(DIAGNOSTIC_REPORT_UUID)
-		        .setType(FhirConstants.DIAGNOSTIC_REPORT);
-		when(referenceTranslator.toFhirResource(any(FhirReference.class))).thenReturn(fhirReference);
+		when(taskOutputTranslator.toFhirResource(refOutput)).thenReturn(refFhirOutput);
+		
+		Task.TaskOutputComponent dateFhirOutput = new Task.TaskOutputComponent();
+		dateFhirOutput.setType(fhirOutputType);
+		dateFhirOutput.setValue(new DateTimeType().setValue(sdf.parse(dateString)));
+		
+		when(taskOutputTranslator.toFhirResource(dateOutput)).thenReturn(dateFhirOutput);
+		
+		Task.TaskOutputComponent numericFhirOutput = new Task.TaskOutputComponent();
+		numericFhirOutput.setType(fhirOutputType);
+		DecimalType decimal = new DecimalType();
+		decimal.setValue(numericValue);
+		numericFhirOutput.setValue(decimal);
+		
+		when(taskOutputTranslator.toFhirResource(numericOutput)).thenReturn(numericFhirOutput);
+		
+		Task.TaskOutputComponent textFhirOutput = new Task.TaskOutputComponent();
+		textFhirOutput.setType(fhirOutputType);
+		textFhirOutput.setValue(new StringType().setValue(textValue));
+		when(taskOutputTranslator.toFhirResource(textOutput)).thenReturn(textFhirOutput);
 		
 		Task result = taskTranslator.toFhirResource(task);
 		
@@ -605,13 +648,38 @@ public class FhirTaskTranslatorImplTest {
 		
 		Concept openmrsOutputType = new Concept();
 		openmrsOutputType.setUuid(CONCEPT_UUID);
-		when(conceptTranslator.toOpenmrsType(outputType)).thenReturn(openmrsOutputType);
+		
+		FhirTaskOutput refOpenmrsOutput = new FhirTaskOutput();
+		refOpenmrsOutput.setType(openmrsOutputType);
+		FhirReference openmrsOutputReference = new FhirReference();
+		openmrsOutputReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
+		openmrsOutputReference.setReference(DIAGNOSTIC_REPORT_UUID);
+		refOpenmrsOutput.setValueReference(openmrsOutputReference);
+		
+		when(taskOutputTranslator.toOpenmrsType(refOutput)).thenReturn(refOpenmrsOutput);
+		
+		FhirTaskOutput dateOpenmrsOutput = new FhirTaskOutput();
+		dateOpenmrsOutput.setType(openmrsOutputType);
+		dateOpenmrsOutput.setValueDatetime(sdf.parse(dateString));
+		
+		when(taskOutputTranslator.toOpenmrsType(dateOutput)).thenReturn(dateOpenmrsOutput);
+		
+		FhirTaskOutput numericOpenmrsOutput = new FhirTaskOutput();
+		numericOpenmrsOutput.setType(openmrsOutputType);
+		numericOpenmrsOutput.setValueNumeric(numericValue);
+		
+		when(taskOutputTranslator.toOpenmrsType(numericOutput)).thenReturn(numericOpenmrsOutput);
+		
+		FhirTaskOutput textOpenmrsOutput = new FhirTaskOutput();
+		textOpenmrsOutput.setType(openmrsOutputType);
+		numericOpenmrsOutput.setValueText(textValue);
+		;
+		
+		when(taskOutputTranslator.toOpenmrsType(textOutput)).thenReturn(textOpenmrsOutput);
 		
 		FhirReference openmrsReference = new FhirReference();
 		openmrsReference.setReference(DIAGNOSTIC_REPORT_UUID);
 		openmrsReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
-		
-		when(referenceTranslator.toOpenmrsType(any(Reference.class))).thenReturn(openmrsReference);
 		
 		FhirTask result = taskTranslator.toOpenmrsType(task);
 		
@@ -645,8 +713,12 @@ public class FhirTaskTranslatorImplTest {
 		input.setValueText(inputVal);
 		task.setInput(Collections.singleton(input));
 		
-		when(conceptTranslator.toFhirResource(inputType))
-		        .thenReturn(new CodeableConcept().setCoding(Collections.singletonList(new Coding().setCode(CONCEPT_UUID))));
+		CodeableConcept fhirInputType = new CodeableConcept()
+		        .setCoding(Collections.singletonList(new Coding().setCode(CONCEPT_UUID)));
+		Task.ParameterComponent textFhirInput = new Task.ParameterComponent();
+		textFhirInput.setType(fhirInputType);
+		textFhirInput.setValue(new StringType().setValue(inputVal));
+		when(taskInputTranslator.toFhirResource(input)).thenReturn(textFhirInput);
 		
 		Task result = taskTranslator.toFhirResource(task);
 		
@@ -671,7 +743,10 @@ public class FhirTaskTranslatorImplTest {
 		
 		task.setInput(Collections.singletonList(input));
 		
-		when(conceptTranslator.toOpenmrsType(inputType)).thenReturn(openmrsInputType);
+		FhirTaskInput textInput = new FhirTaskInput();
+		textInput.setType(openmrsInputType);
+		textInput.setValueText(inputVal);
+		when(taskInputTranslator.toOpenmrsType(input)).thenReturn(textInput);
 		
 		FhirTask result = taskTranslator.toOpenmrsType(task);
 		
@@ -698,7 +773,10 @@ public class FhirTaskTranslatorImplTest {
 		openmrsTask.setUuid(TASK_UUID);
 		openmrsTask.setInput(Collections.singleton(new FhirTaskInput()));
 		
-		when(conceptTranslator.toOpenmrsType(inputType)).thenReturn(openmrsInputType);
+		FhirTaskInput textInput = new FhirTaskInput();
+		textInput.setType(openmrsInputType);
+		textInput.setValueText(inputVal);
+		when(taskInputTranslator.toOpenmrsType(input)).thenReturn(textInput);
 		
 		FhirTask result = taskTranslator.toOpenmrsType(openmrsTask, task);
 		
@@ -743,12 +821,32 @@ public class FhirTaskTranslatorImplTest {
 		input.add(textInput);
 		task.setInput(input);
 		
-		when(conceptTranslator.toFhirResource(inputType))
-		        .thenReturn(new CodeableConcept().setCoding(Collections.singletonList(new Coding().setCode(CONCEPT_UUID))));
+		Reference fhirRef = new Reference().setReference(DIAGNOSTIC_REPORT_UUID).setType(FhirConstants.DIAGNOSTIC_REPORT);
+		Task.ParameterComponent refFhirInput = new Task.ParameterComponent();
+		CodeableConcept fhirInputType = new CodeableConcept()
+		        .setCoding(Collections.singletonList(new Coding().setCode(CONCEPT_UUID)));
+		refFhirInput.setType(fhirInputType).setValue(fhirRef);
 		
-		Reference fhirReference = new Reference().setReference(DIAGNOSTIC_REPORT_UUID)
-		        .setType(FhirConstants.DIAGNOSTIC_REPORT);
-		when(referenceTranslator.toFhirResource(any(FhirReference.class))).thenReturn(fhirReference);
+		when(taskInputTranslator.toFhirResource(refInput)).thenReturn(refFhirInput);
+		
+		Task.ParameterComponent dateFhirInput = new Task.ParameterComponent();
+		dateFhirInput.setType(fhirInputType);
+		dateFhirInput.setValue(new DateTimeType().setValue(sdf.parse(dateString)));
+		
+		when(taskInputTranslator.toFhirResource(dateInput)).thenReturn(dateFhirInput);
+		
+		Task.ParameterComponent numericFhirInput = new Task.ParameterComponent();
+		numericFhirInput.setType(fhirInputType);
+		DecimalType decimal = new DecimalType();
+		decimal.setValue(numericValue);
+		numericFhirInput.setValue(decimal);
+		
+		when(taskInputTranslator.toFhirResource(numericInput)).thenReturn(numericFhirInput);
+		
+		Task.ParameterComponent textFhirInput = new Task.ParameterComponent();
+		textFhirInput.setType(fhirInputType);
+		textFhirInput.setValue(new StringType().setValue(textValue));
+		when(taskInputTranslator.toFhirResource(textInput)).thenReturn(textFhirInput);
 		
 		Task result = taskTranslator.toFhirResource(task);
 		
@@ -807,13 +905,37 @@ public class FhirTaskTranslatorImplTest {
 		
 		Concept openmrsInputType = new Concept();
 		openmrsInputType.setUuid(CONCEPT_UUID);
-		when(conceptTranslator.toOpenmrsType(inputType)).thenReturn(openmrsInputType);
+		
+		FhirTaskInput refOpenmrsInput = new FhirTaskInput();
+		refOpenmrsInput.setType(openmrsInputType);
+		FhirReference openmrsInputReference = new FhirReference();
+		openmrsInputReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
+		openmrsInputReference.setReference(DIAGNOSTIC_REPORT_UUID);
+		refOpenmrsInput.setValueReference(openmrsInputReference);
+		
+		when(taskInputTranslator.toOpenmrsType(refInput)).thenReturn(refOpenmrsInput);
+		
+		FhirTaskInput dateOpenmrsInput = new FhirTaskInput();
+		dateOpenmrsInput.setType(openmrsInputType);
+		dateOpenmrsInput.setValueDatetime(sdf.parse(dateString));
+		
+		when(taskInputTranslator.toOpenmrsType(dateInput)).thenReturn(dateOpenmrsInput);
+		
+		FhirTaskInput numericOpenmrsInput = new FhirTaskInput();
+		numericOpenmrsInput.setType(openmrsInputType);
+		numericOpenmrsInput.setValueNumeric(numericValue);
+		
+		when(taskInputTranslator.toOpenmrsType(numericInput)).thenReturn(numericOpenmrsInput);
+		
+		FhirTaskInput textOpenmrsInput = new FhirTaskInput();
+		textOpenmrsInput.setType(openmrsInputType);
+		numericOpenmrsInput.setValueText(textValue);
+		
+		when(taskInputTranslator.toOpenmrsType(textInput)).thenReturn(textOpenmrsInput);
 		
 		FhirReference openmrsReference = new FhirReference();
 		openmrsReference.setReference(DIAGNOSTIC_REPORT_UUID);
 		openmrsReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
-		
-		when(referenceTranslator.toOpenmrsType(any(Reference.class))).thenReturn(openmrsReference);
 		
 		FhirTask result = taskTranslator.toOpenmrsType(task);
 		
@@ -1015,6 +1137,5 @@ public class FhirTaskTranslatorImplTest {
 		assertThat(resultReference, hasSize(1));
 		assertThat(resultReference.iterator().next().getReference(), equalTo(refUuid));
 		assertThat(resultReference.iterator().next().getType(), equalTo(refType));
-		
 	}
 }
