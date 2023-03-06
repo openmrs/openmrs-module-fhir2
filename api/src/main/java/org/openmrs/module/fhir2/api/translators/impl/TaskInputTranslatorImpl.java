@@ -38,20 +38,20 @@ public class TaskInputTranslatorImpl implements TaskInputTranslator {
 	private ReferenceTranslator referenceTranslator;
 	
 	@Override
-	public ParameterComponent toFhirResource(FhirTaskInput openmrsInput) {
-		CodeableConcept type = conceptTranslator.toFhirResource(openmrsInput.getType());
+	public ParameterComponent toFhirResource(FhirTaskInput openmrsTaskInput) {
+		CodeableConcept type = conceptTranslator.toFhirResource(openmrsTaskInput.getType());
 		Task.ParameterComponent input = new Task.ParameterComponent().setType(type);
-		if (openmrsInput.getValueReference() != null) {
-			Reference ref = referenceTranslator.toFhirResource(openmrsInput.getValueReference());
+		if (openmrsTaskInput.getValueReference() != null) {
+			Reference ref = referenceTranslator.toFhirResource(openmrsTaskInput.getValueReference());
 			return input.setValue(ref);
-		} else if (openmrsInput.getValueText() != null) {
-			return input.setValue(new StringType().setValue(openmrsInput.getValueText()));
-		} else if (openmrsInput.getValueNumeric() != null) {
+		} else if (openmrsTaskInput.getValueText() != null) {
+			return input.setValue(new StringType().setValue(openmrsTaskInput.getValueText()));
+		} else if (openmrsTaskInput.getValueNumeric() != null) {
 			DecimalType decimal = new DecimalType();
-			decimal.setValue(openmrsInput.getValueNumeric());
+			decimal.setValue(openmrsTaskInput.getValueNumeric());
 			return input.setValue(decimal);
-		} else if (openmrsInput.getValueDatetime() != null) {
-			return input.setValue(new DateTimeType().setValue(openmrsInput.getValueDatetime()));
+		} else if (openmrsTaskInput.getValueDatetime() != null) {
+			return input.setValue(new DateTimeType().setValue(openmrsTaskInput.getValueDatetime()));
 		} else {
 			return null;
 		}

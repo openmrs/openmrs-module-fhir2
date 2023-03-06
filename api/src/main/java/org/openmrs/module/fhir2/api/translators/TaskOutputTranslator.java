@@ -24,7 +24,7 @@ public interface TaskOutputTranslator extends ToFhirTranslator<FhirTaskOutput, T
 	 * @return the corresponding FHIR Task output
 	 */
 	@Override
-	Task.TaskOutputComponent toFhirResource(@Nonnull FhirTaskOutput openmrsOutput);
+	Task.TaskOutputComponent toFhirResource(@Nonnull FhirTaskOutput openmrsTaskOutput);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.Task.TaskOutputComponent} to a existing
@@ -34,5 +34,5 @@ public interface TaskOutputTranslator extends ToFhirTranslator<FhirTaskOutput, T
 	 * @return corresponding Openmrs Task output
 	 */
 	@Override
-	FhirTaskOutput toOpenmrsType(@Nonnull Task.TaskOutputComponent fhirOutput);
+	FhirTaskOutput toOpenmrsType(@Nonnull Task.TaskOutputComponent fhirTaskOutput);
 }

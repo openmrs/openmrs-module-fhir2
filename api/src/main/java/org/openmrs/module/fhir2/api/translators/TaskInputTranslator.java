@@ -24,7 +24,7 @@ public interface TaskInputTranslator extends ToFhirTranslator<FhirTaskInput, Tas
 	 * @return the corresponding FHIR Task input
 	 */
 	@Override
-	Task.ParameterComponent toFhirResource(@Nonnull FhirTaskInput openmrsInput);
+	Task.ParameterComponent toFhirResource(@Nonnull FhirTaskInput openmrsTaskInput);
 	
 	/**
 	 * Maps an {@link org.hl7.fhir.r4.model.Task.ParameterComponent} to a existing
@@ -34,5 +34,5 @@ public interface TaskInputTranslator extends ToFhirTranslator<FhirTaskInput, Tas
 	 * @return corresponding Openmrs Task input
 	 */
 	@Override
-	FhirTaskInput toOpenmrsType(@Nonnull Task.ParameterComponent fhirInput);
+	FhirTaskInput toOpenmrsType(@Nonnull Task.ParameterComponent fhirTaskInput);
 }
