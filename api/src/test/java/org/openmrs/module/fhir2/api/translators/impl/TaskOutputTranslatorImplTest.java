@@ -60,7 +60,7 @@ public class TaskOutputTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateInputReference() {
+	public void toOpenmrsType_shouldTranslateOutputReference() {
 		CodeableConcept outputType = innitializeFhirType();
 		
 		FhirReference openmrsReference = new FhirReference();
@@ -80,23 +80,23 @@ public class TaskOutputTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateInputNumeric() {
+	public void toOpenmrsType_shouldTranslateOutputNumeric() {
 		CodeableConcept outputType = innitializeFhirType();
 		
-		Task.TaskOutputComponent numericInput = new Task.TaskOutputComponent();
+		Task.TaskOutputComponent numericOutput = new Task.TaskOutputComponent();
 		DecimalType decimal = new DecimalType();
 		Double numericValue = 12.0;
 		decimal.setValue(numericValue);
-		numericInput.setType(outputType);
-		numericInput.setValue(decimal);
+		numericOutput.setType(outputType);
+		numericOutput.setValue(decimal);
 		
-		FhirTaskOutput output = taskOutputTranslator.toOpenmrsType(numericInput);
+		FhirTaskOutput output = taskOutputTranslator.toOpenmrsType(numericOutput);
 		assertThat(output.getType().getUuid(), equalTo(CONCEPT_UUID));
 		assertThat(output.getValueNumeric(), equalTo(numericValue));
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateInputDate() throws ParseException {
+	public void toOpenmrsType_shouldTranslateOutputDate() throws ParseException {
 		CodeableConcept outputType = innitializeFhirType();
 		
 		Task.TaskOutputComponent dateOutput = new Task.TaskOutputComponent();
@@ -111,7 +111,7 @@ public class TaskOutputTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateInputText() {
+	public void toOpenmrsType_shouldTranslateOutputText() {
 		CodeableConcept outputType = innitializeFhirType();
 		
 		Task.TaskOutputComponent textOutput = new Task.TaskOutputComponent();
@@ -124,7 +124,7 @@ public class TaskOutputTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateInputReference() {
+	public void toFhirResource_shouldTranslateOutputReference() {
 		Concept outputType = innitializeOpenmrsType();
 		
 		Reference fhirReference = new Reference().setReference(DIAGNOSTIC_REPORT_UUID)
@@ -132,11 +132,11 @@ public class TaskOutputTranslatorImplTest {
 		when(referenceTranslator.toFhirResource(any(FhirReference.class))).thenReturn(fhirReference);
 		
 		FhirTaskOutput refOutput = new FhirTaskOutput();
-		FhirReference inputReference = new FhirReference();
-		inputReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
-		inputReference.setReference(DIAGNOSTIC_REPORT_UUID);
+		FhirReference outputReference = new FhirReference();
+		outputReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
+		outputReference.setReference(DIAGNOSTIC_REPORT_UUID);
 		refOutput.setType(outputType);
-		refOutput.setValueReference(inputReference);
+		refOutput.setValueReference(outputReference);
 		
 		Task.TaskOutputComponent taskOutput = taskOutputTranslator.toFhirResource(refOutput);
 		assertThat(taskOutput.getType().getCoding().iterator().next().getCode(), equalTo(CONCEPT_UUID));
@@ -145,7 +145,7 @@ public class TaskOutputTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateInputDate() throws ParseException {
+	public void toFhirResource_shouldTranslateOutputDate() throws ParseException {
 		Concept outputType = innitializeOpenmrsType();
 		
 		FhirTaskOutput dateOutput = new FhirTaskOutput();
@@ -162,7 +162,7 @@ public class TaskOutputTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateInputNumeric() {
+	public void toFhirResource_shouldTranslateOutputNumeric() {
 		Concept outputType = innitializeOpenmrsType();
 		
 		FhirTaskOutput numericOutput = new FhirTaskOutput();
@@ -177,7 +177,7 @@ public class TaskOutputTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateInputText() {
+	public void toFhirResource_shouldTranslateOutputText() {
 		Concept outputType = innitializeOpenmrsType();
 		
 		FhirTaskOutput textOutput = new FhirTaskOutput();
@@ -192,14 +192,14 @@ public class TaskOutputTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldReturnNullIfOpenmrsInputHasNoValue() {
+	public void toFhirResource_shouldReturnNullIfOpenmrsOutputHasNoValue() {
 		Concept outputType = innitializeOpenmrsType();
 		
 		FhirTaskOutput output = new FhirTaskOutput();
 		output.setType(outputType);
 		
-		Task.TaskOutputComponent taskInput = taskOutputTranslator.toFhirResource(output);
-		assertThat(taskInput, equalTo(null));
+		Task.TaskOutputComponent taskOutput = taskOutputTranslator.toFhirResource(output);
+		assertThat(taskOutput, equalTo(null));
 	}
 	
 	private CodeableConcept innitializeFhirType() {
