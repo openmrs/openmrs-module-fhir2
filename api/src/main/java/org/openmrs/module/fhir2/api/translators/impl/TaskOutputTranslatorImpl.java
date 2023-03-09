@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
+import org.hl7.fhir.r4.model.Type;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ReferenceTranslator;
@@ -62,21 +63,19 @@ public class TaskOutputTranslatorImpl implements TaskOutputTranslator {
 		FhirTaskOutput output = new FhirTaskOutput();
 		Concept type = conceptTranslator.toOpenmrsType(taskOutputComponent.getType());
 		output.setType(type);
-		
-		if (taskOutputComponent.getValue() instanceof Reference) {
-			FhirReference ref = referenceTranslator.toOpenmrsType((Reference) taskOutputComponent.getValue());
+		Type value = taskOutputComponent.getValue();
+		if (value instanceof Reference) {
+			FhirReference ref = referenceTranslator.toOpenmrsType((Reference) value);
 			output.setValueReference(ref);
+		} else if (value instanceof StringType) {
+			output.setValueText(value.toString());
+		} else if (value instanceof DecimalType) {
+			output.setValueNumeric(((DecimalType) value).getValueAsNumber().doubleValue());
+		} else if (value instanceof DateTimeType) {
+			output.setValueDatetime(((DateTimeType) value).getValue());
+		} else {
+			return null;
 		}
-		if (taskOutputComponent.getValue() instanceof StringType) {
-			output.setValueText(taskOutputComponent.getValue().toString());
-		}
-		if (taskOutputComponent.getValue() instanceof DecimalType) {
-			output.setValueNumeric(((DecimalType) taskOutputComponent.getValue()).getValueAsNumber().doubleValue());
-		}
-		if (taskOutputComponent.getValue() instanceof DateTimeType) {
-			output.setValueDatetime(((DateTimeType) taskOutputComponent.getValue()).getValue());
-		}
-		
 		output.setName("TaskOutputComponent/" + output.getUuid());
 		return output;
 	}

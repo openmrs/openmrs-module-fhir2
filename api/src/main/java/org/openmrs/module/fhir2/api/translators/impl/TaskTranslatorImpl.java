@@ -104,13 +104,13 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		}
 		
 		if (openmrsTask.getInput() != null && !openmrsTask.getInput().isEmpty()) {
-			fhirTask.setInput(
-			    openmrsTask.getInput().stream().map(taskInputTranslator::toFhirResource).collect(Collectors.toList()));
+			fhirTask.setInput(openmrsTask.getInput().stream().map(taskInputTranslator::toFhirResource)
+			        .filter(obj -> obj != null).collect(Collectors.toList()));
 		}
 		
 		if (openmrsTask.getOutput() != null && !openmrsTask.getOutput().isEmpty()) {
-			fhirTask.setOutput(
-			    openmrsTask.getOutput().stream().map(taskOutputTranslator::toFhirResource).collect(Collectors.toList()));
+			fhirTask.setOutput(openmrsTask.getOutput().stream().map(taskOutputTranslator::toFhirResource)
+			        .filter(obj -> obj != null).collect(Collectors.toList()));
 		}
 		
 		fhirTask.setAuthoredOn(openmrsTask.getDateCreated());
@@ -170,13 +170,13 @@ public class TaskTranslatorImpl implements TaskTranslator {
 		}
 		
 		if (!fhirTask.getInput().isEmpty()) {
-			openmrsTask.setInput(
-			    fhirTask.getInput().stream().map(taskInputTranslator::toOpenmrsType).collect(Collectors.toSet()));
+			openmrsTask.setInput(fhirTask.getInput().stream().map(taskInputTranslator::toOpenmrsType)
+			        .filter(obj -> obj != null).collect(Collectors.toSet()));
 		}
 		
 		if (!fhirTask.getOutput().isEmpty()) {
-			openmrsTask.setOutput(
-			    fhirTask.getOutput().stream().map(taskOutputTranslator::toOpenmrsType).collect(Collectors.toSet()));
+			openmrsTask.setOutput(fhirTask.getOutput().stream().map(taskOutputTranslator::toOpenmrsType)
+			        .filter(obj -> obj != null).collect(Collectors.toSet()));
 		}
 		
 		openmrsTask.setName(FhirConstants.TASK + "/" + fhirTask.getId());

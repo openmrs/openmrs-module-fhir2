@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
+import org.hl7.fhir.r4.model.Type;
 import org.openmrs.Concept;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.ReferenceTranslator;
@@ -63,18 +64,18 @@ public class TaskInputTranslatorImpl implements TaskInputTranslator {
 		Concept type = conceptTranslator.toOpenmrsType(parameterComponent.getType());
 		input.setType(type);
 		
-		if (parameterComponent.getValue() instanceof Reference) {
-			FhirReference ref = referenceTranslator.toOpenmrsType((Reference) parameterComponent.getValue());
+		Type value = parameterComponent.getValue();
+		if (value instanceof Reference) {
+			FhirReference ref = referenceTranslator.toOpenmrsType((Reference) value);
 			input.setValueReference(ref);
-		}
-		if (parameterComponent.getValue() instanceof StringType) {
-			input.setValueText(parameterComponent.getValue().toString());
-		}
-		if (parameterComponent.getValue() instanceof DecimalType) {
-			input.setValueNumeric(((DecimalType) parameterComponent.getValue()).getValueAsNumber().doubleValue());
-		}
-		if (parameterComponent.getValue() instanceof DateTimeType) {
-			input.setValueDatetime(((DateTimeType) parameterComponent.getValue()).getValue());
+		} else if (value instanceof StringType) {
+			input.setValueText(value.toString());
+		} else if (value instanceof DecimalType) {
+			input.setValueNumeric(((DecimalType) value).getValueAsNumber().doubleValue());
+		} else if (value instanceof DateTimeType) {
+			input.setValueDatetime(((DateTimeType) value).getValue());
+		} else {
+			return null;
 		}
 		
 		input.setName("ParameterComponent/" + input.getUuid());

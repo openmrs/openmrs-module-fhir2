@@ -673,7 +673,6 @@ public class TaskTranslatorImplTest {
 		FhirTaskOutput textOpenmrsOutput = new FhirTaskOutput();
 		textOpenmrsOutput.setType(openmrsOutputType);
 		numericOpenmrsOutput.setValueText(textValue);
-		;
 		
 		when(taskOutputTranslator.toOpenmrsType(textOutput)).thenReturn(textOpenmrsOutput);
 		

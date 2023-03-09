@@ -9,9 +9,101 @@
     graphic logo is a trademark of OpenMRS Inc.
 -->
 <Task xmlns="http://hl7.org/fhir">
-    <id value="55616228-dc6d-446f-ab50-4ec711ea9243"/>
-    <status value="accepted"/>
-    <intent value="order"/>
-    <authoredOn value="2016-10-31T08:25:05+10:00"/>
-    <lastModified value="2016-10-31T09:45:05+10:00"/>
+  <id value="55616228-dc6d-446f-ab50-4ec711ea9243"/>
+  <basedOn>
+    <reference value="7d96f25c-4949-4f72-9931-d808fbc226de"/>
+    <type value="ServiceRequest"/>
+  </basedOn>
+  <basedOn>
+    <reference value="a7fd2d2a-e068-4c45-b613-8261d70b29b7"/>
+    <type value="ServiceRequest"/>
+  </basedOn>
+  <output>
+    <type>
+      <coding>
+        <system value="https://openconceptlab.org/orgs/CIEL/sources/CIEL"/>
+        <code value="5085"/>
+        <display value="Systolic blood pressure"/>
+      </coding>
+    </type>
+    <valueReference>
+      <reference value="DiagnosticReport/9b6f11dd-55d2-4ff6-8ec2-73f6ad1b759e"/>
+    </valueReference>
+  </output>
+  <output>
+    <type>
+      <coding>
+        <system value="https://openconceptlab.org/orgs/CIEL/sources/CIEL"/>
+        <code value="5086"/>
+        <display value="test Code"/>
+      </coding>
+    </type>
+    <valueString value="Blood Pressure"/>
+  </output>
+  <output>
+    <type>
+      <coding>
+        <system value="https://openconceptlab.org/orgs/CIEL/sources/CIEL"/>
+        <code value="5086"/>
+        <display value="test Code"/>
+      </coding>
+    </type>
+    <valueDecimal value="37.38"/>
+  </output>
+  <output>
+    <type>
+      <coding>
+        <system value="https://openconceptlab.org/orgs/CIEL/sources/CIEL"/>
+        <code value="5086"/>
+        <display value="test Code"/>
+      </coding>
+    </type>
+    <valueDateTime value="2011-03-04T11:45:33+11:00"/>
+  </output>
+  <input>
+    <type>
+      <coding>
+        <system value="https://openconceptlab.org/orgs/CIEL/sources/CIEL"/>
+        <code value="5085"/>
+        <display value="Systolic blood pressure"/>
+      </coding>
+    </type>
+    <valueReference>
+      <reference value="DiagnosticReport/dbbd9f60-b963-4987-9ac6-ed7d9906bd82"/>
+    </valueReference>
+  </input>
+  <input>
+    <type>
+      <coding>
+        <system value="https://openconceptlab.org/orgs/CIEL/sources/CIEL"/>
+        <code value="5086"/>
+        <display value="test Code"/>
+      </coding>
+    </type>
+    <valueString value="Test code"/>
+  </input>
+  <input>
+    <type>
+      <coding>
+        <system value="https://openconceptlab.org/orgs/CIEL/sources/CIEL"/>
+        <code value="5086"/>
+        <display value="test Code"/>
+      </coding>
+    </type>
+    <valueDecimal value="37.38"/>
+  </input>
+  <input>
+    <type>
+      <coding>
+        <system value="https://openconceptlab.org/orgs/CIEL/sources/CIEL"/>
+        <code value="5086"/>
+        <display value="test Code"/>
+      </coding>
+    </type>
+    <valueDateTime value="2011-03-04T11:45:33+11:00"/>
+  </input>
+  <status value="accepted"/>
+  <intent value="order"/>
+  <authoredOn value="2016-10-31T08:25:05+10:00"/>
+  <lastModified value="2016-10-31T09:45:05+10:00"/>
 </Task>

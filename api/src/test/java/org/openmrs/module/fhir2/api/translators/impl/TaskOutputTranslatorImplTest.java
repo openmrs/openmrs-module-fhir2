@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -121,6 +122,18 @@ public class TaskOutputTranslatorImplTest {
 		
 		FhirTaskOutput output = taskOutputTranslator.toOpenmrsType(textOutput);
 		assertThat(output.getValueText(), equalTo(textValue));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldReturnNullIfFhirOutputHasValueTypeNotSupported() {
+		CodeableConcept outputType = innitializeFhirType();
+		
+		Task.TaskOutputComponent output = new Task.TaskOutputComponent();
+		output.setType(outputType);
+		output.setValue(new BooleanType(true));
+		
+		FhirTaskOutput openmrsOutput = taskOutputTranslator.toOpenmrsType(output);
+		assertThat(openmrsOutput, equalTo(null));
 	}
 	
 	@Test
