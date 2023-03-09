@@ -15,11 +15,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -101,14 +101,12 @@ public class TaskInputTranslatorImplTest {
 		CodeableConcept inputType = innitializeFhirType();
 		
 		Task.ParameterComponent dateInput = new Task.ParameterComponent();
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String dateString = "2014-02-11";
 		dateInput.setType(inputType);
-		dateInput.setValue(new DateTimeType().setValue(sdf.parse(dateString)));
+		dateInput.setValue(new DateTimeType().setValue(new Date()));
 		
 		FhirTaskInput input = taskInputTranslator.toOpenmrsType(dateInput);
 		assertThat(input.getType().getUuid(), equalTo(CONCEPT_UUID));
-		assertThat(sdf.format(input.getValueDatetime()), equalTo(dateString));
+		assertThat(input.getValueDatetime(), DateMatchers.sameDay(new Date()));
 	}
 	
 	@Test
@@ -163,15 +161,12 @@ public class TaskInputTranslatorImplTest {
 		
 		FhirTaskInput dateInput = new FhirTaskInput();
 		dateInput.setType(inputType);
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String dateString = "2014-02-11";
-		dateInput.setValueDatetime(sdf.parse(dateString));
+		dateInput.setValueDatetime(new Date());
 		
 		Task.ParameterComponent taskInput = taskInputTranslator.toFhirResource(dateInput);
 		assertThat(taskInput.getType().getCoding().iterator().next().getCode(), equalTo(CONCEPT_UUID));
 		assertTrue(taskInput.getValue() instanceof DateTimeType);
-		String dateResult = sdf.format(((DateTimeType) taskInput.getValue()).getValue());
-		assertThat(dateResult, equalTo(dateString));
+		assertThat(((DateTimeType) taskInput.getValue()).getValue(), DateMatchers.sameDay(new Date()));
 	}
 	
 	@Test

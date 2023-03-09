@@ -15,11 +15,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -97,18 +96,16 @@ public class TaskOutputTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateOutputDate() throws ParseException {
+	public void toOpenmrsType_shouldTranslateOutputDate() {
 		CodeableConcept outputType = innitializeFhirType();
 		
 		Task.TaskOutputComponent dateOutput = new Task.TaskOutputComponent();
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String dateString = "2014-02-11";
 		dateOutput.setType(outputType);
-		dateOutput.setValue(new DateTimeType().setValue(sdf.parse(dateString)));
+		dateOutput.setValue(new DateTimeType().setValue(new Date()));
 		
 		FhirTaskOutput output = taskOutputTranslator.toOpenmrsType(dateOutput);
 		assertThat(output.getType().getUuid(), equalTo(CONCEPT_UUID));
-		assertThat(sdf.format(output.getValueDatetime()), equalTo(dateString));
+		assertThat(output.getValueDatetime(), DateMatchers.sameDay(new Date()));
 	}
 	
 	@Test
@@ -158,20 +155,17 @@ public class TaskOutputTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateOutputDate() throws ParseException {
+	public void toFhirResource_shouldTranslateOutputDate() {
 		Concept outputType = innitializeOpenmrsType();
 		
 		FhirTaskOutput dateOutput = new FhirTaskOutput();
 		dateOutput.setType(outputType);
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String dateString = "2014-02-11";
-		dateOutput.setValueDatetime(sdf.parse(dateString));
+		dateOutput.setValueDatetime(new Date());
 		
 		Task.TaskOutputComponent taskOutput = taskOutputTranslator.toFhirResource(dateOutput);
 		assertThat(taskOutput.getType().getCoding().iterator().next().getCode(), equalTo(CONCEPT_UUID));
 		assertTrue(taskOutput.getValue() instanceof DateTimeType);
-		String dateResult = sdf.format(((DateTimeType) taskOutput.getValue()).getValue());
-		assertThat(dateResult, equalTo(dateString));
+		assertThat(((DateTimeType) taskOutput.getValue()).getValue(), DateMatchers.sameDay(new Date()));
 	}
 	
 	@Test

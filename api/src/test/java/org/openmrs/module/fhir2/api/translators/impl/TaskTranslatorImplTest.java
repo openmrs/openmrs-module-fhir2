@@ -21,12 +21,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,6 +32,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -529,7 +528,7 @@ public class TaskTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateMultipleOutputValueTypes() throws ParseException {
+	public void toFhirResource_shouldTranslateMultipleOutputValueTypes() {
 		FhirTask task = new FhirTask();
 		Concept outputType = new Concept();
 		outputType.setUuid(CONCEPT_UUID);
@@ -543,9 +542,7 @@ public class TaskTranslatorImplTest {
 		
 		FhirTaskOutput dateOutput = new FhirTaskOutput();
 		dateOutput.setType(outputType);
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String dateString = "2014-02-11";
-		dateOutput.setValueDatetime(sdf.parse(dateString));
+		dateOutput.setValueDatetime(new Date());
 		
 		FhirTaskOutput numericOutput = new FhirTaskOutput();
 		numericOutput.setType(outputType);
@@ -574,7 +571,7 @@ public class TaskTranslatorImplTest {
 		
 		Task.TaskOutputComponent dateFhirOutput = new Task.TaskOutputComponent();
 		dateFhirOutput.setType(fhirOutputType);
-		dateFhirOutput.setValue(new DateTimeType().setValue(sdf.parse(dateString)));
+		dateFhirOutput.setValue(new DateTimeType().setValue(new Date()));
 		
 		when(taskOutputTranslator.toFhirResource(dateOutput)).thenReturn(dateFhirOutput);
 		
@@ -600,8 +597,7 @@ public class TaskTranslatorImplTest {
 		assertThat(((Reference) result.getOutput().get(0).getValue()).getReference(), equalTo(DIAGNOSTIC_REPORT_UUID));
 		
 		assertTrue(result.getOutput().get(1).getValue() instanceof DateTimeType);
-		String dateResult = sdf.format(((DateTimeType) result.getOutput().get(1).getValue()).getValue());
-		assertThat(dateResult, equalTo(dateString));
+		assertThat(((DateTimeType) result.getOutput().get(1).getValue()).getValue(), DateMatchers.sameDay(new Date()));
 		
 		assertTrue(result.getOutput().get(2).getValue() instanceof DecimalType);
 		assertThat(((DecimalType) result.getOutput().get(2).getValue()).getValueAsNumber().doubleValue(),
@@ -612,7 +608,7 @@ public class TaskTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateMultipleOutputValueTypes() throws ParseException {
+	public void toOpenmrsType_shouldTranslateMultipleOutputValueTypes() {
 		Task task = new Task();
 		CodeableConcept outputType = new CodeableConcept().setText("some text");
 		
@@ -622,10 +618,8 @@ public class TaskTranslatorImplTest {
 		refOutput.setType(outputType).setValue(outputReference);
 		
 		Task.TaskOutputComponent dateOutput = new Task.TaskOutputComponent();
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String dateString = "2014-02-11";
 		dateOutput.setType(outputType);
-		dateOutput.setValue(new DateTimeType().setValue(sdf.parse(dateString)));
+		dateOutput.setValue(new DateTimeType().setValue(new Date()));
 		
 		Task.TaskOutputComponent numericOutput = new Task.TaskOutputComponent();
 		DecimalType decimal = new DecimalType();
@@ -655,24 +649,28 @@ public class TaskTranslatorImplTest {
 		openmrsOutputReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
 		openmrsOutputReference.setReference(DIAGNOSTIC_REPORT_UUID);
 		refOpenmrsOutput.setValueReference(openmrsOutputReference);
+		refOpenmrsOutput.setName("REFERENCE");
 		
 		when(taskOutputTranslator.toOpenmrsType(refOutput)).thenReturn(refOpenmrsOutput);
 		
 		FhirTaskOutput dateOpenmrsOutput = new FhirTaskOutput();
 		dateOpenmrsOutput.setType(openmrsOutputType);
-		dateOpenmrsOutput.setValueDatetime(sdf.parse(dateString));
+		dateOpenmrsOutput.setValueDatetime(new Date());
+		dateOpenmrsOutput.setName("DATE");
 		
 		when(taskOutputTranslator.toOpenmrsType(dateOutput)).thenReturn(dateOpenmrsOutput);
 		
 		FhirTaskOutput numericOpenmrsOutput = new FhirTaskOutput();
 		numericOpenmrsOutput.setType(openmrsOutputType);
 		numericOpenmrsOutput.setValueNumeric(numericValue);
+		numericOpenmrsOutput.setName("NUMERIC");
 		
 		when(taskOutputTranslator.toOpenmrsType(numericOutput)).thenReturn(numericOpenmrsOutput);
 		
 		FhirTaskOutput textOpenmrsOutput = new FhirTaskOutput();
 		textOpenmrsOutput.setType(openmrsOutputType);
-		numericOpenmrsOutput.setValueText(textValue);
+		textOpenmrsOutput.setValueText(textValue);
+		textOpenmrsOutput.setName("TEXT");
 		
 		when(taskOutputTranslator.toOpenmrsType(textOutput)).thenReturn(textOpenmrsOutput);
 		
@@ -685,17 +683,21 @@ public class TaskTranslatorImplTest {
 		assertThat(result.getOutput(), hasSize(4));
 		assertThat(result.getOutput().iterator().next().getType().getUuid(), equalTo(CONCEPT_UUID));
 		
-		for (FhirTaskOutput item : result.getOutput()) {
-			if (item.getValueReference() != null) {
-				assertThat(item.getValueReference().getReference(), equalTo(DIAGNOSTIC_REPORT_UUID));
-			} else if (item.getValueDatetime() != null) {
-				assertThat(sdf.format(item.getValueDatetime()), equalTo(dateString));
-			} else if (item.getValueNumeric() != null) {
-				assertThat(item.getValueNumeric(), equalTo(numericValue));
-			} else if (item.getValueText() != null) {
-				assertThat(item.getValueText(), equalTo(textValue));
+		List<FhirTaskOutput> outputList = new ArrayList<>(result.getOutput());
+		Collections.sort(outputList, new Comparator<FhirTaskOutput>() {
+			
+			@Override
+			public int compare(FhirTaskOutput o1, FhirTaskOutput o2) {
+				
+				return o1.getName().compareTo(o2.getName().toString());
 			}
-		}
+		});
+		
+		assertThat(outputList.get(0).getValueDatetime(), DateMatchers.sameDay(new Date()));
+		assertThat(outputList.get(1).getValueNumeric(), equalTo(numericValue));
+		assertThat(outputList.get(2).getValueReference().getReference(), equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(outputList.get(3).getValueText(), equalTo(textValue));
+		
 	}
 	
 	// Task.input
@@ -785,7 +787,7 @@ public class TaskTranslatorImplTest {
 	}
 	
 	@Test
-	public void toFhirResource_shouldTranslateMultipleInputputValueTypes() throws ParseException {
+	public void toFhirResource_shouldTranslateMultipleInputValueTypes() {
 		FhirTask task = new FhirTask();
 		Concept inputType = new Concept();
 		inputType.setUuid(CONCEPT_UUID);
@@ -799,9 +801,7 @@ public class TaskTranslatorImplTest {
 		
 		FhirTaskInput dateInput = new FhirTaskInput();
 		dateInput.setType(inputType);
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String dateString = "2014-02-11";
-		dateInput.setValueDatetime(sdf.parse(dateString));
+		dateInput.setValueDatetime(new Date());
 		
 		FhirTaskInput numericInput = new FhirTaskInput();
 		numericInput.setType(inputType);
@@ -830,7 +830,7 @@ public class TaskTranslatorImplTest {
 		
 		Task.ParameterComponent dateFhirInput = new Task.ParameterComponent();
 		dateFhirInput.setType(fhirInputType);
-		dateFhirInput.setValue(new DateTimeType().setValue(sdf.parse(dateString)));
+		dateFhirInput.setValue(new DateTimeType().setValue(new Date()));
 		
 		when(taskInputTranslator.toFhirResource(dateInput)).thenReturn(dateFhirInput);
 		
@@ -856,8 +856,7 @@ public class TaskTranslatorImplTest {
 		assertThat(((Reference) result.getInput().get(0).getValue()).getReference(), equalTo(DIAGNOSTIC_REPORT_UUID));
 		
 		assertTrue(result.getInput().get(1).getValue() instanceof DateTimeType);
-		String dateResult = sdf.format(((DateTimeType) result.getInput().get(1).getValue()).getValue());
-		assertThat(dateResult, equalTo(dateString));
+		assertThat(((DateTimeType) result.getInput().get(1).getValue()).getValue(), DateMatchers.sameDay(new Date()));
 		
 		assertTrue(result.getInput().get(2).getValue() instanceof DecimalType);
 		assertThat(((DecimalType) result.getInput().get(2).getValue()).getValueAsNumber().doubleValue(),
@@ -868,7 +867,7 @@ public class TaskTranslatorImplTest {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateMultipleInputValueTypes() throws ParseException {
+	public void toOpenmrsType_shouldTranslateMultipleInputValueTypes() {
 		Task task = new Task();
 		CodeableConcept inputType = new CodeableConcept().setText("some text");
 		
@@ -878,10 +877,8 @@ public class TaskTranslatorImplTest {
 		refInput.setType(inputType).setValue(inputReference);
 		
 		Task.ParameterComponent dateInput = new Task.ParameterComponent();
-		DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String dateString = "2014-02-11";
 		dateInput.setType(inputType);
-		dateInput.setValue(new DateTimeType().setValue(sdf.parse(dateString)));
+		dateInput.setValue(new DateTimeType().setValue(new Date()));
 		
 		Task.ParameterComponent numericInput = new Task.ParameterComponent();
 		DecimalType decimal = new DecimalType();
@@ -911,24 +908,28 @@ public class TaskTranslatorImplTest {
 		openmrsInputReference.setType(FhirConstants.DIAGNOSTIC_REPORT);
 		openmrsInputReference.setReference(DIAGNOSTIC_REPORT_UUID);
 		refOpenmrsInput.setValueReference(openmrsInputReference);
+		refOpenmrsInput.setName("REFERENCE");
 		
 		when(taskInputTranslator.toOpenmrsType(refInput)).thenReturn(refOpenmrsInput);
 		
 		FhirTaskInput dateOpenmrsInput = new FhirTaskInput();
 		dateOpenmrsInput.setType(openmrsInputType);
-		dateOpenmrsInput.setValueDatetime(sdf.parse(dateString));
+		dateOpenmrsInput.setValueDatetime(new Date());
+		dateOpenmrsInput.setName("DATE");
 		
 		when(taskInputTranslator.toOpenmrsType(dateInput)).thenReturn(dateOpenmrsInput);
 		
 		FhirTaskInput numericOpenmrsInput = new FhirTaskInput();
 		numericOpenmrsInput.setType(openmrsInputType);
 		numericOpenmrsInput.setValueNumeric(numericValue);
+		numericOpenmrsInput.setName("NUMERIC");
 		
 		when(taskInputTranslator.toOpenmrsType(numericInput)).thenReturn(numericOpenmrsInput);
 		
 		FhirTaskInput textOpenmrsInput = new FhirTaskInput();
 		textOpenmrsInput.setType(openmrsInputType);
-		numericOpenmrsInput.setValueText(textValue);
+		textOpenmrsInput.setValueText(textValue);
+		textOpenmrsInput.setName("TEXT");
 		
 		when(taskInputTranslator.toOpenmrsType(textInput)).thenReturn(textOpenmrsInput);
 		
@@ -941,17 +942,21 @@ public class TaskTranslatorImplTest {
 		assertThat(result.getInput(), hasSize(4));
 		assertThat(result.getInput().iterator().next().getType().getUuid(), equalTo(CONCEPT_UUID));
 		
-		for (FhirTaskInput item : result.getInput()) {
-			if (item.getValueReference() != null) {
-				assertThat(item.getValueReference().getReference(), equalTo(DIAGNOSTIC_REPORT_UUID));
-			} else if (item.getValueDatetime() != null) {
-				assertThat(sdf.format(item.getValueDatetime()), equalTo(dateString));
-			} else if (item.getValueNumeric() != null) {
-				assertThat(item.getValueNumeric(), equalTo(numericValue));
-			} else if (item.getValueText() != null) {
-				assertThat(item.getValueText(), equalTo(textValue));
+		List<FhirTaskInput> inputList = new ArrayList<>(result.getInput());
+		Collections.sort(inputList, new Comparator<FhirTaskInput>() {
+			
+			@Override
+			public int compare(FhirTaskInput o1, FhirTaskInput o2) {
+				
+				return o1.getName().compareTo(o2.getName().toString());
 			}
-		}
+		});
+		
+		assertThat(inputList.get(0).getValueDatetime(), DateMatchers.sameDay(new Date()));
+		assertThat(inputList.get(1).getValueNumeric(), equalTo(numericValue));
+		assertThat(inputList.get(2).getValueReference().getReference(), equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(inputList.get(3).getValueText(), equalTo(textValue));
+		
 	}
 	
 	// Task.authoredOn
