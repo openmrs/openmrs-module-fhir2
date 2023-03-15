@@ -36,9 +36,83 @@
           }
         ]
       },
+      "valueString": "Blood Pressure"
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://openconceptlab.org/orgs/CIEL/sources/CIEL",
+            "code": "5086",
+            "display": "test Code"
+          }
+        ]
+      },
+      "valueDecimal": 37.38
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://openconceptlab.org/orgs/CIEL/sources/CIEL",
+            "code": "5086",
+            "display": "test Code"
+          }
+        ]
+      },
+      "valueDateTime": "2011-03-04T11:45:33+11:00"
+    }
+  ],
+  "input": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://openconceptlab.org/orgs/CIEL/sources/CIEL",
+            "code": "5085",
+            "display": "Systolic blood pressure"
+          }
+        ]
+      },
       "valueReference": {
         "reference": "DiagnosticReport/dbbd9f60-b963-4987-9ac6-ed7d9906bd82"
       }
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://openconceptlab.org/orgs/CIEL/sources/CIEL",
+            "code": "5086",
+            "display": "test Code"
+          }
+        ]
+      },
+      "valueString": "Test code"
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://openconceptlab.org/orgs/CIEL/sources/CIEL",
+            "code": "5086",
+            "display": "test Code"
+          }
+        ]
+      },
+      "valueDecimal": 37.38
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://openconceptlab.org/orgs/CIEL/sources/CIEL",
+            "code": "5086",
+            "display": "test Code"
+          }
+        ]
+      },
+      "valueDateTime": "2011-03-04T11:45:33+11:00"
     }
   ],
   "status": "accepted",
