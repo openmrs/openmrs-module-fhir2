@@ -21,6 +21,7 @@ import java.util.Date;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
@@ -41,6 +42,7 @@ import org.openmrs.OrderFrequency;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.OrderService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
@@ -102,6 +104,8 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 	
 	private org.hl7.fhir.r4.model.MedicationDispense fhirDispense;
 	
+	private Date dateCreated;
+	
 	private MedicationDispenseTranslatorImpl_2_6 translator;
 	
 	@Before
@@ -144,8 +148,10 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 		translator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 		translator.setMedicationDispenseStatusTranslator(medicationDispenseStatusTranslator);
 		
+		dateCreated = new Date();
 		openmrsDispense = new MedicationDispense();
 		openmrsDispense.setUuid(MEDICATION_DISPENSE_UUID);
+		openmrsDispense.setDateCreated(dateCreated);
 		
 		fhirDispense = new org.hl7.fhir.r4.model.MedicationDispense();
 		fhirDispense.setId(MEDICATION_DISPENSE_UUID);
@@ -407,6 +413,14 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 		openmrsDispense.setSubstitutionReason(openmrsObject);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getSubstitution().getReasonFirstRep(), equalTo(fhirObject));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateRecordedExtension() {
+		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
+		assertThat(
+		    ((DateTimeType) dispense.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_RECORDED).getValue()).getValue(),
+		    equalTo(dateCreated));
 	}
 	
 	@Test

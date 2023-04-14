@@ -16,6 +16,8 @@ import javax.annotation.Nonnull;
 
 import lombok.AccessLevel;
 import lombok.Setter;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MedicationDispense.MedicationDispensePerformerComponent;
 import org.hl7.fhir.r4.model.MedicationDispense.MedicationDispenseSubstitutionComponent;
 import org.hl7.fhir.r4.model.MedicationRequest;
@@ -25,6 +27,7 @@ import org.openmrs.Encounter;
 import org.openmrs.MedicationDispense;
 import org.openmrs.Provider;
 import org.openmrs.annotation.OpenmrsProfile;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
@@ -82,6 +85,11 @@ public class MedicationDispenseTranslatorImpl_2_6 implements MedicationDispenseT
 		fhirObject.setType(conceptTranslator.toFhirResource(openmrsObject.getType()));
 		fhirObject.setWhenPrepared(openmrsObject.getDatePrepared());
 		fhirObject.setWhenHandedOver(openmrsObject.getDateHandedOver());
+		
+		Extension extension = new Extension();
+		extension.setUrl(FhirConstants.OPENMRS_FHIR_EXT_RECORDED);
+		extension.setValue(new DateTimeType(openmrsObject.getDateCreated()));
+		fhirObject.addExtension(extension);
 		
 		// There is significant overlap in translating between MedicationRequests and Drug Orders.
 		// Create a temp drug order and use the translated fields to set Medication, Dosing, and Quantity
