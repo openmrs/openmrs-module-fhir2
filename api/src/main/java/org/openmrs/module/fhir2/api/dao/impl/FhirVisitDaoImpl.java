@@ -64,4 +64,17 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 		// not relevant in visit context
 		return null;
 	}
+	
+	@Override
+	protected Criterion generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
+		// not relevant in visit context
+		return null;
+	}
+	
+	@Override
+	protected Criterion generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
+		// not relevant in visit context
+		return null;
+	}
+	
 }

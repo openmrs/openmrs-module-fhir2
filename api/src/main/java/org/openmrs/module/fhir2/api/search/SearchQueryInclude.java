@@ -271,7 +271,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(null, null, null, params, null, null, null, null,
-				    recursiveIncludes, recursiveRevIncludes);
+				    null, recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(null, null, null, params, null, null, null, null);
@@ -292,7 +292,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				    null);
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(null, params, null, null, null, null, null, null,
-				    recursiveIncludes, recursiveRevIncludes);
+				    null, recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.PROCEDURE_REQUEST:
 			case FhirConstants.SERVICE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(null, null, params, null, null, null, null, null);
@@ -306,7 +306,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 		switch (targetType) {
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(null, null, null, null, params, null, null, null,
-				    recursiveIncludes, recursiveRevIncludes);
+				    null, recursiveIncludes, recursiveRevIncludes);
 		}
 		
 		return null;
@@ -341,7 +341,7 @@ public class SearchQueryInclude<U extends IBaseResource> {
 				return encounterService.searchForEncounters(encounterSearchParams);
 			case FhirConstants.MEDICATION_REQUEST:
 				return medicationRequestService.searchForMedicationRequests(params, null, null, null, null, null, null, null,
-				    recursiveIncludes, recursiveRevIncludes);
+				    null, recursiveIncludes, recursiveRevIncludes);
 			case FhirConstants.SERVICE_REQUEST:
 			case FhirConstants.PROCEDURE_REQUEST:
 				return serviceRequestService.searchForServiceRequests(params, null, null, null, null, null, null, null);

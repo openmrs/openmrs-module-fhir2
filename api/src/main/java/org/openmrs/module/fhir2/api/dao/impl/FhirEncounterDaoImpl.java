@@ -110,4 +110,17 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
 		return null;
 	}
+	
+	@Override
+	protected Criterion generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
+		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
+		return null;
+	}
+	
+	@Override
+	protected Criterion generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
+		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
+		return null;
+	}
+	
 }

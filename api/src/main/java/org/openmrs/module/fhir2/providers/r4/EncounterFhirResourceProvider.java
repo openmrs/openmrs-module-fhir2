@@ -200,12 +200,15 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		}
 		
 		if (status != null && !status.isEmpty() && status.getValue().equalsIgnoreCase("active")) {
-			// encounter must have a medication request that is neither completed nor cancelled (expired is okay, since we are using another definition of expired for dispensing purposes)
+			// encounter must have a medication request that is neither completed nor cancelled nor declined (expired is okay, since we are using another definition of expired for dispensing purposes)
 			HasOrListParam notCompletedHasParam = new HasOrListParam()
-			        .add(new HasParam("MedicationRequest", "encounter", "status:not", "completed"));
+			        .add(new HasParam("MedicationRequest", "encounter", "fulfillerStatus:not", "completed"));
+			HasOrListParam notDeclinedHasParam = new HasOrListParam()
+			        .add(new HasParam("MedicationRequest", "encounter", "fulfillerStatus:not", "declined"));
 			HasOrListParam notCancelledHasParam = new HasOrListParam()
 			        .add(new HasParam("MedicationRequest", "encounter", "status:not", "cancelled"));
-			params.setHasAndListParam(new HasAndListParam().addAnd(notCancelledHasParam).addAnd(notCompletedHasParam));
+			params.setHasAndListParam(
+			    new HasAndListParam().addAnd(notCancelledHasParam).addAnd(notDeclinedHasParam).addAnd(notCompletedHasParam));
 		} else {
 			// for "all" query only restriction is that the encounter has at least one medication request
 			params.setHasAndListParam(new HasAndListParam()

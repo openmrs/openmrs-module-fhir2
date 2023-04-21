@@ -14,6 +14,7 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
+import org.openmrs.Order;
 import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.springframework.stereotype.Component;
@@ -32,5 +33,26 @@ public class FhirEncounterDaoImpl_2_2 extends FhirEncounterDaoImpl implements Fh
 		return Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
 		    Restrictions.ne(path + "fulfillerStatus", org.openmrs.Order.FulfillerStatus.COMPLETED));
 		
+	}
+	
+	@Override
+	protected Criterion generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
+		
+		if (StringUtils.isNotBlank(path)) {
+			path = path + ".";
+		}
+		
+		return Restrictions.eq(path + "fulfillerStatus", Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase()));
+	}
+	
+	@Override
+	protected Criterion generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
+		
+		if (StringUtils.isNotBlank(path)) {
+			path = path + ".";
+		}
+		
+		return Restrictions.or(Restrictions.isNull(path + "fulfillerStatus"),
+		    Restrictions.ne(path + "fulfillerStatus", Order.FulfillerStatus.valueOf(fulfillerStatus.toUpperCase())));
 	}
 }

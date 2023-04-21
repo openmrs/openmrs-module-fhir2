@@ -262,6 +262,8 @@ public class FhirConstants {
 	
 	public static final String STATUS_SEARCH_HANDLER = "status.search.handler";
 	
+	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fullfillerStatus.search.handler";
+	
 	public static final String BASED_ON_REFERENCE_SEARCH_HANDLER = "based.on.reference.search.handler";
 	
 	public static final String OWNER_REFERENCE_SEARCH_HANDLER = "owner.reference.search.handler";
@@ -277,6 +279,8 @@ public class FhirConstants {
 	public static final String LAST_UPDATED_PROPERTY = "_lastUpdated.property";
 	
 	public static final String SP_LAST_UPDATED = "_lastUpdated";
+	
+	public static final String SP_FULFILLER_STATUS = "fulfillerStatus";
 	
 	public static final String SERVLET_PATH_R4 = "/ms/fhir2Servlet";
 	

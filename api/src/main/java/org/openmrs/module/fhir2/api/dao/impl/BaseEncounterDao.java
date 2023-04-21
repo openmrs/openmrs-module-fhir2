@@ -136,6 +136,14 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 									}
 								}
 								handled = true;
+							} else if ((FhirConstants.SP_FULFILLER_STATUS).equalsIgnoreCase(paramName)) {
+								if (paramValue != null) {
+									criteria.add(generateFulfillerStatusRestriction("orders", paramValue));
+								}
+							} else if ((FhirConstants.SP_FULFILLER_STATUS + ":not").equalsIgnoreCase(paramName)) {
+								if (paramValue != null) {
+									criteria.add(generateNotFulfillerStatusRestriction("orders", paramValue));
+								}
 							}
 						}
 					}
@@ -155,5 +163,9 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	protected abstract void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam);
 	
 	protected abstract Criterion generateNotCompletedOrderQuery(String path);
+	
+	protected abstract Criterion generateFulfillerStatusRestriction(String path, String fulfillerStatus);
+	
+	protected abstract Criterion generateNotFulfillerStatusRestriction(String path, String fulfillerStatus);
 	
 }
