@@ -173,10 +173,11 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	/**
 	 * Custom search endpoint that fetches encounters that include medication requests Returns a bundle
 	 * that includes the medication requests and any medication dispenses that reference those requests
+	 * NOTE: requires Core 2.6.1 or higher (with new "declined" fulfiller status)
 	 *
 	 * @param date restrict by encounter date
 	 * @param status if set to active, when determined encounters to include, exclude encounters that
-	 *            *only* have completed or cancelled medication requests
+	 *            *only* have completed, cancelled or declined medication requests
 	 * @param patientSearchTerm restrict to encounters for patients who name or identifier matches the
 	 *            search term
 	 * @return
