@@ -21,12 +21,9 @@ import java.util.Date;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 
-@RunWith(MockitoJUnitRunner.class)
 public class MedicationRequestStatusTranslatorImpl_2_2Test {
 	
 	private static final String DRUG_ORDER_UUID = "44fdc8ad-fe4d-499b-93a8-8a991c1d477e";

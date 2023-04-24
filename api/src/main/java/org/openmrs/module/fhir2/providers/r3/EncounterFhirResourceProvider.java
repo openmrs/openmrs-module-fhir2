@@ -158,7 +158,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		        .searchForEncounters(new EncounterSearchParams(date, location, participantReference, subjectReference,
 		                encounterType, tag, hasAndListParam, id, lastUpdated, sort, includes, revIncludes)));
 	}
-
+	
 	/**
 	 * Custom search endpoint that fetches encounters that include medication requests Returns a bundle
 	 * that includes the medication requests and any medication dispenses that reference those requests
