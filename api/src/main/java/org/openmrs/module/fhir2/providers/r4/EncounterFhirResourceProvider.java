@@ -169,10 +169,11 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		
 		return encounterService.getEncounterEverything(encounterReference);
 	}
-	
+
 	/**
-	 * Custom search endpoint that fetches encounters that include medication requests Returns a bundle
-	 * that includes the medication requests and any medication dispenses that reference those requests
+	 * Custom search endpoint that fetches encounters that include medication requests.
+	 * NOTE: This query has been designed to provide the backend query functionality needed by the Dispensing
+	 * ESM, and so the exact contract on what is returned may be modified as that ESM evolves.
 	 * NOTE: requires Core 2.6.1 or higher (with new "declined" fulfiller status)
 	 *
 	 * @param date restrict by encounter date
@@ -180,7 +181,8 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	 *            *only* have completed, cancelled or declined medication requests
 	 * @param patientSearchTerm restrict to encounters for patients who name or identifier matches the
 	 *            search term
-	 * @return
+	 * @param location restrict to encounters at a certain location
+	 * @return bundle that includes the medication requests and any medication dispenses that reference those requests
 	 */
 	
 	@Search(queryName = "encountersWithMedicationRequests")
