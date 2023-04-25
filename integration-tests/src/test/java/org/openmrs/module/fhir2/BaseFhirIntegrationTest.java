@@ -146,6 +146,14 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		
 		return new FhirRequestBuilder(RequestTypeEnum.GET, "http://localhost:8080/ms/" + getServletName() + uri);
 	}
+
+	public FhirRequestBuilder patch(@Nonnull String uri) throws  MalformedURLException {
+		if (!uri.startsWith("/")) {
+			uri = "/" + uri;
+		}
+
+		return new FhirRequestBuilder(RequestTypeEnum.PATCH, "http://localhost:8080/ms/" + getServletName() + uri);
+	}
 	
 	public FhirRequestBuilder post(@Nonnull String uri) throws MalformedURLException {
 		if (!uri.startsWith("/")) {
@@ -260,12 +268,18 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 	public static class FhirMediaTypes {
 		
 		public static final MediaType JSON;
+
+		public static final MediaType JSON_PATCH;
 		
 		public static final MediaType XML;
+
+		public static final MediaType XML_PATCH;
 		
 		static {
 			JSON = MediaType.valueOf("application/fhir+json");
+			JSON_PATCH = MediaType.valueOf("application/json-patch+json");
 			XML = MediaType.valueOf("application/fhir+xml");
+			XML_PATCH = MediaType.valueOf("application/xml-patch+xml");
 		}
 		
 		private FhirMediaTypes() {
@@ -365,10 +379,22 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 			request.setContent(json.getBytes(StandardCharsets.UTF_8));
 			return this;
 		}
+
+		public FhirRequestBuilder jsonPatchContent(@Nonnull String jsonPatch) {
+			request.addHeader(CONTENT_TYPE, FhirMediaTypes.JSON_PATCH.toString());
+			request.setContent(jsonPatch.getBytes(StandardCharsets.UTF_8));
+			return this;
+		}
 		
-		public FhirRequestBuilder xmlContext(@Nonnull String xml) {
+		public FhirRequestBuilder xmlContent(@Nonnull String xml) {
 			request.addHeader(CONTENT_TYPE, FhirMediaTypes.XML.toString());
 			request.setContent(xml.getBytes(StandardCharsets.UTF_8));
+			return this;
+		}
+
+		public FhirRequestBuilder xmlPatchContent(@Nonnull String xmlPatch) {
+			request.addHeader(CONTENT_TYPE, FhirMediaTypes.XML_PATCH.toString());
+			request.setContent(xmlPatch.getBytes(StandardCharsets.UTF_8));
 			return this;
 		}
 		

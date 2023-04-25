@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Parameters xmlns="http://hl7.org/fhir">
+    <parameter>
+        <name value="operation"/>
+        <part>
+            <name value="type"/>
+            <valueCode value="add"/>
+        </part>
+        <part>
+            <name value="path"/>
+            <valueString value="Group.member.entity[1]"/>
+        </part>
+        <part>
+            <name value="name"/>
+            <valueString value="reference"/>
+        </part>
+        <part>
+            <name value="value"/>
+            <valueString id="Patient/256ccf6d-6b41-455c-9be2-51ff4386ae76"/>
+        </part>
+    </parameter>
+</Parameters>

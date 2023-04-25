@@ -291,6 +291,17 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <!-- Support for patches -->
+            <dependency>
+                <groupId>com.github.java-json-tools</groupId>
+                <artifactId>json-patch</artifactId>
+                <version>1.13</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.dnault</groupId>
+                <artifactId>xml-patch</artifactId>
+                <version>0.3.1</version>
+            </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>

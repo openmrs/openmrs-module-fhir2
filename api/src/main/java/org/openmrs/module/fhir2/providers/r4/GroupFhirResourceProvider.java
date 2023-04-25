@@ -18,11 +18,13 @@ import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -81,7 +83,7 @@ public class GroupFhirResourceProvider implements IResourceProvider {
 		
 		group.setId(id.getIdPart());
 		
-		return FhirProviderUtils.buildUpdate(groupService.update(id.getIdPart(), group));
+		return FhirProviderUtils.buildUpdate(groupService.update(id.getIdPart(), group), false);
 	}
 	
 	@Delete
@@ -89,18 +91,41 @@ public class GroupFhirResourceProvider implements IResourceProvider {
 	public OperationOutcome deleteGroup(@IdParam @Nonnull IdType id) {
 		Group group = groupService.delete(id.getIdPart());
 		if (group == null) {
-			throw new ResourceNotFoundException("Could not find group to update with id " + id.getIdPart());
+			throw new ResourceNotFoundException("Could not find Group with id " + id.getIdPart());
 		}
 		return FhirProviderUtils.buildDelete(group);
 	}
 	
-	@Operation(name = "$members", idempotent = true)
-	public IBundleProvider getGroupMembers(@IdParam @Nonnull IdType groupId) {
-		Group group = groupService.get(groupId.getIdPart());
-		if (group == null) {
-			throw new ResourceNotFoundException("Could not find group with the id " + groupId.getIdPart());
+	@Patch
+	@SuppressWarnings("unused")
+	public MethodOutcome patchGroup(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to patch");
 		}
-		return groupMemberService.getGroupMembers(groupId.getIdPart());
+		
+		if (patchType == null) {
+			throw new InvalidRequestException("could not understand which type of patch this is");
+		}
+		
+		if (body == null || body.isEmpty()) {
+			throw new InvalidRequestException("a valid patch must be provided");
+		}
+		
+		return FhirProviderUtils.buildUpdate(groupService.patch(id.getIdPart(), patchType, body), false);
+	}
+	
+	@Operation(name = "$members", idempotent = true)
+	@SuppressWarnings("unused")
+	public IBundleProvider getGroupMembers(@IdParam @Nonnull IdType id) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to patch");
+		}
+		
+		if (!groupService.has(id.getIdPart())) {
+			throw new ResourceNotFoundException("Could not find Group with id " + id.getIdPart());
+		}
+		
+		return groupMemberService.getGroupMembers(id.getIdPart());
 	}
 	
 	@Search

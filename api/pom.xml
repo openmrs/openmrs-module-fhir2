@@ -18,6 +18,14 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
 		</dependency>
 		<dependency>
@@ -29,16 +37,16 @@
 			<artifactId>hapi-fhir-converter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-server</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-client</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.fhir</groupId>
 			<artifactId>ucum</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.java-json-tools</groupId>
+			<artifactId>json-patch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.dnault</groupId>
+			<artifactId>xml-patch</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>

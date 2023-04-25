@@ -15,10 +15,12 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Group;
@@ -201,8 +203,7 @@ public class GroupTranslatorImpl_2_1Test {
 		
 		when(group.hasMember()).thenReturn(true);
 		when(group.getMember()).thenReturn(Arrays.asList(groupMemberComponent, groupMemberComponent));
-		when(groupMemberTranslator21.toOpenmrsType(groupMember)).thenReturn(cohortMembership);
-		when(componentTranslator.toOpenmrsType(groupMemberComponent)).thenReturn(groupMember);
+		when(groupMemberTranslator21.toOpenmrsType(any(), any())).thenReturn(cohortMembership);
 		
 		Cohort cohort = groupTranslator.toOpenmrsType(group);
 		assertThat(cohort, notNullValue());
@@ -259,17 +260,17 @@ public class GroupTranslatorImpl_2_1Test {
 		Cohort existingCohort = new Cohort();
 		existingCohort.setUuid(COHORT_UUID);
 		existingCohort.setVoided(false);
-		existingCohort.setMemberships(Arrays.asList(cohortMembership, cohortMembership));
 		
 		Group group = mock(Group.class);
 		when(group.hasMember()).thenReturn(true);
-		when(groupMemberTranslator21.toOpenmrsType(groupMember)).thenReturn(cohortMembership);
-		when(group.getMember()).thenReturn(Arrays.asList(component, component));
+		when(groupMemberTranslator21.toOpenmrsType(any(), any())).thenReturn(cohortMembership);
+		when(group.getMember()).thenReturn(Collections.singletonList(component));
 		when(componentTranslator.toOpenmrsType(component)).thenReturn(groupMember);
 		
-		Cohort updateCohort = groupTranslator.toOpenmrsType(existingCohort, group);
-		assertThat(updateCohort, notNullValue());
-		assertThat(updateCohort.getMemberships(), notNullValue());
-		assertThat(updateCohort.getMemberships(), hasSize(1));
+		Cohort updatedCohort = groupTranslator.toOpenmrsType(existingCohort, group);
+		
+		assertThat(updatedCohort, notNullValue());
+		assertThat(updatedCohort.getMemberships(), notNullValue());
+		assertThat(updatedCohort.getMemberships(), hasSize(1));
 	}
 }

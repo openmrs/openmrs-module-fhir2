@@ -17,7 +17,6 @@ import ca.uhn.fhir.util.ElementUtil;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Configuration;
 import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Patient;
@@ -30,23 +29,23 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Substance;
 
 @ResourceDef(name = "GroupMember", profile = "http://fhir.openmrs.org/R4/StructureDefinition/GroupMember")
-public class GroupMember extends DomainResource {
+public class GroupMember extends Resource {
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Child(name = "entity", type = { Patient.class, Practitioner.class, PractitionerRole.class, Device.class,
 	        Medication.class, Substance.class, Group.class }, order = 1, min = 1)
-	@Description(shortDefinition = "Reference to the group member", formalDefinition = "A reference to the entity that is a member of the group. Must be consistent with Group.type. If the entity is another group, then the type must be the same.")
+	@Description(shortDefinition = "Reference to the group member", value = "A reference to the entity that is a member of the group. Must be consistent with Group.type. If the entity is another group, then the type must be the same.")
 	protected Reference entity;
 	
 	protected Resource entityTarget;
 	
 	@Child(name = "period", type = { Period.class }, order = 2)
-	@Description(shortDefinition = "Period member belonged to the group", formalDefinition = "The period that the member was in the group, if known.")
+	@Description(shortDefinition = "Period member belonged to the group", value = "The period that the member was in the group, if known.")
 	protected Period period;
 	
 	@Child(name = "inactive", type = { BooleanType.class }, order = 3)
-	@Description(shortDefinition = "If member is no longer in group", formalDefinition = "A flag to indicate that the member is no longer in the group, but previously may have been a member.")
+	@Description(shortDefinition = "If member is no longer in group", value = "A flag to indicate that the member is no longer in the group, but previously may have been a member.")
 	protected BooleanType inactive;
 	
 	public GroupMember() {
@@ -152,7 +151,7 @@ public class GroupMember extends DomainResource {
 	}
 	
 	@Override
-	public DomainResource copy() {
+	public Resource copy() {
 		GroupMember groupMember = new GroupMember();
 		this.copyValues(groupMember);
 		return groupMember;

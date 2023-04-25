@@ -32,15 +32,32 @@ public class FhirProviderUtils {
 	}
 	
 	public static MethodOutcome buildCreate(IAnyResource resource) {
+		return buildCreate(resource, true);
+	}
+	
+	public static MethodOutcome buildCreate(IAnyResource resource, boolean includeResource) {
 		MethodOutcome methodOutcome = new MethodOutcome();
 		methodOutcome.setCreated(true);
-		return buildWithResource(methodOutcome, resource);
+		if (includeResource) {
+			return buildWithResource(methodOutcome, resource);
+		} else {
+			return methodOutcome;
+		}
 	}
 	
 	public static MethodOutcome buildUpdate(IAnyResource resource) {
+		return buildUpdate(resource, true);
+	}
+	
+	public static MethodOutcome buildUpdate(IAnyResource resource, boolean includeResource) {
 		MethodOutcome methodOutcome = new MethodOutcome();
 		methodOutcome.setCreated(false);
-		return buildWithResource(methodOutcome, resource);
+		if (includeResource) {
+			return buildWithResource(methodOutcome, resource);
+		} else {
+			methodOutcome.setId(resource.getIdElement());
+			return methodOutcome;
+		}
 	}
 	
 	public static org.hl7.fhir.r4.model.OperationOutcome buildDelete(org.hl7.fhir.r4.model.Resource resource) {

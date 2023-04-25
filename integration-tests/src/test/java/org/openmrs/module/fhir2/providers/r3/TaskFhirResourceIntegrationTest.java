@@ -177,7 +177,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 			xmlTask = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
-		MockHttpServletResponse response = post("/Task").accept(FhirMediaTypes.XML).xmlContext(xmlTask).go();
+		MockHttpServletResponse response = post("/Task").accept(FhirMediaTypes.XML).xmlContent(xmlTask).go();
 		
 		assertThat(response, isCreated());
 		assertThat(response.getHeader("Location"), containsString("/Task/"));
@@ -298,7 +298,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		task.setStatus(Task.TaskStatus.COMPLETED);
 		
-		response = put("/Task/" + TASK_UUID).xmlContext(toXML(task)).accept(FhirMediaTypes.XML).go();
+		response = put("/Task/" + TASK_UUID).xmlContent(toXML(task)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -330,7 +330,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		task.setId(WRONG_TASK_UUID);
 		
-		response = put("/Task/" + TASK_UUID).xmlContext(toXML(task)).accept(FhirMediaTypes.XML).go();
+		response = put("/Task/" + TASK_UUID).xmlContent(toXML(task)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -352,7 +352,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		
 		patient.setId(WRONG_TASK_UUID);
 		
-		response = put("/Task/" + WRONG_TASK_UUID).xmlContext(toXML(patient)).accept(FhirMediaTypes.XML).go();
+		response = put("/Task/" + WRONG_TASK_UUID).xmlContent(toXML(patient)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

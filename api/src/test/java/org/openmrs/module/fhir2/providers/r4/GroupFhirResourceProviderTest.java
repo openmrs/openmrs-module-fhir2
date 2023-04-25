@@ -113,9 +113,9 @@ public class GroupFhirResourceProviderTest {
 		MethodOutcome result = resourceProvider.updateGroup(new IdType().setValue(COHORT_UUID), group);
 		
 		assertThat(result, notNullValue());
-		assertThat(result.getResource(), notNullValue());
-		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(group.getId()));
-		assertThat(result.getResource().getStructureFhirVersionEnum(), equalTo(FhirVersionEnum.R4));
+		assertThat(result.getCreated(), is(false));
+		// we don't return the group on updates by default
+		assertThat(result.getResource(), nullValue());
 	}
 	
 	@Test(expected = InvalidRequestException.class)

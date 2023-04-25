@@ -187,7 +187,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		}
 		
 		// create IMMUNIZATION
-		MockHttpServletResponse response = post("/Immunization").accept(FhirMediaTypes.XML).xmlContext(xmlImmunization).go();
+		MockHttpServletResponse response = post("/Immunization").accept(FhirMediaTypes.XML).xmlContent(xmlImmunization).go();
 		
 		// verify created correctly
 		assertThat(response, isCreated());
@@ -314,7 +314,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		immunization.setExpirationDate(expirationDate);
 		
 		// send the update to the server
-		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContext(toXML(immunization)).accept(FhirMediaTypes.XML).go();
+		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContent(toXML(immunization)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -345,7 +345,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		immunization.setId(UNKNOWN_IMMUNIZATION_UUID);
 		
 		// send the update to the server
-		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContext(toXML(immunization)).accept(FhirMediaTypes.XML).go();
+		response = put("/Immunization/" + IMMUNIZATION_UUID).xmlContent(toXML(immunization)).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isBadRequest());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -367,7 +367,7 @@ public class ImmunizationFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		immunization.setId(UNKNOWN_IMMUNIZATION_UUID);
 		
 		// send the update to the server
-		response = put("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).xmlContext(toXML(immunization))
+		response = put("/Immunization/" + UNKNOWN_IMMUNIZATION_UUID).xmlContent(toXML(immunization))
 		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isNotFound());

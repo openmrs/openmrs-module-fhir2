@@ -14,20 +14,24 @@ import static org.apache.commons.lang3.Validate.notNull;
 import javax.annotation.Nonnull;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.collection.spi.PersistentCollection;
 import org.hl7.fhir.r4.model.Group;
 import org.openmrs.Cohort;
 import org.openmrs.CohortMembership;
 import org.openmrs.annotation.OpenmrsProfile;
+import org.openmrs.module.fhir2.api.dao.FhirCohortMembershipDao;
 import org.openmrs.module.fhir2.api.translators.GroupComponentTranslator;
 import org.openmrs.module.fhir2.api.translators.GroupMemberTranslator_2_1;
 import org.openmrs.module.fhir2.api.translators.GroupTranslator;
 import org.openmrs.module.fhir2.model.GroupMember;
+import org.openmrs.module.fhir2.model.IdUuidTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +40,9 @@ import org.springframework.stereotype.Component;
 @Setter(AccessLevel.MODULE)
 @OpenmrsProfile(openmrsPlatformVersion = "2.1.* - 2.*")
 public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements GroupTranslator {
+	
+	@Autowired
+	private FhirCohortMembershipDao cohortMembershipDao;
 	
 	@Autowired
 	private GroupMemberTranslator_2_1 groupMemberTranslator21;
@@ -71,18 +78,45 @@ public class GroupTranslatorImpl_2_1 extends BaseGroupTranslator implements Grou
 		Cohort finalExistingCohort = super.toOpenmrsType(existingCohort, group);
 		
 		if (group.hasMember()) {
-			Set<CohortMembership> memberships = new HashSet<>();
-			group.getMember().forEach(
-			    member -> memberships.add(this.setCohort(existingCohort, componentTranslator.toOpenmrsType(member))));
-			existingCohort.setMemberships(memberships);
+			Collection<CohortMembership> memberships = existingCohort.getMemberships();
+			if (memberships instanceof PersistentCollection || existingCohort.getId() != null) {
+				List<GroupMember> groupMembers = group.getMember().stream().map(componentTranslator::toOpenmrsType)
+				        .collect(Collectors.toList());
+				
+				List<String> groupMemberUuids = group.getMember().stream().map(componentTranslator::toOpenmrsType)
+				        .map(m -> m.getIdElement().getIdPart()).collect(Collectors.toList());
+				
+				LinkedHashMap<String, Integer> uuidToId = cohortMembershipDao.getIdsForUuids(groupMemberUuids).stream()
+				        .collect(Collectors.toMap(IdUuidTuple::getUuid, IdUuidTuple::getId, (a, b) -> {
+					        throw new IllegalStateException(String.format("Duplicate key %s", a));
+				        }, LinkedHashMap::new));
+				
+				memberships.removeIf(m -> !uuidToId.containsValue(m.getPatientId()));
+				
+				for (GroupMember member : groupMembers) {
+					if (uuidToId.containsKey(member.getIdElement().getIdPart())) {
+						Integer patientId = uuidToId.get(member.getIdElement().getIdPart());
+						CohortMembership membership = memberships.stream().filter(it -> patientId.equals(it.getPatientId()))
+						        .findFirst().orElseGet(() -> newCohortMembership(existingCohort));
+						memberships.add(groupMemberTranslator21.toOpenmrsType(membership, member));
+					} else {
+						memberships.add(groupMemberTranslator21.toOpenmrsType(newCohortMembership(existingCohort), member));
+					}
+				}
+			} else {
+				for (Group.GroupMemberComponent groupMemberComponent : group.getMember()) {
+					memberships.add(groupMemberTranslator21.toOpenmrsType(newCohortMembership(existingCohort),
+					    componentTranslator.toOpenmrsType(groupMemberComponent)));
+				}
+			}
 		}
 		
 		return finalExistingCohort;
 	}
 	
-	private CohortMembership setCohort(Cohort cohort, GroupMember groupMember) {
-		CohortMembership cohortMembership = groupMemberTranslator21.toOpenmrsType(groupMember);
-		cohortMembership.setCohort(cohort);
-		return cohortMembership;
+	private CohortMembership newCohortMembership(Cohort cohort) {
+		CohortMembership m = new CohortMembership();
+		m.setCohort(cohort);
+		return m;
 	}
 }

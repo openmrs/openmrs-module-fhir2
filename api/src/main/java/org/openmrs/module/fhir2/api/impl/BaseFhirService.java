@@ -15,12 +15,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.reflect.TypeToken;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.Auditable;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Retireable;
@@ -30,12 +33,24 @@ import org.openmrs.module.fhir2.api.FhirService;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
+import org.openmrs.module.fhir2.api.util.patch.FhirPatch;
+import org.openmrs.module.fhir2.api.util.patch.JsonPatchUtils;
+import org.openmrs.module.fhir2.api.util.patch.XmlPatchUtils;
 import org.openmrs.validator.ValidateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @SuppressWarnings("UnstableApiUsage")
 public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsObject & Auditable> implements FhirService<T> {
 	
 	protected final Class<? super T> resourceClass;
+	
+	@Autowired
+	@Qualifier("fhirR4")
+	private FhirContext fhirContext;
+	
+	@Autowired
+	private FhirPatch fhirPatch;
 	
 	protected BaseFhirService() {
 		// @formatter:off
@@ -109,19 +124,50 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 			throw resourceNotFound(uuid);
 		}
 		
-		OpenmrsFhirTranslator<U, T> translator = getTranslator();
-		
-		U updatedObject;
-		if (translator instanceof UpdatableOpenmrsTranslator) {
-			UpdatableOpenmrsTranslator<U, T> updatableOpenmrsTranslator = (UpdatableOpenmrsTranslator<U, T>) translator;
-			updatedObject = updatableOpenmrsTranslator.toOpenmrsType(existingObject, updatedResource);
-		} else {
-			updatedObject = translator.toOpenmrsType(updatedResource);
+		return applyUpdate(existingObject, updatedResource);
+	}
+	
+	@Override
+	public T patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body) {
+		if (uuid == null) {
+			throw new InvalidRequestException("id cannot be null.");
 		}
 		
-		validateObject(updatedObject);
+		U existingObject = getDao().get(uuid);
 		
-		return translator.toFhirResource(getDao().createOrUpdate(updatedObject));
+		if (existingObject == null) {
+			throw resourceNotFound(uuid);
+		}
+		
+		OpenmrsFhirTranslator<U, T> translator = getTranslator();
+		
+		T existingFhirObject = translator.toFhirResource(existingObject);
+		
+		T updatedResource;
+		IBaseResource patch;
+		switch (patchType) {
+			case JSON_PATCH:
+				updatedResource = JsonPatchUtils.apply(fhirContext, existingFhirObject, body);
+				break;
+			case XML_PATCH:
+				updatedResource = XmlPatchUtils.apply(fhirContext, existingFhirObject, body);
+				break;
+			case FHIR_PATCH_JSON:
+				patch = fhirContext.newJsonParser().parseResource(body);
+				fhirPatch.apply(existingFhirObject, patch);
+				updatedResource = existingFhirObject;
+				break;
+			case FHIR_PATCH_XML:
+				patch = fhirContext.newXmlParser().parseResource(body);
+				fhirPatch.apply(existingFhirObject, patch);
+				updatedResource = existingFhirObject;
+				break;
+			default:
+				// shouldn't be possible
+				throw new InvalidRequestException("cannot determine how to handle this patch type");
+		}
+		
+		return applyUpdate(existingObject, updatedResource);
 	}
 	
 	@Override
@@ -137,6 +183,11 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		}
 		
 		return getTranslator().toFhirResource(openmrsObj);
+	}
+	
+	@Override
+	public boolean has(@Nonnull String uuid) {
+		return getDao().get(uuid) != null;
 	}
 	
 	/**
@@ -173,6 +224,30 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	 */
 	protected boolean isRetired(U object) {
 		return object instanceof Retireable && ((Retireable) object).getRetired();
+	}
+	
+	/**
+	 * Actually performs an update. This method represents the shared code between
+	 * {@link #update(String, IAnyResource)} and {@link #patch(String, PatchTypeEnum, String)}.
+	 *
+	 * @param existingObject the existing OMRS object to update
+	 * @param updatedResource the resource to use to update
+	 * @return the updated version of the FHIR resource
+	 */
+	protected T applyUpdate(U existingObject, T updatedResource) {
+		OpenmrsFhirTranslator<U, T> translator = getTranslator();
+		
+		U updatedObject;
+		if (translator instanceof UpdatableOpenmrsTranslator) {
+			UpdatableOpenmrsTranslator<U, T> updatableOpenmrsTranslator = (UpdatableOpenmrsTranslator<U, T>) translator;
+			updatedObject = updatableOpenmrsTranslator.toOpenmrsType(existingObject, updatedResource);
+		} else {
+			updatedObject = translator.toOpenmrsType(updatedResource);
+		}
+		
+		validateObject(updatedObject);
+		
+		return translator.toFhirResource(getDao().createOrUpdate(updatedObject));
 	}
 	
 	/**

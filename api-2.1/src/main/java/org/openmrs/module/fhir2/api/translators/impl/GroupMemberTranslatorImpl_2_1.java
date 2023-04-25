@@ -13,6 +13,8 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.annotation.Nonnull;
 
+import java.util.Date;
+
 import lombok.AccessLevel;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -68,23 +70,33 @@ public class GroupMemberTranslatorImpl_2_1 implements GroupMemberTranslator_2_1 
 	}
 	
 	@Override
-	public CohortMembership toOpenmrsType(@Nonnull CohortMembership existingCohort, @Nonnull GroupMember groupMember) {
+	public CohortMembership toOpenmrsType(@Nonnull CohortMembership existingMembership, @Nonnull GroupMember groupMember) {
 		notNull(groupMember, "groupMemberReference object should not be null");
-		notNull(existingCohort, "ExistingCohort object should not be null");
+		notNull(existingMembership, "ExistingCohort object should not be null");
 		
 		if (groupMember.hasEntity()) {
-			existingCohort.setPatientId(patientReferenceTranslator.toOpenmrsType(groupMember.getEntity()).getPatientId());
+			Patient patient = patientReferenceTranslator.toOpenmrsType(groupMember.getEntity());
+			if (patient != null) {
+				existingMembership.setPatientId(patient.getPatientId());
+			}
 		}
 		
 		if (groupMember.hasPeriod()) {
-			existingCohort.setStartDate(groupMember.getPeriod().getStart());
-			existingCohort.setEndDate(groupMember.getPeriod().getEnd());
+			existingMembership.setStartDate(groupMember.getPeriod().getStart());
+			existingMembership.setEndDate(groupMember.getPeriod().getEnd());
+		} else {
+			if (existingMembership.getStartDate() == null) {
+				existingMembership.setStartDate(new Date());
+			}
 		}
 		
 		if (groupMember.hasInactive()) {
-			existingCohort.setVoided(groupMember.getInactive());
+			Date now = new Date();
+			if (existingMembership.getEndDate() == null || existingMembership.getEndDate().after(now)) {
+				existingMembership.setEndDate(now);
+			}
 		}
 		
-		return existingCohort;
+		return existingMembership;
 	}
 }

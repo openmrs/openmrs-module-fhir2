@@ -7,11 +7,22 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.fhir2.api.translators;
+package org.openmrs.module.fhir2.model;
 
-import org.hl7.fhir.r4.model.Group;
-import org.openmrs.module.fhir2.model.GroupMember;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface GroupComponentTranslator extends OpenmrsFhirTranslator<GroupMember, Group.GroupMemberComponent> {
+/**
+ * Internal DTO to store hold both an OMRS database identifier and the corresponding UUID
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class IdUuidTuple {
+	
+	private Integer id;
+	
+	private String uuid;
 	
 }

@@ -17,6 +17,7 @@ import java.util.List;
 import org.openmrs.CohortMembership;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
+import org.openmrs.module.fhir2.model.IdUuidTuple;
 import org.openmrs.util.PrivilegeConstants;
 
 public interface FhirCohortMembershipDao extends FhirDao<CohortMembership> {
@@ -44,4 +45,10 @@ public interface FhirCohortMembershipDao extends FhirDao<CohortMembership> {
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
 	List<CohortMembership> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<String> resourceUuids);
+	
+	@Authorized(PrivilegeConstants.GET_PATIENTS)
+	List<IdUuidTuple> getIdsForUuids(List<String> uuid);
+	
+	@Authorized(PrivilegeConstants.GET_PATIENTS)
+	List<IdUuidTuple> getUuidsForIds(List<Integer> ids);
 }

@@ -1,0 +1,18 @@
+[
+  {
+    "op": "add",
+    "path": "/member/0",
+    "value": [
+      {
+        "entity": {
+          "reference": "Patient/256ccf6d-6b41-455c-9be2-51ff4386ae76"
+        }
+      }
+    ]
+  },
+  {
+    "op": "replace",
+    "path": "/extension/0/valueString",
+    "value": "Patients with at least one encounter"
+  }
+]
