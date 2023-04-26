@@ -1,0 +1,54 @@
+{
+  "resourceType": "MedicationRequest",
+  "status": "stopped",
+  "intent": "order",
+  "priority": "routine",
+  "identifier": "ORD-123",
+  "medicationReference": {
+    "reference": "Medication/42f00b94-26fe-102b-80cb-0017a47871b2"
+  },
+  "subject": {
+    "reference": "Patient/86526ed5-3c11-11de-a0ba-001e3766667a"
+  },
+  "encounter": {
+    "reference": "Encounter/bb0af6222-707a-9029-9859-f15206e63ab1"
+  },
+  "authoredOn": "2016-08-19T12:20:22-04:00",
+  "requester": {
+    "reference": "Practitioner/c2299800-cca9-11e0-9572-0800200c9a66"
+  },
+  "dosageInstruction": [
+    {
+      "timing": {
+        "code": {
+          "coding": [
+            {
+              "code": "0cbe2ed3-cd5f-4f46-9459-26127c9265ab"
+            }
+          ]
+        }
+      },
+      "asNeededBoolean": false,
+      "route": {
+        "coding": [
+          {
+            "code": "e10ffe54-5184-4efe-8960-cd565ec1cdf8"
+          }
+        ]
+      },
+      "doseAndRate": [
+        {
+          "doseQuantity": {
+            "value": 5.0,
+            "code": "557b9699-68a3-11e3-bd76-0800271c1b75"
+          }
+        }
+      ]
+    }
+  ],
+  "dispenseRequest": {
+    "validityPeriod": {
+      "start": "2016-02-01T00:30:00-05:00"
+    }
+  }
+}

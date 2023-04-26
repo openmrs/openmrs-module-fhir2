@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,8 +19,11 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
+import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -39,6 +43,8 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 	private static final String WRONG_MEDICATION_REQUEST_UUID = "6d0ae116-0000-4629-9850-f15206e63ab0";
 	
 	private static final String PATIENT_UUID = "86526ed5-3c11-11de-a0ba-001e3766667a";
+	
+	private static final String JSON_CREATE_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequestWebTest_create.json";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -211,5 +217,21 @@ public class MedicationRequestFhirResourceProviderIntegrationTest extends BaseFh
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(11)));
+	}
+	
+	@Test
+	public void shouldCreateMedicationRequestFromJson() throws Exception {
+
+		String jsonMedicationRequest;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_CREATE_MEDICATION_REQUEST_PATH)) {
+			Objects.requireNonNull(is);
+			jsonMedicationRequest = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = post("/MedicationRequest").accept(FhirMediaTypes.JSON)
+		        .jsonContent(jsonMedicationRequest).go();
+		
+		assertThat(response, isCreated());
+		
 	}
 }
