@@ -8,16 +8,17 @@ import static org.openmrs.module.fhir2.FhirConstants.OPENMRS_FHIR_EXT_MEDICATION
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
-import org.openmrs.module.fhir2.providers.r4.BaseFhirR4IntegrationTest;
+import org.openmrs.module.fhir2.providers.r3.BaseFhirR3IntegrationTest;
 import org.openmrs.module.fhir2.providers.r4.MedicationRequestFhirResourceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4IntegrationTest<MedicationRequestFhirResourceProvider, MedicationRequest> {
+public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends BaseFhirR3IntegrationTest<MedicationRequestFhirResourceProvider, MedicationRequest> {
 	
 	private static final String MEDICATION_REQUEST_UUID = "6d0ae116-707a-4629-9850-f15206e63ab0";
 	
@@ -50,10 +51,17 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 		assertThat(medicationRequest, validResource());
 		
 		// confirm that the new fulfiller extension has been added
-		assertThat(medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS),
-		    notNullValue());
+		Extension extension = null;
+		for (Extension e : medicationRequest.getExtension()) {
+			if (e.getUrl().equalsIgnoreCase(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS)) {
+				extension = e;
+				break;
+			}
+		}
+
+		assertThat(extension, notNullValue());
 		assertThat(
-		    medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue().toString(),
+		    extension.getValue().toString(),
 		    is("COMPLETED"));
 		
 	}
