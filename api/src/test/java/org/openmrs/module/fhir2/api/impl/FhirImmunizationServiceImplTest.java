@@ -185,8 +185,8 @@ public class FhirImmunizationServiceImplTest extends BaseModuleContextSensitiveT
 		
 		Map<String, Obs> members = helper.getObsMembersMap(obs);
 		assertThat(members.get(CIEL_984).getValueCoded().getUuid(), is("d144d24f-6913-4b63-9660-a9108c2bebef"));
-		assertThat(members.get(CIEL_1410).getValueDatetime(),
-		    equalTo(new DateTimeType("2020-07-08T20:30:00+02:00").getValue()));
+		assertThat(new DateTimeType(members.get(CIEL_1410).getValueDatetime()).getValueAsString(),
+		    equalTo(new DateTimeType("2020-07-08T20:30:00+02:00").getValueAsString()));
 		assertThat(members.get(CIEL_1418).getValueNumeric(), equalTo(4.0));
 		assertThat(members.get(CIEL_1419).getValueText(), is("Pharma Inc."));
 		assertThat(members.get(CIEL_1420).getValueText(), is("YU765YT-1"));

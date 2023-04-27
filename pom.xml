@@ -862,7 +862,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
-        <lombokVersion>1.18.16</lombokVersion>
+        <lombokVersion>1.18.26</lombokVersion>
         <openmrsPlatformVersion>2.0.5</openmrsPlatformVersion>
         <openmrsPlatformToolsVersion>2.4.0</openmrsPlatformToolsVersion>
         <hapifhirVersion>5.4.0</hapifhirVersion>
