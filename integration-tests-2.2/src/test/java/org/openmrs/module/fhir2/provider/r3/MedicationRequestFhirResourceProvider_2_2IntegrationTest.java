@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.providers.r3.BaseFhirR3IntegrationTest;
-import org.openmrs.module.fhir2.providers.r4.MedicationRequestFhirResourceProvider;
+import org.openmrs.module.fhir2.providers.r3.MedicationRequestFhirResourceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -58,11 +58,9 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 				break;
 			}
 		}
-
+		
 		assertThat(extension, notNullValue());
-		assertThat(
-		    extension.getValue().toString(),
-		    is("COMPLETED"));
+		assertThat(extension.getValue().toString(), is("COMPLETED"));
 		
 	}
 }
