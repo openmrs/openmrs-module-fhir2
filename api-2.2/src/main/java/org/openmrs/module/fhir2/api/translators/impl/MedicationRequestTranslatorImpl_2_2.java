@@ -42,7 +42,13 @@ public class MedicationRequestTranslatorImpl_2_2 extends MedicationRequestTransl
 	
 	@Override
 	public DrugOrder toOpenmrsType(@Nonnull MedicationRequest medicationRequest) {
-		DrugOrder drugOrder = super.toOpenmrsType(medicationRequest);
+		return toOpenmrsType(new DrugOrder(), medicationRequest);
+		
+	}
+	
+	@Override
+	public DrugOrder toOpenmrsType(@Nonnull DrugOrder existingDrugOrder, @Nonnull MedicationRequest medicationRequest) {
+		DrugOrder drugOrder = super.toOpenmrsType(existingDrugOrder, medicationRequest);
 		
 		if (medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS) != null) {
 			drugOrder.setFulfillerStatus(Order.FulfillerStatus
