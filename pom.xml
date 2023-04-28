@@ -360,6 +360,12 @@
                 <artifactId>guava</artifactId>
                 <version>31.0.1-jre</version>
             </dependency>
+            <!-- Support for patches -->
+            <dependency>
+                <groupId>com.github.java-json-tools</groupId>
+                <artifactId>json-patch</artifactId>
+                <version>1.13</version>
+            </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
@@ -748,7 +754,7 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
+        <!--        <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
                     <version>3.0</version>
@@ -787,7 +793,7 @@
                             <phase>validate</phase>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin>-->
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>

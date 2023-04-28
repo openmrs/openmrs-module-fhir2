@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -31,12 +33,19 @@ import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.api.util.JsonPatchUtils;
 import org.openmrs.validator.ValidateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @SuppressWarnings("UnstableApiUsage")
 public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsObject & Auditable> implements FhirService<T> {
 	
 	protected final Class<? super T> resourceClass;
+	
+	@Autowired
+	@Qualifier("fhirR4")
+	private FhirContext fhirContext;
 	
 	protected BaseFhirService() {
 		// @formatter:off
@@ -113,19 +122,34 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 			throw resourceNotFound(uuid);
 		}
 		
-		OpenmrsFhirTranslator<U, T> translator = getTranslator();
-		
-		U updatedObject;
-		if (translator instanceof UpdatableOpenmrsTranslator) {
-			UpdatableOpenmrsTranslator<U, T> updatableOpenmrsTranslator = (UpdatableOpenmrsTranslator<U, T>) translator;
-			updatedObject = updatableOpenmrsTranslator.toOpenmrsType(existingObject, updatedResource);
-		} else {
-			updatedObject = translator.toOpenmrsType(updatedResource);
+		return applyUpdate(existingObject, updatedResource);
+	}
+	
+	@Override
+	public T patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body) {
+		if (uuid == null) {
+			throw new InvalidRequestException("id cannot be null");
 		}
 		
-		validateObject(updatedObject);
+		U existingObject = getDao().get(uuid);
 		
-		return translator.toFhirResource(getDao().createOrUpdate(updatedObject));
+		if (existingObject == null) {
+			throw resourceNotFound(uuid);
+		}
+		
+		OpenmrsFhirTranslator<U, T> translator = getTranslator();
+		
+		T existingFhirObject = translator.toFhirResource(existingObject);
+		T updatedFhirObject;
+		
+		switch (patchType) {
+			case JSON_PATCH:
+				updatedFhirObject = JsonPatchUtils.apply(fhirContext, existingFhirObject, body);
+				break;
+			default:
+				throw new InvalidRequestException("only JSON patches currently supported");
+		}
+		return applyUpdate(existingObject, updatedFhirObject);
 	}
 	
 	@Override
@@ -139,6 +163,23 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		if (openmrsObj == null) {
 			throw resourceNotFound(uuid);
 		}
+	}
+	
+	protected T applyUpdate(U existingObject, T updatedResource) {
+		OpenmrsFhirTranslator<U, T> translator = getTranslator();
+		
+		U updatedObject;
+		if (translator instanceof UpdatableOpenmrsTranslator) {
+			UpdatableOpenmrsTranslator<U, T> updatableOpenmrsTranslator = (UpdatableOpenmrsTranslator<U, T>) translator;
+			updatedObject = updatableOpenmrsTranslator.toOpenmrsType(existingObject, updatedResource);
+		} else {
+			updatedObject = translator.toOpenmrsType(updatedResource);
+		}
+		
+		validateObject(updatedObject);
+		
+		return translator.toFhirResource(getDao().createOrUpdate(updatedObject));
+		
 	}
 	
 	/**

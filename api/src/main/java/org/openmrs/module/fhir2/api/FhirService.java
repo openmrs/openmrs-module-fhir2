@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface FhirService<T extends IAnyResource> {
@@ -25,6 +26,8 @@ public interface FhirService<T extends IAnyResource> {
 	T create(@Nonnull T newResource);
 	
 	T update(@Nonnull String uuid, @Nonnull T updatedResource);
+	
+	T patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body);
 	
 	void delete(@Nonnull String uuid);
 }
