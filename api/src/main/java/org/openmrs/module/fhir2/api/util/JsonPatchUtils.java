@@ -41,8 +41,9 @@ public class JsonPatchUtils {
 		
 		try {
 			JsonNode jsonPatchNode = mapper.readTree(factory.createParser(thePatchBody));
-			JsonNode originalJsonDocument = mapper.readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
-
+			JsonNode originalJsonDocument = mapper
+			        .readTree(theCtx.newJsonParser().encodeResourceToString(theResourceToUpdate));
+			
 			// https://github.com/java-json-tools/json-patch
 			patch = JsonMergePatch.fromJson(jsonPatchNode);
 			JsonNode after = patch.apply(originalJsonDocument);

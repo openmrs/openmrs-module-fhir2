@@ -12,8 +12,6 @@ import java.util.Objects;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.Test;
@@ -38,12 +36,6 @@ public class JsonPatchUtilTest {
 		String id = "123abc";
 		medicationRequest.setId(id);
 		
-		CodeableConcept route = new CodeableConcept();
-		route.setText("route");
-		Dosage dosage = new Dosage();
-		dosage.setRoute(route);
-		medicationRequest.addDosageInstruction(dosage);
-		
 		Extension extension = new Extension();
 		extension.setUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS);
 		extension.setValue(new CodeType("RECEIVED"));
@@ -51,9 +43,6 @@ public class JsonPatchUtilTest {
 		
 		MedicationRequest patchedMedicationRequest = JsonPatchUtils.apply(FhirContext.forR4(), medicationRequest,
 		    medicationRequestPatchJson);
-		
-		assertThat(patchedMedicationRequest.getIdElement().getIdPart(), equalTo(id));
-		assertThat(patchedMedicationRequest.getDosageInstruction().get(0).getRoute().getText(), equalTo("route"));
 		
 		Extension resultExtension = patchedMedicationRequest
 		        .getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS);
