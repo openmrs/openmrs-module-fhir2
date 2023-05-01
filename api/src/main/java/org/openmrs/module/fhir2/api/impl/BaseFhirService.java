@@ -144,6 +144,8 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		
 		switch (patchType) {
 			case JSON_PATCH:
+				// note that we are actually doing a JSON Merge Patch, not a JSON Patch, but FHIR doesn't seem to support this type
+				// see https://erosb.github.io/post/json-patch-vs-merge-patch/ for an example of the difference
 				updatedFhirObject = JsonPatchUtils.apply(fhirContext, existingFhirObject, body);
 				break;
 			default:
