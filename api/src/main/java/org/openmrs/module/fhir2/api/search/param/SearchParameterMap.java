@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 @NoArgsConstructor
@@ -33,6 +34,14 @@ public class SearchParameterMap implements Serializable {
 	
 	@Getter
 	private SortSpec sortSpec;
+	
+	@Getter
+	@Setter
+	private int fromIndex = 0;
+	
+	@Getter
+	@Setter
+	private int toIndex = Integer.MAX_VALUE;
 	
 	private final Map<String, List<PropParam<?>>> params = new LinkedCaseInsensitiveMap<>();
 	

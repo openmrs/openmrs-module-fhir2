@@ -31,6 +31,11 @@ import org.springframework.stereotype.Component;
 public class FhirPractitionerDaoImpl extends BasePractitionerDao<Provider> implements FhirPractitionerDao {
 	
 	@Override
+	public boolean hasDistinctResults() {
+		return false;
+	}
+	
+	@Override
 	protected void handleIdentifier(Criteria criteria, TokenAndListParam identifier) {
 		handleAndListParam(identifier, param -> Optional.of(eq("identifier", param.getValue()))).ifPresent(criteria::add);
 	}

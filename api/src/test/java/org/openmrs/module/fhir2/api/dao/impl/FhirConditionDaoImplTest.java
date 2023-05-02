@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.openmrs.test.OpenmrsMatchers.hasId;
 
 import java.util.Collection;
 import java.util.Date;
@@ -94,8 +95,8 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
-		assertThat(matchingResourceIds, hasSize(2));
+		List<Obs> matchingResources = dao.getSearchResults(theParams);
+		assertThat(matchingResources, hasSize(2));
 	}
 	
 	@Test
@@ -108,8 +109,8 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
-		assertThat(matchingResourceIds, hasSize(0));
+		List<Obs> matchingResources = dao.getSearchResults(theParams);
+		assertThat(matchingResources, hasSize(0));
 	}
 	
 	@Test
@@ -122,8 +123,8 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
-		assertThat(matchingResourceIds, not(hasItem(VOIDED_OBS_CONDITION_ID)));
+		List<Obs> matchingResources = dao.getSearchResults(theParams);
+		assertThat(matchingResources, not(hasItem(hasId(VOIDED_OBS_CONDITION_ID))));
 	}
 	
 	@Test
@@ -136,8 +137,7 @@ public class FhirConditionDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
-		Collection<Obs> obs = dao.getSearchResults(theParams, matchingResourceIds);
+		Collection<Obs> obs = dao.getSearchResults(theParams);
 		assertThat(obs, notNullValue());
 		assertThat(obs, hasSize(2));
 	}

@@ -38,9 +38,5 @@ public interface FhirPractitionerDao extends FhirDao<Provider> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PROVIDERS)
-	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PROVIDERS)
-	List<Provider> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
+	List<Provider> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

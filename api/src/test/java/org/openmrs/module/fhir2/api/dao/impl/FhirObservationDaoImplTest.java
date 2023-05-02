@@ -15,7 +15,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 import java.util.Collection;
-import java.util.List;
 
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -74,8 +73,7 @@ public class FhirObservationDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
-		Collection<Obs> obs = dao.getSearchResults(theParams, matchingResourceIds);
+		Collection<Obs> obs = dao.getSearchResults(theParams);
 		
 		assertThat(obs, notNullValue());
 	}

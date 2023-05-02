@@ -34,9 +34,5 @@ public interface FhirObservationDao extends FhirDao<Obs> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_OBS)
-	List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
+	List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

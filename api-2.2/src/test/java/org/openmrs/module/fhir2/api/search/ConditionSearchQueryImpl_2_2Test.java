@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
@@ -24,12 +25,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
+import static org.openmrs.test.OpenmrsMatchers.hasId;
+import static org.openmrs.test.OpenmrsMatchers.hasUuid;
 
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -337,8 +339,8 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
-		assertThat(resultSet, hasSize(2)); // 6 with repetitions
+		List<Condition> resultSet = dao.getSearchResults(theParams);
+		assertThat(resultSet, containsInAnyOrder(hasUuid("2cc6880e-2c46-15e4-9038-a6c5e4d22fb7"), hasId(2))); // 6 with repetitions
 	}
 	
 	@Test
@@ -444,8 +446,9 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
-		assertThat(resultSet, hasSize(2)); // 9 with repetitions
+		List<Condition> resultSet = dao.getSearchResults(theParams);
+		assertThat(resultSet, containsInAnyOrder(hasUuid("2cc6880e-2c46-15e4-9038-a6c5e4d22fb7"),
+		    hasUuid("2cc6880e-2c46-11e4-9138-a6c5e4d20fb7"))); // 9 with repetitions
 	}
 	
 	@Test
@@ -534,8 +537,9 @@ public class ConditionSearchQueryImpl_2_2Test extends BaseModuleContextSensitive
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		List<Integer> resultSet = dao.getSearchResultIds(theParams);
-		assertThat(resultSet, hasSize(2));
+		List<Condition> resultSet = dao.getSearchResults(theParams);
+		assertThat(resultSet, containsInAnyOrder(hasUuid("2cc6880e-2c46-15e4-9038-a6c5e4d22fb7"),
+		    hasUuid("2cc6880e-2c46-11e4-9138-a6c5e4d20fb7")));
 	}
 	
 	@Test

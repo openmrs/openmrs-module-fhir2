@@ -42,6 +42,11 @@ import org.springframework.stereotype.Component;
 public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements FhirEncounterDao {
 	
 	@Override
+	public boolean hasDistinctResults() {
+		return false;
+	}
+	
+	@Override
 	public List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
 			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(Encounter.class);

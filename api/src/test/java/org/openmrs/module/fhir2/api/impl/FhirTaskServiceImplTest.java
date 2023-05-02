@@ -208,8 +208,7 @@ public class FhirTaskServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(TASK_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(openmrsTasks);
+		when(dao.getSearchResults(any())).thenReturn(openmrsTasks);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, fhirGlobalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

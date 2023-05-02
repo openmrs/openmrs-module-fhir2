@@ -233,8 +233,7 @@ public class FhirMedicationDispenseServiceImpl_2_6Test {
 		        .addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, medicationRequestParam)
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes).setSortSpec(sortParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(MEDICATION_DISPENSE_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(openmrsDispense));
+		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(openmrsDispense));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

@@ -10,12 +10,12 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.openmrs.test.OpenmrsMatchers.hasId;
 
 import java.util.List;
 
@@ -126,10 +126,8 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.PATIENT_REFERENCE_SEARCH_HANDLER, patientAndParam);
 		
-		List<Integer> results = dao.getSearchResultIds(theParams);
-		assertThat(results, hasSize(2));
-		assertThat(results, hasItem(10));
-		assertThat(results, hasItem(11));
+		List<MedicationDispense> results = dao.getSearchResults(theParams);
+		assertThat(results, containsInAnyOrder(hasId(10), hasId(11)));
 	}
 	
 	@Test
@@ -140,9 +138,8 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, param);
 		
-		List<Integer> results = dao.getSearchResultIds(theParams);
-		assertThat(results, hasSize(1));
-		assertThat(results, hasItem(10));
+		List<MedicationDispense> results = dao.getSearchResults(theParams);
+		assertThat(results, containsInAnyOrder(hasId(10)));
 	}
 	
 	@Test
@@ -153,9 +150,8 @@ public class FhirMedicationDispenseDaoImpl_2_6Test extends BaseModuleContextSens
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.MEDICATION_REQUEST_REFERENCE_SEARCH_HANDLER, param);
 		
-		List<Integer> results = dao.getSearchResultIds(theParams);
-		assertThat(results, hasSize(1));
-		assertThat(results, hasItem(1));
+		List<MedicationDispense> results = dao.getSearchResults(theParams);
+		assertThat(results, containsInAnyOrder(hasId(1)));
 	}
 	
 	@Test

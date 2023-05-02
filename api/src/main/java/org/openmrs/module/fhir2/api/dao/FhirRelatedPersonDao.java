@@ -35,9 +35,5 @@ public interface FhirRelatedPersonDao extends FhirDao<Relationship> {
 	
 	@Override
 	@Authorized({ PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS })
-	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized({ PrivilegeConstants.GET_PERSONS, PrivilegeConstants.GET_RELATIONSHIPS })
-	List<Relationship> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
+	List<Relationship> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

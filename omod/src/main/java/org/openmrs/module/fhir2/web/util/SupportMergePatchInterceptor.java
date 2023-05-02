@@ -1,6 +1,14 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.fhir2.web.util;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -66,11 +74,11 @@ public class SupportMergePatchInterceptor {
 		if (requestDetails.getRequestType() == RequestTypeEnum.PATCH && requestDetails instanceof ServletRequestDetails) {
 			Object originalServletRequest = requestDetails.getAttribute(OPENMRS_REQUEST_HOLD);
 			if (originalServletRequest instanceof HttpServletRequest) {
-				((ServletRequestDetails)requestDetails).setServletRequest((HttpServletRequest) originalServletRequest);
+				((ServletRequestDetails) requestDetails).setServletRequest((HttpServletRequest) originalServletRequest);
 			}
 		}
 		
 		requestDetails.setAttribute(OPENMRS_REQUEST_HOLD, null);
 	}
-
+	
 }

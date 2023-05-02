@@ -14,7 +14,6 @@ import javax.annotation.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -54,11 +53,9 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	
 	private final FhirGlobalPropertyService globalPropertyService;
 	
-	private transient Integer count;
-	
 	private transient Integer pageSize;
 	
-	private transient List<Integer> matchingResources;
+	private transient Integer size;
 	
 	private final SearchQueryInclude<U> searchQueryInclude;
 	
@@ -78,35 +75,11 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	@Override
 	@Nonnull
 	public List<IBaseResource> getResources(int fromIndex, int toIndex) {
-		if (matchingResources == null) {
-			matchingResources = dao.getSearchResultIds(searchParameterMap);
-		}
+		searchParameterMap.setFromIndex(fromIndex);
+		searchParameterMap.setToIndex(toIndex);
 		
-		if (matchingResources.isEmpty()) {
-			return Collections.emptyList();
-		}
-		
-		int firstResult = 0;
-		if (fromIndex >= 0) {
-			firstResult = fromIndex;
-		}
-		
-		Integer size = size();
-		if (size != null && firstResult > size) {
-			return Collections.emptyList();
-		}
-		
-		// NPE-safe unboxing
-		int lastResult = Integer.MAX_VALUE;
-		lastResult = size == null ? lastResult : size;
-		
-		if (toIndex - firstResult > 0) {
-			lastResult = Math.min(lastResult, toIndex);
-		}
-		
-		List<U> returnedResourceList = dao
-		        .getSearchResults(searchParameterMap, matchingResources.subList(firstResult, lastResult)).stream()
-		        .map(translator::toFhirResource).filter(Objects::nonNull).collect(Collectors.toList());
+		List<U> returnedResourceList = dao.getSearchResults(searchParameterMap).stream().map(translator::toFhirResource)
+		        .filter(Objects::nonNull).collect(Collectors.toList());
 		
 		Set<IBaseResource> includedResources = searchQueryInclude.getIncludedResources(returnedResourceList,
 		    this.searchParameterMap);
@@ -129,14 +102,9 @@ public class SearchQueryBundleProvider<T extends OpenmrsObject & Auditable, U ex
 	@Override
 	@Nullable
 	public Integer size() {
-		if (matchingResources == null) {
-			matchingResources = dao.getSearchResultIds(searchParameterMap);
+		if (size == null) {
+			size = dao.getSearchResultsCount(searchParameterMap);
 		}
-		
-		if (count == null) {
-			count = matchingResources.size();
-		}
-		
-		return count;
+		return size;
 	}
 }

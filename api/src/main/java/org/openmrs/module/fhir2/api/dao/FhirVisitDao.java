@@ -26,9 +26,5 @@ public interface FhirVisitDao extends FhirDao<Visit> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_VISITS)
-	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_VISITS)
-	List<Visit> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
+	List<Visit> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

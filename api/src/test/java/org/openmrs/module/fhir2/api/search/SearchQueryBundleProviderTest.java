@@ -19,7 +19,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -79,15 +78,8 @@ public class SearchQueryBundleProviderTest {
 	
 	@Test
 	public void shouldReturnEmptyListWhenNoResults() {
-		when(observationDao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
+		when(observationDao.getSearchResults(any())).thenReturn(Collections.emptyList());
 		List<IBaseResource> resources = searchQueryBundleProvider.getResources(0, 10);
-		assertThat(resources, empty());
-	}
-	
-	@Test
-	public void shouldReturnEmptyListWhenRequestingTooManyResults() {
-		when(observationDao.getSearchResultIds(any())).thenReturn(Arrays.asList(1, 2));
-		List<IBaseResource> resources = searchQueryBundleProvider.getResources(3, 13);
 		assertThat(resources, empty());
 	}
 	
