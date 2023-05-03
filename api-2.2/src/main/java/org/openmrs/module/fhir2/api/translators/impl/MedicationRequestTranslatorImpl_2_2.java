@@ -51,9 +51,14 @@ public class MedicationRequestTranslatorImpl_2_2 extends MedicationRequestTransl
 		DrugOrder drugOrder = super.toOpenmrsType(existingDrugOrder, medicationRequest);
 		
 		if (medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS) != null) {
-			drugOrder.setFulfillerStatus(Order.FulfillerStatus
-			        .valueOf(medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS)
-			                .getValue().toString().toUpperCase()));
+			if (!medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue()
+			        .isEmpty()) {
+				drugOrder.setFulfillerStatus(Order.FulfillerStatus
+				        .valueOf(medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS)
+				                .getValue().toString().toUpperCase()));
+			} else {
+				drugOrder.setFulfillerStatus(null);
+			}
 		}
 		
 		return drugOrder;

@@ -115,4 +115,20 @@ public class MedicationRequestTranslatorImpl_2_2Test {
 		assertThat(drugOrder.getFulfillerStatus(), equalTo(Order.FulfillerStatus.COMPLETED));
 		
 	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateNullFulfillerStatusExtension() {
+		MedicationRequest medicationRequest = new MedicationRequest();
+		
+		Extension extension = new Extension();
+		extension.setUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS);
+		extension.setValue(new CodeType(null));
+		
+		medicationRequest.addExtension(extension);
+		
+		DrugOrder drugOrder = medicationRequestTranslator.toOpenmrsType(medicationRequest);
+		assertThat(drugOrder, notNullValue());
+		assertThat(drugOrder.getFulfillerStatus(), equalTo(null));
+		
+	}
 }
