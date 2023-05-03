@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.openmrs.Encounter;
 import org.openmrs.annotation.OpenmrsProfile;
@@ -103,11 +102,5 @@ public class FhirEncounterDaoImpl extends BaseEncounterDao<Encounter> implements
 			default:
 				return null;
 		}
-	}
-	
-	@Override
-	protected Criterion generateNotCompletedOrderQuery(String path) {
-		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
-		return null;
 	}
 }

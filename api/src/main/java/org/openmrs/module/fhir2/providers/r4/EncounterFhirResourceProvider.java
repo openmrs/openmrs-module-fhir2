@@ -171,15 +171,19 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	}
 	
 	/**
-	 * Custom search endpoint that fetches encounters that include medication requests Returns a bundle
-	 * that includes the medication requests and any medication dispenses that reference those requests
+	 * Custom search endpoint that fetches encounters that include medication requests. NOTE: This query
+	 * has been designed to provide the backend query functionality needed by the Dispensing ESM, and so
+	 * the exact contract on what is returned may be modified as that ESM evolves. NOTE: requires Core
+	 * 2.6.1 or higher (with new "declined" fulfiller status)
 	 *
 	 * @param date restrict by encounter date
 	 * @param status if set to active, when determined encounters to include, exclude encounters that
-	 *            *only* have completed or cancelled medication requests
+	 *            *only* have completed, cancelled or declined medication requests
 	 * @param patientSearchTerm restrict to encounters for patients who name or identifier matches the
 	 *            search term
-	 * @return
+	 * @param location restrict to encounters at a certain location
+	 * @return bundle that includes the medication requests and any medication dispenses that reference
+	 *         those requests
 	 */
 	
 	@Search(queryName = "encountersWithMedicationRequests")
@@ -200,12 +204,15 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 		}
 		
 		if (status != null && !status.isEmpty() && status.getValue().equalsIgnoreCase("active")) {
-			// encounter must have a medication request that is neither completed nor cancelled (expired is okay, since we are using another definition of expired for dispensing purposes)
+			// encounter must have a medication request that is neither completed nor cancelled nor declined (expired is okay, since we are using another definition of expired for dispensing purposes)
 			HasOrListParam notCompletedHasParam = new HasOrListParam()
-			        .add(new HasParam("MedicationRequest", "encounter", "status:not", "completed"));
+			        .add(new HasParam("MedicationRequest", "encounter", "fulfillerStatus:not", "completed"));
+			HasOrListParam notDeclinedHasParam = new HasOrListParam()
+			        .add(new HasParam("MedicationRequest", "encounter", "fulfillerStatus:not", "declined"));
 			HasOrListParam notCancelledHasParam = new HasOrListParam()
 			        .add(new HasParam("MedicationRequest", "encounter", "status:not", "cancelled"));
-			params.setHasAndListParam(new HasAndListParam().addAnd(notCancelledHasParam).addAnd(notCompletedHasParam));
+			params.setHasAndListParam(
+			    new HasAndListParam().addAnd(notCancelledHasParam).addAnd(notDeclinedHasParam).addAnd(notCompletedHasParam));
 		} else {
 			// for "all" query only restriction is that the encounter has at least one medication request
 			params.setHasAndListParam(new HasAndListParam()

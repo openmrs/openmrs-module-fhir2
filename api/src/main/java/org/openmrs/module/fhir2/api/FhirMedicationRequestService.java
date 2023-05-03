@@ -28,5 +28,6 @@ public interface FhirMedicationRequestService extends FhirService<MedicationRequ
 	IBundleProvider searchForMedicationRequests(ReferenceAndListParam patientReference,
 	        ReferenceAndListParam encounterReference, TokenAndListParam code, ReferenceAndListParam participantReference,
 	        ReferenceAndListParam medicationReference, TokenAndListParam id, TokenAndListParam status,
-	        DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes);
+	        TokenAndListParam fulfillerStatus, DateRangeParam lastUpdated, HashSet<Include> includes,
+	        HashSet<Include> revIncludes);
 }

@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationRequestService;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
@@ -113,6 +114,7 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	                "" }, targetTypes = Medication.class) ReferenceAndListParam medicationReference,
 	        @OptionalParam(name = MedicationRequest.SP_RES_ID) TokenAndListParam id,
 	        @OptionalParam(name = MedicationRequest.SP_STATUS) TokenAndListParam status,
+	        @OptionalParam(name = FhirConstants.SP_FULFILLER_STATUS) TokenAndListParam fulfillerStatus,
 	        @OptionalParam(name = "_lastUpdated") DateRangeParam lastUpdated,
 	        @IncludeParam(allow = { "MedicationRequest:" + MedicationRequest.SP_MEDICATION,
 	                "MedicationRequest:" + MedicationRequest.SP_REQUESTER,
@@ -133,6 +135,6 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		}
 		
 		return fhirMedicationRequestService.searchForMedicationRequests(patientReference, encounterReference, code,
-		    participantReference, medicationReference, id, status, lastUpdated, includes, revIncludes);
+		    participantReference, medicationReference, id, status, fulfillerStatus, lastUpdated, includes, revIncludes);
 	}
 }

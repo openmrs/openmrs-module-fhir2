@@ -136,6 +136,14 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 									}
 								}
 								handled = true;
+							} else if ((FhirConstants.SP_FULFILLER_STATUS).equalsIgnoreCase(paramName)) {
+								if (paramValue != null) {
+									criteria.add(generateFulfillerStatusRestriction("orders", paramValue));
+								}
+							} else if ((FhirConstants.SP_FULFILLER_STATUS + ":not").equalsIgnoreCase(paramName)) {
+								if (paramValue != null) {
+									criteria.add(generateNotFulfillerStatusRestriction("orders", paramValue));
+								}
 							}
 						}
 					}
@@ -154,6 +162,19 @@ public abstract class BaseEncounterDao<T extends OpenmrsObject & Auditable> exte
 	
 	protected abstract void handleParticipant(Criteria criteria, ReferenceAndListParam referenceAndListParam);
 	
-	protected abstract Criterion generateNotCompletedOrderQuery(String path);
+	protected Criterion generateNotCompletedOrderQuery(String path) {
+		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
+		return null;
+	}
+	
+	protected Criterion generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
+		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
+		return null;
+	}
+	
+	protected Criterion generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
+		// not implemented in Core until 2.2; see override in FhirEncounterDaoImpl_2_2
+		return null;
+	}
 	
 }

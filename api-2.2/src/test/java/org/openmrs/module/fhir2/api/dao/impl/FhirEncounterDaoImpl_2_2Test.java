@@ -127,10 +127,75 @@ public class FhirEncounterDaoImpl_2_2Test extends BaseModuleContextSensitiveTest
 		    hasItem(equalTo(ENCOUNTER_WITH_ONLY_CANCELlED_DRUG_ORDER)));
 		assertThat("Encounter with only expired Drug Orders is returned", matchingResourceIds,
 		    hasItem(equalTo(ENCOUNTER_WITH_ONLY_EXPIRED_DRUG_ORDER)));
-		assertThat("Encounter with only completed Drug Orders is returned", matchingResourceIds,
+		assertThat("Encounter with only completed Drug Orders not is returned", matchingResourceIds,
 		    not(hasItem(equalTo(ENCOUNTER_WITH_ONLY_COMPLETED_DRUG_ORDER))));
 		assertThat("Encounter without Drug Orders is not returned", matchingResourceIds,
 		    not(hasItem(equalTo(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
 	}
 	
+	@Test
+	public void shouldExcludedEncountersWithMedicationRequestsWithOnlyFulfillerStatusCompletedWhenReturnEncountersThatHaveAssociatedMedicationRequests() {
+		Encounter withNoDrugOrders = dao.get(ENCOUNTER_WITH_NO_DRUG_ORDERS);
+		assertThat(withNoDrugOrders, notNullValue());
+		assertThat("Orders is empty", withNoDrugOrders.getOrders().isEmpty());
+		
+		Encounter withDrugOrders = dao.get(ENCOUNTER_WITH_DRUG_ORDERS);
+		assertThat(withDrugOrders, notNullValue());
+		assertThat("Orders is not empty", !withDrugOrders.getOrders().isEmpty());
+		for (Order order : withDrugOrders.getOrders()) {
+			assertThat(order.getClass(), equalTo(DrugOrder.class));
+		}
+		
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "fulfillerStatus:not", "completed"));
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		assertThat("Encounter with Drug Orders is returned", matchingResourceIds,
+		    hasItem(equalTo(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
+		assertThat("Encounter with only cancelled Drug Orders is returned", matchingResourceIds,
+		    hasItem(equalTo(ENCOUNTER_WITH_ONLY_CANCELlED_DRUG_ORDER)));
+		assertThat("Encounter with only expired Drug Orders is returned", matchingResourceIds,
+		    hasItem(equalTo(ENCOUNTER_WITH_ONLY_EXPIRED_DRUG_ORDER)));
+		assertThat("Encounter with only completed Drug Orders not is returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_ONLY_COMPLETED_DRUG_ORDER))));
+		assertThat("Encounter without Drug Orders is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
+	}
+	
+	@Test
+	public void shouldOnlyIncludeEncountersWithMedicationRequestsWithFulfillerStatusCompletedWhenReturnEncountersThatHaveAssociatedMedicationRequests() {
+		Encounter withNoDrugOrders = dao.get(ENCOUNTER_WITH_NO_DRUG_ORDERS);
+		assertThat(withNoDrugOrders, notNullValue());
+		assertThat("Orders is empty", withNoDrugOrders.getOrders().isEmpty());
+		
+		Encounter withDrugOrders = dao.get(ENCOUNTER_WITH_DRUG_ORDERS);
+		assertThat(withDrugOrders, notNullValue());
+		assertThat("Orders is not empty", !withDrugOrders.getOrders().isEmpty());
+		for (Order order : withDrugOrders.getOrders()) {
+			assertThat(order.getClass(), equalTo(DrugOrder.class));
+		}
+		
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "fulfillerStatus", "completed"));
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
+		assertThat("Encounter with Drug Orders is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_DRUG_ORDERS_ID))));
+		assertThat("Encounter with only cancelled Drug Orders is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_ONLY_CANCELlED_DRUG_ORDER))));
+		assertThat("Encounter with only expired Drug Orders is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_ONLY_EXPIRED_DRUG_ORDER))));
+		assertThat("Encounter with only completed Drug Orders is returned", matchingResourceIds,
+		    hasItem(equalTo(ENCOUNTER_WITH_ONLY_COMPLETED_DRUG_ORDER)));
+		assertThat("Encounter without Drug Orders is not returned", matchingResourceIds,
+		    not(hasItem(equalTo(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
+	}
 }

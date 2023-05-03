@@ -23,9 +23,10 @@ import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
-import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
+import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirMedicationRequestDao;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
+@OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
 public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> implements FhirMedicationRequestDao {
 	
 	@Override
@@ -110,7 +112,7 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 			if (token.getValue() != null) {
 				try {
 					// currently only handles "ACTIVE"
-					if (Medication.MedicationStatus.ACTIVE.toString().equals(token.getValue().toUpperCase())) {
+					if (MedicationRequest.MedicationRequestStatus.ACTIVE.toString().equals(token.getValue().toUpperCase())) {
 						return Optional.of(generateActiveOrderQuery());
 					}
 				}
