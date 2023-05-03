@@ -73,7 +73,7 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 		}
 		
 		MockHttpServletResponse response = patch("/MedicationRequest/" + MEDICATION_REQUEST_UUID)
-		        .jsonPatch(jsonMedicationRequestPatch).accept(FhirMediaTypes.JSON).go();
+		        .jsonMergePatch(jsonMedicationRequestPatch).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
