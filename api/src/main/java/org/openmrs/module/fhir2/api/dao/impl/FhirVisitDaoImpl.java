@@ -22,7 +22,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
 import org.openmrs.Visit;
 import org.openmrs.module.fhir2.api.dao.FhirVisitDao;
 import org.springframework.stereotype.Component;
@@ -58,23 +57,4 @@ public class FhirVisitDaoImpl extends BaseEncounterDao<Visit> implements FhirVis
 				return null;
 		}
 	}
-	
-	@Override
-	protected Criterion generateNotCompletedOrderQuery(String path) {
-		// not relevant in visit context
-		return null;
-	}
-	
-	@Override
-	protected Criterion generateFulfillerStatusRestriction(String path, String fulfillerStatus) {
-		// not relevant in visit context
-		return null;
-	}
-	
-	@Override
-	protected Criterion generateNotFulfillerStatusRestriction(String path, String fulfillerStatus) {
-		// not relevant in visit context
-		return null;
-	}
-	
 }
