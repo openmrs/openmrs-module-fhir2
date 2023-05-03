@@ -19,10 +19,12 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -71,23 +73,18 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 		return medicationRequest;
 	}
 	
-	public MethodOutcome createMedicationRequest(@ResourceParam MedicationRequest mRequest) {
-		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = fhirMedicationRequestService.create(mRequest);
-		
-		return FhirProviderUtils.buildCreate(medicationRequest);
-	}
+	// NOTE: POST/Create not yet supported, see: https://issues.openmrs.org/browse/FM2-568
+	// NOTE: PUT/Update not supported, because Drug Orders are immutable, use PATCH
 	
-	public MethodOutcome updateMedicationRequest(@IdParam IdType id, @ResourceParam MedicationRequest mRequest) {
+	@Patch
+	public MethodOutcome patchMedicationRequest(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update resource");
 		}
 		
-		mRequest.setId(id.getIdPart());
+		MedicationRequest medicationRequest = fhirMedicationRequestService.patch(id.getIdPart(), patchType, body);
 		
-		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = fhirMedicationRequestService.update(id.getIdPart(),
-		    mRequest);
-		
-		return FhirProviderUtils.buildUpdate(medicationRequest);
+		return FhirProviderUtils.buildPatch(medicationRequest);
 	}
 	
 	public OperationOutcome deleteMedicationRequest(@IdParam IdType id) {

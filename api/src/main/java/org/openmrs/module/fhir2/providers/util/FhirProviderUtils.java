@@ -43,6 +43,12 @@ public class FhirProviderUtils {
 		return buildWithResource(methodOutcome, resource);
 	}
 	
+	public static MethodOutcome buildPatch(IAnyResource resource) {
+		MethodOutcome methodOutcome = new MethodOutcome();
+		methodOutcome.setCreated(false);
+		return buildWithResource(methodOutcome, resource);
+	}
+	
 	public static org.hl7.fhir.r4.model.OperationOutcome buildDeleteR4() {
 		org.hl7.fhir.r4.model.OperationOutcome outcome = new org.hl7.fhir.r4.model.OperationOutcome();
 		outcome.addIssue().setSeverity(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.INFORMATION)

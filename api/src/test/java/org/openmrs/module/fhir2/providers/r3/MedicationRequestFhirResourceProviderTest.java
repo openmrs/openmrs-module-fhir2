@@ -13,10 +13,8 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +25,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -35,10 +32,7 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.convertors.conv30_40.MedicationRequest30_40;
 import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Medication;
@@ -322,63 +316,6 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
-	}
-	
-	@Test
-	public void createMedicationRequest_shouldCreateMedicationRequest() {
-		when(fhirMedicationRequestService.create(any(org.hl7.fhir.r4.model.MedicationRequest.class)))
-		        .thenReturn(medicationRequest);
-		
-		MethodOutcome result = resourceProvider
-		        .createMedicationRequest(MedicationRequest30_40.convertMedicationRequest(medicationRequest));
-		assertThat(result, notNullValue());
-		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationRequest.getId()));
-	}
-	
-	@Test
-	public void updateMedicationRequest_shouldUpdateMedicationRequest() {
-		when(fhirMedicationRequestService.update(eq(MEDICATION_REQUEST_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationRequest.class))).thenReturn(medicationRequest);
-		
-		MethodOutcome result = resourceProvider.updateMedicationRequest(new IdType().setValue(MEDICATION_REQUEST_UUID),
-		    MedicationRequest30_40.convertMedicationRequest(medicationRequest));
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getResource(), notNullValue());
-		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationRequest.getId()));
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updateMedicationRequest_shouldThrowInvalidRequestForUuidMismatch() {
-		when(fhirMedicationRequestService.update(eq(WRONG_MEDICATION_REQUEST_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationRequest.class))).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateMedicationRequest(new IdType().setValue(WRONG_MEDICATION_REQUEST_UUID),
-		    MedicationRequest30_40.convertMedicationRequest(medicationRequest));
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updateMedicationRequest_shouldThrowInvalidRequestForMissingId() {
-		org.hl7.fhir.r4.model.MedicationRequest noIdMedicationRequest = new org.hl7.fhir.r4.model.MedicationRequest();
-		
-		when(fhirMedicationRequestService.update(eq(MEDICATION_REQUEST_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationRequest.class))).thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateMedicationRequest(new IdType().setValue(MEDICATION_REQUEST_UUID),
-		    MedicationRequest30_40.convertMedicationRequest(noIdMedicationRequest));
-	}
-	
-	@Test(expected = MethodNotAllowedException.class)
-	public void updateMedicationShouldThrowMethodNotAllowedIfDoesNotExist() {
-		org.hl7.fhir.r4.model.MedicationRequest wrongMedicationRequest = new org.hl7.fhir.r4.model.MedicationRequest();
-		wrongMedicationRequest.setId(WRONG_MEDICATION_REQUEST_UUID);
-		
-		when(fhirMedicationRequestService.update(eq(WRONG_MEDICATION_REQUEST_UUID),
-		    any(org.hl7.fhir.r4.model.MedicationRequest.class))).thenThrow(MethodNotAllowedException.class);
-		
-		resourceProvider.updateMedicationRequest(new IdType().setValue(WRONG_MEDICATION_REQUEST_UUID),
-		    MedicationRequest30_40.convertMedicationRequest(wrongMedicationRequest));
 	}
 	
 	@Test

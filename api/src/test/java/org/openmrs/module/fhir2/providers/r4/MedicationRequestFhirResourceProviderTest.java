@@ -13,10 +13,8 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
@@ -26,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -34,8 +31,6 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Encounter;
@@ -316,59 +311,6 @@ public class MedicationRequestFhirResourceProviderTest {
 		assertThat(resources.get(0), notNullValue());
 		assertThat(resources.get(0).fhirType(), equalTo(FhirConstants.MEDICATION_REQUEST));
 		assertThat(resources.get(0).getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
-	}
-	
-	@Test
-	public void createMedicationRequest_shouldCreateMedicationRequest() {
-		when(fhirMedicationRequestService.create(any(MedicationRequest.class))).thenReturn(medicationRequest);
-		
-		MethodOutcome result = resourceProvider.createMedicationRequest(medicationRequest);
-		assertThat(result, notNullValue());
-		assertThat(result.getCreated(), is(true));
-		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationRequest.getId()));
-	}
-	
-	@Test
-	public void updateMedicationRequest_shouldUpdateMedicationRequest() {
-		when(fhirMedicationRequestService.update(eq(MEDICATION_REQUEST_UUID), any(MedicationRequest.class)))
-		        .thenReturn(medicationRequest);
-		
-		MethodOutcome result = resourceProvider.updateMedicationRequest(new IdType().setValue(MEDICATION_REQUEST_UUID),
-		    medicationRequest);
-		
-		assertThat(result, notNullValue());
-		assertThat(result.getResource(), notNullValue());
-		assertThat(result.getResource().getIdElement().getIdPart(), equalTo(medicationRequest.getId()));
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updateMedicationRequest_shouldThrowInvalidRequestForUuidMismatch() {
-		when(fhirMedicationRequestService.update(eq(WRONG_MEDICATION_REQUEST_UUID), any(MedicationRequest.class)))
-		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateMedicationRequest(new IdType().setValue(WRONG_MEDICATION_REQUEST_UUID), medicationRequest);
-	}
-	
-	@Test(expected = InvalidRequestException.class)
-	public void updateMedicationRequest_shouldThrowInvalidRequestForMissingId() {
-		MedicationRequest noIdMedicationRequest = new MedicationRequest();
-		
-		when(fhirMedicationRequestService.update(eq(MEDICATION_REQUEST_UUID), any(MedicationRequest.class)))
-		        .thenThrow(InvalidRequestException.class);
-		
-		resourceProvider.updateMedicationRequest(new IdType().setValue(MEDICATION_REQUEST_UUID), noIdMedicationRequest);
-	}
-	
-	@Test(expected = MethodNotAllowedException.class)
-	public void updateMedicationShouldThrowMethodNotAllowedIfDoesNotExist() {
-		MedicationRequest wrongMedicationRequest = new MedicationRequest();
-		wrongMedicationRequest.setId(WRONG_MEDICATION_REQUEST_UUID);
-		
-		when(fhirMedicationRequestService.update(eq(WRONG_MEDICATION_REQUEST_UUID), any(MedicationRequest.class)))
-		        .thenThrow(MethodNotAllowedException.class);
-		
-		resourceProvider.updateMedicationRequest(new IdType().setValue(WRONG_MEDICATION_REQUEST_UUID),
-		    wrongMedicationRequest);
 	}
 	
 	@Test
