@@ -10,12 +10,15 @@
 package org.openmrs.module.fhir2.api.dao.impl;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.openmrs.test.OpenmrsMatchers.hasId;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -99,9 +102,11 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 	
 	@Test
 	public void getMedicationRequestsBySearchResults_shouldNotReturnDiscontinuedOrders() {
-		List<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(null,
-		    Collections.singletonList(DISCONTINUE_ORDER_ID));
-		assertThat(drugOrders, hasSize(0));
+		SearchParameterMap theParams = new SearchParameterMap();
+		theParams.setToIndex(20);
+		List<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(theParams);
+		assertThat(drugOrders, not(hasItems(hasId(DISCONTINUE_ORDER_ID))));
+		assertThat(drugOrders, hasSize(11));
 	}
 	
 	@Test
@@ -114,8 +119,7 @@ public class FhirMedicationRequestDaoImplTest extends BaseModuleContextSensitive
 		SearchParameterMap theParams = new SearchParameterMap();
 		theParams.addParameter(FhirConstants.CODED_SEARCH_HANDLER, code);
 		
-		List<Integer> matchingResourceIds = medicationRequestDao.getSearchResultIds(theParams);
-		Collection<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(theParams, matchingResourceIds);
+		Collection<DrugOrder> drugOrders = medicationRequestDao.getSearchResults(theParams);
 		
 		assertThat(drugOrders, notNullValue());
 		assertThat(drugOrders, hasSize(greaterThanOrEqualTo(1)));

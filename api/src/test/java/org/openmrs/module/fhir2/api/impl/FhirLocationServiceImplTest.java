@@ -150,13 +150,12 @@ public class FhirLocationServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		
-		when(locationDao.getSearchResultIds(any())).thenReturn(Collections.singletonList(LOCATION_ID));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(new SearchQueryBundleProvider<>(theParams,
 		        locationDao, locationTranslator, globalPropertyService, searchQueryInclude));
 		
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(locationTranslator.toFhirResource(location)).thenReturn(fhirLocation);
-		when(locationDao.getSearchResults(any(), any())).thenReturn(locations);
+		when(locationDao.getSearchResults(any())).thenReturn(locations);
 		
 		IBundleProvider results = fhirLocationService.searchForLocations(
 		    new LocationSearchParams(null, null, null, null, null, null, null, null, null, null, null, null));

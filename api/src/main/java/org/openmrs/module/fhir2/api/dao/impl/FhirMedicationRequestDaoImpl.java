@@ -61,8 +61,8 @@ public class FhirMedicationRequestDaoImpl extends BaseFhirDao<DrugOrder> impleme
 	}
 	
 	@Override
-	public List<DrugOrder> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds) {
-		List<DrugOrder> results = super.getSearchResults(theParams, resourceIds);
+	public List<DrugOrder> getSearchResults(@Nonnull SearchParameterMap theParams) {
+		List<DrugOrder> results = super.getSearchResults(theParams);
 		if (results == null) {
 			return results;
 		} else {

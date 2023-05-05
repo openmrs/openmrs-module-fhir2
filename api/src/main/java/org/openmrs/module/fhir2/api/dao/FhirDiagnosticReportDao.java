@@ -34,9 +34,5 @@ public interface FhirDiagnosticReportDao extends FhirDao<FhirDiagnosticReport> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_OBS)
-	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_OBS)
-	List<FhirDiagnosticReport> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
+	List<FhirDiagnosticReport> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

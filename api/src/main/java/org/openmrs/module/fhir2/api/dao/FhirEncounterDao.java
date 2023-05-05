@@ -32,14 +32,10 @@ public interface FhirEncounterDao extends FhirDao<Encounter> {
 	@Authorized(PrivilegeConstants.DELETE_ENCOUNTERS)
 	Encounter delete(@Nonnull String uuid);
 	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
-	
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
 	List<String> getSearchResultUuids(@Nonnull SearchParameterMap theParams);
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ENCOUNTERS)
-	List<Encounter> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
+	List<Encounter> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

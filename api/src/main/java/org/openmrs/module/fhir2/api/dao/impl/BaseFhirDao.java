@@ -17,9 +17,9 @@ import static org.hibernate.criterion.Restrictions.or;
 
 import javax.annotation.Nonnull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,6 +35,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.proxy.HibernateProxy;
 import org.hl7.fhir.r4.model.DomainResource;
@@ -150,8 +151,7 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		return existing;
 	}
 	
-	@Override
-	public List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams) {
+	private Criteria getSearchResultCriteria(SearchParameterMap theParams) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType());
 		
 		if (isVoidable) {
@@ -161,24 +161,73 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 		}
 		
 		setupSearchParams(criteria, theParams);
-		handleSort(criteria, theParams.getSortSpec());
 		
-		criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
-		criteria.setProjection(Projections.property("id"));
-		
-		@SuppressWarnings("unchecked")
-		List<Integer> results = criteria.list();
-		
-		return results.stream().distinct().collect(Collectors.toList());
+		return criteria;
+	}
+	
+	/**
+	 * Override to return false if the getSearchResults may return duplicate items that need to be
+	 * removed from the results. Note that it has performance implications as it requires "select
+	 * distinct" and 2 queries instead of 1 for getting the results.
+	 * 
+	 * @return
+	 */
+	public boolean hasDistinctResults() {
+		return true;
 	}
 	
 	@Override
-	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds) {
-		@SuppressWarnings("unchecked")
-		List<T> results = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType())
-		        .add(in("id", resourceIds)).list();
+	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
+		Criteria criteria = getSearchResultCriteria(theParams);
+		if (hasDistinctResults()) {
+			return ((Long) criteria.setProjection(Projections.rowCount()).uniqueResult()).intValue();
+		} else {
+			return ((Long) criteria.setProjection(Projections.countDistinct("id")).uniqueResult()).intValue();
+		}
+	}
+	
+	@Override
+	public List<T> getSearchResults(@Nonnull SearchParameterMap theParams) {
+		Criteria criteria = getSearchResultCriteria(theParams);
 		
-		results.sort(Comparator.comparingInt(r -> resourceIds.indexOf(r.getId())));
+		handleSort(criteria, theParams.getSortSpec());
+		criteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+		
+		criteria.setFirstResult(theParams.getFromIndex());
+		if (theParams.getToIndex() != Integer.MAX_VALUE) {
+			int maxResults = theParams.getToIndex() - theParams.getFromIndex();
+			criteria.setMaxResults(maxResults);
+		}
+		
+		List<T> results;
+		if (hasDistinctResults()) {
+			results = criteria.list();
+		} else {
+			ProjectionList projectionList = Projections.projectionList();
+			projectionList.add(Projections.distinct(Projections.projectionList().add(Projections.property("id"))));
+			// Sort parameters must be included in projections
+			handleSort(criteria, theParams.getSortSpec(), this::paramToProps).ifPresent(orders -> orders.forEach(order -> {
+				projectionList.add(Projections.property(order.getPropertyName()));
+			}));
+			criteria.setProjection(projectionList);
+			List<Integer> ids = new ArrayList<>();
+			if (projectionList.getLength() > 1) {
+				for (Object[] o : ((List<Object[]>) criteria.list())) {
+					ids.add((Integer) o[0]);
+				}
+			} else {
+				ids = criteria.list();
+			}
+			
+			// Use distinct ids from the original query to return entire objects
+			Criteria idsCriteria = sessionFactory.getCurrentSession().createCriteria(typeToken.getRawType())
+			        .add(in("id", ids));
+			// Need to reapply ordering
+			handleSort(idsCriteria, theParams.getSortSpec());
+			idsCriteria.addOrder(org.hibernate.criterion.Order.asc("id"));
+			
+			results = idsCriteria.list();
+		}
 		return results.stream().map(this::deproxyResult).collect(Collectors.toList());
 	}
 	

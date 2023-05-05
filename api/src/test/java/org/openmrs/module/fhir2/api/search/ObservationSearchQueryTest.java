@@ -1613,6 +1613,7 @@ public class ObservationSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		List<IBaseResource> resultList = get(results);
 		
+		assertThat(results.size(), equalTo(17));
 		assertThat(resultList.size(), equalTo(10));
 		assertThat(resultList, everyItem(anyOf(allOf(is(instanceOf(Observation.class))))));
 		assertThat(resultList, isSortedAndWithinMax(2));

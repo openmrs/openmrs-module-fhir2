@@ -11,6 +11,7 @@ package org.openmrs.module.fhir2.api.search;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
@@ -25,12 +26,12 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.openmrs.test.OpenmrsMatchers.hasId;
 
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -52,6 +53,7 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.fhir2.FhirConstants;
@@ -342,8 +344,8 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
-		assertThat(resultSet, hasSize(2));
+		List<Obs> resultSet = dao.getSearchResults(theParams);
+		assertThat(resultSet, containsInAnyOrder(hasId(30), hasId(31)));
 	}
 	
 	@Test
@@ -450,8 +452,8 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
-		assertThat(resultSet, hasSize(2));
+		List<Obs> resultSet = dao.getSearchResults(theParams);
+		assertThat(resultSet, containsInAnyOrder(hasId(30), hasId(31)));
 	}
 	
 	@Test
@@ -540,8 +542,8 @@ public class ConditionSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(2));
 		
-		List<Integer> resultSet = dao.getSearchResultIds(theParams);
-		assertThat(resultSet, hasSize(2));
+		List<Obs> resultSet = dao.getSearchResults(theParams);
+		assertThat(resultSet, containsInAnyOrder(hasId(30), hasId(31)));
 	}
 	
 	@Test

@@ -54,15 +54,8 @@ public class FhirMedicationDispenseDaoImpl_2_6 extends BaseFhirDao<MedicationDis
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
-	public List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams) {
-		return super.getSearchResultIds(theParams);
-	}
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_MEDICATION_DISPENSE)
-	public List<MedicationDispense> getSearchResults(@Nonnull SearchParameterMap theParams,
-	        @Nonnull List<Integer> resourceIds) {
-		return super.getSearchResults(theParams, resourceIds);
+	public List<MedicationDispense> getSearchResults(@Nonnull SearchParameterMap theParams) {
+		return super.getSearchResults(theParams);
 	}
 	
 	@Override
