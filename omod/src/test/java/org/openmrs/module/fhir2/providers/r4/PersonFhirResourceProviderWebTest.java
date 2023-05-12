@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,6 +53,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPersonService;
+import org.openmrs.module.fhir2.api.search.param.PersonSearchParams;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -88,16 +88,7 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	private PersonFhirResourceProvider resourceProvider;
 	
 	@Captor
-	private ArgumentCaptor<StringAndListParam> stringAndListCaptor;
-	
-	@Captor
-	private ArgumentCaptor<TokenAndListParam> tokenAndListCaptor;
-	
-	@Captor
-	private ArgumentCaptor<DateRangeParam> dateRangeCaptor;
-	
-	@Captor
-	private ArgumentCaptor<HashSet<Include>> includeArgumentCaptor;
+	private ArgumentCaptor<PersonSearchParams> personSearchParamsCaptor;
 	
 	@Before
 	@Override
@@ -135,12 +126,12 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	public void shouldGetPersonByName() throws Exception {
 		verifyUri(String.format("/Person/?name=%s", PERSON_NAME));
 		
-		verify(personService).searchForPeople(stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		StringAndListParam personName = personSearchParamsCaptor.getValue().getName();
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(personName, notNullValue());
+		assertThat(personName.getValuesAsQueryTokens(), not(empty()));
+		assertThat(personName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PERSON_NAME));
 	}
 	
@@ -148,12 +139,12 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	public void shouldGetPersonByGender() throws Exception {
 		verifyUri(String.format("/Person/?gender=%s", PERSON_GENDER));
 		
-		verify(personService).searchForPeople(isNull(), tokenAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		TokenAndListParam gender = personSearchParamsCaptor.getValue().getGender();
 		
-		assertThat(tokenAndListCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(gender, notNullValue());
+		assertThat(gender.getValuesAsQueryTokens(), not(empty()));
+		assertThat(gender.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PERSON_GENDER));
 	}
 	
@@ -161,138 +152,133 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	public void shouldGetPersonByBirthDate() throws Exception {
 		verifyUri("/Person/?birthdate=eq1975-02-02");
 		
-		verify(personService).searchForPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
+		
+		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getUpperBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
 	public void shouldGetPersonByBirthDateGreaterThanOrEqualTo() throws Exception {
 		verifyUri("/Person/?birthdate=ge1975-02-02");
 		
-		verify(personService).searchForPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
+		
+		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound(), nullValue());
+		assertThat(birthdate.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getUpperBound(), nullValue());
 	}
 	
 	@Test
 	public void shouldGetPersonByBirthDateGreaterThan() throws Exception {
 		verifyUri("/Person/?birthdate=gt1975-02-02");
 		
-		verify(personService).searchForPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
+		
+		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound(), nullValue());
+		assertThat(birthdate.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getUpperBound(), nullValue());
 	}
 	
 	@Test
 	public void shouldGetPersonByBirthDateLessThanOrEqualTo() throws Exception {
 		verifyUri("/Person/?birthdate=le1975-02-02");
 		
-		verify(personService).searchForPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
+		
+		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound(), nullValue());
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getLowerBound(), nullValue());
+		assertThat(birthdate.getUpperBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
 	public void shouldGetPersonByBirthDateLessThan() throws Exception {
 		verifyUri("/Person/?birthdate=lt1975-02-02");
 		
-		verify(personService).searchForPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull());
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
+		
+		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound(), nullValue());
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getLowerBound(), nullValue());
+		assertThat(birthdate.getUpperBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
 	public void shouldGetPersonByBirthDateBetween() throws Exception {
 		verifyUri("/Person/?birthdate=ge1975-02-02&birthdate=le1980-02-02");
 		
-		verify(personService).searchForPeople(isNull(), isNull(), dateRangeCaptor.capture(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
 		
 		Calendar lowerBound = Calendar.getInstance();
 		lowerBound.set(1975, Calendar.FEBRUARY, 2);
 		Calendar upperBound = Calendar.getInstance();
 		upperBound.set(1980, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(lowerBound.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(upperBound.getTime(), Calendar.DATE)));
+		assertThat(birthdate, notNullValue());
+		assertThat(birthdate.getLowerBound().getValue(), equalTo(DateUtils.truncate(lowerBound.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getUpperBound().getValue(), equalTo(DateUtils.truncate(upperBound.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
 	public void shouldGetPersonByCity() throws Exception {
 		verifyUri(String.format("/Person/?address-city=%s", ADDRESS_FIELD));
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), stringAndListCaptor.capture(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		StringAndListParam city = personSearchParamsCaptor.getValue().getCity();
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(ADDRESS_FIELD));
+		assertThat(city, notNullValue());
+		assertThat(city.getValuesAsQueryTokens(), not(empty()));
+		assertThat(city.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(ADDRESS_FIELD));
 	}
 	
 	@Test
 	public void shouldGetPersonByState() throws Exception {
 		verifyUri(String.format("/Person/?address-state=%s", ADDRESS_FIELD));
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), stringAndListCaptor.capture(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		StringAndListParam state = personSearchParamsCaptor.getValue().getState();
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(ADDRESS_FIELD));
+		assertThat(state, notNullValue());
+		assertThat(state.getValuesAsQueryTokens(), not(empty()));
+		assertThat(state.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(ADDRESS_FIELD));
 	}
 	
 	@Test
 	public void shouldGetPersonByPostalCode() throws Exception {
 		verifyUri(String.format("/Person/?address-postalcode=%s", POSTAL_CODE));
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(),
-		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		StringAndListParam postalcode = personSearchParamsCaptor.getValue().getPostalCode();
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(postalcode, notNullValue());
+		assertThat(postalcode.getValuesAsQueryTokens(), not(empty()));
+		assertThat(postalcode.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(POSTAL_CODE));
 	}
 	
@@ -300,12 +286,12 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	public void shouldGetPersonByCountry() throws Exception {
 		verifyUri(String.format("/Person/?address-country=%s", ADDRESS_FIELD));
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    stringAndListCaptor.capture(), isNull(), isNull(), isNull(), isNull());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		StringAndListParam country = personSearchParamsCaptor.getValue().getCountry();
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(country, notNullValue());
+		assertThat(country.getValuesAsQueryTokens(), not(empty()));
+		assertThat(country.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(ADDRESS_FIELD));
 	}
 	
@@ -313,30 +299,29 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	public void shouldGetPersonByUUID() throws Exception {
 		verifyUri(String.format("/Person?_id=%s", PERSON_UUID));
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    tokenAndListCaptor.capture(), isNull(), isNull(), isNull());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		TokenAndListParam uuid = personSearchParamsCaptor.getValue().getId();
 		
-		assertThat(tokenAndListCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(PERSON_UUID));
+		assertThat(uuid, notNullValue());
+		assertThat(uuid.getValuesAsQueryTokens(), not(empty()));
+		assertThat(uuid.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(PERSON_UUID));
 	}
 	
 	@Test
 	public void shouldGetPersonByLastUpdatedDate() throws Exception {
 		verifyUri(String.format("/Person?_lastUpdated=%s", LAST_UPDATED_DATE));
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    dateRangeCaptor.capture(), isNull(), isNull());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		DateRangeParam last_updated_date = personSearchParamsCaptor.getValue().getLastUpdated();
 		
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		assertThat(last_updated_date, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(2020, Calendar.SEPTEMBER, 3);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
+		assertThat(last_updated_date.getLowerBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
+		assertThat(last_updated_date.getUpperBound().getValue(),
 		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
@@ -344,63 +329,60 @@ public class PersonFhirResourceProviderWebTest extends BaseFhirR4ResourceProvide
 	public void shouldGetPersonByComplexQuery() throws Exception {
 		verifyUri(String.format("/Person/?name=%s&gender=%s&birthdate=eq1975-02-02", PERSON_NAME, PERSON_GENDER));
 		
-		verify(personService).searchForPeople(stringAndListCaptor.capture(), tokenAndListCaptor.capture(),
-		    dateRangeCaptor.capture(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		StringAndListParam name = personSearchParamsCaptor.getValue().getName();
+		TokenAndListParam gender = personSearchParamsCaptor.getValue().getGender();
+		DateRangeParam birthdate = personSearchParamsCaptor.getValue().getBirthDate();
 		
-		assertThat(stringAndListCaptor.getValue(), notNullValue());
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(stringAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
-		    equalTo(PERSON_NAME));
+		assertThat(name, notNullValue());
+		assertThat(name.getValuesAsQueryTokens(), not(empty()));
+		assertThat(name.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(PERSON_NAME));
 		
-		assertThat(tokenAndListCaptor.getValue(), notNullValue());
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens(), not(empty()));
-		assertThat(tokenAndListCaptor.getValue().getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
+		assertThat(gender, notNullValue());
+		assertThat(gender.getValuesAsQueryTokens(), not(empty()));
+		assertThat(gender.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(PERSON_GENDER));
 		
-		assertThat(dateRangeCaptor.getValue(), notNullValue());
+		assertThat(birthdate, notNullValue());
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1975, Calendar.FEBRUARY, 2);
 		
-		assertThat(dateRangeCaptor.getValue().getLowerBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
-		assertThat(dateRangeCaptor.getValue().getUpperBound().getValue(),
-		    equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getLowerBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
+		assertThat(birthdate.getUpperBound().getValue(), equalTo(DateUtils.truncate(calendar.getTime(), Calendar.DATE)));
 	}
 	
 	@Test
 	public void shouldAddPatientsToResultListWhenIncluded() throws Exception {
 		verifyUri("/Person?_include=Person:patient");
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), includeArgumentCaptor.capture());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		HashSet<Include> include = personSearchParamsCaptor.getValue().getIncludes();
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.PERSON));
+		assertThat(include, notNullValue());
+		assertThat(include.size(), equalTo(1));
+		assertThat(include.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_PATIENT_PARAM));
+		assertThat(include.iterator().next().getParamType(), equalTo(FhirConstants.PERSON));
 	}
 	
 	@Test
 	public void shouldAddLinksToResultListWhenIncluded() throws Exception {
 		verifyUri("/Person?_include=Person:link:Patient");
 		
-		verify(personService).searchForPeople(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), includeArgumentCaptor.capture());
+		verify(personService).searchForPeople(personSearchParamsCaptor.capture());
+		HashSet<Include> include = personSearchParamsCaptor.getValue().getIncludes();
 		
-		assertThat(includeArgumentCaptor.getValue(), notNullValue());
-		assertThat(includeArgumentCaptor.getValue().size(), equalTo(1));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamName(),
-		    equalTo(FhirConstants.INCLUDE_LINK_PARAM));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamType(), equalTo(FhirConstants.PERSON));
-		assertThat(includeArgumentCaptor.getValue().iterator().next().getParamTargetType(), equalTo(FhirConstants.PATIENT));
+		assertThat(include, notNullValue());
+		assertThat(include.size(), equalTo(1));
+		assertThat(include.iterator().next().getParamName(), equalTo(FhirConstants.INCLUDE_LINK_PARAM));
+		assertThat(include.iterator().next().getParamType(), equalTo(FhirConstants.PERSON));
+		assertThat(include.iterator().next().getParamTargetType(), equalTo(FhirConstants.PATIENT));
 	}
 	
 	private void verifyUri(String uri) throws Exception {
 		Person person = new Person();
 		person.setId(PERSON_UUID);
-		when(personService.searchForPeople(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+		when(personService.searchForPeople(any()))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(person), 10, 1));
 		
 		MockHttpServletResponse response = get(uri).accept(FhirMediaTypes.JSON).go();
