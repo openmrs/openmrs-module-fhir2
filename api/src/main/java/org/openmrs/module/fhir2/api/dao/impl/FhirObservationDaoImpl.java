@@ -9,16 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.dao.impl;
 
-import static org.hibernate.criterion.Projections.property;
 import static org.hibernate.criterion.Restrictions.eq;
-import static org.openmrs.module.fhir2.api.util.LastnOperationUtils.getTopNRankedIds;
 
 import javax.annotation.Nonnull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,6 +31,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Subqueries;
 import org.hl7.fhir.r4.model.Observation;
@@ -44,7 +42,6 @@ import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
 import org.openmrs.module.fhir2.api.mappings.ObservationCategoryMap;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
-import org.openmrs.module.fhir2.api.util.LastnResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,26 +55,97 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	private FhirEncounterDao encounterDao;
 	
 	@Override
-	public List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams) {
+	public List<Obs> getSearchResults(@Nonnull SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
 			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
 			
 			setupSearchParams(criteria, theParams);
 			
-			criteria.setProjection(
-			    Projections.projectionList().add(property("id")).add(property("concept")).add(property("obsDatetime")));
+			criteria.addOrder(Order.asc("concept")).addOrder(Order.desc("obsDatetime"));
 			
-			@SuppressWarnings("unchecked")
-			List<LastnResult<Integer>> results = ((List<Object[]>) criteria.list()).stream().map(objects -> {
-				Map<String, Object> attributes = new HashMap<>();
-				attributes.put("concept", objects[1]);
-				return new LastnResult<Integer>(objects[0], objects[2], attributes);
-			}).collect(Collectors.toList());
+			List<Obs> results = new ArrayList<>();
+			int firstResult = 0;
+			final int maxGroupCount = getMaxParameter(theParams);
+			final int batchSize = 100;
+			Concept prevConcept = null;
+			Date prevObsDatetime = null;
+			int groupCount = maxGroupCount;
+			while (results.size() < theParams.getToIndex()) {
+				criteria.setFirstResult(firstResult);
+				criteria.setMaxResults(batchSize);
+				List<Obs> observations = criteria.list();
+				for (Obs obs : observations) {
+					if (prevConcept == obs.getConcept()) {
+						if (groupCount > 0 || obs.getObsDatetime().equals(prevObsDatetime)) {
+							//Load only as many results as requested per group or more if time matches
+							if (!obs.getObsDatetime().equals(prevObsDatetime)) {
+								groupCount--;
+							}
+							prevObsDatetime = obs.getObsDatetime();
+							results.add(obs);
+						}
+					} else {
+						prevConcept = obs.getConcept();
+						prevObsDatetime = obs.getObsDatetime();
+						groupCount = maxGroupCount;
+						results.add(obs);
+						groupCount--;
+					}
+
+					if (results.size() >= theParams.getToIndex()) {
+						//Load only as many results as requested per page
+						break;
+					}
+				}
+				
+				if (observations.size() < batchSize) {
+					break;
+				} else {
+					firstResult += batchSize;
+				}
+			}
 			
-			return getLastnIds(handleGrouping(results), getMaxParameter(theParams)).stream().distinct()
+			int toIndex = results.size() > theParams.getToIndex() ? theParams.getToIndex() : results.size();
+			return results.subList(theParams.getFromIndex(), toIndex).stream().map(this::deproxyResult)
 			        .collect(Collectors.toList());
 		}
 		
+		return super.getSearchResults(theParams);
+	}
+	
+	@Override
+	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
+		if (!theParams.getParameters(FhirConstants.LASTN_OBSERVATION_SEARCH_HANDLER).isEmpty()) {
+			Criteria criteria = getSessionFactory().getCurrentSession().createCriteria(typeToken.getRawType());
+			setupSearchParams(criteria, theParams);
+			criteria.addOrder(Order.asc("concept")).addOrder(Order.desc("obsDatetime"));
+			criteria.setProjection(Projections.projectionList().add(Projections.groupProperty("concept.id"))
+			        .add(Projections.groupProperty("obsDatetime")).add(Projections.rowCount()));
+			List<Object[]> rows = criteria.list();
+			final int maxGroupCount = getMaxParameter(theParams);
+			int groupCount = maxGroupCount;
+			int count = 0;
+			Integer prevConceptId = null;
+			for (Object[] row : rows) {
+				Integer conceptId = (Integer) row[0];
+				Long rowCount = (Long) row[2];
+				if (!conceptId.equals(prevConceptId)) {
+					groupCount = maxGroupCount;
+				}
+				if (groupCount > 0) {
+					count += rowCount;
+					groupCount--;
+				}
+				prevConceptId = conceptId;
+			}
+			
+			return count;
+		}
+		return super.getSearchResultsCount(theParams);
+	}
+	
+	@Override
+	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		if (!theParams.getParameters(FhirConstants.LASTN_ENCOUNTERS_SEARCH_HANDLER).isEmpty()) {
 			ReferenceAndListParam encountersReferences = new ReferenceAndListParam();
 			ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
@@ -90,11 +158,6 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			theParams.addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encountersReferences);
 		}
 		
-		return super.getSearchResultIds(theParams);
-	}
-	
-	@Override
-	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {
 				case FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER:
@@ -232,17 +295,5 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 	private int getMaxParameter(SearchParameterMap theParams) {
 		return ((NumberParam) theParams.getParameters(FhirConstants.MAX_SEARCH_HANDLER).get(0).getParam()).getValue()
 		        .intValue();
-	}
-	
-	private Map<Concept, List<LastnResult<Integer>>> handleGrouping(List<LastnResult<Integer>> observations) {
-		return observations.stream().collect(Collectors.groupingBy(obs -> (Concept) (obs.getAttributes().get("concept"))));
-	}
-	
-	private List<Integer> getLastnIds(Map<Concept, List<LastnResult<Integer>>> groupingByObsCode, int max) {
-		List<Integer> results = new ArrayList<>(groupingByObsCode.size());
-		for (Map.Entry<Concept, List<LastnResult<Integer>>> entry : groupingByObsCode.entrySet()) {
-			results.addAll(getTopNRankedIds(entry.getValue(), max));
-		}
-		return results;
 	}
 }

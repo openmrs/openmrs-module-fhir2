@@ -23,7 +23,7 @@ public class DisableCacheInterceptor {
 	public boolean handleOutgoingResponse(RequestDetails requestDetails) {
 		if (requestDetails.getRestOperationType() == RestOperationTypeEnum.READ
 		        || requestDetails.getRestOperationType() == RestOperationTypeEnum.SEARCH_TYPE) {
-			requestDetails.getResponse().addHeader(Constants.HEADER_CACHE_CONTROL, "no-cache");
+			requestDetails.getResponse().addHeader(Constants.HEADER_CACHE_CONTROL, "no-store");
 		}
 		
 		return true;

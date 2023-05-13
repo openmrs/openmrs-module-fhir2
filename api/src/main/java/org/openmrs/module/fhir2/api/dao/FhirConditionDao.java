@@ -29,8 +29,5 @@ public interface FhirConditionDao<T extends OpenmrsObject & Auditable> extends F
 	T delete(@Nonnull String uuid);
 	
 	@Override
-	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
+	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

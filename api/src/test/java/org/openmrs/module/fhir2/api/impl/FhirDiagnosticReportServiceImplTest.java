@@ -207,8 +207,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap();
 		
-		when(dao.getSearchResults(any(), any())).thenReturn(fhirDiagnosticReports);
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ID));
+		when(dao.getSearchResults(any())).thenReturn(fhirDiagnosticReports);
 		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -239,8 +238,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(dao.getSearchResults(any(), any())).thenReturn(diagnosticReportList);
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ID));
+		when(dao.getSearchResults(any())).thenReturn(diagnosticReportList);
 		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -273,8 +271,7 @@ public class FhirDiagnosticReportServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(dao.getSearchResults(any(), any())).thenReturn(diagnosticReportList);
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(ID));
+		when(dao.getSearchResults(any())).thenReturn(diagnosticReportList);
 		when(translator.toFhirResource(fhirDiagnosticReport)).thenReturn(diagnosticReport);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));

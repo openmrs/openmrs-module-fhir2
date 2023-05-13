@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+
+<!-- concept "792" name="D4T+3TC+NVP" in standard test dataset -->
+<dataset>
+    <encounter encounter_id="1001" encounter_type="1" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="430bbb70-6a9c-4e1e-badb-9d1034b1b5e9"/>
+    <orders order_id="1001" order_type_id="2" order_number="1" urgency="ROUTINE" patient_id="2" encounter_id="1001" date_activated="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="0d86e8b4-2f33-495e-aa22-6954785e4e9e" order_action="NEW" care_setting="1"/>
+    <drug_order order_id="1001" drug_inventory_id="3" dose="325.0" dose_units="50" as_needed="false" frequency="1" dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51" num_refills="10" dispense_as_written="0" />
+
+    <!-- encounter with discontinued order -->
+    <encounter encounter_id="2002" encounter_type="1" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="fe98c4f0-0ceb-4c61-bd27-a013a90d4d5e"/>
+    <orders order_id="2002" order_type_id="1" order_number="2002" urgency="ROUTINE" patient_id="2" encounter_id="2002" date_activated="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="0e4cca23-9a52-4fc3-8207-b6ecbf2f470f" order_action="DISCONTINUE" care_setting="1"/>
+    <drug_order order_id="2002" drug_inventory_id="3" dose="325.0" dose_units="50" as_needed="false" frequency="1" dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51" num_refills="10" dispense_as_written="0" />
+
+    <!-- encounter with cancelled order -->
+    <encounter encounter_id="2003" encounter_type="1" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="2a21f6e3-3ed0-40f2-a8ea-569694994999"/>
+    <orders order_id="2003" order_type_id="1" order_number="2003" urgency="ROUTINE" patient_id="2" encounter_id="2003" date_activated="2012-08-19 00:00:00.0" date_stopped="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="4d2f8b6a-beb7-4f1a-ab9a-8aed2c875321" order_action="NEW" care_setting="1"/>
+    <drug_order order_id="2003" drug_inventory_id="3" dose="325.0" dose_units="50" as_needed="false" frequency="1" dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51" num_refills="10" dispense_as_written="0" />
+
+    <!-- encounter with expired order -->
+    <encounter encounter_id="2004" encounter_type="1" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="ed19b329-9ac6-4271-b730-906a27dd2d2c"/>
+    <orders order_id="2004" order_type_id="1" order_number="2004" urgency="ROUTINE" patient_id="2" encounter_id="2004" date_activated="2012-08-19 00:00:00.0" auto_expire_date="2012-08-19 00:00:00.0" concept_id="792" orderer="1" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="cbf3f654-f2d5-4306-89aa-bc02cdd29f34" order_action="NEW" care_setting="1"/>
+    <drug_order order_id="2004" drug_inventory_id="3" dose="325.0" dose_units="50" as_needed="false" frequency="1" dosing_type="org.openmrs.SimpleDosingInstructions" route="22" quantity="1.0" quantity_units="51" num_refills="10" dispense_as_written="0" />
+
+</dataset>

@@ -12,6 +12,7 @@ package org.openmrs.module.fhir2.api.search;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
@@ -27,10 +28,10 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
+import static org.openmrs.test.OpenmrsMatchers.hasId;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.model.api.Include;
@@ -215,8 +216,8 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
-		assertThat(resultSet, hasSize(1)); // 3 with repetitions
+		List<org.openmrs.Encounter> resultSet = dao.getSearchResults(theParams);
+		assertThat(resultSet, containsInAnyOrder(hasId(6))); // 3 with repetitions
 	}
 	
 	@Test
@@ -306,8 +307,8 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
-		assertThat(resultSet.size(), equalTo(1)); // 3 with repetitions
+		List<org.openmrs.Encounter> resultSet = dao.getSearchResults(theParams);
+		assertThat(resultSet, containsInAnyOrder(hasId(6))); // 3 with repetitions
 	}
 	
 	@Test
@@ -397,8 +398,8 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 		assertThat(results, notNullValue());
 		assertThat(results.size(), equalTo(1));
 		
-		Set<Integer> resultSet = new HashSet<>(dao.getSearchResultIds(theParams));
-		assertThat(resultSet, hasSize(1)); // 2 with repetitions
+		List<org.openmrs.Encounter> resultSet = dao.getSearchResults(theParams);
+		assertThat(resultSet, containsInAnyOrder(hasId(6))); // 2 with repetitions
 	}
 	
 	@Test
@@ -1538,5 +1539,22 @@ public class EncounterSearchQueryTest extends BaseModuleContextSensitiveTest {
 			assertThat(resultList.get(i - 1).getPeriod().getStart(),
 			    greaterThanOrEqualTo(resultList.get(i).getPeriod().getStart()));
 		}
+	}
+	
+	@Test
+	public void searchForEncounters_shouldReturnAllNonVoidedEncountersSortedById() {
+		SearchParameterMap theParams = new SearchParameterMap();
+		
+		IBundleProvider results = search(theParams);
+		
+		List<IBaseResource> resultList = get(results);
+		
+		assertThat(results, notNullValue());
+		assertThat(resultList, hasSize(4));
+		assertThat(resultList.get(0).getIdElement().getIdPart(), equalTo("6519d653-393b-4118-9c83-a3715b82d4ac")); // encounter with encounter_id=3
+		assertThat(resultList.get(1).getIdElement().getIdPart(), equalTo("eec646cb-c847-45a7-98bc-91c8c4f70add")); // encounter with encounter_id=4
+		assertThat(resultList.get(2).getIdElement().getIdPart(), equalTo("e403fafb-e5e4-42d0-9d11-4f52e89d148c")); // encounter with encounter_id=5
+		assertThat(resultList.get(3).getIdElement().getIdPart(), equalTo("y403fafb-e5e4-42d0-9d11-4f52e89d123r")); // encounter with encounter_id=6
+		
 	}
 }

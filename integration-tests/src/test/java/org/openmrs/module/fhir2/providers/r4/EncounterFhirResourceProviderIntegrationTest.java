@@ -47,8 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<EncounterFhirResourceProvider, Encounter> {
 	
-	private static final String[] ENCOUNTER_DATA_XML = {
-	        "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml" };
+	private static final String MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml"; // not loaded for all tests
 	
 	private static final String ENCOUNTER_JSON_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_create.json";
 	
@@ -66,21 +65,21 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	
 	private static final String VISIT_JSON_UPDATE_ENCOUNTER_PATH_WITH_WRONG_ID = "org/openmrs/module/fhir2/providers/VisitWebTest_updateWithWrongId.json";
 	
-	private static final String ENCOUNTER_UUID = "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9";
+	private static final String ENCOUNTER_UUID = "6519d653-393b-4118-9c83-a3715b82d4ac"; // encounter 3 from standard test dataset
 	
 	private static final String BAD_ENCOUNTER_UUID = "890bbb70-6a9c-451e-badb-9d1034b1b5er";
 	
-	private static final String PATIENT_UUID = "a194be38-271a-44cb-ba3f-f2dbf4831fe9";
+	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041"; // patient 7 from the standard test dataset
 	
-	private static final String LOCATION_UUID = "c36006e5-9fbb-4f20-866b-0ece245615a1";
+	private static final String LOCATION_UUID = "8d6c993e-c2cc-11de-8d13-0010c6dffd0f"; // location 1 from the standard test dataset
 	
-	private static final String PATIENT_GIVEN_NAME = "John";
+	private static final String PATIENT_GIVEN_NAME = "Collet"; // given name of patient 7 from the standard test dataset
 	
 	private static final String VISIT_UUID = "1e5d5d48-6b78-11e0-93c3-18a905e044dc";
 	
 	private static final String BAD_VISIT_UUID = "78aefd46-883d-4526-00de-93842c80ad86";
 	
-	private static final String ENCOUNTER_TYPE_UUID = "61ae96f4-6afe-4351-b6f8-cd4fc383cce1";
+	private static final String ENCOUNTER_TYPE_UUID = "61ae96f4-6afe-4351-b6f8-cd4fc383cce1"; // encounter type 1 from the standard test dataset
 	
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
@@ -90,10 +89,6 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	@Override
 	public void setup() throws Exception {
 		super.setup();
-		
-		for (String encounterData : ENCOUNTER_DATA_XML) {
-			executeDataSet(encounterData);
-		}
 	}
 	
 	@Test
@@ -372,8 +367,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		assertThat(entries, everyItem(hasResource(hasProperty("location",
 		    hasItems(hasProperty("location", hasProperty("reference", equalTo("Location/" + LOCATION_UUID))))))));
-		assertThat(entries, everyItem(hasResource(
-		    hasProperty("location", hasItems(hasProperty("location", hasProperty("display", equalTo("Test Location"))))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("location",
+		    hasItems(hasProperty("location", hasProperty("display", equalTo("Unknown Location"))))))));
 	}
 	
 	@Test
@@ -400,8 +395,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		assertThat(entries, everyItem(hasResource(hasProperty("location",
 		    hasItems(hasProperty("location", hasProperty("reference", equalTo("Location/" + LOCATION_UUID))))))));
-		assertThat(entries, everyItem(hasResource(
-		    hasProperty("location", hasItems(hasProperty("location", hasProperty("display", equalTo("Test Location"))))))));
+		assertThat(entries, everyItem(hasResource(hasProperty("location",
+		    hasItems(hasProperty("location", hasProperty("display", equalTo("Unknown Location"))))))));
 	}
 	
 	@Test
@@ -416,7 +411,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(12)));
+		assertThat(result, hasProperty("total", equalTo(9))); // 5 non-voided visits and 4 non-voided encounters in standard test dataset
 	}
 	
 	@Test
@@ -431,7 +426,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(12)));
+		assertThat(result, hasProperty("total", equalTo(9))); // 5 non-voided visits and 4 non-voided encounters in standard test data
 	}
 	
 	@Test
@@ -484,7 +479,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter.getSubject().getType(), equalTo("Patient"));
 		assertThat(encounter.getParticipant().get(0).getIndividual().getType(), equalTo("Practitioner"));
 		assertThat(encounter.getPeriod().getStart(), notNullValue());
-		assertThat(encounter.getLocation().get(0).getLocation().getDisplay(), equalTo("Test Location"));
+		assertThat(encounter.getLocation().get(0).getLocation().getDisplay(), equalTo("Unknown Location"));
 		
 		response = get("/Encounter/" + encounter.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		
@@ -520,7 +515,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter.getSubject().getType(), equalTo("Patient"));
 		assertThat(encounter.getParticipant().get(0).getIndividual().getType(), equalTo("Practitioner"));
 		assertThat(encounter.getPeriod().getStart(), notNullValue());
-		assertThat(encounter.getLocation().get(0).getLocation().getDisplay(), equalTo("Test Location"));
+		assertThat(encounter.getLocation().get(0).getLocation().getDisplay(), equalTo("Unknown Location"));
 		
 		response = get("/Encounter/" + encounter.getIdElement().getIdPart()).accept(FhirMediaTypes.XML).go();
 		
@@ -696,8 +691,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(7)));
-		assertThat(result.getEntry(), hasSize(7));
+		assertThat(result, hasProperty("total", equalTo(8)));
+		assertThat(result.getEntry(), hasSize(8));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
@@ -718,7 +713,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(7)));
+		assertThat(result, hasProperty("total", equalTo(8)));
 		assertThat(result.getEntry(), hasSize(5));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -740,8 +735,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(7)));
-		assertThat(result.getEntry(), hasSize(7));
+		assertThat(result, hasProperty("total", equalTo(8)));
+		assertThat(result.getEntry(), hasSize(8));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		
@@ -762,7 +757,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
-		assertThat(result, hasProperty("total", equalTo(7)));
+		assertThat(result, hasProperty("total", equalTo(8)));
 		assertThat(result.getEntry(), hasSize(5));
 		
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -817,5 +812,147 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
+	}
+	
+	@Test
+	public void shouldReturnEncountersWithMedicationRequestAsJson() throws Exception {
+		
+		executeDataSet(MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML); // additional test data from the fhe FHIR Enocounter DAO test we use to test the encountersWithMedicationRequests query
+		
+		MockHttpServletResponse response = get("/Encounter/?_query=encountersWithMedicationRequests")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(5))); // 3 encounters in FhirEncounterDaoImplTest_initial_data that have associated medication request (not discontinued), and two encounter (3 and 6) with orders in standard test data set, so total = 5
+		assertThat(result.getEntry(), hasSize(16)); // there are 8 requests associated  encounter 3 and 6 in the test data, 3 with the 3 encounters from the test data so total elements should be 8 + 3 + 5 =
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnEncountersWithMedicationRequestShouldRestrictByDate() throws Exception {
+		
+		executeDataSet(MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML); // additional test data from the fhe FHIR Enocounter DAO test we use to test the encountersWithMedicationRequests query
+		
+		MockHttpServletResponse response = get("/Encounter/?_query=encountersWithMedicationRequests&date=ge2009-01-01")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(3))); // 3 encounters in FhirEncounterDaoImplTest_initial_data are from 2010, and two encounter (3 and 6) with orders in standard test data set are from 2008, so searching on 2010, expect only
+		assertThat(result.getEntry(), hasSize(6)); // 3 orders with the 3 encounters from the test data so total elements should be 3 + 3 = 6
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnEncountersWithMedicationRequestShouldRestrictByPatientName() throws Exception {
+		
+		executeDataSet(MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML); // additional test data from the fhe FHIR Enocounter DAO test we use to test the encountersWithMedicationRequests query
+		
+		MockHttpServletResponse response = get(
+		    "/Encounter/?_query=encountersWithMedicationRequests&patientSearchTerm=Chebaskwony").accept(FhirMediaTypes.JSON)
+		            .go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(1))); // patient 7 (Chebashkwony) only have 1 encounter with medication request
+		assertThat(result.getEntry(), hasSize(3)); // and that encounter has two requests, so total should be 3
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnEncountersWithMedicationRequestShouldRestrictByPatientIdentifier() throws Exception {
+		
+		executeDataSet(MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML);
+		
+		MockHttpServletResponse response = get("/Encounter/?_query=encountersWithMedicationRequests&patientSearchTerm=6TS-4")
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(1))); // patient 7 (Chebashkwony) only have 1 encounter with medication request
+		assertThat(result.getEntry(), hasSize(3)); // and that encounter has two requests, so total should be 3
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
+	}
+	
+	@Test
+	public void shouldReturnEncountersWithMedicationRequestShouldRestrictByLocation() throws Exception {
+		
+		executeDataSet(MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML); // additional test data from the fhe FHIR Enocounter DAO test we use to test the encountersWithMedicationRequests query
+		
+		MockHttpServletResponse response = get(
+		    "/Encounter/?_query=encountersWithMedicationRequests&location=9356400c-a5a2-4532-8f2b-2361b3446eb8")
+		            .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Bundle result = readBundleResponse(response);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
+		assertThat(result, hasProperty("total", equalTo(1))); // only 1 of the encounters (6 in the main test data) is at location 2 ("Xanadu",  9356400c-a5a2-4532-8f2b-2361b3446eb8)
+		assertThat(result.getEntry(), hasSize(7)); // there are 6 requests associated, so that plus the tne encounter is 7
+		
+		List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		
+		assertThat(entries, everyItem(hasProperty("fullUrl", startsWith("http://localhost/ws/fhir2/R4/"))));
+		assertThat(entries,
+		    everyItem(hasResource(hasProperty("resourceType", in(getEncounterWithMedicationRequestsValidResourceTypes())))));
+	}
+	
+	private Set<ResourceType> getEncounterWithMedicationRequestsValidResourceTypes() {
+		Set<ResourceType> validTypes = new HashSet<>();
+		
+		validTypes.add(ResourceType.Encounter);
+		validTypes.add(ResourceType.MedicationRequest);
+		validTypes.add(ResourceType.MedicationDispense);
+		
+		return validTypes;
 	}
 }

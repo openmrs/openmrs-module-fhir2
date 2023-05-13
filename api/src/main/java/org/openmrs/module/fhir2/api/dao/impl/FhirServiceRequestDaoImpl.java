@@ -33,6 +33,11 @@ import org.springframework.stereotype.Component;
 public class FhirServiceRequestDaoImpl extends BaseFhirDao<TestOrder> implements FhirServiceRequestDao<TestOrder> {
 	
 	@Override
+	public boolean hasDistinctResults() {
+		return false;
+	}
+	
+	@Override
 	protected void setupSearchParams(Criteria criteria, SearchParameterMap theParams) {
 		theParams.getParameters().forEach(entry -> {
 			switch (entry.getKey()) {

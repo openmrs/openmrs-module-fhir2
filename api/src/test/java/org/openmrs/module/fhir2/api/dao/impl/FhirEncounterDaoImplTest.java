@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.openmrs.test.OpenmrsMatchers.hasId;
 
 import java.util.List;
 
@@ -53,7 +54,9 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 	
 	private static final Integer ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER = 2002;
 	
-	private static final Integer ENCOUNTER_WITH_ONLY_INACTIVE_DRUG_ORDER = 2003;
+	private static final Integer ENCOUNTER_WITH_ONLY_CANCELlED_DRUG_ORDER = 2003;
+	
+	private static final Integer ENCOUNTER_WITH_ONLY_EXPIRED_DRUG_ORDER = 2004;
 	
 	private static final String ENCOUNTER_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml";
 	
@@ -106,13 +109,15 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
 		    hasAndListParam);
 		
-		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
-		assertThat("Encounter with Drug Orders is returned", matchingResourceIds,
-		    hasItem(equalTo(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
-		assertThat("Encounter with only inactive Drug Orders is returned", matchingResourceIds,
-		    hasItem(equalTo(ENCOUNTER_WITH_ONLY_INACTIVE_DRUG_ORDER)));
-		assertThat("Encounter without Drug Orders is not returned", matchingResourceIds,
-		    not(hasItem(equalTo(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
+		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		assertThat("Encounter with Drug Orders is returned", matchingResources,
+		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
+		assertThat("Encounter with only cancelled Drug Orders is returned", matchingResources,
+		    hasItem(hasId(ENCOUNTER_WITH_ONLY_CANCELlED_DRUG_ORDER)));
+		assertThat("Encounter with only expired Drug Orders is returned", matchingResources,
+		    hasItem(hasId(ENCOUNTER_WITH_ONLY_EXPIRED_DRUG_ORDER)));
+		assertThat("Encounter without Drug Orders is not returned", matchingResources,
+		    not(hasItem(hasId(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
 	}
 	
 	@Test
@@ -125,13 +130,59 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
 		    hasAndListParam);
 		
-		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
-		assertThat("Encounter with Drug Orders is returned", matchingResourceIds,
-		    hasItem(equalTo(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
-		assertThat("Encounter with only inactive Drug Orders is not returned", matchingResourceIds,
-		    not(hasItem(equalTo(ENCOUNTER_WITH_ONLY_INACTIVE_DRUG_ORDER))));
-		assertThat("Encounter without Drug Orders is not returned", matchingResourceIds,
-		    not(hasItem(equalTo(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
+		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		assertThat("Encounter with Drug Orders is returned", matchingResources,
+		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
+		assertThat("Encounter with only cancelled Drug Orders not is returned", matchingResources,
+		    not(hasItem(hasId(ENCOUNTER_WITH_ONLY_CANCELlED_DRUG_ORDER))));
+		assertThat("Encounter with only expired Drug Orders not is returned", matchingResources,
+		    not(hasItem(hasId(ENCOUNTER_WITH_ONLY_EXPIRED_DRUG_ORDER))));
+		assertThat("Encounter without Drug Orders is not returned", matchingResources,
+		    not(hasItem(hasId(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
+	}
+	
+	@Test
+	public void shouldOnlyReturnEncountersThatHaveAssociatedMedicationRequestsThatDoNotHaveCancelledStatus() {
+		
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "status:not", "cancelled")); // has parameter with status!=cancelled
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		assertThat("Encounter with Drug Orders is returned", matchingResources,
+		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
+		assertThat("Encounter with only cancelled Drug Orders not is returned", matchingResources,
+		    not(hasItem(hasId(ENCOUNTER_WITH_ONLY_CANCELlED_DRUG_ORDER))));
+		assertThat("Encounter with only expired Drug Orders is returned", matchingResources,
+		    hasItem(hasId(ENCOUNTER_WITH_ONLY_EXPIRED_DRUG_ORDER)));
+		assertThat("Encounter without Drug Orders is not returned", matchingResources,
+		    not(hasItem(hasId(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
+	}
+	
+	@Test
+	public void shouldIgnoreCompletedStatus() {
+		
+		// the completed status is not available until OpenMRS Core 2.2, and is tested in FhirEncounterDaoImpl_2_2Test... this test just makes sure we simply ignore this param prior to 2.2
+		
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.add(new HasParam("MedicationRequest", "encounter", "status:not", "completed")); // has parameter with status!=completed
+		HasAndListParam hasAndListParam = new HasAndListParam();
+		hasAndListParam.addAnd(hasOrListParam);
+		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
+		    hasAndListParam);
+		
+		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		assertThat("Encounter with Drug Orders is returned", matchingResources,
+		    hasItem(hasId(ENCOUNTER_WITH_DRUG_ORDERS_ID)));
+		assertThat("Encounter with only cancelled Drug Orders is returned", matchingResources,
+		    hasItem(hasId(ENCOUNTER_WITH_ONLY_CANCELlED_DRUG_ORDER)));
+		assertThat("Encounter with only expired Drug Orders is returned", matchingResources,
+		    hasItem(hasId(ENCOUNTER_WITH_ONLY_EXPIRED_DRUG_ORDER)));
+		assertThat("Encounter without Drug Orders is not returned", matchingResources,
+		    not(hasItem(hasId(ENCOUNTER_WITH_NO_DRUG_ORDERS_ID))));
 	}
 	
 	@Test
@@ -143,9 +194,9 @@ public class FhirEncounterDaoImplTest extends BaseModuleContextSensitiveTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.HAS_SEARCH_HANDLER,
 		    hasAndListParam);
 		
-		List<Integer> matchingResourceIds = dao.getSearchResultIds(theParams);
-		assertThat("Encounter with only Discontinue Order is not returned", matchingResourceIds,
-		    not(hasItem(equalTo(ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER))));
+		List<Encounter> matchingResources = dao.getSearchResults(theParams);
+		assertThat("Encounter with only Discontinue Order is not returned", matchingResources,
+		    not(hasItem(hasId(ENCOUNTER_WITH_ONLY_DISCONTINUE_DRUG_ORDER))));
 	}
 	
 	@Test

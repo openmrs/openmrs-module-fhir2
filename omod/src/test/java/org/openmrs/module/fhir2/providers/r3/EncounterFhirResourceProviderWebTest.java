@@ -67,7 +67,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProviderWebTest<EncounterFhirResourceProvider, Encounter> {
 	
-	private static final String ENCOUNTER_UUID = "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9";
+	private static final String ENCOUNTER_UUID = "6519d653-393b-4118-9c83-a3715b82d4ac"; // encounter 3 from standard test dataset
 	
 	private static final String ENCOUNTER_TYPE_UUID = "07000be2-26b6-4cce-8b40-866d8435b613";
 	
@@ -75,7 +75,7 @@ public class EncounterFhirResourceProviderWebTest extends BaseFhirR3ResourceProv
 	
 	private static final String PATIENT_IDENTIFIER = "h43489-h";
 	
-	private static final String PATIENT_UUID = "d9bc6c12-6adc-4ca6-8bde-441ec1a1c344";
+	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041"; // patient 7 from the standard test dataset
 	
 	private static final String PATIENT_GIVEN_NAME = "Hannibal";
 	

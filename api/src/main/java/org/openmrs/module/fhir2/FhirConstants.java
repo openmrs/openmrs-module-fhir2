@@ -112,6 +112,11 @@ public class FhirConstants {
 	public static final String OPENMRS_FHIR_EXT_OBSERVATION_REFERENCE_RANGE = OPENMRS_FHIR_EXT_PREFIX
 	        + "/obs/reference-range";
 	
+	public static final String OPENMRS_FHIR_EXT_RECORDED = OPENMRS_FHIR_EXT_PREFIX + "/medicationdispense/recorded";
+	
+	public static final String OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS = OPENMRS_FHIR_EXT_PREFIX
+	        + "/medicationrequest/fullfillerstatus";
+	
 	public static final String OPENMRS_FHIR_DEFAULT_PAGE_SIZE = "fhir2.paging.default";
 	
 	public static final String OPENMRS_FHIR_MAXIMUM_PAGE_SIZE = "fhir2.paging.maximum";
@@ -260,6 +265,8 @@ public class FhirConstants {
 	
 	public static final String STATUS_SEARCH_HANDLER = "status.search.handler";
 	
+	public static final String FULFILLER_STATUS_SEARCH_HANDLER = "fullfillerStatus.search.handler";
+	
 	public static final String BASED_ON_REFERENCE_SEARCH_HANDLER = "based.on.reference.search.handler";
 	
 	public static final String OWNER_REFERENCE_SEARCH_HANDLER = "owner.reference.search.handler";
@@ -275,6 +282,8 @@ public class FhirConstants {
 	public static final String LAST_UPDATED_PROPERTY = "_lastUpdated.property";
 	
 	public static final String SP_LAST_UPDATED = "_lastUpdated";
+	
+	public static final String SP_FULFILLER_STATUS = "fulfillerStatus";
 	
 	public static final String SERVLET_PATH_R4 = "/ms/fhir2Servlet";
 	

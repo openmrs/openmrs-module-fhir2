@@ -47,7 +47,15 @@
 			<openmrsVersion>2.6.* - 9.*</openmrsVersion>
 		</conditionalResource>
 		<conditionalResource>
-			<path>/lib/jackson-.*.jar</path>
+			<path>/lib/jackson-annotations-.*.jar</path>
+			<openmrsVersion>2.0.5 - 2.1.2</openmrsVersion>
+		</conditionalResource>
+		<conditionalResource>
+			<path>/lib/jackson-core-.*.jar</path>
+			<openmrsVersion>2.0.5 - 2.1.2</openmrsVersion>
+		</conditionalResource>
+		<conditionalResource>
+			<path>/lib/jackson-databind-.*.jar</path>
 			<openmrsVersion>2.0.5 - 2.1.2</openmrsVersion>
 		</conditionalResource>
 		<conditionalResource>
@@ -55,11 +63,6 @@
 			<openmrsVersion>2.0.5 - 2.1.*</openmrsVersion>
 		</conditionalResource>
     </conditionalResources>
-
-
-	<aware_of_modules>
-		<aware_of_module>org.openmrs.module.legacyui</aware_of_module>
-	</aware_of_modules>
 
 	<servlet>
 		<servlet-name>fhir2Servlet</servlet-name>

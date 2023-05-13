@@ -35,10 +35,10 @@ public class LastnResult<T> {
 	 * @param datetime the resource's effective datetime
 	 * @param attributes the other attributes of the resource
 	 */
-	public LastnResult(Object id, Object datetime, Map<String, Object> attributes) {
+	public LastnResult(T id, Date datetime, Map<String, Object> attributes) {
 		Objects.requireNonNull(id, "id must not be null");
-		this.id = (T) id;
-		this.datetime = (Date) datetime;
+		this.id = id;
+		this.datetime = datetime;
 		this.attributes = attributes;
 	}
 	

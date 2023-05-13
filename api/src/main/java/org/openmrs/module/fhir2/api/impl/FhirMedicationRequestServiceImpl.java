@@ -52,7 +52,8 @@ public class FhirMedicationRequestServiceImpl extends BaseFhirService<Medication
 	public IBundleProvider searchForMedicationRequests(ReferenceAndListParam patientReference,
 	        ReferenceAndListParam encounterReference, TokenAndListParam code, ReferenceAndListParam participantReference,
 	        ReferenceAndListParam medicationReference, TokenAndListParam id, TokenAndListParam status,
-	        DateRangeParam lastUpdated, HashSet<Include> includes, HashSet<Include> revIncludes) {
+	        TokenAndListParam fulfillerStatus, DateRangeParam lastUpdated, HashSet<Include> includes,
+	        HashSet<Include> revIncludes) {
 		
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.ENCOUNTER_REFERENCE_SEARCH_HANDLER, encounterReference)
@@ -62,6 +63,7 @@ public class FhirMedicationRequestServiceImpl extends BaseFhirService<Medication
 		        .addParameter(FhirConstants.MEDICATION_REFERENCE_SEARCH_HANDLER, medicationReference)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, id)
 		        .addParameter(FhirConstants.STATUS_SEARCH_HANDLER, status)
+		        .addParameter(FhirConstants.FULFILLER_STATUS_SEARCH_HANDLER, fulfillerStatus)
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes)
 		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, revIncludes);

@@ -39,9 +39,5 @@ public interface FhirCohortMembershipDao extends FhirDao<CohortMembership> {
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
-	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_PATIENT_COHORTS)
-	List<CohortMembership> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
+	List<CohortMembership> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

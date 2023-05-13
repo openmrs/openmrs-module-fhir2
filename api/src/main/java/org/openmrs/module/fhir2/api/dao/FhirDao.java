@@ -32,7 +32,7 @@ public interface FhirDao<T extends OpenmrsObject & Auditable> extends Serializab
 	
 	T delete(@Nonnull String uuid);
 	
-	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
+	int getSearchResultsCount(@Nonnull SearchParameterMap theParams);
 	
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
+	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

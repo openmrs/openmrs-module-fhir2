@@ -228,8 +228,7 @@ public class FhirConditionServiceImplTest {
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated)
 		        .setSortSpec(sort);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(OBS_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(Collections.singletonList(obsCondition));
+		when(dao.getSearchResults(any())).thenReturn(Collections.singletonList(obsCondition));
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());

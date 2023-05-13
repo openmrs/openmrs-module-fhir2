@@ -9,20 +9,11 @@
  */
 package org.openmrs.module.fhir2.api;
 
-import java.util.HashSet;
-
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
 import org.hl7.fhir.r4.model.Person;
+import org.openmrs.module.fhir2.api.search.param.PersonSearchParams;
 
 public interface FhirPersonService extends FhirService<Person> {
 	
-	IBundleProvider searchForPeople(StringAndListParam name, TokenAndListParam gender, DateRangeParam birthDate,
-	        StringAndListParam city, StringAndListParam state, StringAndListParam postalCode, StringAndListParam country,
-	        TokenAndListParam id, DateRangeParam lastUpdated, SortSpec sort, HashSet<Include> includes);
-	
+	IBundleProvider searchForPeople(PersonSearchParams personSearchParams);
 }

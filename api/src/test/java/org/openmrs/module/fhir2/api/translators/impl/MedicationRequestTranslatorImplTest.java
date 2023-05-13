@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.Date;
 
 import lombok.SneakyThrows;
 import org.hl7.fhir.r4.model.Annotation;
@@ -626,6 +627,17 @@ public class MedicationRequestTranslatorImplTest {
 		
 		assertThat(result, notNullValue());
 		assertThat(result.getQuantity(), equalTo(200.0));
+	}
+	
+	@Test
+	public void toFhirResource_shouldTranslateDateCreatedToAuthoredOn() {
+		Date now = new Date();
+		drugOrder.setDateCreated(now);
+		
+		MedicationRequest result = medicationRequestTranslator.toFhirResource(drugOrder);
+		
+		assertThat(result, notNullValue());
+		assertThat(result.getAuthoredOn(), equalTo(now));
 	}
 	
 	@SneakyThrows

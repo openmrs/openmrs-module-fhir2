@@ -94,8 +94,7 @@ public class FhirGroupMemberService_2_1Test {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.GROUP_MEMBERS_SEARCH_HANDLER,
 		    GROUP_MEMBER_UUID);
 		
-		when(dao.getSearchResults(any(), any())).thenReturn(memberships);
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(GROUP_MEMBER_ID));
+		when(dao.getSearchResults(any())).thenReturn(memberships);
 		when(translator.toFhirResource(cohortMembership)).thenReturn(groupMember);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));

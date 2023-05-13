@@ -3,7 +3,7 @@
     <parent>
         <artifactId>fhir2</artifactId>
         <groupId>org.openmrs.module</groupId>
-        <version>1.8.0-SNAPSHOT</version>
+        <version>1.10.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -50,7 +50,6 @@
             <groupId>${project.parent.groupId}</groupId>
             <artifactId>${project.parent.artifactId}-test-data</artifactId>
             <version>${project.parent.version}</version>
-            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -85,6 +84,13 @@
                 <configuration>
                     <skipIfEmpty>true</skipIfEmpty>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>

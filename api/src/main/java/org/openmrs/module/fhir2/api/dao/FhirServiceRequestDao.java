@@ -35,9 +35,5 @@ public interface FhirServiceRequestDao<T extends OpenmrsObject & Auditable> exte
 	
 	@Override
 	@Authorized(PrivilegeConstants.GET_ORDERS)
-	List<Integer> getSearchResultIds(@Nonnull SearchParameterMap theParams);
-	
-	@Override
-	@Authorized(PrivilegeConstants.GET_ORDERS)
-	List<T> getSearchResults(@Nonnull SearchParameterMap theParams, @Nonnull List<Integer> resourceIds);
+	List<T> getSearchResults(@Nonnull SearchParameterMap theParams);
 }

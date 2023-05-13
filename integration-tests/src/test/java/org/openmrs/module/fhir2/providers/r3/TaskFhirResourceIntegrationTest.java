@@ -22,20 +22,30 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertTrue;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Task;
+import org.hl7.fhir.dstu3.model.Task.ParameterComponent;
+import org.hl7.fhir.dstu3.model.Task.TaskOutputComponent;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +63,10 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 	private static final String JSON_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create.json";
 	
 	private static final String XML_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create.xml";
+	
+	private static final String JSON_TASK_UN_SUPPORTED_VALUES_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_un_supported_values.json";
+	
+	private static final String XML_TASK_UN_SUPPORTED_VALUES_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_un_supported_values.xml";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -155,7 +169,8 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		assertThat(task.getLastModified(), within(1, ChronoUnit.MINUTES, new Date()));
 		assertThat(task, validResource());
 		assertThat(task.getBasedOn(), hasSize(2));
-		assertThat(task.getOutput(), hasSize(2));
+		assertThat(task.getOutput(), hasSize(4));
+		assertThat(task.getInput(), hasSize(4));
 		
 		response = get("/Task/" + task.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
 		
@@ -169,6 +184,93 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		assertThat(newTask.getIntent(), equalTo(task.getIntent()));
 		assertThat(task.getAuthoredOn(), equalTo(task.getAuthoredOn()));
 		assertThat(task.getLastModified(), equalTo(task.getLastModified()));
+		assertThat(newTask.getOutput(), hasSize(4));
+		assertThat(newTask.getInput(), hasSize(4));
+		
+		List<TaskOutputComponent> outputList = newTask.getOutput();
+		Collections.sort(outputList, new Comparator<TaskOutputComponent>() {
+			
+			@Override
+			public int compare(TaskOutputComponent o1, TaskOutputComponent o2) {
+				return o1.getValue().toString().compareTo(o2.getValue().toString());
+			}
+		});
+		
+		assertTrue(outputList.get(0).getValue() instanceof StringType);
+		assertThat(outputList.get(0).getValue().toString(), equalTo("Blood Pressure"));
+		
+		assertTrue(outputList.get(1).getValue() instanceof DateTimeType);
+		assertThat(((DateTimeType) outputList.get(1).getValue()).getValue(),
+		    equalTo(Date.from(LocalDateTime.of(2011, 3, 4, 11, 45, 33).atOffset(ZoneOffset.ofHours(11)).toInstant())));
+		
+		assertTrue(outputList.get(2).getValue() instanceof DecimalType);
+		assertThat(((DecimalType) outputList.get(2).getValue()).getValueAsNumber().doubleValue(), equalTo(37.38));
+		
+		assertTrue(outputList.get(3).getValue() instanceof Reference);
+		assertThat(((Reference) outputList.get(3).getValue()).getReference(),
+		    equalTo("DiagnosticReport/9b6f11dd-55d2-4ff6-8ec2-73f6ad1b759e"));
+		
+		List<ParameterComponent> inputList = newTask.getInput();
+		Collections.sort(inputList, new Comparator<ParameterComponent>() {
+			
+			@Override
+			public int compare(ParameterComponent o1, ParameterComponent o2) {
+				
+				return o1.getValue().toString().compareTo(o2.getValue().toString());
+			}
+		});
+		
+		assertTrue(inputList.get(0).getValue() instanceof DateTimeType);
+		assertThat(((DateTimeType) inputList.get(0).getValue()).getValue(),
+		    equalTo(Date.from(LocalDateTime.of(2011, 3, 4, 11, 45, 33).atOffset(ZoneOffset.ofHours(11)).toInstant())));
+		
+		assertTrue(inputList.get(1).getValue() instanceof DecimalType);
+		assertThat(((DecimalType) inputList.get(1).getValue()).getValueAsNumber().doubleValue(), equalTo(37.38));
+		
+		assertTrue(inputList.get(2).getValue() instanceof StringType);
+		assertThat(inputList.get(2).getValue().toString(), equalTo("Test code"));
+		
+		assertTrue(inputList.get(3).getValue() instanceof Reference);
+		assertThat(((Reference) inputList.get(3).getValue()).getReference(),
+		    equalTo("DiagnosticReport/dbbd9f60-b963-4987-9ac6-ed7d9906bd82"));
+	}
+	
+	@Test
+	public void shouldIgnoreUnsupportedInPutAndOutPutValueTypesOnCreateNewTaskAsJson() throws Exception {
+		String jsonTask;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_TASK_UN_SUPPORTED_VALUES_DOCUMENT)) {
+			assertThat(is, notNullValue());
+			jsonTask = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = post("/Task").accept(FhirMediaTypes.JSON).jsonContent(jsonTask).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getHeader("Location"), containsString("/Task/"));
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Task task = readResponse(response);
+		
+		assertThat(task, notNullValue());
+		assertThat(task.getIdElement().getIdPart(), notNullValue());
+		assertThat(task.getStatus(), is(Task.TaskStatus.ACCEPTED));
+		assertThat(task.getIntent(), is(Task.TaskIntent.ORDER));
+		assertThat(task.getAuthoredOn(), within(1, ChronoUnit.MINUTES, new Date()));
+		assertThat(task.getLastModified(), within(1, ChronoUnit.MINUTES, new Date()));
+		assertThat(task, validResource());
+		assertThat(task.getBasedOn(), hasSize(2));
+		assertThat(task.getOutput(), hasSize(0));
+		assertThat(task.getInput(), hasSize(0));
+		
+		response = get("/Task/" + task.getIdElement().getIdPart()).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		
+		Task newTask = readResponse(response);
+		assertThat(newTask.getOutput(), hasSize(0));
+		assertThat(newTask.getInput(), hasSize(0));
+		
 	}
 	
 	@Test
@@ -208,6 +310,99 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR3IntegrationTest<T
 		assertThat(newTask.getIntent(), equalTo(task.getIntent()));
 		assertThat(task.getAuthoredOn(), equalTo(task.getAuthoredOn()));
 		assertThat(task.getLastModified(), equalTo(task.getLastModified()));
+		assertThat(task.getBasedOn(), hasSize(2));
+		assertThat(newTask.getOutput(), hasSize(4));
+		assertThat(newTask.getInput(), hasSize(4));
+		
+		List<TaskOutputComponent> outputList = newTask.getOutput();
+		Collections.sort(outputList, new Comparator<TaskOutputComponent>() {
+			
+			@Override
+			public int compare(TaskOutputComponent o1, TaskOutputComponent o2) {
+				return o1.getValue().toString().compareTo(o2.getValue().toString());
+			}
+		});
+		
+		assertTrue(outputList.get(0).getValue() instanceof StringType);
+		assertThat(outputList.get(0).getValue().toString(), equalTo("Blood Pressure"));
+		
+		assertTrue(outputList.get(1).getValue() instanceof DateTimeType);
+		assertThat(((DateTimeType) outputList.get(1).getValue()).getValue(),
+		    equalTo(Date.from(LocalDateTime.of(2011, 3, 4, 11, 45, 33).atOffset(ZoneOffset.ofHours(11)).toInstant())));
+		
+		assertTrue(outputList.get(2).getValue() instanceof DecimalType);
+		assertThat(((DecimalType) outputList.get(2).getValue()).getValueAsNumber().doubleValue(), equalTo(37.38));
+		
+		assertTrue(outputList.get(3).getValue() instanceof Reference);
+		assertThat(((Reference) outputList.get(3).getValue()).getReference(),
+		    equalTo("DiagnosticReport/9b6f11dd-55d2-4ff6-8ec2-73f6ad1b759e"));
+		
+		List<ParameterComponent> inputList = newTask.getInput();
+		Collections.sort(inputList, new Comparator<ParameterComponent>() {
+			
+			@Override
+			public int compare(ParameterComponent o1, ParameterComponent o2) {
+				
+				return o1.getValue().toString().compareTo(o2.getValue().toString());
+			}
+		});
+		
+		assertTrue(inputList.get(0).getValue() instanceof DateTimeType);
+		assertThat(((DateTimeType) inputList.get(0).getValue()).getValue(),
+		    equalTo(Date.from(LocalDateTime.of(2011, 3, 4, 11, 45, 33).atOffset(ZoneOffset.ofHours(11)).toInstant())));
+		
+		assertTrue(inputList.get(1).getValue() instanceof DecimalType);
+		assertThat(((DecimalType) inputList.get(1).getValue()).getValueAsNumber().doubleValue(), equalTo(37.38));
+		
+		assertTrue(inputList.get(2).getValue() instanceof StringType);
+		assertThat(inputList.get(2).getValue().toString(), equalTo("Test code"));
+		
+		assertTrue(inputList.get(3).getValue() instanceof Reference);
+		assertThat(((Reference) inputList.get(3).getValue()).getReference(),
+		    equalTo("DiagnosticReport/dbbd9f60-b963-4987-9ac6-ed7d9906bd82"));
+	}
+	
+	@Test
+	public void shouldIgnoreUnsupportedInPutAndOutPutValueTypesOnCreateNewTaskAsXML() throws Exception {
+		String xmlTask;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_TASK_UN_SUPPORTED_VALUES_DOCUMENT)) {
+			assertThat(is, notNullValue());
+			xmlTask = inputStreamToString(is, UTF_8);
+		}
+		MockHttpServletResponse response = post("/Task").accept(FhirMediaTypes.XML).xmlContent(xmlTask).go();
+		
+		assertThat(response, isCreated());
+		assertThat(response.getHeader("Location"), containsString("/Task/"));
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Task task = readResponse(response);
+		
+		assertThat(task, notNullValue());
+		assertThat(task.getIdElement().getIdPart(), notNullValue());
+		assertThat(task.getStatus(), is(Task.TaskStatus.ACCEPTED));
+		assertThat(task.getIntent(), is(Task.TaskIntent.ORDER));
+		assertThat(task.getAuthoredOn(), within(1, ChronoUnit.MINUTES, new Date()));
+		assertThat(task.getLastModified(), within(1, ChronoUnit.MINUTES, new Date()));
+		assertThat(task, validResource());
+		assertThat(task.getOutput(), hasSize(0));
+		assertThat(task.getInput(), hasSize(0));
+		
+		response = get("/Task/" + task.getIdElement().getIdPart()).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		
+		Task newTask = readResponse(response);
+		
+		assertThat(newTask, notNullValue());
+		assertThat(newTask.getIdElement().getIdPart(), equalTo(task.getIdElement().getIdPart()));
+		assertThat(newTask.getStatus(), equalTo(task.getStatus()));
+		assertThat(newTask.getIntent(), equalTo(task.getIntent()));
+		assertThat(task.getAuthoredOn(), equalTo(task.getAuthoredOn()));
+		assertThat(task.getLastModified(), equalTo(task.getLastModified()));
+		assertThat(newTask.getOutput(), hasSize(0));
+		assertThat(newTask.getInput(), hasSize(0));
+		
 	}
 	
 	@Test

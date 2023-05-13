@@ -208,8 +208,7 @@ public class FhirGroupServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap()
 		        .addParameter(FhirConstants.PARTICIPANT_REFERENCE_SEARCH_HANDLER, participant);
 		
-		when(dao.getSearchResults(any(), any())).thenReturn(cohorts);
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.singletonList(COHORT_ID));
+		when(dao.getSearchResults(any())).thenReturn(cohorts);
 		when(translator.toFhirResource(cohort)).thenReturn(group);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));

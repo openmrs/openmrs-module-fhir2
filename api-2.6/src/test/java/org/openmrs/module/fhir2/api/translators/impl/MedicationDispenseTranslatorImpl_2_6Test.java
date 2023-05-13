@@ -21,13 +21,13 @@ import java.util.Date;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Dosage;
-import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Timing;
+import org.joda.time.DateTime;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -42,6 +42,7 @@ import org.openmrs.OrderFrequency;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.OrderService;
+import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.LocationReferenceTranslator;
@@ -103,6 +104,8 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 	
 	private org.hl7.fhir.r4.model.MedicationDispense fhirDispense;
 	
+	private Date dateCreated;
+	
 	private MedicationDispenseTranslatorImpl_2_6 translator;
 	
 	@Before
@@ -145,8 +148,10 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 		translator.setPractitionerReferenceTranslator(practitionerReferenceTranslator);
 		translator.setMedicationDispenseStatusTranslator(medicationDispenseStatusTranslator);
 		
+		dateCreated = new Date();
 		openmrsDispense = new MedicationDispense();
 		openmrsDispense.setUuid(MEDICATION_DISPENSE_UUID);
+		openmrsDispense.setDateCreated(dateCreated);
 		
 		fhirDispense = new org.hl7.fhir.r4.model.MedicationDispense();
 		fhirDispense.setId(MEDICATION_DISPENSE_UUID);
@@ -261,14 +266,25 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 	
 	@Test
 	public void toFhirResource_shouldTranslateDateLastUpdated() {
-		openmrsDispense.setDateCreated(new Date());
+		Date dateCreated = new DateTime("2012-01-01").toDate();
+		Date dateChanged = new DateTime("2012-02-01").toDate();
+		
+		// should use date created if only date created
+		openmrsDispense.setDateCreated(dateCreated);
 		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
 		assertThat(dispense.getMeta().getLastUpdated(), notNullValue());
 		assertThat(dispense.getMeta().getLastUpdated(), equalTo(openmrsDispense.getDateCreated()));
+		
+		// but use date updated if it exists
+		openmrsDispense.setDateCreated(dateCreated);
+		openmrsDispense.setDateChanged(dateChanged);
+		dispense = translator.toFhirResource(openmrsDispense);
+		assertThat(dispense.getMeta().getLastUpdated(), notNullValue());
+		assertThat(dispense.getMeta().getLastUpdated(), equalTo(openmrsDispense.getDateChanged()));
+		
 	}
 	
 	@Test
-	@Ignore // TODO: Un-ignore once we merge in other PR around medication request concepts
 	public void toFhirResource_shouldTranslateMedicationConcept() {
 		Concept openmrsObject = new Concept();
 		CodeableConcept fhirObject = newCodeableConcept();
@@ -400,22 +416,18 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 	}
 	
 	@Test
+	public void toFhirResource_shouldTranslateRecordedExtension() {
+		org.hl7.fhir.r4.model.MedicationDispense dispense = translator.toFhirResource(openmrsDispense);
+		assertThat(
+		    ((DateTimeType) dispense.getExtensionByUrl(FhirConstants.OPENMRS_FHIR_EXT_RECORDED).getValue()).getValue(),
+		    equalTo(dateCreated));
+	}
+	
+	@Test
 	public void toOpenmrsType_shouldTranslateId() {
 		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
 		assertThat(dispense, notNullValue());
 		assertThat(dispense.getUuid(), equalTo(MEDICATION_DISPENSE_UUID));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldTranslatePatient() {
-		Patient openmrsObject = new Patient();
-		Reference fhirObject = newReference();
-		when(patientReferenceTranslator.toOpenmrsType(fhirObject)).thenReturn(openmrsObject);
-		
-		fhirDispense.setSubject(fhirObject);
-		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
-		assertThat(dispense.getPatient(), notNullValue());
-		assertThat(dispense.getPatient(), equalTo(openmrsObject));
 	}
 	
 	@Test
@@ -507,15 +519,6 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 	}
 	
 	@Test
-	public void toOpenmrsType_shouldTranslateDateLastUpdated() {
-		fhirDispense.setMeta(new Meta().setLastUpdated(new Date()));
-		MedicationDispense dispense = translator.toOpenmrsType(fhirDispense);
-		assertThat(dispense.getDateCreated(), notNullValue());
-		assertThat(dispense.getDateCreated(), equalTo(fhirDispense.getMeta().getLastUpdated()));
-	}
-	
-	@Test
-	@Ignore // TODO: Un-ignore once we merge in other PR around medication request concepts
 	public void toOpenmrsType_shouldTranslateMedicationConcept() {
 		Concept openmrsObject = new Concept();
 		CodeableConcept fhirObject = newCodeableConcept();
@@ -648,6 +651,211 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 		assertThat(dispense.getSubstitutionReason(), equalTo(openmrsObject));
 	}
 	
+	/**
+	 * The following set of tests confirm that if we set a specific Medication Dispense FHIR field to
+	 * null, when updating an OpenMRS Medication Dispense, that field is set to null
+	 */
+	@Test
+	public void toOpenmrsType_shouldSetEncounterToNull() {
+		Encounter encounter = new Encounter();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setEncounter(encounter);
+		
+		fhirDispense.setContext(null);
+		;
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getEncounter(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetDrugOrderToNull() {
+		DrugOrder drugOrder = new DrugOrder();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setDrugOrder(drugOrder);
+		
+		fhirDispense.addAuthorizingPrescription(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getDrugOrder(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetStatusReasonToNull() {
+		Concept statusReason = new Concept();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setStatusReason(statusReason);
+		
+		fhirDispense.setStatusReason(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getStatusReason(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetLocationToNull() {
+		Location location = new Location();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setLocation(location);
+		
+		fhirDispense.setLocation(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getLocation(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetTypeToNull() {
+		Concept type = new Concept();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setType(type);
+		
+		fhirDispense.setType(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getType(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetDatePreparedToNull() {
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setDatePrepared(new Date());
+		
+		fhirDispense.setWhenPrepared(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getDatePrepared(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetDateHandedOverToNull() {
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setDateHandedOver(new Date());
+		
+		fhirDispense.setWhenHandedOver(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getDateHandedOver(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetDoseQuantityAndUnitsToNull() {
+		Concept doseUnits = new Concept();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setDose(100d);
+		medicationDispense.setDoseUnits(doseUnits);
+		
+		Dosage.DosageDoseAndRateComponent doseAndRateComponent = new Dosage.DosageDoseAndRateComponent();
+		doseAndRateComponent.setDose(null);
+		fhirDispense.addDosageInstruction(new Dosage().addDoseAndRate(doseAndRateComponent));
+		MedicationDispense dispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(dispense.getDose(), nullValue());
+		assertThat(dispense.getDoseUnits(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetRouteToNull() {
+		Concept route = new Concept();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setRoute(route);
+		
+		fhirDispense.addDosageInstruction().setRoute(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getRoute(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetDoseFrequencyToNull() {
+		OrderFrequency frequencyConcept = new OrderFrequency();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setFrequency(frequencyConcept);
+		
+		fhirDispense.addDosageInstruction().setTiming(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getFrequency(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetDoseAsNeededToNull() {
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setAsNeeded(true);
+		
+		fhirDispense.addDosageInstruction().setAsNeeded(null);
+		MedicationDispense dispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(dispense.getAsNeeded(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetDosingInstructionsToNull() {
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setDosingInstructions("These are dosing instructions");
+		
+		fhirDispense.addDosageInstruction().setText(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getDosingInstructions(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetDispenseQuantityAndUnitsToNull() {
+		Concept quantityUnits = new Concept();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setQuantity(100d);
+		medicationDispense.setQuantityUnits(quantityUnits);
+		
+		fhirDispense.setQuantity(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getQuantity(), nullValue());
+		assertThat(medicationDispense.getQuantityUnits(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetDispenserToNull() {
+		Provider provider = new Provider();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setDispenser(provider);
+		
+		fhirDispense.addPerformer().setActor(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getDispenser(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetSubstitutionToNull() {
+		Concept substitutionType = new Concept();
+		Concept substitutionReason = new Concept();
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setWasSubstituted(true);
+		medicationDispense.setSubstitutionType(substitutionType);
+		medicationDispense.setSubstitutionReason(substitutionReason);
+		
+		fhirDispense.setSubstitution(null);
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getWasSubstituted(), nullValue());
+		assertThat(medicationDispense.getSubstitutionType(), nullValue());
+		assertThat(medicationDispense.getSubstitutionReason(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetSubstitutionTypeToNull() {
+		Concept substitutionType = new Concept();
+		;
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setWasSubstituted(true);
+		medicationDispense.setSubstitutionType(substitutionType);
+		
+		fhirDispense.setSubstitution(new org.hl7.fhir.r4.model.MedicationDispense.MedicationDispenseSubstitutionComponent()
+		        .setType(null).setWasSubstituted(true));
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getSubstitutionType(), nullValue());
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldSetSubstitutionReasonToNull() {
+		Concept substitutionReason = new Concept();
+		;
+		MedicationDispense medicationDispense = new MedicationDispense();
+		medicationDispense.setWasSubstituted(true);
+		medicationDispense.setSubstitutionReason(substitutionReason);
+		
+		fhirDispense.setSubstitution(new org.hl7.fhir.r4.model.MedicationDispense.MedicationDispenseSubstitutionComponent()
+		        .setReason(null).setWasSubstituted(true));
+		medicationDispense = translator.toOpenmrsType(medicationDispense, fhirDispense);
+		assertThat(medicationDispense.getSubstitutionReason(), nullValue());
+	}
+	
 	private CodeableConcept newCodeableConcept() {
 		CodeableConcept c = new CodeableConcept();
 		c.addCoding(new Coding("system", "code", "display"));
@@ -659,4 +867,4 @@ public class MedicationDispenseTranslatorImpl_2_6Test {
 		r.setReference("reference");
 		return r;
 	}
-}
+};

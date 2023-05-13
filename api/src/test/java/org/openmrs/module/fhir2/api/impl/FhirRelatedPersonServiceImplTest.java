@@ -223,8 +223,7 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -248,8 +247,7 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -273,7 +271,6 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.NAME_SEARCH_HANDLER,
 		    stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -293,8 +290,7 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.GENDER_SEARCH_HANDLER,
 		    tokenAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -317,7 +313,6 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.GENDER_SEARCH_HANDLER,
 		    tokenAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -342,8 +337,7 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
 		    dateRangeParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -367,7 +361,6 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.DATE_RANGE_SEARCH_HANDLER,
 		    dateRangeParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -388,8 +381,7 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.CITY_PROPERTY, stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -413,7 +405,6 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.CITY_PROPERTY, stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -434,8 +425,7 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.STATE_PROPERTY, stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -459,7 +449,6 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.STATE_PROPERTY, stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -480,8 +469,7 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.POSTAL_CODE_PROPERTY, stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -505,7 +493,6 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.POSTAL_CODE_PROPERTY, stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -526,8 +513,7 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.COUNTRY_PROPERTY, stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -551,7 +537,6 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.ADDRESS_SEARCH_HANDLER,
 		    FhirConstants.COUNTRY_PROPERTY, stringAndListParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -571,8 +556,8 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -593,7 +578,6 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.ID_PROPERTY, uuid);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -611,8 +595,8 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResultsCount(any())).thenReturn(1);
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -634,7 +618,6 @@ public class FhirRelatedPersonServiceImplTest {
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER,
 		    FhirConstants.LAST_UPDATED_PROPERTY, lastUpdated);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
@@ -652,8 +635,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -676,8 +658,7 @@ public class FhirRelatedPersonServiceImplTest {
 		
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, includes);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(RELATED_PERSON_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(relationship));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(relationship));
 		when(translator.toFhirResource(relationship)).thenReturn(relatedPerson);
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));

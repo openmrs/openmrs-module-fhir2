@@ -28,6 +28,7 @@ import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
 import org.openmrs.Provider;
+import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.module.fhir2.api.translators.ConceptTranslator;
 import org.openmrs.module.fhir2.api.translators.DosageTranslator;
 import org.openmrs.module.fhir2.api.translators.EncounterReferenceTranslator;
@@ -44,6 +45,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
+@OpenmrsProfile(openmrsPlatformVersion = "2.0.5 - 2.1.*")
 public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTranslator implements MedicationRequestTranslator {
 	
 	@Autowired
@@ -82,6 +84,7 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		
 		MedicationRequest medicationRequest = new MedicationRequest();
 		medicationRequest.setId(drugOrder.getUuid());
+		medicationRequest.setAuthoredOn(drugOrder.getDateCreated());
 		medicationRequest.setStatus(statusTranslator.toFhirResource(drugOrder));
 		
 		if (drugOrder.getDrug() != null) {
@@ -133,7 +136,9 @@ public class MedicationRequestTranslatorImpl extends BaseReferenceHandlingTransl
 		notNull(existingDrugOrder, "The existing DrugOrder object should not be null");
 		notNull(medicationRequest, "The MedicationRequest object should not be null");
 		
-		existingDrugOrder.setUuid(medicationRequest.getId());
+		if (medicationRequest.hasId()) {
+			existingDrugOrder.setUuid(medicationRequest.getIdElement().getIdPart());
+		}
 		
 		if (medicationRequest.hasMedicationReference()) {
 			Drug drug = medicationReferenceTranslator.toOpenmrsType(medicationRequest.getMedicationReference());

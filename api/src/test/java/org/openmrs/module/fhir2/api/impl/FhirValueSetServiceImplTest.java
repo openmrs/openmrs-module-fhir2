@@ -115,8 +115,7 @@ public class FhirValueSetServiceImplTest {
 		        .addAnd(new StringOrListParam().add(new StringParam(ROOT_CONCEPT_NAME)));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.TITLE_SEARCH_HANDLER, titleParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(singletonList(ROOT_CONCEPT_ID));
-		when(dao.getSearchResults(any(), any())).thenReturn(singletonList(concept));
+		when(dao.getSearchResults(any())).thenReturn(singletonList(concept));
 		
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
@@ -138,7 +137,6 @@ public class FhirValueSetServiceImplTest {
 		        .addAnd(new StringOrListParam().add(new StringParam("wrong name")));
 		SearchParameterMap theParams = new SearchParameterMap().addParameter(FhirConstants.TITLE_SEARCH_HANDLER, titleParam);
 		
-		when(dao.getSearchResultIds(any())).thenReturn(Collections.emptyList());
 		when(searchQuery.getQueryResults(any(), any(), any(), any())).thenReturn(
 		    new SearchQueryBundleProvider<>(theParams, dao, translator, globalPropertyService, searchQueryInclude));
 		
