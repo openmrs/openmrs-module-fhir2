@@ -91,7 +91,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 						results.add(obs);
 						groupCount--;
 					}
-
+					
 					if (results.size() >= theParams.getToIndex()) {
 						//Load only as many results as requested per page
 						break;

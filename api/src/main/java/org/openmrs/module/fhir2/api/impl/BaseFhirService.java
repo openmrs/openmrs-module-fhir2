@@ -34,6 +34,7 @@ import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.api.util.JsonPatchUtils;
+import org.openmrs.module.fhir2.api.util.XmlPatchUtils;
 import org.openmrs.validator.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -148,8 +149,12 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 				// see https://erosb.github.io/post/json-patch-vs-merge-patch/ for an example of the difference
 				updatedFhirObject = JsonPatchUtils.apply(fhirContext, existingFhirObject, body);
 				break;
+			case XML_PATCH:
+				// uses https://github.com/dnault/xml-patch to do the patches on an xml document
+				updatedFhirObject = XmlPatchUtils.apply(fhirContext, existingFhirObject, body);
+				break;
 			default:
-				throw new InvalidRequestException("only JSON patches currently supported");
+				throw new InvalidRequestException("only JSON and XML patches currently supported");
 		}
 		return applyUpdate(existingObject, updatedFhirObject);
 	}

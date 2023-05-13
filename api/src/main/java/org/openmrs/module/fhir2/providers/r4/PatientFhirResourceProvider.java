@@ -23,12 +23,14 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -96,6 +98,16 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		patient.setId(id.getIdPart());
 		
 		return FhirProviderUtils.buildUpdate(patientService.update(id.getIdPart(), patient));
+	}
+	
+	@Patch
+	public MethodOutcome patchPatient(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update resource");
+		}
+		
+		Patient patient = patientService.patch(id.getIdPart(), patchType, body);
+		return FhirProviderUtils.buildPatch(patient);
 	}
 	
 	@Delete

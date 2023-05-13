@@ -26,8 +26,6 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-;
-
 public class JsonPatchUtils {
 	
 	public static <T extends IBaseResource> T apply(FhirContext theCtx, T theResourceToUpdate, String thePatchBody) {
