@@ -91,7 +91,7 @@ public class LocationFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Patch
-	public MethodOutcome patchMedicationRequest(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body) {
+	public MethodOutcome patchLocation(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update resource");
 		}
