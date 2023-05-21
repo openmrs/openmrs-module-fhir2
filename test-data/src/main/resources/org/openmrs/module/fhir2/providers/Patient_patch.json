@@ -1,11 +1,3 @@
 {
-  "name": [
-    {
-      "family": "Muhereza",
-      "given": [
-        "Herman"
-      ]
-    }
-  ],
-  "gender" : "F"
+  "gender": "female"
 }
