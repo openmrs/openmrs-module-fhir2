@@ -39,6 +39,7 @@ public class PatientFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4In
 	
 	private static final String JSON_PATCH_PATIENT_PATH = "org/openmrs/module/fhir2/providers/Patient_patch.json";
 	
+	private static final String XML_PATCH_PATIENT_PATH = "org/openmrs/module/fhir2/providers/Patient_xmlpatch.xml";
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private PatientFhirResourceProvider resourceProvider;
@@ -64,6 +65,30 @@ public class PatientFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4In
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
 		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Patient patient = readResponse(response);
+		
+		assertThat(patient, notNullValue());
+		assertThat(patient.getIdElement().getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(patient, validResource());
+		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
+	}
+	
+	@Test
+	public void shouldPatchExistingPatientAsXMLPatch() throws Exception {
+		String xmlPatientPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_PATIENT_PATH)) {
+			Objects.requireNonNull(is);
+			xmlPatientPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).xmlPatch(xmlPatientPatch)
+				.accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, notNullValue());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Patient patient = readResponse(response);

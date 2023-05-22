@@ -273,11 +273,14 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		
 		public static final MediaType JSON_MERGE_PATCH;
 		
+		public static final MediaType XML_PATCH;
+		
 		static {
 			JSON = MediaType.valueOf("application/fhir+json");
 			XML = MediaType.valueOf("application/fhir+xml");
 			// note that this is actually the MIME-type for a Json Patch (not a Json Merge Patch); it should really be "application/merge-patch+json" but HAPI FHIR doesn't seem to support this
 			JSON_MERGE_PATCH = MediaType.valueOf("application/merge-patch+json");
+			XML_PATCH = MediaType.valueOf("application/xml-patch+xml");
 		}
 		
 		private FhirMediaTypes() {
@@ -381,6 +384,12 @@ public abstract class BaseFhirIntegrationTest<T extends IResourceProvider, U ext
 		public FhirRequestBuilder jsonMergePatch(@Nonnull String json) {
 			request.addHeader(CONTENT_TYPE, FhirMediaTypes.JSON_MERGE_PATCH.toString());
 			request.setContent(json.getBytes(StandardCharsets.UTF_8));
+			return this;
+		}
+		
+		public FhirRequestBuilder xmlPatch(@Nonnull String xml) {
+			request.addHeader(CONTENT_TYPE, FhirMediaTypes.XML_PATCH.toString());
+			request.setContent(xml.getBytes(StandardCharsets.UTF_8));
 			return this;
 		}
 		
