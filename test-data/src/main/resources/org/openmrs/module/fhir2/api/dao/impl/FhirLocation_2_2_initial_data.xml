@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+	<location location_id="1"  name="Test location 1" description="Test description" date_created="2023-01-01 00:00:00.0" retired="false" uuid="e0938432-1691-11df-97a5-7038c432"/>
+	<location location_id="5"  name="Test location 5" description="Test description" city_village="Artuor" country="Kenya" postal_code="4069-3100" state_province="province" date_created="2005-01-01 00:00:00.0" retired="false" uuid="dc80983f-8b2c-4524-bdbd-b5e825e263a0"/>
+</dataset>
