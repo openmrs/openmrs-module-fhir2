@@ -43,6 +43,10 @@ public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> impleme
 	@Autowired
 	private SearchQuery<FhirTask, Task, FhirTaskDao, TaskTranslator, SearchQueryInclude<Task>> searchQuery;
 	
+	/**
+	 * Get collection of tasks corresponding to the provided search parameters
+	 * @return the collection of Tasks that match the search parameters
+	 */
 	@Override
 	@Transactional(readOnly = true)
 	public IBundleProvider searchForTasks(TaskSearchParams taskSearchParams) {

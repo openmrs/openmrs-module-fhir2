@@ -36,6 +36,7 @@ public class TaskSearchParams extends BaseResourceSearchParams {
      * @param id The UUID of the requested task
      * @param lastUpdated A date range corresponding to when the Tasks were last updated
      * @param sort The sort parameters for the search results
+     * @param includes request for specified referenced resources
      * @return the collection of Tasks that match the search parameters
      */
 
