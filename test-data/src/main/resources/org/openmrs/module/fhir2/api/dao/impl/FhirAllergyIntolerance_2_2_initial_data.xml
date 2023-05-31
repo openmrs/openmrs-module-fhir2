@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+	<concept concept_id="5085" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept concept_id="5086" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept concept_id="5087" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5087AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept concept_id="5088" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5088AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept concept_id="5089" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept concept_id="5090" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept concept_id="5091" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5091AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept concept_id="5092" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5092AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<concept concept_id="5093" retired="false" datatype_id="4" class_id="3" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" changed_by="1" date_changed="2005-02-25 11:43:43.0" uuid="5093AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+	<allergy allergy_id="1010" patient_id="6" severity_concept_id="5090" allergen_type="FOOD" coded_allergen="5085" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1085AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<allergy allergy_id="1011" patient_id="6" severity_concept_id="5091" allergen_type="DRUG" coded_allergen="5087" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1081AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<allergy allergy_id="1012" patient_id="6" severity_concept_id="5092" allergen_type="ENVIRONMENT" coded_allergen="5088" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1082AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<allergy allergy_id="1013" patient_id="6" severity_concept_id="5093" allergen_type="OTHER" coded_allergen="5089" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1083AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+	<allergy_reaction allergy_reaction_id="2020" allergy_id="1010"  reaction_concept_id="5087" reaction_non_coded="" uuid="9950AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<allergy_reaction allergy_reaction_id="2021" allergy_id="1010"  reaction_concept_id="5086" reaction_non_coded="" uuid="5099AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<allergy_reaction allergy_reaction_id="2022" allergy_id="1011"  reaction_concept_id="5086" reaction_non_coded="" uuid="5097AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<allergy_reaction allergy_reaction_id="2023" allergy_id="1012"  reaction_concept_id="5087" reaction_non_coded="" uuid="5098AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<allergy_reaction allergy_reaction_id="2024" allergy_id="1013"  reaction_concept_id="5087" reaction_non_coded="" uuid="5096AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+	<person person_id="6" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="8d703ff2-c3e2-4070-9737-73e713d5a50d"/>
+	<person person_id="7" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="ca17fcc5-ec96-487f-b9ea-42973c8973e3"/>
+	<person_name person_name_id="2" preferred="true" person_id="6" given_name="John" middle_name="F" family_name="Doe" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="7e2acadc-5073-4a39-914a-debcbec8c1c9"/>
+	<person_name person_name_id="3" preferred="true" person_id="7" given_name="I" middle_name="am" family_name="voided" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="37e60810-0ba9-4f32-ba80-0af59f59e966"/>
+	<patient patient_id="6" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+	<patient patient_id="7" creator="1" date_created="2005-01-01 00:00:00.0" voided="true"/>
+
+	<patient_identifier patient_identifier_id="1" patient_id="6" identifier="M4001-1" identifier_type="1" preferred="0" location_id="1" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689f"/>
+	<patient_identifier patient_identifier_id="2" patient_id="7" identifier="M4001-2" identifier_type="1" preferred="0" location_id="1" creator="1" date_created="2004-01-01 00:00:00.0" voided="false" uuid="504c83c7-cfbf-4ae7-a4da-bdfa3236689g"/>
+
+	<allergy allergy_id="1014" patient_id="8" severity_concept_id="23" allergen_type="ENVIRONMENT" coded_allergen="5497" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1084AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+	<concept_name concept_id="5085" name="CD3+CD4+ABS CNT" locale="en_GB" creator="1" date_created="2006-06-06 14:03:53.0" concept_name_id="1480" locale_preferred="0" voided="false" uuid="8230adbf-30a9-4e18-b8d7-hc87e0c23cad"/>
+	<concept_name concept_id="5086" name="TREATMENT STATUS" locale="en_GB" creator="1" date_created="2008-08-15 16:22:03.0" concept_name_id="1461" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="f1d6bf98-6hg5-48a0-aafd-1e2b590e6ed1"/>
+	<concept_name concept_id="5087" name="ANTIRETROVIRAL TREATMENT GROUP" locale="en_GB" creator="1" date_created="2008-08-15 16:57:42.0" concept_name_id="1462" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="de1jhbe-33e1-422a-8d5e-9a4c28c1ea42"/>
+	<concept_name concept_id="5088" name="FOLLOWING" locale="en_GB" creator="1" date_created="2008-08-15 16:58:44.0" concept_name_id="1463" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="e821bc92-66b7-4948-8614-52dsfs6988bb"/>
+	<concept_name concept_id="5090" name="DIED" locale="en_GB" creator="1" date_created="2008-08-15 16:59:19.0" concept_name_id="1465" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="f3ba002f-801f-45fc-8cfe-5437e15a9b3b"/>
+	<concept_name concept_id="5091" name="WAITING FOR RESULTS" locale="en_GB" creator="1" date_created="2008-08-15 16:59:56.0" concept_name_id="1466" concept_name_type="FULLY_SPECIFIED" locale_preferred="1" voided="false" uuid="2f7ds3e4-2a57-49b5-aef0-af9a259aac65"/>
+
+	<allergy allergy_id="1015" patient_id="2" severity_concept_id="21" allergen_type="ENVIRONMENT" coded_allergen="23" creator="1" date_voided="2010-09-03 11:12:00.0" date_changed="2010-03-31 00:12:00.0" date_created="2005-01-01 00:00:00.0" voided="true" uuid="1090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<allergy allergy_id="1016" patient_id="2" severity_concept_id="21" allergen_type="ENVIRONMENT" coded_allergen="23" creator="1" date_changed="2010-03-31 00:12:00.0" date_created="2005-01-01 00:00:00.0" voided="false" uuid="1091AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+	<allergy_reaction allergy_reaction_id="2025" allergy_id="1014"  reaction_concept_id="5086" reaction_non_coded="" uuid="5100AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<allergy_reaction allergy_reaction_id="2026" allergy_id="1015"  reaction_concept_id="5086" reaction_non_coded="" uuid="5101AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+	<allergy_reaction allergy_reaction_id="2027" allergy_id="1016"  reaction_concept_id="5086" reaction_non_coded="" uuid="5102AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
+
+	<global_property property="allergy.concept.severity.mild" property_value="5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" uuid="4f55827e-26fe-dsfb-80cb-0017a47871b3"/>
+	<global_property property="allergy.concept.severity.moderate" property_value="5091AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" uuid="4f5dgs7e-26fe-dsfb-80cb-0017a47871b3"/>
+	<global_property property="allergy.concept.severity.severe" property_value="5092AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" uuid="4f55827e-26fe-dsfb-80cb-0017fhfd1b3"/>
+</dataset>
