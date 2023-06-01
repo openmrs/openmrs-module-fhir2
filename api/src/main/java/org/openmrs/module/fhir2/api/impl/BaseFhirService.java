@@ -33,6 +33,7 @@ import org.openmrs.module.fhir2.api.dao.FhirDao;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
+import org.openmrs.module.fhir2.api.util.JsonMergePatchUtils;
 import org.openmrs.module.fhir2.api.util.JsonPatchUtils;
 import org.openmrs.validator.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,8 +149,17 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 				// see https://erosb.github.io/post/json-patch-vs-merge-patch/ for an example of the difference
 				updatedFhirObject = JsonPatchUtils.apply(fhirContext, existingFhirObject, body);
 				break;
+			case XML_PATCH:
+			case FHIR_PATCH_JSON:
+			case FHIR_PATCH_XML:
+				throw new InvalidRequestException("only JSON_PATCH and JSON_MERGE_PATCH patches are currently supported");
 			default:
-				throw new InvalidRequestException("only JSON patches currently supported");
+				if (patchType.getContentType().equalsIgnoreCase("application/merge-patch+json")) {
+					// Handles JSON_MERGE_PATCH as a special case since it's not part of the PatchTypeEnum enum class
+					updatedFhirObject = JsonMergePatchUtils.apply(fhirContext, existingFhirObject, body);
+				} else {
+					throw new InvalidRequestException("Invalid patch type");
+				}
 		}
 		return applyUpdate(existingObject, updatedFhirObject);
 	}
