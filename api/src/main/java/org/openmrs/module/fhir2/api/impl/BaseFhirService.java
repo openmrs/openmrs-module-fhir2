@@ -146,10 +146,19 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 			case JSON_PATCH:
 				// note that we are actually doing a JSON Merge Patch, not a JSON Patch, but FHIR doesn't seem to support this type
 				// see https://erosb.github.io/post/json-patch-vs-merge-patch/ for an example of the difference
-				updatedFhirObject = JsonPatchUtils.apply(fhirContext, existingFhirObject, body);
+				updatedFhirObject = JsonPatchUtils.applyJsonPatch(fhirContext, existingFhirObject, body);
 				break;
+			case XML_PATCH:
+			case FHIR_PATCH_JSON:
+			case FHIR_PATCH_XML:
+				throw new InvalidRequestException("only JSON_PATCH and JSON_MERGE_PATCH patches are currently supported");
 			default:
-				throw new InvalidRequestException("only JSON patches currently supported");
+				if (isJsonMergePatch(patchType)) {
+					// Handles JSON_MERGE_PATCH as a special case since it's not part of the PatchTypeEnum enum class
+					updatedFhirObject = JsonPatchUtils.applyJsonMergePatch(fhirContext, existingFhirObject, body);
+				} else {
+					throw new InvalidRequestException("Invalid patch type");
+				}
 		}
 		return applyUpdate(existingObject, updatedFhirObject);
 	}
@@ -234,6 +243,10 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		catch (ValidationException e) {
 			throw new UnprocessableEntityException(e.getMessage(), e);
 		}
+	}
+	
+	private Boolean isJsonMergePatch(PatchTypeEnum patchTypeEnum) {
+		return patchTypeEnum.getContentType().equalsIgnoreCase("application/merge-patch+json");
 	}
 	
 	protected ResourceNotFoundException resourceNotFound(String uuid) {
