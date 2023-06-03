@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -81,13 +82,13 @@ public class MedicationRequestFhirResourceProvider implements IResourceProvider 
 	
 	@Patch
 	public MethodOutcome patchMedicationRequest(@IdParam @Nonnull IdType id, PatchTypeEnum patchType,
-	        @ResourceParam String body) {
+	        @ResourceParam String body, RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update resource");
 		}
 		
 		org.hl7.fhir.r4.model.MedicationRequest medicationRequest = medicationRequestService.patch(id.getIdPart(), patchType,
-		    body);
+		    body, requestDetails);
 		
 		return FhirProviderUtils.buildPatch(medicationRequest);
 	}

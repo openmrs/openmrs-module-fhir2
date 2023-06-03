@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -126,7 +128,8 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 	}
 	
 	@Override
-	public T patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body) {
+	public T patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body,
+	        RequestDetails requestDetails) {
 		if (uuid == null) {
 			throw new InvalidRequestException("id cannot be null");
 		}
@@ -144,21 +147,15 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		
 		switch (patchType) {
 			case JSON_PATCH:
-				// note that we are actually doing a JSON Merge Patch, not a JSON Patch, but FHIR doesn't seem to support this type
-				// see https://erosb.github.io/post/json-patch-vs-merge-patch/ for an example of the difference
-				updatedFhirObject = JsonPatchUtils.applyJsonPatch(fhirContext, existingFhirObject, body);
-				break;
-			case XML_PATCH:
-			case FHIR_PATCH_JSON:
-			case FHIR_PATCH_XML:
-				throw new InvalidRequestException("only JSON_PATCH and JSON_MERGE_PATCH patches are currently supported");
-			default:
-				if (isJsonMergePatch(patchType)) {
-					// Handles JSON_MERGE_PATCH as a special case since it's not part of the PatchTypeEnum enum class
+				if (isJsonMergePatch(requestDetails)) {
 					updatedFhirObject = JsonPatchUtils.applyJsonMergePatch(fhirContext, existingFhirObject, body);
 				} else {
-					throw new InvalidRequestException("Invalid patch type");
+					updatedFhirObject = JsonPatchUtils.applyJsonPatch(fhirContext, existingFhirObject, body);
 				}
+				break;
+			default:
+				throw new InvalidRequestException("only JSON_PATCH and JSON_MERGE_PATCH patches are currently supported");
+			
 		}
 		return applyUpdate(existingObject, updatedFhirObject);
 	}
@@ -245,8 +242,13 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		}
 	}
 	
-	private Boolean isJsonMergePatch(PatchTypeEnum patchTypeEnum) {
-		return patchTypeEnum.getContentType().equalsIgnoreCase("application/merge-patch+json");
+	/**
+	 * checks the Content-Type header of the request to determine if it corresponds to a merge json
+	 * patch
+	 */
+	private Boolean isJsonMergePatch(RequestDetails requestDetails) {
+		String contentType = requestDetails.getHeader(Constants.HEADER_CONTENT_TYPE);
+		return contentType != null && contentType.equalsIgnoreCase("application/merge-patch+json");
 	}
 	
 	protected ResourceNotFoundException resourceNotFound(String uuid) {

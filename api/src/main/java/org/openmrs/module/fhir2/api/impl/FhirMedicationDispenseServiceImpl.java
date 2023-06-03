@@ -16,6 +16,7 @@ import java.util.List;
 
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.AccessLevel;
@@ -56,7 +57,8 @@ public class FhirMedicationDispenseServiceImpl implements FhirMedicationDispense
 	}
 	
 	@Override
-	public MedicationDispense patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body) {
+	public MedicationDispense patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body,
+	        RequestDetails requestDetails) {
 		throw new UnsupportedOperationException("MedicationDispense is not available in OpenMRS versions < 2.6.0");
 	}
 	
