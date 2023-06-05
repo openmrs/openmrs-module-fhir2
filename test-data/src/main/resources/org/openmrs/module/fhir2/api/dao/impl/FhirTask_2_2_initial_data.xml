@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+-->
+<dataset>
+	<fhir_reference reference_id="1" name="basedOn reference" target_type="ServiceRequest" reference="7d96f25c-4949-4f72-9931-d808fbc226de" uuid="2fcc13f9-8b72-4fba-9997-50ebbd73f305" creator="1" date_created="2012-01-01 00:00:00.0" retired="false"/>
+	<fhir_reference reference_id="2" name="Other reference" target_type="Practitioner" reference="7d96f25c-4949-4f72-9931-d808fa226de" uuid="2fcc13f8-8b72-4fba-9997-50ebbd73d305" creator="1" date_created="2012-01-01 00:00:00.0" retired="false"/>
+	<fhir_reference reference_id="3" name="owner reference" target_type="Practitioner" reference="7f8aec9d-8269-4bb4-8bc5-1820bb31092c" uuid="2fcc13f9-8b72-4fba-9997-50eebd73f3c5" creator="1" date_created="2012-01-01 00:00:00.0" retired="false"/>
+	<fhir_reference reference_id="4" name="location reference" target_type="Location" reference="58ab6cf9-ea12-43bc-98a6-40353423331e" uuid="4fd5425a-6aca-418d-b92c-23e07e164080" creator="1" date_created="2012-01-01 00:00:00.0" retired="false"/>
+	<fhir_task task_id="1" name="Accepted Order Task" status="ACCEPTED" location_reference_id="4" intent="ORDER" creator="1" date_created="2012-01-01 00:00:00.0" date_changed="2012-09-01 00:00:00.0" retired="false" uuid="d899333c-5bd4-45cc-b1e7-2f9542dbcbf6"/>
+</dataset>
