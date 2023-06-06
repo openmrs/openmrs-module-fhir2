@@ -77,7 +77,9 @@ public class PractitionerTranslatorProviderImpl implements PractitionerTranslato
 			return null;
 		}
 		
-		existingProvider.setUuid(practitioner.getId());
+		if (practitioner.hasId()) {
+			existingProvider.setUuid(practitioner.getIdElement().getIdPart());
+		}
 		
 		existingProvider.setIdentifier(practitioner.getIdentifierFirstRep().getValue());
 		

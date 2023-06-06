@@ -134,7 +134,9 @@ public class PatientTranslatorImpl implements PatientTranslator {
 		notNull(currentPatient, "The existing Openmrs Patient object should not be null");
 		notNull(patient, "The Patient object should not be null");
 		
-		currentPatient.setUuid(patient.getId());
+		if (patient.hasId()) {
+			currentPatient.setUuid(patient.getIdElement().getIdPart());
+		}
 		
 		for (Identifier identifier : patient.getIdentifier()) {
 			PatientIdentifier omrsIdentifier = identifierTranslator.toOpenmrsType(identifier);

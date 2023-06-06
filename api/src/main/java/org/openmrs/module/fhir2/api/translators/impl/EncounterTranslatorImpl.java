@@ -99,7 +99,9 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		notNull(existingEncounter, "The existing Openmrs Encounter object should not be null");
 		notNull(encounter, "The Encounter object should not be null");
 		
-		existingEncounter.setUuid(encounter.getId());
+		if (encounter.hasId()) {
+			existingEncounter.setUuid(encounter.getIdElement().getIdPart());
+		}
 		
 		EncounterType encounterType = encounterTypeTranslator.toOpenmrsType(encounter.getType());
 		if (encounterType != null) {

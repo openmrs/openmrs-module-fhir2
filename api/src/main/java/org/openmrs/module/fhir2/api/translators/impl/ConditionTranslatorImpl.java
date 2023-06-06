@@ -96,7 +96,11 @@ public class ConditionTranslatorImpl implements ConditionTranslator<Obs> {
 	public Obs toOpenmrsType(@Nonnull Obs existingObsCondition, @Nonnull org.hl7.fhir.r4.model.Condition condition) {
 		notNull(existingObsCondition, "The existing Openmrs Obs Condition object should not be null");
 		notNull(condition, "The Condition object should not be null");
-		existingObsCondition.setUuid(condition.getIdElement().getIdPart());
+		
+		if (condition.hasId()) {
+			existingObsCondition.setUuid(condition.getIdElement().getIdPart());
+		}
+		
 		CodeableConcept codeableConcept = condition.getCode();
 		existingObsCondition.setValueCoded(conceptTranslator.toOpenmrsType(codeableConcept));
 		existingObsCondition.setPerson(patientReferenceTranslator.toOpenmrsType(condition.getSubject()));

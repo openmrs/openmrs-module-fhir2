@@ -94,8 +94,8 @@ public class MedicationTranslatorImpl implements MedicationTranslator {
 			return null;
 		}
 		
-		if (medication.getId() != null) {
-			existingDrug.setUuid(medication.getId());
+		if (medication.hasId()) {
+			existingDrug.setUuid(medication.getIdElement().getIdPart());
 		}
 		
 		if (medication.hasCode()) {
