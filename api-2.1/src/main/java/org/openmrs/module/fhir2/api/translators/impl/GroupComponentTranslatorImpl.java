@@ -33,7 +33,11 @@ public class GroupComponentTranslatorImpl implements GroupComponentTranslator {
 	@Override
 	public GroupMember toOpenmrsType(@Nonnull Group.GroupMemberComponent component) {
 		GroupMember member = new GroupMember();
-		member.setId(component.getId());
+		
+		if (component.hasId()) {
+			member.setId(component.getId());
+		}
+		
 		member.setEntity(component.getEntity());
 		member.setEntityTarget(component.getEntityTarget());
 		member.setInactive(component.getInactive());
