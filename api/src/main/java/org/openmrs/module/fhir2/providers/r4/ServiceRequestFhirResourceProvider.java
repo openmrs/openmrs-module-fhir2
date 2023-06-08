@@ -19,10 +19,12 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
@@ -83,6 +85,17 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 		serviceRequest.setId(id.getIdPart());
 		
 		return FhirProviderUtils.buildUpdate(serviceRequestService.update(id.getIdPart(), serviceRequest));
+	}
+	
+	@Patch
+	public MethodOutcome patchServiceRequest(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update resource");
+		}
+		
+		ServiceRequest serviceRequest = serviceRequestService.patch(id.getIdPart(), patchType, body);
+		
+		return FhirProviderUtils.buildPatch(serviceRequest);
 	}
 	
 	@SuppressWarnings("unused")
