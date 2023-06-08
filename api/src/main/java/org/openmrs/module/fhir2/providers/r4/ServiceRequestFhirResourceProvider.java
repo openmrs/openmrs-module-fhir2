@@ -90,7 +90,7 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	@Patch
 	public MethodOutcome patchServiceRequest(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body) {
 		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update resource");
+			throw new InvalidRequestException("id must be specified to update service request resource");
 		}
 		
 		ServiceRequest serviceRequest = serviceRequestService.patch(id.getIdPart(), patchType, body);
