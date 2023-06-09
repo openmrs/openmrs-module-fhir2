@@ -65,7 +65,7 @@ public class PersonFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4Int
 	}
 	
 	@Test
-	public void shouldPatchPersonResourceViaJson() throws Exception {
+	public void shouldPatchPersonResourceViaJsonMergePatch() throws Exception {
 		String jsonPersonPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PERSON_PATH)) {
 			Objects.requireNonNull(is);
