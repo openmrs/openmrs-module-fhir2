@@ -64,7 +64,7 @@ public class LocationFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4I
 	}
 	
 	@Test
-	public void shouldPatchExistingLocationViaJson() throws Exception {
+	public void shouldPatchExistingLocationUsingJsonMergePatch() throws Exception {
 		String jsonLocationPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_LOCATION_PATH)) {
 			Objects.requireNonNull(is);
