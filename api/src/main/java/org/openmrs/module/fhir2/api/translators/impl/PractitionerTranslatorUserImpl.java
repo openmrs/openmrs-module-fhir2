@@ -85,7 +85,10 @@ public class PractitionerTranslatorUserImpl implements PractitionerTranslator<Us
 			return null;
 		}
 		
-		user.setUuid(practitioner.getId());
+		if (practitioner.hasId()) {
+			user.setUuid(practitioner.getIdElement().getIdPart());
+		}
+		
 		setSystemId(practitioner, user);
 		
 		if (practitioner.hasBirthDateElement()) {

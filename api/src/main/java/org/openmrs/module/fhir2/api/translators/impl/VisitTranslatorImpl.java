@@ -79,7 +79,9 @@ public class VisitTranslatorImpl extends BaseEncounterTranslator implements Enco
 		notNull(existingVisit, "The existingVisit object should not be null");
 		notNull(encounter, "The Encounter object should not be null");
 		
-		existingVisit.setUuid(encounter.getId());
+		if (encounter.hasId()) {
+			existingVisit.setUuid(encounter.getIdElement().getIdPart());
+		}
 		
 		VisitType visitType = visitTypeTranslator.toOpenmrsType(encounter.getType());
 		if (visitType != null) {

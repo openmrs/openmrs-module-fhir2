@@ -59,7 +59,7 @@ public abstract class BaseGroupTranslator {
 		notNull(existingCohort, "ExistingCohort object should not be null");
 		
 		if (group.hasId()) {
-			existingCohort.setUuid(group.getId());
+			existingCohort.setUuid(group.getIdElement().getIdPart());
 		}
 		
 		if (group.hasName()) {
