@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -122,12 +123,12 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	}
 	
 	@Patch
-	public MethodOutcome patchAllergy(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body) {
+	public MethodOutcome patchAllergy(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body, RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to patch resource");
 		}
 		
-		AllergyIntolerance allergyIntolerance = fhirAllergyIntoleranceService.patch(id.getIdPart(), patchType, body);
+		AllergyIntolerance allergyIntolerance = fhirAllergyIntoleranceService.patch(id.getIdPart(), patchType, body, requestDetails);
 		
 		return FhirProviderUtils.buildPatch(allergyIntolerance);
 	}

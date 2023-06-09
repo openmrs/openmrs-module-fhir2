@@ -64,7 +64,7 @@ public class AllergyIntoleranceFhirResourceProvider_2_2IntegrationTest extends B
 	}
 	
 	@Test
-	public void shouldPatchExistingAllergyViaJson() throws Exception {
+	public void shouldPatchExistingAllergyViaJsonMergePatch() throws Exception {
 		String jsonAllergyPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_ALLERGY_PATH)) {
 			Objects.requireNonNull(is);
