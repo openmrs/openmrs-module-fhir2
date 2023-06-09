@@ -154,7 +154,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 				}
 				break;
 			default:
-				throw new InvalidRequestException("only JSON_PATCH and JSON_MERGE_PATCH patches are currently supported");
+				throw new InvalidRequestException("only JSON-formatted patches are currently supported");
 			
 		}
 		return applyUpdate(existingObject, updatedFhirObject);
