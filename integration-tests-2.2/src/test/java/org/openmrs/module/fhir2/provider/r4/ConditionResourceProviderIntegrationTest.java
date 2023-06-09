@@ -278,7 +278,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	}
 	
 	@Test
-	public void shouldPatchExistingConditionViaJson() throws Exception {
+	public void shouldPatchExistingConditionViaJsonMergePatch() throws Exception {
 		String jsonConditionPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_CONDITION_PATH)) {
 			Objects.requireNonNull(is);
