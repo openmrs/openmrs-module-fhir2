@@ -102,7 +102,8 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Patch
-	public MethodOutcome patchPatient(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body, RequestDetails requestDetails) {
+	public MethodOutcome patchPatient(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
+	        RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update resource");
 		}

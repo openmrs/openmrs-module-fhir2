@@ -40,7 +40,7 @@ public class PatientFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4In
 	private static final String JSON_PATCH_PATIENT_TEXT = "[\n    { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"female\" }\n]";
 	
 	private static final String JSON_MERGE_PATCH_PATIENT_PATH = "org/openmrs/module/fhir2/providers/Patient_patch.json";
-
+	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private PatientFhirResourceProvider resourceProvider;
@@ -61,7 +61,7 @@ public class PatientFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4In
 		}
 		
 		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).jsonMergePatch(jsonPatientPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
@@ -79,7 +79,7 @@ public class PatientFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4In
 	@Test
 	public void shouldPatchExistingResourceViaJsonPatch() throws Exception {
 		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).jsonPatch(JSON_PATCH_PATIENT_TEXT)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response, notNullValue());
@@ -93,5 +93,5 @@ public class PatientFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4In
 		assertThat(patient, validResource());
 		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
 	}
-
+	
 }
