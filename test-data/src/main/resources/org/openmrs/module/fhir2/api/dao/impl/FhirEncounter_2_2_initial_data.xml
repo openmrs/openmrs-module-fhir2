@@ -9,5 +9,19 @@
     graphic logo is a trademark of OpenMRS Inc.
 -->
 <dataset>
+    <location location_id="1" name="Test Location" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="c36006e5-9fbb-4f20-866b-0ece245615a1"/>
+
+    <encounter_role encounter_role_id="2" name = "surgeon" description = "who did the operation" creator="1" date_created="2005-01-01 00:00:00.0" retired = "true" retired_by="1" date_retired="2005-01-01 00:00:00.0" retire_reason="for testing" uuid="430bbb70-6a9c-4e1e-badb-9c1054b1b5e9"/>
+    <encounter_type encounter_type_id="1" name="Test Enc Type B" description="Some desc" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="759799ab-c9a5-435e-b671-77773ada74e4"/>
+
+    <form form_id="1" name="Basic Form" version="0.1" build="0" published="0" description="Test form" creator="1" date_created="2005-08-07 00:00:00.0" changed_by="1" date_changed="2007-10-24 14:51:53.0" retired="false"  uuid="2a45c87e-e43d-42ff-83c7-e70a229fa99d"/>
+    <provider provider_id="2" person_id="1" identifier="2"  creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="04df6c50-772c-42d5-88ba-5a582957afa8" />
+
+    <person person_id="2" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" gender="M"  uuid="a194be38-271a-44cb-ba3f-f2dbf4831fe9"/>
+    <person_name person_id="2" person_name_id="2" preferred="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" given_name="John" middle_name=" " family_name="Doe"  uuid="765b882e-db79-498b-aff7-b5b53f12caf1"/>
+    <patient patient_id="2" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+    <patient_identifier patient_identifier_id="1" patient_id="2" creator="1" date_created="2005-01-01 00:00:00.0" identifier="1234" identifier_type="1" preferred="1" voided="false" location_id="1"  uuid="b2c299e7-2679-44b8-a7a3-c69159a20ac0"/>
+
 	<encounter encounter_id="1001" encounter_type="1" form_id="1" encounter_datetime="2010-01-01 00:00:00.0" patient_id="2" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="0" uuid="430bbb70-6a9c-4e1e-badb-9d1034b1b5e9"/>
+    <encounter_provider encounter_provider_id="2" encounter_id="1001" provider_id="2" encounter_role_id="2" creator="1" date_created="2006-03-11 15:57:35.0" voided="false" uuid="b566821c-1ad9-473b-836b-9e9c67688e02" />
 </dataset>

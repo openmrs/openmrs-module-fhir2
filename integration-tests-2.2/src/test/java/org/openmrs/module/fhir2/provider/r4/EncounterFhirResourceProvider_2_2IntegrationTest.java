@@ -74,7 +74,7 @@ public class EncounterFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4
 		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
 		assertThat(encounter, validResource());
 		
-//		assertThat(encounter.getClass_().getCode(), is("EMER"));
-//		assertThat(encounter.getClass_().getDisplay(), is("emergency"));
+		assertThat(encounter.getClass_().getCode(), is("EMER"));
+		assertThat(encounter.getClass_().getDisplay(), is("emergency"));
 	}
 }
