@@ -38,6 +38,8 @@ public class MedicationFhirResourceProvider_2_2IntegrationTest extends BaseFhirR
 	
 	private static final String JSON_PATCH_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/Medication_patch.json";
 	
+	private static final String JSON_PATCH_MEDICATION_FILE = "org/openmrs/module/fhir2/providers/Medication_json_patch.json";
+	
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
 	private MedicationFhirResourceProvider resourceProvider;
@@ -76,6 +78,30 @@ public class MedicationFhirResourceProvider_2_2IntegrationTest extends BaseFhirR
 		
 		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).jsonMergePatch(jsonMedicationPatch)
 		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Medication medication = readResponse(response);
+		
+		assertThat(medication, notNullValue());
+		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
+		assertThat(medication, validResource());
+		
+		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationViaJsonPatch() throws Exception {
+		String jsonMedicationPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_MEDICATION_FILE)) {
+			Objects.requireNonNull(is);
+			jsonMedicationPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).jsonPatch(jsonMedicationPatch)
+				.accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
