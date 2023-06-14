@@ -61,6 +61,8 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	
 	private static final String JSON_PATCH_CONDITION_PATH = "org/openmrs/module/fhir2/providers/Condition_json_merge_patch.json";
 	
+	private static final String JSON_PATCH_CONDITION_FILE= "org/openmrs/module/fhir2/providers/Condition_json_patch.json";
+	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private ConditionFhirResourceProvider resourceProvider;
@@ -287,6 +289,33 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID)
 				.jsonMergePatch(jsonConditionPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Condition condition = readResponse(response);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
+		assertThat(condition, validResource());
+		
+		assertThat(condition.hasClinicalStatus(), is(true));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("inactive"));
+	}
+	
+	
+	@Test
+	public void shouldPatchExistingConditionViaJsonPatch() throws Exception {
+		String jsonConditionPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_CONDITION_FILE)) {
+			Objects.requireNonNull(is);
+			jsonConditionPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID)
+				.jsonPatch(jsonConditionPatch).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
