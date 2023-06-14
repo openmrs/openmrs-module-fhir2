@@ -39,6 +39,8 @@ public class TaskFhirResourceProvider_2_2_IntegrationTest extends BaseFhirR4Inte
 	
 	private static final String JSON_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_merge_json_patch.json";
 	
+	private static final String JSON_PATCH_TASK_TEXT = "[\n    { \"op\": \"replace\", \"path\": \"/status\", \"value\": \"requested\" }\n]";
+	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private TaskFhirResourceProvider resourceProvider;
@@ -78,6 +80,23 @@ public class TaskFhirResourceProvider_2_2_IntegrationTest extends BaseFhirR4Inte
 		
 		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonMergePatch(jsonTaskPatch)
 		        .accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Task task = readResponse(response);
+		
+		assertThat(task, notNullValue());
+		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
+		assertThat(task, validResource());
+		assertThat(task.getStatus(), is(Task.TaskStatus.REQUESTED));
+	}
+	
+	@Test
+	public void shouldPatchExistingTaskAsJsonUsingJsonPatch() throws Exception {
+		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonPatch(JSON_PATCH_TASK_TEXT)
+				.accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
