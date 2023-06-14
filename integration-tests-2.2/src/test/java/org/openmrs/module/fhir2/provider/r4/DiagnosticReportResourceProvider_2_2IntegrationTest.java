@@ -40,6 +40,8 @@ public class DiagnosticReportResourceProvider_2_2IntegrationTest extends BaseFhi
 	
 	private static final String JSON_PATCH_REPORT_PATH = "org/openmrs/module/fhir2/providers/DiagnosticReport_patch.json";
 	
+	private static final String JSON_PATCH_REPORT_TEXT = "[\n    { \"op\": \"replace\", \"path\": \"/status\", \"value\": \"registered\" }\n]";
+	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private DiagnosticReportFhirResourceProvider resourceProvider;
@@ -92,6 +94,25 @@ public class DiagnosticReportResourceProvider_2_2IntegrationTest extends BaseFhi
 		
 		MockHttpServletResponse response = patch("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
 		        .jsonMergePatch(jsonDiagnosticReportPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		DiagnosticReport diagnosticReport = readResponse(response);
+		
+		assertThat(diagnosticReport, notNullValue());
+		assertThat(diagnosticReport.getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(diagnosticReport, validResource());
+		
+		assertThat(diagnosticReport.getStatus(), equalTo(DiagnosticReport.DiagnosticReportStatus.REGISTERED));
+	}
+	
+	
+	@Test
+	public void shouldPatchExistingDiagnosticReportViaJsonPatch() throws Exception {
+		MockHttpServletResponse response = patch("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
+				.jsonPatch(JSON_PATCH_REPORT_TEXT).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
