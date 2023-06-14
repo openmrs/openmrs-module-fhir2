@@ -37,6 +37,8 @@ public class LocationFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4I
 	
 	private static final String JSON_PATCH_LOCATION_PATH = "org/openmrs/module/fhir2/providers/Location_merge_json_patch.json";
 	
+	private static final String JSON_PATCH_LOCATION_TEXT= "[\n  {\n    \"op\": \"replace\",\n    \"path\": \"/name\",\n    \"value\": \"Patched Location\"\n  }\n]\n";
+	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private LocationFhirResourceProvider resourceProvider;
@@ -90,5 +92,24 @@ public class LocationFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4I
 		assertThat(location.getAddress().getCountry(), is("Uganda"));
 		assertThat(location.getAddress().getPostalCode(), is("0000 WK"));
 		assertThat(location.getAddress().getState(), is("Central Region"));
+	}
+	
+	@Test
+	public void shouldPatchExistingLocationUsingJsonPatch() throws Exception {
+		MockHttpServletResponse response = patch("/Location/" + LOCATION_UUID).jsonPatch(JSON_PATCH_LOCATION_TEXT)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, notNullValue());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Location location = readResponse(response);
+		
+		assertThat(location, notNullValue());
+		assertThat(location.getIdElement().getIdPart(), equalTo(LOCATION_UUID));
+		assertThat(location, validResource());
+		
+		assertThat(location.getName(), is("Patched Location"));
 	}
 }
