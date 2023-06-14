@@ -37,6 +37,8 @@ public class AllergyIntoleranceFhirResourceProvider_2_2IntegrationTest extends B
 	
 	private static final String JSON_PATCH_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntolerance_json_merge_patch.json";
 	
+	private static final String JSON_PATCH_ALLERGY_TEXT = "[\n  {\n    \"op\": \"replace\",\n    \"path\": \"/clinicalStatus\",\n    \"value\": {\n      \"coding\": [\n        {\n          \"system\": \"http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical\",\n          \"code\": \"active\"\n        }\n      ],\n      \"text\": \"Active\"\n    }\n  }\n]\n";
+	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private AllergyIntoleranceFhirResourceProvider resourceProvider;
@@ -88,6 +90,29 @@ public class AllergyIntoleranceFhirResourceProvider_2_2IntegrationTest extends B
 		assertThat(allergyIntolerance.hasClinicalStatus(), is(true));
 		assertThat(allergyIntolerance.getClinicalStatus().getCodingFirstRep().getSystem(),
 		    equalTo("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"));
+		assertThat(allergyIntolerance.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("active"));
+		assertThat(allergyIntolerance.getClinicalStatus().getText(), equalTo("Active"));
+	}
+	
+	@Test
+	public void shouldPatchExistingAllergyViaJsonPatch() throws Exception {
+		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID)
+				.jsonPatch(JSON_PATCH_ALLERGY_TEXT).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		AllergyIntolerance allergyIntolerance = readResponse(response);
+		
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
+		assertThat(allergyIntolerance, validResource());
+		
+		//ensure clinical status has been patched
+		assertThat(allergyIntolerance.hasClinicalStatus(), is(true));
+		assertThat(allergyIntolerance.getClinicalStatus().getCodingFirstRep().getSystem(),
+				equalTo("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"));
 		assertThat(allergyIntolerance.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("active"));
 		assertThat(allergyIntolerance.getClinicalStatus().getText(), equalTo("Active"));
 	}
