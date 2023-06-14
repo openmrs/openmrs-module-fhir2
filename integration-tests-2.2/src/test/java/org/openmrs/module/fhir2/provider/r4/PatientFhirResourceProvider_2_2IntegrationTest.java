@@ -37,7 +37,7 @@ public class PatientFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4In
 	
 	private static final String PATIENT_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirPatient_2_2_initial_data.xml";
 	
-	private static final String JSON_PATCH_PATIENT_TEXT = "[\n    { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"female\" }\n]";
+	private static final String JSON_PATCH_PATIENT_PATH = "org/openmrs/module/fhir2/providers/Patient_json_patch.json";
 	
 	private static final String JSON_MERGE_PATCH_PATIENT_PATH = "org/openmrs/module/fhir2/providers/Patient_patch.json";
 	
@@ -78,7 +78,13 @@ public class PatientFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4In
 	
 	@Test
 	public void shouldPatchExistingResourceViaJsonPatch() throws Exception {
-		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).jsonPatch(JSON_PATCH_PATIENT_TEXT)
+		String jsonPatientPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PATIENT_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPatientPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).jsonPatch(jsonPatientPatch)
 		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
