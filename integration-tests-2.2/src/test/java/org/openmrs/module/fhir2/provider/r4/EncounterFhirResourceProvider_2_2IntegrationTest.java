@@ -1,4 +1,27 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.fhir2.provider.r4;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.exparity.hamcrest.date.DateMatchers.sameDay;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
+
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,22 +33,14 @@ import org.openmrs.module.fhir2.providers.r4.EncounterFhirResourceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.io.InputStream;
-import java.util.Objects;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
-
-public class EncounterFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4IntegrationTest<EncounterFhirResourceProvider, Encounter> {
+public class EncounterFhirResourceProvider_2_2IntegrationTest
+		extends BaseFhirR4IntegrationTest<EncounterFhirResourceProvider, Encounter> {
+	
 	private static final String ENCOUNTER_UUID = "430bbb70-6a9c-4e1e-badb-9d1034b1b5e9";
 	
-	private static final String MEDICATION_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounter_2_2_initial_data.xml";
+	private static final String ENCOUNTER_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounter_2_2_initial_data.xml";
 	
-	private static final String JSON_PATCH_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/Encounter_patch.json";
+	private static final String JSON_PATCH_ENCOUNTER_PATCH = "org/openmrs/module/fhir2/providers/Encounter_patch.json";
 	
 	@Autowired
 	@Getter(AccessLevel.PUBLIC)
@@ -35,7 +50,7 @@ public class EncounterFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4
 	@Override
 	public void setup() throws Exception {
 		super.setup();
-		executeDataSet(MEDICATION_DATA_XML);
+		executeDataSet(ENCOUNTER_DATA_XML);
 	}
 	
 	@Test
@@ -56,7 +71,7 @@ public class EncounterFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4
 	@Test
 	public void shouldPatchExistingMedicationViaJsonMergePatch() throws Exception {
 		String jsonEncounterPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_MEDICATION_PATH)) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_ENCOUNTER_PATCH)) {
 			Objects.requireNonNull(is);
 			jsonEncounterPatch = inputStreamToString(is, UTF_8);
 		}
@@ -74,7 +89,10 @@ public class EncounterFhirResourceProvider_2_2IntegrationTest extends BaseFhirR4
 		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
 		assertThat(encounter, validResource());
 		
-		assertThat(encounter.getClass_().getCode(), is("EMER"));
-		assertThat(encounter.getClass_().getDisplay(), is("emergency"));
+		assertThat(encounter.getPeriod(), notNullValue());
+		assertThat(encounter.getPeriod().hasStart(), is(true));
+		assertThat(encounter.getPeriod().getStart(),
+				sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
 	}
 }

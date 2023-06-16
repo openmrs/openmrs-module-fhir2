@@ -1,7 +1,5 @@
 {
-  "class": {
-    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
-    "code": "EMER",
-    "display": "emergency"
+  "period": {
+    "start": "2005-02-01T00:00:00+05:30"
   }
 }

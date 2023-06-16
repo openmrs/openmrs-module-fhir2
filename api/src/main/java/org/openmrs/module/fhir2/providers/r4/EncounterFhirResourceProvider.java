@@ -111,7 +111,7 @@ public class EncounterFhirResourceProvider implements IResourceProvider {
 	@Patch
 	@SuppressWarnings("unused")
 	public MethodOutcome patchEncounter(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
-			RequestDetails requestDetails) {
+	        RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to update encounter resource");
 		}
