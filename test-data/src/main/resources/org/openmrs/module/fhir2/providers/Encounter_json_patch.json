@@ -1,0 +1,7 @@
+[
+  {
+    "op": "replace",
+    "path": "/period/start",
+    "value": "2005-02-01T00:00:00+05:30"
+  }
+]
