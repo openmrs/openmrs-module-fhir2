@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.providers.r4;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.exparity.hamcrest.date.DateMatchers.sameDay;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
@@ -26,6 +27,9 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +54,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	private static final String MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml"; // not loaded for all tests
 	
 	private static final String ENCOUNTER_JSON_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_create.json";
+	
+	private static final String JSON_PATCH_ENCOUNTER_PATCH = "org/openmrs/module/fhir2/providers/Encounter_patch.json";
 	
 	private static final String ENCOUNTER_XML_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_create.xml";
 	
@@ -104,6 +110,34 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter, notNullValue());
 		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
 		assertThat(encounter, validResource());
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationViaJsonMergePatch() throws Exception {
+		String jsonEncounterPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_ENCOUNTER_PATCH)) {
+			Objects.requireNonNull(is);
+			jsonEncounterPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Encounter/" + ENCOUNTER_UUID).jsonMergePatch(jsonEncounterPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Encounter encounter = readResponse(response);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
+		assertThat(encounter, validResource());
+		
+		assertThat(encounter.getPeriod(), notNullValue());
+		assertThat(encounter.getPeriod().hasStart(), is(true));
+		assertThat(encounter.getPeriod().getStart(),
+				sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
 	}
 	
 	@Test
