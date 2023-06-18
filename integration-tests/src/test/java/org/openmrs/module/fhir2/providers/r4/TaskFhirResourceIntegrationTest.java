@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -61,6 +62,10 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	private static final String WRONG_TASK_UUID = "097c8573-b26d-4893-a3e3-ea5c21c3cc94";
 	
 	private static final String JSON_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create.json";
+	
+	final String JSON_MERGE_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_merge_json_patch.json";
+	
+	private static final String JSON_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_json_patch.json";
 	
 	private static final String JSON_TASK_UN_SUPPORTED_VALUES_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_un_supported_values.json";
 	
@@ -99,6 +104,52 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(task.getLocation().getReference(), is(LOCATION_UUID));
 		assertThat(task, validResource());
 		
+	}
+	
+	@Test
+	public void shouldPatchExistingTaskAsJsonUsingJsonMergePatch() throws Exception {
+		String jsonTaskPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_TASK_PATH)) {
+			Objects.requireNonNull(is);
+			jsonTaskPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonMergePatch(jsonTaskPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Task task = readResponse(response);
+		
+		assertThat(task, notNullValue());
+		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
+		assertThat(task, validResource());
+		assertThat(task.getStatus(), is(Task.TaskStatus.REQUESTED));
+	}
+	
+	@Test
+	public void shouldPatchExistingTaskAsJsonUsingJsonPatch() throws Exception {
+		String jsonTaskPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_TASK_PATH)) {
+			Objects.requireNonNull(is);
+			jsonTaskPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonPatch(jsonTaskPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Task task = readResponse(response);
+		
+		assertThat(task, notNullValue());
+		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
+		assertThat(task, validResource());
+		assertThat(task.getStatus(), is(Task.TaskStatus.REQUESTED));
 	}
 	
 	@Test
