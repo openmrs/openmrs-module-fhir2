@@ -50,6 +50,10 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	
 	private static final String MEDICATION_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationDaoImplTest_initial_data.xml";
 	
+	private static final String JSON_MERGE_PATCH_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/Medication_patch.json";
+	
+	private static final String JSON_PATCH_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/Medication_json_patch.json";
+	
 	private static final String JSON_CREATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_create.json";
 	
 	private static final String XML_CREATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_create.xml";
@@ -83,6 +87,54 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(medication, notNullValue());
 		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
 		assertThat(medication, validResource());
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationViaJsonMergePatch() throws Exception {
+		String jsonMedicationPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_MEDICATION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonMedicationPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).jsonMergePatch(jsonMedicationPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Medication medication = readResponse(response);
+		
+		assertThat(medication, notNullValue());
+		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
+		assertThat(medication, validResource());
+		
+		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationViaJsonPatch() throws Exception {
+		String jsonMedicationPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_MEDICATION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonMedicationPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).jsonPatch(jsonMedicationPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Medication medication = readResponse(response);
+		
+		assertThat(medication, notNullValue());
+		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
+		assertThat(medication, validResource());
+		
+		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
 	}
 	
 	@Test
