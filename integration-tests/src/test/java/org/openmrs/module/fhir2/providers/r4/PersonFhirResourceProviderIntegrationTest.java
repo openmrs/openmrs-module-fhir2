@@ -52,6 +52,10 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 	
 	private static final String XML_CREATE_PERSON = "org/openmrs/module/fhir2/providers/PersonWebTest_create.xml";
 	
+	private static final String JSON_PATCH_PERSON_PATH = "org/openmrs/module/fhir2/providers/Person_json_merge_patch.json";
+	
+	private static final String JSON_PATCH_PERSON_FILE = "org/openmrs/module/fhir2/providers/Person_json_patch.json";
+	
 	private static final String PERSON_UUID = "5c521595-4e12-46b0-8248-b8f2d3697766";
 	
 	private static final String WRONG_PERSON_UUID = "f090747b-459b-4a13-8c1b-c0567d8aeb63";
@@ -80,6 +84,54 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		assertThat(person, notNullValue());
 		assertThat(person.getIdElement().getIdPart(), equalTo(PERSON_UUID));
 		assertThat(person, validResource());
+	}
+	
+	@Test
+	public void shouldPatchPersonResourceViaJsonMergePatch() throws Exception {
+		String jsonPersonPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PERSON_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPersonPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).jsonMergePatch(jsonPersonPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Person person = readResponse(response);
+		
+		assertThat(person, notNullValue());
+		assertThat(person.getIdElement().getIdPart(), equalTo(PERSON_UUID));
+		assertThat(person, validResource());
+		
+		assertThat(person.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
+	}
+	
+	@Test
+	public void shouldPatchPersonResourceViaJsonPatch() throws Exception {
+		String jsonPersonPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PERSON_FILE)) {
+			Objects.requireNonNull(is);
+			jsonPersonPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).jsonPatch(jsonPersonPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Person person = readResponse(response);
+		
+		assertThat(person, notNullValue());
+		assertThat(person.getIdElement().getIdPart(), equalTo(PERSON_UUID));
+		assertThat(person, validResource());
+		
+		assertThat(person.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
 	}
 	
 	@Test
