@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.provider.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,8 +19,11 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
+import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -41,6 +45,10 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 	public static final String NEW_DISPENSE_UUID = "a15e4988-d07a-11ec-8307-0242ac110002";
 	
 	private static final String PATIENT_UUID = "5946f880-b197-400b-9caa-a3c661d23041";
+	
+	private static final String JSON_MERGE_PATCH_DISPENSE_PATH = "org/openmrs/module/fhir2/providers/MedicationDispense_json_merge_patch.json";
+	
+	private static final String JSON_PATCH_DISPENSE_PATH = "org/openmrs/module/fhir2/providers/MedicationDispense_json_patch.json";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -75,6 +83,54 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(medicationDispense, notNullValue());
 		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
 		assertThat(medicationDispense, validResource());
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationDispenseViaJsonMergePatch() throws Exception {
+		String jsonMedicationDispensePatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_DISPENSE_PATH)) {
+			Objects.requireNonNull(is);
+			jsonMedicationDispensePatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/MedicationDispense/" + EXISTING_DISPENSE_UUID)
+		        .jsonMergePatch(jsonMedicationDispensePatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		MedicationDispense medicationDispense = readResponse(response);
+		
+		assertThat(medicationDispense, notNullValue());
+		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
+		assertThat(medicationDispense, validResource());
+		
+		assertThat(medicationDispense.getStatus(), is(MedicationDispense.MedicationDispenseStatus.COMPLETED));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationDispenseViaJsonPatch() throws Exception {
+		String jsonMedicationDispensePatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_DISPENSE_PATH)) {
+			Objects.requireNonNull(is);
+			jsonMedicationDispensePatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/MedicationDispense/" + EXISTING_DISPENSE_UUID)
+		        .jsonPatch(jsonMedicationDispensePatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		MedicationDispense medicationDispense = readResponse(response);
+		
+		assertThat(medicationDispense, notNullValue());
+		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
+		assertThat(medicationDispense, validResource());
+		
+		assertThat(medicationDispense.getStatus(), is(MedicationDispense.MedicationDispenseStatus.COMPLETED));
 	}
 	
 	@Test
