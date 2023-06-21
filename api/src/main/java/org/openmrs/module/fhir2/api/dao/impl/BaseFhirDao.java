@@ -14,6 +14,8 @@ import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.in;
 import static org.hibernate.criterion.Restrictions.isNull;
 import static org.hibernate.criterion.Restrictions.or;
+import static org.openmrs.module.fhir2.FhirConstants.COUNT_QUERY_CACHE;
+import static org.openmrs.module.fhir2.FhirConstants.EXACT_TOTAL_SEARCH_PARAMETER;
 
 import javax.annotation.Nonnull;
 
@@ -31,6 +33,7 @@ import com.google.common.reflect.TypeToken;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
@@ -50,6 +53,7 @@ import org.openmrs.api.handler.RetireHandler;
 import org.openmrs.api.handler.VoidHandler;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirDao;
+import org.openmrs.module.fhir2.api.search.param.PropParam;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -179,10 +183,27 @@ public abstract class BaseFhirDao<T extends OpenmrsObject & Auditable> extends B
 	@Override
 	public int getSearchResultsCount(@Nonnull SearchParameterMap theParams) {
 		Criteria criteria = getSearchResultCriteria(theParams);
+		
+		applyExactTotal(theParams, criteria);
+		
 		if (hasDistinctResults()) {
 			return ((Long) criteria.setProjection(Projections.rowCount()).uniqueResult()).intValue();
 		} else {
 			return ((Long) criteria.setProjection(Projections.countDistinct("id")).uniqueResult()).intValue();
+		}
+	}
+	
+	protected void applyExactTotal(SearchParameterMap theParams, Criteria criteria) {
+		
+		List<PropParam<?>> exactTotal = theParams.getParameters(EXACT_TOTAL_SEARCH_PARAMETER);
+		if (!exactTotal.isEmpty()) {
+			PropParam<Boolean> propParam = (PropParam<Boolean>) exactTotal.get(0);
+			if (propParam.getParam()) {
+				criteria.setCacheMode(CacheMode.REFRESH);
+			}
+		} else {
+			criteria.setCacheable(true);
+			criteria.setCacheRegion(COUNT_QUERY_CACHE);
 		}
 	}
 	

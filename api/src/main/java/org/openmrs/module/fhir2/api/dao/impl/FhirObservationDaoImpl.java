@@ -91,7 +91,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 						results.add(obs);
 						groupCount--;
 					}
-
+					
 					if (results.size() >= theParams.getToIndex()) {
 						//Load only as many results as requested per page
 						break;
@@ -121,6 +121,7 @@ public class FhirObservationDaoImpl extends BaseFhirDao<Obs> implements FhirObse
 			criteria.addOrder(Order.asc("concept")).addOrder(Order.desc("obsDatetime"));
 			criteria.setProjection(Projections.projectionList().add(Projections.groupProperty("concept.id"))
 			        .add(Projections.groupProperty("obsDatetime")).add(Projections.rowCount()));
+			applyExactTotal(theParams, criteria);
 			List<Object[]> rows = criteria.list();
 			final int maxGroupCount = getMaxParameter(theParams);
 			int groupCount = maxGroupCount;
