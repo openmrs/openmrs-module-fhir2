@@ -126,30 +126,6 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 	}
 	
 	@Test
-	public void shouldPatchExistingPatientViaXMLPatch() throws Exception {
-		String xmlPatientPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_PATIENT_PATH)) {
-			Objects.requireNonNull(is);
-			xmlPatientPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).xmlPatch(xmlPatientPatch)
-		        .accept(FhirMediaTypes.XML).go();
-		
-		assertThat(response, isOk());
-		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Patient patient = readResponse(response);
-		
-		assertThat(patient, notNullValue());
-		assertThat(patient.getIdElement().getIdPart(), equalTo(PATIENT_UUID));
-		assertThat(patient, validResource());
-		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
-	}
-	
-	@Test
 	public void shouldReturnNotFoundWhenPatientNotFoundAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Patient/" + WRONG_PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -436,6 +412,30 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldPatchExistingPatientUsingXmlPatch() throws Exception {
+		String xmlPatientPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_PATIENT_PATH)) {
+			Objects.requireNonNull(is);
+			xmlPatientPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).xmlPatch(xmlPatientPatch)
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, notNullValue());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Patient patient = readResponse(response);
+		
+		assertThat(patient, notNullValue());
+		assertThat(patient.getIdElement().getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(patient, validResource());
+		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
 	}
 	
 	@Test

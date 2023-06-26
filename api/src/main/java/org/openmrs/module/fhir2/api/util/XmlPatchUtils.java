@@ -18,6 +18,7 @@ import java.io.IOException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.github.dnault.xmlpatch.Patcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -27,7 +28,6 @@ public class XmlPatchUtils {
 	 * Handles xml patch operations ("application/xml-patch+xml")
 	 */
 	public static <T extends IBaseResource> T applyXmlPatch(FhirContext theCtx, T theResourceToUpdate, String thePatchBody) {
-		
 		@SuppressWarnings("unchecked")
 		Class<T> clazz = (Class<T>) theResourceToUpdate.getClass();
 		
@@ -39,13 +39,10 @@ public class XmlPatchUtils {
 			    new ByteArrayInputStream(thePatchBody.getBytes(Constants.CHARSET_UTF8)), result);
 		}
 		catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InvalidRequestException(e);
 		}
 		
-		String resultString = toUtf8String(result.toByteArray());
-		T retVal = theCtx.newXmlParser().parseResource(clazz, resultString);
-		
-		return retVal;
+		return theCtx.newXmlParser().parseResource(clazz, toUtf8String(result.toByteArray()));
 	}
 	
 }
