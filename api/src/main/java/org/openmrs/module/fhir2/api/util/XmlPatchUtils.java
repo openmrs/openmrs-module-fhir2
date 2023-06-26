@@ -17,7 +17,6 @@ import java.io.IOException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.github.dnault.xmlpatch.Patcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
