@@ -117,55 +117,6 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 	}
 	
 	@Test
-	public void shouldPatchExistingDiagnosticReportViaJsonMergePatch() throws Exception {
-		String jsonDiagnosticReportPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_REPORT_PATH)) {
-			Objects.requireNonNull(is);
-			jsonDiagnosticReportPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
-				.jsonMergePatch(jsonDiagnosticReportPatch).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		DiagnosticReport diagnosticReport = readResponse(response);
-		
-		assertThat(diagnosticReport, notNullValue());
-		assertThat(diagnosticReport.getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
-		assertThat(diagnosticReport, validResource());
-		
-		assertThat(diagnosticReport.getStatus(), equalTo(DiagnosticReport.DiagnosticReportStatus.REGISTERED));
-	}
-	
-	
-	@Test
-	public void shouldPatchExistingDiagnosticReportViaJsonPatch() throws Exception {
-		String jsonDiagnosticReportPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_REPORT_PATH)) {
-			Objects.requireNonNull(is);
-			jsonDiagnosticReportPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
-				.jsonPatch(jsonDiagnosticReportPatch).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		DiagnosticReport diagnosticReport = readResponse(response);
-		
-		assertThat(diagnosticReport, notNullValue());
-		assertThat(diagnosticReport.getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
-		assertThat(diagnosticReport, validResource());
-		
-		assertThat(diagnosticReport.getStatus(), equalTo(DiagnosticReport.DiagnosticReportStatus.REGISTERED));
-	}
-	
-	@Test
 	public void shouldReturnNotFoundWhenDiagnosticReportDoesNotExistAsJson() throws Exception {
 		MockHttpServletResponse response = get("/DiagnosticReport/" + WRONG_DIAGNOSTIC_REPORT_UUID)
 		        .accept(FhirMediaTypes.JSON).go();
@@ -492,6 +443,54 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldPatchExistingDiagnosticReportUsingJsonMergePatch() throws Exception {
+		String jsonDiagnosticReportPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_REPORT_PATH)) {
+			Objects.requireNonNull(is);
+			jsonDiagnosticReportPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
+				.jsonMergePatch(jsonDiagnosticReportPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		DiagnosticReport diagnosticReport = readResponse(response);
+		
+		assertThat(diagnosticReport, notNullValue());
+		assertThat(diagnosticReport.getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(diagnosticReport, validResource());
+		
+		assertThat(diagnosticReport.getStatus(), equalTo(DiagnosticReport.DiagnosticReportStatus.REGISTERED));
+	}
+	
+	@Test
+	public void shouldPatchExistingDiagnosticReportUsingJsonPatch() throws Exception {
+		String jsonDiagnosticReportPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_REPORT_PATH)) {
+			Objects.requireNonNull(is);
+			jsonDiagnosticReportPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
+				.jsonPatch(jsonDiagnosticReportPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		DiagnosticReport diagnosticReport = readResponse(response);
+		
+		assertThat(diagnosticReport, notNullValue());
+		assertThat(diagnosticReport.getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(diagnosticReport, validResource());
+		
+		assertThat(diagnosticReport.getStatus(), equalTo(DiagnosticReport.DiagnosticReportStatus.REGISTERED));
 	}
 	
 	@Test

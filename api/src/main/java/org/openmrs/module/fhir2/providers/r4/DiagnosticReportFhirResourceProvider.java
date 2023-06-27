@@ -94,7 +94,7 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 	public MethodOutcome patchDiagnosticReport(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
 	        RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update Diagnostic Report resource");
+			throw new InvalidRequestException("id must be specified to update DiagnosticReport resource");
 		}
 		
 		DiagnosticReport diagnosticReport = service.patch(id.getIdPart(), patchType, body, requestDetails);
