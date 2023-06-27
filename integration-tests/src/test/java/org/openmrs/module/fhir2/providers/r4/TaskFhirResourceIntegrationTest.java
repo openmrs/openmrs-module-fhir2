@@ -107,52 +107,6 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	}
 	
 	@Test
-	public void shouldPatchExistingTaskAsJsonUsingJsonMergePatch() throws Exception {
-		String jsonTaskPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_TASK_PATH)) {
-			Objects.requireNonNull(is);
-			jsonTaskPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonMergePatch(jsonTaskPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Task task = readResponse(response);
-		
-		assertThat(task, notNullValue());
-		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
-		assertThat(task, validResource());
-		assertThat(task.getStatus(), is(Task.TaskStatus.REQUESTED));
-	}
-	
-	@Test
-	public void shouldPatchExistingTaskAsJsonUsingJsonPatch() throws Exception {
-		String jsonTaskPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_TASK_PATH)) {
-			Objects.requireNonNull(is);
-			jsonTaskPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonPatch(jsonTaskPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Task task = readResponse(response);
-		
-		assertThat(task, notNullValue());
-		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
-		assertThat(task, validResource());
-		assertThat(task.getStatus(), is(Task.TaskStatus.REQUESTED));
-	}
-	
-	@Test
 	public void shouldReturnNotFoundWhenTaskNotFoundAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Task/" + WRONG_TASK_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -615,6 +569,53 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	
+	@Test
+	public void shouldPatchExistingTaskAsJsonUsingJsonMergePatch() throws Exception {
+		String jsonTaskPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_TASK_PATH)) {
+			Objects.requireNonNull(is);
+			jsonTaskPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonMergePatch(jsonTaskPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Task task = readResponse(response);
+		
+		assertThat(task, notNullValue());
+		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
+		assertThat(task, validResource());
+		assertThat(task.getStatus(), is(Task.TaskStatus.REQUESTED));
+	}
+	
+	@Test
+	public void shouldPatchExistingTaskAsJsonUsingJsonPatch() throws Exception {
+		String jsonTaskPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_TASK_PATH)) {
+			Objects.requireNonNull(is);
+			jsonTaskPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonPatch(jsonTaskPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Task task = readResponse(response);
+		
+		assertThat(task, notNullValue());
+		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
+		assertThat(task, validResource());
+		assertThat(task.getStatus(), is(Task.TaskStatus.REQUESTED));
 	}
 	
 	@Test

@@ -83,7 +83,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	@Patch
 	public MethodOutcome patchTask(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body, RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to patch task resource");
+			throw new InvalidRequestException("id must be specified to patch Task resource");
 		}
 		
 		Task task = service.patch(id.getIdPart(), patchType, body, requestDetails);
