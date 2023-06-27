@@ -53,7 +53,6 @@ import org.openmrs.module.fhir2.api.dao.FhirConditionDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
-import org.openmrs.module.fhir2.api.search.SearchQueryInclude_2_2;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ConditionTranslator;
 
@@ -82,7 +81,7 @@ public class FhirConditionServiceImpl_2_2Test {
 	private FhirGlobalPropertyService globalPropertyService;
 	
 	@Mock
-	private SearchQueryInclude_2_2 searchQueryInclude;
+	private SearchQueryInclude searchQueryInclude;
 	
 	@Mock
 	private SearchQuery<Condition, org.hl7.fhir.r4.model.Condition, FhirConditionDao<Condition>, ConditionTranslator<Condition>, SearchQueryInclude<org.hl7.fhir.r4.model.Condition>> searchQuery;
