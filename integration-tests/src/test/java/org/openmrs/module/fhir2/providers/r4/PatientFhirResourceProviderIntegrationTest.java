@@ -129,54 +129,6 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 	}
 	
 	@Test
-	public void shouldPatchExistingPatientViaJsonMergePatch() throws Exception {
-		String jsonPatientPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_PATIENT_PATH)) {
-			Objects.requireNonNull(is);
-			jsonPatientPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).jsonMergePatch(jsonPatientPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Patient patient = readResponse(response);
-		
-		assertThat(patient, notNullValue());
-		assertThat(patient.getIdElement().getIdPart(), equalTo(PATIENT_UUID));
-		assertThat(patient, validResource());
-		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
-	}
-	
-	@Test
-	public void shouldPatchExistingResourceViaJsonPatch() throws Exception {
-		String jsonPatientPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PATIENT_PATH)) {
-			Objects.requireNonNull(is);
-			jsonPatientPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).jsonPatch(jsonPatientPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response, notNullValue());
-		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Patient patient = readResponse(response);
-		
-		assertThat(patient, notNullValue());
-		assertThat(patient.getIdElement().getIdPart(), equalTo(PATIENT_UUID));
-		assertThat(patient, validResource());
-		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
-	}
-	
-	@Test
 	public void shouldReturnNotFoundWhenPatientNotFoundAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Patient/" + WRONG_PATIENT_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -463,6 +415,54 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldPatchExistingPatientUsingJsonMergePatch() throws Exception {
+		String jsonPatientPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_PATIENT_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPatientPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).jsonMergePatch(jsonPatientPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, notNullValue());
+		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Patient patient = readResponse(response);
+		
+		assertThat(patient, notNullValue());
+		assertThat(patient.getIdElement().getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(patient, validResource());
+		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
+	}
+	
+	@Test
+	public void shouldPatchExistingResourceUsingJsonPatch() throws Exception {
+		String jsonPatientPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PATIENT_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPatientPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).jsonPatch(jsonPatientPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, notNullValue());
+		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Patient patient = readResponse(response);
+		
+		assertThat(patient, notNullValue());
+		assertThat(patient.getIdElement().getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(patient, validResource());
+		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
 	}
 	
 	@Test
