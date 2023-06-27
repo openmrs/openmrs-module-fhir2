@@ -94,7 +94,7 @@ public class PersonFhirResourceProvider implements IResourceProvider {
 	@Patch
 	public MethodOutcome patchPerson(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body, RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to patch person");
+			throw new InvalidRequestException("id must be specified to patch Person");
 		}
 		
 		Person person = fhirPersonService.patch(id.getIdPart(), patchType, body, requestDetails);

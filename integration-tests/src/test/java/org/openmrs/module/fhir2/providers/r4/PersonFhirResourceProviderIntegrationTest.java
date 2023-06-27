@@ -87,54 +87,6 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 	}
 	
 	@Test
-	public void shouldPatchPersonResourceViaJsonMergePatch() throws Exception {
-		String jsonPersonPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PERSON_PATH)) {
-			Objects.requireNonNull(is);
-			jsonPersonPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).jsonMergePatch(jsonPersonPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Person person = readResponse(response);
-		
-		assertThat(person, notNullValue());
-		assertThat(person.getIdElement().getIdPart(), equalTo(PERSON_UUID));
-		assertThat(person, validResource());
-		
-		assertThat(person.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
-	}
-	
-	@Test
-	public void shouldPatchPersonResourceViaJsonPatch() throws Exception {
-		String jsonPersonPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PERSON_FILE)) {
-			Objects.requireNonNull(is);
-			jsonPersonPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).jsonPatch(jsonPersonPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Person person = readResponse(response);
-		
-		assertThat(person, notNullValue());
-		assertThat(person.getIdElement().getIdPart(), equalTo(PERSON_UUID));
-		assertThat(person, validResource());
-		
-		assertThat(person.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
-	}
-	
-	@Test
 	public void shouldThrow404ForNonExistingPersonAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Person/" + WRONG_PERSON_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -383,6 +335,54 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldPatchPersonResourceUsingJsonMergePatch() throws Exception {
+		String jsonPersonPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PERSON_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPersonPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).jsonMergePatch(jsonPersonPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Person person = readResponse(response);
+		
+		assertThat(person, notNullValue());
+		assertThat(person.getIdElement().getIdPart(), equalTo(PERSON_UUID));
+		assertThat(person, validResource());
+		
+		assertThat(person.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
+	}
+	
+	@Test
+	public void shouldPatchPersonResourceUsingJsonPatch() throws Exception {
+		String jsonPersonPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PERSON_FILE)) {
+			Objects.requireNonNull(is);
+			jsonPersonPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).jsonPatch(jsonPersonPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Person person = readResponse(response);
+		
+		assertThat(person, notNullValue());
+		assertThat(person.getIdElement().getIdPart(), equalTo(PERSON_UUID));
+		assertThat(person, validResource());
+		
+		assertThat(person.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
 	}
 	
 	@Test
