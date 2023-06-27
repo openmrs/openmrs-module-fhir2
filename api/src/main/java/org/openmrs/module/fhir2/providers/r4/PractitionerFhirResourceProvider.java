@@ -96,7 +96,7 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 	public MethodOutcome patchPractitioner(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
 	        RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update resource");
+			throw new InvalidRequestException("id must be specified to update Practitioner resource");
 		}
 		
 		Practitioner practitioner = practitionerService.patch(id.getIdPart(), patchType, body, requestDetails);

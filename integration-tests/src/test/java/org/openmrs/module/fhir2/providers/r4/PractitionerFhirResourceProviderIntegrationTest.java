@@ -87,54 +87,6 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	}
 	
 	@Test
-	public void shouldPatchExistingPractitionerViaJsonMergePatch() throws Exception {
-		String jsonPractitionerPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_PRACTITIONER_PATH)) {
-			Objects.requireNonNull(is);
-			jsonPractitionerPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Practitioner/" + PRACTITIONER_UUID).jsonMergePatch(jsonPractitionerPatch)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Practitioner practitioner = readResponse(response);
-		
-		assertThat(practitioner, notNullValue());
-		assertThat(practitioner.getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
-		assertThat(practitioner, validResource());
-		
-		assertThat(practitioner.getGender(), is(Enumerations.AdministrativeGender.FEMALE));
-	}
-	
-	@Test
-	public void shouldPatchExistingPractitionerViaJsonPatch() throws Exception {
-		String jsonPractitionerPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PRACTITIONER_PATH)) {
-			Objects.requireNonNull(is);
-			jsonPractitionerPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Practitioner/" + PRACTITIONER_UUID).jsonPatch(jsonPractitionerPatch)
-		        .accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Practitioner practitioner = readResponse(response);
-		
-		assertThat(practitioner, notNullValue());
-		assertThat(practitioner.getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
-		assertThat(practitioner, validResource());
-		
-		assertThat(practitioner.getGender(), is(Enumerations.AdministrativeGender.FEMALE));
-	}
-	
-	@Test
 	public void shouldReturnNotFoundWhenPractitionerNotFoundAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Practitioner/" + WRONG_PRACTITIONER_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -420,6 +372,54 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldPatchExistingPractitionerUsingJsonMergePatch() throws Exception {
+		String jsonPractitionerPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_PRACTITIONER_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPractitionerPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Practitioner/" + PRACTITIONER_UUID).jsonMergePatch(jsonPractitionerPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Practitioner practitioner = readResponse(response);
+		
+		assertThat(practitioner, notNullValue());
+		assertThat(practitioner.getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+		assertThat(practitioner, validResource());
+		
+		assertThat(practitioner.getGender(), is(Enumerations.AdministrativeGender.FEMALE));
+	}
+	
+	@Test
+	public void shouldPatchExistingPractitionerUsingJsonPatch() throws Exception {
+		String jsonPractitionerPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_PRACTITIONER_PATH)) {
+			Objects.requireNonNull(is);
+			jsonPractitionerPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Practitioner/" + PRACTITIONER_UUID).jsonPatch(jsonPractitionerPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Practitioner practitioner = readResponse(response);
+		
+		assertThat(practitioner, notNullValue());
+		assertThat(practitioner.getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+		assertThat(practitioner, validResource());
+		
+		assertThat(practitioner.getGender(), is(Enumerations.AdministrativeGender.FEMALE));
 	}
 	
 	@Test
