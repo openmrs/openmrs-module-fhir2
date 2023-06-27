@@ -90,54 +90,6 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	}
 	
 	@Test
-	public void shouldPatchExistingMedicationViaJsonMergePatch() throws Exception {
-		String jsonMedicationPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_MEDICATION_PATH)) {
-			Objects.requireNonNull(is);
-			jsonMedicationPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).jsonMergePatch(jsonMedicationPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Medication medication = readResponse(response);
-		
-		assertThat(medication, notNullValue());
-		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
-		assertThat(medication, validResource());
-		
-		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
-	}
-	
-	@Test
-	public void shouldPatchExistingMedicationViaJsonPatch() throws Exception {
-		String jsonMedicationPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_MEDICATION_PATH)) {
-			Objects.requireNonNull(is);
-			jsonMedicationPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).jsonPatch(jsonMedicationPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Medication medication = readResponse(response);
-		
-		assertThat(medication, notNullValue());
-		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
-		assertThat(medication, validResource());
-		
-		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
-	}
-	
-	@Test
 	public void shouldThrow404ForNonExistingMedicationAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Medication/" + WRONG_MEDICATION_UUID)
 		        .accept(BaseFhirIntegrationTest.FhirMediaTypes.JSON).go();
@@ -442,6 +394,54 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationUsingJsonMergePatch() throws Exception {
+		String jsonMedicationPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_MEDICATION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonMedicationPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).jsonMergePatch(jsonMedicationPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Medication medication = readResponse(response);
+		
+		assertThat(medication, notNullValue());
+		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
+		assertThat(medication, validResource());
+		
+		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationUsingJsonPatch() throws Exception {
+		String jsonMedicationPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_MEDICATION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonMedicationPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).jsonPatch(jsonMedicationPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Medication medication = readResponse(response);
+		
+		assertThat(medication, notNullValue());
+		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
+		assertThat(medication, validResource());
+		
+		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
 	}
 	
 	@Test

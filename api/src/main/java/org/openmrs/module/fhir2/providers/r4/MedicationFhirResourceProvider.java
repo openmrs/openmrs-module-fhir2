@@ -94,7 +94,7 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 	public MethodOutcome patchMedication(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
 	        RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update medication resource");
+			throw new InvalidRequestException("id must be specified to update Medication resource");
 		}
 		
 		Medication medication = fhirMedicationService.patch(id.getIdPart(), patchType, body, requestDetails);
