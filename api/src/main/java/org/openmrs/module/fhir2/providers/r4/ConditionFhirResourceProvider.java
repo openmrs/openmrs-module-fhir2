@@ -93,7 +93,7 @@ public class ConditionFhirResourceProvider implements IResourceProvider {
 	@Patch
 	public MethodOutcome patchCondition(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body, RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to patch condition");
+			throw new InvalidRequestException("id must be specified to patch Condition");
 		}
 		
 		Condition condition = conditionService.patch(id.getIdPart(), patchType, body, requestDetails);
