@@ -115,62 +115,6 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	}
 	
 	@Test
-	public void shouldPatchExistingMedicationViaJsonMergePatch() throws Exception {
-		String jsonEncounterPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_ENCOUNTER_PATH)) {
-			Objects.requireNonNull(is);
-			jsonEncounterPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Encounter/" + ENCOUNTER_UUID).jsonMergePatch(jsonEncounterPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Encounter encounter = readResponse(response);
-		
-		assertThat(encounter, notNullValue());
-		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
-		assertThat(encounter, validResource());
-		
-		assertThat(encounter.getPeriod(), notNullValue());
-		assertThat(encounter.getPeriod().hasStart(), is(true));
-		assertThat(encounter.getPeriod().getStart(),
-				sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
-						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
-	}
-	
-	@Test
-	public void shouldPatchExistingMedicationViaJsonPatch() throws Exception {
-		String jsonEncounterPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_ENCOUNTER_PATH)) {
-			Objects.requireNonNull(is);
-			jsonEncounterPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/Encounter/" + ENCOUNTER_UUID).jsonPatch(jsonEncounterPatch)
-				.accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		Encounter encounter = readResponse(response);
-		
-		assertThat(encounter, notNullValue());
-		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
-		assertThat(encounter, validResource());
-		
-		assertThat(encounter.getPeriod(), notNullValue());
-		assertThat(encounter.getPeriod().hasStart(), is(true));
-		assertThat(encounter.getPeriod().getStart(),
-				sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
-						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
-	}
-	
-	@Test
 	public void shouldReturnExistingEncounterFromOpenMrsVisitAsJson() throws Exception {
 		MockHttpServletResponse response = get("/Encounter/" + VISIT_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -876,6 +820,62 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationUsingJsonMergePatch() throws Exception {
+		String jsonEncounterPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_ENCOUNTER_PATH)) {
+			Objects.requireNonNull(is);
+			jsonEncounterPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Encounter/" + ENCOUNTER_UUID).jsonMergePatch(jsonEncounterPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Encounter encounter = readResponse(response);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
+		assertThat(encounter, validResource());
+		
+		assertThat(encounter.getPeriod(), notNullValue());
+		assertThat(encounter.getPeriod().hasStart(), is(true));
+		assertThat(encounter.getPeriod().getStart(),
+				sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationUsingJsonPatch() throws Exception {
+		String jsonEncounterPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_ENCOUNTER_PATH)) {
+			Objects.requireNonNull(is);
+			jsonEncounterPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Encounter/" + ENCOUNTER_UUID).jsonPatch(jsonEncounterPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Encounter encounter = readResponse(response);
+		
+		assertThat(encounter, notNullValue());
+		assertThat(encounter.getIdElement().getIdPart(), equalTo(ENCOUNTER_UUID));
+		assertThat(encounter, validResource());
+		
+		assertThat(encounter.getPeriod(), notNullValue());
+		assertThat(encounter.getPeriod().hasStart(), is(true));
+		assertThat(encounter.getPeriod().getStart(),
+				sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
 	}
 	
 	@Test
