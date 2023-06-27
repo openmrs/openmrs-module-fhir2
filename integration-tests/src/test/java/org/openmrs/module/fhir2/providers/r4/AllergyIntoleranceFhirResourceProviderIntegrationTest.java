@@ -80,56 +80,6 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 	}
 	
 	@Test
-	public void shouldPatchExistingAllergyViaJsonMergePatch() throws Exception {
-		String jsonAllergyPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_ALLERGY_PATH)) {
-			Objects.requireNonNull(is);
-			jsonAllergyPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID)
-				.jsonMergePatch(jsonAllergyPatch).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		AllergyIntolerance allergyIntolerance = readResponse(response);
-		
-		assertThat(allergyIntolerance, notNullValue());
-		assertThat(allergyIntolerance.getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
-		
-		//ensure category has been patched
-		assertThat(allergyIntolerance.getCategory().get(0).getCode(), equalTo("food"));
-		assertThat(allergyIntolerance, validResource());
-	}
-	
-	@Test
-	public void shouldPatchExistingAllergyViaJsonPatch() throws Exception {
-		String jsonAllergyPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_ALLERGY_PATH)) {
-			Objects.requireNonNull(is);
-			jsonAllergyPatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID)
-				.jsonPatch(jsonAllergyPatch).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		AllergyIntolerance allergyIntolerance = readResponse(response);
-		
-		assertThat(allergyIntolerance, notNullValue());
-		assertThat(allergyIntolerance.getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
-		
-		//ensure category has been patched
-		assertThat(allergyIntolerance.getCategory().get(0).getCode(), equalTo("food"));
-		assertThat(allergyIntolerance, validResource());
-	}
-	
-	@Test
 	public void shouldReturnNotFoundWhenAllergyNotFoundAsJson() throws Exception {
 		MockHttpServletResponse response = get("/AllergyIntolerance/" + UNKNOWN_ALLERGY_UUID).accept(FhirMediaTypes.JSON)
 		        .go();
@@ -456,6 +406,56 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldPatchExistingAllergyUsingJsonMergePatch() throws Exception {
+		String jsonAllergyPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_ALLERGY_PATH)) {
+			Objects.requireNonNull(is);
+			jsonAllergyPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID)
+				.jsonMergePatch(jsonAllergyPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		AllergyIntolerance allergyIntolerance = readResponse(response);
+		
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
+		
+		//ensure category has been patched
+		assertThat(allergyIntolerance.getCategory().get(0).getCode(), equalTo("food"));
+		assertThat(allergyIntolerance, validResource());
+	}
+	
+	@Test
+	public void shouldPatchExistingAllergyUsingJsonPatch() throws Exception {
+		String jsonAllergyPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_ALLERGY_PATH)) {
+			Objects.requireNonNull(is);
+			jsonAllergyPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID)
+				.jsonPatch(jsonAllergyPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		AllergyIntolerance allergyIntolerance = readResponse(response);
+		
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
+		
+		//ensure category has been patched
+		assertThat(allergyIntolerance.getCategory().get(0).getCode(), equalTo("food"));
+		assertThat(allergyIntolerance, validResource());
 	}
 	
 	@Test
