@@ -50,8 +50,8 @@ public class JsonPatchUtilTest {
 		extension.setValue(new CodeType("RECEIVED"));
 		medicationRequest.addExtension(extension);
 		
-		MedicationRequest patchedMedicationRequest = JsonPatchUtils.apply(FhirContext.forR4(), medicationRequest,
-		    medicationRequestPatchJson);
+		MedicationRequest patchedMedicationRequest = JsonPatchUtils.applyJsonMergePatch(FhirContext.forR4(),
+		    medicationRequest, medicationRequestPatchJson);
 		
 		Extension resultExtension = patchedMedicationRequest
 		        .getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS);

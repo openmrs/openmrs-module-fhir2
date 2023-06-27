@@ -346,4 +346,8 @@ public class FhirConstants {
 	public static final String RX_NORM_SYSTEM_URI = "http://www.nlm.nih.gov/research/umls/rxnorm";
 	
 	public static final String UCUM_SYSTEM_URI = "http://unitsofmeasure.org";
+	
+	public static final String EXACT_TOTAL_SEARCH_PARAMETER = "_exactTotal";
+	
+	public static final String COUNT_QUERY_CACHE = "countQueryCache";
 }

@@ -44,7 +44,8 @@ public abstract class BaseResourceSearchParams implements Serializable {
 		return new SearchParameterMap().addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.ID_PROPERTY, getId())
 		        .addParameter(FhirConstants.COMMON_SEARCH_HANDLER, FhirConstants.LAST_UPDATED_PROPERTY, getLastUpdated())
 		        .addParameter(FhirConstants.INCLUDE_SEARCH_HANDLER, getIncludes())
-		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, getRevIncludes()).setSortSpec(getSort());
+		        .addParameter(FhirConstants.REVERSE_INCLUDE_SEARCH_HANDLER, getRevIncludes()).setSortSpec(getSort())
+		        .addParameter(FhirConstants.EXACT_TOTAL_SEARCH_PARAMETER, Boolean.FALSE);
 	}
 	
 	public abstract SearchParameterMap toSearchParameterMap();

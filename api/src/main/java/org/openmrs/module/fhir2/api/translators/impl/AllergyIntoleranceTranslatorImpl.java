@@ -99,8 +99,8 @@ public class AllergyIntoleranceTranslatorImpl extends BaseReferenceHandlingTrans
 		notNull(allergy, "The existing Allergy should not be null");
 		notNull(fhirAllergy, "The AllergyIntolerance object should not be null");
 		
-		if (fhirAllergy.getId() != null) {
-			allergy.setUuid(fhirAllergy.getId());
+		if (fhirAllergy.hasId()) {
+			allergy.setUuid(fhirAllergy.getIdElement().getIdPart());
 		}
 		
 		if (fhirAllergy.hasCode()) {

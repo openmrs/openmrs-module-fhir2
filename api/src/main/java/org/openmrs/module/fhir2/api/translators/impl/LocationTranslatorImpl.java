@@ -148,7 +148,10 @@ public class LocationTranslatorImpl extends BaseReferenceHandlingTranslator impl
 		notNull(openmrsLocation, "The existing Openmrs location should not be null");
 		notNull(fhirLocation, "The Location object should not be null");
 		
-		openmrsLocation.setUuid(fhirLocation.getIdElement().getIdPart());
+		if (fhirLocation.hasId()) {
+			openmrsLocation.setUuid(fhirLocation.getIdElement().getIdPart());
+		}
+		
 		openmrsLocation.setName(fhirLocation.getName());
 		openmrsLocation.setDescription(fhirLocation.getDescription());
 		

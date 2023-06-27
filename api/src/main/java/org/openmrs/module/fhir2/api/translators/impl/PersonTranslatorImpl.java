@@ -106,7 +106,9 @@ public class PersonTranslatorImpl implements PersonTranslator {
 		notNull(openmrsPerson, "The existing Openmrs Person object should not be null");
 		notNull(person, "The Person object should not be null");
 		
-		openmrsPerson.setUuid(person.getId());
+		if (person.hasId()) {
+			openmrsPerson.setUuid(person.getIdElement().getIdPart());
+		}
 		
 		for (HumanName name : person.getName()) {
 			openmrsPerson.addName(nameTranslator.toOpenmrsType(name));
