@@ -86,54 +86,6 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 	}
 	
 	@Test
-	public void shouldPatchExistingMedicationDispenseViaJsonMergePatch() throws Exception {
-		String jsonMedicationDispensePatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_DISPENSE_PATH)) {
-			Objects.requireNonNull(is);
-			jsonMedicationDispensePatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/MedicationDispense/" + EXISTING_DISPENSE_UUID)
-		        .jsonMergePatch(jsonMedicationDispensePatch).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		MedicationDispense medicationDispense = readResponse(response);
-		
-		assertThat(medicationDispense, notNullValue());
-		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
-		assertThat(medicationDispense, validResource());
-		
-		assertThat(medicationDispense.getStatus(), is(MedicationDispense.MedicationDispenseStatus.COMPLETED));
-	}
-	
-	@Test
-	public void shouldPatchExistingMedicationDispenseViaJsonPatch() throws Exception {
-		String jsonMedicationDispensePatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_DISPENSE_PATH)) {
-			Objects.requireNonNull(is);
-			jsonMedicationDispensePatch = inputStreamToString(is, UTF_8);
-		}
-		
-		MockHttpServletResponse response = patch("/MedicationDispense/" + EXISTING_DISPENSE_UUID)
-		        .jsonPatch(jsonMedicationDispensePatch).accept(FhirMediaTypes.JSON).go();
-		
-		assertThat(response, isOk());
-		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
-		assertThat(response.getContentAsString(), notNullValue());
-		
-		MedicationDispense medicationDispense = readResponse(response);
-		
-		assertThat(medicationDispense, notNullValue());
-		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
-		assertThat(medicationDispense, validResource());
-		
-		assertThat(medicationDispense.getStatus(), is(MedicationDispense.MedicationDispenseStatus.COMPLETED));
-	}
-	
-	@Test
 	public void shouldThrow404ForNonExistingMedicationDispenseAsJson() throws Exception {
 		MockHttpServletResponse response = get("/MedicationDispense/" + NEW_DISPENSE_UUID).accept(FhirMediaTypes.JSON).go();
 		
@@ -276,5 +228,53 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 		assertThat(result, notNullValue());
 		assertThat(result.getType(), equalTo(Bundle.BundleType.SEARCHSET));
 		assertThat(result, hasProperty("total", equalTo(3)));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationDispenseUsingJsonMergePatch() throws Exception {
+		String jsonMedicationDispensePatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_DISPENSE_PATH)) {
+			Objects.requireNonNull(is);
+			jsonMedicationDispensePatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/MedicationDispense/" + EXISTING_DISPENSE_UUID)
+				.jsonMergePatch(jsonMedicationDispensePatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		MedicationDispense medicationDispense = readResponse(response);
+		
+		assertThat(medicationDispense, notNullValue());
+		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
+		assertThat(medicationDispense, validResource());
+		
+		assertThat(medicationDispense.getStatus(), is(MedicationDispense.MedicationDispenseStatus.COMPLETED));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationDispenseUsingJsonPatch() throws Exception {
+		String jsonMedicationDispensePatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_DISPENSE_PATH)) {
+			Objects.requireNonNull(is);
+			jsonMedicationDispensePatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/MedicationDispense/" + EXISTING_DISPENSE_UUID)
+				.jsonPatch(jsonMedicationDispensePatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		MedicationDispense medicationDispense = readResponse(response);
+		
+		assertThat(medicationDispense, notNullValue());
+		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
+		assertThat(medicationDispense, validResource());
+		
+		assertThat(medicationDispense.getStatus(), is(MedicationDispense.MedicationDispenseStatus.COMPLETED));
 	}
 }
