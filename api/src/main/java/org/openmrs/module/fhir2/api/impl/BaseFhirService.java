@@ -144,7 +144,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		OpenmrsFhirTranslator<U, T> translator = getTranslator();
 		
 		T existingFhirObject = translator.toFhirResource(existingObject);
-		T updatedFhirObject;
+		T updatedFhirObject = null;
 		
 		switch (patchType) {
 			case JSON_PATCH:
@@ -157,11 +157,8 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 			case XML_PATCH:
 				updatedFhirObject = XmlPatchUtils.applyXmlPatch(fhirContext, existingFhirObject, body);
 				break;
-			default:
-				throw new InvalidRequestException(
-				        "only JSON-formatted patches and XML-formatted patches are currently supported");
-			
 		}
+		
 		return applyUpdate(existingObject, updatedFhirObject);
 	}
 	

@@ -24,7 +24,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public class XmlPatchUtils {
 	
 	/**
-	 * Handles xml patch operations ("application/xml-patch+xml")
+	 * Applies an XML Patch to a FHIR Resource
+	 * @param theCtx The {@link FhirContext} object representing the FHIR context.
+	 * @param theResourceToUpdate the resource of type {@link T} to be updated.
+	 * @param thePatchBody  The XML patch to apply to the resource.
+	 * @param <T> A type that extends IBaseResource.
+	 * @return The updated resource after applying the XML patch.
 	 */
 	public static <T extends IBaseResource> T applyXmlPatch(FhirContext theCtx, T theResourceToUpdate, String thePatchBody) {
 		@SuppressWarnings("unchecked")
