@@ -110,7 +110,24 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 	
 	@Override
 	public TestOrder toOpenmrsType(@Nonnull ServiceRequest resource) {
-		throw new UnsupportedOperationException();
+		notNull(resource, "The ServiceRequest object should not be null");
+		return this.toOpenmrsType(new TestOrder(), resource);
+	}
+	
+	@Override
+	public TestOrder toOpenmrsType(@Nonnull TestOrder currentTestOrder, @Nonnull ServiceRequest serviceRequest) {
+		notNull(currentTestOrder, "The existing Openmrs TestOrder object should not be null");
+		notNull(serviceRequest, "The ServiceRequest object should not be null");
+		
+		if (serviceRequest.hasId()) {
+			currentTestOrder.setUuid(serviceRequest.getIdElement().getIdPart());
+		}
+		
+		currentTestOrder.setConcept(conceptTranslator.toOpenmrsType(serviceRequest.getCode()));
+		currentTestOrder.setPatient(patientReferenceTranslator.toOpenmrsType(serviceRequest.getSubject()));
+		currentTestOrder.setEncounter(encounterReferenceTranslator.toOpenmrsType(serviceRequest.getEncounter()));
+		currentTestOrder.setOrderer(providerReferenceTranslator.toOpenmrsType(serviceRequest.getRequester()));
+		return currentTestOrder;
 	}
 	
 	private ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(TestOrder order) {

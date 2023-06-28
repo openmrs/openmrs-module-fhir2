@@ -24,4 +24,22 @@ public interface ServiceRequestTranslator<T> extends OpenmrsFhirTranslator<T, Se
 	 */
 	@Override
 	ServiceRequest toFhirResource(@Nonnull T order);
+	
+	/**
+	 * Maps a {@link ServiceRequest} to a {@link TestOrder}
+	 *
+	 * @param resource the FHIR resource to translate
+	 * @return the corresponding OpenMRS TestOrder
+	 */
+	@Override
+	T toOpenmrsType(@Nonnull ServiceRequest resource);
+	
+	/**
+	 * Maps a {@link ServiceRequest} to an existing {@link TestOrder}
+	 *
+	 * @param currentTestOrder the existing test order to update
+	 * @param serviceRequest the FHIR ServiceRequest to map
+	 * @return the updated OpenMRS testorder
+	 */
+	TestOrder toOpenmrsType(@Nonnull TestOrder currentTestOrder, @Nonnull ServiceRequest serviceRequest);
 }

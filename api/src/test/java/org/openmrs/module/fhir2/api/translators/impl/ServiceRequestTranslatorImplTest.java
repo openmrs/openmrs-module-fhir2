@@ -40,6 +40,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Concept;
+import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
 import org.openmrs.OrderType;
@@ -104,6 +105,8 @@ public class ServiceRequestTranslatorImplTest {
 	
 	private TestOrder order;
 	
+	private ServiceRequest serviceRequest;
+	
 	private TestOrder discontinuedTestOrder;
 	
 	@Before
@@ -128,6 +131,9 @@ public class ServiceRequestTranslatorImplTest {
 		discontinuedTestOrder.setUuid(DISCONTINUED_TEST_ORDER_UUID);
 		setOrderNumberByReflection(discontinuedTestOrder, DISCONTINUED_TEST_ORDER_NUMBER);
 		discontinuedTestOrder.setPreviousOrder(order);
+		
+		serviceRequest = new ServiceRequest();
+		serviceRequest.setId(SERVICE_REQUEST_UUID);
 	}
 	
 	@Test
@@ -584,6 +590,62 @@ public class ServiceRequestTranslatorImplTest {
 		ServiceRequest result = translator.toFhirResource(order);
 		assertThat(result, notNullValue());
 		assertThat(result.getMeta().getLastUpdated(), DateMatchers.sameDay(new Date()));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateOrderer() {
+		Provider provider = new Provider();
+		provider.setUuid(PRACTITIONER_UUID);
+		
+		Reference requesterReference = new Reference();
+		requesterReference.setReference(FhirConstants.PRACTITIONER + "/" + PRACTITIONER_UUID);
+		serviceRequest.setRequester(requesterReference);
+		
+		when(practitionerReferenceTranslator.toOpenmrsType(requesterReference)).thenReturn(provider);
+		
+		TestOrder result = translator.toOpenmrsType(new TestOrder(), serviceRequest);
+		assertThat(result, notNullValue());
+		assertThat(result.getOrderer(), notNullValue());
+		assertThat(result.getOrderer().getUuid(), equalTo(PRACTITIONER_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateSubject() {
+		Patient patient = new Patient();
+		patient.setUuid(PATIENT_UUID);
+		
+		Reference patientReference = new Reference();
+		patientReference.setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID);
+		serviceRequest.setSubject(patientReference);
+		
+		when(patientReferenceTranslator.toOpenmrsType(patientReference)).thenReturn(patient);
+		
+		TestOrder result = translator.toOpenmrsType(new TestOrder(), serviceRequest);
+		assertThat(result, notNullValue());
+		assertThat(result.getPatient(), notNullValue());
+		assertThat(result.getPatient().getUuid(), equalTo(PATIENT_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateEncounter() {
+		Encounter encounter = new Encounter();
+		encounter.setUuid(ENCOUNTER_UUID);
+		
+		Reference requesterReference = new Reference();
+		requesterReference.setReference(FhirConstants.ENCOUNTER + "/" + ENCOUNTER_UUID);
+		serviceRequest.setEncounter(requesterReference);
+		
+		when(encounterReferenceTranslator.toOpenmrsType(requesterReference)).thenReturn(encounter);
+		
+		TestOrder result = translator.toOpenmrsType(new TestOrder(), serviceRequest);
+		assertThat(result, notNullValue());
+		assertThat(result.getEncounter(), notNullValue());
+		assertThat(result.getEncounter().getUuid(), equalTo(ENCOUNTER_UUID));
+	}
+	
+	@Test
+	public void toOpenmrsType_shouldTranslateCode() {
+	
 	}
 	
 	private TestOrder setOrderNumberByReflection(TestOrder order, String orderNumber) {
