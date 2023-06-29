@@ -82,6 +82,8 @@ public class ServiceRequestTranslatorImplTest {
 	
 	private static final String ORGANIZATION_UUID = "44f7a79e-1de6-4b0b-9daf-bbcb7ed18b7e";
 	
+	private static final String CONCEPT_UUID = "33fdc8ad-fe4d-499b-93a8-8a991c1d488g";
+	
 	private static final int PREFERRED_PAGE_SIZE = 10;
 	
 	private static final int COUNT = 1;
@@ -627,6 +629,24 @@ public class ServiceRequestTranslatorImplTest {
 	}
 	
 	@Test
+	public void toOpenmrsType_shouldTranslateCode() {
+		CodeableConcept fhirConcept = new CodeableConcept();
+		fhirConcept.setId(CONCEPT_UUID);
+		fhirConcept.setText("Test Concept");
+		Concept openmrsConcept = new Concept();
+		openmrsConcept.setUuid(CONCEPT_UUID);
+		
+		when(conceptTranslator.toOpenmrsType(fhirConcept)).thenReturn(openmrsConcept);
+//		when(conceptTranslator.toFhirResource(openmrsConcept)).thenReturn(fhirConcept);
+		
+		serviceRequest.setCode(fhirConcept);
+		TestOrder result = translator.toOpenmrsType(new TestOrder(), serviceRequest);
+		assertThat(result, notNullValue());
+		assertThat(result.getConcept(), notNullValue());
+		assertThat(result.getConcept().getUuid(), equalTo(CONCEPT_UUID));
+	}
+	
+	@Test
 	public void toOpenmrsType_shouldTranslateEncounter() {
 		Encounter encounter = new Encounter();
 		encounter.setUuid(ENCOUNTER_UUID);
@@ -641,11 +661,6 @@ public class ServiceRequestTranslatorImplTest {
 		assertThat(result, notNullValue());
 		assertThat(result.getEncounter(), notNullValue());
 		assertThat(result.getEncounter().getUuid(), equalTo(ENCOUNTER_UUID));
-	}
-	
-	@Test
-	public void toOpenmrsType_shouldTranslateCode() {
-	
 	}
 	
 	private TestOrder setOrderNumberByReflection(TestOrder order, String orderNumber) {
