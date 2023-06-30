@@ -21,14 +21,17 @@ import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Patch;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -85,6 +88,18 @@ public class DiagnosticReportFhirResourceProvider implements IResourceProvider {
 		}
 		
 		return FhirProviderUtils.buildUpdate(service.update(id.getIdPart(), diagnosticReport));
+	}
+	
+	@Patch
+	public MethodOutcome patchDiagnosticReport(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
+	        RequestDetails requestDetails) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update DiagnosticReport resource");
+		}
+		
+		DiagnosticReport diagnosticReport = service.patch(id.getIdPart(), patchType, body, requestDetails);
+		
+		return FhirProviderUtils.buildPatch(diagnosticReport);
 	}
 	
 	@Delete
