@@ -123,10 +123,25 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 			currentTestOrder.setUuid(serviceRequest.getIdElement().getIdPart());
 		}
 		
-		currentTestOrder.setConcept(conceptTranslator.toOpenmrsType(serviceRequest.getCode()));
-		currentTestOrder.setPatient(patientReferenceTranslator.toOpenmrsType(serviceRequest.getSubject()));
-		currentTestOrder.setEncounter(encounterReferenceTranslator.toOpenmrsType(serviceRequest.getEncounter()));
-		currentTestOrder.setOrderer(providerReferenceTranslator.toOpenmrsType(serviceRequest.getRequester()));
+		if (serviceRequest.hasCode()) {
+			currentTestOrder.setConcept(conceptTranslator.toOpenmrsType(serviceRequest.getCode()));
+		}
+		
+		if (serviceRequest.hasSubject()) {
+			currentTestOrder.setPatient(patientReferenceTranslator.toOpenmrsType(serviceRequest.getSubject()));
+		}
+		
+		if (serviceRequest.hasEncounter()) {
+			currentTestOrder.setEncounter(encounterReferenceTranslator.toOpenmrsType(serviceRequest.getEncounter()));
+		}
+		
+		if (serviceRequest.hasPerformer()) {
+			currentTestOrder.setOrderer(providerReferenceTranslator.toOpenmrsType(serviceRequest.getRequester()));
+		}
+		Date activatedDate = new Date();
+		if (activatedDate != null) {
+			currentTestOrder.setDateActivated(activatedDate);
+		}
 		return currentTestOrder;
 	}
 	
