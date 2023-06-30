@@ -1,0 +1,7 @@
+[
+  {
+    "op": "replace",
+    "path": "/subject/display",
+    "value": "Kunta Kinte"
+  }
+]

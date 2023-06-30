@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -88,13 +89,13 @@ public class ServiceRequestFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Patch
-	public MethodOutcome patchServiceRequest(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body) {
+	public MethodOutcome patchServiceRequest(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
+			RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update service request resource");
+			throw new InvalidRequestException("id must be specified to update ServiceRequest resource");
 		}
 		
-		ServiceRequest serviceRequest = serviceRequestService.patch(id.getIdPart(), patchType, body);
-		
+		ServiceRequest serviceRequest = serviceRequestService.patch(id.getIdPart(), patchType, body, requestDetails);
 		return FhirProviderUtils.buildPatch(serviceRequest);
 	}
 	

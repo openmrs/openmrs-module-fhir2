@@ -110,7 +110,7 @@ public class ServiceRequestTranslatorImpl extends BaseReferenceHandlingTranslato
 	
 	@Override
 	public TestOrder toOpenmrsType(@Nonnull ServiceRequest resource) {
-		throw new UnsupportedOperationException("just checking why service request is not accepting patch operations!");
+		throw new UnsupportedOperationException();
 	}
 	
 	private ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(TestOrder order) {

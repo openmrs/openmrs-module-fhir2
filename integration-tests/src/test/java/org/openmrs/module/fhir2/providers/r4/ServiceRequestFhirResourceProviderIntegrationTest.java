@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.fhir2.providers.r4;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
@@ -18,8 +19,11 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.openmrs.module.fhir2.api.util.GeneralUtils.inputStreamToString;
 
+import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -33,6 +37,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR4IntegrationTest<ServiceRequestFhirResourceProvider, ServiceRequest> {
 	
 	private static final String TEST_ORDER_INITIAL_DATA = "org/openmrs/module/fhir2/api/dao/impl/FhirServiceRequestTest_initial_data.xml";
+	
+	private static final String JSON_MERGE_PATCH_SERVICE_REQUEST_PATH = "org/openmrs/module/fhir2/providers/ServiceRequest_patch.json";
+	
+	private static final String JSON_PATCH_SERVICE_REQUEST_PATH = "org/openmrs/module/fhir2/providers/ServiceRequest_json_patch.json";
 	
 	private static final String SERVICE_REQUEST_UUID = "7d96f25c-4949-4f72-9931-d808fbc226de";
 	
@@ -101,6 +109,52 @@ public class ServiceRequestFhirResourceProviderIntegrationTest extends BaseFhirR
 		assertThat(response, isNotFound());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
+	}
+	
+	@Test
+	public void shouldPatchExistingServiceRequestUsingJsonMergePatch() throws Exception {
+		String jsonServiceRequestPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_SERVICE_REQUEST_PATH)) {
+			Objects.requireNonNull(is);
+			jsonServiceRequestPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/ServiceRequest/" + SERVICE_REQUEST_UUID)
+				.jsonMergePatch(jsonServiceRequestPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		ServiceRequest serviceRequest = readResponse(response);
+		
+		assertThat(serviceRequest, notNullValue());
+		assertThat(serviceRequest.getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
+		assertThat(serviceRequest, validResource());
+		assertThat(serviceRequest.getSubject().getDisplay(), equalTo("Kunta Kinte"));
+	}
+	
+	@Test
+	public void shouldPatchExistingServiceRequestUsingJsonPatch() throws Exception {
+		String jsonServiceRequestPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_SERVICE_REQUEST_PATH)) {
+			Objects.requireNonNull(is);
+			jsonServiceRequestPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/ServiceRequest/" + SERVICE_REQUEST_UUID)
+				.jsonPatch(jsonServiceRequestPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		ServiceRequest serviceRequest = readResponse(response);
+		
+		assertThat(serviceRequest, notNullValue());
+		assertThat(serviceRequest.getIdElement().getIdPart(), equalTo(SERVICE_REQUEST_UUID));
+		assertThat(serviceRequest, validResource());
+		assertThat(serviceRequest.getSubject().getDisplay(), equalTo("Kunta Kinte"));
 	}
 	
 	@Test
