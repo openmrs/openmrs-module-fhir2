@@ -53,11 +53,11 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 	
 	private static final String MEDICATION_REQUEST_QUERY_INITIAL_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirEncounterDaoImplTest_initial_data.xml"; // not loaded for all tests
 	
+	private static final String JSON_MERGE_PATCH_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/Encounter_patch.json";
+	
 	private static final String JSON_PATCH_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/Encounter_json_patch.json";
 	
 	private static final String ENCOUNTER_JSON_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_create.json";
-	
-	private static final String JSON_MERGE_PATCH_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/Encounter_patch.json";
 	
 	private static final String ENCOUNTER_XML_CREATE_ENCOUNTER_PATH = "org/openmrs/module/fhir2/providers/EncounterWebTest_create.xml";
 	
