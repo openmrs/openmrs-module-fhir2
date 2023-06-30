@@ -29,6 +29,7 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -57,6 +58,10 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	private static final String WRONG_CONDITION_UUID = "950d965d-a935-429f-945f-75a502a90188";
 	
 	private static final String CONDITION_SUBJECT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
+	
+	private static final String JSON_PATCH_CONDITION_PATH = "org/openmrs/module/fhir2/providers/Condition_json_merge_patch.json";
+	
+	private static final String JSON_PATCH_CONDITION_FILE= "org/openmrs/module/fhir2/providers/Condition_json_patch.json";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -405,6 +410,58 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldPatchExistingConditionUsingJsonMergePatch() throws Exception {
+		String jsonConditionPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_CONDITION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonConditionPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID)
+				.jsonMergePatch(jsonConditionPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Condition condition = readResponse(response);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
+		assertThat(condition, validResource());
+		
+		assertThat(condition.hasClinicalStatus(), is(true));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("inactive"));
+	}
+	
+	@Test
+	public void shouldPatchExistingConditionUsingJsonPatch() throws Exception {
+		String jsonConditionPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_CONDITION_FILE)) {
+			Objects.requireNonNull(is);
+			jsonConditionPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID)
+				.jsonPatch(jsonConditionPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Condition condition = readResponse(response);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
+		assertThat(condition, validResource());
+		
+		assertThat(condition.hasClinicalStatus(), is(true));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("inactive"));
 	}
 	
 	@Test

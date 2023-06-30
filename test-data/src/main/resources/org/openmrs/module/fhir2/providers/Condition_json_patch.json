@@ -1,0 +1,14 @@
+[
+  {
+    "op": "replace",
+    "path": "/clinicalStatus",
+    "value": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+          "code": "inactive"
+        }
+      ]
+    }
+  }
+]

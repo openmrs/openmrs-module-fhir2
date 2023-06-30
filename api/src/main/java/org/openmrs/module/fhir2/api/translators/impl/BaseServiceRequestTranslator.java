@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.Task;
 import org.openmrs.module.fhir2.api.FhirTaskService;
+import org.openmrs.module.fhir2.api.search.param.TaskSearchParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Setter(AccessLevel.PROTECTED)
@@ -35,10 +36,10 @@ public abstract class BaseServiceRequestTranslator extends BaseReferenceHandling
 	private FhirTaskService taskService;
 	
 	protected ServiceRequest.ServiceRequestStatus determineServiceRequestStatus(String orderUuid) {
-		IBundleProvider results = taskService.searchForTasks(
+		IBundleProvider results = taskService.searchForTasks(new TaskSearchParams(
 		    new ReferenceAndListParam()
 		            .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
-		    null, null, null, null, null, null);
+		    null, null, null, null, null, null));
 		
 		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
 		        .collect(Collectors.toList());
@@ -69,10 +70,10 @@ public abstract class BaseServiceRequestTranslator extends BaseReferenceHandling
 	}
 	
 	protected Reference determineServiceRequestPerformer(String orderUuid) {
-		IBundleProvider results = taskService.searchForTasks(
+		IBundleProvider results = taskService.searchForTasks(new TaskSearchParams(
 		    new ReferenceAndListParam()
 		            .addAnd(new ReferenceOrListParam().add(new ReferenceParam("ServiceRequest", null, orderUuid))),
-		    null, null, null, null, null, null);
+		    null, null, null, null, null, null));
 		
 		Collection<Task> serviceRequestTasks = results.getResources(START_INDEX, END_INDEX).stream().map(p -> (Task) p)
 		        .collect(Collectors.toList());

@@ -1,0 +1,7 @@
+[
+  {
+    "op": "replace",
+    "path": "/category/0",
+    "value": "food"
+  }
+]

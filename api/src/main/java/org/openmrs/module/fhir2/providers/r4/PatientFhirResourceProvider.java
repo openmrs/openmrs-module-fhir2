@@ -101,12 +101,11 @@ public class PatientFhirResourceProvider implements IResourceProvider {
 		return FhirProviderUtils.buildUpdate(patientService.update(id.getIdPart(), patient));
 	}
 	
-	//should be merged with whatever comes from https://github.com/openmrs/openmrs-module-fhir2/pull/487
 	@Patch
 	public MethodOutcome patchPatient(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
 	        RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
-			throw new InvalidRequestException("id must be specified to update resource");
+			throw new InvalidRequestException("id must be specified to update Patient resource");
 		}
 		
 		Patient patient = patientService.patch(id.getIdPart(), patchType, body, requestDetails);
