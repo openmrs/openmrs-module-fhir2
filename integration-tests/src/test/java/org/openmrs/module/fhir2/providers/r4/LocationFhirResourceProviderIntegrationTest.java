@@ -50,11 +50,11 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 	
 	private static final String JSON_CREATE_LOCATION_DOCUMENT = "org/openmrs/module/fhir2/providers/LocationWebTest_create.json";
 	
+	private static final String XML_CREATE_LOCATION_DOCUMENT = "org/openmrs/module/fhir2/providers/LocationWebTest_create.xml";
+
 	private static final String JSON_MERGE_PATCH_LOCATION_PATH = "org/openmrs/module/fhir2/providers/Location_merge_json_patch.json";
 	
 	private static final String JSON_PATCH_LOCATION_PATH= "org/openmrs/module/fhir2/providers/Location_json_patch.json";
-	
-	private static final String XML_CREATE_LOCATION_DOCUMENT = "org/openmrs/module/fhir2/providers/LocationWebTest_create.xml";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
