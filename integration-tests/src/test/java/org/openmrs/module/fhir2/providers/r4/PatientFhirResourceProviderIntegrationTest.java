@@ -60,10 +60,12 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 	private static final String JSON_CREATE_PATIENT_DOCUMENT = "org/openmrs/module/fhir2/providers/PatientWebTest_create.json";
 	
 	private static final String XML_CREATE_PATIENT_DOCUMENT = "org/openmrs/module/fhir2/providers/PatientWebTest_create.xml";
-	
+  
 	private static final String JSON_PATCH_PATIENT_PATH = "org/openmrs/module/fhir2/providers/Patient_json_patch.json";
 	
 	private static final String JSON_MERGE_PATCH_PATIENT_PATH = "org/openmrs/module/fhir2/providers/Patient_patch.json";
+  
+  private static final String XML_PATCH_PATIENT_PATH = "org/openmrs/module/fhir2/providers/Patient_xmlpatch.xml";
 	
 	private static final String PATIENT_UUID = "30e2aa2a-4ed1-415d-84c5-ba29016c14b7";
 	
@@ -417,7 +419,6 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
 	
-	@Test
 	public void shouldPatchExistingPatientUsingJsonMergePatch() throws Exception {
 		String jsonPatientPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_PATIENT_PATH)) {
@@ -458,6 +459,29 @@ public class PatientFhirResourceProviderIntegrationTest extends BaseFhirR4Integr
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Patient patient = readResponse(response);
+		
+		assertThat(patient, notNullValue());
+		assertThat(patient.getIdElement().getIdPart(), equalTo(PATIENT_UUID));
+		assertThat(patient, validResource());
+		assertThat(patient.getGender(), equalTo(Enumerations.AdministrativeGender.FEMALE));
+	}
+  
+  	@Test
+	public void shouldPatchExistingPatientUsingXmlPatch() throws Exception {
+		String xmlPatientPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_PATIENT_PATH)) {
+			Objects.requireNonNull(is);
+			xmlPatientPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Patient/" + PATIENT_UUID).xmlPatch(xmlPatientPatch)
+		        .accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, notNullValue());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+    
+    Patient patient = readResponse(response);
 		
 		assertThat(patient, notNullValue());
 		assertThat(patient.getIdElement().getIdPart(), equalTo(PATIENT_UUID));

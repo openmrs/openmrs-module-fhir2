@@ -36,6 +36,7 @@ import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 import org.openmrs.module.fhir2.api.util.FhirUtils;
 import org.openmrs.module.fhir2.api.util.JsonPatchUtils;
+import org.openmrs.module.fhir2.api.util.XmlPatchUtils;
 import org.openmrs.validator.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -143,7 +144,7 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		OpenmrsFhirTranslator<U, T> translator = getTranslator();
 		
 		T existingFhirObject = translator.toFhirResource(existingObject);
-		T updatedFhirObject;
+		T updatedFhirObject = null;
 		
 		switch (patchType) {
 			case JSON_PATCH:
@@ -153,10 +154,11 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 					updatedFhirObject = JsonPatchUtils.applyJsonPatch(fhirContext, existingFhirObject, body);
 				}
 				break;
-			default:
-				throw new InvalidRequestException("only JSON-formatted patches are currently supported");
-			
+			case XML_PATCH:
+				updatedFhirObject = XmlPatchUtils.applyXmlPatch(fhirContext, existingFhirObject, body);
+				break;
 		}
+		
 		return applyUpdate(existingObject, updatedFhirObject);
 	}
 	
