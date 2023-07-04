@@ -53,15 +53,17 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	
 	private static final String XML_CREATE_CONDITION_DOCUMENT = "org/openmrs/module/fhir2/providers/ConditionWebTest_create.xml";
 	
+	private static final String JSON_MERGE_PATCH_CONDITION_PATH = "org/openmrs/module/fhir2/providers/Condition_json_merge_patch.json";
+	
+	private static final String JSON_PATCH_CONDITION_PATH = "org/openmrs/module/fhir2/providers/Condition_json_patch.json";
+	
+	private static final String XML_PATCH_CONDITION_PATH = "org/openmrs/module/fhir2/providers/Condition_xmlpatch.xml";
+	
 	private static final String CONDITION_UUID = "2cc6880e-2c46-11e4-9138-a6c5e4d20fb7";
 	
 	private static final String WRONG_CONDITION_UUID = "950d965d-a935-429f-945f-75a502a90188";
 	
 	private static final String CONDITION_SUBJECT_UUID = "da7f524f-27ce-4bb2-86d6-6d1d05312bd5";
-	
-	private static final String JSON_PATCH_CONDITION_PATH = "org/openmrs/module/fhir2/providers/Condition_json_merge_patch.json";
-	
-	private static final String JSON_PATCH_CONDITION_FILE= "org/openmrs/module/fhir2/providers/Condition_json_patch.json";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -415,7 +417,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	@Test
 	public void shouldPatchExistingConditionUsingJsonMergePatch() throws Exception {
 		String jsonConditionPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_CONDITION_PATH)) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_CONDITION_PATH)) {
 			Objects.requireNonNull(is);
 			jsonConditionPatch = inputStreamToString(is, UTF_8);
 		}
@@ -441,7 +443,7 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	@Test
 	public void shouldPatchExistingConditionUsingJsonPatch() throws Exception {
 		String jsonConditionPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_CONDITION_FILE)) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_CONDITION_PATH)) {
 			Objects.requireNonNull(is);
 			jsonConditionPatch = inputStreamToString(is, UTF_8);
 		}
@@ -451,6 +453,32 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Condition condition = readResponse(response);
+		
+		assertThat(condition, notNullValue());
+		assertThat(condition.getIdElement().getIdPart(), equalTo(CONDITION_UUID));
+		assertThat(condition, validResource());
+		
+		assertThat(condition.hasClinicalStatus(), is(true));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("inactive"));
+	}
+	
+	@Test
+	public void shouldPatchExistingConditionUsingXmlPatch() throws Exception {
+		String jsonConditionPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_CONDITION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonConditionPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID)
+				.xmlPatch(jsonConditionPatch).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Condition condition = readResponse(response);
