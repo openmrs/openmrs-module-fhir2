@@ -63,9 +63,11 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 	
 	private static final String JSON_CREATE_TASK_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_create.json";
 	
-	final String JSON_MERGE_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_merge_json_patch.json";
+	private static final String JSON_MERGE_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_merge_json_patch.json";
 	
 	private static final String JSON_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_json_patch.json";
+	
+	private static final String XML_PATCH_TASK_PATH = "org/openmrs/module/fhir2/providers/Task_xml_patch.xml";
 	
 	private static final String JSON_TASK_UN_SUPPORTED_VALUES_DOCUMENT = "org/openmrs/module/fhir2/providers/Task_un_supported_values.json";
 	
@@ -571,7 +573,6 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		assertThat(operationOutcome.hasIssue(), is(true));
 	}
 	
-	
 	@Test
 	public void shouldPatchExistingTaskAsJsonUsingJsonMergePatch() throws Exception {
 		String jsonTaskPatch;
@@ -608,6 +609,29 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Task task = readResponse(response);
+		
+		assertThat(task, notNullValue());
+		assertThat(task.getIdElement().getIdPart(), equalTo(TASK_UUID));
+		assertThat(task, validResource());
+		assertThat(task.getStatus(), is(Task.TaskStatus.REQUESTED));
+	}
+	
+	@Test
+	public void shouldPatchExistingTaskAsJsonUsingXmlPatch() throws Exception {
+		String xmlTaskPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_TASK_PATH)) {
+			Objects.requireNonNull(is);
+			xmlTaskPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).xmlPatch(xmlTaskPatch)
+				.accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Task task = readResponse(response);
