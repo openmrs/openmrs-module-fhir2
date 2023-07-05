@@ -36,7 +36,11 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 	
 	private static final String MEDICATION_REQUEST_DATA_XML = "org/openmrs/module/fhir2/api/dao/impl/FhirMedicationRequest_2_2_initial_data.xml";
 	
-	private static final String JSON_PATCH_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequest_patch.json";
+	private static final String JSON_MERGE_PATCH_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequest_patch.json";
+	
+	private static final String JSON_PATCH_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequest_json_patch.json";
+	
+	private static final String XML_PATCH_MEDICATION_REQUEST_PATH = "org/openmrs/module/fhir2/providers/MedicationRequest_xml_patch.xml";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -74,9 +78,9 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 	}
 	
 	@Test
-	public void shouldPatchExistingMedicationRequestViaJson() throws Exception {
+	public void shouldPatchExistingMedicationRequestUsingJsonMergePatch() throws Exception {
 		String jsonMedicationRequestPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_MEDICATION_REQUEST_PATH)) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_MEDICATION_REQUEST_PATH)) {
 			Objects.requireNonNull(is);
 			jsonMedicationRequestPatch = inputStreamToString(is, UTF_8);
 		}
@@ -100,5 +104,63 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 		assertThat(
 		    medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue().toString(),
 		    is("COMPLETED"));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationRequestUsingJsonPatch() throws Exception {
+		String jsonMedicationRequestPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_MEDICATION_REQUEST_PATH)) {
+			Objects.requireNonNull(is);
+			jsonMedicationRequestPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/MedicationRequest/" + MEDICATION_REQUEST_UUID)
+				.jsonPatch(jsonMedicationRequestPatch).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		MedicationRequest medicationRequest = readResponse(response);
+		
+		assertThat(medicationRequest, notNullValue());
+		assertThat(medicationRequest.getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+		assertThat(medicationRequest, validResource());
+		
+		// confirm that the fulfiller extension has been updated
+		assertThat(medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS),
+				notNullValue());
+		assertThat(
+				medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue().toString(),
+				is("COMPLETED"));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationRequestUsingXmlPatch() throws Exception {
+		String xmlMedicationRequestPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_MEDICATION_REQUEST_PATH)) {
+			Objects.requireNonNull(is);
+			xmlMedicationRequestPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/MedicationRequest/" + MEDICATION_REQUEST_UUID)
+				.xmlPatch(xmlMedicationRequestPatch).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		MedicationRequest medicationRequest = readResponse(response);
+		
+		assertThat(medicationRequest, notNullValue());
+		assertThat(medicationRequest.getIdElement().getIdPart(), equalTo(MEDICATION_REQUEST_UUID));
+		assertThat(medicationRequest, validResource());
+		
+		// confirm that the fulfiller extension has been updated
+		assertThat(medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS),
+				notNullValue());
+		assertThat(
+				medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue().toString(),
+				is("COMPLETED"));
 	}
 }

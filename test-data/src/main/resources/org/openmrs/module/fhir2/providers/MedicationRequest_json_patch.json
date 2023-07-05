@@ -1,0 +1,12 @@
+[
+  {
+  "op": "replace",
+  "path": "/extension",
+  "value": [
+      {
+        "url": "http://fhir.openmrs.org/ext/medicationrequest/fullfillerstatus",
+        "valueCode": "COMPLETED"
+      }
+    ]
+  }
+]
