@@ -54,6 +54,8 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 	
 	private static final String JSON_PATCH_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/Medication_json_patch.json";
 	
+	private static final String XML_PATCH_MEDICATION_PATH = "org/openmrs/module/fhir2/providers/Medication_xml_patch.xml";
+	
 	private static final String JSON_CREATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_create.json";
 	
 	private static final String XML_CREATE_MEDICATION_DOCUMENT = "org/openmrs/module/fhir2/providers/MedicationWebTest_create.xml";
@@ -416,8 +418,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(medication, notNullValue());
 		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
 		assertThat(medication, validResource());
-		
-		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
+		assertThat(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(), equalTo("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 	}
 	
 	@Test
@@ -439,9 +440,33 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		
 		assertThat(medication, notNullValue());
 		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
+		System.out.println(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode());
 		assertThat(medication, validResource());
+		assertThat(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(), equalTo("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		
-		assertThat(medication.getStatus(), is(Medication.MedicationStatus.ACTIVE));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationUsingXmlPatch() throws Exception {
+		String xmlMedicationPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_MEDICATION_PATH)) {
+			Objects.requireNonNull(is);
+			xmlMedicationPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).xmlPatch(xmlMedicationPatch)
+				.accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Medication medication = readResponse(response);
+		
+		assertThat(medication, notNullValue());
+		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
+		assertThat(medication, validResource());
+		assertThat(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(), equalTo("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 	}
 	
 	@Test
