@@ -17,9 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,6 +51,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
+import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -172,8 +171,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	public void findPractitionersByName_shouldReturnMatchingBundleOfPractitioners() {
 		StringAndListParam nameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(GIVEN_NAME)));
-		when(practitionerService.searchForPractitioners(isNull(), argThat(is(nameParam)), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, nameParam, null, null, null, null, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(nameParam, null, null, null, null, null, null,
@@ -190,8 +189,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	public void findPractitionersByWrongName_shouldReturnBundleWithEmptyEntries() {
 		StringAndListParam nameParam = new StringAndListParam()
 		        .addAnd(new StringOrListParam().add(new StringParam(WRONG_NAME)));
-		when(practitionerService.searchForPractitioners(isNull(), argThat(is(nameParam)), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, nameParam, null, null, null, null, null, null, null, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(nameParam, null, null, null, null, null, null,
@@ -206,9 +205,10 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByIdentifier_shouldReturnMatchingBundleOfPractitioners() {
 		TokenAndListParam identifier = new TokenAndListParam().addAnd(new TokenOrListParam().add(PRACTITIONER_IDENTIFIER));
-		when(practitionerService.searchForPractitioners(argThat(is(identifier)), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(identifier, null, null, null, null, null, null, null, null, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, identifier, null, null, null, null, null,
 		    null, null, null, null);
@@ -224,8 +224,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	public void findPractitionersByWrongIdentifier_shouldReturnBundleWithEmptyEntries() {
 		TokenAndListParam identifier = new TokenAndListParam()
 		        .addAnd(new TokenOrListParam().add(WRONG_PRACTITIONER_IDENTIFIER));
-		when(practitionerService.searchForPractitioners(argThat(is(identifier)), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(identifier, null, null, null, null, null, null, null, null, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, identifier, null, null, null, null, null,
@@ -240,8 +240,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByGivenName_shouldReturnMatchingBundleOfPractitioners() {
 		StringAndListParam givenName = new StringAndListParam().addAnd(new StringParam(PRACTITIONER_GIVEN_NAME));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), argThat(is(givenName)), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, givenName, null, null, null, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, givenName, null, null, null, null,
@@ -257,8 +257,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByWrongGivenName_shouldReturnBundleWithEmptyEntries() {
 		StringAndListParam givenName = new StringAndListParam().addAnd(new StringParam(WRONG_GIVEN_NAME));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), argThat(is(givenName)), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, givenName, null, null, null, null, null, null, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, givenName, null, null, null, null,
@@ -273,9 +273,10 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByFamilyName_shouldReturnMatchingBundleOfPractitioners() {
 		StringAndListParam familyName = new StringAndListParam().addAnd(new StringParam(PRACTITIONER_FAMILY_NAME));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), argThat(is(familyName)), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, familyName, null, null, null, null, null, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, familyName, null, null, null,
 		    null, null, null, null);
@@ -290,8 +291,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByWrongFamilyName_shouldReturnBundleWithEmptyEntries() {
 		StringAndListParam familyName = new StringAndListParam().addAnd(new StringParam(WRONG_FAMILY_NAME));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), argThat(is(familyName)), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, familyName, null, null, null, null, null, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, familyName, null, null, null,
@@ -306,8 +307,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByAddressCity_shouldReturnMatchingBundleOfPractitioners() {
 		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(CITY));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), argThat(is(city)), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, city, null, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, city, null, null, null,
@@ -323,8 +324,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByWrongAddressCity_shouldReturnBundleWithEmptyEntries() {
 		StringAndListParam city = new StringAndListParam().addAnd(new StringParam(WRONG_CITY));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), argThat(is(city)), isNull(),
-		    isNull(), isNull(), isNull(), isNull(), isNull()))
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, city, null, null, null, null, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, city, null, null, null,
@@ -339,8 +340,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByAddressState_shouldReturnMatchingBundleOfPractitioners() {
 		StringAndListParam state = new StringAndListParam().addAnd(new StringParam(STATE));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(state)),
-		    isNull(), isNull(), isNull(), isNull(), isNull())).thenReturn(
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, state, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, state, null, null,
@@ -356,8 +357,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByWrongAddressState_shouldReturnBundleWithEmptyEntries() {
 		StringAndListParam state = new StringAndListParam().addAnd(new StringParam(WRONG_STATE));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), argThat(is(state)),
-		    isNull(), isNull(), isNull(), isNull(), isNull()))
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, state, null, null, null, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, state, null, null,
@@ -372,9 +373,10 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByAddressPostalCode_shouldReturnMatchingBundleOfPractitioners() {
 		StringAndListParam postalCode = new StringAndListParam().addAnd(new StringParam(POSTAL_CODE));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(postalCode)), isNull(), isNull(), isNull(), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, null, postalCode, null, null, null, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, postalCode,
 		    null, null, null, null);
@@ -389,8 +391,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByWrongAddressPostalCode_shouldReturnBundleWithEmptyEntries() {
 		StringAndListParam postalCode = new StringAndListParam().addAnd(new StringParam(WRONG_POSTAL_CODE));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(postalCode)), isNull(), isNull(), isNull(), isNull()))
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, null, postalCode, null, null, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, postalCode,
@@ -405,8 +407,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByAddressCountry_shouldReturnMatchingBundleOfPractitioners() {
 		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(COUNTRY));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(country)), isNull(), isNull(), isNull())).thenReturn(
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, country, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, country,
@@ -422,8 +424,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByWrongAddressCountry_shouldReturnBundleWithEmptyEntries() {
 		StringAndListParam country = new StringAndListParam().addAnd(new StringParam(WRONG_COUNTRY));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    argThat(is(country)), isNull(), isNull(), isNull()))
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, country, null, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, country,
@@ -438,8 +440,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByUUID_shouldReturnMatchingBundleOfPractitioners() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(PRACTITIONER_UUID));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), argThat(is(uuid)), isNull(), isNull())).thenReturn(
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, uuid, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, null,
@@ -455,8 +457,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByWrongUUID_shouldReturnBundleWithEmptyEntries() {
 		TokenAndListParam uuid = new TokenAndListParam().addAnd(new TokenParam(WRONG_PRACTITIONER_UUID));
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), argThat(is(uuid)), isNull(), isNull()))
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, uuid, null, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, null,
@@ -471,9 +473,10 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	@Test
 	public void findPractitionersByLastUpdated_shouldReturnMatchingBundleOfPractitioners() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(LAST_UPDATED_DATE).setLowerBound(LAST_UPDATED_DATE);
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), argThat(is(lastUpdated)), isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, lastUpdated, null)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, null,
 		    null, lastUpdated, null);
@@ -489,8 +492,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	public void findPractitionersByWrongLastUpdated_shouldReturnBundleWithEmptyEntries() {
 		DateRangeParam lastUpdated = new DateRangeParam().setUpperBound(WRONG_LAST_UPDATED_DATE)
 		        .setLowerBound(WRONG_LAST_UPDATED_DATE);
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), argThat(is(lastUpdated)), isNull()))
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, lastUpdated, null)))
 		            .thenReturn(new MockIBundleProvider<>(Collections.emptyList(), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, null,
@@ -507,9 +510,10 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 		HashSet<Include> revIncludes = new HashSet<>();
 		revIncludes.add(new Include("Encounter:participant"));
 		
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), argThat(is(revIncludes)))).thenReturn(
-		        new MockIBundleProvider<>(Arrays.asList(practitioner, new Encounter()), PREFERRED_PAGE_SIZE, COUNT));
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, null, revIncludes)))
+		            .thenReturn(
+		                new MockIBundleProvider<>(Arrays.asList(practitioner, new Encounter()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, null,
 		    null, null, revIncludes);
@@ -527,8 +531,8 @@ public class PractitionerFhirResourceProviderTest extends BaseFhirProvenanceReso
 	public void findPractitioners_shouldNotAddRelatedResourcesForEmptyReverseInclude() {
 		HashSet<Include> revIncludes = new HashSet<>();
 		
-		when(practitionerService.searchForPractitioners(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), isNull(),
-		    isNull(), isNull(), isNull(), isNull())).thenReturn(
+		when(practitionerService.searchForPractitioners(
+		    new PractitionerSearchParams(null, null, null, null, null, null, null, null, null, null, null))).thenReturn(
 		        new MockIBundleProvider<>(Collections.singletonList(practitioner), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForPractitioners(null, null, null, null, null, null, null, null,
