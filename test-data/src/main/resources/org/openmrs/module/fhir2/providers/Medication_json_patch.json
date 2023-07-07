@@ -1,7 +1,17 @@
 [
   {
     "op": "replace",
-    "path": "/status",
-    "value": "inactive"
+    "path": "/ingredient",
+    "value": [
+      {
+        "itemCodeableConcept": {
+          "coding": [
+            {
+              "code": "5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            }
+          ]
+        }
+      }
+    ]
   }
 ]
