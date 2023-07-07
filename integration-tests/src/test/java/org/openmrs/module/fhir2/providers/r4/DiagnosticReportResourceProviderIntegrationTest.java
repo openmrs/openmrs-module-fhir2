@@ -54,6 +54,8 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 	
 	private static final String JSON_PATCH_REPORT_PATH = "org/openmrs/module/fhir2/providers/DiagnosticReport_json_patch.json";
 	
+	private static final String XML_PATCH_REPORT_PATH = "org/openmrs/module/fhir2/providers/DiagnosticReport_xml_patch.xml";
+	
 	private static final String DIAGNOSTIC_REPORT_UUID = "1e589127-f391-4d0c-8e98-e0a158b2be22";
 	
 	private static final String WRONG_DIAGNOSTIC_REPORT_UUID = "6ebc40fb-fe8b-4208-9526-68375d2cbe1c";
@@ -482,6 +484,30 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		DiagnosticReport diagnosticReport = readResponse(response);
+		
+		assertThat(diagnosticReport, notNullValue());
+		assertThat(diagnosticReport.getIdElement().getIdPart(), equalTo(DIAGNOSTIC_REPORT_UUID));
+		assertThat(diagnosticReport, validResource());
+		
+		assertThat(diagnosticReport.getStatus(), equalTo(DiagnosticReport.DiagnosticReportStatus.REGISTERED));
+	}
+	
+	@Test
+	public void shouldPatchExistingDiagnosticReportUsingXmlPatch() throws Exception {
+		String xmlDiagnosticReportPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_REPORT_PATH)) {
+			Objects.requireNonNull(is);
+			xmlDiagnosticReportPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
+				.xmlPatch(xmlDiagnosticReportPatch).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		DiagnosticReport diagnosticReport = readResponse(response);
