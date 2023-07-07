@@ -47,6 +47,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirPractitionerService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.PractitionerSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -120,8 +121,9 @@ public class PractitionerFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(practitionerService.searchForPractitioners(identifier, name, given,
-		    family, city, state, postalCode, country, id, lastUpdated, revIncludes));
+		return new SearchQueryBundleProviderR3Wrapper(
+		        practitionerService.searchForPractitioners(new PractitionerSearchParams(identifier, name, given, family,
+		                city, state, postalCode, country, id, lastUpdated, revIncludes)));
 	}
 	
 }

@@ -385,7 +385,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		}
 		
 		MockHttpServletResponse response = patch("/Practitioner/" + PRACTITIONER_UUID).jsonMergePatch(jsonPractitionerPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -409,7 +409,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		}
 		
 		MockHttpServletResponse response = patch("/Practitioner/" + PRACTITIONER_UUID).jsonPatch(jsonPractitionerPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
