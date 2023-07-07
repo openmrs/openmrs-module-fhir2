@@ -426,13 +426,13 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	
 	@Test
 	public void shouldPatchExistingPractitionerUsingXmlPatch() throws Exception {
-		String jsonPractitionerPatch;
+		String xmlPractitionerPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_PRACTITIONER_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPractitionerPatch = inputStreamToString(is, UTF_8);
+			xmlPractitionerPatch = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = patch("/Practitioner/" + PRACTITIONER_UUID).xmlPatch(jsonPractitionerPatch)
+		MockHttpServletResponse response = patch("/Practitioner/" + PRACTITIONER_UUID).xmlPatch(xmlPractitionerPatch)
 				.accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
