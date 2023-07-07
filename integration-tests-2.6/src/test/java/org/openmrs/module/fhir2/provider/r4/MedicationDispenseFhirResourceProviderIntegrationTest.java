@@ -50,6 +50,8 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 	
 	private static final String JSON_PATCH_DISPENSE_PATH = "org/openmrs/module/fhir2/providers/MedicationDispense_json_patch.json";
 	
+	private static final String XML_PATCH_DISPENSE_PATH = "org/openmrs/module/fhir2/providers/MedicationDispense_xml_patch.xml";
+	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
 	private MedicationDispenseFhirResourceProvider resourceProvider;
@@ -267,6 +269,30 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		MedicationDispense medicationDispense = readResponse(response);
+		
+		assertThat(medicationDispense, notNullValue());
+		assertThat(medicationDispense.getIdElement().getIdPart(), equalTo(EXISTING_DISPENSE_UUID));
+		assertThat(medicationDispense, validResource());
+		
+		assertThat(medicationDispense.getStatus(), is(MedicationDispense.MedicationDispenseStatus.COMPLETED));
+	}
+	
+	@Test
+	public void shouldPatchExistingMedicationDispenseUsingXmlPatch() throws Exception {
+		String xmlMedicationDispensePatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_DISPENSE_PATH)) {
+			Objects.requireNonNull(is);
+			xmlMedicationDispensePatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/MedicationDispense/" + EXISTING_DISPENSE_UUID)
+				.xmlPatch(xmlMedicationDispensePatch).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		MedicationDispense medicationDispense = readResponse(response);
