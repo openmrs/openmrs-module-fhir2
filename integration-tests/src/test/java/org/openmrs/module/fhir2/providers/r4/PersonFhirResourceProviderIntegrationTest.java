@@ -389,13 +389,13 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 	
 	@Test
 	public void shouldPatchPersonResourceUsingXmlPatch() throws Exception {
-		String jsonPersonPatch;
+		String xmlPersonPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_PERSON_PATH)) {
 			Objects.requireNonNull(is);
-			jsonPersonPatch = inputStreamToString(is, UTF_8);
+			xmlPersonPatch = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).xmlPatch(jsonPersonPatch)
+		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).xmlPatch(xmlPersonPatch)
 				.accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
