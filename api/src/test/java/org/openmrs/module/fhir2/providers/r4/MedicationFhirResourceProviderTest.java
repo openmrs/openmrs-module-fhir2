@@ -17,9 +17,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
-import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,6 +46,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
+import org.openmrs.module.fhir2.api.search.param.MedicationSearchParams;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedicationFhirResourceProviderTest {
@@ -119,7 +118,7 @@ public class MedicationFhirResourceProviderTest {
 		TokenAndListParam code = new TokenAndListParam();
 		code.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
 		
-		when(fhirMedicationService.searchForMedications(argThat(is(code)), isNull(), isNull(), isNull(), isNull(), isNull()))
+		when(fhirMedicationService.searchForMedications(new MedicationSearchParams(code, null, null, null, null, null)))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForMedication(code, null, null, null, null, null);
@@ -136,9 +135,9 @@ public class MedicationFhirResourceProviderTest {
 		TokenAndListParam dosageFormCode = new TokenAndListParam();
 		dosageFormCode.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
 		
-		when(fhirMedicationService.searchForMedications(isNull(), argThat(is(dosageFormCode)), isNull(), isNull(), isNull(),
-		    isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
+		when(fhirMedicationService
+		        .searchForMedications(new MedicationSearchParams(null, dosageFormCode, null, null, null, null))).thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForMedication(null, dosageFormCode, null, null, null, null);
 		
@@ -154,9 +153,9 @@ public class MedicationFhirResourceProviderTest {
 		TokenAndListParam ingredientCode = new TokenAndListParam();
 		ingredientCode.addAnd(new TokenOrListParam().addOr(new TokenParam().setValue(CODE)));
 		
-		when(fhirMedicationService.searchForMedications(isNull(), isNull(), argThat(is(ingredientCode)), isNull(), isNull(),
-		    isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
+		when(fhirMedicationService
+		        .searchForMedications(new MedicationSearchParams(null, null, ingredientCode, null, null, null))).thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForMedication(null, null, ingredientCode, null, null, null);
 		
@@ -172,7 +171,7 @@ public class MedicationFhirResourceProviderTest {
 		TokenAndListParam uuid = new TokenAndListParam();
 		uuid.addAnd(new TokenParam().setValue(MEDICATION_UUID));
 		
-		when(fhirMedicationService.searchForMedications(isNull(), isNull(), isNull(), argThat(is(uuid)), isNull(), isNull()))
+		when(fhirMedicationService.searchForMedications(new MedicationSearchParams(null, null, null, uuid, null, null)))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForMedication(null, null, null, uuid, null, null);
@@ -188,9 +187,9 @@ public class MedicationFhirResourceProviderTest {
 	public void searchForMedication_shouldReturnMatchingBundleOfMedicationByLastUpdated() {
 		DateRangeParam lastUpdated = new DateRangeParam().setLowerBound(LAST_UPDATED_DATE).setUpperBound(LAST_UPDATED_DATE);
 		
-		when(fhirMedicationService.searchForMedications(isNull(), isNull(), isNull(), isNull(), argThat(is(lastUpdated)),
-		    isNull())).thenReturn(
-		        new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
+		when(fhirMedicationService
+		        .searchForMedications(new MedicationSearchParams(null, null, null, null, lastUpdated, null))).thenReturn(
+		            new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
 		
 		IBundleProvider results = resourceProvider.searchForMedication(null, null, null, null, lastUpdated, null);
 		
@@ -203,7 +202,7 @@ public class MedicationFhirResourceProviderTest {
 	
 	@Test
 	public void searchForMedication_shouldAddRelatedResourcesForRevInclude() {
-		when(fhirMedicationService.searchForMedications(any(), any(), any(), any(), any(), any())).thenReturn(
+		when(fhirMedicationService.searchForMedications(any())).thenReturn(
 		    new MockIBundleProvider<>(Arrays.asList(medication, new MedicationRequest()), PREFERRED_PAGE_SIZE, COUNT));
 		
 		HashSet<Include> revIncludes = new HashSet<>();
@@ -222,7 +221,7 @@ public class MedicationFhirResourceProviderTest {
 	
 	@Test
 	public void searchForMedication_shouldNotAddResourcesForEmptyRevInclude() {
-		when(fhirMedicationService.searchForMedications(any(), any(), any(), any(), any(), isNull()))
+		when(fhirMedicationService.searchForMedications(new MedicationSearchParams(null, null, null, null, null, null)))
 		        .thenReturn(new MockIBundleProvider<>(Collections.singletonList(medication), PREFERRED_PAGE_SIZE, COUNT));
 		
 		HashSet<Include> revIncludes = new HashSet<>();

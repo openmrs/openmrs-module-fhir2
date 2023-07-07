@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.openmrs.module.fhir2.api.FhirMedicationService;
 import org.openmrs.module.fhir2.api.annotations.R3Provider;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProviderR3Wrapper;
+import org.openmrs.module.fhir2.api.search.param.MedicationSearchParams;
 import org.openmrs.module.fhir2.providers.util.FhirProviderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -109,7 +110,7 @@ public class MedicationFhirResourceProvider implements IResourceProvider {
 			revIncludes = null;
 		}
 		
-		return new SearchQueryBundleProviderR3Wrapper(
-		        medicationService.searchForMedications(code, dosageForm, ingredientCode, id, lastUpdated, revIncludes));
+		return new SearchQueryBundleProviderR3Wrapper(medicationService.searchForMedications(
+		    new MedicationSearchParams(code, dosageForm, ingredientCode, id, lastUpdated, revIncludes)));
 	}
 }
