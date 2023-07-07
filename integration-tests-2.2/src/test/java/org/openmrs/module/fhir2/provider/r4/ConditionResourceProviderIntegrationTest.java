@@ -468,14 +468,14 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 	
 	@Test
 	public void shouldPatchExistingConditionUsingXmlPatch() throws Exception {
-		String jsonConditionPatch;
+		String xmlConditionPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_CONDITION_PATH)) {
 			Objects.requireNonNull(is);
-			jsonConditionPatch = inputStreamToString(is, UTF_8);
+			xmlConditionPatch = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID)
-				.xmlPatch(jsonConditionPatch).accept(FhirMediaTypes.XML).go();
+				.xmlPatch(xmlConditionPatch).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
