@@ -405,7 +405,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		}
 		
 		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).jsonMergePatch(jsonMedicationPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -429,7 +429,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		}
 		
 		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).jsonPatch(jsonMedicationPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));

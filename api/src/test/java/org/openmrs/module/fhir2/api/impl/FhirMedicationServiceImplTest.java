@@ -51,6 +51,7 @@ import org.openmrs.module.fhir2.api.dao.FhirMedicationDao;
 import org.openmrs.module.fhir2.api.search.SearchQuery;
 import org.openmrs.module.fhir2.api.search.SearchQueryBundleProvider;
 import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
+import org.openmrs.module.fhir2.api.search.param.MedicationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.MedicationTranslator;
 
@@ -149,7 +150,8 @@ public class FhirMedicationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(code, null, null, null, null, null);
+		IBundleProvider result = fhirMedicationService
+		        .searchForMedications(new MedicationSearchParams(code, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -175,7 +177,8 @@ public class FhirMedicationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, dosageForm, null, null, null, null);
+		IBundleProvider result = fhirMedicationService
+		        .searchForMedications(new MedicationSearchParams(null, dosageForm, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -201,7 +204,8 @@ public class FhirMedicationServiceImplTest {
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, ingredientCode, null, null, null);
+		IBundleProvider result = fhirMedicationService
+		        .searchForMedications(new MedicationSearchParams(null, null, ingredientCode, null, null, null));
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -223,7 +227,8 @@ public class FhirMedicationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, uuid, null, null);
+		IBundleProvider result = fhirMedicationService
+		        .searchForMedications(new MedicationSearchParams(null, null, null, uuid, null, null));
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -245,7 +250,8 @@ public class FhirMedicationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider result = fhirMedicationService.searchForMedications(null, null, null, null, lastUpdated, null);
+		IBundleProvider result = fhirMedicationService
+		        .searchForMedications(new MedicationSearchParams(null, null, null, null, lastUpdated, null));
 		
 		List<IBaseResource> resultList = get(result);
 		
@@ -269,7 +275,8 @@ public class FhirMedicationServiceImplTest {
 		        .thenReturn(Collections.singleton(new MedicationRequest()));
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider results = fhirMedicationService.searchForMedications(null, null, null, null, null, revIncludes);
+		IBundleProvider results = fhirMedicationService
+		        .searchForMedications(new MedicationSearchParams(null, null, null, null, null, revIncludes));
 		
 		List<IBaseResource> resultList = get(results);
 		
@@ -292,7 +299,8 @@ public class FhirMedicationServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(medicationTranslator.toFhirResource(drug)).thenReturn(medication);
 		
-		IBundleProvider results = fhirMedicationService.searchForMedications(null, null, null, null, null, revIncludes);
+		IBundleProvider results = fhirMedicationService
+		        .searchForMedications(new MedicationSearchParams(null, null, null, null, null, revIncludes));
 		
 		List<IBaseResource> resultList = get(results);
 		
