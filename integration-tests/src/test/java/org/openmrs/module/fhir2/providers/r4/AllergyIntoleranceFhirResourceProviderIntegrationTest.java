@@ -462,14 +462,14 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 	
 	@Test
 	public void shouldPatchExistingAllergyUsingXmlPatch() throws Exception {
-		String jsonAllergyPatch;
+		String xmlAllergyPatch;
 		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_ALLERGY_PATH)) {
 			Objects.requireNonNull(is);
-			jsonAllergyPatch = inputStreamToString(is, UTF_8);
+			xmlAllergyPatch = inputStreamToString(is, UTF_8);
 		}
 		
 		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID)
-				.xmlPatch(jsonAllergyPatch).accept(FhirMediaTypes.XML).go();
+				.xmlPatch(xmlAllergyPatch).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
