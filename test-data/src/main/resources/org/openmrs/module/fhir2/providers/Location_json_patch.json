@@ -1,0 +1,17 @@
+[
+  {
+    "op": "replace",
+    "path": "/name",
+    "value": "Patched Location"
+  },
+  {
+    "op": "add",
+    "path": "/address",
+    "value": {
+      "city": "Wakiso",
+      "country": "Uganda",
+      "postalCode": "0000 WK",
+      "state": "Central Region"
+    }
+  }
+]

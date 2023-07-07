@@ -51,6 +51,10 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 	private static final String JSON_CREATE_LOCATION_DOCUMENT = "org/openmrs/module/fhir2/providers/LocationWebTest_create.json";
 	
 	private static final String XML_CREATE_LOCATION_DOCUMENT = "org/openmrs/module/fhir2/providers/LocationWebTest_create.xml";
+
+	private static final String JSON_MERGE_PATCH_LOCATION_PATH = "org/openmrs/module/fhir2/providers/Location_merge_json_patch.json";
+	
+	private static final String JSON_PATCH_LOCATION_PATH= "org/openmrs/module/fhir2/providers/Location_json_patch.json";
 	
 	@Getter(AccessLevel.PUBLIC)
 	@Autowired
@@ -415,6 +419,63 @@ public class LocationFhirResourceProviderIntegrationTest extends BaseFhirR4Integ
 		
 		assertThat(operationOutcome, notNullValue());
 		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldPatchExistingLocationUsingJsonMergePatch() throws Exception {
+		String jsonLocationPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_LOCATION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonLocationPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Location/" + LOCATION_UUID).jsonMergePatch(jsonLocationPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, notNullValue());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Location location = readResponse(response);
+		
+		assertThat(location, notNullValue());
+		assertThat(location.getIdElement().getIdPart(), equalTo(LOCATION_UUID));
+		assertThat(location, validResource());
+		
+		assertThat(location.getName(), is("Patched Location"));
+		assertThat(location.getAddress().getCity(), is("Wakiso"));
+		assertThat(location.getAddress().getCountry(), is("Uganda"));
+		assertThat(location.getAddress().getPostalCode(), is("0000 WK"));
+		assertThat(location.getAddress().getState(), is("Central Region"));
+	}
+	
+	@Test
+	public void shouldPatchExistingLocationUsingJsonPatch() throws Exception {
+		String jsonLocationPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_PATCH_LOCATION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonLocationPatch = inputStreamToString(is, UTF_8);
+		}
+		MockHttpServletResponse response = patch("/Location/" + LOCATION_UUID).jsonPatch(jsonLocationPatch)
+				.accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response, notNullValue());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Location location = readResponse(response);
+		
+		assertThat(location, notNullValue());
+		assertThat(location.getIdElement().getIdPart(), equalTo(LOCATION_UUID));
+		assertThat(location, validResource());
+		
+		assertThat(location.getName(), is("Patched Location"));
+		assertThat(location.getAddress().getCity(), is("Wakiso"));
+		assertThat(location.getAddress().getCountry(), is("Uganda"));
+		assertThat(location.getAddress().getPostalCode(), is("0000 WK"));
+		assertThat(location.getAddress().getState(), is("Central Region"));
 	}
 	
 	@Test
