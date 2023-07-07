@@ -189,7 +189,6 @@ public abstract class BaseFhirService<T extends IAnyResource, U extends OpenmrsO
 		validateObject(updatedObject);
 		
 		return translator.toFhirResource(getDao().createOrUpdate(updatedObject));
-		
 	}
 	
 	/**
