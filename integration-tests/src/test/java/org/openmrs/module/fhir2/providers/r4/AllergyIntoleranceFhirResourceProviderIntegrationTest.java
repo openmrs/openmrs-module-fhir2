@@ -45,6 +45,8 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 	
 	private static final String JSON_PATCH_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntolerance_json_patch.json";
 	
+	private static final String XML_PATCH_ALLERGY_PATH = "org/openmrs/module/fhir2/providers/AllergyIntolerance_xmlpatch.xml";
+	
 	private static final String JSON_CREATE_ALLERGY_DOCUMENT = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_create.json";
 	
 	private static final String XML_CREATE_ALLERGY_DOCUMENT = "org/openmrs/module/fhir2/providers/AllergyIntoleranceWebTest_create.xml";
@@ -446,6 +448,31 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		AllergyIntolerance allergyIntolerance = readResponse(response);
+		
+		assertThat(allergyIntolerance, notNullValue());
+		assertThat(allergyIntolerance.getIdElement().getIdPart(), equalTo(ALLERGY_UUID));
+		
+		//ensure category has been patched
+		assertThat(allergyIntolerance.getCategory().get(0).getCode(), equalTo("food"));
+		assertThat(allergyIntolerance, validResource());
+	}
+	
+	@Test
+	public void shouldPatchExistingAllergyUsingXmlPatch() throws Exception {
+		String xmlAllergyPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_ALLERGY_PATH)) {
+			Objects.requireNonNull(is);
+			xmlAllergyPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID)
+				.xmlPatch(xmlAllergyPatch).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		AllergyIntolerance allergyIntolerance = readResponse(response);
