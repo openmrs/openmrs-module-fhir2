@@ -55,6 +55,8 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 	
 	private static final String JSON_PATCH_PRACTITIONER_PATH = "org/openmrs/module/fhir2/providers/Practitioner_json_patch.json";
 	
+	private static final String XML_PATCH_PRACTITIONER_PATH = "org/openmrs/module/fhir2/providers/Practitioner_xmlpatch.xml";
+	
 	private static final String PRACTITIONER_UUID = "f9badd80-ab76-11e2-9e96-0800200c9a66";
 	
 	private static final String WRONG_PRACTITIONER_UUID = "f8bc0122-21db-4e91-a5d3-92ae01cafe92";
@@ -411,6 +413,30 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Practitioner practitioner = readResponse(response);
+		
+		assertThat(practitioner, notNullValue());
+		assertThat(practitioner.getIdElement().getIdPart(), equalTo(PRACTITIONER_UUID));
+		assertThat(practitioner, validResource());
+		
+		assertThat(practitioner.getGender(), is(Enumerations.AdministrativeGender.FEMALE));
+	}
+	
+	@Test
+	public void shouldPatchExistingPractitionerUsingXmlPatch() throws Exception {
+		String xmlPractitionerPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(XML_PATCH_PRACTITIONER_PATH)) {
+			Objects.requireNonNull(is);
+			xmlPractitionerPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Practitioner/" + PRACTITIONER_UUID).xmlPatch(xmlPractitionerPatch)
+				.accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Practitioner practitioner = readResponse(response);
