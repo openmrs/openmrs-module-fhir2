@@ -58,6 +58,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 	
 	private static final String JSON_CREATE_OBS_DOCUMENT = "org/openmrs/module/fhir2/providers/ObservationWebTest_create.json";
 	
+	private static final String OBS_JSON_UPDATE_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_update.json";
+	
 	private static final String XML_CREATE_OBS_DOCUMENT = "org/openmrs/module/fhir2/providers/ObservationWebTest_create.xml";
 	
 	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
@@ -1363,6 +1365,29 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(1));
+	}
+	
+	@Test
+	public void shouldUpdateExistingObservationAsJson() throws Exception {
+		String jsonObs;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(OBS_JSON_UPDATE_PATH)) {
+			Objects.requireNonNull(is);
+			jsonObs = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = put("/Observation/" + OBS_UUID).jsonContent(jsonObs).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Observation updatedObservation = readResponse(response);
+		
+		System.out.println("uuid: " + updatedObservation.getIdElement().getIdPart());
+		assertThat(updatedObservation, notNullValue());
+		assertThat(updatedObservation.getIdElement().getIdPart(), equalTo(OBS_UUID));
+		assertThat(updatedObservation.getCode().getCodingFirstRep().getCode(), is("5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+		assertThat(updatedObservation, validResource());
 	}
 	
 	private int getDistinctEncounterDatetime(List<Bundle.BundleEntryComponent> resultList) {

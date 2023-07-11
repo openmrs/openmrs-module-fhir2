@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
@@ -81,6 +83,21 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 	@Create
 	public MethodOutcome createObservationResource(@ResourceParam Observation observation) {
 		return FhirProviderUtils.buildCreate(observationService.create(observation));
+	}
+	
+	@Update
+	@SuppressWarnings("unused")
+	public MethodOutcome updateObservation(@IdParam IdType id, @ResourceParam Observation observation) {
+		if (id == null || id.getIdPart() == null) {
+			throw new InvalidRequestException("id must be specified to update");
+		}
+		
+//		Basically, when you call the update() function, the result should have a JSON version of the new Obs,
+//				so you should be able to get the UUID from the id field in the JSON object.
+		
+		observation.setId(id.getIdPart());
+		
+		return FhirProviderUtils.buildUpdate(observationService.update(id.getIdPart(), observation));
 	}
 	
 	@Delete
