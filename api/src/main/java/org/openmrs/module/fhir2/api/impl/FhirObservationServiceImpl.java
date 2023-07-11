@@ -14,11 +14,13 @@ import java.util.Optional;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Observation;
 import org.openmrs.Obs;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.FhirObservationService;
 import org.openmrs.module.fhir2.api.dao.FhirObservationDao;
@@ -27,9 +29,13 @@ import org.openmrs.module.fhir2.api.search.SearchQueryInclude;
 import org.openmrs.module.fhir2.api.search.param.ObservationSearchParams;
 import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
+import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
+import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Nonnull;
 
 @Component
 @Transactional
@@ -76,5 +82,49 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		        .addParameter(FhirConstants.MAX_SEARCH_HANDLER, Optional.ofNullable(max).orElse(new NumberParam(1)));
 		
 		return searchQuery.getQueryResults(theParams, dao, translator, searchQueryInclude);
+	}
+	
+	@Override
+	public Observation update(@Nonnull String uuid, @Nonnull Observation updatedObservation) {
+		if (uuid == null) {
+			throw new InvalidRequestException("Uuid cannot be null.");
+		}
+		
+		if (updatedObservation == null) {
+			throw new InvalidRequestException("Resource cannot be null.");
+		}
+		
+		if (updatedObservation.getId() == null) {
+			throw new InvalidRequestException("Observation resource is missing id.");
+		}
+		
+		if (!updatedObservation.getIdElement().getIdPart().equals(uuid)) {
+			throw new InvalidRequestException("Observation id does not match resource id.");
+		}
+		
+		Obs existingObservation = dao.get(uuid);
+		
+		if (existingObservation == null) {
+			throw resourceNotFound(uuid);
+		}
+		
+		return applyUpdate(existingObservation, updatedObservation);
+	}
+	
+	@Override
+	protected Observation applyUpdate(org.openmrs.Obs existingObject, Observation updatedResource) {
+		OpenmrsFhirTranslator<Obs, Observation> translator = getTranslator();
+		
+		org.openmrs.Obs updatedObject;
+		if (translator instanceof UpdatableOpenmrsTranslator) {
+			UpdatableOpenmrsTranslator<org.openmrs.Obs, Observation> updatableOpenmrsTranslator = (UpdatableOpenmrsTranslator<org.openmrs.Obs, Observation>) translator;
+			updatedObject = updatableOpenmrsTranslator.toOpenmrsType(existingObject, updatedResource);
+		} else {
+			updatedObject = translator.toOpenmrsType(updatedResource);
+		}
+		
+		validateObject(updatedObject);
+		
+		return translator.toFhirResource(Context.getObsService().saveObs(updatedObject, "Updated via the FHIR2 API"));
 	}
 }
