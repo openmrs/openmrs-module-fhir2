@@ -255,7 +255,9 @@ public class DosageTranslatorImplTest {
 		
 		drugOrder.setDose(20.0);
 		drugOrder.setDoseUnits(mg);
+		
 		Dosage result = dosageTranslator.toFhirResource(drugOrder);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getValue().doubleValue(), equalTo(20.0));
 		assertThat(result.getDoseAndRate().get(0).getDoseQuantity().getUnit(), is("mg"));

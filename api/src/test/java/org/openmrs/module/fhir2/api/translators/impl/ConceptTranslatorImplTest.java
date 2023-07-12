@@ -10,6 +10,7 @@
 package org.openmrs.module.fhir2.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -134,9 +135,8 @@ public class ConceptTranslatorImplTest {
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), not(empty()));
-		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL))));
-		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1000-1"))));
-		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+		assertThat(result.getCoding(), hasItem(allOf(hasProperty("system", equalTo(FhirTestConstants.LOINC_SYSTEM_URL)),
+		    hasProperty("code", equalTo("1000-1")), hasProperty("display", nullValue()))));
 	}
 	
 	@Test
@@ -145,9 +145,8 @@ public class ConceptTranslatorImplTest {
 		CodeableConcept result = conceptTranslator.toFhirResource(concept);
 		assertThat(result, notNullValue());
 		assertThat(result.getCoding(), not(empty()));
-		assertThat(result.getCoding(), hasItem(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN))));
-		assertThat(result.getCoding(), hasItem(hasProperty("code", equalTo("1650"))));
-		assertThat(result.getCoding(), hasItem(hasProperty("display", equalTo(CONCEPT_NAME))));
+		assertThat(result.getCoding(), hasItem(allOf(hasProperty("system", equalTo(FhirTestConstants.CIEL_SYSTEM_URN)),
+		    hasProperty("code", equalTo("1650")), hasProperty("display", nullValue()))));
 	}
 	
 	@Test

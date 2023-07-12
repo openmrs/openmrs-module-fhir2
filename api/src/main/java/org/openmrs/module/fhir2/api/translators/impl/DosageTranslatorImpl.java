@@ -44,6 +44,7 @@ public class DosageTranslatorImpl implements DosageTranslator {
 		if (drugOrder == null) {
 			return null;
 		}
+		
 		Dosage dosage = new Dosage();
 		dosage.setText(drugOrder.getDosingInstructions());
 		dosage.setAsNeeded(new BooleanType(drugOrder.getAsNeeded()));
@@ -59,7 +60,7 @@ public class DosageTranslatorImpl implements DosageTranslator {
 				if (coding != null) {
 					dose.setSystem(coding.getSystem());
 					dose.setCode(coding.getCode());
-					dose.setUnit(coding.getDisplay());
+					dose.setUnit(drugOrder.getDoseUnits().getDisplayString());
 				}
 			}
 			doseAndRate.setDose(dose);

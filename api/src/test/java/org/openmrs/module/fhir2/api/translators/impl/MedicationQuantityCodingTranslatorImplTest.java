@@ -82,6 +82,7 @@ public class MedicationQuantityCodingTranslatorImplTest {
 		mg.addConceptMapping(new ConceptMap(new ConceptReferenceTerm(rxNorm, "rx-norm-mg-code", "rxnorm"), sameAs));
 		
 		Coding result = quantityCodingTranslator.toFhirResource(mg);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getDisplay(), is("mg"));
 		assertThat(result.getSystem(), is(FhirConstants.RX_NORM_SYSTEM_URI));
@@ -102,6 +103,7 @@ public class MedicationQuantityCodingTranslatorImplTest {
 		mg.addConceptMapping(new ConceptMap(new ConceptReferenceTerm(snomed, "snomed-ct-mg-code", "snomed"), sameAs));
 		
 		Coding result = quantityCodingTranslator.toFhirResource(mg);
+		
 		assertThat(result, notNullValue());
 		assertThat(result.getDisplay(), is("mg"));
 		assertThat(result.getSystem(), is(FhirConstants.SNOMED_SYSTEM_URI));

@@ -52,7 +52,7 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.setText(concept.getDisplayString());
 		addConceptCoding(codeableConcept.addCoding(), null, concept.getUuid(), concept);
-		//map of <systemUrl ,<mapType , code>> ie { "http://loinc.org” : { "SAME-AS" : "108-5", "NAROOWER-THAN": "108-8" }}
+		//map of <systemUrl ,<mapType , code>> ie { "http://loinc.org” : { "SAME-AS" : "108-5", "NARROWER-THAN": "108-8" }}
 		Map<String, Map<String, String>> systemUrlToCodeMap = new HashMap<>();
 		for (ConceptMap mapping : concept.getConceptMappings()) {
 			if (mapping.getConceptMapType() != null) {
@@ -126,7 +126,9 @@ public class ConceptTranslatorImpl implements ConceptTranslator {
 	private void addConceptCoding(Coding coding, String system, String code, Concept concept) {
 		coding.setSystem(system);
 		coding.setCode(code);
-		coding.setDisplay(concept.getDisplayString());
+		if (system == null) {
+			coding.setDisplay(concept.getDisplayString());
+		}
 	}
 	
 	private void addSystemToCodeMap(Map<String, Map<String, String>> systemUrlToCodeMap, String systemUrl, String mapType,

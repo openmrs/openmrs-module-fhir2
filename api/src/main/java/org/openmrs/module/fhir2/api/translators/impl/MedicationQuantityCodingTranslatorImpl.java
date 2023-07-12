@@ -33,6 +33,7 @@ public class MedicationQuantityCodingTranslatorImpl extends BaseCodingTranslator
 		if (codeableConcept == null) {
 			return null;
 		}
+		
 		Coding coding = getCodingForSystem(codeableConcept, FhirConstants.RX_NORM_SYSTEM_URI);
 		if (coding == null) {
 			coding = getCodingForSystem(codeableConcept, FhirConstants.SNOMED_SYSTEM_URI);
@@ -43,6 +44,10 @@ public class MedicationQuantityCodingTranslatorImpl extends BaseCodingTranslator
 		if (coding == null) {
 			coding = codeableConcept.getCodingFirstRep();
 		}
+		
+		coding.setDisplay(codeableConcept.getCoding().stream().filter(c -> c.getSystem() == null || c.getSystem().isEmpty())
+		        .findFirst().map(Coding::getDisplay).orElse(null));
+		
 		return coding;
 	}
 }
