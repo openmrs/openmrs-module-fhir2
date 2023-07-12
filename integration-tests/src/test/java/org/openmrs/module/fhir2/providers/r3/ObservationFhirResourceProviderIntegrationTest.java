@@ -584,7 +584,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
+		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(entries, isSortedAndWithinMax(2));
@@ -615,7 +615,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
+		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(entries, isSortedAndWithinMax(1));
@@ -646,7 +646,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
+		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(entries, isSortedAndWithinMax(2));
@@ -674,7 +674,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
+		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(entries, isSortedAndWithinMax(2));
@@ -704,7 +704,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
+		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
@@ -785,7 +785,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
+		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(entries, isSortedAndWithinMax(2));
@@ -816,7 +816,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
+		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(entries, isSortedAndWithinMax(1));
@@ -847,7 +847,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
+		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(entries, isSortedAndWithinMax(2));
@@ -875,7 +875,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
+		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(entries, isSortedAndWithinMax(2));
@@ -905,7 +905,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(hasResource(
-		    hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Respiratory rate"))))))));
+		    hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Respiratory rate"))))))));
 		assertThat(entries, isSortedAndWithinMax(2));
 	}
 	
@@ -985,7 +985,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(
-		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		    hasResource(hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Weight"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
@@ -1016,7 +1016,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(
-		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		    hasResource(hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Weight"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(1));
@@ -1048,7 +1048,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(
-		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		    hasResource(hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Weight"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
@@ -1076,7 +1076,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		assertThat(entries, everyItem(
-		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		    hasResource(hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Weight"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
@@ -1107,7 +1107,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(
-		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		    hasResource(hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Weight"))))))));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
 	}
 	
@@ -1188,7 +1188,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(
-		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		    hasResource(hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Weight"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
@@ -1219,7 +1219,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(
-		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		    hasResource(hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Weight"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(1));
@@ -1251,7 +1251,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(
-		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		    hasResource(hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Weight"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
@@ -1279,7 +1279,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries, everyItem(hasResource(instanceOf(Observation.class))));
 		assertThat(entries, everyItem(hasResource(validResource())));
 		assertThat(entries, everyItem(
-		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		    hasResource(hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Weight"))))))));
 		assertThat(entries, everyItem(hasResource(hasProperty("category",
 		    everyItem(hasProperty("coding", everyItem(hasProperty("code", equalTo("laboratory")))))))));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
@@ -1310,7 +1310,7 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR3In
 		assertThat(entries,
 		    everyItem(hasResource(hasProperty("subject", hasProperty("reference", endsWith(OBS_PATIENT_UUID))))));
 		assertThat(entries, everyItem(
-		    hasResource(hasProperty("code", hasProperty("coding", everyItem(hasProperty("display", equalTo("Weight"))))))));
+		    hasResource(hasProperty("code", hasProperty("coding", hasItem(hasProperty("display", equalTo("Weight"))))))));
 		assertThat(getDistinctEncounterDatetime(entries), lessThanOrEqualTo(2));
 	}
 	
