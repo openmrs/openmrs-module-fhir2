@@ -348,7 +348,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		}
 		
 		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).jsonMergePatch(jsonPersonPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -372,7 +372,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		}
 		
 		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).jsonPatch(jsonPersonPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -396,7 +396,7 @@ public class PersonFhirResourceProviderIntegrationTest extends BaseFhirR4Integra
 		}
 		
 		MockHttpServletResponse response = patch("/Person/" + PERSON_UUID).xmlPatch(xmlPersonPatch)
-				.accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

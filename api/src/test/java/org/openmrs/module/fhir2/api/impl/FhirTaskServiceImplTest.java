@@ -215,7 +215,8 @@ public class FhirTaskServiceImplTest {
 		when(searchQueryInclude.getIncludedResources(any(), any())).thenReturn(Collections.emptySet());
 		when(translator.toFhirResource(openmrsTask)).thenReturn(task);
 		
-		IBundleProvider results = fhirTaskService.searchForTasks(new TaskSearchParams(null, null, null, null, null, null, null));
+		IBundleProvider results = fhirTaskService
+		        .searchForTasks(new TaskSearchParams(null, null, null, null, null, null, null));
 		
 		List<IBaseResource> resultList = get(results);
 		

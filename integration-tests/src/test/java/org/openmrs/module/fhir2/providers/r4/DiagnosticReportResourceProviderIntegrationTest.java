@@ -456,7 +456,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		}
 		
 		MockHttpServletResponse response = patch("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
-				.jsonMergePatch(jsonDiagnosticReportPatch).accept(FhirMediaTypes.JSON).go();
+		        .jsonMergePatch(jsonDiagnosticReportPatch).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -480,7 +480,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		}
 		
 		MockHttpServletResponse response = patch("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
-				.jsonPatch(jsonDiagnosticReportPatch).accept(FhirMediaTypes.JSON).go();
+		        .jsonPatch(jsonDiagnosticReportPatch).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -504,7 +504,7 @@ public class DiagnosticReportResourceProviderIntegrationTest extends BaseFhirR4I
 		}
 		
 		MockHttpServletResponse response = patch("/DiagnosticReport/" + DIAGNOSTIC_REPORT_UUID)
-				.xmlPatch(xmlDiagnosticReportPatch).accept(FhirMediaTypes.XML).go();
+		        .xmlPatch(xmlDiagnosticReportPatch).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

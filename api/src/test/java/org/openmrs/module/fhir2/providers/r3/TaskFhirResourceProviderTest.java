@@ -170,8 +170,7 @@ public class TaskFhirResourceProviderTest extends BaseFhirR3ProvenanceResourceTe
 		List<org.hl7.fhir.r4.model.Task> tasks = new ArrayList<>();
 		tasks.add(task);
 		
-		when(taskService.searchForTasks(any()))
-		        .thenReturn(new MockIBundleProvider<>(tasks, 10, 1));
+		when(taskService.searchForTasks(any())).thenReturn(new MockIBundleProvider<>(tasks, 10, 1));
 		
 		TokenAndListParam status = new TokenAndListParam();
 		TokenParam statusToken = new TokenParam();

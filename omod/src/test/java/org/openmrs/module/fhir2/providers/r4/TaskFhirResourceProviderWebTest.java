@@ -80,10 +80,10 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 	
 	@Getter(AccessLevel.PUBLIC)
 	private TaskFhirResourceProvider resourceProvider;
-
+	
 	@Captor
 	private ArgumentCaptor<TaskSearchParams> taskSearchParamsArgumentCaptor;
-
+	
 	@Before
 	public void setup() throws ServletException {
 		resourceProvider = new TaskFhirResourceProvider();
@@ -199,14 +199,10 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		
 		assertThat(resource, notNullValue());
 		assertThat(resource.getValuesAsQueryTokens(), not(empty()));
-		assertThat(resource.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getResourceType(),
+		assertThat(resource.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getResourceType(),
 		    equalTo(FhirConstants.SERVICE_REQUEST));
-		assertThat(resource.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
-		    equalTo(null));
-		assertThat(resource.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(resource.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(), equalTo(null));
+		assertThat(resource.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(BASED_ON_UUID));
 	}
 	
@@ -219,15 +215,10 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		
 		assertThat(owner, notNullValue());
 		assertThat(owner.getValuesAsQueryTokens(), not(empty()));
-		assertThat(owner.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getResourceType(),
+		assertThat(owner.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getResourceType(),
 		    equalTo(FhirConstants.PRACTITIONER));
-		assertThat(owner.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
-		    equalTo(null));
-		assertThat(owner.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
-		    equalTo(OWNER_UUID));
+		assertThat(owner.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(), equalTo(null));
+		assertThat(owner.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(OWNER_UUID));
 	}
 	
 	@Test
@@ -239,8 +230,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		
 		assertThat(status, notNullValue());
 		assertThat(status.getValuesAsQueryTokens(), not(empty()));
-		assertThat(status.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		assertThat(status.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(Task.TaskStatus.ACCEPTED.toString()));
 	}
 	
@@ -250,26 +240,21 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		    Task.TaskStatus.ACCEPTED.toString()));
 		
 		verify(service).searchForTasks(taskSearchParamsArgumentCaptor.capture());
-
+		
 		TokenAndListParam status = taskSearchParamsArgumentCaptor.getValue().getStatus();
 		ReferenceAndListParam serviceRequest = taskSearchParamsArgumentCaptor.getValue().getBasedOnReference();
 		
 		assertThat(serviceRequest, notNullValue());
 		assertThat(serviceRequest.getValuesAsQueryTokens(), not(empty()));
-		assertThat(serviceRequest.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getResourceType(),
+		assertThat(serviceRequest.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getResourceType(),
 		    equalTo(FhirConstants.SERVICE_REQUEST));
-		assertThat(serviceRequest.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getChain(),
-		    equalTo(null));
-		assertThat(serviceRequest.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()
-		        .get(0).getValue(),
+		assertThat(serviceRequest.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getChain(), equalTo(null));
+		assertThat(serviceRequest.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(BASED_ON_UUID));
 		
 		assertThat(status, notNullValue());
 		assertThat(status.getValuesAsQueryTokens(), not(empty()));
-		assertThat(status.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
+		assertThat(status.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(),
 		    equalTo(Task.TaskStatus.ACCEPTED.toString()));
 	}
 	
@@ -282,9 +267,7 @@ public class TaskFhirResourceProviderWebTest extends BaseFhirR4ResourceProviderW
 		
 		assertThat(taskUuid, notNullValue());
 		assertThat(taskUuid.getValuesAsQueryTokens(), not(empty()));
-		assertThat(taskUuid.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0)
-		        .getValue(),
-		    equalTo(TASK_UUID));
+		assertThat(taskUuid.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue(), equalTo(TASK_UUID));
 	}
 	
 	@Test

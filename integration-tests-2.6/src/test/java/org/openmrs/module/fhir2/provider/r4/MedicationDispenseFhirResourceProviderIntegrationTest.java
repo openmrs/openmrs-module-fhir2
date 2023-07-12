@@ -241,7 +241,7 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 		}
 		
 		MockHttpServletResponse response = patch("/MedicationDispense/" + EXISTING_DISPENSE_UUID)
-				.jsonMergePatch(jsonMedicationDispensePatch).accept(FhirMediaTypes.JSON).go();
+		        .jsonMergePatch(jsonMedicationDispensePatch).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -265,7 +265,7 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 		}
 		
 		MockHttpServletResponse response = patch("/MedicationDispense/" + EXISTING_DISPENSE_UUID)
-				.jsonPatch(jsonMedicationDispensePatch).accept(FhirMediaTypes.JSON).go();
+		        .jsonPatch(jsonMedicationDispensePatch).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.JSON.toString()));
@@ -289,7 +289,7 @@ public class MedicationDispenseFhirResourceProviderIntegrationTest extends BaseF
 		}
 		
 		MockHttpServletResponse response = patch("/MedicationDispense/" + EXISTING_DISPENSE_UUID)
-				.xmlPatch(xmlMedicationDispensePatch).accept(FhirMediaTypes.XML).go();
+		        .xmlPatch(xmlMedicationDispensePatch).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), startsWith(FhirMediaTypes.XML.toString()));

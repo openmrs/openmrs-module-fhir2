@@ -69,14 +69,14 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		
 		encounter.setSubject(patientReferenceTranslator.toFhirResource(openmrsEncounter.getPatient()));
 		encounter.setParticipant(openmrsEncounter.getEncounterProviders().stream().map(participantTranslator::toFhirResource)
-				.collect(Collectors.toList()));
+		        .collect(Collectors.toList()));
 		
 		// add visit as part of encounter
 		encounter.setPartOf(visitReferenceTranlator.toFhirResource(openmrsEncounter.getVisit()));
 		
 		if (openmrsEncounter.getLocation() != null) {
 			encounter.setLocation(
-					Collections.singletonList(encounterLocationTranslator.toFhirResource(openmrsEncounter.getLocation())));
+			    Collections.singletonList(encounterLocationTranslator.toFhirResource(openmrsEncounter.getLocation())));
 		}
 		
 		encounter.setPeriod(encounterPeriodTranslator.toFhirResource(openmrsEncounter));
@@ -96,7 +96,7 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 	
 	@Override
 	public org.openmrs.Encounter toOpenmrsType(@Nonnull org.openmrs.Encounter existingEncounter,
-			@Nonnull Encounter encounter) {
+	        @Nonnull Encounter encounter) {
 		notNull(existingEncounter, "The existing Openmrs Encounter object should not be null");
 		notNull(encounter, "The Encounter object should not be null");
 		
@@ -122,9 +122,9 @@ public class EncounterTranslatorImpl extends BaseEncounterTranslator implements 
 		}
 		
 		existingProviders.addAll(encounter
-				.getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
-						.toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
-				.collect(Collectors.toCollection(LinkedHashSet::new)));
+		        .getParticipant().stream().map(encounterParticipantComponent -> participantTranslator
+		                .toOpenmrsType(new EncounterProvider(), encounterParticipantComponent))
+		        .collect(Collectors.toCollection(LinkedHashSet::new)));
 		
 		existingEncounter.setEncounterProviders(existingProviders);
 		

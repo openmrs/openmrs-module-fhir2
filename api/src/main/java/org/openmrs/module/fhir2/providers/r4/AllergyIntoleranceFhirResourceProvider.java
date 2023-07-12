@@ -123,12 +123,14 @@ public class AllergyIntoleranceFhirResourceProvider implements IResourceProvider
 	}
 	
 	@Patch
-	public MethodOutcome patchAllergy(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body, RequestDetails requestDetails) {
+	public MethodOutcome patchAllergy(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
+	        RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to patch AllergyIntolerance resource");
 		}
 		
-		AllergyIntolerance allergyIntolerance = fhirAllergyIntoleranceService.patch(id.getIdPart(), patchType, body, requestDetails);
+		AllergyIntolerance allergyIntolerance = fhirAllergyIntoleranceService.patch(id.getIdPart(), patchType, body,
+		    requestDetails);
 		
 		return FhirProviderUtils.buildPatch(allergyIntolerance);
 	}

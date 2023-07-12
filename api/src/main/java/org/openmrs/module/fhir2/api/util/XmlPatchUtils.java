@@ -28,7 +28,7 @@ public class XmlPatchUtils {
 	 *
 	 * @param theCtx The {@link FhirContext} object representing the FHIR context.
 	 * @param theResourceToUpdate the resource of type {@link T} to be updated.
-	 * @param thePatchBody  The XML patch to apply to the resource.
+	 * @param thePatchBody The XML patch to apply to the resource.
 	 * @param <T> A type that extends IBaseResource.
 	 * @return The updated resource after applying the XML patch.
 	 */

@@ -433,7 +433,7 @@ public class PractitionerFhirResourceProviderIntegrationTest extends BaseFhirR4I
 		}
 		
 		MockHttpServletResponse response = patch("/Practitioner/" + PRACTITIONER_UUID).xmlPatch(xmlPractitionerPatch)
-				.accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

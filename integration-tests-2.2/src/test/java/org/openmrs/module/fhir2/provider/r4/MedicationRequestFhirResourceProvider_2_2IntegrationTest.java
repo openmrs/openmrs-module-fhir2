@@ -80,7 +80,8 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 	@Test
 	public void shouldPatchExistingMedicationRequestUsingJsonMergePatch() throws Exception {
 		String jsonMedicationRequestPatch;
-		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_MEDICATION_REQUEST_PATH)) {
+		try (InputStream is = this.getClass().getClassLoader()
+		        .getResourceAsStream(JSON_MERGE_PATCH_MEDICATION_REQUEST_PATH)) {
 			Objects.requireNonNull(is);
 			jsonMedicationRequestPatch = inputStreamToString(is, UTF_8);
 		}
@@ -115,7 +116,7 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 		}
 		
 		MockHttpServletResponse response = patch("/MedicationRequest/" + MEDICATION_REQUEST_UUID)
-				.jsonPatch(jsonMedicationRequestPatch).accept(FhirMediaTypes.JSON).go();
+		        .jsonPatch(jsonMedicationRequestPatch).accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -129,10 +130,10 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 		
 		// confirm that the fulfiller extension has been updated
 		assertThat(medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS),
-				notNullValue());
+		    notNullValue());
 		assertThat(
-				medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue().toString(),
-				is("COMPLETED"));
+		    medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue().toString(),
+		    is("COMPLETED"));
 	}
 	
 	@Test
@@ -144,7 +145,7 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 		}
 		
 		MockHttpServletResponse response = patch("/MedicationRequest/" + MEDICATION_REQUEST_UUID)
-				.xmlPatch(xmlMedicationRequestPatch).accept(FhirMediaTypes.XML).go();
+		        .xmlPatch(xmlMedicationRequestPatch).accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -158,9 +159,9 @@ public class MedicationRequestFhirResourceProvider_2_2IntegrationTest extends Ba
 		
 		// confirm that the fulfiller extension has been updated
 		assertThat(medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS),
-				notNullValue());
+		    notNullValue());
 		assertThat(
-				medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue().toString(),
-				is("COMPLETED"));
+		    medicationRequest.getExtensionByUrl(OPENMRS_FHIR_EXT_MEDICATION_REQUEST_FULFILLER_STATUS).getValue().toString(),
+		    is("COMPLETED"));
 	}
 }

@@ -418,7 +418,8 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(medication, notNullValue());
 		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
 		assertThat(medication, validResource());
-		assertThat(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(), equalTo("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+		assertThat(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(),
+		    equalTo("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 	}
 	
 	@Test
@@ -442,7 +443,8 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
 		System.out.println(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode());
 		assertThat(medication, validResource());
-		assertThat(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(), equalTo("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+		assertThat(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(),
+		    equalTo("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		
 	}
 	
@@ -455,7 +457,7 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		}
 		
 		MockHttpServletResponse response = patch("/Medication/" + MEDICATION_UUID).xmlPatch(xmlMedicationPatch)
-				.accept(FhirMediaTypes.XML).go();
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -466,7 +468,8 @@ public class MedicationFhirResourceProviderIntegrationTest extends BaseFhirR4Int
 		assertThat(medication, notNullValue());
 		assertThat(medication.getIdElement().getIdPart(), equalTo(MEDICATION_UUID));
 		assertThat(medication, validResource());
-		assertThat(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(), equalTo("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+		assertThat(medication.getIngredientFirstRep().getItemCodeableConcept().getCodingFirstRep().getCode(),
+		    equalTo("5086AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 	}
 	
 	@Test

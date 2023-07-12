@@ -582,7 +582,7 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 		}
 		
 		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonMergePatch(jsonTaskPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -604,8 +604,8 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 			jsonTaskPatch = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonPatch(jsonTaskPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).jsonPatch(jsonTaskPatch).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -627,8 +627,8 @@ public class TaskFhirResourceIntegrationTest extends BaseFhirR4IntegrationTest<T
 			xmlTaskPatch = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).xmlPatch(xmlTaskPatch)
-				.accept(FhirMediaTypes.XML).go();
+		MockHttpServletResponse response = patch("/Task/" + TASK_UUID).xmlPatch(xmlTaskPatch).accept(FhirMediaTypes.XML)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

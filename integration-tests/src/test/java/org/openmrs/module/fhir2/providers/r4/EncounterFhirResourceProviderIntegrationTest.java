@@ -831,7 +831,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		}
 		
 		MockHttpServletResponse response = patch("/Encounter/" + ENCOUNTER_UUID).jsonMergePatch(jsonEncounterPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -846,8 +846,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter.getPeriod(), notNullValue());
 		assertThat(encounter.getPeriod().hasStart(), is(true));
 		assertThat(encounter.getPeriod().getStart(),
-				sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
-						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
+		    sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+		            .withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
 	}
 	
 	@Test
@@ -859,7 +859,7 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		}
 		
 		MockHttpServletResponse response = patch("/Encounter/" + ENCOUNTER_UUID).jsonPatch(jsonEncounterPatch)
-				.accept(FhirMediaTypes.JSON).go();
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -874,8 +874,8 @@ public class EncounterFhirResourceProviderIntegrationTest extends BaseFhirR4Inte
 		assertThat(encounter.getPeriod(), notNullValue());
 		assertThat(encounter.getPeriod().hasStart(), is(true));
 		assertThat(encounter.getPeriod().getStart(),
-				sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
-						.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
+		    sameDay(LocalDate.of(2005, 2, 1).atStartOfDay(ZoneId.ofOffset("UTC", ZoneOffset.of("+05:30")))
+		            .withZoneSameInstant(ZoneId.systemDefault()).toLocalDate()));
 	}
 	
 	@Test

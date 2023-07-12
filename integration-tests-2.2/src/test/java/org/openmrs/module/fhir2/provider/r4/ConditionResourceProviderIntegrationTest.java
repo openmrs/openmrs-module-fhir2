@@ -422,8 +422,8 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 			jsonConditionPatch = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID)
-				.jsonMergePatch(jsonConditionPatch).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID).jsonMergePatch(jsonConditionPatch)
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -436,7 +436,8 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		assertThat(condition, validResource());
 		
 		assertThat(condition.hasClinicalStatus(), is(true));
-		assertThat(condition.getClinicalStatus().getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
 		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("inactive"));
 	}
 	
@@ -448,8 +449,8 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 			jsonConditionPatch = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID)
-				.jsonPatch(jsonConditionPatch).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID).jsonPatch(jsonConditionPatch)
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -462,7 +463,8 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		assertThat(condition, validResource());
 		
 		assertThat(condition.hasClinicalStatus(), is(true));
-		assertThat(condition.getClinicalStatus().getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
 		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("inactive"));
 	}
 	
@@ -474,8 +476,8 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 			xmlConditionPatch = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID)
-				.xmlPatch(xmlConditionPatch).accept(FhirMediaTypes.XML).go();
+		MockHttpServletResponse response = patch("/Condition/" + CONDITION_UUID).xmlPatch(xmlConditionPatch)
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -488,7 +490,8 @@ public class ConditionResourceProviderIntegrationTest extends BaseFhirR4Integrat
 		assertThat(condition, validResource());
 		
 		assertThat(condition.hasClinicalStatus(), is(true));
-		assertThat(condition.getClinicalStatus().getCodingFirstRep().getSystem(), equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
+		assertThat(condition.getClinicalStatus().getCodingFirstRep().getSystem(),
+		    equalTo(FhirConstants.CONDITION_CLINICAL_STATUS_SYSTEM_URI));
 		assertThat(condition.getClinicalStatus().getCodingFirstRep().getCode(), equalTo("inactive"));
 	}
 	

@@ -105,7 +105,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 		if (CollectionUtils.isEmpty(includes)) {
 			includes = null;
 		}
-		return new SearchQueryBundleProviderR3Wrapper(
-		        fhirTaskService.searchForTasks(new TaskSearchParams(basedOnReference, ownerReference, status, id, lastUpdated, sort, includes)));
+		return new SearchQueryBundleProviderR3Wrapper(fhirTaskService.searchForTasks(
+		    new TaskSearchParams(basedOnReference, ownerReference, status, id, lastUpdated, sort, includes)));
 	}
 }

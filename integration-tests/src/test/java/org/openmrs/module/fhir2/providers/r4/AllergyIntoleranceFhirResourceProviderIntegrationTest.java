@@ -418,8 +418,8 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 			jsonAllergyPatch = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID)
-				.jsonMergePatch(jsonAllergyPatch).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID).jsonMergePatch(jsonAllergyPatch)
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -443,8 +443,8 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 			jsonAllergyPatch = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID)
-				.jsonPatch(jsonAllergyPatch).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID).jsonPatch(jsonAllergyPatch)
+		        .accept(FhirMediaTypes.JSON).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
@@ -468,8 +468,8 @@ public class AllergyIntoleranceFhirResourceProviderIntegrationTest extends BaseF
 			xmlAllergyPatch = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID)
-				.xmlPatch(xmlAllergyPatch).accept(FhirMediaTypes.XML).go();
+		MockHttpServletResponse response = patch("/AllergyIntolerance/" + ALLERGY_UUID).xmlPatch(xmlAllergyPatch)
+		        .accept(FhirMediaTypes.XML).go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));

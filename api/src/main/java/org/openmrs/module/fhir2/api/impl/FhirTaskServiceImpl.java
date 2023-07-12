@@ -45,6 +45,7 @@ public class FhirTaskServiceImpl extends BaseFhirService<Task, FhirTask> impleme
 	
 	/**
 	 * Get collection of tasks corresponding to the provided search parameters
+	 * 
 	 * @return the collection of Tasks that match the search parameters
 	 */
 	@Override

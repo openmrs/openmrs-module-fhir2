@@ -20,6 +20,7 @@ public interface FhirTaskService extends FhirService<Task> {
 	
 	/**
 	 * Get collection of tasks corresponding to the provided search parameters
+	 * 
 	 * @return the collection of Tasks that match the search parameters
 	 */
 	IBundleProvider searchForTasks(TaskSearchParams taskSearchParams);

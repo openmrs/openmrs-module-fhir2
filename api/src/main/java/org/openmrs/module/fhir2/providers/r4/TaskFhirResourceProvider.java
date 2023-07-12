@@ -82,7 +82,8 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 	}
 	
 	@Patch
-	public MethodOutcome patchTask(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body, RequestDetails requestDetails) {
+	public MethodOutcome patchTask(@IdParam IdType id, PatchTypeEnum patchType, @ResourceParam String body,
+	        RequestDetails requestDetails) {
 		if (id == null || id.getIdPart() == null) {
 			throw new InvalidRequestException("id must be specified to patch Task resource");
 		}
@@ -110,6 +111,7 @@ public class TaskFhirResourceProvider implements IResourceProvider {
 		if (CollectionUtils.isEmpty(includes)) {
 			includes = null;
 		}
-		return service.searchForTasks(new TaskSearchParams(basedOnReference, ownerReference, status, id, lastUpdated, sort, includes));
+		return service.searchForTasks(
+		    new TaskSearchParams(basedOnReference, ownerReference, status, id, lastUpdated, sort, includes));
 	}
 }
