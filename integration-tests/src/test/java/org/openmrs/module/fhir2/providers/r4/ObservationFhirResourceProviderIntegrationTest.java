@@ -1382,10 +1382,9 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Observation updatedObservation = readResponse(response);
-		
-		System.out.println("uuid: " + updatedObservation.getIdElement().getIdPart());
+
 		assertThat(updatedObservation, notNullValue());
-		assertThat(updatedObservation.getIdElement().getIdPart(), equalTo(OBS_UUID));
+		assertThat(updatedObservation.getIdElement().getIdPart(), not(equalTo(OBS_UUID)));
 		assertThat(updatedObservation.getCode().getCodingFirstRep().getCode(), is("5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		assertThat(updatedObservation, validResource());
 	}

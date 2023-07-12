@@ -92,9 +92,6 @@ public class ObservationFhirResourceProvider implements IResourceProvider {
 			throw new InvalidRequestException("id must be specified to update");
 		}
 		
-//		Basically, when you call the update() function, the result should have a JSON version of the new Obs,
-//				so you should be able to get the UUID from the id field in the JSON object.
-		
 		observation.setId(id.getIdPart());
 		
 		return FhirProviderUtils.buildUpdate(observationService.update(id.getIdPart(), observation));
