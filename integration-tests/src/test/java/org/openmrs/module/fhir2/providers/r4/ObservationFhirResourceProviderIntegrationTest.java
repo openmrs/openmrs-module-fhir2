@@ -58,9 +58,11 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 	
 	private static final String JSON_CREATE_OBS_DOCUMENT = "org/openmrs/module/fhir2/providers/ObservationWebTest_create.json";
 	
+	private static final String XML_CREATE_OBS_DOCUMENT = "org/openmrs/module/fhir2/providers/ObservationWebTest_create.xml";
+	
 	private static final String OBS_JSON_UPDATE_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_update.json";
 	
-	private static final String XML_CREATE_OBS_DOCUMENT = "org/openmrs/module/fhir2/providers/ObservationWebTest_create.xml";
+	private static final String OBS_XML_UPDATE_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_update.xml";
 	
 	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
 	
@@ -1387,6 +1389,104 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(updatedObservation.getIdElement().getIdPart(), not(equalTo(OBS_UUID)));
 		assertThat(updatedObservation.getCode().getCodingFirstRep().getCode(), is("5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		assertThat(updatedObservation, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotFoundWhenUpdatingNonExistentObservationAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
+		Observation observation = readResponse(response);
+		
+		observation.setId(WRONG_OBS_UUID);
+		
+		response = put("/Observation/" + WRONG_OBS_UUID).jsonContent(toJson(observation)).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchObservationIdAsJson() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.JSON).go();
+		Observation observation = readResponse(response);
+		
+		observation.setId(WRONG_OBS_UUID);
+		
+		response = put("/Observation/" + OBS_UUID).jsonContent(toJson(observation)).accept(FhirMediaTypes.JSON).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldUpdateExistingObservationAsXml() throws Exception {
+		String xmlObs;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(OBS_XML_UPDATE_PATH)) {
+			Objects.requireNonNull(is);
+			xmlObs = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = put("/Observation/" + OBS_UUID).xmlContent(xmlObs).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isOk());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Observation updatedObservation = readResponse(response);
+		
+		assertThat(updatedObservation, notNullValue());
+		assertThat(updatedObservation.getIdElement().getIdPart(), not(equalTo(OBS_UUID)));
+		assertThat(updatedObservation.getCode().getCodingFirstRep().getCode(), is("5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+		assertThat(updatedObservation, validResource());
+	}
+	
+	@Test
+	public void shouldReturnNotFoundWhenUpdatingNonExistentObservationAsXml() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.XML).go();
+		Observation observation = readResponse(response);
+		
+		observation.setId(WRONG_OBS_UUID);
+		
+		response = put("/Observation/" + WRONG_OBS_UUID).xmlContent(toXML(observation)).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isNotFound());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
+	}
+	
+	@Test
+	public void shouldReturnBadRequestWhenDocumentIdDoesNotMatchObservationIdAsXML() throws Exception {
+		MockHttpServletResponse response = get("/Observation/" + OBS_UUID).accept(FhirMediaTypes.XML).go();
+		Observation observation = readResponse(response);
+		
+		observation.setId(WRONG_OBS_UUID);
+		
+		response = put("/Observation/" + OBS_UUID).xmlContent(toXML(observation)).accept(FhirMediaTypes.XML).go();
+		
+		assertThat(response, isBadRequest());
+		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		OperationOutcome operationOutcome = readOperationOutcome(response);
+		
+		assertThat(operationOutcome, notNullValue());
+		assertThat(operationOutcome.hasIssue(), is(true));
 	}
 	
 	private int getDistinctEncounterDatetime(List<Bundle.BundleEntryComponent> resultList) {
