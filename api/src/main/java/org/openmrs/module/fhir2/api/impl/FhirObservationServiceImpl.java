@@ -9,9 +9,13 @@
  */
 package org.openmrs.module.fhir2.api.impl;
 
+import javax.annotation.Nonnull;
+
 import java.util.Optional;
 
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -31,11 +35,11 @@ import org.openmrs.module.fhir2.api.search.param.SearchParameterMap;
 import org.openmrs.module.fhir2.api.translators.ObservationTranslator;
 import org.openmrs.module.fhir2.api.translators.OpenmrsFhirTranslator;
 import org.openmrs.module.fhir2.api.translators.UpdatableOpenmrsTranslator;
+import org.openmrs.module.fhir2.api.util.JsonPatchUtils;
+import org.openmrs.module.fhir2.api.util.XmlPatchUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Nonnull;
 
 @Component
 @Transactional
@@ -109,6 +113,40 @@ public class FhirObservationServiceImpl extends BaseFhirService<Observation, org
 		}
 		
 		return applyUpdate(existingObservation, updatedObservation);
+	}
+	
+	@Override
+	public Observation patch(@Nonnull String uuid, @Nonnull PatchTypeEnum patchType, @Nonnull String body,
+	        RequestDetails requestDetails) {
+		if (uuid == null) {
+			throw new InvalidRequestException("id cannot be null");
+		}
+		
+		Obs existingObs = dao.get(uuid);
+		
+		if (existingObs == null) {
+			throw resourceNotFound(uuid);
+		}
+		
+		OpenmrsFhirTranslator<Obs, Observation> translator = getTranslator();
+		
+		Observation existingObservation = translator.toFhirResource(existingObs);
+		Observation updatedObservationFhirResource = null;
+		
+		switch (patchType) {
+			case JSON_PATCH:
+				if (isJsonMergePatch(requestDetails)) {
+					updatedObservationFhirResource = JsonPatchUtils.applyJsonMergePatch(fhirContext, existingObservation,
+					    body);
+				} else {
+					updatedObservationFhirResource = JsonPatchUtils.applyJsonPatch(fhirContext, existingObservation, body);
+				}
+				break;
+			case XML_PATCH:
+				updatedObservationFhirResource = XmlPatchUtils.applyXmlPatch(fhirContext, existingObservation, body);
+				break;
+		}
+		return applyUpdate(existingObs, updatedObservationFhirResource);
 	}
 	
 	@Override

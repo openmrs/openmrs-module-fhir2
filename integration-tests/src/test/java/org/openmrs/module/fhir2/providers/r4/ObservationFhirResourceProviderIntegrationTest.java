@@ -46,6 +46,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.module.fhir2.BaseFhirIntegrationTest;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhir2.api.dao.FhirEncounterDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 	private static final String OBS_JSON_UPDATE_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_update.json";
 	
 	private static final String OBS_XML_UPDATE_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_update.xml";
+	
+	private static final String JSON_MERGE_PATCH_OBSERVATION_PATH = "org/openmrs/module/fhir2/providers/ObservationWebTest_json_patch.json";
 	
 	private static final String OBS_UUID = "39fb7f47-e80a-4056-9285-bd798be13c63";
 	
@@ -1377,14 +1380,15 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 			jsonObs = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = put("/Observation/" + OBS_UUID).jsonContent(jsonObs).accept(FhirMediaTypes.JSON).go();
+		MockHttpServletResponse response = put("/Observation/" + OBS_UUID).jsonContent(jsonObs).accept(FhirMediaTypes.JSON)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.JSON.toString()));
 		assertThat(response.getContentAsString(), notNullValue());
 		
 		Observation updatedObservation = readResponse(response);
-
+		
 		assertThat(updatedObservation, notNullValue());
 		assertThat(updatedObservation.getIdElement().getIdPart(), not(equalTo(OBS_UUID)));
 		assertThat(updatedObservation.getCode().getCodingFirstRep().getCode(), is("5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
@@ -1437,7 +1441,8 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 			xmlObs = inputStreamToString(is, UTF_8);
 		}
 		
-		MockHttpServletResponse response = put("/Observation/" + OBS_UUID).xmlContent(xmlObs).accept(FhirMediaTypes.XML).go();
+		MockHttpServletResponse response = put("/Observation/" + OBS_UUID).xmlContent(xmlObs).accept(FhirMediaTypes.XML)
+		        .go();
 		
 		assertThat(response, isOk());
 		assertThat(response.getContentType(), is(FhirMediaTypes.XML.toString()));
@@ -1449,6 +1454,31 @@ public class ObservationFhirResourceProviderIntegrationTest extends BaseFhirR4In
 		assertThat(updatedObservation.getIdElement().getIdPart(), not(equalTo(OBS_UUID)));
 		assertThat(updatedObservation.getCode().getCodingFirstRep().getCode(), is("5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 		assertThat(updatedObservation, validResource());
+	}
+	
+	@Test
+	public void shouldPatchExistingObservationUsingJsonMergePatch() throws Exception {
+		String jsonObservationPatch;
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(JSON_MERGE_PATCH_OBSERVATION_PATH)) {
+			Objects.requireNonNull(is);
+			jsonObservationPatch = inputStreamToString(is, UTF_8);
+		}
+		
+		MockHttpServletResponse response = patch("/Observation/" + OBS_UUID).jsonMergePatch(jsonObservationPatch)
+		        .accept(FhirMediaTypes.JSON).go();
+		
+		
+		assertThat(response, isOk());
+		assertThat(response, notNullValue());
+		assertThat(response.getContentType(), is(BaseFhirIntegrationTest.FhirMediaTypes.JSON.toString()));
+		assertThat(response.getContentAsString(), notNullValue());
+		
+		Observation observation = readResponse(response);
+		
+		assertThat(observation, notNullValue());
+		assertThat(observation.getIdElement().getIdPart(), not(equalTo(OBS_UUID)));
+		assertThat(observation.getCode().getCodingFirstRep().getCode(), is("5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+		assertThat(observation, validResource());
 	}
 	
 	@Test
